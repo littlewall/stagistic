@@ -1,9 +1,14 @@
 import type {
-    EditorSettingsOverride, ScriptDocument, TitlePageSettings,
+    EditorSettingsOverride,
+    ScriptDocument,
+    TitlePageSettings,
 } from '@stagistic/script';
 
 import type {
-    STEPKG_DOCUMENT_PATH, STEPKG_FORMAT, STEPKG_FORMAT_VERSION, STEPKG_TEXT_PATH,
+    STEPKG_DOCUMENT_PATH,
+    STEPKG_FORMAT,
+    STEPKG_FORMAT_VERSION,
+    STEPKG_TEXT_PATH,
 } from './constants';
 
 export interface StepkgScriptData {
@@ -181,7 +186,9 @@ export interface StepkgManifest {
     createdAt: string,
     generator: {name: string, version: string},
     script: {
-        id: string, title: string, updatedAt: string,
+        id: string,
+        title: string,
+        updatedAt: string,
     },
     entrypoints: {
         document: typeof STEPKG_DOCUMENT_PATH,
@@ -198,7 +205,10 @@ export interface StepkgEntry {
 }
 
 export type StepkgExportResult = {
-    ok: true, blob: Blob, fileName: string, manifest: StepkgManifest,
+    ok: true,
+    blob: Blob,
+    fileName: string,
+    manifest: StepkgManifest,
 } | {ok: false, issues: StepkgExportIssue[]};
 
 export interface BuildStepkgEntriesArgs {
@@ -210,7 +220,9 @@ export interface BuildStepkgEntriesArgs {
 }
 
 export type StepkgBuildResult = {
-    ok: true, manifest: StepkgManifest, entries: StepkgEntry[],
+    ok: true,
+    manifest: StepkgManifest,
+    entries: StepkgEntry[],
 } | {ok: false, issues: StepkgExportIssue[]};
 
 export type StepkgIssueCode =

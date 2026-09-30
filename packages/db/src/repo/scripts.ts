@@ -129,7 +129,9 @@ export const createScriptsHandlers = ({
             const id = uuidv7();
 
             await createWithId({
-                id, title, initialContent,
+                id,
+                title,
+                initialContent,
             });
 
             return id;
@@ -154,7 +156,9 @@ export const createScriptsHandlers = ({
                     opType: 'script.rename',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
-                        scriptId, title: nextTitle, updatedAt: now,
+                        scriptId,
+                        title: nextTitle,
+                        updatedAt: now,
                     }),
                 }, tx);
             });
@@ -178,7 +182,9 @@ export const createScriptsHandlers = ({
                     opType: 'script.title.rename',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
-                        scriptId, title: nextTitle, updatedAt: now,
+                        scriptId,
+                        title: nextTitle,
+                        updatedAt: now,
                     }),
                 }, tx);
             });
@@ -187,7 +193,9 @@ export const createScriptsHandlers = ({
         duplicate: async (
             sourceScriptId: string,
             input: {
-                title: string, copySettings: boolean, copyAttributes: boolean,
+                title: string,
+                copySettings: boolean,
+                copyAttributes: boolean,
             },
         ) => {
             const targetScriptId = uuidv7();
@@ -231,7 +239,9 @@ export const createScriptsHandlers = ({
                     opType: 'script.active-block.set',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
-                        scriptId, blockId, updatedAt: now,
+                        scriptId,
+                        blockId,
+                        updatedAt: now,
                     }),
                 }, tx);
             });

@@ -12,7 +12,9 @@ export interface MoreActionsMenuProps {
 
 /** Compact "⋯" trigger opening a DropdownMenu; for row- and card-level actions. */
 export const MoreActionsMenu = ({
-    'aria-label': ariaLabel, items, onAction,
+    'aria-label': ariaLabel,
+    items,
+    onAction,
 }: MoreActionsMenuProps) => (
     <MenuTrigger>
         <IconButton

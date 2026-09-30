@@ -38,7 +38,12 @@ export interface DuplicateScriptQueryPayload {
  */
 export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScriptQueryPayload): Promise<void> => {
     const {
-        sourceScriptId, targetScriptId, title, now, copySettings, copyAttributes,
+        sourceScriptId,
+        targetScriptId,
+        title,
+        now,
+        copySettings,
+        copyAttributes,
     } = payload;
 
     await db.insert(scripts).values({

@@ -26,7 +26,8 @@ export default defineConfig({
             rules: {
                 'eslint/max-lines': 'off',
             },
-        }, {
+        },
+        {
             files: ['**/*.{js,jsx,mjs,cjs}'],
             plugins: ['oxc', 'unicorn'],
             rules: {
@@ -78,7 +79,8 @@ export default defineConfig({
         'typescript/no-empty-object-type': 'error',
         'typescript/no-explicit-any': 'warn',
         'typescript/no-misused-promises': [
-            'error', {
+            'error',
+            {
                 checksVoidReturn: false,
             },
         ],

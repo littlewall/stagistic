@@ -130,7 +130,8 @@ const buildRow = (
                     alter: low.alter,
                     ledgerPositions: ledgerPositions(staffPosition(low, clef)),
                     xFraction: LOW_NOTE_X_FRACTION,
-                }, {
+                },
+                {
                     position: staffPosition(high, clef),
                     alter: high.alter,
                     ledgerPositions: ledgerPositions(staffPosition(high, clef)),

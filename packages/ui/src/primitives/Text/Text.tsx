@@ -1,6 +1,9 @@
 import clsx from 'clsx';
 import {
-    type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement,
+    type ComponentPropsWithoutRef,
+    createElement,
+    type ElementType,
+    type ReactElement,
 } from 'react';
 
 import styles from './Text.module.css';
@@ -38,7 +41,12 @@ const SIZE_CLASS: Record<TextSize, string> = {
 };
 
 export const Text = <T extends ElementType = 'p'>({
-    as, variant = 'body', size = 'md', truncate = false, className, ...props
+    as,
+    variant = 'body',
+    size = 'md',
+    truncate = false,
+    className,
+    ...props
 }: TextProps<T>): ReactElement => {
     const Element = as ?? 'p';
 

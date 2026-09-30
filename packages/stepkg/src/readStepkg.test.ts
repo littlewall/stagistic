@@ -1,7 +1,9 @@
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {unzipSync, zipSync} from 'fflate';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 const encoder = new TextEncoder();
@@ -12,13 +14,19 @@ import {readStepkg} from './readStepkg';
 
 const baseSnapshot = (): StepkgSnapshot => ({
     script: {
-        id: 's1', title: 'Round trip', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z',
+        id: 's1',
+        title: 'Round trip',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
     },
     document: createEmptyScriptDocument(),
     titlePage: {},
     settings: {},
     characters: {
-        characters: [], groups: [], genderOptions: [],
+        characters: [],
+        groups: [],
+        genderOptions: [],
     },
     music: {items: []},
     scenes: {scenes: [], locations: []},
@@ -159,7 +167,9 @@ describe('readStepkg', () => {
             createdAt: '2026-09-18T12:00:00.000Z',
             generator: {name: 'Stagistic', version: '0.0.0'},
             script: {
-                id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z',
+                id: 's1',
+                title: 'T',
+                updatedAt: '2026-09-18T11:00:00.000Z',
             },
             entrypoints: {document: 'document.json', text: 'script.stagistic'},
             files: [],
@@ -168,7 +178,11 @@ describe('readStepkg', () => {
             'manifest.json': encoder.encode(JSON.stringify(manifest)),
             'document.json': encoder.encode(JSON.stringify(createEmptyScriptDocument())),
             'data/script.json': encoder.encode(JSON.stringify({
-                id: 's1', title: 'T', subtitle: null, createdAt: 'x', updatedAt: 'x',
+                id: 's1',
+                title: 'T',
+                subtitle: null,
+                createdAt: 'x',
+                updatedAt: 'x',
             })),
             'data/title-page.json': encoder.encode('{}'),
             'data/settings.json': encoder.encode('{}'),
@@ -177,7 +191,12 @@ describe('readStepkg', () => {
                     characters: [],
                     groups: [
                         {
-                            id: 'g1', key: 'FAMILY', colorHex: null, memberIds: ['missing-char'], createdAt: 'x', updatedAt: 'x',
+                            id: 'g1',
+                            key: 'FAMILY',
+                            colorHex: null,
+                            memberIds: ['missing-char'],
+                            createdAt: 'x',
+                            updatedAt: 'x',
                         },
                     ],
                     genderOptions: [],
@@ -205,7 +224,9 @@ describe('readStepkg', () => {
             createdAt: '2026-09-18T12:00:00.000Z',
             generator: {name: 'Stagistic', version: '0.0.0'},
             script: {
-                id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z',
+                id: 's1',
+                title: 'T',
+                updatedAt: '2026-09-18T11:00:00.000Z',
             },
             entrypoints: {document: 'document.json', text: 'script.stagistic'},
             files: [],
@@ -214,12 +235,18 @@ describe('readStepkg', () => {
             'manifest.json': encoder.encode(JSON.stringify(manifest)),
             'document.json': encoder.encode(JSON.stringify(createEmptyScriptDocument())),
             'data/script.json': encoder.encode(JSON.stringify({
-                id: 's1', title: 'T', subtitle: null, createdAt: 'x', updatedAt: 'x',
+                id: 's1',
+                title: 'T',
+                subtitle: null,
+                createdAt: 'x',
+                updatedAt: 'x',
             })),
             'data/title-page.json': encoder.encode('{}'),
             'data/settings.json': encoder.encode('{}'),
             'data/characters.json': encoder.encode(JSON.stringify({
-                characters: [], groups: [], genderOptions: [],
+                characters: [],
+                groups: [],
+                genderOptions: [],
             })),
             'data/music.json': encoder.encode(JSON.stringify({items: []})),
             'data/scenes.json': encoder.encode(JSON.stringify({scenes: [], locations: []})),

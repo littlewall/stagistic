@@ -1,29 +1,43 @@
 import clsx from 'clsx';
 import {
-    type ReactNode, useEffect, useState,
+    type ReactNode,
+    useEffect,
+    useState,
 } from 'react';
 import {Button as RACButton, MenuTrigger} from 'react-aria-components';
 
 import {Button} from '../atoms/Button/Button';
 import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {
-    AttributeManagerIcon, DownloadIcon, HomeIcon, PlusIcon, SettingsIcon, UploadIcon,
+    AttributeManagerIcon,
+    DownloadIcon,
+    HomeIcon,
+    PlusIcon,
+    SettingsIcon,
+    UploadIcon,
 } from '../icons/ui';
 import {DropdownMenu} from '../molecules/DropdownMenu/DropdownMenu';
 import {
-    applyAppThemeMode, type AppThemeMode, readPreferredAppThemeMode, subscribeToSystemThemeChange,
+    applyAppThemeMode,
+    type AppThemeMode,
+    readPreferredAppThemeMode,
+    subscribeToSystemThemeChange,
 } from '../theme/theme';
 import styles from './AppHeader.module.css';
 import {AccountMenu} from './header/AccountMenu';
 import {ScriptTitle} from './header/ScriptTitle';
 import {SyncIndicator} from './header/SyncIndicator';
 import type {
-    ScriptListItem, ScriptSyncState, ScriptView,
+    ScriptListItem,
+    ScriptSyncState,
+    ScriptView,
 } from './header/types';
 import {ViewSwitcher} from './header/ViewSwitcher';
 
 export type {
-    ScriptListItem, ScriptSyncState, ScriptView,
+    ScriptListItem,
+    ScriptSyncState,
+    ScriptView,
 };
 
 export type AppHeaderProps = {

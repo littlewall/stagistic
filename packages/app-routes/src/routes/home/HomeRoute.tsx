@@ -16,7 +16,9 @@ import {
 } from '@stagistic/ui';
 import clsx from 'clsx';
 import {
-    useCallback, useMemo, useState,
+    useCallback,
+    useMemo,
+    useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
@@ -35,10 +37,19 @@ export const HomeRoute = () => {
     const navigate = useNavigate();
     const repository = useScriptRepository();
     const {
-        scriptSummaries, isLoading: scriptsLoading, error, refreshScripts, createScript, deleteScript: deleteScriptRecord,
+        scriptSummaries,
+        isLoading: scriptsLoading,
+        error,
+        refreshScripts,
+        createScript,
+        deleteScript: deleteScriptRecord,
     } = useScripts();
     const {
-        openNewScript, openImportScript, openDeleteScript, openRenameScript, openDuplicateScript,
+        openNewScript,
+        openImportScript,
+        openDeleteScript,
+        openRenameScript,
+        openDuplicateScript,
     } = useGlobalModals();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
@@ -74,7 +85,9 @@ export const HomeRoute = () => {
     );
     const renameScript = useCallback(
         (script: {
-            id: string, title: string, subtitle: string | null,
+            id: string,
+            title: string,
+            subtitle: string | null,
         }) => {
             openRenameScript({
                 id: script.id,

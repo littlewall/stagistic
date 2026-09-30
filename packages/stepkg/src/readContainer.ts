@@ -2,7 +2,9 @@ import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '@stagistic/script';
 import {unzip} from 'fflate';
 
 import {
-    STEPKG_FORMAT, STEPKG_FORMAT_VERSION, STEPKG_MANIFEST_PATH,
+    STEPKG_FORMAT,
+    STEPKG_FORMAT_VERSION,
+    STEPKG_MANIFEST_PATH,
 } from './constants';
 import type {StepkgManifest} from './contracts';
 import type {StepkgImportIssue} from './importContracts';
@@ -12,7 +14,9 @@ const unzipAsync = (bytes: Uint8Array): Promise<Record<string, Uint8Array>> => n
 });
 
 export type StepkgContainerResult = {
-    ok: true, manifest: StepkgManifest, files: Map<string, Uint8Array>,
+    ok: true,
+    manifest: StepkgManifest,
+    files: Map<string, Uint8Array>,
 } | {ok: false, issues: StepkgImportIssue[]};
 
 export const readStepkgContainer = async (bytes: Uint8Array): Promise<StepkgContainerResult> => {
@@ -27,12 +31,16 @@ export const readStepkgContainer = async (bytes: Uint8Array): Promise<StepkgCont
     const manifestBytes = entries[STEPKG_MANIFEST_PATH];
 
     if (!manifestBytes) {
-        return {ok: false,
+        return {
+            ok: false,
             issues: [
                 {
-                    code: 'manifest_invalid', stage: 'manifest', path: STEPKG_MANIFEST_PATH,
+                    code: 'manifest_invalid',
+                    stage: 'manifest',
+                    path: STEPKG_MANIFEST_PATH,
                 },
-            ]};
+            ],
+        };
     }
 
     let manifest: StepkgManifest;
@@ -40,21 +48,29 @@ export const readStepkgContainer = async (bytes: Uint8Array): Promise<StepkgCont
     try {
         manifest = JSON.parse(new TextDecoder().decode(manifestBytes)) as StepkgManifest;
     } catch {
-        return {ok: false,
+        return {
+            ok: false,
             issues: [
                 {
-                    code: 'manifest_invalid', stage: 'manifest', path: STEPKG_MANIFEST_PATH,
+                    code: 'manifest_invalid',
+                    stage: 'manifest',
+                    path: STEPKG_MANIFEST_PATH,
                 },
-            ]};
+            ],
+        };
     }
 
     if (manifest.format !== STEPKG_FORMAT || !Array.isArray(manifest.files) || typeof manifest.script?.id !== 'string') {
-        return {ok: false,
+        return {
+            ok: false,
             issues: [
                 {
-                    code: 'manifest_invalid', stage: 'manifest', path: STEPKG_MANIFEST_PATH,
+                    code: 'manifest_invalid',
+                    stage: 'manifest',
+                    path: STEPKG_MANIFEST_PATH,
                 },
-            ]};
+            ],
+        };
     }
 
     if (manifest.formatVersion !== STEPKG_FORMAT_VERSION) {
@@ -62,7 +78,9 @@ export const readStepkgContainer = async (bytes: Uint8Array): Promise<StepkgCont
             ok: false,
             issues: [
                 {
-                    code: 'unsupported_format_version', stage: 'manifest', details: {found: manifest.formatVersion, supported: STEPKG_FORMAT_VERSION},
+                    code: 'unsupported_format_version',
+                    stage: 'manifest',
+                    details: {found: manifest.formatVersion, supported: STEPKG_FORMAT_VERSION},
                 },
             ],
         };
@@ -84,6 +102,8 @@ export const readStepkgContainer = async (bytes: Uint8Array): Promise<StepkgCont
     const files = new Map(Object.entries(entries));
 
     return {
-        ok: true, manifest, files,
+        ok: true,
+        manifest,
+        files,
     };
 };

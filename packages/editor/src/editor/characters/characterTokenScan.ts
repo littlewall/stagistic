@@ -1,5 +1,8 @@
 import {
-    collectCharacterTags, normalizeCharacterKey, type ScriptNode, splitCharacterTokens,
+    collectCharacterTags,
+    normalizeCharacterKey,
+    type ScriptNode,
+    splitCharacterTokens,
 } from '@stagistic/script';
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 

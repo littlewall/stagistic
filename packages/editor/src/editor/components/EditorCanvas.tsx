@@ -1,12 +1,16 @@
 import type {
-    BlockShortcut, HeaderFooterSettings, ScriptBlockNodeType,
+    BlockShortcut,
+    HeaderFooterSettings,
+    ScriptBlockNodeType,
 } from '@stagistic/script';
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
 import type {
-    EditorMusicRemoveRequest, PersistentCharacterRef, PersistentMusicRef,
+    EditorMusicRemoveRequest,
+    PersistentCharacterRef,
+    PersistentMusicRef,
 } from '../contracts';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import {CommentMarkersOverlay} from './CommentMarkersOverlay';

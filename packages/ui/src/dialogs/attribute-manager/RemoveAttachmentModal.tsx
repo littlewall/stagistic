@@ -9,7 +9,11 @@ export interface RemoveAttachmentModalProps {
 }
 
 export const RemoveAttachmentModal = ({
-    isOpen, attachmentName, isRemoving = false, onClose, onConfirm,
+    isOpen,
+    attachmentName,
+    isRemoving = false,
+    onClose,
+    onConfirm,
 }: RemoveAttachmentModalProps) => (
     <ConfirmModal
         isOpen={isOpen}

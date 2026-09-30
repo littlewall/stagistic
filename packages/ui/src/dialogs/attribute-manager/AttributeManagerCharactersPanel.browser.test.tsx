@@ -1,13 +1,22 @@
 import {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
 import {
-    CHARACTERS, cleanupPanels, findButtonByText, GROUPS, mountedRoots, waitForElement,
+    CHARACTERS,
+    cleanupPanels,
+    findButtonByText,
+    GROUPS,
+    mountedRoots,
+    waitForElement,
 } from './AttributeManagerCharactersPanel.browser.testUtils';
 
 afterEach(cleanupPanels);
@@ -102,7 +111,8 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
             const [groups, setGroups] = useState(GROUPS);
             const handleCreate = async (name: string) => {
                 setGroups(current => [
-                    ...current, {
+                    ...current,
+                    {
                         id: 'group-3',
                         name,
                         color: null,

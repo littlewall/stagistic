@@ -1,7 +1,9 @@
 import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR} from '@stagistic/script';
 import {Mark, mergeAttributes} from '@tiptap/core';
 import {
-    Fragment, type Node as ProseMirrorNode, Slice,
+    Fragment,
+    type Node as ProseMirrorNode,
+    Slice,
 } from '@tiptap/pm/model';
 import {Plugin, PluginKey} from '@tiptap/pm/state';
 

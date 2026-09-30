@@ -1,5 +1,7 @@
 import {
-    type BlockShortcut, type SceneNumberFormat, type ScriptBlockNodeType,
+    type BlockShortcut,
+    type SceneNumberFormat,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 import {formControlStyles, FormSelect} from '@stagistic/ui';
 
@@ -14,7 +16,10 @@ interface ElementNumericControlsProps {
 }
 
 export const ElementNumericControls = ({
-    blockType, shortcutPrefix, model, handlers,
+    blockType,
+    shortcutPrefix,
+    model,
+    handlers,
 }: ElementNumericControlsProps) => {
     const {
         spacingBefore,

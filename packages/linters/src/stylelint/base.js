@@ -27,7 +27,8 @@ const index = {
         'custom-property-no-missing-var-function': true,
         'declaration-block-no-duplicate-custom-properties': true,
         'declaration-block-no-duplicate-properties': [
-            true, {
+            true,
+            {
                 ignore: ['consecutive-duplicates-with-different-syntaxes'],
             },
         ],
@@ -50,7 +51,8 @@ const index = {
         'selector-anb-no-unmatchable': true,
         'selector-pseudo-element-no-unknown': true,
         'selector-type-no-unknown': [
-            true, {
+            true,
+            {
                 ignore: ['custom-elements'],
             },
         ],
@@ -58,7 +60,8 @@ const index = {
         'unit-no-unknown': true,
         // custom
         'at-rule-empty-line-before': [
-            'always', {
+            'always',
+            {
                 except: ['blockless-after-same-name-blockless'],
                 ignore: ['after-comment'],
                 ignoreAtRules: [
@@ -74,7 +77,8 @@ const index = {
         '@stylistic/at-rule-name-space-after': 'always',
         'at-rule-no-vendor-prefix': true,
         'at-rule-no-unknown': [
-            true, {
+            true,
+            {
                 ignoreAtRules: [
                     'import-normalize',
                     'mixin',
@@ -122,7 +126,8 @@ const index = {
         '@stylistic/function-whitespace-after': 'always',
         '@stylistic/indentation': 4,
         'length-zero-no-unit': [
-            true, {
+            true,
+            {
                 ignore: ['custom-properties'],
             },
         ],
@@ -132,7 +137,8 @@ const index = {
         '@stylistic/media-feature-colon-space-before': 'never',
         '@stylistic/media-feature-name-case': 'lower',
         'media-feature-name-no-unknown': [
-            true, {
+            true,
+            {
                 ignoreMediaFeatureNames: ['prefers-reduced-motion'],
             },
         ],
@@ -146,12 +152,14 @@ const index = {
         '@stylistic/media-query-list-comma-space-before': 'never',
         'no-descending-specificity': null,
         'no-unknown-animations': [
-            true, {
+            true,
+            {
                 severity: 'warning',
             },
         ],
         'order/properties-order': [
-            propertiesOrder, {
+            propertiesOrder,
+            {
                 severity: 'warning',
                 unspecified: 'bottomAlphabetical',
             },
@@ -195,7 +203,8 @@ const index = {
         '@stylistic/property-case': 'lower',
         'property-no-vendor-prefix': true,
         'property-no-unknown': [
-            true, {
+            true,
+            {
                 ignoreProperties: ['composes', 'appearance'],
             },
         ],
@@ -216,14 +225,16 @@ const index = {
         'selector-max-id': 1,
         'selector-max-type': 1,
         'selector-no-qualifying-type': [
-            true, {
+            true,
+            {
                 ignore: ['attribute'],
             },
         ],
         'selector-no-vendor-prefix': true,
         '@stylistic/selector-pseudo-class-case': 'lower',
         'selector-pseudo-class-no-unknown': [
-            true, {
+            true,
+            {
                 ignorePseudoClasses: ['global', 'local'],
             },
         ],

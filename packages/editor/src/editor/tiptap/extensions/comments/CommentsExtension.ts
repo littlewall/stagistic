@@ -17,7 +17,9 @@ import {
 } from './commentsPluginState';
 import {detectMergedBlocks} from './detectMergedBlocks';
 import type {
-    CommentsExtensionCallbacks, CommentsPluginState, EditorCommentThreadRef,
+    CommentsExtensionCallbacks,
+    CommentsPluginState,
+    EditorCommentThreadRef,
 } from './types';
 
 export {commentsPluginKey, getCommentsState} from './commentsPluginState';
@@ -71,7 +73,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                 },
             startCommentDraft:
                 () => ({
-                    tr, state, dispatch,
+                    tr,
+                    state,
+                    dispatch,
                 }) => {
                     const draft = readDraft(state);
 
@@ -91,7 +95,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                 },
             commitCommentDraft:
                 threadId => ({
-                    tr, state, dispatch,
+                    tr,
+                    state,
+                    dispatch,
                 }) => {
                     const draft = getCommentsState(state).draft;
 
@@ -111,7 +117,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                 },
             removeCommentAnchor:
                 threadId => ({
-                    tr, state, dispatch,
+                    tr,
+                    state,
+                    dispatch,
                 }) => {
                     const anchor = getCommentsState(state).anchors.get(threadId);
 
@@ -134,7 +142,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                 },
             restoreCommentAnchor:
                 threadId => ({
-                    tr, state, dispatch,
+                    tr,
+                    state,
+                    dispatch,
                 }) => {
                     const tombstone = getCommentsState(state).tombstones.get(threadId);
 
@@ -144,7 +154,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                         }
 
                         dispatch(withMeta(tr, {
-                            type: 'tombstone', threadId, tombstone: null,
+                            type: 'tombstone',
+                            threadId,
+                            tombstone: null,
                         }));
                     }
 

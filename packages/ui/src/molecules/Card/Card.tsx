@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import type {
-    ComponentPropsWithoutRef, ElementType, ReactNode,
+    ComponentPropsWithoutRef,
+    ElementType,
+    ReactNode,
 } from 'react';
 
 import styles from './Card.module.css';

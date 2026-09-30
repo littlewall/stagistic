@@ -1,7 +1,11 @@
 import type {ComponentProps, ComponentType} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
@@ -68,7 +72,8 @@ const renderPanel = (
                     vocalRangeLow: null,
                     vocalRangeHigh: null,
                     groupNames: ['ALL', 'ENSEMBLE'],
-                }, {
+                },
+                {
                     id: 'char-2',
                     name: 'BORIS',
                     color: null,

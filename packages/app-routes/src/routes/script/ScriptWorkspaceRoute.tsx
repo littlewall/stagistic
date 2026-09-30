@@ -19,7 +19,9 @@ export const ScriptWorkspaceRoute = () => {
     const {scriptId} = useParams();
     const controller = useScriptEditorController(scriptId);
     const {
-        editorLoadState, initialValue, storageError,
+        editorLoadState,
+        initialValue,
+        storageError,
     } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
     const editorSnapshotStore = useMemo(() => createEditorSnapshotStore(), [scriptId]);
@@ -47,7 +49,9 @@ export const ScriptWorkspaceRoute = () => {
 
     const workspaceValue = useMemo<ScriptWorkspaceValue>(
         () => ({
-            ...controller, editorSnapshotStore, editorSurfaceCache,
+            ...controller,
+            editorSnapshotStore,
+            editorSurfaceCache,
         }),
         [
             controller,

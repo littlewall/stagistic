@@ -5,7 +5,10 @@ import type {DbClient} from '../../queries';
 import * as dbQueries from '../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
 import {
-    buildCharacterColorPayload, buildCharacterConfirmPayload, buildCharacterDeletePayload, buildCharacterRenamePayload,
+    buildCharacterColorPayload,
+    buildCharacterConfirmPayload,
+    buildCharacterDeletePayload,
+    buildCharacterRenamePayload,
 } from './outboxPayloads';
 import type {CharacterHandlers} from './types';
 import {createCharacterAttributeUpdater} from './updateCharacterAttribute';
@@ -19,7 +22,9 @@ export const createCoreCharacterMutations = ({
     'confirmScriptCharacter' | 'confirmScriptCharacterWithId' | 'deleteScriptCharacter' | 'renameScriptCharacter' | 'setScriptCharacterColor'
 > => {
     const updateCharacterAttribute = createCharacterAttributeUpdater({
-        getDb, recordOutbox, syncDb,
+        getDb,
+        recordOutbox,
+        syncDb,
     });
 
     const confirmScriptCharacterWithId: CharacterHandlers['confirmScriptCharacterWithId'] = async (scriptId, input) => {

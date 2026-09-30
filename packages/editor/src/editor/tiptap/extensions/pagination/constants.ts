@@ -1,7 +1,11 @@
 import {type PaginationOptions} from './types';
 
 export {
-    FIT_EPSILON_PX, isOrphanCandidateBlockType, isSplittableBlockType, MIN_SPLIT_LINES_AFTER, MIN_SPLIT_LINES_BEFORE,
+    FIT_EPSILON_PX,
+    isOrphanCandidateBlockType,
+    isSplittableBlockType,
+    MIN_SPLIT_LINES_AFTER,
+    MIN_SPLIT_LINES_BEFORE,
 } from '@stagistic/script-pagination';
 
 export const DEFAULT_OPTIONS: PaginationOptions = {

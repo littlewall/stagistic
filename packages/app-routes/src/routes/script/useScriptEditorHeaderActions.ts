@@ -1,6 +1,8 @@
 import {exportScriptPackage, type ScriptRepository} from '@stagistic/app-core';
 import {
-    type ScriptDocument, serializeStagistic, type TitlePageSettings,
+    type ScriptDocument,
+    serializeStagistic,
+    type TitlePageSettings,
 } from '@stagistic/script';
 import {useCallback, useState} from 'react';
 import {type NavigateFunction} from 'react-router-dom';

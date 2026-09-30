@@ -1,6 +1,12 @@
 import {coerceUnknownBlocksToStageDirections, type ScriptDocument} from '@stagistic/script';
 import {
-    type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import {EditorActCommandsProvider} from './actCommands/context';
@@ -9,7 +15,10 @@ import {EditorShell} from './components/editorShell/EditorShell';
 import {EditorInstanceProvider} from './context';
 import type {EditorProps} from './contracts';
 import {
-    getEditorCssVars, resolveEditorSettings, selectEditorRebuildSettings, stripScriptSettings,
+    getEditorCssVars,
+    resolveEditorSettings,
+    selectEditorRebuildSettings,
+    stripScriptSettings,
 } from './editorSettings';
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
@@ -44,14 +53,25 @@ const Editor = ({
     children,
 }: EditorProps & {children?: ReactNode}) => {
     const {
-        initialValue, persistentCharacters = [], persistentMusic = [], commentThreads, scriptTitle, draftDate,
+        initialValue,
+        persistentCharacters = [],
+        persistentMusic = [],
+        commentThreads,
+        scriptTitle,
+        draftDate,
     } = document;
     const {settings: globalSettings, scriptSettings} = settingsProps ?? {};
     const {
-        onAutoSave, onManualSave, onDirtyChange, autoSaveDelayMs,
+        onAutoSave,
+        onManualSave,
+        onDirtyChange,
+        autoSaveDelayMs,
     } = save ?? {};
     const {
-        autoFocus, leftSidebarToggle, rightSidebarToggle, sidebarWidth,
+        autoFocus,
+        leftSidebarToggle,
+        rightSidebarToggle,
+        sidebarWidth,
     } = layout ?? {};
     const {
         onValueChange,
@@ -125,7 +145,11 @@ const Editor = ({
     }, [persistentMusic]);
 
     const {
-        colorByCharacterIdRef, rememberedColorByKeyRef, persistentCharactersRef, confirmedCharacterColorsById, liveStore,
+        colorByCharacterIdRef,
+        rememberedColorByKeyRef,
+        persistentCharactersRef,
+        confirmedCharacterColorsById,
+        liveStore,
     } = useEditorCharacterColors({
         persistentCharacters,
         characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
@@ -150,7 +174,9 @@ const Editor = ({
     ]);
 
     const {
-        resolvedLayout, handleLeftSidebarToggleMouseDown, handleRightSidebarToggleMouseDown,
+        resolvedLayout,
+        handleLeftSidebarToggleMouseDown,
+        handleRightSidebarToggleMouseDown,
     } = useEditorSidebarLayout({children, layout});
 
     const extensions = useEditorExtensions({
@@ -204,7 +230,10 @@ const Editor = ({
         return stripScriptSettings(editor.getJSON() as ScriptDocument);
     }, [editor]);
     const {
-        scheduleAutosave, handleManualSave, setLatestValue, syncInitialValue,
+        scheduleAutosave,
+        handleManualSave,
+        setLatestValue,
+        syncInitialValue,
     } = useAutosaveController({
         onAutoSave,
         onManualSave,

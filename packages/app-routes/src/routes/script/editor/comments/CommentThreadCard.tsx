@@ -1,7 +1,9 @@
 import type {ScriptCommentMessage, ScriptCommentThread} from '@stagistic/app-core';
 import {Button, MoreActionsMenu} from '@stagistic/ui';
 import {
-    type KeyboardEvent, type Ref, useState,
+    type KeyboardEvent,
+    type Ref,
+    useState,
 } from 'react';
 
 import styles from './CommentThreadCard.module.css';
@@ -55,7 +57,13 @@ interface ComposerProps {
 }
 
 const Composer = ({
-    label, submitLabel, placeholder, initialValue = '', autoFocus = false, onSubmit, onCancel,
+    label,
+    submitLabel,
+    placeholder,
+    initialValue = '',
+    autoFocus = false,
+    onSubmit,
+    onCancel,
 }: ComposerProps) => {
     const [value, setValue] = useState(initialValue);
     const submit = () => {
@@ -104,7 +112,10 @@ interface MessageProps {
 }
 
 const MessageBody = ({
-    message, isEditing, onStopEdit, onEdit,
+    message,
+    isEditing,
+    onStopEdit,
+    onEdit,
 }: Pick<MessageProps, 'message' | 'isEditing' | 'onStopEdit' | 'onEdit'>) => isEditing ? (
     <Composer
         label="Edit comment"
@@ -125,7 +136,12 @@ const MessageBody = ({
 );
 
 const Reply = ({
-    message, isEditing, onStartEdit, onStopEdit, onEdit, onDelete,
+    message,
+    isEditing,
+    onStartEdit,
+    onStopEdit,
+    onEdit,
+    onDelete,
 }: MessageProps) => (
     <div className={styles.reply}>
         <span className={styles.railPoint} aria-hidden="true" />
@@ -134,8 +150,11 @@ const Reply = ({
             <MoreActionsMenu
                 aria-label="Reply actions"
                 items={[
-                    {id: 'edit', label: 'Edit'}, {
-                        id: 'delete', label: 'Delete', tone: 'danger',
+                    {id: 'edit', label: 'Edit'},
+                    {
+                        id: 'delete',
+                        label: 'Delete',
+                        tone: 'danger',
                     },
                 ]}
                 onAction={id => (id === 'edit' ? onStartEdit() : onDelete())}
@@ -207,7 +226,9 @@ export const CommentThreadCard = ({
                                     {id: 'edit', label: 'Edit'},
                                     {id: 'status', label: isResolved ? 'Reopen' : 'Resolve'},
                                     {
-                                        id: 'delete', label: 'Delete', tone: 'danger',
+                                        id: 'delete',
+                                        label: 'Delete',
+                                        tone: 'danger',
                                     },
                                 ]}
                                 onAction={id => {

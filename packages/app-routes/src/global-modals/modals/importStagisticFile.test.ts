@@ -1,6 +1,9 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {
-    describe, expect, it, vi,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {importStagisticFile} from './importStagisticFile';

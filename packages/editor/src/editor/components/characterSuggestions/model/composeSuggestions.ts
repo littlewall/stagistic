@@ -6,11 +6,15 @@ import {isCaretAtCharacterTagEnd, readCommittedTagCharacterId} from '../../../ti
 import {getCharacterTagComposeFromState} from '../../../tiptap/extensions/CharacterTagInputExtension';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../../tiptap/scriptCore';
 import type {
-    CharacterSuggestionsResult, PersistentCharacterRef, SuppressedSelection,
+    CharacterSuggestionsResult,
+    PersistentCharacterRef,
+    SuppressedSelection,
 } from '../types';
 import {buildSuggestionRows} from './buildSuggestionRows';
 import {
-    CHARACTER_TAG_HORIZONTAL_PADDING_PX, MAX_SUGGESTIONS, OVERLAY_WIDTH_PX,
+    CHARACTER_TAG_HORIZONTAL_PADDING_PX,
+    MAX_SUGGESTIONS,
+    OVERLAY_WIDTH_PX,
 } from './constants';
 import {computeOverlayStyle} from './overlayPosition';
 import {getPersistentColorByKey} from './persistentCharacters';

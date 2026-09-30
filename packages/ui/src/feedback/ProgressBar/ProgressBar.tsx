@@ -12,7 +12,9 @@ type ProgressBarProps = {
 const clampProgress = (value: number) => clampNumber(value, 0, 1);
 
 export const ProgressBar = ({
-    value, label, size = 'md',
+    value,
+    label,
+    size = 'md',
 }: ProgressBarProps) => {
     const hasValue = typeof value === 'number';
     const progressValue = hasValue ? clampProgress(value) : null;

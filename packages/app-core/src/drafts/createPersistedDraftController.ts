@@ -10,7 +10,9 @@ import {
 import {reconcileDraftEntity} from './reconcileDraftEntity';
 
 export type {
-    PersistedDraftScheduler, PersistedDraftSnapshot, PersistedDraftStatus,
+    PersistedDraftScheduler,
+    PersistedDraftSnapshot,
+    PersistedDraftStatus,
 } from './persistedDraftContract';
 
 export const createPersistedDraftController = <TKey, TValue>({

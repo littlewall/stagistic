@@ -9,7 +9,9 @@ import {writeScriptSettingsTx} from './config';
 import {LEGACY_TO_BLOCKS_TRIGGERS, migrateScriptDocumentToBlocks} from './migration/legacyToBlocks';
 import {writeTitlePageFieldsTx} from './titlePage';
 import type {
-    GetDb, RecordOutbox, SyncDb,
+    GetDb,
+    RecordOutbox,
+    SyncDb,
 } from './types';
 
 interface CreateImportPackageHandlerArgs {
@@ -138,10 +140,15 @@ const writePackageDomainRowsTx = async (
         if (!projectedSceneId) continue;
 
         await dbQueries.updateScriptSceneMetadata(tx, {
-            sceneId: projectedSceneId, colorHex: scene.colorHex, synopsis: scene.synopsis, updatedAt: now,
+            sceneId: projectedSceneId,
+            colorHex: scene.colorHex,
+            synopsis: scene.synopsis,
+            updatedAt: now,
         });
         await dbQueries.replaceScriptSceneLocations(tx, {
-            scriptId, sceneHeadingBlockId: scene.headingBlockId, locationIds: scene.locationIds,
+            scriptId,
+            sceneHeadingBlockId: scene.headingBlockId,
+            locationIds: scene.locationIds,
         });
     }
 
@@ -198,7 +205,10 @@ const deleteBlobsBestEffort = async (fileStorage: FileStorage, keys: string[], c
 };
 
 export const createImportPackageHandler = ({
-    getDb, recordOutbox, syncDb, fileStorage,
+    getDb,
+    recordOutbox,
+    syncDb,
+    fileStorage,
 }: CreateImportPackageHandlerArgs) => {
     const createScriptFromPackage = async (input: ScriptPackageWrite): Promise<void> => {
         const db = await getDb();
@@ -216,7 +226,9 @@ export const createImportPackageHandler = ({
                 });
                 if (input.script.subtitle) {
                     await dbQueries.updateScriptSubtitle(tx, {
-                        id: scriptId, subtitle: input.script.subtitle, updatedAt: now,
+                        id: scriptId,
+                        subtitle: input.script.subtitle,
+                        updatedAt: now,
                     });
                 }
 
@@ -251,7 +263,10 @@ export const createImportPackageHandler = ({
         try {
             await db.transaction(async tx => {
                 await dbQueries.updateScript(tx, {
-                    id: scriptId, title: input.script.title, subtitle: input.script.subtitle, updatedAt: now,
+                    id: scriptId,
+                    title: input.script.title,
+                    subtitle: input.script.subtitle,
+                    updatedAt: now,
                 });
 
                 const existingAttachments = await dbQueries.listScriptAttachments(tx, scriptId);

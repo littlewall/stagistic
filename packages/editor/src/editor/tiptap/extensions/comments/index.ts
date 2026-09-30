@@ -1,6 +1,13 @@
 export {
-    CommentsExtension, commentsPluginKey, getCommentsState,
+    CommentsExtension,
+    commentsPluginKey,
+    getCommentsState,
 } from './CommentsExtension';
 export type {
-    CommentAnchorLocation, CommentBlockMerge, CommentDraft, CommentsExtensionCallbacks, CommentsPluginState, EditorCommentThreadRef,
+    CommentAnchorLocation,
+    CommentBlockMerge,
+    CommentDraft,
+    CommentsExtensionCallbacks,
+    CommentsPluginState,
+    EditorCommentThreadRef,
 } from './types';

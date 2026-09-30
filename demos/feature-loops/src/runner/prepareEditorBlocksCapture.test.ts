@@ -52,7 +52,8 @@ describe('prepareEditorBlocksCapture', () => {
 
         expect(events).toEqual([
             [
-                'acknowledgePreview', {
+                'acknowledgePreview',
+                {
                     key: 'stagistic.web.publicPreviewAcknowledgement',
                     value: '1',
                 },
@@ -60,7 +61,8 @@ describe('prepareEditorBlocksCapture', () => {
             ['goto', 'http://localhost:3000/dev/demos/editor-blocks'],
             ['waitForURL', '**/script/*/editor'],
             [
-                'addDemoStyle', {
+                'addDemoStyle',
+                {
                     content: [
                         '[data-id="demo-aside"]:has(> .ProseMirror-trailingBreak:only-child)::before,',
                         '[data-id="demo-aside"]:has(> .ProseMirror-trailingBreak:only-child)::after {',

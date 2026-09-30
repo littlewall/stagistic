@@ -1,11 +1,16 @@
 import {
-    BLOCK_TEXT_ALIGN_OPTIONS, type BlockCasing, type BlockTextAlign, type ScriptBlockNodeType,
+    BLOCK_TEXT_ALIGN_OPTIONS,
+    type BlockCasing,
+    type BlockTextAlign,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 import {ToggleButtonGroup, type ToggleButtonGroupOption} from '@stagistic/ui';
 import clsx from 'clsx';
 
 import type {
-    BlockSettingsPatch, ElementFormattingModel, ElementsHandlers,
+    BlockSettingsPatch,
+    ElementFormattingModel,
+    ElementsHandlers,
 } from '../types';
 import styles from './ElementFormattingToolbar.module.css';
 
@@ -67,11 +72,17 @@ const TEXT_STYLE_OPTIONS: ToggleButtonGroupOption<TextStyle>[] = [
 ];
 
 export const ElementFormattingToolbar = ({
-    blockType, model, handlers,
+    blockType,
+    model,
+    handlers,
 }: ElementFormattingToolbarProps) => {
     const update = (patch: BlockSettingsPatch) => handlers.onUpdateBlockSettings(blockType, patch);
     const {
-        textAlign, casing, isBold, isItalic, isUnderline,
+        textAlign,
+        casing,
+        isBold,
+        isItalic,
+        isUnderline,
     } = model;
     const activeTextStyles: TextStyle[] = [];
 

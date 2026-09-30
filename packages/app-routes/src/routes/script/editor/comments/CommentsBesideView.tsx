@@ -1,9 +1,18 @@
 import type {ScriptCommentThread} from '@stagistic/app-core';
 import {
-    COMMENT_DRAFT_ANCHOR_KEY, type CommentAnchorLocation, useCommentAnchorTops, useEditorInstance,
+    COMMENT_DRAFT_ANCHOR_KEY,
+    type CommentAnchorLocation,
+    useCommentAnchorTops,
+    useEditorInstance,
 } from '@stagistic/editor';
 import {
-    type ReactNode, useCallback, useEffect, useMemo, useRef, useState, type WheelEvent,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type WheelEvent,
 } from 'react';
 
 import {layoutBesideCards} from './layoutBesideCards';

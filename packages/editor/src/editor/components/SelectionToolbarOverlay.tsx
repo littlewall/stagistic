@@ -1,6 +1,9 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MouseEvent as ReactMouseEvent, type RefObject, useEffect, useState,
+    type MouseEvent as ReactMouseEvent,
+    type RefObject,
+    useEffect,
+    useState,
 } from 'react';
 
 import {commentsPluginKey} from '../tiptap/extensions/comments';

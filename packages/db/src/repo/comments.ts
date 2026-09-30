@@ -3,7 +3,9 @@ import * as dbQueries from '../queries';
 import type {ScriptCommentsRepository} from '../scriptRepository';
 import {LOCAL_COMMENT_AUTHOR_ID} from '../types';
 import type {
-    GetDb, RecordOutbox, SyncDb,
+    GetDb,
+    RecordOutbox,
+    SyncDb,
 } from './types';
 
 interface CreateCommentHandlersArgs {
@@ -21,10 +23,16 @@ interface CommentOutboxEntry {
 }
 
 export const createCommentHandlers = ({
-    getDb, recordOutbox, syncDb,
+    getDb,
+    recordOutbox,
+    syncDb,
 }: CreateCommentHandlersArgs): ScriptCommentsRepository => {
     const touchScript = async (tx: DbClient, {
-        scriptId, entityKey, opType, now, payload,
+        scriptId,
+        entityKey,
+        opType,
+        now,
+        payload,
     }: CommentOutboxEntry) => {
         await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         await recordOutbox(
@@ -140,7 +148,10 @@ export const createCommentHandlers = ({
 
         await db.transaction(async tx => {
             await dbQueries.updateScriptCommentMessageBody(tx, {
-                scriptId, messageId, body, editedAt: now,
+                scriptId,
+                messageId,
+                body,
+                editedAt: now,
             });
             await touchScript(tx, {
                 scriptId,
@@ -206,7 +217,10 @@ export const createCommentHandlers = ({
 
         await db.transaction(async tx => {
             const moved = await dbQueries.moveScriptCommentBlockAnchors(tx, {
-                scriptId, fromBlockId, toBlockId, updatedAt: now,
+                scriptId,
+                fromBlockId,
+                toBlockId,
+                updatedAt: now,
             });
 
             movedCount = moved.length;
@@ -218,7 +232,9 @@ export const createCommentHandlers = ({
                     opType: 'comment.anchor.move',
                     now,
                     payload: {
-                        fromBlockId, toBlockId, threadIds: moved,
+                        fromBlockId,
+                        toBlockId,
+                        threadIds: moved,
                     },
                 });
             }

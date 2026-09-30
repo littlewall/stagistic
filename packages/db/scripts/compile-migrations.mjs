@@ -1,6 +1,8 @@
 import {createHash} from 'node:crypto';
 import {
-    readdir, readFile, writeFile,
+    readdir,
+    readFile,
+    writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
 

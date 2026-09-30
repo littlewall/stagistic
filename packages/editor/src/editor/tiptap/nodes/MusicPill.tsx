@@ -1,19 +1,29 @@
 import {
-    MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_MODE_ATTR, MUSIC_TITLE_ATTR,
+    MUSIC_DRAFT_ATTR,
+    MUSIC_ID_ATTR,
+    MUSIC_MODE_ATTR,
+    MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import {ArrowRightIcon, EditPencilIcon} from '@stagistic/ui';
 import {type NodeViewProps, NodeViewWrapper} from '@tiptap/react';
 import clsx from 'clsx';
 import {
-    useEffect, useId, useRef, useState,
+    useEffect,
+    useId,
+    useRef,
+    useState,
 } from 'react';
 
 import type {
-    EditorMusicCreateRequest, EditorMusicRemoveRequest, PersistentMusicRef,
+    EditorMusicCreateRequest,
+    EditorMusicRemoveRequest,
+    PersistentMusicRef,
 } from '../../contracts';
 import styles from './MusicPill.module.css';
 import {
-    MusicMenuButton, type MusicMode, MusicUnassignIcon,
+    MusicMenuButton,
+    type MusicMode,
+    MusicUnassignIcon,
 } from './MusicPillControls';
 import {requestMusicPillCreation} from './musicPillCreation';
 import {
@@ -53,7 +63,9 @@ export const MusicStartPill = ({
     persistentMusicRef,
 }: MusicStartPillProps) => {
     const {
-        active, setActive, rootRef,
+        active,
+        setActive,
+        rootRef,
     } = usePillActivation();
     const anchorName = `--music-pill-${useId().replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
     const titleRef = useRef<HTMLSpanElement>(null);

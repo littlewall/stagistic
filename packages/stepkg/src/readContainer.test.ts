@@ -1,6 +1,8 @@
 import {zipSync} from 'fflate';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {readStepkgContainer} from './readContainer';
@@ -20,7 +22,9 @@ interface ManifestFixture {
     createdAt: string,
     generator: {name: string, version: string},
     script: {
-        id: string, title: string, updatedAt: string,
+        id: string,
+        title: string,
+        updatedAt: string,
     },
     entrypoints: {document: string, text: string},
     files: unknown[],
@@ -33,7 +37,9 @@ const manifestFixture = (): ManifestFixture => ({
     createdAt: '2026-09-18T12:00:00.000Z',
     generator: {name: 'Stagistic', version: '0.0.0'},
     script: {
-        id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z',
+        id: 's1',
+        title: 'T',
+        updatedAt: '2026-09-18T11:00:00.000Z',
     },
     entrypoints: {document: 'document.json', text: 'script.stagistic'},
     files: [],

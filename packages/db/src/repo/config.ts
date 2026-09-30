@@ -7,7 +7,9 @@ import type {ScriptRepository} from '../scriptRepository';
 import {normalizeSettingsBlockType} from './configBlockTypes';
 import {buildConfigRows, hydrateBlockSettings} from './configRows';
 import type {
-    GetDb, RecordOutbox, SyncDb,
+    GetDb,
+    RecordOutbox,
+    SyncDb,
 } from './types';
 
 type SettingsHandlers = Pick<ScriptRepository, 'loadScriptSettings' | 'saveScriptSettings' | 'deleteScriptSettings'>;
@@ -177,7 +179,9 @@ export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, sett
 };
 
 export const createSettingsHandlers = ({
-    getDb, recordOutbox, syncDb,
+    getDb,
+    recordOutbox,
+    syncDb,
 }: CreateSettingsHandlersArgs): SettingsHandlers => {
     const loadScriptSettings: SettingsHandlers['loadScriptSettings'] = async scriptId => {
         const db = await getDb();

@@ -1,7 +1,10 @@
 import {type ScriptBlockIndexSnapshot} from '@stagistic/script';
 import {Extension} from '@tiptap/core';
 import {
-    type EditorState, Plugin, PluginKey, type Transaction,
+    type EditorState,
+    Plugin,
+    PluginKey,
+    type Transaction,
 } from '@tiptap/pm/state';
 
 import type {EditorBlockUiEvent} from '../../contracts';

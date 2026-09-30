@@ -10,7 +10,9 @@ type PageContainerProps = {
 };
 
 export const PageContainer = ({
-    children, variant = 'standard', className,
+    children,
+    variant = 'standard',
+    className,
 }: PageContainerProps) => {
     return (
         <div className={styles.root}>

@@ -1,6 +1,9 @@
 import {createInMemoryReactiveQuerySource} from '@stagistic/db';
 import {
-    describe, expect, it, vi,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {createReactiveCollection} from './createReactiveCollection';

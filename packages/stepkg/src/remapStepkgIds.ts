@@ -1,5 +1,8 @@
 import {
-    COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR, MUSIC_ID_ATTR, type ScriptDocument,
+    COMMENT_ANCHOR_MARK_NAME,
+    COMMENT_THREAD_ID_ATTR,
+    MUSIC_ID_ATTR,
+    type ScriptDocument,
 } from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
@@ -111,7 +114,9 @@ export const remapStepkgIds = (snapshot: StepkgSnapshot, newId: () => string = u
     const next: StepkgSnapshot = {
         script: {...snapshot.script, id: newId()},
         document: remapDocument(snapshot.document, {
-            characters: idMap.characters, music: idMap.music, commentThreads: idMap.commentThreads,
+            characters: idMap.characters,
+            music: idMap.music,
+            commentThreads: idMap.commentThreads,
         }) as ScriptDocument,
         titlePage: snapshot.titlePage,
         settings: snapshot.settings,

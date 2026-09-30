@@ -16,10 +16,14 @@ const script = {
             {
                 ...block('stageDirection', 'cue', ''),
                 content: [
-                    {type: 'musicStart',
+                    {
+                        type: 'musicStart',
                         attrs: {
-                            musicId: 'music-1', mode: 'open', title: 'Opening',
-                        }},
+                            musicId: 'music-1',
+                            mode: 'open',
+                            title: 'Opening',
+                        },
+                    },
                 ],
             },
             block('lyrics', 'music', 'Song'),
@@ -45,7 +49,11 @@ describe('deriveIntegratedScoreExportPlan', () => {
 
         expect(plan.postSteps).toEqual([
             {
-                kind: 'integrated-score', musicId: 'music-1', title: 'Opening', startBlockId: 'cue', afterBlockId: 'out',
+                kind: 'integrated-score',
+                musicId: 'music-1',
+                title: 'Opening',
+                startBlockId: 'cue',
+                afterBlockId: 'out',
             },
         ]);
         expect(plan.pagination.forcedBreaks).toContainEqual({blockId: 'music', kind: 'odd-page'});

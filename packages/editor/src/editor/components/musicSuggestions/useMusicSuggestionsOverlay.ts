@@ -1,5 +1,9 @@
 import {
-    type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import type {PersistentMusicRef} from '../../contracts';
@@ -9,7 +13,10 @@ import {buildCommitMusic} from '../../tiptap/extensions/musicInput/transactions'
 import {getActiveScriptBlockFromState} from '../../tiptap/scriptCore';
 import {computeOverlayStyle} from '../characterSuggestions/model/overlayPosition';
 import {
-    getMusicSuggestions, getSafeIsFocused, type MusicSuggestionOverlayState, type MusicSuggestionsOverlayProps,
+    getMusicSuggestions,
+    getSafeIsFocused,
+    type MusicSuggestionOverlayState,
+    type MusicSuggestionsOverlayProps,
 } from './musicSuggestionModel';
 
 export const useMusicSuggestionsOverlay = ({

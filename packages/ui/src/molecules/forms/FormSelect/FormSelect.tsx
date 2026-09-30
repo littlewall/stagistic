@@ -16,7 +16,16 @@ interface FormSelectProps {
 }
 
 export const FormSelect = ({
-    id, value, options, ariaLabel, onChange, className, isOpen, onIsOpenChange, size = 'lg', width,
+    id,
+    value,
+    options,
+    ariaLabel,
+    onChange,
+    className,
+    isOpen,
+    onIsOpenChange,
+    size = 'lg',
+    width,
 }: FormSelectProps) => (
     <Select
         id={id}

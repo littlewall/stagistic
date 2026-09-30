@@ -1,10 +1,14 @@
 import {createNodeId, splitTrailingParentheticalSuffix} from '@stagistic/shared';
 
 import {
-    createScriptBlockNode, type ScriptDocument, type ScriptNode,
+    createScriptBlockNode,
+    type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {
-    isForcedCharacterCueLine, isQuotedCharacterCueLine, isUppercaseSyntaxLine,
+    isForcedCharacterCueLine,
+    isQuotedCharacterCueLine,
+    isUppercaseSyntaxLine,
 } from '../syntax';
 import {parseStagisticFrontmatter} from './frontmatter';
 import {parseInlineText, parseStageDirectionLine} from './inline';
@@ -105,7 +109,10 @@ const isParenthetical = (value: string) => {
 
 export const parseStagistic = (source: string): ParseStagisticResult => {
     const {
-        body, bodyStartLine, title, titlePage,
+        body,
+        bodyStartLine,
+        title,
+        titlePage,
     } = parseStagisticFrontmatter(source);
     const lines = body.split('\n');
     const hasActs = lines.some(line => (/^##\s+/u).test(line));

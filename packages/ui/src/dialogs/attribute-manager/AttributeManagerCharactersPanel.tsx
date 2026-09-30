@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import {
-    useEffect, useMemo, useState,
+    useEffect,
+    useMemo,
+    useState,
 } from 'react';
 
 import {useKeyedFieldDrafts} from '../../hooks/useKeyedFieldDrafts';
@@ -15,7 +17,8 @@ import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterN
 import {useOptimisticAttributeManagerColors} from './useOptimisticAttributeManagerColors';
 
 const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
-    {id: 'characters', label: 'Characters'}, {id: 'groups', label: 'Groups'},
+    {id: 'characters', label: 'Characters'},
+    {id: 'groups', label: 'Groups'},
     // {id: 'cast', label: 'Cast'},
 ];
 
@@ -54,7 +57,10 @@ export const AttributeManagerCharactersPanel = ({
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
     const {colorizedItems: colorizedCharacters, setColor: handleSetCharacterColor} = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
     const {
-        displayedCharacters, persistName, resetName, setName,
+        displayedCharacters,
+        persistName,
+        resetName,
+        setName,
     } = useAttributeManagerCharacterNames({
         characters: colorizedCharacters,
         draftScopeKey,

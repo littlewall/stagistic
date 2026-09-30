@@ -12,9 +12,14 @@ import {getScriptCharactersStore} from './scriptCharactersStoreRegistry';
 
 const defaultGenderOptions = [
     {
-        id: 'default:male', key: 'male', label: 'Male',
-    }, {
-        id: 'default:female', key: 'female', label: 'Female',
+        id: 'default:male',
+        key: 'male',
+        label: 'Male',
+    },
+    {
+        id: 'default:female',
+        key: 'female',
+        label: 'Female',
     },
 ];
 

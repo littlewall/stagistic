@@ -1,8 +1,14 @@
 import {
-    buildScriptBlockIndex, collectCommentAnchorThreadIds, parseStagistic,
+    buildScriptBlockIndex,
+    collectCommentAnchorThreadIds,
+    parseStagistic,
 } from '@stagistic/script';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {createExampleScript, type ExampleScriptRepository} from './createExampleScript';
@@ -63,7 +69,9 @@ const createRepository = () => {
         replaceScriptCharacterGroupMembers: resolved(null),
         upsertScriptCharacterGender: vi.fn((_scriptId: string, label: string) => {
             return Promise.resolve({
-                id: `gender-${label}`, key: label.toLowerCase(), label,
+                id: `gender-${label}`,
+                key: label.toLowerCase(),
+                label,
             });
         }),
         setScriptCharacterGender: resolved(null),

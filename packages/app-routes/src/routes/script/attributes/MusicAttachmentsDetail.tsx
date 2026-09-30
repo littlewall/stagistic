@@ -1,5 +1,7 @@
 import {
-    AttributeManagerMusicDetail, type MusicAttachmentSlotView, RemoveAttachmentModal,
+    AttributeManagerMusicDetail,
+    type MusicAttachmentSlotView,
+    RemoveAttachmentModal,
 } from '@stagistic/ui';
 import {useState} from 'react';
 
@@ -9,7 +11,8 @@ import type {
 } from '../editor/music/types';
 import {MusicAttachmentPreviewModal} from './MusicAttachmentPreviewModal';
 import {
-    INTEGRATED_SCORE_ROLE, useMusicAttachmentsState,
+    INTEGRATED_SCORE_ROLE,
+    useMusicAttachmentsState,
 } from './useMusicAttachmentsState';
 
 interface MusicAttachmentsDetailProps {

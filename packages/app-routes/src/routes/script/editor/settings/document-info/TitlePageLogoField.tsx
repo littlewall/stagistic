@@ -1,7 +1,9 @@
 import type {TitlePageLogo, TitlePageLogoMimeType} from '@stagistic/script';
 import {Button, Notice} from '@stagistic/ui';
 import {
-    type ChangeEvent, useRef, useState,
+    type ChangeEvent,
+    useRef,
+    useState,
 } from 'react';
 
 import styles from './TitlePageLogoField.module.css';

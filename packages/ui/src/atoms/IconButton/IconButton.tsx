@@ -19,7 +19,13 @@ type IconButtonProps = {
 } & Omit<RACButtonProps, 'className'>;
 
 export const IconButton = ({
-    variant = 'ghost', size = 'sm', tone = 'neutral', shape = 'default', isSelected = false, className, ...props
+    variant = 'ghost',
+    size = 'sm',
+    tone = 'neutral',
+    shape = 'default',
+    isSelected = false,
+    className,
+    ...props
 }: IconButtonProps) => (
     <RACButton
         {...props}

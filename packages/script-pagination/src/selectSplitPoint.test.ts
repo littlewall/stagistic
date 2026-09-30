@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {selectSplitPoint} from './selectSplitPoint';
@@ -20,7 +22,9 @@ describe('selectSplitPoint', () => {
         });
 
         expect(decision).toEqual({
-            kind: 'split', breakPos: 3, fragmentHeight: 30,
+            kind: 'split',
+            breakPos: 3,
+            fragmentHeight: 30,
         });
     });
 

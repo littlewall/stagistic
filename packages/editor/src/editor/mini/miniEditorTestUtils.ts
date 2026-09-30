@@ -31,7 +31,8 @@ export const createMiniEditorTestDocument = (): ScriptDocument => ({
             type: 'stageDirection',
             attrs: {id: 'mini-stage-direction'},
             content: [
-                {type: 'text', text: 'Music starts. '}, {
+                {type: 'text', text: 'Music starts. '},
+                {
                     type: MUSIC_START_NODE_NAME,
                     attrs: {
                         [MUSIC_ID_ATTR]: 'mini-music',
@@ -95,7 +96,8 @@ export const createMiniEditorTestEditor = () => new Editor({
 export const createGuardedMiniEditorTestEditor = () => new Editor({
     content: createMiniEditorTestDocument(),
     extensions: [
-        ...baseExtensions, MiniEditorGuardExtension.configure({
+        ...baseExtensions,
+        MiniEditorGuardExtension.configure({
             signature: miniEditorStructureSignature,
         }),
     ],

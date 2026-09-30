@@ -16,7 +16,10 @@ import {
 } from '@stagistic/script';
 
 import {
-    DEFAULT_BLOCK_TYPE, type InlineStyle, type MusicLabels, type TextSegment,
+    DEFAULT_BLOCK_TYPE,
+    type InlineStyle,
+    type MusicLabels,
+    type TextSegment,
 } from './model';
 
 const getNodeText = (node: ScriptNode): string => {

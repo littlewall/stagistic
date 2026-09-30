@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import {
-    useEffect, useMemo, useState,
+    useEffect,
+    useMemo,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -38,7 +40,9 @@ export const AttributeManagerPlacesPanel = ({
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const {
-        getValue: getNameDraft, persistValue: persistNameDraft, setValue: setNameDraft,
+        getValue: getNameDraft,
+        persistValue: persistNameDraft,
+        setValue: setNameDraft,
     } = useKeyedFieldDrafts<string>(draftScopeKey);
     const displayedPlaces = useMemo(
         () => places.map(place => ({

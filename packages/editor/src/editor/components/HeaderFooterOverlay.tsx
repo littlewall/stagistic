@@ -8,7 +8,10 @@ import {
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
-    type CSSProperties, type RefObject, useLayoutEffect, useState,
+    type CSSProperties,
+    type RefObject,
+    useLayoutEffect,
+    useState,
 } from 'react';
 
 import {usePageStructureMarks} from '../headerFooter/usePageStructureMarks';
@@ -73,7 +76,11 @@ const renderCells = (row: HeaderFooterRowSettings, resolve: (cell: HeaderFooterC
 });
 
 export const HeaderFooterOverlay = ({
-    editor, canvasRef, headerFooter, scriptTitle, draftDate,
+    editor,
+    canvasRef,
+    headerFooter,
+    scriptTitle,
+    draftDate,
 }: HeaderFooterOverlayProps) => {
     const pagination = usePaginationState(editor);
     const marks = usePageStructureMarks(editor, pagination?.pages ?? []);
@@ -118,7 +125,10 @@ export const HeaderFooterOverlay = ({
     }
 
     const {
-        pageHeight, marginTop, marginBottom, marginLeft,
+        pageHeight,
+        marginTop,
+        marginBottom,
+        marginLeft,
     } = pagination;
 
     const layerStyle: CSSProperties = {

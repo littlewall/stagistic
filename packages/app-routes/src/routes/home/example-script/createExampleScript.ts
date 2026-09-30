@@ -2,7 +2,10 @@ import type {ScriptRepository} from '@stagistic/app-core';
 import {linkCharacterRefInScriptDocument, type ScriptDocument} from '@stagistic/script';
 
 import {
-    EXAMPLE_CHARACTERS, EXAMPLE_COMMENT_THREADS, EXAMPLE_GROUPS, EXAMPLE_LOCATIONS,
+    EXAMPLE_CHARACTERS,
+    EXAMPLE_COMMENT_THREADS,
+    EXAMPLE_GROUPS,
+    EXAMPLE_LOCATIONS,
 } from './exampleScriptMetadata';
 import {loadExampleScriptTemplate} from './loadExampleScriptTemplate';
 import {anchorExampleComment} from './prepareExampleScriptDocument';

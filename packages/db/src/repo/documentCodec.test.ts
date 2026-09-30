@@ -1,9 +1,13 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
-    fromMillis, parseJson, toMillis,
+    fromMillis,
+    parseJson,
+    toMillis,
 } from './documentCodec';
 
 describe('toMillis', () => {

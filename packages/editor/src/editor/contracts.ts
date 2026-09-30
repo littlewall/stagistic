@@ -15,7 +15,9 @@
  * autosave without coupling it to value-change notifications.
  */
 import type {
-    EditorSettingsOverride, ScriptBlockIndexSnapshot, ScriptDocument,
+    EditorSettingsOverride,
+    ScriptBlockIndexSnapshot,
+    ScriptDocument,
 } from '@stagistic/script';
 import type {ReactNode} from 'react';
 

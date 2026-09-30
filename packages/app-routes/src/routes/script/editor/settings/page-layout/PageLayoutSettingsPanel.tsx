@@ -1,10 +1,16 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {
-    formControlStyles, FormSelect, PanelHeader, SettingsGroup,
+    formControlStyles,
+    FormSelect,
+    PanelHeader,
+    SettingsGroup,
 } from '@stagistic/ui';
 import clsx from 'clsx';
 import {
-    startTransition, useEffect, useRef, useState,
+    startTransition,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
@@ -24,7 +30,8 @@ const PAGE_SIZE_PRESETS = [
         label: 'A4',
         widthPx: 794,
         heightPx: 1123,
-    }, {
+    },
+    {
         id: 'letter',
         label: 'US Letter',
         widthPx: 816,
@@ -45,16 +52,28 @@ interface PageLayoutSettingsPanelProps {
 
 export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSettings}: PageLayoutSettingsPanelProps) => {
     const {
-        preview, slider, numeric,
+        preview,
+        slider,
+        numeric,
     } = usePageLayoutSettingsViewModel({resolvedScriptSettings});
     const {
-        pagePreviewStyle, headerRows, footerRows, contentRows,
+        pagePreviewStyle,
+        headerRows,
+        footerRows,
+        contentRows,
     } = preview;
     const {
-        sliderStyle, sliderStart, sliderEnd, previewReferenceTotal, minSliderStart, maxSliderEnd,
+        sliderStyle,
+        sliderStart,
+        sliderEnd,
+        previewReferenceTotal,
+        minSliderStart,
+        maxSliderEnd,
     } = slider;
     const {
-        topMarginRows, bottomMarginRows, marginRowOptions,
+        topMarginRows,
+        bottomMarginRows,
+        marginRowOptions,
     } = numeric;
 
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx;
@@ -66,7 +85,8 @@ export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSet
         ...PAGE_SIZE_PRESETS.map(preset => ({
             value: preset.id,
             label: preset.label,
-        })), ...pageSizePresetId === 'custom' ? [{value: 'custom', label: 'Custom'}] : [],
+        })),
+        ...pageSizePresetId === 'custom' ? [{value: 'custom', label: 'Custom'}] : [],
     ];
 
     const marginSliderStep = 0.05 * 96; // 0.05"

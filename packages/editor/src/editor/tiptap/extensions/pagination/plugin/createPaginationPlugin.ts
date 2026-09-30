@@ -1,13 +1,17 @@
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
-    type EditorState, Plugin, PluginKey,
+    type EditorState,
+    Plugin,
+    PluginKey,
 } from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
 import {buildPaginationState} from '../layout/buildPaginationState';
 import {createInitialPaginationState} from '../state/createInitialPaginationState';
 import {
-    type BlockCacheEntry, type PaginationPluginState, type PaginationStorage,
+    type BlockCacheEntry,
+    type PaginationPluginState,
+    type PaginationStorage,
 } from '../types';
 
 export const paginationKey = new PluginKey<PaginationPluginState>('script-pagination');
@@ -137,7 +141,11 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     }
 
                     const {
-                        decorations, pagination, nextCache, hasInlineBreaks, usedFallbackMeasurements,
+                        decorations,
+                        pagination,
+                        nextCache,
+                        hasInlineBreaks,
+                        usedFallbackMeasurements,
                     } = buildPaginationState(
                         view,
                         storage.options,

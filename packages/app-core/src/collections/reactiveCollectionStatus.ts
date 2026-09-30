@@ -59,8 +59,11 @@ export const createReactiveCollectionStatusStore = (): ReactiveCollectionStatusS
         startMutation: mutation => emit({
             ...snapshot,
             mutations: [
-                ...removeMutation(mutation.entityKey, mutation.action), {
-                    ...mutation, error: null, status: 'pending',
+                ...removeMutation(mutation.entityKey, mutation.action),
+                {
+                    ...mutation,
+                    error: null,
+                    status: 'pending',
                 },
             ],
         }),
@@ -71,8 +74,12 @@ export const createReactiveCollectionStatusStore = (): ReactiveCollectionStatusS
         failMutation: (entityKey, action, error) => emit({
             ...snapshot,
             mutations: [
-                ...removeMutation(entityKey, action), {
-                    entityKey, action, error, status: 'failed',
+                ...removeMutation(entityKey, action),
+                {
+                    entityKey,
+                    action,
+                    error,
+                    status: 'failed',
                 },
             ],
         }),

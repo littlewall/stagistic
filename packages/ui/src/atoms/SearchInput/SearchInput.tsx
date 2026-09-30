@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import {
-    type ComponentPropsWithoutRef, forwardRef, type ReactNode,
+    type ComponentPropsWithoutRef,
+    forwardRef,
+    type ReactNode,
 } from 'react';
 
 import {SearchIcon} from '../../icons/ui/SearchIcon';
@@ -28,7 +30,11 @@ const SIZE_CLASS: Record<SearchInputSize, string> = {
 };
 
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
-    size = 'md', className, startAdornment, endAdornment, ...props
+    size = 'md',
+    className,
+    startAdornment,
+    endAdornment,
+    ...props
 }, ref) => {
     const resolvedStartAdornment =
         startAdornment === undefined ? (

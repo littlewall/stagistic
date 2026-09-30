@@ -1,7 +1,9 @@
 import {type EditorValueChangeMeta} from '@stagistic/editor';
 import {type ScriptDocument} from '@stagistic/script';
 import {
-    createContext, type ReactNode, useContext,
+    createContext,
+    type ReactNode,
+    useContext,
 } from 'react';
 
 import type {

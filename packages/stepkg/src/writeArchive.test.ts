@@ -1,6 +1,8 @@
 import {unzipSync} from 'fflate';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {STEPKG_MEDIA_TYPE} from './constants';
@@ -10,9 +12,16 @@ describe('writeStepkgArchive', () => {
     it('creates a standard ZIP while retaining per-file compression policy', async () => {
         const blob = await writeStepkgArchive([
             {
-                path: 'script.stagistic', mediaType: 'text/plain;charset=utf-8', bytes: new TextEncoder().encode('Line one\nLine two\n'), compression: 'deflate',
-            }, {
-                path: 'assets/att-1/score.pdf', mediaType: 'application/pdf', bytes: new TextEncoder().encode('%PDF-test'), compression: 'store',
+                path: 'script.stagistic',
+                mediaType: 'text/plain;charset=utf-8',
+                bytes: new TextEncoder().encode('Line one\nLine two\n'),
+                compression: 'deflate',
+            },
+            {
+                path: 'assets/att-1/score.pdf',
+                mediaType: 'application/pdf',
+                bytes: new TextEncoder().encode('%PDF-test'),
+                compression: 'store',
             },
         ]);
         const archive = new Uint8Array(await blob.arrayBuffer());

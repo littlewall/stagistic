@@ -4,7 +4,9 @@ import type {FileStorage} from '../fileStorage';
 import * as dbQueries from '../queries';
 import type {ScriptAttachmentsRepository} from '../scriptRepository';
 import type {
-    GetDb, RecordOutbox, SyncDb,
+    GetDb,
+    RecordOutbox,
+    SyncDb,
 } from './types';
 
 interface CreateAttachmentHandlersArgs {
@@ -174,6 +176,9 @@ export const createAttachmentHandlers = ({
     };
 
     return {
-        getByMusicRole, setForMusic, removeFromMusic, getBlob,
+        getByMusicRole,
+        setForMusic,
+        removeFromMusic,
+        getBlob,
     };
 };

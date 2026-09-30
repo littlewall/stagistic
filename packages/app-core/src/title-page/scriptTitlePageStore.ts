@@ -6,7 +6,9 @@ import {createReactiveCollection, createRepositoryStoreRegistry} from '../collec
 const createScriptTitlePageStore = (repository: ScriptRepository, scriptId: string) => {
     const source = repository.getScriptTitlePageSource(scriptId);
     const {
-        collection, status, confirmed,
+        collection,
+        status,
+        confirmed,
     } = createReactiveCollection<ScriptTitlePageRecord, string>({
         id: `script-title-page:${scriptId}`,
         source,

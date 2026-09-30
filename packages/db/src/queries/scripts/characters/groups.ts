@@ -1,5 +1,8 @@
 import {
-    and, asc, eq, inArray,
+    and,
+    asc,
+    eq,
+    inArray,
 } from 'drizzle-orm';
 
 import {scriptCharacterGroupMembers, scriptCharacters} from '../../../schema';

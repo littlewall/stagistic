@@ -1,6 +1,8 @@
 import {asc, eq} from 'drizzle-orm';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {migrateLegacyJsonToBlocksForScript, rebuildScriptDocumentFromBlocks} from '../../blocks';
@@ -86,7 +88,8 @@ describe('script import with fractional indexing', () => {
                     type: 'scene',
                     attrs: {id: 'scene1'},
                     content: [{type: 'text', text: 'EXT. PARK - NIGHT'}],
-                }, {
+                },
+                {
                     type: 'stageDirection',
                     attrs: {id: 'action1'},
                     content: [{type: 'text', text: 'Trees sway in the wind.'}],

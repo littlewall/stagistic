@@ -1,14 +1,20 @@
 import '@stagistic/ui/styles/base.css';
 
 import {
-    COMMENT_ANCHOR_MARK_NAME, type ScriptDocument, type ScriptNode,
+    COMMENT_ANCHOR_MARK_NAME,
+    type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
@@ -34,7 +40,9 @@ const dialogue = (id: string, text: string, threadIds: readonly string[] = []): 
 });
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: [{type: 'text', text}],
+    type: 'scene',
+    attrs: {id},
+    content: [{type: 'text', text}],
 });
 
 const createDocument = (blocks: ScriptNode[] = [dialogue('b1', 'Hello world'), dialogue('b2', 'Second line')]): ScriptDocument => ({
@@ -43,7 +51,10 @@ const createDocument = (blocks: ScriptNode[] = [dialogue('b1', 'Hello world'), d
 });
 
 const openRange = (id: string): EditorCommentThreadRef => ({
-    id, status: 'open', anchorKind: 'range', anchorBlockId: null,
+    id,
+    status: 'open',
+    anchorKind: 'range',
+    anchorBlockId: null,
 });
 
 const EditorProbe = () => {
@@ -163,7 +174,10 @@ describe('comment host contract', () => {
 
         rerender({commentThreads: [
             {
-                id: 't1', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 't1',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]});
 
@@ -253,7 +267,10 @@ describe('comment margin markers', () => {
     it('marks block-anchored threads too, as a single dot for one', async () => {
         await mountEditor({commentThreads: [
             {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b2',
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b2',
             },
         ]});
 
@@ -303,7 +320,10 @@ describe('comment indicators', () => {
     it('never draws a block-edge line; the active block comment lights its marker instead', async () => {
         const {editor} = await mountEditor({commentThreads: [
             {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]});
 
@@ -329,7 +349,10 @@ describe('comment indicators', () => {
     it('keeps the marker clear of the music rail', async () => {
         await mountEditor({commentThreads: [
             {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]});
 
@@ -354,7 +377,10 @@ describe('comment marker placement', () => {
             ]),
             commentThreads: [
                 {
-                    id: 'ts', status: 'open', anchorKind: 'block', anchorBlockId: 's1',
+                    id: 'ts',
+                    status: 'open',
+                    anchorKind: 'block',
+                    anchorBlockId: 's1',
                 },
             ],
         });
@@ -370,7 +396,10 @@ describe('comment marker placement', () => {
     it('sits midway between the music rail and the scrollbar', async () => {
         await mountEditor({commentThreads: [
             {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]});
 

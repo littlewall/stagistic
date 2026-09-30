@@ -14,7 +14,10 @@ interface CharacterColorControlProps {
 }
 
 export const CharacterColorControl = ({
-    characterKey, color, className, swatchClassName,
+    characterKey,
+    color,
+    className,
+    swatchClassName,
 }: CharacterColorControlProps) => {
     const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
         event.stopPropagation();

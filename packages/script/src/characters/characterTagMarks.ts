@@ -69,7 +69,9 @@ export const collectCharacterTags = (blockNode: ScriptNode): CharacterTagRef[] =
 
         if (key.length > 0) {
             tags.push({
-                key, characterId: runCharacterId, text: runText,
+                key,
+                characterId: runCharacterId,
+                text: runText,
             });
         }
 
@@ -189,7 +191,9 @@ interface RenameCharacterTagsArgs {
 export const renameCharacterTagsInNode = (
     blockNode: ScriptNode,
     {
-        fromKey, newName, characterId,
+        fromKey,
+        newName,
+        characterId,
     }: RenameCharacterTagsArgs,
 ): ScriptNode => {
     if (!Array.isArray(blockNode.content) || newName.length === 0) {
@@ -227,7 +231,9 @@ export const renameCharacterTagsInNode = (
         });
 
         return {
-            ...child, text: newName, marks: nextMarks,
+            ...child,
+            text: newName,
+            marks: nextMarks,
         };
     });
 

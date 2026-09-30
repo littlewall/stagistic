@@ -23,6 +23,8 @@ export const restoreScriptPackage = async ({repository, bytes}: RestoreScriptPac
     }
 
     return {
-        ok: true, scriptId: write.script.id, title: write.script.title,
+        ok: true,
+        scriptId: write.script.id,
+        title: write.script.title,
     };
 };

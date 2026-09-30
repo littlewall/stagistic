@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {StepkgSnapshot} from './contracts';
@@ -7,14 +9,22 @@ import {validateStepkgSnapshot} from './validateSnapshot';
 
 const snapshot: StepkgSnapshot = {
     script: {
-        id: 'script-1', title: 'Test', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z',
+        id: 'script-1',
+        title: 'Test',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
     },
-    document: {type: 'doc',
+    document: {
+        type: 'doc',
         content: [
             {
-                type: 'scene', attrs: {id: 'block-1'}, content: [],
+                type: 'scene',
+                attrs: {id: 'block-1'},
+                content: [],
             },
-        ]},
+        ],
+    },
     titlePage: {},
     settings: {},
     characters: {
@@ -32,7 +42,8 @@ const snapshot: StepkgSnapshot = {
                 vocalRangeHigh: null,
                 createdAt: '2026-09-18T10:00:00.000Z',
                 updatedAt: '2026-09-18T10:00:00.000Z',
-            }, {
+            },
+            {
                 id: 'character-1',
                 key: 'BERTA',
                 colorHex: null,
@@ -99,7 +110,8 @@ const snapshot: StepkgSnapshot = {
             contentKey: 'key-1',
             createdAt: '2026-09-18T10:00:00.000Z',
             updatedAt: '2026-09-18T10:00:00.000Z',
-        }, {
+        },
+        {
             id: 'attachment-2',
             filename: 'score.pdf',
             mimeType: 'application/pdf',
@@ -112,7 +124,11 @@ const snapshot: StepkgSnapshot = {
     comments: {threads: [], messages: []},
     attachmentBindings: [
         {
-            target: {type: 'music', id: 'music-1'}, attachmentId: 'missing-attachment', role: 'score', order: 0, createdAt: '2026-09-18T10:00:00.000Z',
+            target: {type: 'music', id: 'music-1'},
+            attachmentId: 'missing-attachment',
+            role: 'score',
+            order: 0,
+            createdAt: '2026-09-18T10:00:00.000Z',
         },
     ],
 };
@@ -168,7 +184,9 @@ describe('validateStepkgSnapshot', () => {
         const clean: StepkgSnapshot = {
             ...snapshot,
             characters: {
-                ...snapshot.characters, characters: [snapshot.characters.characters[0]], groups: [],
+                ...snapshot.characters,
+                characters: [snapshot.characters.characters[0]],
+                groups: [],
             },
             scenes: {scenes: [], locations: []},
             music: {items: []},
@@ -178,7 +196,13 @@ describe('validateStepkgSnapshot', () => {
                 threads: [thread, thread],
                 messages: [
                     {
-                        id: 'message-1', threadId: 'missing', authorId: 'local', body: 'b', createdAt: 'x', updatedAt: 'x', editedAt: null,
+                        id: 'message-1',
+                        threadId: 'missing',
+                        authorId: 'local',
+                        body: 'b',
+                        createdAt: 'x',
+                        updatedAt: 'x',
+                        editedAt: null,
                     },
                 ],
             },
@@ -193,7 +217,8 @@ describe('validateStepkgSnapshot', () => {
                 'duplicate_id',
                 'comment',
                 'thread-1',
-            ], [
+            ],
+            [
                 'broken_reference',
                 'comment',
                 'message-1',

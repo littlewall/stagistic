@@ -15,7 +15,10 @@ interface CharacterRowConfirmedProps {
 }
 
 export const CharacterRowConfirmed = ({
-    character, characterColorSaturation, onEditCharacter, onSetCharacterColor,
+    character,
+    characterColorSaturation,
+    onEditCharacter,
+    onSetCharacterColor,
 }: CharacterRowConfirmedProps) => {
     const isColorActionDisabled = Boolean(character.isColorUpdatePending) || !onSetCharacterColor;
     const isEditDisabled = !character.id || !onEditCharacter;

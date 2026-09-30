@@ -47,7 +47,8 @@ describe('prepareActsAndScenesCapture', () => {
 
         expect(events).toEqual([
             [
-                'acknowledgePreview', {
+                'acknowledgePreview',
+                {
                     key: 'stagistic.web.publicPreviewAcknowledgement',
                     value: '1',
                 },

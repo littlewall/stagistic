@@ -1,8 +1,16 @@
 import {
-    createNodeId, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR,
+    createNodeId,
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_MODE_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import {
-    type EditorState, TextSelection, type Transaction,
+    type EditorState,
+    TextSelection,
+    type Transaction,
 } from '@tiptap/pm/state';
 
 import type {MusicComposeState} from './composeState';

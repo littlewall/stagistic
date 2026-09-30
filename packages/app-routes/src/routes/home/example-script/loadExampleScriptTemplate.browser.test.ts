@@ -1,7 +1,9 @@
 import * as pdfjs from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {loadExampleScriptTemplate} from './loadExampleScriptTemplate';

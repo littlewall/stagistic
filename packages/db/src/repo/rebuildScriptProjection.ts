@@ -5,7 +5,10 @@ import {extractScriptBlocks} from '../blocks';
 import * as dbQueries from '../queries';
 import {type DbClient, generateBlockOrderKeys} from '../queries';
 import {
-    scriptActs, scriptBlocks, scriptMusic, scriptScenes,
+    scriptActs,
+    scriptBlocks,
+    scriptMusic,
+    scriptScenes,
 } from '../schema';
 import {toCharacterRefRows} from './characterRefRows';
 import type {SaveScriptDocumentOptions} from './documentProjection';
@@ -17,7 +20,10 @@ export interface RebuildScriptProjectionArgs extends SaveScriptDocumentOptions {
 }
 
 export const rebuildScriptProjection = async ({
-    db, scriptId, document, afterPersist,
+    db,
+    scriptId,
+    document,
+    afterPersist,
 }: RebuildScriptProjectionArgs): Promise<void> => {
     const now = Date.now();
     const extracted = extractScriptBlocks(scriptId, document);

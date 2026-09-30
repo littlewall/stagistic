@@ -1,5 +1,7 @@
 import {
-    MUSIC_ATTACHMENT_ROLES, type MusicAttachmentRole, type ScriptPackageWrite,
+    MUSIC_ATTACHMENT_ROLES,
+    type MusicAttachmentRole,
+    type ScriptPackageWrite,
 } from '@stagistic/db';
 import type {StepkgSnapshot} from '@stagistic/stepkg';
 

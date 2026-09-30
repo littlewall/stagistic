@@ -1,12 +1,19 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
-    GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute,
+    GlobalModalsProvider,
+    HomeRoute,
+    ScriptEditorRoute,
+    ScriptExportRoute,
+    ScriptSettingsRoute,
+    ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {getCurrentWindow} from '@tauri-apps/api/window';
 import {useEffect, useState} from 'react';
 import {
-    Navigate, Route, Routes,
+    Navigate,
+    Route,
+    Routes,
 } from 'react-router-dom';
 
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';

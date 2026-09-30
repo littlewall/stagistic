@@ -1,5 +1,8 @@
 import {
-    type EditorSettings, resolveDraftDate, type TitlePageCredit, type TitlePageSettings,
+    type EditorSettings,
+    resolveDraftDate,
+    type TitlePageCredit,
+    type TitlePageSettings,
 } from '@stagistic/script';
 
 import type {VisualLine, VisualRun} from '../visualLine';

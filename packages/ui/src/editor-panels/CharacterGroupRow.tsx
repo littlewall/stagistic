@@ -16,7 +16,10 @@ interface CharacterGroupRowProps {
 }
 
 export const CharacterGroupRow = ({
-    group, characterColorSaturation, onEditGroup, onSetGroupColor,
+    group,
+    characterColorSaturation,
+    onEditGroup,
+    onSetGroupColor,
 }: CharacterGroupRowProps) => {
     const isColorActionDisabled = Boolean(group.isColorUpdatePending) || !onSetGroupColor;
     const isEditDisabled = !group.id || !onEditGroup;

@@ -1,5 +1,8 @@
 import type {
-    InlineStyle, TextSegment, TextWord, WrappedLine,
+    InlineStyle,
+    TextSegment,
+    TextWord,
+    WrappedLine,
 } from './model';
 import {pushSegment} from './textSegments';
 

@@ -9,7 +9,9 @@ type EditorBlocksDemoRepository = {
     createScriptMusicWithId: (
         scriptId: string,
         music: {
-            id: string, title: string, kind: 'song' | 'instrumental',
+            id: string,
+            title: string,
+            kind: 'song' | 'instrumental',
         },
     ) => Promise<unknown>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,

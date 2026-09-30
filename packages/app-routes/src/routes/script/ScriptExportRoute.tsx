@@ -23,7 +23,11 @@ export const ScriptExportRoute = () => {
 
     const {script, settings} = useExportScriptData();
     const {
-        openSettingsModal, openAttributeManagerModal, scriptTitleDraft, updateScriptTitle, musicAttachmentsState,
+        openSettingsModal,
+        openAttributeManagerModal,
+        scriptTitleDraft,
+        updateScriptTitle,
+        musicAttachmentsState,
     } = useScriptSettingsModal();
 
     const handleMenuAction = useCallback(

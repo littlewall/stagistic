@@ -5,11 +5,17 @@ import type {Editor} from '@tiptap/react';
 
 import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
 import {
-    type ActiveScriptBlock, type BlockNodeType, getActiveScriptBlockFromState, isScriptBlockNodeName, normalizeBlockNodeType,
+    type ActiveScriptBlock,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
 } from '../../scriptCore';
 import {normalizeFormerStageDirectionContent} from '../normalizeStageDirectionContent';
 import {
-    normalizeCharacterMusicText, stripLeadingActionTabs, stripRenderedBlockDelimiters,
+    normalizeCharacterMusicText,
+    stripLeadingActionTabs,
+    stripRenderedBlockDelimiters,
 } from './blockTextNormalization';
 import {focusEditor, restoreBlockSelection} from './selection';
 

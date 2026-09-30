@@ -80,7 +80,9 @@ export const ElementPreview = ({
         <div
             className={formControlStyles.previewCard}
             style={{
-                ...previewStyle, ...previewStyleOverride, ...localSliderStyleOverride,
+                ...previewStyle,
+                ...previewStyleOverride,
+                ...localSliderStyleOverride,
             }}
         >
             {toolbar}

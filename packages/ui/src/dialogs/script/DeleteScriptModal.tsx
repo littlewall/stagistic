@@ -14,7 +14,11 @@ export interface DeleteScriptModalProps {
 }
 
 export const DeleteScriptModal = ({
-    isOpen, scriptTitle, isDeleting = false, onClose, onConfirm,
+    isOpen,
+    scriptTitle,
+    isDeleting = false,
+    onClose,
+    onConfirm,
 }: DeleteScriptModalProps) => (
     <ModalDialog
         isOpen={isOpen}

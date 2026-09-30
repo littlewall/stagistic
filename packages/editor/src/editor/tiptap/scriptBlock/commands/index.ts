@@ -5,7 +5,9 @@ import type {Editor} from '@tiptap/react';
 
 import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
 import {
-    type ActiveScriptBlock, type BlockNodeType, normalizeBlockNodeType,
+    type ActiveScriptBlock,
+    type BlockNodeType,
+    normalizeBlockNodeType,
 } from '../../scriptCore';
 import {normalizeFormerStageDirectionContent} from '../normalizeStageDirectionContent';
 import {stripLeadingActionTabs, stripRenderedBlockDelimiters} from './blockTextNormalization';
@@ -14,7 +16,9 @@ import {focusEditor, restoreBlockSelection} from './selection';
 
 export {splitBlockWithType} from './blockSplit';
 export {
-    insertParenPair, updateBlockType, updateBlockTypeForSelection,
+    insertParenPair,
+    updateBlockType,
+    updateBlockTypeForSelection,
 } from './blockTypeChange';
 
 export const insertActionBefore = (editor: Editor, blockPos: number, blockStart: number) => {

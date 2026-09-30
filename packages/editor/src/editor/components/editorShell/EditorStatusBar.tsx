@@ -14,7 +14,10 @@ import {
 } from '../../model/formatBlockShortcut';
 import {resolveAsideFlowTarget, resolveAsideToggleTarget} from '../../tiptap/scriptBlock/handlers/tab';
 import {
-    getActiveScriptBlockFromState, isScriptBlockContentEmpty, isSelectionAcrossBlocks, SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+    isScriptBlockContentEmpty,
+    isSelectionAcrossBlocks,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../tiptap/scriptCore';
 import styles from './EditorStatusBar.module.css';
 

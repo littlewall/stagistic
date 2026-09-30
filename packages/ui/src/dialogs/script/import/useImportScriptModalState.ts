@@ -1,5 +1,9 @@
 import {
-    type FormEvent, useCallback, useEffect, useRef, useState,
+    type FormEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import type {UseImportScriptModalStateArgs} from './types';
@@ -31,7 +35,10 @@ export const useImportScriptModalState = ({
         handlePickFile,
         handleChoiceChange,
     } = useImportFileSelection({
-        isOpen, onPeekStepkg, onPickFile, preselectedFile,
+        isOpen,
+        onPeekStepkg,
+        onPickFile,
+        preselectedFile,
     });
     const [isProcessing, setIsProcessing] = useState(false);
     const [isDownloadingBackup, setIsDownloadingBackup] = useState(false);
@@ -88,7 +95,9 @@ export const useImportScriptModalState = ({
 
                 try {
                     await onImportStagistic({
-                        name, fileName: selectedFile.name, text: fileText,
+                        name,
+                        fileName: selectedFile.name,
+                        text: fileText,
                     });
                 } finally {
                     setIsProcessing(false);
@@ -108,7 +117,9 @@ export const useImportScriptModalState = ({
 
             try {
                 await onImportStepkgAsNew({
-                    fileName: selectedFile.name, bytes: selectedFile.bytes, title: name,
+                    fileName: selectedFile.name,
+                    bytes: selectedFile.bytes,
+                    title: name,
                 });
             } finally {
                 setIsProcessing(false);

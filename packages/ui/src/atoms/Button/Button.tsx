@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import {
-    Button as RACButton, type ButtonProps as RACButtonProps, composeRenderProps,
+    Button as RACButton,
+    type ButtonProps as RACButtonProps,
+    composeRenderProps,
 } from 'react-aria-components';
 
 import {ProgressCircle} from '../ProgressCircle/ProgressCircle';
@@ -17,7 +19,10 @@ type ButtonProps = {
 } & Omit<RACButtonProps, 'className'>;
 
 export const Button = ({
-    variant = 'primary', size = 'md', className, ...props
+    variant = 'primary',
+    size = 'md',
+    className,
+    ...props
 }: ButtonProps) => (
     <RACButton
         {...props}

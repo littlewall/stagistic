@@ -1,11 +1,16 @@
 import {
-    CHARACTER_TAG_MARK_NAME, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME,
+    CHARACTER_TAG_MARK_NAME,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {EditorState, Transaction} from '@tiptap/pm/state';
 
 import {
-    type BlockNodeType, getActiveScriptBlockFromState, isScriptBlockNodeName, normalizeBlockNodeType,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
 } from '../tiptap/scriptCore';
 
 interface ChangedRange {

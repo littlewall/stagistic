@@ -1,9 +1,15 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
-    STEPKG_EXTENSION, STEPKG_FORMAT, STEPKG_FORMAT_VERSION, STEPKG_MEDIA_TYPE, type StepkgManifest,
+    STEPKG_EXTENSION,
+    STEPKG_FORMAT,
+    STEPKG_FORMAT_VERSION,
+    STEPKG_MEDIA_TYPE,
+    type StepkgManifest,
 } from './index';
 
 describe('stepkg contract', () => {

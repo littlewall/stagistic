@@ -68,7 +68,10 @@ export const createLocationHandlers = ({
                 opType: 'location.create',
                 occurredAt: now,
                 payloadJson: JSON.stringify({
-                    scriptId, locationId, name, createdAt: now,
+                    scriptId,
+                    locationId,
+                    name,
+                    createdAt: now,
                 }),
             }, tx);
         });
@@ -104,7 +107,10 @@ export const createLocationHandlers = ({
                 opType: 'location.rename',
                 occurredAt: now,
                 payloadJson: JSON.stringify({
-                    scriptId, locationId, name, updatedAt: now,
+                    scriptId,
+                    locationId,
+                    name,
+                    updatedAt: now,
                 }),
             }, tx);
         });
@@ -133,7 +139,9 @@ export const createLocationHandlers = ({
                 opType: 'location.delete',
                 occurredAt: now,
                 payloadJson: JSON.stringify({
-                    scriptId, locationId, deletedAt: now,
+                    scriptId,
+                    locationId,
+                    deletedAt: now,
                 }),
             }, tx);
         });

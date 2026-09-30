@@ -2,7 +2,11 @@ import '../../../styles/tokens.css';
 
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
@@ -67,7 +71,10 @@ describe('ImportScriptModal', () => {
                 onReplaceWithStepkg={() => Promise.resolve()}
                 onDownloadStepkgBackup={() => Promise.resolve()}
                 onPeekStepkg={() => Promise.resolve({
-                    ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null,
+                    ok: true,
+                    scriptId: 's',
+                    packageTitle: 'T',
+                    existingLocalTitle: null,
                 } satisfies StepkgPeekResult)}
             />,
         );
@@ -78,7 +85,10 @@ describe('ImportScriptModal', () => {
 
     it('reveals the New/Replace toggle and the replace panel on a .stepkg collision', async () => {
         const onPeekStepkg = () => Promise.resolve({
-            ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+            ok: true,
+            scriptId: 'script-1',
+            packageTitle: 'My Play',
+            existingLocalTitle: 'Local Copy',
         } satisfies StepkgPeekResult);
         const onDownloadStepkgBackup = vi.fn(() => Promise.resolve());
         const onReplaceWithStepkg = vi.fn(() => Promise.resolve());

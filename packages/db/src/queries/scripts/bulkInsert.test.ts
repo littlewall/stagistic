@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../../testing/createTestDb';
@@ -33,7 +35,8 @@ describe('bulk domain inserts', () => {
                 vocalRangeHigh: null,
                 createdAt: now,
                 updatedAt: now,
-            }, {
+            },
+            {
                 id: 'g1',
                 scriptId: 'sc1',
                 characterKey: 'FAMILY',
@@ -53,12 +56,22 @@ describe('bulk domain inserts', () => {
         await insertScriptCharacterGroupMembers(db, [{groupId: 'g1', characterId: 'c1'}]);
         await insertScriptCharacterGenders(db, [
             {
-                id: 'gd1', scriptId: 'sc1', genderKey: 'f', genderLabel: 'Female', createdAt: now, updatedAt: now,
+                id: 'gd1',
+                scriptId: 'sc1',
+                genderKey: 'f',
+                genderLabel: 'Female',
+                createdAt: now,
+                updatedAt: now,
             },
         ]);
         await insertScriptLocations(db, [
             {
-                id: 'l1', scriptId: 'sc1', name: 'Kitchen', description: null, createdAt: now, updatedAt: now,
+                id: 'l1',
+                scriptId: 'sc1',
+                name: 'Kitchen',
+                description: null,
+                createdAt: now,
+                updatedAt: now,
             },
         ]);
 

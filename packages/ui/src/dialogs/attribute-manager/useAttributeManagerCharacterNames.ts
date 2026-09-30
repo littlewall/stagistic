@@ -10,10 +10,15 @@ interface UseAttributeManagerCharacterNamesArgs {
 }
 
 export const useAttributeManagerCharacterNames = ({
-    characters, draftScopeKey, onRenameCharacter,
+    characters,
+    draftScopeKey,
+    onRenameCharacter,
 }: UseAttributeManagerCharacterNamesArgs) => {
     const {
-        getValue, persistValue, resetValue, setValue,
+        getValue,
+        persistValue,
+        resetValue,
+        setValue,
     } = useKeyedFieldDrafts<string>(draftScopeKey);
     const displayedCharacters = useMemo(
         () => characters.map(character => ({

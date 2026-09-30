@@ -27,7 +27,9 @@ export interface LocalPgliteRepositoryDeps {
 }
 
 export const createLocalPgliteRepository = ({
-    getLocalDb, syncToFs, fileStorage,
+    getLocalDb,
+    syncToFs,
+    fileStorage,
 }: LocalPgliteRepositoryDeps): ScriptRepository => {
     const dbPromise = getLocalDb();
     const getDb: GetDb = async () => dbPromise;

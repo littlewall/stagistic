@@ -1,5 +1,8 @@
 import {
-    exportScriptPackage, importScriptPackageAsNew, peekStepkgPackage, restoreScriptPackage,
+    exportScriptPackage,
+    importScriptPackageAsNew,
+    peekStepkgPackage,
+    restoreScriptPackage,
 } from '@stagistic/app-core';
 import {useCallback} from 'react';
 
@@ -51,13 +54,17 @@ export const useStepkgPackageMutations = ({
     );
     const handleImportStepkgAsNew = useCallback(
         async (payload: {
-            fileName: string, bytes: Uint8Array, title: string,
+            fileName: string,
+            bytes: Uint8Array,
+            title: string,
         }) => {
             setIsImportLoading(true);
 
             try {
                 const result = await importScriptPackageAsNew({
-                    repository, bytes: payload.bytes, title: payload.title,
+                    repository,
+                    bytes: payload.bytes,
+                    title: payload.title,
                 });
 
                 if (!result.ok) {
@@ -137,7 +144,9 @@ export const useStepkgPackageMutations = ({
 
             try {
                 const result = await exportScriptPackage({
-                    repository, scriptId, generator: {name: 'Stagistic', version: 'web'},
+                    repository,
+                    scriptId,
+                    generator: {name: 'Stagistic', version: 'web'},
                 });
 
                 if (result.ok) {

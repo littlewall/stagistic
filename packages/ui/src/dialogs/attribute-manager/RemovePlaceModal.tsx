@@ -9,7 +9,11 @@ export interface RemovePlaceModalProps {
 }
 
 export const RemovePlaceModal = ({
-    isOpen, placeName, isRemoving = false, onClose, onConfirm,
+    isOpen,
+    placeName,
+    isRemoving = false,
+    onClose,
+    onConfirm,
 }: RemovePlaceModalProps) => (
     <ConfirmModal
         isOpen={isOpen}

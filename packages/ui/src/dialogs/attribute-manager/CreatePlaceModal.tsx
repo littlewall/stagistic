@@ -1,5 +1,11 @@
 import {
-    type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState,
+    type ChangeEvent,
+    type FormEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -19,7 +25,10 @@ export interface CreatePlaceModalProps {
 const normalizePlaceName = (name: string) => name.trim().toLocaleLowerCase();
 
 export const CreatePlaceModal = ({
-    isOpen, existingPlaceNames = [], onClose, onCreate,
+    isOpen,
+    existingPlaceNames = [],
+    onClose,
+    onCreate,
 }: CreatePlaceModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');

@@ -22,10 +22,12 @@ describe('createActsAndScenesDemoDocument', () => {
             'dialogue',
         ]);
         expect(document.content?.[0]).toMatchObject({
-            attrs: {id: 'acts-demo-act-1'}, content: [{type: 'text', text: 'ACT I'}],
+            attrs: {id: 'acts-demo-act-1'},
+            content: [{type: 'text', text: 'ACT I'}],
         });
         expect(document.content?.[1]).toMatchObject({
-            attrs: {id: 'acts-demo-scene-1'}, content: [{type: 'text', text: 'THE STATION'}],
+            attrs: {id: 'acts-demo-scene-1'},
+            content: [{type: 'text', text: 'THE STATION'}],
         });
         expect(document.content?.[6]).toMatchObject({
             attrs: {id: 'acts-demo-station-dialogue-2'},
@@ -66,7 +68,8 @@ describe('seedActsAndScenesDemoScript', () => {
                 'createScript',
                 'Acts and scenes demo',
                 expect.objectContaining({type: 'doc'}),
-            ], [
+            ],
+            [
                 'setActiveBlock',
                 'acts-demo-script',
                 'acts-demo-scene-1',

@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ScriptDocument} from '../document';
@@ -18,7 +20,8 @@ describe('renameCharacterInScriptDocument with tags', () => {
                             type: 'text',
                             text: 'Anna',
                             marks: [{type: 'characterTag', attrs: {characterKey: 'ANNA', characterId: 'char-anna'}}],
-                        }, {type: 'text', text: ' waits for Anna.'},
+                        },
+                        {type: 'text', text: ' waits for Anna.'},
                     ],
                 },
             ],

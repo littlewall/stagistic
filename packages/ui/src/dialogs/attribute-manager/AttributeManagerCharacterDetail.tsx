@@ -1,7 +1,10 @@
 import {normalizeCharacterKey} from '@stagistic/script';
 import clsx from 'clsx';
 import {
-    type CSSProperties, type FormEvent, useMemo, useState,
+    type CSSProperties,
+    type FormEvent,
+    useMemo,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';

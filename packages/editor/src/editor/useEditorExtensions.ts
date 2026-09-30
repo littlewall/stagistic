@@ -1,5 +1,7 @@
 import {
-    createNodeId, DEFAULT_SCENE_NUMBER_FORMAT, type EditorSettings,
+    createNodeId,
+    DEFAULT_SCENE_NUMBER_FORMAT,
+    type EditorSettings,
 } from '@stagistic/script';
 import {type Extensions} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
@@ -11,10 +13,15 @@ import UniqueID from '@tiptap/extension-unique-id';
 import {useMemo, useRef} from 'react';
 
 import type {
-    EditorMusicCreateRequest, EditorMusicRemoveRequest, PersistentCharacterRef, PersistentMusicRef,
+    EditorMusicCreateRequest,
+    EditorMusicRemoveRequest,
+    PersistentCharacterRef,
+    PersistentMusicRef,
 } from './contracts';
 import {
-    getBlockCasing, getBlockNextElements, getBlockShortcuts,
+    getBlockCasing,
+    getBlockNextElements,
+    getBlockShortcuts,
 } from './model/blockSettingMaps';
 import {
     BlockFocusFlashExtension,
@@ -41,7 +48,9 @@ import {
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
 import {CharacterTagMark, CommentAnchorMark} from './tiptap/marks';
 import {
-    MusicOutNode, MusicStartNode, ScriptBlockNodes,
+    MusicOutNode,
+    MusicStartNode,
+    ScriptBlockNodes,
 } from './tiptap/nodes';
 import characterTagStyles from './tiptap/scriptBlock/CharacterTagDecorations.module.css';
 import {type BlockNodeType, SCRIPT_BLOCK_NODE_NAMES} from './tiptap/scriptCore';

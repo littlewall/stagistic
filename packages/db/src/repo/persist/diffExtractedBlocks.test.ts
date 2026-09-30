@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ExtractedBlockRow} from '../../blocks';
@@ -19,12 +21,16 @@ describe('diffExtractedBlocks', () => {
     it('detects a pure text change as a non-structural update', () => {
         const prev = [
             block({
-                blockId: 'a', orderNo: 0, textContent: 'hi',
+                blockId: 'a',
+                orderNo: 0,
+                textContent: 'hi',
             }),
         ];
         const next = [
             block({
-                blockId: 'a', orderNo: 0, textContent: 'hello',
+                blockId: 'a',
+                orderNo: 0,
+                textContent: 'hello',
             }),
         ];
 
@@ -68,12 +74,16 @@ describe('diffExtractedBlocks', () => {
     it('flags boundary-ness change (stage direction -> scene heading) as structural', () => {
         const prev = [
             block({
-                blockId: 'a', orderNo: 0, blockType: 'stage_direction',
+                blockId: 'a',
+                orderNo: 0,
+                blockType: 'stage_direction',
             }),
         ];
         const next = [
             block({
-                blockId: 'a', orderNo: 0, blockType: 'scene',
+                blockId: 'a',
+                orderNo: 0,
+                blockType: 'scene',
             }),
         ];
 
@@ -86,12 +96,18 @@ describe('diffExtractedBlocks', () => {
     it('flags a text edit of an existing act heading as structural (act-row name must reconcile)', () => {
         const prev = [
             block({
-                blockId: 'h', orderNo: 0, blockType: 'act', textContent: 'ACT ONE',
+                blockId: 'h',
+                orderNo: 0,
+                blockType: 'act',
+                textContent: 'ACT ONE',
             }),
         ];
         const next = [
             block({
-                blockId: 'h', orderNo: 0, blockType: 'act', textContent: 'ACT TWO',
+                blockId: 'h',
+                orderNo: 0,
+                blockType: 'act',
+                textContent: 'ACT TWO',
             }),
         ];
 
@@ -104,12 +120,16 @@ describe('diffExtractedBlocks', () => {
     it('returns no changes for identical input', () => {
         const prev = [
             block({
-                blockId: 'a', orderNo: 0, textContent: 'x',
+                blockId: 'a',
+                orderNo: 0,
+                textContent: 'x',
             }),
         ];
         const next = [
             block({
-                blockId: 'a', orderNo: 0, textContent: 'x',
+                blockId: 'a',
+                orderNo: 0,
+                textContent: 'x',
             }),
         ];
 

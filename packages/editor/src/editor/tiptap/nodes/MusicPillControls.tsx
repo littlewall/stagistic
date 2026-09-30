@@ -18,7 +18,10 @@ const keepEditorFocus = (event: {preventDefault: () => void}) => {
 };
 
 export const MusicMenuButton = ({
-    label, isDanger = false, onClick, children,
+    label,
+    isDanger = false,
+    onClick,
+    children,
 }: MusicMenuButtonProps) => (
     <Tooltip label={label}>
         <button

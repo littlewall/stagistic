@@ -1,10 +1,14 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
-    PanelHeader, SettingRow, SettingsGroup,
+    PanelHeader,
+    SettingRow,
+    SettingsGroup,
 } from './SettingsGroup';
 import styles from './SettingsGroup.module.css';
 

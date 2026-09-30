@@ -1,5 +1,8 @@
 import {
-    formatDatePreview, getTodayIso, type TitlePageDateFormat, type TitlePageSettings,
+    formatDatePreview,
+    getTodayIso,
+    type TitlePageDateFormat,
+    type TitlePageSettings,
 } from '@stagistic/script';
 import {
     Checkbox,
@@ -13,7 +16,10 @@ import {
     SettingsGroup,
 } from '@stagistic/ui';
 import {
-    useCallback, useEffect, useMemo, useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
 } from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
@@ -26,7 +32,8 @@ const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
         label: 'Credit',
         type: 'string',
         placeholder: 'Written by',
-    }, {
+    },
+    {
         key: 'authors',
         label: 'Author(s)',
         type: 'string-array',
@@ -47,7 +54,10 @@ interface TitlePageSettingsPanelProps {
 }
 
 export const TitlePageSettingsPanel = ({
-    scriptTitle, settings, onUpdateScriptTitle, onUpdate,
+    scriptTitle,
+    settings,
+    onUpdateScriptTitle,
+    onUpdate,
 }: TitlePageSettingsPanelProps) => {
     const draftDateMode = settings.draftDateMode ?? 'auto';
     const dateFormat = settings.dateFormat ?? 'mdy';

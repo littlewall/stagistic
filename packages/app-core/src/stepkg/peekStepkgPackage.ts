@@ -3,7 +3,10 @@ import {readStepkgContainer, type StepkgImportIssue} from '@stagistic/stepkg';
 
 export type StepkgPeekResult =
     | {
-        ok: true, scriptId: string, packageTitle: string, existingScript: {id: string, title: string} | null,
+        ok: true,
+        scriptId: string,
+        packageTitle: string,
+        existingScript: {id: string, title: string} | null,
     }
     | {ok: false, issues: StepkgImportIssue[]};
 

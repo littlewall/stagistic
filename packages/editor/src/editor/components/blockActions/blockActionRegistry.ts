@@ -1,5 +1,7 @@
 import type {
-    BlockActionContext, BlockActionItem, BlockActionProvider,
+    BlockActionContext,
+    BlockActionItem,
+    BlockActionProvider,
 } from './actionTypes';
 import {resolveCommentActions} from './commentActions';
 import {resolveSceneActions} from './sceneActions';

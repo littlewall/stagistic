@@ -1,5 +1,7 @@
 import {
-    type ReactNode, useCallback, useState,
+    type ReactNode,
+    useCallback,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -15,7 +17,11 @@ export interface TypeToConfirmFieldProps {
 }
 
 export const TypeToConfirmField = ({
-    phrase, value, inputAriaLabel, isPending = false, onChange,
+    phrase,
+    value,
+    inputAriaLabel,
+    isPending = false,
+    onChange,
 }: TypeToConfirmFieldProps) => (
     <TextInput
         label={(
@@ -47,7 +53,12 @@ export interface TypeToConfirmActionProps {
 }
 
 export const TypeToConfirmAction = ({
-    phrase, confirmLabel, inputAriaLabel, isPending = false, secondaryAction, onConfirm,
+    phrase,
+    confirmLabel,
+    inputAriaLabel,
+    isPending = false,
+    secondaryAction,
+    onConfirm,
 }: TypeToConfirmActionProps) => {
     const [confirmText, setConfirmText] = useState('');
     const isUnlocked = confirmText.trim() === phrase;

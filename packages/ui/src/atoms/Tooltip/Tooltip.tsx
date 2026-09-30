@@ -1,8 +1,13 @@
 import type {
-    ComponentProps, ReactElement, ReactNode,
+    ComponentProps,
+    ReactElement,
+    ReactNode,
 } from 'react';
 import {
-    Focusable, Tooltip as AriaTooltip, type TooltipProps as AriaTooltipProps, TooltipTrigger,
+    Focusable,
+    Tooltip as AriaTooltip,
+    type TooltipProps as AriaTooltipProps,
+    TooltipTrigger,
 } from 'react-aria-components';
 
 import styles from './Tooltip.module.css';
@@ -32,7 +37,13 @@ export interface TooltipProps {
  * toolbars, bubble menus, gutter controls.
  */
 export const Tooltip = ({
-    label, shortcut, placement = 'top', delay = 0, closeDelay = 0, isDisabled = false, children,
+    label,
+    shortcut,
+    placement = 'top',
+    delay = 0,
+    closeDelay = 0,
+    isDisabled = false,
+    children,
 }: TooltipProps) => {
     if (isDisabled) {
         return children;

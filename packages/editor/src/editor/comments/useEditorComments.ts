@@ -1,5 +1,7 @@
 import {
-    useCallback, useMemo, useSyncExternalStore,
+    useCallback,
+    useMemo,
+    useSyncExternalStore,
 } from 'react';
 
 import {useEditorInstance} from '../context';

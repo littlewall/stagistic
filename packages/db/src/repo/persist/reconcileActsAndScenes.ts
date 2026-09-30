@@ -2,7 +2,11 @@ import {eq} from 'drizzle-orm';
 
 import type {ExtractedActRow, ExtractedSceneRow} from '../../blocks';
 import {
-    bulkDeleteScriptActs, bulkDeleteScriptScenes, bulkUpsertScriptActs, bulkUpsertScriptScenes, type DbClient,
+    bulkDeleteScriptActs,
+    bulkDeleteScriptScenes,
+    bulkUpsertScriptActs,
+    bulkUpsertScriptScenes,
+    type DbClient,
 } from '../../queries';
 import {scriptActs, scriptScenes} from '../../schema';
 

@@ -52,7 +52,11 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
         blockAnchorsByBlockId.get(blockId)?.forEach(threadId => {
             if (!index.has(threadId)) {
                 index.set(threadId, {
-                    threadId, kind: 'block', from: contentFrom, to: contentFrom + node.content.size, ...base,
+                    threadId,
+                    kind: 'block',
+                    from: contentFrom,
+                    to: contentFrom + node.content.size,
+                    ...base,
                 });
             }
         });
@@ -77,10 +81,16 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
                     threadId,
                     existing?.kind === 'range'
                         ? {
-                            ...existing, from: Math.min(existing.from, from), to: Math.max(existing.to, to),
+                            ...existing,
+                            from: Math.min(existing.from, from),
+                            to: Math.max(existing.to, to),
                         }
                         : {
-                            threadId, kind: 'range', from, to, ...base,
+                            threadId,
+                            kind: 'range',
+                            from,
+                            to,
+                            ...base,
                         },
                 );
             });

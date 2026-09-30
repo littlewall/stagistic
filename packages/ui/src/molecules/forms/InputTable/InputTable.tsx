@@ -114,7 +114,11 @@ const StringArrayCell = ({
 );
 
 export const InputTable = ({
-    columns, rows, onChange, rowCount, addRowLabel,
+    columns,
+    rows,
+    onChange,
+    rowCount,
+    addRowLabel,
 }: InputTableProps) => {
     const showDeleteColumn = rowCount?.type !== 'fixed';
     const columnWidths = columns.map(c => c.width ?? '1fr');

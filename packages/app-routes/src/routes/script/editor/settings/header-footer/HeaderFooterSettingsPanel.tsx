@@ -7,7 +7,15 @@ import {
     type TitlePageSettings,
 } from '@stagistic/script';
 import {
-    BoldIcon, Button, formControlStyles, IconButton, ItalicIcon, PanelHeader, SettingsGroup, Switch, UnderlineIcon,
+    BoldIcon,
+    Button,
+    formControlStyles,
+    IconButton,
+    ItalicIcon,
+    PanelHeader,
+    SettingsGroup,
+    Switch,
+    UnderlineIcon,
 } from '@stagistic/ui';
 import clsx from 'clsx';
 import {useRef, useState} from 'react';
@@ -62,7 +70,10 @@ const resolvePreview = (text: string, scriptTitle: string, draftDate: string) =>
     .replaceAll('{{draft_date}}', draftDate);
 
 export const HeaderFooterSettingsPanel = ({
-    settings, scriptTitle, titlePageSettings, onUpdate,
+    settings,
+    scriptTitle,
+    titlePageSettings,
+    onUpdate,
 }: HeaderFooterSettingsPanelProps) => {
     const draftDate = resolveDraftDate(titlePageSettings);
     const [selection, setSelection] = useState<Selection | null>(null);

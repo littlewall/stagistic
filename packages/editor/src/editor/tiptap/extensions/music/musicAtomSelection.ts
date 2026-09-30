@@ -1,6 +1,8 @@
 import {MUSIC_ID_ATTR, MUSIC_START_NODE_NAME} from '@stagistic/script';
 import {
-    type EditorState, TextSelection, type Transaction,
+    type EditorState,
+    TextSelection,
+    type Transaction,
 } from '@tiptap/pm/state';
 
 import {isMusicAtom} from './musicCaret';

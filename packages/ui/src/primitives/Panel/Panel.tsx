@@ -1,6 +1,9 @@
 import clsx from 'clsx';
 import {
-    type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement,
+    type ComponentPropsWithoutRef,
+    createElement,
+    type ElementType,
+    type ReactElement,
 } from 'react';
 
 import styles from './Panel.module.css';

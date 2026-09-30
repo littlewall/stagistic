@@ -1,7 +1,10 @@
 import '../../styles/base.css';
 
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {applyAppThemeMode} from './theme';

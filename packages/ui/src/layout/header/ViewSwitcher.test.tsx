@@ -1,6 +1,8 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {VIEW_SWITCHER_ITEMS, ViewSwitcher} from './ViewSwitcher';

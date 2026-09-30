@@ -1,13 +1,19 @@
 import type {ScriptPackageSource} from '@stagistic/db';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {mapScriptPackageSourceToStepkg} from './mapScriptPackageSource';
 
 const source = {
     script: {
-        id: 'script-1', title: 'Test', subtitle: null, createdAt: 1_000, updatedAt: 1_000,
+        id: 'script-1',
+        title: 'Test',
+        subtitle: null,
+        createdAt: 1_000,
+        updatedAt: 1_000,
     },
     document: {type: 'doc', content: []},
     titlePage: {},
@@ -39,7 +45,14 @@ const source = {
         ],
         messages: [
             {
-                id: 'm1', scriptId: 'script-1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1_000, updatedAt: 3_000, editedAt: 3_000,
+                id: 'm1',
+                scriptId: 'script-1',
+                threadId: 't1',
+                authorId: 'local',
+                body: 'B',
+                createdAt: 1_000,
+                updatedAt: 3_000,
+                editedAt: 3_000,
             },
         ],
     },

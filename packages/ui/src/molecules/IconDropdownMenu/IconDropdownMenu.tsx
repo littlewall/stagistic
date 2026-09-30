@@ -13,7 +13,11 @@ export interface IconDropdownMenuProps {
 }
 
 export const IconDropdownMenu = ({
-    'aria-label': ariaLabel, icon, items, size = 'sm', onAction,
+    'aria-label': ariaLabel,
+    icon,
+    items,
+    size = 'sm',
+    onAction,
 }: IconDropdownMenuProps) => (
     <MenuTrigger>
         <IconButton

@@ -1,19 +1,30 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {
-    ScriptCommentMessage, ScriptCommentsState, ScriptCommentThread, ScriptCommentThreadSnapshot,
+    ScriptCommentMessage,
+    ScriptCommentsState,
+    ScriptCommentThread,
+    ScriptCommentThreadSnapshot,
 } from '@stagistic/app-core';
 import {
-    getCommentsState, ScriptEditor, useEditorInstance,
+    getCommentsState,
+    ScriptEditor,
+    useEditorInstance,
 } from '@stagistic/editor';
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {ToastProvider} from '@stagistic/ui';
 import {
-    useEffect, useMemo, useRef, useState,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
@@ -43,7 +54,9 @@ const dialogue = (id: string, text: string, threadIds: readonly string[] = []): 
 });
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: [{type: 'text', text}],
+    type: 'scene',
+    attrs: {id},
+    content: [{type: 'text', text}],
 });
 
 const baseDocument = (
@@ -103,7 +116,9 @@ const useFakeComments = (initialThreads: ScriptCommentThread[], initialMessages:
             allocateThreadId: () => allocate('thread'),
             createThread: input => {
                 const created = thread(input.id, {
-                    anchorKind: input.anchorKind, anchorBlockId: input.anchorBlockId, quotedText: input.quotedText,
+                    anchorKind: input.anchorKind,
+                    anchorBlockId: input.anchorBlockId,
+                    quotedText: input.quotedText,
                 });
 
                 setThreads(previous => [...previous, created]);
@@ -120,7 +135,9 @@ const useFakeComments = (initialThreads: ScriptCommentThread[], initialMessages:
             },
             editMessage: (messageId, body) => {
                 setMessages(previous => previous.map(row => (row.id === messageId ? {
-                    ...row, body, editedAt: 2,
+                    ...row,
+                    body,
+                    editedAt: 2,
                 } : row)));
 
                 return Promise.resolve(null);
@@ -179,7 +196,10 @@ interface HarnessProps {
 }
 
 const Harness = ({
-    content, threads, messages, isInitiallyOpen,
+    content,
+    threads,
+    messages,
+    isInitiallyOpen,
 }: HarnessProps) => {
     const comments = useFakeComments(threads, messages);
     const panelState = useCommentsPanelState();
@@ -201,7 +221,9 @@ const Harness = ({
             layout={{
                 autoFocus: true,
                 rightSidebarToggle: {
-                    isOpen, label: 'Comments', onToggle: () => setIsOpen(value => !value),
+                    isOpen,
+                    label: 'Comments',
+                    onToggle: () => setIsOpen(value => !value),
                 },
             }}
             editorZoom={1}
@@ -239,7 +261,10 @@ const poll = async <T,>(getValue: () => T | null | undefined | false, label: str
 };
 
 const mount = async ({
-    content = baseDocument(), threads = [], messages = [], isInitiallyOpen = true,
+    content = baseDocument(),
+    threads = [],
+    messages = [],
+    isInitiallyOpen = true,
 }: Partial<HarnessProps> = {}) => {
     const host = document.createElement('div');
 
@@ -406,8 +431,11 @@ describe('ScriptCommentsSidebar', () => {
         // The range thread is older, but the block anchor comes first in the editor.
         const editor = await mount({
             threads: [
-                thread('t1'), thread('tb', {
-                    anchorKind: 'block', anchorBlockId: 'b1', createdAt: 2,
+                thread('t1'),
+                thread('tb', {
+                    anchorKind: 'block',
+                    anchorBlockId: 'b1',
+                    createdAt: 2,
                 }),
             ],
             messages: [message('m1', 't1', 'Range'), message('mb', 'tb', 'Block')],
@@ -441,7 +469,8 @@ describe('ScriptCommentsSidebar', () => {
     it('a group opened by activating one of its threads folds back when it is collapsed', async () => {
         const editor = await mount({
             content: baseDocument([
-                scene('s1', 'INT. ROOM'), dialogue('b1', 'Hello world', [
+                scene('s1', 'INT. ROOM'),
+                dialogue('b1', 'Hello world', [
                     'g1',
                     'g2',
                     'g3',

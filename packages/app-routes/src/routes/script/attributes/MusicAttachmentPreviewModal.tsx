@@ -1,6 +1,8 @@
 import {ModalDialog, ProgressCircle} from '@stagistic/ui';
 import {
-    useEffect, useRef, useState,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {renderPdfToCanvases} from '../export/renderPdfToCanvases';

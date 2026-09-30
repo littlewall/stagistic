@@ -1,9 +1,15 @@
 import {canBlockTypeHaveCharacterTags, collectCharacterTags} from '../characters/characterTagMarks';
 import {
-    getCharacterRefByKey, getNodeTextContent, isCharacterBlockType,
+    getCharacterRefByKey,
+    getNodeTextContent,
+    isCharacterBlockType,
 } from '../characters/documentHelpers';
 import {
-    getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, type ScriptDocument, type ScriptNode,
+    getScriptBlockId,
+    getScriptBlockNodeType,
+    isScriptBlockNode,
+    type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {collectMusicAtoms} from '../music/collectMusicAtoms';
 import {deriveMusicTimeline} from '../music/deriveMusic';

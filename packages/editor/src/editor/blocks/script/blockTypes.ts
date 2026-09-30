@@ -1,5 +1,8 @@
 import {
-    ALL_BLOCK_SPECS, DEFAULT_SCRIPT_BLOCK_NODE_TYPE, resolveScriptBlockNodeType, type ScriptBlockNodeType,
+    ALL_BLOCK_SPECS,
+    DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
+    resolveScriptBlockNodeType,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 
 /**

@@ -1,15 +1,24 @@
 import {
-    type DerivedMusic, formatMusicNumber, type IndexedScriptBlock, MUSIC_OUT_NODE_NAME, type ScriptBlockIndexSnapshot,
+    type DerivedMusic,
+    formatMusicNumber,
+    type IndexedScriptBlock,
+    MUSIC_OUT_NODE_NAME,
+    type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {
-    blockHasMusicStart, resolveMusicTargetBlock, resolveNewMusicNumber, resolveScriptTargetBlock,
+    blockHasMusicStart,
+    resolveMusicTargetBlock,
+    resolveNewMusicNumber,
+    resolveScriptTargetBlock,
 } from '../../tiptap/extensions/music/musicCommands';
 import {findMusicAtomRange, resolveMusicOutCandidate} from '../../tiptap/extensions/music/musicOutCommands';
 import type {
-    BlockActionCommand, BlockActionContext, BlockActionItem,
+    BlockActionCommand,
+    BlockActionContext,
+    BlockActionItem,
 } from './actionTypes';
 
 const MUSIC_TITLE_PREVIEW_LENGTH = 10;

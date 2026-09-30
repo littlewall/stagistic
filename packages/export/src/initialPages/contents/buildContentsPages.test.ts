@@ -43,9 +43,16 @@ const scenesPlan = (
             preSceneMusic: [],
             scenes: [
                 {
-                    sceneNumber: 1, title: 'Kylie\'s Bedroom', startBlockId: 's1', music: [],
-                }, {
-                    sceneNumber: 2, title: 'The Diner', startBlockId: 's2', music: [],
+                    sceneNumber: 1,
+                    title: 'Kylie\'s Bedroom',
+                    startBlockId: 's1',
+                    music: [],
+                },
+                {
+                    sceneNumber: 2,
+                    title: 'The Diner',
+                    startBlockId: 's2',
+                    music: [],
                 },
             ],
         },
@@ -109,7 +116,9 @@ describe('buildContentsPages scenes variant', () => {
         const entry = findLine(page, '1. Kylie\'s Bedroom');
 
         expect(entry.runs[0]).toMatchObject({
-            text: '1. Kylie\'s Bedroom', bold: true, x: CONTENT_LEFT,
+            text: '1. Kylie\'s Bedroom',
+            bold: true,
+            x: CONTENT_LEFT,
         });
 
         const number = page
@@ -252,7 +261,9 @@ describe('buildContentsPages musical numbers variant', () => {
                     name: 'ACT TWO',
                     preSceneMusic: [
                         musicEntry({
-                            musicId: 'm0', number: '0)', title: 'Entracte',
+                            musicId: 'm0',
+                            number: '0)',
+                            title: 'Entracte',
                         }),
                     ],
                     scenes: musicPlan().acts[0].scenes,

@@ -46,16 +46,28 @@ describe('buildAttributeManagerMusicItems', () => {
         const structure: EditorLiveStructureSnapshot = {
             rows: [
                 {
-                    kind: 'act', blockId: 'act-1', name: 'ACT I', index: 0,
+                    kind: 'act',
+                    blockId: 'act-1',
+                    name: 'ACT I',
+                    index: 0,
                 },
                 {
-                    kind: 'scene', blockId: 'scene-1', title: 'Dawn', index: 1,
+                    kind: 'scene',
+                    blockId: 'scene-1',
+                    title: 'Dawn',
+                    index: 1,
                 },
                 {
-                    kind: 'act', blockId: 'act-2', name: 'ACT II', index: 2,
+                    kind: 'act',
+                    blockId: 'act-2',
+                    name: 'ACT II',
+                    index: 2,
                 },
                 {
-                    kind: 'scene', blockId: 'scene-2', title: 'Night', index: 3,
+                    kind: 'scene',
+                    blockId: 'scene-2',
+                    title: 'Night',
+                    index: 3,
                 },
             ],
             rowIndexByBlockId: new Map(),

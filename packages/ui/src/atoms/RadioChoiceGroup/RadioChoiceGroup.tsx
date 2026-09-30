@@ -19,7 +19,12 @@ interface RadioChoiceGroupProps<T extends string> {
 }
 
 export const RadioChoiceGroup = <T extends string>({
-    ariaLabel, className, value, options, onChange, isDisabled,
+    ariaLabel,
+    className,
+    value,
+    options,
+    onChange,
+    isDisabled,
 }: RadioChoiceGroupProps<T>) => (
     <RACRadioGroup
         aria-label={ariaLabel}

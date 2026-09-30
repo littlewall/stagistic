@@ -10,7 +10,9 @@ export type CheckboxProps = Omit<RACCheckboxProps, 'children' | 'className'> & {
 };
 
 export const Checkbox = ({
-    className, children, ...props
+    className,
+    children,
+    ...props
 }: CheckboxProps) => (
     <RACCheckbox
         {...props}

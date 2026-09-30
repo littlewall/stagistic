@@ -2,7 +2,9 @@ import {createNodeId} from '@stagistic/shared';
 
 import type {EditorSettingsOverride} from '../settings';
 import {
-    isScriptBlockNodeType, resolveScriptBlockNodeType, type ScriptBlockNodeType,
+    isScriptBlockNodeType,
+    resolveScriptBlockNodeType,
+    type ScriptBlockNodeType,
 } from '../syntax';
 
 export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
@@ -106,7 +108,8 @@ export const createEmptyScriptDocument = (blockId?: string, settings?: EditorSet
             {
                 ...actBlock,
                 content: [{type: 'text', text: 'ACT ONE'}],
-            }, createScriptBlockNode('scene', blockId),
+            },
+            createScriptBlockNode('scene', blockId),
         ],
     };
 };

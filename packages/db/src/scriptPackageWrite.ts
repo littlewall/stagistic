@@ -1,5 +1,7 @@
 import type {
-    EditorSettingsOverride, ScriptDocument, TitlePageSettings,
+    EditorSettingsOverride,
+    ScriptDocument,
+    TitlePageSettings,
 } from '@stagistic/script';
 
 import type {MusicAttachmentRole} from './types';
@@ -107,7 +109,11 @@ export interface ScriptPackageWriteCommentMessage {
 
 export interface ScriptPackageWrite {
     script: {
-        id: string, title: string, subtitle: string | null, createdAt: number, updatedAt: number,
+        id: string,
+        title: string,
+        subtitle: string | null,
+        createdAt: number,
+        updatedAt: number,
     },
     document: ScriptDocument,
     titlePage: TitlePageSettings,

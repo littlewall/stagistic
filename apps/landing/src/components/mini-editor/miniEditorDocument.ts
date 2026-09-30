@@ -98,7 +98,8 @@ export const miniEditorDocument: ScriptDocument = {
                 {
                     type: 'text',
                     text: 'Music starts to play.',
-                }, {
+                },
+                {
                     type: MUSIC_START_NODE_NAME,
                     attrs: {
                         [MUSIC_ID_ATTR]: 'landing-mini-music',

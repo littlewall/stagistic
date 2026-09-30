@@ -77,7 +77,8 @@ export const useExportScriptData = (): {
             ...confirmedCharacterRecords.map(character => ({
                 ...character,
                 kind: 'character' as const,
-            })), ...confirmedGroupRecords,
+            })),
+            ...confirmedGroupRecords,
         ];
         const {
             initialCharacters,

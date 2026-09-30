@@ -1,7 +1,9 @@
 import * as dbQueries from '../queries';
 import {createPgliteReactiveQuerySource, type ReactiveQuerySource} from '../reactive';
 import type {
-    ScriptEditorSettingsRecord, ScriptSceneLocationAssignment, ScriptTitlePageRecord,
+    ScriptEditorSettingsRecord,
+    ScriptSceneLocationAssignment,
+    ScriptTitlePageRecord,
 } from '../scriptRepository';
 import type {
     ScriptAttachment,

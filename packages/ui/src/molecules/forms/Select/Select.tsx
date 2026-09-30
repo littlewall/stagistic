@@ -1,6 +1,11 @@
 import clsx from 'clsx';
 import {
-    type MouseEvent, type ReactNode, useId, useMemo, useRef, useState,
+    type MouseEvent,
+    type ReactNode,
+    useId,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import {useAnchoredMenuPlacement} from '../shared/useAnchoredMenuHeight';

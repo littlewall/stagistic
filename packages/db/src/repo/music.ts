@@ -135,7 +135,9 @@ export const createMusicHandlers = ({
                 opType: 'music.delete',
                 occurredAt: now,
                 payloadJson: JSON.stringify({
-                    scriptId, musicId, deletedAt: now,
+                    scriptId,
+                    musicId,
+                    deletedAt: now,
                 }),
             }, tx);
         });

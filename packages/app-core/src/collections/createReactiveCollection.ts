@@ -161,7 +161,11 @@ export const createReactiveCollection = <T extends object, TKey extends string |
         sync: {
             rowUpdateMode: 'full',
             sync: ({
-                begin, write, commit, markReady, truncate,
+                begin,
+                write,
+                commit,
+                markReady,
+                truncate,
             }) => {
                 let active = true;
                 let unsubscribe: (() => void) | undefined;

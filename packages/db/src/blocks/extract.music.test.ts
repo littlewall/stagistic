@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {extractScriptBlocks} from './extract';
@@ -16,12 +18,18 @@ describe('extractScriptBlocks music', () => {
                         {
                             type: 'musicStart',
                             attrs: {
-                                musicId: 'c1', mode: 'open', title: 'Night', kind: null,
+                                musicId: 'c1',
+                                mode: 'open',
+                                title: 'Night',
+                                kind: null,
                             },
                         },
                     ],
-                }, {
-                    type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'musicOut'}],
+                },
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'b2'},
+                    content: [{type: 'musicOut'}],
                 },
             ],
         };
@@ -30,7 +38,14 @@ describe('extractScriptBlocks music', () => {
 
         expect(music).toEqual([
             {
-                id: 'c1', sceneNumber: 0, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                id: 'c1',
+                sceneNumber: 0,
+                indexInScene: 0,
+                mode: 'open',
+                title: 'Night',
+                kind: null,
+                startBlockId: 'b1',
+                endBlockId: 'b2',
             },
         ]);
     });
@@ -46,12 +61,18 @@ describe('extractScriptBlocks music', () => {
                         {
                             type: 'musicStart',
                             attrs: {
-                                musicId: 'h1', mode: 'hit', title: 'Sting', kind: null,
+                                musicId: 'h1',
+                                mode: 'hit',
+                                title: 'Sting',
+                                kind: null,
                             },
                         },
                     ],
-                }, {
-                    type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'musicOut'}],
+                },
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'b2'},
+                    content: [{type: 'musicOut'}],
                 },
             ],
         };
@@ -60,7 +81,14 @@ describe('extractScriptBlocks music', () => {
 
         expect(music).toEqual([
             {
-                id: 'h1', sceneNumber: 0, indexInScene: 0, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b1', endBlockId: 'b1',
+                id: 'h1',
+                sceneNumber: 0,
+                indexInScene: 0,
+                mode: 'hit',
+                title: 'Sting',
+                kind: null,
+                startBlockId: 'b1',
+                endBlockId: 'b1',
             },
         ]);
     });

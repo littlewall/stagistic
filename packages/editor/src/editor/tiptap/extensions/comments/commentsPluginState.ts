@@ -1,14 +1,20 @@
 import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR} from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
-    type EditorState, PluginKey, type Transaction,
+    type EditorState,
+    PluginKey,
+    type Transaction,
 } from '@tiptap/pm/state';
 
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {buildCommentAnchorIndex} from './buildCommentAnchorIndex';
 import {buildDecorations} from './commentDecorations';
 import type {
-    CommentAnchorLocation, CommentDraft, CommentsPluginState, CommentTombstone, EditorCommentThreadRef,
+    CommentAnchorLocation,
+    CommentDraft,
+    CommentsPluginState,
+    CommentTombstone,
+    EditorCommentThreadRef,
 } from './types';
 
 export type CommentsMeta =
@@ -19,7 +25,9 @@ export type CommentsMeta =
     | {type: 'hovered', threadId: string | null}
     | {type: 'hoveredBlock', blockId: string | null}
     | {
-        type: 'tombstone', threadId: string, tombstone: CommentTombstone | null,
+        type: 'tombstone',
+        threadId: string,
+        tombstone: CommentTombstone | null,
     };
 
 export type CommentsBaseState = Omit<CommentsPluginState, 'anchors' | 'openThreadIdsByBlockId' | 'decorations'>;
@@ -46,7 +54,9 @@ export const finalize = (doc: ProseMirrorNode, base: CommentsBaseState): Comment
         anchors,
         openThreadIdsByBlockId,
         decorations: buildDecorations(doc, {
-            ...base, anchors, openThreadIdsByBlockId,
+            ...base,
+            anchors,
+            openThreadIdsByBlockId,
         }),
     };
 };
@@ -64,7 +74,9 @@ export const mapDraft = (draft: CommentDraft | null, tr: Transaction): CommentDr
     }
 
     return {
-        ...draft, from, to,
+        ...draft,
+        from,
+        to,
     };
 };
 
@@ -97,7 +109,11 @@ export const readDraft = (state: EditorState): CommentDraft | null => {
     }
 
     return {
-        kind: 'block', blockId: block.id, from: block.from, to: block.to, quotedText: block.node.textContent,
+        kind: 'block',
+        blockId: block.id,
+        from: block.from,
+        to: block.to,
+        quotedText: block.node.textContent,
     };
 };
 
@@ -107,11 +123,15 @@ export const applyMeta = (base: CommentsBaseState, meta: CommentsMeta | undefine
             return {...base, threads: new Map(meta.threads.map(thread => [thread.id, thread]))};
         case 'draft':
             return {
-                ...base, draft: meta.draft, activeThreadId: meta.draft ? null : base.activeThreadId,
+                ...base,
+                draft: meta.draft,
+                activeThreadId: meta.draft ? null : base.activeThreadId,
             };
         case 'commit':
             return {
-                ...base, draft: null, activeThreadId: meta.threadId,
+                ...base,
+                draft: null,
+                activeThreadId: meta.threadId,
             };
         case 'active':
             return {...base, activeThreadId: meta.threadId};

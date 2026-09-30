@@ -8,7 +8,9 @@ import type {
 } from '@stagistic/db';
 
 import {
-    createReactiveCollection, createRepositoryStoreRegistry, toDomainCollectionValue,
+    createReactiveCollection,
+    createRepositoryStoreRegistry,
+    toDomainCollectionValue,
 } from '../collections';
 
 export type CreateCommentThreadInput = Omit<CreateScriptCommentThreadInput, 'messageId' | 'timestamp'>;

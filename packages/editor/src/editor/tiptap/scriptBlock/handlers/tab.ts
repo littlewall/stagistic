@@ -3,7 +3,9 @@ import type {Editor} from '@tiptap/react';
 
 import {getBlockQuickToggleTarget} from '../../../model/blockQuickToggle';
 import {
-    type BlockNodeType, getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
 import {setBlockTypeWithSelection} from '../commands';
 import {type BlockContext, createBlockContext} from '../context';

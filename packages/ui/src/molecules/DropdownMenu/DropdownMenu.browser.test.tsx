@@ -3,7 +3,11 @@ import '../../../styles/tokens.css';
 import {Button, MenuTrigger} from 'react-aria-components';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 

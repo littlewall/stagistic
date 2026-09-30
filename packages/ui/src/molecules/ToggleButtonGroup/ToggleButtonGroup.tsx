@@ -37,7 +37,12 @@ export type ToggleButtonGroupProps<Value extends string> = ToggleButtonGroupBase
 
 export const ToggleButtonGroup = <Value extends string>(props: ToggleButtonGroupProps<Value>) => {
     const {
-        options, ariaLabel, ariaLabelledBy, className, isDisabled, variant = 'default',
+        options,
+        ariaLabel,
+        ariaLabelledBy,
+        className,
+        isDisabled,
+        variant = 'default',
     } = props;
     const selectionMode = props.selectionMode ?? 'single';
     const selectedKeys = props.selectionMode === 'multiple' ? props.value : [props.value];

@@ -1,6 +1,8 @@
 import {DEFAULT_EDITOR_SETTINGS, type TitlePageSettings} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {VisualLine} from '../visualLine';

@@ -1,5 +1,7 @@
 import {
-    DEFAULT_SCENE_NUMBER_FORMAT, formatSceneNumber, type SceneNumberFormat,
+    DEFAULT_SCENE_NUMBER_FORMAT,
+    formatSceneNumber,
+    type SceneNumberFormat,
 } from '@stagistic/script';
 import {Extension} from '@tiptap/core';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';

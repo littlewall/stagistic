@@ -12,7 +12,12 @@ export interface RemoveGroupModalProps {
 }
 
 export const RemoveGroupModal = ({
-    isOpen, groupName, usageCount, isRemoving = false, onClose, onConfirm,
+    isOpen,
+    groupName,
+    usageCount,
+    isRemoving = false,
+    onClose,
+    onConfirm,
 }: RemoveGroupModalProps) => {
     const notes: ReactNode[] = usageCount > 0 ? ['Its occurrences stay in the script and become unconfirmed characters.'] : [];
 

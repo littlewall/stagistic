@@ -11,10 +11,14 @@ import {stripScriptSettings} from '../editorSettings';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
 import {
-    forcePaginationRecalc, getWindowTarget, resolveInitialSelection,
+    forcePaginationRecalc,
+    getWindowTarget,
+    resolveInitialSelection,
 } from './editorLifecycleHelpers';
 import {
-    sanitizeScriptBlocks, type UseEditorLifecycleArgs, useEditorLifecycleSync,
+    sanitizeScriptBlocks,
+    type UseEditorLifecycleArgs,
+    useEditorLifecycleSync,
 } from './editorLifecycleSync';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
@@ -34,7 +38,11 @@ export const useEditorLifecycle = ({
 }: UseEditorLifecycleArgs): {actCommands: EditorActCommands} => {
     const {instance, autoFocus} = editor;
     const {
-        initialValue, initialSerialized, setLatestValue, syncInitialValue, scheduleAutosave,
+        initialValue,
+        initialSerialized,
+        setLatestValue,
+        syncInitialValue,
+        scheduleAutosave,
     } = document;
     const {onManualSave, handleManualSave} = save;
     const isApplyingInitialRef = useRef(false);
@@ -46,7 +54,11 @@ export const useEditorLifecycle = ({
     const onBlockUiEventRef = useLatestRef(callbacks.onBlockUiEvent);
 
     const {
-        syncValueFromEditor, patchFallbackSnapshot, syncRuntimeSnapshotFromEditor, emitIndexFromEditor, emitBlockUiEventsFromEditor,
+        syncValueFromEditor,
+        patchFallbackSnapshot,
+        syncRuntimeSnapshotFromEditor,
+        emitIndexFromEditor,
+        emitBlockUiEventsFromEditor,
     } =
         useEditorLifecycleSync({
             liveStore,

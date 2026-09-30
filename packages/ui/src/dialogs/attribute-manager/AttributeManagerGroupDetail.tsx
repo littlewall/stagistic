@@ -1,6 +1,8 @@
 import {normalizeCharacterKey} from '@stagistic/script';
 import {
-    type FormEvent, useMemo, useState,
+    type FormEvent,
+    useMemo,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';

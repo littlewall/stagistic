@@ -1,5 +1,7 @@
 import {
-    useCallback, useRef, useSyncExternalStore,
+    useCallback,
+    useRef,
+    useSyncExternalStore,
 } from 'react';
 
 import type {

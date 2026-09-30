@@ -2,14 +2,20 @@ import type {ScriptPackageWrite, ScriptRepository} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {importScriptPackageAsNew} from './importScriptPackageAsNew';
 
 const baseSnapshot = (): StepkgSnapshot => ({
     script: {
-        id: 'original-id', title: 'Original', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z',
+        id: 'original-id',
+        title: 'Original',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
     },
     document: createEmptyScriptDocument(),
     titlePage: {source: 'Original'},
@@ -85,14 +91,18 @@ describe('importScriptPackageAsNew', () => {
         const repository = {createScriptFromPackage: () => Promise.resolve()} as unknown as ScriptRepository;
 
         const overridden = await importScriptPackageAsNew({
-            repository, bytes, title: 'My Copy',
+            repository,
+            bytes,
+            title: 'My Copy',
         });
 
         expect(overridden.ok).toBe(true);
         if (overridden.ok) expect(overridden.title).toBe('My Copy');
 
         const fallback = await importScriptPackageAsNew({
-            repository, bytes, title: '   ',
+            repository,
+            bytes,
+            title: '   ',
         });
 
         expect(fallback.ok).toBe(true);

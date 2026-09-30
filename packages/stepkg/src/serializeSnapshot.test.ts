@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {StepkgSnapshot} from './contracts';
@@ -13,16 +15,22 @@ const snapshot: StepkgSnapshot = {
         createdAt: '2026-09-18T10:00:00.000Z',
         updatedAt: '2026-09-18T11:00:00.000Z',
     },
-    document: {type: 'doc',
+    document: {
+        type: 'doc',
         content: [
             {
-                type: 'act', attrs: {id: 'block-1'}, content: [{type: 'text', text: 'Act One'}],
+                type: 'act',
+                attrs: {id: 'block-1'},
+                content: [{type: 'text', text: 'Act One'}],
             },
-        ]},
+        ],
+    },
     titlePage: {},
     settings: {page: {widthPx: 816}},
     characters: {
-        characters: [], groups: [], genderOptions: [],
+        characters: [],
+        groups: [],
+        genderOptions: [],
     },
     music: {items: []},
     scenes: {scenes: [], locations: []},

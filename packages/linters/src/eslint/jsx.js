@@ -4,14 +4,16 @@ const jsxRules = {
     '@stylistic/jsx-closing-bracket-location': ['error', 'line-aligned'],
     '@stylistic/jsx-closing-tag-location': 'error',
     '@stylistic/jsx-curly-brace-presence': [
-        'error', {
+        'error',
+        {
             props: 'never',
             children: 'never',
             propElementValues: 'always',
         },
     ],
     '@stylistic/jsx-curly-newline': [
-        'error', {
+        'error',
+        {
             multiline: 'consistent',
             singleline: 'consistent',
         },
@@ -21,15 +23,18 @@ const jsxRules = {
     '@stylistic/jsx-first-prop-new-line': ['error', 'multiline'],
     '@stylistic/jsx-function-call-newline': ['error', 'multiline'],
     '@stylistic/jsx-indent-props': ['error', 4],
+    '@stylistic/jsx-max-props-per-line': ['error', {maximum: 1, when: 'multiline'}],
     '@stylistic/jsx-quotes': ['error', 'prefer-double'],
     '@stylistic/jsx-self-closing-comp': [
-        'error', {
+        'error',
+        {
             component: true,
             html: false,
         },
     ],
     '@stylistic/jsx-tag-spacing': [
-        'error', {
+        'error',
+        {
             closingSlash: 'never',
             beforeSelfClosing: 'always',
             afterOpening: 'never',
@@ -37,7 +42,8 @@ const jsxRules = {
         },
     ],
     '@stylistic/jsx-wrap-multilines': [
-        'error', {
+        'error',
+        {
             declaration: 'parens-new-line',
             assignment: 'parens-new-line',
             return: 'parens-new-line',

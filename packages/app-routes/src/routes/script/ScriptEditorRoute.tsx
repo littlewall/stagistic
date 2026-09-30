@@ -1,11 +1,15 @@
 import {useScriptComments, useScriptRepository} from '@stagistic/app-core';
 import {
-    type EditorMusicCreateRequest, type EditorMusicRemoveRequest, ScriptEditor,
+    type EditorMusicCreateRequest,
+    type EditorMusicRemoveRequest,
+    ScriptEditor,
 } from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
 import {
-    useCallback, useMemo, useState,
+    useCallback,
+    useMemo,
+    useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
@@ -13,11 +17,15 @@ import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {
-    ScriptCommentsSidebar, useCommentsEditorBridge, useCommentsPanelState,
+    ScriptCommentsSidebar,
+    useCommentsEditorBridge,
+    useCommentsPanelState,
 } from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
 import {
-    AddMusicModal, ScriptMusicSidebar, UnassignMusicModal,
+    AddMusicModal,
+    ScriptMusicSidebar,
+    UnassignMusicModal,
 } from './editor/music';
 import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
@@ -70,13 +78,26 @@ export const ScriptEditorRoute = () => {
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
     const {
-        pendingSceneDelete, deleteSceneRequest, requestDeleteScene, closeSceneDeleteModal, confirmDeleteScene,
+        pendingSceneDelete,
+        deleteSceneRequest,
+        requestDeleteScene,
+        closeSceneDeleteModal,
+        confirmDeleteScene,
     } = useSceneDeletionState();
     const {
-        pendingSceneConversion, convertSceneRequest, requestConvertScene, closeSceneConvertModal, confirmConvertScene,
+        pendingSceneConversion,
+        convertSceneRequest,
+        requestConvertScene,
+        closeSceneConvertModal,
+        confirmConvertScene,
     } = useSceneConversionState();
     const {
-        music, createMusic, unassignMusic, markMusicAssigned, markMusicUnassigned, updateMusicRequest,
+        music,
+        createMusic,
+        unassignMusic,
+        markMusicAssigned,
+        markMusicUnassigned,
+        updateMusicRequest,
     } = musicState;
     const comments = useScriptComments(currentScriptId, scriptRepository);
     const commentsPanelState = useCommentsPanelState();
@@ -215,7 +236,12 @@ export const ScriptEditorRoute = () => {
         ],
     );
     const {
-        leftSidebarToggle, rightSidebarToggle, leftSidebar, rightSidebar, revealPanel, isPanelOpen,
+        leftSidebarToggle,
+        rightSidebarToggle,
+        leftSidebar,
+        rightSidebar,
+        revealPanel,
+        isPanelOpen,
     } = useEditorSidebars({
         panels: sidebarPanels,
         defaultLeftPanelId: 'structure',

@@ -1,5 +1,8 @@
 import {
-    parseStagistic, type TitlePageLogo, type TitlePageSettings, trimOrFallback,
+    parseStagistic,
+    type TitlePageLogo,
+    type TitlePageSettings,
+    trimOrFallback,
 } from '@stagistic/script';
 
 import logoUrl from './example-logo.png?url&no-inline';

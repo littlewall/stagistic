@@ -28,7 +28,9 @@ export interface StructureState {
 const EMPTY_STATE: StructureState = {
     groups: [
         {
-            groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
+            groupId: ROOT_ACT_GROUP,
+            actName: null,
+            scenes: [],
         },
     ],
     sceneAncestorByBlockId: new Map(),
@@ -44,7 +46,9 @@ interface RawBlock {
 const buildState = (blocks: RawBlock[]): StructureState => {
     const groups: StructureGroup[] = [
         {
-            groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
+            groupId: ROOT_ACT_GROUP,
+            actName: null,
+            scenes: [],
         },
     ];
     const sceneAncestorByBlockId = new Map<string, string>();

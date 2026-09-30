@@ -1,14 +1,22 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {layoutBesideCards} from './layoutBesideCards';
 
 const card = (threadId: string, blockId: string, anchorTop: number, height = 40) => ({
-    threadId, blockId, anchorTop, height,
+    threadId,
+    blockId,
+    anchorTop,
+    height,
 });
 const base = {
-    activeThreadId: null, expandedBlockId: null, collapsedHeight: 32, gap: 8,
+    activeThreadId: null,
+    expandedBlockId: null,
+    collapsedHeight: 32,
+    gap: 8,
 };
 const tops = (entries: ReturnType<typeof layoutBesideCards>) => entries.map(entry => [entry.key, entry.top]);
 
@@ -38,12 +46,14 @@ describe('layoutBesideCards', () => {
     });
 
     it('pushes colliding cards down with a gap', () => {
-        expect(tops(layoutBesideCards({...base,
+        expect(tops(layoutBesideCards({
+            ...base,
             cards: [
                 card('a', 'b1', 0),
                 card('b', 'b2', 10),
                 card('c', 'b3', 20),
-            ]}))).toEqual([
+            ],
+        }))).toEqual([
             ['a', 0],
             ['b', 48],
             ['c', 96],
@@ -71,16 +81,21 @@ describe('layoutBesideCards', () => {
     });
 
     it('collapses three threads on one block into one entry', () => {
-        const entries = layoutBesideCards({...base,
+        const entries = layoutBesideCards({
+            ...base,
             cards: [
                 card('a', 'b1', 0),
                 card('b', 'b1', 0),
                 card('c', 'b1', 0),
                 card('d', 'b2', 10),
-            ]});
+            ],
+        });
 
         expect(entries.map(entry => ({
-            key: entry.key, collapsed: entry.collapsed, threadIds: entry.threadIds, top: entry.top,
+            key: entry.key,
+            collapsed: entry.collapsed,
+            threadIds: entry.threadIds,
+            top: entry.top,
         }))).toEqual([
             {
                 key: 'group:b1',
@@ -91,8 +106,12 @@ describe('layoutBesideCards', () => {
                     'c',
                 ],
                 top: 0,
-            }, {
-                key: 'd', collapsed: false, threadIds: ['d'], top: 40,
+            },
+            {
+                key: 'd',
+                collapsed: false,
+                threadIds: ['d'],
+                top: 40,
             },
         ]);
     });
@@ -105,10 +124,14 @@ describe('layoutBesideCards', () => {
         ];
 
         expect(layoutBesideCards({
-            ...base, expandedBlockId: 'b1', cards,
+            ...base,
+            expandedBlockId: 'b1',
+            cards,
         }).every(entry => !entry.collapsed)).toBe(true);
         expect(layoutBesideCards({
-            ...base, activeThreadId: 'b', cards,
+            ...base,
+            activeThreadId: 'b',
+            cards,
         }).every(entry => !entry.collapsed)).toBe(true);
     });
 

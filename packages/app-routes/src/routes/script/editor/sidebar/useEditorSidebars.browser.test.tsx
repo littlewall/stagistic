@@ -1,7 +1,11 @@
 import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {getStorageKey, type SidebarLayoutState} from './sidebarLayoutStorage';
@@ -15,13 +19,19 @@ let mountCount = 0;
 
 const panels: readonly SidebarPanel[] = [
     {
-        id: 'structure', label: 'Structure', renderContent: () => null,
+        id: 'structure',
+        label: 'Structure',
+        renderContent: () => null,
     },
     {
-        id: 'characters', label: 'Characters', renderContent: () => null,
+        id: 'characters',
+        label: 'Characters',
+        renderContent: () => null,
     },
     {
-        id: 'comments', label: 'Comments', renderContent: () => null,
+        id: 'comments',
+        label: 'Comments',
+        renderContent: () => null,
     },
 ];
 
@@ -90,7 +100,10 @@ describe('useEditorSidebars.revealPanel', () => {
 
     it('shows comments on the right when writing starts even if comments were selected on the left', () => {
         const sidebars = mount({
-            leftPanelId: 'comments', rightPanelId: 'characters', isLeftOpen: false, isRightOpen: false,
+            leftPanelId: 'comments',
+            rightPanelId: 'characters',
+            isLeftOpen: false,
+            isRightOpen: false,
         });
 
         act(() => sidebars.current.revealPanel('comments', {side: 'right'}));

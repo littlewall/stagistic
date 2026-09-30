@@ -1,11 +1,15 @@
 import type {
-    ScriptBlockNodeType, ScriptDocument, ScriptNode,
+    ScriptBlockNodeType,
+    ScriptDocument,
+    ScriptNode,
 } from '@stagistic/script';
 import {Editor} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Text from '@tiptap/extension-text';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {ScriptBlockNodes} from '../../nodes';

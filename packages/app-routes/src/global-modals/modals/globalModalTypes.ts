@@ -84,13 +84,18 @@ export interface GlobalModalActions {
     handleImportStagistic: (payload: ScriptImportFile & {name: string}) => Promise<void>,
     handlePeekStepkg: (bytes: Uint8Array) => Promise<StepkgPeekResult>,
     handleImportStepkgAsNew: (payload: {
-        fileName: string, bytes: Uint8Array, title: string,
+        fileName: string,
+        bytes: Uint8Array,
+        title: string,
     }) => Promise<void>,
     handleReplaceWithStepkg: (payload: {fileName: string, bytes: Uint8Array}) => Promise<void>,
     handleDownloadStepkgBackup: (scriptId: string) => Promise<void>,
     handleDelete: () => Promise<void>,
     handleRename: (values: {title: string, subtitle: string}) => Promise<void>,
     handleDuplicate: (values: {
-        title: string, copySettings: boolean, copyAttributes: boolean, openInEditor: boolean,
+        title: string,
+        copySettings: boolean,
+        copyAttributes: boolean,
+        openInEditor: boolean,
     }) => Promise<void>,
 }

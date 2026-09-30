@@ -1,9 +1,13 @@
 import {
-    and, eq, sql,
+    and,
+    eq,
+    sql,
 } from 'drizzle-orm';
 
 import {
-    scriptAttachments, scriptMusic, scriptMusicAttachments,
+    scriptAttachments,
+    scriptMusic,
+    scriptMusicAttachments,
 } from '../../schema';
 import type {MusicAttachmentRole, ScriptMusicAttachmentBinding} from '../../types';
 import type {DbClient} from '../types';

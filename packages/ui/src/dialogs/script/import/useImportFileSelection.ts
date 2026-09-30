@@ -1,9 +1,17 @@
 import {
-    type ChangeEvent, useCallback, useEffect, useMemo, useState,
+    type ChangeEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
 } from 'react';
 
 import {
-    classifyFileKind, type DropEvent, getFileBaseName, isFileDropItem, type SelectedFile,
+    classifyFileKind,
+    type DropEvent,
+    getFileBaseName,
+    isFileDropItem,
+    type SelectedFile,
 } from './model';
 import type {StepkgPeekResult, UseImportScriptModalStateArgs} from './types';
 
@@ -13,7 +21,10 @@ type UseImportFileSelectionArgs = Pick<UseImportScriptModalStateArgs, 'isOpen' |
 
 /** Selected file, its .stepkg peek result, and the name/choice the user derives from it. */
 export const useImportFileSelection = ({
-    isOpen, onPeekStepkg, onPickFile, preselectedFile,
+    isOpen,
+    onPeekStepkg,
+    onPickFile,
+    preselectedFile,
 }: UseImportFileSelectionArgs) => {
     const [name, setName] = useState('');
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
@@ -41,7 +52,9 @@ export const useImportFileSelection = ({
         }
 
         setSelectedFile({
-            kind: 'stagistic', name: preselectedFile.fileName, text: preselectedFile.text,
+            kind: 'stagistic',
+            name: preselectedFile.fileName,
+            text: preselectedFile.text,
         });
         setFileError(null);
         setStepkgPeek(null);
@@ -86,7 +99,9 @@ export const useImportFileSelection = ({
     );
 
     const applyStagisticFile = useCallback((file: {
-        name: string, file?: File, text?: string,
+        name: string,
+        file?: File,
+        text?: string,
     }) => {
         setSelectedFile({kind: 'stagistic', ...file});
         setFileError(null);
@@ -98,7 +113,9 @@ export const useImportFileSelection = ({
     const applyStepkgFile = useCallback(
         (fileName: string, bytes: Uint8Array) => {
             setSelectedFile({
-                kind: 'stepkg', name: fileName, bytes,
+                kind: 'stepkg',
+                name: fileName,
+                bytes,
             });
             setFileError(null);
             setStepkgPeek(null);

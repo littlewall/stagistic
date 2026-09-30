@@ -60,7 +60,8 @@ export const buildMiniEditorCharacterPresentation = (
     const stats = collectScriptCharacterStats(document, new Set());
     const colorByCharacterId = new Map(
         characters.map(character => [
-            character.id, getConfirmedCharacterColor(
+            character.id,
+            getConfirmedCharacterColor(
                 character.id,
                 character.colorHex ?? null,
                 MINI_EDITOR_CHARACTER_SATURATION,

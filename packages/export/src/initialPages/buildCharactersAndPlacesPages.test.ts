@@ -26,9 +26,14 @@ const basePlan = (
     kind: 'characters-and-places',
     characters: [
         {
-            id: 'anna', displayName: 'Anna', outline: 'A brave lead',
-        }, {
-            id: 'bob', displayName: 'Bob', outline: 'A careful friend',
+            id: 'anna',
+            displayName: 'Anna',
+            outline: 'A brave lead',
+        },
+        {
+            id: 'bob',
+            displayName: 'Bob',
+            outline: 'A careful friend',
         },
     ],
     places: [{id: 'attic', name: 'Attic'}, {id: 'stage', name: 'Stage'}],

@@ -1,10 +1,18 @@
 import {jsPDF} from 'jspdf';
 import {
-    PDFDocument, type PDFPage, rgb, StandardFonts,
+    PDFDocument,
+    type PDFPage,
+    rgb,
+    StandardFonts,
 } from 'pdf-lib';
 
 import type {
-    PageItem, StaffRowItem, TitlePageImageItem, TranscriptResult, VisualLine, VisualRun,
+    PageItem,
+    StaffRowItem,
+    TitlePageImageItem,
+    TranscriptResult,
+    VisualLine,
+    VisualRun,
 } from '../visualLine';
 import {drawStaffRow} from './drawStaffRow';
 import {getPdfMonoFontFamily, registerFonts} from './fonts';

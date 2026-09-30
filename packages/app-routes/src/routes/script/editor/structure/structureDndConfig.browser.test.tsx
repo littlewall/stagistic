@@ -23,9 +23,14 @@ const groups: StructureGroup[] = [
         actName: null,
         scenes: [
             {
-                blockId: 'scene-1', title: 'First scene', sceneNumber: 1,
-            }, {
-                blockId: 'scene-2', title: 'Second scene', sceneNumber: 2,
+                blockId: 'scene-1',
+                title: 'First scene',
+                sceneNumber: 1,
+            },
+            {
+                blockId: 'scene-2',
+                title: 'Second scene',
+                sceneNumber: 2,
             },
         ],
     },

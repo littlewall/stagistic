@@ -18,10 +18,17 @@ const MusicKindIcon = ({kind}: {kind: PersistentMusicRef['kind']}) => {
 };
 
 const MusicSuggestionsOverlay = ({
-    editor, canvasRef, persistentMusic = [], onMusicAssigned,
+    editor,
+    canvasRef,
+    persistentMusic = [],
+    onMusicAssigned,
 }: MusicSuggestionsOverlayProps) => {
     const {
-        overlayRef, overlayState, suggestions, activeSuggestionIndex, handleSuggestionMouseDown,
+        overlayRef,
+        overlayState,
+        suggestions,
+        activeSuggestionIndex,
+        handleSuggestionMouseDown,
     } = useMusicSuggestionsOverlay({
         editor,
         canvasRef,

@@ -1,9 +1,13 @@
 import {type useScriptRepository} from '@stagistic/app-core';
 import {
-    type EditorSettings, type ScriptBlockIndexSnapshot, type ScriptDocument,
+    type EditorSettings,
+    type ScriptBlockIndexSnapshot,
+    type ScriptDocument,
 } from '@stagistic/script';
 import {
-    createContext, type ReactNode, useContext,
+    createContext,
+    type ReactNode,
+    useContext,
 } from 'react';
 
 type ScriptRepository = ReturnType<typeof useScriptRepository>;

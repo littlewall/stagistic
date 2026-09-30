@@ -12,5 +12,10 @@ export * from './structure';
 export * from './syntax';
 export * from './titlePage';
 export {
-    clampNumber, collapseWhitespace, createNodeId, isObjectRecord, splitTrailingParentheticalSuffix, trimOrFallback,
+    clampNumber,
+    collapseWhitespace,
+    createNodeId,
+    isObjectRecord,
+    splitTrailingParentheticalSuffix,
+    trimOrFallback,
 } from '@stagistic/shared';

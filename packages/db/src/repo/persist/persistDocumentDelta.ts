@@ -1,12 +1,20 @@
 import {
-    and, eq, sql,
+    and,
+    eq,
+    sql,
 } from 'drizzle-orm';
 
 import {
-    type ExtractedBlockRow, extractScriptBlocks, type RewriteScriptDocument,
+    type ExtractedBlockRow,
+    extractScriptBlocks,
+    type RewriteScriptDocument,
 } from '../../blocks';
 import {
-    bulkDeleteScriptBlocks, bulkReplaceScriptBlockCharacterRefs, type DbClient, listScriptSpeakingEntities, writeFinalBlockOrders,
+    bulkDeleteScriptBlocks,
+    bulkReplaceScriptBlockCharacterRefs,
+    type DbClient,
+    listScriptSpeakingEntities,
+    writeFinalBlockOrders,
 } from '../../queries';
 import {scriptBlocks} from '../../schema';
 import {toCharacterRefRows} from '../characterRefRows';

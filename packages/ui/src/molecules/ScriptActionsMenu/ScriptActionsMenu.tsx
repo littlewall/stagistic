@@ -13,7 +13,10 @@ interface ScriptActionsMenuProps {
 }
 
 export const ScriptActionsMenu = ({
-    scriptTitle, onDelete, onRename, onDuplicate,
+    scriptTitle,
+    onDelete,
+    onRename,
+    onDuplicate,
 }: ScriptActionsMenuProps) => {
     const handleAction = (key: Key) => {
         if (key === 'rename') {
@@ -42,7 +45,9 @@ export const ScriptActionsMenu = ({
                     {id: 'rename', label: 'Rename script'},
                     {id: 'duplicate', label: 'Duplicate script'},
                     {
-                        id: 'delete', label: 'Delete script', tone: 'danger',
+                        id: 'delete',
+                        label: 'Delete script',
+                        tone: 'danger',
                     },
                 ]}
                 onAction={handleAction}

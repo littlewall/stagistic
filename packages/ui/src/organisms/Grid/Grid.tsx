@@ -10,7 +10,9 @@ type GridProps = {
 };
 
 export const Grid = ({
-    children, columns = 2, className,
+    children,
+    columns = 2,
+    className,
 }: GridProps) => {
     return (
         <div

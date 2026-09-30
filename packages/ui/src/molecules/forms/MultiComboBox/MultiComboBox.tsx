@@ -1,6 +1,10 @@
 import clsx from 'clsx';
 import {
-    type MouseEvent, useEffect, useId, useRef, useState,
+    type MouseEvent,
+    useEffect,
+    useId,
+    useRef,
+    useState,
 } from 'react';
 import {Group} from 'react-aria-components';
 import {type Tag, WithContext as ReactTags} from 'react-tag-input';
@@ -31,7 +35,9 @@ interface RemoveTagButtonProps {
 }
 
 const RemoveTagButton = ({
-    className, onRemove, tag,
+    className,
+    onRemove,
+    tag,
 }: RemoveTagButtonProps) => (
     <button
         className={className}
@@ -50,7 +56,13 @@ const toTag = ({id, label}: MultiComboBoxOption): Tag => ({
 });
 
 export const MultiComboBox = ({
-    label, placeholder, options, value, onChange, className, isDisabled = false,
+    label,
+    placeholder,
+    options,
+    value,
+    onChange,
+    className,
+    isDisabled = false,
 }: MultiComboBoxProps) => {
     const inputId = useId();
     const rootRef = useRef<HTMLDivElement>(null);

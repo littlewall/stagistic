@@ -2,7 +2,11 @@ import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
 import {SearchControl, useDropdownDismiss} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
@@ -13,7 +17,10 @@ import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {
-    BlockTypeSelectActions, BlockTypeSelectState, InlineMarksGroupActions, InlineMarksGroupState,
+    BlockTypeSelectActions,
+    BlockTypeSelectState,
+    InlineMarksGroupActions,
+    InlineMarksGroupState,
 } from './toolbar/contracts';
 import {InlineMarksGroup} from './toolbar/InlineMarksGroup';
 import {useToolbarState} from './toolbar/useToolbarState';

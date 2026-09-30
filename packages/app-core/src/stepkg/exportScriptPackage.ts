@@ -11,7 +11,10 @@ export interface ExportScriptPackageArgs {
 }
 
 export const exportScriptPackage = async ({
-    repository, scriptId, flush, generator,
+    repository,
+    scriptId,
+    flush,
+    generator,
 }: ExportScriptPackageArgs): Promise<StepkgExportResult> => {
     try {
         await flush?.();
@@ -21,12 +24,16 @@ export const exportScriptPackage = async ({
 
     const source = await repository.getScriptPackageSource(scriptId);
 
-    if (!source) return {ok: false,
+    if (!source) return {
+        ok: false,
         issues: [
             {
-                code: 'script_not_found', stage: 'snapshot', entity: {type: 'script', id: scriptId},
+                code: 'script_not_found',
+                stage: 'snapshot',
+                entity: {type: 'script', id: scriptId},
             },
-        ]};
+        ],
+    };
 
     return createStepkg({
         snapshot: mapScriptPackageSourceToStepkg(source),

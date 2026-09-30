@@ -1,9 +1,17 @@
 import {
-    useCallback, useEffect, useRef, useState,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {
-    createInitialState, getIsMatchingViewport, getStorageKey, type OverlayDrawer, resolvePanelId, type SidebarLayoutState,
+    createInitialState,
+    getIsMatchingViewport,
+    getStorageKey,
+    type OverlayDrawer,
+    resolvePanelId,
+    type SidebarLayoutState,
 } from './sidebarLayoutStorage';
 import {SIDEBAR_EXCLUSIVE_QUERY, SIDEBAR_OVERLAY_QUERY} from './sidebarViewport';
 import type {SidebarPanelId} from './types';
@@ -28,7 +36,10 @@ interface UseSidebarLayoutArgs {
 }
 
 export const useSidebarLayout = ({
-    availablePanelIds, defaultLeftPanelId, defaultRightPanelId, storageScope,
+    availablePanelIds,
+    defaultLeftPanelId,
+    defaultRightPanelId,
+    storageScope,
 }: UseSidebarLayoutArgs) => {
     const storageScopeRef = useRef(storageScope);
     const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));

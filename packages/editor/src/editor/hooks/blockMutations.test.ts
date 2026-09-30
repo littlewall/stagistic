@@ -1,7 +1,9 @@
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {ensureSceneHeading, getScriptBlockNodeType} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {buildDeleteActContent} from './actBlockMutations';

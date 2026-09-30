@@ -11,7 +11,10 @@ type LoaderOverlayProps = {
 };
 
 export const LoaderOverlay = ({
-    label = 'Preparing Stagistic', messages = ['Setting up your workspace'], progress, variant = 'solid',
+    label = 'Preparing Stagistic',
+    messages = ['Setting up your workspace'],
+    progress,
+    variant = 'solid',
 }: LoaderOverlayProps) => {
     return (
         <div

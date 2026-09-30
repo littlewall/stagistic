@@ -10,10 +10,17 @@ import {
 
 import type {ExportPlan} from '../plan';
 import type {
-    PageItem, VisualLine, VisualRun,
+    PageItem,
+    VisualLine,
+    VisualRun,
 } from '../visualLine';
 import {
-    CHAR_WIDTH_EM, HEADER_FOOTER_ALIGNMENTS, HEADER_FOOTER_MAX_WIDTH_RATIO, MONO_FONT_FAMILY, PAGE_BREAK_ITEM, type ScriptPage,
+    CHAR_WIDTH_EM,
+    HEADER_FOOTER_ALIGNMENTS,
+    HEADER_FOOTER_MAX_WIDTH_RATIO,
+    MONO_FONT_FAMILY,
+    PAGE_BREAK_ITEM,
+    type ScriptPage,
 } from './model';
 
 const makeHeaderFooterRun = (text: string, x: number, cell: HeaderFooterCellSettings, fontSizePx: number): VisualRun => ({

@@ -1,6 +1,8 @@
 import {parseStagistic} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {InMemoryFileStorage} from '../fileStorage';
@@ -20,7 +22,11 @@ SING TO ME.
 
 const write = (): ScriptPackageWrite => ({
     script: {
-        id: 'imported-1', title: 'Imported', subtitle: null, createdAt: 1_000, updatedAt: 2_000,
+        id: 'imported-1',
+        title: 'Imported',
+        subtitle: null,
+        createdAt: 1_000,
+        updatedAt: 2_000,
     },
     document: parseStagistic(source).document,
     titlePage: {source: 'Original'},
@@ -37,7 +43,9 @@ const write = (): ScriptPackageWrite => ({
 });
 
 const makeRepository = (db: Awaited<ReturnType<typeof createTestDb>>['db'], fileStorage = new InMemoryFileStorage()) => createLocalPgliteRepository({
-    getLocalDb: () => Promise.resolve(db), syncToFs: () => Promise.resolve(), fileStorage,
+    getLocalDb: () => Promise.resolve(db),
+    syncToFs: () => Promise.resolve(),
+    fileStorage,
 });
 
 describe('createScriptFromPackage', () => {
@@ -79,17 +87,30 @@ describe('createScriptFromPackage', () => {
         ];
         input.genders = [
             {
-                id: 'gd1', key: 'f', label: 'Female', createdAt: 1_000, updatedAt: 1_000,
+                id: 'gd1',
+                key: 'f',
+                label: 'Female',
+                createdAt: 1_000,
+                updatedAt: 1_000,
             },
         ];
         input.groups = [
             {
-                id: 'g1', key: 'FAMILY', colorHex: null, memberIds: ['c1'], createdAt: 1_000, updatedAt: 1_000,
+                id: 'g1',
+                key: 'FAMILY',
+                colorHex: null,
+                memberIds: ['c1'],
+                createdAt: 1_000,
+                updatedAt: 1_000,
             },
         ];
         input.locations = [
             {
-                id: 'l1', name: 'Kitchen', description: null, createdAt: 1_000, updatedAt: 1_000,
+                id: 'l1',
+                name: 'Kitchen',
+                description: null,
+                createdAt: 1_000,
+                updatedAt: 1_000,
             },
         ];
         input.music = [
@@ -108,12 +129,22 @@ describe('createScriptFromPackage', () => {
         ];
         input.attachments = [
             {
-                id: 'a1', filename: 'score.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1_000, updatedAt: 1_000,
+                id: 'a1',
+                filename: 'score.pdf',
+                mimeType: 'application/pdf',
+                sizeBytes: 3,
+                blob: new Blob(['pdf']),
+                createdAt: 1_000,
+                updatedAt: 1_000,
             },
         ];
         input.bindings = [
             {
-                musicId: 'm1', attachmentId: 'a1', role: 'integrated_score', sortOrder: 0, createdAt: 1_000,
+                musicId: 'm1',
+                attachmentId: 'a1',
+                role: 'integrated_score',
+                sortOrder: 0,
+                createdAt: 1_000,
             },
         ];
 
@@ -156,7 +187,13 @@ describe('createScriptFromPackage', () => {
             ],
             messages: [
                 {
-                    id: 'm1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1, updatedAt: 1, editedAt: null,
+                    id: 'm1',
+                    threadId: 't1',
+                    authorId: 'local',
+                    body: 'B',
+                    createdAt: 1,
+                    updatedAt: 1,
+                    editedAt: null,
                 },
             ],
         };
@@ -167,12 +204,17 @@ describe('createScriptFromPackage', () => {
 
         expect(source?.comments.threads).toMatchObject([
             {
-                id: 't1', anchorBlockId: 'b1', status: 'resolved', resolvedAt: 5,
+                id: 't1',
+                anchorBlockId: 'b1',
+                status: 'resolved',
+                resolvedAt: 5,
             },
         ]);
         expect(source?.comments.messages).toMatchObject([
             {
-                id: 'm1', threadId: 't1', body: 'B',
+                id: 'm1',
+                threadId: 't1',
+                body: 'B',
             },
         ]);
     });
@@ -186,7 +228,13 @@ describe('createScriptFromPackage', () => {
         broken.document = {type: 'doc'} as ScriptPackageWrite['document'];
         broken.attachments = [
             {
-                id: 'a1', filename: 'a.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1, updatedAt: 1,
+                id: 'a1',
+                filename: 'a.pdf',
+                mimeType: 'application/pdf',
+                sizeBytes: 3,
+                blob: new Blob(['pdf']),
+                createdAt: 1,
+                updatedAt: 1,
             },
         ];
 

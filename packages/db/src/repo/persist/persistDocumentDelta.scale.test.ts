@@ -1,12 +1,16 @@
 import {asc, eq} from 'drizzle-orm';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {RewriteScriptDocument} from '../../blocks';
 import {scriptBlocks} from '../../schema';
 import {
-    createTestDb, seedScript, type TestDb,
+    createTestDb,
+    seedScript,
+    type TestDb,
 } from '../../testing/createTestDb';
 import {createDocumentPersister} from './persistDocumentDelta';
 
@@ -23,7 +27,8 @@ const docFromScenes = (scenes: Scene[]): RewriteScriptDocument => ({
             type: 'scene',
             attrs: {id: scene.headingId},
             content: [{type: 'text', text: scene.headingId.toUpperCase()}],
-        }, ...scene.blockIds.map(id => ({
+        },
+        ...scene.blockIds.map(id => ({
             type: 'stageDirection',
             attrs: {id},
             content: [{type: 'text', text: id}],

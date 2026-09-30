@@ -2,20 +2,28 @@ import type {ScriptPackageWrite, ScriptRepository} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {restoreScriptPackage} from './restoreScriptPackage';
 
 const snapshot: StepkgSnapshot = {
     script: {
-        id: 'script-1', title: 'Original', subtitle: null, createdAt: '2026-09-21T10:00:00.000Z', updatedAt: '2026-09-21T11:00:00.000Z',
+        id: 'script-1',
+        title: 'Original',
+        subtitle: null,
+        createdAt: '2026-09-21T10:00:00.000Z',
+        updatedAt: '2026-09-21T11:00:00.000Z',
     },
     document: createEmptyScriptDocument(),
     titlePage: {},
     settings: {},
     characters: {
-        characters: [], groups: [], genderOptions: [],
+        characters: [],
+        groups: [],
+        genderOptions: [],
     },
     music: {items: []},
     scenes: {scenes: [], locations: []},

@@ -70,7 +70,9 @@ export const EXAMPLE_CHARACTERS: readonly ExampleCharacter[] = [
 
 export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
     {
-        key: 'CREW', colorHex: '#9AA7B8', memberKeys: ['ROOK', 'TAM'],
+        key: 'CREW',
+        colorHex: '#9AA7B8',
+        memberKeys: ['ROOK', 'TAM'],
     },
 ];
 

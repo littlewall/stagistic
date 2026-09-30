@@ -15,7 +15,10 @@ interface AttributeManagerDetailTabsProps {
 }
 
 export const AttributeManagerDetailTabs = ({
-    tabs, activeTabId, ariaLabel, onSelectTab,
+    tabs,
+    activeTabId,
+    ariaLabel,
+    onSelectTab,
 }: AttributeManagerDetailTabsProps) => (
     <nav
         className={styles.detailNavigation}

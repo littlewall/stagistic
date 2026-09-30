@@ -1,9 +1,14 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
-    classifyFileKind, getFileBaseName, isStagisticFileName, isStepkgFileName,
+    classifyFileKind,
+    getFileBaseName,
+    isStagisticFileName,
+    isStepkgFileName,
 } from './model';
 
 describe('Stagistic import file model', () => {

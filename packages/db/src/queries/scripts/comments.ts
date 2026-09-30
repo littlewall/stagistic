@@ -1,5 +1,8 @@
 import {
-    and, asc, eq, type InferInsertModel,
+    and,
+    asc,
+    eq,
+    type InferInsertModel,
 } from 'drizzle-orm';
 
 import {scriptCommentMessages, scriptCommentThreads} from '../../schema';
@@ -75,13 +78,21 @@ export const getScriptCommentMessageById = async (db: DbClient, payload: {script
 export const updateScriptCommentThreadStatus = async (
     db: DbClient,
     payload: {
-        scriptId: string, threadId: string, status: string, resolvedAt: number | null, resolvedBy: string | null, updatedAt: number,
+        scriptId: string,
+        threadId: string,
+        status: string,
+        resolvedAt: number | null,
+        resolvedBy: string | null,
+        updatedAt: number,
     },
 ) => {
     await db
         .update(scriptCommentThreads)
         .set({
-            status: payload.status, resolvedAt: payload.resolvedAt, resolvedBy: payload.resolvedBy, updatedAt: payload.updatedAt,
+            status: payload.status,
+            resolvedAt: payload.resolvedAt,
+            resolvedBy: payload.resolvedBy,
+            updatedAt: payload.updatedAt,
         })
         .where(and(eq(scriptCommentThreads.scriptId, payload.scriptId), eq(scriptCommentThreads.id, payload.threadId)));
 };
@@ -89,7 +100,10 @@ export const updateScriptCommentThreadStatus = async (
 export const moveScriptCommentBlockAnchors = async (
     db: DbClient,
     payload: {
-        scriptId: string, fromBlockId: string, toBlockId: string, updatedAt: number,
+        scriptId: string,
+        fromBlockId: string,
+        toBlockId: string,
+        updatedAt: number,
     },
 ): Promise<string[]> => {
     const rows = await db
@@ -108,12 +122,17 @@ export const moveScriptCommentBlockAnchors = async (
 };
 
 export const updateScriptCommentMessageBody = async (db: DbClient, payload: {
-    scriptId: string, messageId: string, body: string, editedAt: number,
+    scriptId: string,
+    messageId: string,
+    body: string,
+    editedAt: number,
 }) => {
     await db
         .update(scriptCommentMessages)
         .set({
-            body: payload.body, editedAt: payload.editedAt, updatedAt: payload.editedAt,
+            body: payload.body,
+            editedAt: payload.editedAt,
+            updatedAt: payload.editedAt,
         })
         .where(and(eq(scriptCommentMessages.scriptId, payload.scriptId), eq(scriptCommentMessages.id, payload.messageId)));
 };

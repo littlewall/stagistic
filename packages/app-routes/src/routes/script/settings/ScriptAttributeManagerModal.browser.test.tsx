@@ -70,9 +70,14 @@ const renderStructureManager = (
     const root = createRoot(host);
     const sceneItems = [
         {
-            id: 's1', number: '1.', title: 'Opening',
-        }, {
-            id: 's2', number: '2.', title: 'Kitchen',
+            id: 's1',
+            number: '1.',
+            title: 'Opening',
+        },
+        {
+            id: 's2',
+            number: '2.',
+            title: 'Kitchen',
         },
     ];
 

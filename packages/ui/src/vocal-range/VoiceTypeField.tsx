@@ -1,5 +1,7 @@
 import {
-    useEffect, useRef, useState,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {Input} from '../atoms/Input/Input';
@@ -14,7 +16,9 @@ interface VoiceTypeFieldProps {
 }
 
 export const VoiceTypeField = ({
-    value, onChange, id,
+    value,
+    onChange,
+    id,
 }: VoiceTypeFieldProps) => {
     const [draft, setDraft] = useState(value ?? '');
     const [isOpen, setIsOpen] = useState(false);

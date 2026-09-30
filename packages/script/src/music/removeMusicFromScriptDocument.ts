@@ -1,9 +1,13 @@
 import {
-    getScriptBlockId, type ScriptDocument, type ScriptNode,
+    getScriptBlockId,
+    type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {buildScriptBlockIndex} from '../indexing/scriptBlockIndex';
 import {
-    MUSIC_ID_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME,
+    MUSIC_ID_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
 } from './constants';
 
 export interface RemoveMusicFromScriptDocumentResult {

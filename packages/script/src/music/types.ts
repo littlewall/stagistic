@@ -4,7 +4,11 @@ export type MusicMode = (typeof MUSIC_MODES)[number];
 
 export type MusicAtom =
     | {
-        role: 'start', musicId: string, mode: MusicMode, title: string, kind: string | null,
+        role: 'start',
+        musicId: string,
+        mode: MusicMode,
+        title: string,
+        kind: string | null,
     }
     | {role: 'out'};
 

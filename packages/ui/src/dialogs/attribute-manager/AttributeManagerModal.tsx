@@ -1,6 +1,9 @@
 import clsx from 'clsx';
 import {
-    type MouseEvent as ReactMouseEvent, type ReactNode, useCallback, useEffect,
+    type MouseEvent as ReactMouseEvent,
+    type ReactNode,
+    useCallback,
+    useEffect,
 } from 'react';
 
 import styles from './AttributeManagerModal.module.css';
@@ -21,7 +24,13 @@ export interface AttributeManagerModalProps {
 }
 
 export const AttributeManagerModal = ({
-    isOpen, title = 'Attribute manager', tabs, activeTabId, onClose, onSelectTab, children,
+    isOpen,
+    title = 'Attribute manager',
+    tabs,
+    activeTabId,
+    onClose,
+    onSelectTab,
+    children,
 }: AttributeManagerModalProps) => {
     useEffect(() => {
         if (!isOpen) {

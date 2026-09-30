@@ -1,6 +1,9 @@
 import type {ComponentProps, ReactNode} from 'react';
 import {
-    Dialog, DialogTrigger, Popover, type PopoverProps,
+    Dialog,
+    DialogTrigger,
+    Popover,
+    type PopoverProps,
 } from 'react-aria-components';
 
 import {IconButton} from '../../atoms/IconButton/IconButton';
@@ -16,7 +19,11 @@ export interface IconPopoverProps {
 
 /** Icon trigger opening a small non-modal panel of controls (not a menu of actions). */
 export const IconPopover = ({
-    'aria-label': ariaLabel, icon, children, size = 'sm', placement = 'bottom end',
+    'aria-label': ariaLabel,
+    icon,
+    children,
+    size = 'sm',
+    placement = 'bottom end',
 }: IconPopoverProps) => (
     <DialogTrigger>
         <IconButton

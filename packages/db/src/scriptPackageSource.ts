@@ -1,10 +1,14 @@
 import type {
-    EditorSettingsOverride, ScriptDocument, TitlePageSettings,
+    EditorSettingsOverride,
+    ScriptDocument,
+    TitlePageSettings,
 } from '@stagistic/script';
 import type {InferSelectModel} from 'drizzle-orm';
 
 import type {
-    scriptCharacterGroupMembers, scriptMusicAttachments, scriptSceneLocations,
+    scriptCharacterGroupMembers,
+    scriptMusicAttachments,
+    scriptSceneLocations,
 } from './schema';
 import type {
     ScriptAttachment,

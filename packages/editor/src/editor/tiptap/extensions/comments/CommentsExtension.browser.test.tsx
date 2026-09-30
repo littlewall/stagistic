@@ -3,14 +3,20 @@ import '@stagistic/ui/styles/base.css';
 import {COMMENT_ANCHOR_MARK_NAME, type ScriptDocument} from '@stagistic/script';
 import {createNodeId} from '@stagistic/script';
 import {
-    Editor, Extension, type Extensions,
+    Editor,
+    Extension,
+    type Extensions,
 } from '@tiptap/core';
 import History from '@tiptap/extension-history';
 import Text from '@tiptap/extension-text';
 import UniqueID from '@tiptap/extension-unique-id';
 import {Plugin} from '@tiptap/pm/state';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {CommentAnchorMark} from '../../marks';
@@ -29,8 +35,11 @@ const anchoredDoc = (): ScriptDocument => ({
             type: 'dialogue',
             attrs: {id: 'b1'},
             content: [
-                {type: 'text', text: 'Hello '}, {
-                    type: 'text', text: 'world', marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't1'}}],
+                {type: 'text', text: 'Hello '},
+                {
+                    type: 'text',
+                    text: 'world',
+                    marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't1'}}],
                 },
             ],
         },
@@ -51,7 +60,9 @@ const createCommentsTestEditor = (content: ScriptDocument = anchoredDoc(), extra
             CommentAnchorMark,
             ...ScriptBlockNodes,
             UniqueID.configure({
-                types: [...SCRIPT_BLOCK_NODE_NAMES], attributeName: 'id', generateID: () => createNodeId(),
+                types: [...SCRIPT_BLOCK_NODE_NAMES],
+                attributeName: 'id',
+                generateID: () => createNodeId(),
             }),
             ...extraExtensions,
         ],
@@ -136,7 +147,10 @@ const withComments = (content?: ScriptDocument, extraExtensions: Extensions = []
 
     editor.commands.setCommentThreads([
         {
-            id: 't1', status: 'open', anchorKind: 'range', anchorBlockId: null,
+            id: 't1',
+            status: 'open',
+            anchorKind: 'range',
+            anchorBlockId: null,
         },
     ]);
 
@@ -147,9 +161,14 @@ const twoBlocks = (): ScriptDocument => ({
     type: 'doc',
     content: [
         {
-            type: 'dialogue', attrs: {id: 'b1'}, content: [{type: 'text', text: 'One'}],
-        }, {
-            type: 'dialogue', attrs: {id: 'b2'}, content: [{type: 'text', text: 'Two'}],
+            type: 'dialogue',
+            attrs: {id: 'b1'},
+            content: [{type: 'text', text: 'One'}],
+        },
+        {
+            type: 'dialogue',
+            attrs: {id: 'b2'},
+            content: [{type: 'text', text: 'Two'}],
         },
     ],
 });
@@ -161,7 +180,10 @@ describe('CommentsExtension', () => {
         expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).not.toBeNull();
         editor.commands.setCommentThreads([
             {
-                id: 't1', status: 'resolved', anchorKind: 'range', anchorBlockId: null,
+                id: 't1',
+                status: 'resolved',
+                anchorKind: 'range',
+                anchorBlockId: null,
             },
         ]);
         expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).toBeNull();
@@ -180,14 +202,18 @@ describe('CommentsExtension', () => {
         editor.chain().setTextSelection({from: 1, to: 6}).startCommentDraft()
             .run();
         expect(getCommentsState(editor.state).draft).toMatchObject({
-            kind: 'range', blockId: 'b1', quotedText: 'Hello',
+            kind: 'range',
+            blockId: 'b1',
+            quotedText: 'Hello',
         });
         expect(callbacks.onRequestReveal).toHaveBeenCalledTimes(1);
 
         editor.commands.commitCommentDraft('t9');
         expect(getCommentsState(editor.state).draft).toBeNull();
         expect(getCommentsState(editor.state).anchors.get('t9')).toMatchObject({
-            kind: 'range', from: 1, to: 6,
+            kind: 'range',
+            from: 1,
+            to: 6,
         });
         expect(getCommentsState(editor.state).activeThreadId).toBe('t9');
 
@@ -201,7 +227,9 @@ describe('CommentsExtension', () => {
         editor.chain().setTextSelection(3).startCommentDraft()
             .run();
         expect(getCommentsState(editor.state).draft).toMatchObject({
-            kind: 'block', blockId: 'b1', quotedText: 'Hello world',
+            kind: 'block',
+            blockId: 'b1',
+            quotedText: 'Hello world',
         });
 
         editor.commands.commitCommentDraft('tb');
@@ -285,9 +313,16 @@ describe('CommentsExtension', () => {
 
         editor.commands.setCommentThreads([
             {
-                id: 't1', status: 'open', anchorKind: 'range', anchorBlockId: null,
-            }, {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 't1',
+                status: 'open',
+                anchorKind: 'range',
+                anchorBlockId: null,
+            },
+            {
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]);
         expect(tinted()).toEqual([]);
@@ -321,7 +356,10 @@ describe('CommentsExtension', () => {
 
         editor.commands.setCommentThreads([
             {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]);
         editor.chain().setTextSelection(4).splitBlock()
@@ -350,13 +388,22 @@ describe('CommentsExtension', () => {
 
         editor.commands.setCommentThreads([
             {
-                id: 't1', status: 'open', anchorKind: 'range', anchorBlockId: null,
+                id: 't1',
+                status: 'open',
+                anchorKind: 'range',
+                anchorBlockId: null,
             },
             {
-                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 'tb',
+                status: 'open',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
             {
-                id: 'tr', status: 'resolved', anchorKind: 'block', anchorBlockId: 'b1',
+                id: 'tr',
+                status: 'resolved',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
             },
         ]);
 

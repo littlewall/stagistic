@@ -12,7 +12,12 @@ export interface RemoveCharacterModalProps {
 }
 
 export const RemoveCharacterModal = ({
-    isOpen, characterKey, groupNames = [], isRemoving = false, onClose, onConfirm,
+    isOpen,
+    characterKey,
+    groupNames = [],
+    isRemoving = false,
+    onClose,
+    onConfirm,
 }: RemoveCharacterModalProps) => {
     const notes: ReactNode[] = ['Its lines and blocks stay in the script — nothing is removed from the screenplay.'];
 

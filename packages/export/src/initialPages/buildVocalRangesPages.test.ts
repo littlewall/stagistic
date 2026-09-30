@@ -1,6 +1,8 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {VocalRangesInitialPagePlan} from '../plan';
@@ -11,9 +13,18 @@ const plan: VocalRangesInitialPagePlan = {
     kind: 'vocal-ranges',
     entries: [
         {
-            id: 'a', displayName: 'Kylie', voiceType: 'soprano', low: 'A3', high: 'C6',
-        }, {
-            id: 'b', displayName: 'Whit', voiceType: null, low: 'C3', high: 'A4',
+            id: 'a',
+            displayName: 'Kylie',
+            voiceType: 'soprano',
+            low: 'A3',
+            high: 'C6',
+        },
+        {
+            id: 'b',
+            displayName: 'Whit',
+            voiceType: null,
+            low: 'C3',
+            high: 'A4',
         },
     ],
 };

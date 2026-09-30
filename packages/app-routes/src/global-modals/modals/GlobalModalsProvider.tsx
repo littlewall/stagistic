@@ -1,14 +1,26 @@
 import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
 import {
-    DeleteScriptModal, DuplicateScriptModal, ImportScriptModal, NewScriptModal, RenameScriptModal, useToastController,
+    DeleteScriptModal,
+    DuplicateScriptModal,
+    ImportScriptModal,
+    NewScriptModal,
+    RenameScriptModal,
+    useToastController,
 } from '@stagistic/ui';
 import {
-    createContext, type ReactNode, useCallback, useContext, useMemo,
+    createContext,
+    type ReactNode,
+    useCallback,
+    useContext,
+    useMemo,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {
-    type ScriptToDelete, type ScriptToDuplicate, type ScriptToRename, useGlobalModalActions,
+    type ScriptToDelete,
+    type ScriptToDuplicate,
+    type ScriptToRename,
+    useGlobalModalActions,
 } from './useGlobalModalActions';
 import {useNewScriptTransitionCompletion} from './useNewScriptTransitionCompletion';
 

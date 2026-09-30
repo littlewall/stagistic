@@ -1,6 +1,8 @@
 import {Extension} from '@tiptap/core';
 import {
-    type EditorState, Plugin, PluginKey,
+    type EditorState,
+    Plugin,
+    PluginKey,
 } from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 

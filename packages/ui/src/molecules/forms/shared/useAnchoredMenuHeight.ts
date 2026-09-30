@@ -1,5 +1,8 @@
 import {
-    type CSSProperties, type RefObject, useLayoutEffect, useState,
+    type CSSProperties,
+    type RefObject,
+    useLayoutEffect,
+    useState,
 } from 'react';
 
 import {type AnchoredMenuPlacement, resolveAnchoredMenuPlacement} from './anchoredMenuPlacement';

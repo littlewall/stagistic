@@ -1,5 +1,7 @@
 import {
-    useMemo, useRef, useState,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 interface ColorItem {

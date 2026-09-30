@@ -1,5 +1,9 @@
 import {
-    BaseDirectory, mkdir, readDir, remove, writeFile,
+    BaseDirectory,
+    mkdir,
+    readDir,
+    remove,
+    writeFile,
 } from '@tauri-apps/plugin-fs';
 
 import {dumpDataDir} from '~db';

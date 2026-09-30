@@ -3,7 +3,10 @@ import '../../../styles/tokens.css';
 import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 

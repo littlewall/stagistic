@@ -2,7 +2,10 @@ import {execFileSync} from 'node:child_process';
 import {existsSync, readFileSync} from 'node:fs';
 
 import {
-    beforeAll, describe, expect, it,
+    beforeAll,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 describe('web document metadata', () => {

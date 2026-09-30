@@ -1,6 +1,8 @@
 import {getEnterFallback} from '@stagistic/script';
 import {
-    type EditorState, Plugin, PluginKey,
+    type EditorState,
+    Plugin,
+    PluginKey,
 } from '@tiptap/pm/state';
 
 import type {BlockNextElementMap} from '../scriptBlock/handlers/types';

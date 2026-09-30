@@ -1,7 +1,9 @@
 import {useSortable} from '@dnd-kit/react/sortable';
 import clsx from 'clsx';
 import {
-    memo, useCallback, useRef,
+    memo,
+    useCallback,
+    useRef,
 } from 'react';
 
 import {ACT_DND_TYPE, SCENE_DND_TYPE} from './dnd';
@@ -9,7 +11,13 @@ import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowActContentProps, StructureRowActProps} from './types';
 
 const ActRowContent = memo(({
-    blockId, name, namePreview, onRename, onNamePreview, onNamePreviewClear, onDelete,
+    blockId,
+    name,
+    namePreview,
+    onRename,
+    onNamePreview,
+    onNamePreviewClear,
+    onDelete,
 }: StructureRowActContentProps) => {
     // Set by Escape so the following blur discards the draft instead of committing.
     const revertOnBlurRef = useRef(false);

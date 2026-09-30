@@ -1,5 +1,7 @@
 import type {
-    EditorSettingsOverride, ScriptDocument, TitlePageSettings,
+    EditorSettingsOverride,
+    ScriptDocument,
+    TitlePageSettings,
 } from '@stagistic/script';
 
 import type {ReactiveQuerySource} from './reactive';
@@ -24,7 +26,9 @@ import type {
 
 export type {ScriptPackageWrite} from './scriptPackageWrite';
 export type {
-    ScriptCharacterGenderOption, ScriptCharacterGroupRef, ScriptCharacterRef,
+    ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
+    ScriptCharacterRef,
 } from './types';
 
 export interface ListScriptsOptions {

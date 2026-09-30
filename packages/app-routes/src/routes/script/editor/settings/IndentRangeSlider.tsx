@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import type {
-    ChangeEvent, CSSProperties, ReactNode,
+    ChangeEvent,
+    CSSProperties,
+    ReactNode,
 } from 'react';
 
 import styles from './IndentRangeSlider.module.css';
@@ -37,7 +39,10 @@ const handleProps = (handle: IndentRangeHandle) => ({
 });
 
 export const IndentRangeSlider = ({
-    style, start, end, labels,
+    style,
+    start,
+    end,
+    labels,
 }: IndentRangeSliderProps) => (
     <>
         <div

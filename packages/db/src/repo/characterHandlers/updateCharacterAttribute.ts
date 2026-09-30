@@ -18,9 +18,13 @@ interface CharacterAttributeUpdate {
  */
 export const createCharacterAttributeUpdater =
     ({
-        getDb, recordOutbox, syncDb,
+        getDb,
+        recordOutbox,
+        syncDb,
     }: CharacterMutationDeps) => async (scriptId: string, characterId: string, {
-        opType, update, buildPayload,
+        opType,
+        update,
+        buildPayload,
     }: CharacterAttributeUpdate) => {
         if (!characterId) {
             return null;

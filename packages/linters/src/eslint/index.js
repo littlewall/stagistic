@@ -1,15 +1,10 @@
-/*
- * Formatting-only ESLint config, adapted from @dvdevcz/eslint
- * (https://github.com/digitalvisioncz/project-linters/tree/main/packages/eslint).
- * Correctness rules live in oxlint; this config carries only @stylistic and
- * import sorting, so it needs no type information and runs fast with --fix.
- */
 import stylistic from '@stylistic/eslint-plugin';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import {parser} from 'typescript-eslint';
 
 import jsxRules from './jsx.js';
 import lineBreakRules from './lineBreaks.js';
+import oneItemPerLine from './rules/oneItemPerLine.js';
 import spacingRules from './spacing.js';
 
 const config = [
@@ -33,6 +28,7 @@ const config = [
         plugins: {
             '@stylistic': stylistic,
             'simple-import-sort': simpleImportSort,
+            stagistic: {rules: {'one-item-per-line': oneItemPerLine}},
         },
         rules: {
             ...spacingRules,
@@ -45,7 +41,8 @@ const config = [
             '@stylistic/dot-location': ['error', 'property'],
             '@stylistic/indent': ['error', 4],
             '@stylistic/max-len': [
-                'error', {
+                'error',
+                {
                     code: 160,
                     ignoreComments: true,
                     ignoreStrings: true,
@@ -55,7 +52,8 @@ const config = [
             ],
             '@stylistic/max-statements-per-line': ['error', {max: 1}],
             '@stylistic/member-delimiter-style': [
-                'error', {
+                'error',
+                {
                     multiline: {
                         delimiter: 'comma',
                         requireLast: true,
@@ -82,7 +80,8 @@ const config = [
             '@stylistic/no-extra-semi': 'error',
             '@stylistic/no-floating-decimal': 'error',
             '@stylistic/no-mixed-operators': [
-                'error', {
+                'error',
+                {
                     groups: [
                         ['%', '**'],
                         ['%', '+'],
@@ -119,6 +118,8 @@ const config = [
             ],
             '@stylistic/semi-style': ['error', 'last'],
             '@stylistic/wrap-regex': 'error',
+
+            'stagistic/one-item-per-line': 'error',
 
             'simple-import-sort/imports': 'error',
             'simple-import-sort/exports': 'error',

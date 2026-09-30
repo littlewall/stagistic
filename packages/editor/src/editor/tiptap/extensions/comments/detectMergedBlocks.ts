@@ -15,7 +15,9 @@ const collectBlocks = (doc: ProseMirrorNode) => {
     doc.descendants((node, pos) => {
         if (node.isTextblock && typeof node.attrs.id === 'string') {
             blocks.push({
-                id: node.attrs.id, pos, size: node.content.size,
+                id: node.attrs.id,
+                pos,
+                size: node.content.size,
             });
 
             return false;

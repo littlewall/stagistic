@@ -9,7 +9,9 @@ export interface AttributeManagerSceneDetailProps {
 }
 
 export const AttributeManagerSceneDetail = ({
-    places, selectedPlaceIds, onChangePlaceIds,
+    places,
+    selectedPlaceIds,
+    onChangePlaceIds,
 }: AttributeManagerSceneDetailProps) => (
     <div className={styles.fields}>
         <MultiComboBox

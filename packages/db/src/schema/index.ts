@@ -1,10 +1,14 @@
 import {scriptBlockCharacterRefs, scriptBlocks} from './blocks';
 import {
-    scriptCharacterGenders, scriptCharacterGroupMembers, scriptCharacters,
+    scriptCharacterGenders,
+    scriptCharacterGroupMembers,
+    scriptCharacters,
 } from './characters';
 import {scriptCommentMessages, scriptCommentThreads} from './comments';
 import {
-    scriptAttachments, scriptMusic, scriptMusicAttachments,
+    scriptAttachments,
+    scriptMusic,
+    scriptMusicAttachments,
 } from './music';
 import {scripts, syncOutbox} from './scripts';
 import {
@@ -17,16 +21,23 @@ import {
     scriptSettingsVisualPreferences,
 } from './settings';
 import {
-    scriptActs, scriptLocations, scriptSceneLocations, scriptScenes,
+    scriptActs,
+    scriptLocations,
+    scriptSceneLocations,
+    scriptScenes,
 } from './structure';
 
 export {scriptBlockCharacterRefs, scriptBlocks} from './blocks';
 export {
-    scriptCharacterGenders, scriptCharacterGroupMembers, scriptCharacters,
+    scriptCharacterGenders,
+    scriptCharacterGroupMembers,
+    scriptCharacters,
 } from './characters';
 export {scriptCommentMessages, scriptCommentThreads} from './comments';
 export {
-    scriptAttachments, scriptMusic, scriptMusicAttachments,
+    scriptAttachments,
+    scriptMusic,
+    scriptMusicAttachments,
 } from './music';
 export {scripts, syncOutbox} from './scripts';
 export {
@@ -39,7 +50,10 @@ export {
     scriptSettingsVisualPreferences,
 } from './settings';
 export {
-    scriptActs, scriptLocations, scriptSceneLocations, scriptScenes,
+    scriptActs,
+    scriptLocations,
+    scriptSceneLocations,
+    scriptScenes,
 } from './structure';
 
 export const dbSchema = {

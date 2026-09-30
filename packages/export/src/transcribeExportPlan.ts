@@ -1,5 +1,9 @@
 import {
-    DEFAULT_SCENE_NUMBER_FORMAT, type EditorSettings, formatSceneNumber, getScriptBlockId, getScriptBlockNodeType,
+    DEFAULT_SCENE_NUMBER_FORMAT,
+    type EditorSettings,
+    formatSceneNumber,
+    getScriptBlockId,
+    getScriptBlockNodeType,
 } from '@stagistic/script';
 import {
     FIT_EPSILON_PX,
@@ -21,15 +25,23 @@ import {buildTitlePageLogoItem} from './titlePage/buildTitlePageLogoItem';
 import {getIntegratedFooter, withHeaderFooter} from './transcript/headerFooter';
 import {makeRun, resolveLineX} from './transcript/lineLayout';
 import {
-    CHAR_WIDTH_EM, DEFAULT_BLOCK_TYPE, PAGE_BREAK_ITEM, type PreparedBlock, type ScriptPage,
+    CHAR_WIDTH_EM,
+    DEFAULT_BLOCK_TYPE,
+    PAGE_BREAK_ITEM,
+    type PreparedBlock,
+    type ScriptPage,
 } from './transcript/model';
 import {buildStructureMarks} from './transcript/structureMarks';
 import {
-    buildMusicLabels, getBlockRawSegments, normalizeBlockSegments,
+    buildMusicLabels,
+    getBlockRawSegments,
+    normalizeBlockSegments,
 } from './transcript/textSegments';
 import {wrapSegments} from './transcript/wrapSegments';
 import type {
-    PageItem, TranscriptResult, VisualLine,
+    PageItem,
+    TranscriptResult,
+    VisualLine,
 } from './visualLine';
 
 export interface TranscribeOptions {

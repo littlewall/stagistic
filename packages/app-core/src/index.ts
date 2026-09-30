@@ -10,5 +10,7 @@ export * from './scripts';
 export * from './stepkg';
 export * from './title-page';
 export type {
-    ScriptEditorSettingsRecord, ScriptRepository, ScriptTitlePageRecord,
+    ScriptEditorSettingsRecord,
+    ScriptRepository,
+    ScriptTitlePageRecord,
 } from '@stagistic/db';

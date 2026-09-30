@@ -1,11 +1,16 @@
 import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
 import {
-    type EditorSettings, type EditorSettingsOverride, type TitlePageSettings,
+    type EditorSettings,
+    type EditorSettingsOverride,
+    type TitlePageSettings,
 } from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {ScriptSettingsModal, useKeyedFieldDrafts} from '@stagistic/ui';
 import {
-    createContext, type ReactNode, useContext, useMemo,
+    createContext,
+    type ReactNode,
+    useContext,
+    useMemo,
 } from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
@@ -66,7 +71,12 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {deleteScript, renameScriptTitle} = useScriptActions();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
-        currentScript, currentScriptId, characterCatalog, musicCatalog, initialValue, handleAutoSave,
+        currentScript,
+        currentScriptId,
+        characterCatalog,
+        musicCatalog,
+        initialValue,
+        handleAutoSave,
     } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
@@ -86,13 +96,21 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         repository: scriptRepository,
     });
     const {
-        titlePageDraft, isTitlePageHydrated, updateTitlePage, titlePageDraftError, retryTitlePage,
+        titlePageDraft,
+        isTitlePageHydrated,
+        updateTitlePage,
+        titlePageDraftError,
+        retryTitlePage,
     } = useTitlePageDraft({
         currentScriptId,
         repository: scriptRepository,
     });
     const {
-        scriptTitleDraft, isScriptTitleHydrated, updateScriptTitle, scriptTitleDraftError, retryScriptTitle,
+        scriptTitleDraft,
+        isScriptTitleHydrated,
+        updateScriptTitle,
+        scriptTitleDraftError,
+        retryScriptTitle,
     } = useScriptTitleDraft({
         currentScriptId,
         currentScriptTitle: currentScript?.name ?? '',
@@ -146,7 +164,9 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const musicState = useScriptMusicState(currentScriptId, musicCatalog);
     const {
-        getValue: getMusicTitleDraft, persistValue: persistMusicTitleDraft, setValue: setMusicTitleDraft,
+        getValue: getMusicTitleDraft,
+        persistValue: persistMusicTitleDraft,
+        setValue: setMusicTitleDraft,
     } = useKeyedFieldDrafts<string>(currentScriptId);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
     const musicAttachmentsState = useMusicAttachmentsState(currentScriptId, scriptRepository);

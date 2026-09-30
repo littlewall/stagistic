@@ -3,7 +3,9 @@ import type {PersistedDraftEntity, PersistedDraftSnapshot} from './persistedDraf
 export type DraftEntityReconciliation<TValue> =
     /** Another entity was loaded: start a new save generation, then emit. */
     {type: 'switch', snapshot: PersistedDraftSnapshot<TValue>} | {
-        type: 'emit', snapshot: PersistedDraftSnapshot<TValue>, cancelSave: boolean,
+        type: 'emit',
+        snapshot: PersistedDraftSnapshot<TValue>,
+        cancelSave: boolean,
     } | {type: 'none'};
 
 interface ReconcileDraftEntityArgs<TKey, TValue> {
@@ -52,7 +54,9 @@ export const reconcileDraftEntity = <TKey, TValue>({
         return previous.isHydrated ? {type: 'none'} : {
             type: 'emit',
             snapshot: {
-                ...snapshot, status: 'loading', isHydrated: false,
+                ...snapshot,
+                status: 'loading',
+                isHydrated: false,
             },
             cancelSave: false,
         };
@@ -60,7 +64,9 @@ export const reconcileDraftEntity = <TKey, TValue>({
 
     if (!previous.isHydrated) {
         return {
-            type: 'emit', snapshot: settled(confirmedValue), cancelSave: false,
+            type: 'emit',
+            snapshot: settled(confirmedValue),
+            cancelSave: false,
         };
     }
 
@@ -69,7 +75,10 @@ export const reconcileDraftEntity = <TKey, TValue>({
             ? {
                 type: 'emit',
                 snapshot: {
-                    ...snapshot, status: 'saved', isDirty: false, error: null,
+                    ...snapshot,
+                    status: 'saved',
+                    isDirty: false,
+                    error: null,
                 },
                 cancelSave: true,
             }
@@ -82,6 +91,8 @@ export const reconcileDraftEntity = <TKey, TValue>({
     }
 
     return {
-        type: 'emit', snapshot: settled(confirmedValue), cancelSave: false,
+        type: 'emit',
+        snapshot: settled(confirmedValue),
+        cancelSave: false,
     };
 };

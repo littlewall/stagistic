@@ -150,7 +150,9 @@ describe('theme mode toggle', () => {
      */
     it('marks the active mode without a third border', async () => {
         const {
-            track, system, light,
+            track,
+            system,
+            light,
         } = await openThemeControls();
 
         await settle();

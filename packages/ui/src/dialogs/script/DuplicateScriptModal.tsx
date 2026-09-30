@@ -1,5 +1,10 @@
 import {
-    type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState,
+    type ChangeEvent,
+    type FormEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -25,7 +30,11 @@ export interface DuplicateScriptModalProps {
 }
 
 export const DuplicateScriptModal = ({
-    isOpen, initialTitle, isPending = false, onClose, onSubmit,
+    isOpen,
+    initialTitle,
+    isPending = false,
+    onClose,
+    onSubmit,
 }: DuplicateScriptModalProps) => {
     const titleInputRef = useRef<HTMLInputElement | null>(null);
     const [title, setTitle] = useState(initialTitle);

@@ -14,10 +14,14 @@ import {
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
 import {
-    insertActionBefore, setBlockTypeWithSelection, splitBlockWithType,
+    insertActionBefore,
+    setBlockTypeWithSelection,
+    splitBlockWithType,
 } from '../commands';
 import {
-    type BlockContext, createBlockContext, isEmptyDialogueLikeBlock,
+    type BlockContext,
+    createBlockContext,
+    isEmptyDialogueLikeBlock,
 } from '../context';
 import {resolveAsideFlowTarget} from './tab';
 import {type BlockNextElementMap, type HandlerMap} from './types';
@@ -174,7 +178,10 @@ export const handleEnter = (editor: Editor, event: KeyboardEvent, blockNextEleme
 
         const chooserCommands = editor.commands as {
             openEmptyEnterChooser?: (payload: {
-                blockId: string, blockPos: number, blockType: BlockNodeType, selectedType?: BlockNodeType,
+                blockId: string,
+                blockPos: number,
+                blockType: BlockNodeType,
+                selectedType?: BlockNodeType,
             }) => boolean,
         };
 

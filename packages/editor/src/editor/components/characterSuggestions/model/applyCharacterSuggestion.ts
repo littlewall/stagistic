@@ -22,7 +22,9 @@ export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: strin
     }
 
     const {
-        tokens, activeTokenIndex, activeToken,
+        tokens,
+        activeTokenIndex,
+        activeToken,
     } = tokenResult;
 
     const {suffix} = splitBaseAndSuffix(activeToken.value);

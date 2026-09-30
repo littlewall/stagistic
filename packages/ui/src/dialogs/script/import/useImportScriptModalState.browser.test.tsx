@@ -1,6 +1,10 @@
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import type {StepkgPeekResult} from './types';
@@ -66,7 +70,10 @@ describe('useImportScriptModalState', () => {
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup: () => Promise.resolve(),
             onPeekStepkg: () => Promise.resolve({
-                ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null,
+                ok: true,
+                scriptId: 's',
+                packageTitle: 'T',
+                existingLocalTitle: null,
             } satisfies StepkgPeekResult),
         });
 
@@ -86,7 +93,10 @@ describe('useImportScriptModalState', () => {
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup: () => Promise.resolve(),
             onPeekStepkg: () => Promise.resolve({
-                ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null,
+                ok: true,
+                scriptId: 's',
+                packageTitle: 'T',
+                existingLocalTitle: null,
             } satisfies StepkgPeekResult),
         });
 
@@ -101,7 +111,10 @@ describe('useImportScriptModalState', () => {
 
     it('peeks a .stepkg selection and shows only the name field when there is no collision', async () => {
         const onPeekStepkg = vi.fn(() => Promise.resolve({
-            ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: null,
+            ok: true,
+            scriptId: 'script-1',
+            packageTitle: 'My Play',
+            existingLocalTitle: null,
         } satisfies StepkgPeekResult));
         const getApi = mount({
             isOpen: true,
@@ -125,7 +138,10 @@ describe('useImportScriptModalState', () => {
 
     it('reveals the New/Replace choice on collision, and the replace panel when Replace is selected', async () => {
         const onPeekStepkg = () => Promise.resolve({
-            ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+            ok: true,
+            scriptId: 'script-1',
+            packageTitle: 'My Play',
+            existingLocalTitle: 'Local Copy',
         } satisfies StepkgPeekResult);
         const getApi = mount({
             isOpen: true,
@@ -180,7 +196,10 @@ describe('useImportScriptModalState', () => {
             onReplaceWithStepkg,
             onDownloadStepkgBackup: () => Promise.resolve(),
             onPeekStepkg: () => Promise.resolve({
-                ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+                ok: true,
+                scriptId: 'script-1',
+                packageTitle: 'My Play',
+                existingLocalTitle: 'Local Copy',
             } satisfies StepkgPeekResult),
         });
 
@@ -205,7 +224,10 @@ describe('useImportScriptModalState', () => {
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup,
             onPeekStepkg: () => Promise.resolve({
-                ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+                ok: true,
+                scriptId: 'script-1',
+                packageTitle: 'My Play',
+                existingLocalTitle: 'Local Copy',
             } satisfies StepkgPeekResult),
         });
 

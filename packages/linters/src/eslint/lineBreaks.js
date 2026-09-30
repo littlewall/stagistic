@@ -1,11 +1,15 @@
 const lineBreaks = {
     '@stylistic/array-bracket-newline': [
-        'error', {
+        'error',
+        {
             multiline: true,
         },
     ],
     '@stylistic/array-element-newline': [
-        'error', {
+        'error',
+        {
+            consistent: true,
+            multiline: true,
             minItems: 3,
         },
     ],
@@ -17,7 +21,8 @@ const lineBreaks = {
     '@stylistic/multiline-comment-style': ['error', 'starred-block'],
     '@stylistic/newline-per-chained-call': ['error', {ignoreChainWithDepth: 3}],
     '@stylistic/object-curly-newline': [
-        'error', {
+        'error',
+        {
             consistent: true,
             minProperties: 3,
         },

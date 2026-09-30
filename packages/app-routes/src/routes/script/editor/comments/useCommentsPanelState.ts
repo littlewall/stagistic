@@ -1,7 +1,9 @@
 import {useMemo, useState} from 'react';
 
 import {
-    type CommentFilter, type CommentsViewMode, DEFAULT_COMMENT_FILTER,
+    type CommentFilter,
+    type CommentsViewMode,
+    DEFAULT_COMMENT_FILTER,
 } from './types';
 
 /*

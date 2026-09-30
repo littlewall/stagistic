@@ -10,7 +10,9 @@ type SectionProps = {
 };
 
 export const Section = ({
-    children, variant = 'default', className,
+    children,
+    variant = 'default',
+    className,
 }: SectionProps) => {
     return (
         <section

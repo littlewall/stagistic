@@ -118,14 +118,20 @@ const createRepository = (initialGroups: ScriptCharacterGroupRef[]) => {
     } as unknown as ScriptRepository;
 
     return {
-        repository, characters, groups, actions,
+        repository,
+        characters,
+        groups,
+        actions,
     };
 };
 
 describe('script character groups store concurrency', () => {
     it('allows only one overlapping create for the same normalized key', async () => {
         const {
-            repository, characters, groups, actions,
+            repository,
+            characters,
+            groups,
+            actions,
         } = createRepository([]);
         const blocked = blockReads(characters);
         const store = createScriptCharacterGroupsStore(repository, 'script-1');
@@ -149,7 +155,10 @@ describe('script character groups store concurrency', () => {
     it('allows only one overlapping rename to the same normalized key', async () => {
         const initial = [group('group-1', 'ENSEMBLE'), group('group-2', 'CHORUS')];
         const {
-            repository, characters, groups, actions,
+            repository,
+            characters,
+            groups,
+            actions,
         } = createRepository(initial);
         const blocked = blockReads(characters);
         const store = createScriptCharacterGroupsStore(repository, 'script-1');

@@ -1,5 +1,10 @@
 import {
-    type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState,
+    type ChangeEvent,
+    type FormEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -23,7 +28,12 @@ export interface RenameScriptModalProps {
 }
 
 export const RenameScriptModal = ({
-    isOpen, initialTitle, initialSubtitle, isPending = false, onClose, onSubmit,
+    isOpen,
+    initialTitle,
+    initialSubtitle,
+    isPending = false,
+    onClose,
+    onSubmit,
 }: RenameScriptModalProps) => {
     const titleInputRef = useRef<HTMLInputElement | null>(null);
     const [title, setTitle] = useState(initialTitle);

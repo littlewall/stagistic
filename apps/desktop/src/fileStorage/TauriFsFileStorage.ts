@@ -1,7 +1,12 @@
 import type {FileStorage} from '@stagistic/db';
 import {uuidv7} from '@stagistic/shared';
 import {
-    BaseDirectory, exists, mkdir, readFile, remove, writeFile,
+    BaseDirectory,
+    exists,
+    mkdir,
+    readFile,
+    remove,
+    writeFile,
 } from '@tauri-apps/plugin-fs';
 
 const ATTACHMENTS_DIR = 'attachments';

@@ -1,5 +1,7 @@
 import {
-    bigint, pgTable, text,
+    bigint,
+    pgTable,
+    text,
 } from 'drizzle-orm/pg-core';
 
 export const scripts = pgTable('scripts', {

@@ -63,7 +63,12 @@ const formatSize = (bytes: number): string => {
 };
 
 const MusicMetadataFields = ({
-    musicId, musicTitle, confirmedMusicTitle, musicKind, onUpdateMusic, onMusicTitleChange,
+    musicId,
+    musicTitle,
+    confirmedMusicTitle,
+    musicKind,
+    onUpdateMusic,
+    onMusicTitleChange,
 }: MusicMetadataFieldsProps) => {
     const persistTitle = () => {
         const title = musicTitle.trim();
@@ -143,7 +148,10 @@ const MusicMetadataFields = ({
 };
 
 const AttachmentSlot = ({
-    slot, onUploadPdf, onPreview, onRemove,
+    slot,
+    onUploadPdf,
+    onPreview,
+    onRemove,
 }: AttachmentSlotProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const {attachment} = slot;

@@ -21,7 +21,10 @@ describe('createPlaywrightActsAndScenesDriver', () => {
                 events.push(['secondActBox']);
 
                 return Promise.resolve({
-                    x: 80, y: 40, width: 40, height: 20,
+                    x: 80,
+                    y: 40,
+                    width: 40,
+                    height: 20,
                 });
             },
         };
@@ -70,7 +73,10 @@ describe('createPlaywrightActsAndScenesDriver', () => {
                             events.push(['firstSceneBox']);
 
                             return Promise.resolve({
-                                x: 10, y: 10, width: 20, height: 10,
+                                x: 10,
+                                y: 10,
+                                width: 20,
+                                height: 10,
                             });
                         },
                     }),

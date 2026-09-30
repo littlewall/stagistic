@@ -1,10 +1,14 @@
 import {
-    type ReactNode, useCallback, useMemo,
+    type ReactNode,
+    useCallback,
+    useMemo,
 } from 'react';
 
 import {SidebarPanelSelect} from './SidebarPanelSelect';
 import type {
-    SidebarPanel, SidebarPanelId, SidebarToggle,
+    SidebarPanel,
+    SidebarPanelId,
+    SidebarToggle,
 } from './types';
 import {useSidebarLayout} from './useSidebarLayout';
 
@@ -26,7 +30,10 @@ interface UseEditorSidebarsResult {
 }
 
 export const useEditorSidebars = ({
-    panels, defaultLeftPanelId, defaultRightPanelId, storageScope,
+    panels,
+    defaultLeftPanelId,
+    defaultRightPanelId,
+    storageScope,
 }: UseEditorSidebarsArgs): UseEditorSidebarsResult => {
     const availablePanelIds = useMemo(() => panels.map(panel => panel.id), [panels]);
     const resolvedDefaultLeft = defaultLeftPanelId ?? panels[0]?.id ?? '';
@@ -71,7 +78,13 @@ export const useEditorSidebars = ({
     );
 
     const {
-        leftPanelId, rightPanelId, isLeftOpen, isRightOpen, toggleLeft, toggleRight, selectRight,
+        leftPanelId,
+        rightPanelId,
+        isLeftOpen,
+        isRightOpen,
+        toggleLeft,
+        toggleRight,
+        selectRight,
     } = layout;
     const revealPanel = useCallback(
         (panelId: SidebarPanelId, options?: {side: 'right'}) => {

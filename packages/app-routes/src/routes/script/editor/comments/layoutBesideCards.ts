@@ -29,7 +29,10 @@ interface LayoutBesideCardsArgs {
 type PendingEntry = Omit<BesideCardEntry, 'top'> & {desired: number, order: number};
 
 const toEntries = ({
-    cards, activeThreadId, expandedBlockId, collapsedHeight,
+    cards,
+    activeThreadId,
+    expandedBlockId,
+    collapsedHeight,
 }: LayoutBesideCardsArgs) => {
     const groups = new Map<string, BesideCardInput[]>();
     const entries: PendingEntry[] = [];
@@ -72,7 +75,9 @@ const toEntries = ({
  */
 export const layoutBesideCards = (args: LayoutBesideCardsArgs): BesideCardEntry[] => {
     const {
-        activeThreadId, gap, groupGap = gap,
+        activeThreadId,
+        gap,
+        groupGap = gap,
     } = args;
     const entries = toEntries(args);
     const cardsPerBlock = new Map<string, number>();
@@ -100,6 +105,8 @@ export const layoutBesideCards = (args: LayoutBesideCardsArgs): BesideCardEntry[
     }
 
     return entries.map(({
-        desired: _desired, order: _order, ...entry
+        desired: _desired,
+        order: _order,
+        ...entry
     }, index) => ({...entry, top: tops[index]}));
 };

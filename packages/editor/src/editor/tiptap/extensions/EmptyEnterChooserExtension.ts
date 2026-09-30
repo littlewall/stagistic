@@ -3,7 +3,9 @@ import {Extension} from '@tiptap/core';
 import {splitBlockWithType, updateBlockType} from '../scriptBlock/commands';
 import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
-    type BlockNodeType, getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../scriptCore';
 import {
     CLOSE_META_KEY,
@@ -20,14 +22,19 @@ const PREVENT_DISPATCH_META_KEY = 'preventDispatch';
 
 export type {EmptyEnterChooserState} from './emptyEnterChooserState';
 export {
-    EMPTY_ENTER_CHOOSER_WRITER_TYPES, getEmptyEnterChooserFromState, isEmptyEnterChooserWriterType,
+    EMPTY_ENTER_CHOOSER_WRITER_TYPES,
+    getEmptyEnterChooserFromState,
+    isEmptyEnterChooserWriterType,
 } from './emptyEnterChooserState';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         emptyEnterChooser: {
             openEmptyEnterChooser: (payload: {
-                blockId: string, blockPos: number, blockType: BlockNodeType, selectedType?: BlockNodeType,
+                blockId: string,
+                blockPos: number,
+                blockType: BlockNodeType,
+                selectedType?: BlockNodeType,
             }) => ReturnType,
             closeEmptyEnterChooser: () => ReturnType,
             selectEmptyEnterChooserType: (type: BlockNodeType) => ReturnType,

@@ -1,13 +1,21 @@
 import {useRef} from 'react';
 import {
-    Button, FileTrigger, useDrop,
+    Button,
+    FileTrigger,
+    useDrop,
 } from 'react-aria-components';
 
 import styles from '../ImportScriptModal.module.css';
 import type {ImportDropZoneProps} from './types';
 
 export const ImportDropZone = ({
-    fileLabel, hint, isFileSelected = false, acceptedExtensions, onDrop, onFileSelect, onPickFile,
+    fileLabel,
+    hint,
+    isFileSelected = false,
+    acceptedExtensions,
+    onDrop,
+    onFileSelect,
+    onPickFile,
 }: ImportDropZoneProps) => {
     const dropZoneRef = useRef<HTMLDivElement | null>(null);
     const {dropProps, isDropTarget} = useDrop({

@@ -3,7 +3,9 @@ export {useEditorActCommands} from './editor/actCommands/context';
 export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
 export {getCharacterColor, getCharacterColorVarName} from './editor/characters/characterColors';
 export {
-    getConfirmedCharacterColor, getUnconfirmedCharacterColor, normalizePersistentCharacterRefs,
+    getConfirmedCharacterColor,
+    getUnconfirmedCharacterColor,
+    normalizePersistentCharacterRefs,
 } from './editor/characters/colorResolver';
 export {COMMENT_DRAFT_ANCHOR_KEY, useCommentAnchorTops} from './editor/comments/useCommentAnchorTops';
 export {type EditorCommentsApi, useEditorComments} from './editor/comments/useEditorComments';

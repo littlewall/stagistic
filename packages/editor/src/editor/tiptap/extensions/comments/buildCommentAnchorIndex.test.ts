@@ -1,12 +1,17 @@
 import {Schema} from '@tiptap/pm/model';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {buildCommentAnchorIndex} from './buildCommentAnchorIndex';
 
 const block = {
-    group: 'block', content: 'inline*', attrs: {id: {default: null}, blockType: {default: 'dialogue'}}, toDOM: () => ['p', 0] as const,
+    group: 'block',
+    content: 'inline*',
+    attrs: {id: {default: null}, blockType: {default: 'dialogue'}},
+    toDOM: () => ['p', 0] as const,
 };
 const schema = new Schema({
     nodes: {
@@ -16,7 +21,9 @@ const schema = new Schema({
         scene: {...block, attrs: {id: {default: null}, blockType: {default: 'scene'}}},
     },
     marks: {commentAnchor: {
-        attrs: {threadId: {default: ''}}, inclusive: false, excludes: '',
+        attrs: {threadId: {default: ''}},
+        inclusive: false,
+        excludes: '',
     }},
 });
 const anchor = (threadId: string) => schema.marks.commentAnchor.create({threadId});
@@ -32,7 +39,11 @@ describe('buildCommentAnchorIndex', () => {
         const t1 = index.get('t1');
 
         expect(t1).toMatchObject({
-            kind: 'range', blockId: 'b1', blockIndex: 1, sceneBlockId: 's1', sceneTitle: 'INT. ROOM',
+            kind: 'range',
+            blockId: 'b1',
+            blockIndex: 1,
+            sceneBlockId: 's1',
+            sceneTitle: 'INT. ROOM',
         });
         expect(doc.textBetween(t1!.from, t1!.to, '|')).toBe('world|Bye');
         expect(index.get('t2')).toMatchObject({blockId: 'b2', blockIndex: 2});
@@ -41,19 +52,30 @@ describe('buildCommentAnchorIndex', () => {
     it('locates block anchors by block id and skips missing blocks', () => {
         const threads = new Map([
             [
-                't3', {
-                    id: 't3', status: 'open' as const, anchorKind: 'block' as const, anchorBlockId: 'b2',
+                't3',
+                {
+                    id: 't3',
+                    status: 'open' as const,
+                    anchorKind: 'block' as const,
+                    anchorBlockId: 'b2',
                 },
-            ], [
-                't4', {
-                    id: 't4', status: 'open' as const, anchorKind: 'block' as const, anchorBlockId: 'gone',
+            ],
+            [
+                't4',
+                {
+                    id: 't4',
+                    status: 'open' as const,
+                    anchorKind: 'block' as const,
+                    anchorBlockId: 'gone',
                 },
             ],
         ]);
         const index = buildCommentAnchorIndex(doc, threads);
 
         expect(index.get('t3')).toMatchObject({
-            kind: 'block', blockId: 'b2', blockIndex: 2,
+            kind: 'block',
+            blockId: 'b2',
+            blockIndex: 2,
         });
         expect(doc.textBetween(index.get('t3')!.from, index.get('t3')!.to)).toBe('Bye');
         expect(index.has('t4')).toBe(false);
@@ -65,8 +87,12 @@ describe('buildCommentAnchorIndex', () => {
             duplicated,
             new Map([
                 [
-                    't5', {
-                        id: 't5', status: 'open' as const, anchorKind: 'block' as const, anchorBlockId: 'b1',
+                    't5',
+                    {
+                        id: 't5',
+                        status: 'open' as const,
+                        anchorKind: 'block' as const,
+                        anchorBlockId: 'b1',
                     },
                 ],
             ]),

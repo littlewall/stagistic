@@ -1,9 +1,15 @@
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {
-    APP_THEME_STORAGE_KEY, applyAppThemeMode, readStoredAppThemeMode,
+    APP_THEME_STORAGE_KEY,
+    applyAppThemeMode,
+    readStoredAppThemeMode,
 } from './theme';
 
 const createLocalStorage = () => {
@@ -69,7 +75,9 @@ describe('theme swap cross-fade', () => {
         } = {},
     ): Environment => {
         const {
-            documentTheme, reducedMotion = false, viewTransitions = true,
+            documentTheme,
+            reducedMotion = false,
+            viewTransitions = true,
         } = options;
         const documentElement = createDocumentElement(documentTheme ? {'data-theme': documentTheme} : {});
         /* Runs the callback straight away, the way the browser does — one frame later. */

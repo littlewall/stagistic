@@ -2,7 +2,10 @@ import '../../styles/base.css';
 
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {IconButton} from '../atoms/IconButton/IconButton';
@@ -96,7 +99,8 @@ describe('selection is carried by fill alone', () => {
                     {
                         value: 'left',
                         label: 'Left',
-                    }, {
+                    },
+                    {
                         value: 'center',
                         label: 'Center',
                     },

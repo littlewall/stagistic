@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {buildStepkgEntries} from './buildEntries';
@@ -7,13 +9,19 @@ import type {StepkgSnapshot} from './contracts';
 
 const snapshot: StepkgSnapshot = {
     script: {
-        id: 'script-1', title: 'Test', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z',
+        id: 'script-1',
+        title: 'Test',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
     },
     document: {type: 'doc', content: []},
     titlePage: {},
     settings: {},
     characters: {
-        characters: [], groups: [], genderOptions: [],
+        characters: [],
+        groups: [],
+        genderOptions: [],
     },
     music: {items: []},
     scenes: {scenes: [], locations: []},
@@ -53,12 +61,17 @@ describe('buildStepkgEntries', () => {
     it('aggregates missing assets and serializer failures', async () => {
         const missing = await buildStepkgEntries({
             ...baseArgs(),
-            snapshot: {...snapshot,
+            snapshot: {
+                ...snapshot,
                 attachments: [
-                    snapshot.attachments[0], {
-                        ...snapshot.attachments[0], id: 'att-2', contentKey: 'blob-2',
+                    snapshot.attachments[0],
+                    {
+                        ...snapshot.attachments[0],
+                        id: 'att-2',
+                        contentKey: 'blob-2',
                     },
-                ]},
+                ],
+            },
             loadAsset: () => Promise.resolve(null),
         });
 

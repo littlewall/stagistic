@@ -1,6 +1,10 @@
 import clsx from 'clsx';
 import {
-    type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement, type ReactNode,
+    type ComponentPropsWithoutRef,
+    createElement,
+    type ElementType,
+    type ReactElement,
+    type ReactNode,
 } from 'react';
 
 import styles from './ActionCard.module.css';

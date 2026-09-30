@@ -1,5 +1,10 @@
 import {
-    type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState,
+    type ChangeEvent,
+    type FormEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -16,7 +21,8 @@ const SCRIPT_SHAPE_OPTIONS: RadioChoiceOption<NewScriptShape>[] = [
         value: 'multi-act',
         label: 'Multi-act',
         description: 'Starts with Act One and a scene.',
-    }, {
+    },
+    {
         value: 'one-act',
         label: 'One-act',
         description: 'Starts with a scene only.',
@@ -24,7 +30,10 @@ const SCRIPT_SHAPE_OPTIONS: RadioChoiceOption<NewScriptShape>[] = [
 ];
 
 export const NewScriptModal = ({
-    isOpen, isTransitioning = false, onClose, onCreate,
+    isOpen,
+    isTransitioning = false,
+    onClose,
+    onCreate,
 }: NewScriptModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');

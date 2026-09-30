@@ -2,7 +2,10 @@ import clsx from 'clsx';
 import type {ReactNode} from 'react';
 import type {Key} from 'react-aria-components';
 import {
-    Menu, MenuItem, Popover, type PopoverProps,
+    Menu,
+    MenuItem,
+    Popover,
+    type PopoverProps,
 } from 'react-aria-components';
 
 import styles from './DropdownMenu.module.css';
@@ -23,7 +26,10 @@ export interface DropdownMenuProps {
 }
 
 export const DropdownMenu = ({
-    'aria-label': ariaLabel, items, onAction, placement = 'bottom end',
+    'aria-label': ariaLabel,
+    items,
+    onAction,
+    placement = 'bottom end',
 }: DropdownMenuProps) => (
     <Popover
         className={styles.popover}

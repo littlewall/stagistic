@@ -1,5 +1,7 @@
 import {
-    buildScriptBlockIndex, type ScriptDocument, type ScriptNode,
+    buildScriptBlockIndex,
+    type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {MutableRefObject} from 'react';
@@ -24,12 +26,19 @@ export interface CommitContext {
 
 export {buildDeleteActContent, buildInsertActContent} from './actBlockMutations';
 export {
-    buildConvertSceneHeadingContent, buildDeleteSceneHeadingContent, setPlainTextContent,
+    buildConvertSceneHeadingContent,
+    buildDeleteSceneHeadingContent,
+    setPlainTextContent,
 } from './blockMutations';
 
 const commitDocument = (
     {
-        editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+        editor,
+        setLatestValue,
+        onValueChangeRef,
+        onIndexChangeRef,
+        scheduleAutosave,
+        revisionRef,
     }: CommitContext,
     nextContent: ScriptNode[],
     currentDocAttrs: ScriptDocument['attrs'],
@@ -79,7 +88,12 @@ export const tryCommitSceneReorder = (
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
     const {
-        editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+        editor,
+        setLatestValue,
+        onValueChangeRef,
+        onIndexChangeRef,
+        scheduleAutosave,
+        revisionRef,
     } = ctx;
 
     if (!didChange || !Array.isArray(nextContent)) {

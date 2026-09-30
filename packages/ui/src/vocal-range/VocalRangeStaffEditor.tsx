@@ -15,7 +15,10 @@ interface RangeHeaderProps {
 }
 
 export const VocalRangeHeader = ({
-    low, high, selectedNote, onSelect,
+    low,
+    high,
+    selectedNote,
+    onSelect,
 }: RangeHeaderProps) => (
     <div className={styles.rangeHeader}>
         {(
@@ -57,7 +60,12 @@ interface NoteControlsProps {
 }
 
 export const VocalRangeNoteControls = ({
-    which, pitch, canAdjustOctave, canToggleAccidental, onAdjustOctave, onToggleAccidental,
+    which,
+    pitch,
+    canAdjustOctave,
+    canToggleAccidental,
+    onAdjustOctave,
+    onToggleAccidental,
 }: NoteControlsProps) => (
     <footer
         className={styles.noteControls}

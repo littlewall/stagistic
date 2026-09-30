@@ -7,7 +7,14 @@ import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowSceneProps} from './types';
 
 export const StructureRowScene = memo(({
-    blockId, title, sceneNumber, index, groupId, isActive, startPage, onFocus,
+    blockId,
+    title,
+    sceneNumber,
+    index,
+    groupId,
+    isActive,
+    startPage,
+    onFocus,
 }: StructureRowSceneProps) => {
     const {ref, handleRef} = useSortable({
         id: blockId,

@@ -116,7 +116,9 @@ const createRepository = () => {
     const repository = repositoryAdapter as unknown as ScriptRepository;
 
     return {
-        createInputs, repository, source,
+        createInputs,
+        repository,
+        source,
     };
 };
 

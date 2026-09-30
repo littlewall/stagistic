@@ -1,10 +1,14 @@
 import type {ScriptNode} from '@stagistic/script';
 
 import type {
-    StepkgAttachmentSnapshot, StepkgExportIssue, StepkgSnapshot,
+    StepkgAttachmentSnapshot,
+    StepkgExportIssue,
+    StepkgSnapshot,
 } from './contracts';
 import {
-    getStepkgAssetPath, isSafeStepkgAttachmentId, isSafeStepkgPath,
+    getStepkgAssetPath,
+    isSafeStepkgAttachmentId,
+    isSafeStepkgPath,
 } from './paths';
 
 type EntityType = NonNullable<StepkgExportIssue['entity']>['type'];

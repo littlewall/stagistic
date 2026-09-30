@@ -17,7 +17,9 @@ export interface ImportScriptModalProps {
     onClose: () => void,
     onImportStagistic: (payload: ImportPayload) => void | Promise<void>,
     onImportStepkgAsNew: (payload: {
-        fileName: string, bytes: Uint8Array, title: string,
+        fileName: string,
+        bytes: Uint8Array,
+        title: string,
     }) => void | Promise<void>,
     onReplaceWithStepkg: (payload: {fileName: string, bytes: Uint8Array}) => void | Promise<void>,
     onDownloadStepkgBackup: (scriptId: string) => void | Promise<void>,

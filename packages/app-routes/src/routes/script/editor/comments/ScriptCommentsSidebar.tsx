@@ -1,12 +1,22 @@
 import type {
-    ScriptCommentMessage, ScriptCommentsState, ScriptCommentThread,
+    ScriptCommentMessage,
+    ScriptCommentsState,
+    ScriptCommentThread,
 } from '@stagistic/app-core';
 import {type CommentAnchorLocation, useEditorComments} from '@stagistic/editor';
 import {
-    IconPopover, SearchOptionsIcon, Select, SidebarMiniHeader, ToggleButtonGroup, useToastController,
+    IconPopover,
+    SearchOptionsIcon,
+    Select,
+    SidebarMiniHeader,
+    ToggleButtonGroup,
+    useToastController,
 } from '@stagistic/ui';
 import {
-    type ReactNode, useEffect, useMemo, useRef,
+    type ReactNode,
+    useEffect,
+    useMemo,
+    useRef,
 } from 'react';
 
 import {CommentsBesideView} from './CommentsBesideView';
@@ -44,12 +54,21 @@ interface ScriptCommentsSidebarProps {
 }
 
 export const ScriptCommentsSidebar = ({
-    header, comments, panelState,
+    header,
+    comments,
+    panelState,
 }: ScriptCommentsSidebarProps) => {
     const editorComments = useEditorComments();
     const {addToast} = useToastController();
     const {
-        viewMode, setViewMode, filter, setFilter, expandedBlockId, setExpandedBlockId, pendingActivation, clearPendingActivation,
+        viewMode,
+        setViewMode,
+        filter,
+        setFilter,
+        expandedBlockId,
+        setExpandedBlockId,
+        pendingActivation,
+        clearPendingActivation,
     } = panelState;
     const anchors = editorComments.state?.anchors ?? NO_ANCHORS;
     const draft = editorComments.state?.draft ?? null;

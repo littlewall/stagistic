@@ -97,7 +97,9 @@ export const groupScenes = (doc: ScriptDocument): SceneGroup[] => {
         if (blockType === 'act') {
             currentAct = blockId;
             groups.push({
-                actBlockId: currentAct, sceneBlockId: null, blocks: [block],
+                actBlockId: currentAct,
+                sceneBlockId: null,
+                blocks: [block],
             });
 
             return;
@@ -105,7 +107,9 @@ export const groupScenes = (doc: ScriptDocument): SceneGroup[] => {
 
         if (blockType === 'scene') {
             groups.push({
-                actBlockId: currentAct, sceneBlockId: blockId, blocks: [block],
+                actBlockId: currentAct,
+                sceneBlockId: blockId,
+                blocks: [block],
             });
 
             return;

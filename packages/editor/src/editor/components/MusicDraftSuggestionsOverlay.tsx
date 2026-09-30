@@ -1,11 +1,20 @@
 import {
-    MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR,
+    MUSIC_DRAFT_ATTR,
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import {MicrophoneIcon, MusicDoubleNoteIcon} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
-    type CSSProperties, type MouseEvent as ReactMouseEvent, type RefObject, useCallback, useEffect, useState,
+    type CSSProperties,
+    type MouseEvent as ReactMouseEvent,
+    type RefObject,
+    useCallback,
+    useEffect,
+    useState,
 } from 'react';
 
 import type {PersistentMusicRef} from '../contracts';
@@ -98,7 +107,10 @@ const assignDraftMusic = (editor: TiptapEditor, draftMusicId: string, music: Per
 };
 
 const MusicDraftSuggestionsOverlay = ({
-    editor, canvasRef, persistentMusic = [], onMusicAssigned,
+    editor,
+    canvasRef,
+    persistentMusic = [],
+    onMusicAssigned,
 }: MusicDraftSuggestionsOverlayProps) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);

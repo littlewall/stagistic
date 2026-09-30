@@ -1,8 +1,12 @@
 import {
-    buildScriptBlockIndex, collectCommentAnchorThreadIds, parseStagistic,
+    buildScriptBlockIndex,
+    collectCommentAnchorThreadIds,
+    parseStagistic,
 } from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import source from './example-script.stagistic?raw';
@@ -12,7 +16,11 @@ describe('prepareExampleScriptDocument', () => {
     it('prepares the example source as a two-act musical with linked-ready characters', () => {
         const parsed = parseStagistic(source);
         const {
-            characterKeys, document, groupKeys, sceneBlockIdsByTitle, scoreMusicId,
+            characterKeys,
+            document,
+            groupKeys,
+            sceneBlockIdsByTitle,
+            scoreMusicId,
         } = prepareExampleScriptDocument(parsed.document);
         const {snapshot} = buildScriptBlockIndex(document);
 

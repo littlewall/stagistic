@@ -1,14 +1,16 @@
 const spacingRules = {
     '@stylistic/array-bracket-spacing': ['error', 'never'],
     '@stylistic/arrow-spacing': [
-        'error', {
+        'error',
+        {
             before: true,
             after: true,
         },
     ],
     '@stylistic/block-spacing': ['error', 'never'],
     '@stylistic/comma-spacing': [
-        'error', {
+        'error',
+        {
             before: false,
             after: true,
         },
@@ -16,19 +18,22 @@ const spacingRules = {
     '@stylistic/computed-property-spacing': ['error', 'never'],
     '@stylistic/function-call-spacing': ['error', 'never'],
     '@stylistic/generator-star-spacing': [
-        'error', {
+        'error',
+        {
             before: false,
             after: true,
         },
     ],
     '@stylistic/key-spacing': [
-        'error', {
+        'error',
+        {
             beforeColon: false,
             afterColon: true,
         },
     ],
     '@stylistic/keyword-spacing': [
-        'error', {
+        'error',
+        {
             before: true,
             after: true,
         },
@@ -41,7 +46,8 @@ const spacingRules = {
     '@stylistic/rest-spread-spacing': ['error', 'never'],
     '@stylistic/space-before-blocks': 'error',
     '@stylistic/space-before-function-paren': [
-        'error', {
+        'error',
+        {
             anonymous: 'never',
             named: 'never',
             asyncArrow: 'always',

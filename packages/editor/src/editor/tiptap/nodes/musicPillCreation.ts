@@ -1,5 +1,8 @@
 import {
-    MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_TITLE_ATTR,
+    MUSIC_DRAFT_ATTR,
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import type {NodeViewProps} from '@tiptap/react';
 

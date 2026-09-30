@@ -1,9 +1,13 @@
 import {
-    getScriptBlockId, type ScriptDocument, type ScriptNode,
+    getScriptBlockId,
+    type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 
 import type {
-    StepkgAttachmentSnapshot, StepkgManifest, StepkgSnapshot,
+    StepkgAttachmentSnapshot,
+    StepkgManifest,
+    StepkgSnapshot,
 } from './contracts';
 import type {StepkgImportIssue} from './importContracts';
 import {readStepkgContainer} from './readContainer';
@@ -19,7 +23,13 @@ export type StepkgReadResult = {ok: true, package: StepkgPackage} | {ok: false, 
 
 interface StepkgAttachmentsFile {
     items: {
-        id: string, filename: string, mimeType: string, sizeBytes: number, assetPath: string, createdAt: string, updatedAt: string,
+        id: string,
+        filename: string,
+        mimeType: string,
+        sizeBytes: number,
+        assetPath: string,
+        createdAt: string,
+        updatedAt: string,
     }[],
     bindings: StepkgSnapshot['attachmentBindings'],
 }
@@ -62,14 +72,19 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
 
         if (!content) {
             issues.push({
-                code: 'file_missing', stage: 'checksum', path: file.path,
+                code: 'file_missing',
+                stage: 'checksum',
+                path: file.path,
             });
             continue;
         }
 
         if (content.byteLength !== file.byteLength) {
             issues.push({
-                code: 'checksum_mismatch', stage: 'checksum', path: file.path, details: {expected: file.byteLength, found: content.byteLength},
+                code: 'checksum_mismatch',
+                stage: 'checksum',
+                path: file.path,
+                details: {expected: file.byteLength, found: content.byteLength},
             });
             continue;
         }
@@ -78,7 +93,9 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
 
         if (digest !== file.sha256) {
             issues.push({
-                code: 'checksum_mismatch', stage: 'checksum', path: file.path,
+                code: 'checksum_mismatch',
+                stage: 'checksum',
+                path: file.path,
             });
         }
     }
@@ -87,7 +104,9 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
 
     for (const path of REQUIRED_PATHS) {
         if (!files.has(path)) issues.push({
-            code: 'schema_invalid', stage: 'schema', path,
+            code: 'schema_invalid',
+            stage: 'schema',
+            path,
         });
     }
 
@@ -122,12 +141,16 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
     }
 
     if (manifest.script.id !== script.id) {
-        return {ok: false,
+        return {
+            ok: false,
             issues: [
                 {
-                    code: 'broken_reference', stage: 'validation', details: {manifestId: manifest.script.id, dataId: script.id},
+                    code: 'broken_reference',
+                    stage: 'validation',
+                    details: {manifestId: manifest.script.id, dataId: script.id},
                 },
-            ]};
+            ],
+        };
     }
 
     const characterIds = new Set(characters.characters.map(character => character.id));
@@ -140,7 +163,10 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         group.memberIds.forEach(memberId => {
             if (!characterIds.has(memberId)) {
                 issues.push({
-                    code: 'broken_reference', stage: 'validation', entity: {type: 'character', id: memberId}, details: {via: `group ${group.id}`},
+                    code: 'broken_reference',
+                    stage: 'validation',
+                    entity: {type: 'character', id: memberId},
+                    details: {via: `group ${group.id}`},
                 });
             }
         });
@@ -158,7 +184,10 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         scene.locationIds.forEach(locationId => {
             if (!locationIds.has(locationId)) {
                 issues.push({
-                    code: 'broken_reference', stage: 'validation', entity: {type: 'scene', id: scene.id}, details: {locationId},
+                    code: 'broken_reference',
+                    stage: 'validation',
+                    entity: {type: 'scene', id: scene.id},
+                    details: {locationId},
                 });
             }
         });
@@ -166,24 +195,34 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
     music.items.forEach(item => {
         if (item.startBlockId && !blockIds.has(item.startBlockId)) {
             issues.push({
-                code: 'broken_reference', stage: 'validation', entity: {type: 'music', id: item.id}, details: {startBlockId: item.startBlockId},
+                code: 'broken_reference',
+                stage: 'validation',
+                entity: {type: 'music', id: item.id},
+                details: {startBlockId: item.startBlockId},
             });
         }
 
         if (item.endBlockId && !blockIds.has(item.endBlockId)) {
             issues.push({
-                code: 'broken_reference', stage: 'validation', entity: {type: 'music', id: item.id}, details: {endBlockId: item.endBlockId},
+                code: 'broken_reference',
+                stage: 'validation',
+                entity: {type: 'music', id: item.id},
+                details: {endBlockId: item.endBlockId},
             });
         }
     });
     attachmentsFile.bindings.forEach(binding => {
         if (!musicIds.has(binding.target.id)) issues.push({
-            code: 'broken_reference', stage: 'validation', entity: {type: 'music', id: binding.target.id},
+            code: 'broken_reference',
+            stage: 'validation',
+            entity: {type: 'music', id: binding.target.id},
         });
 
         if (!attachmentIds.has(binding.attachmentId))
             issues.push({
-                code: 'broken_reference', stage: 'validation', entity: {type: 'attachment', id: binding.attachmentId},
+                code: 'broken_reference',
+                stage: 'validation',
+                entity: {type: 'attachment', id: binding.attachmentId},
             });
     });
 
@@ -192,7 +231,10 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
     comments.messages.forEach(message => {
         if (!commentThreadIds.has(message.threadId)) {
             issues.push({
-                code: 'broken_reference', stage: 'validation', entity: {type: 'comment', id: message.id}, details: {threadId: message.threadId},
+                code: 'broken_reference',
+                stage: 'validation',
+                entity: {type: 'comment', id: message.id},
+                details: {threadId: message.threadId},
             });
         }
     });
@@ -204,7 +246,10 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
 
         if (!content) {
             issues.push({
-                code: 'asset_missing', stage: 'assets', path: item.assetPath, entity: {type: 'attachment', id: item.id},
+                code: 'asset_missing',
+                stage: 'assets',
+                path: item.assetPath,
+                entity: {type: 'attachment', id: item.id},
             });
 
             return;
@@ -238,8 +283,12 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         comments,
     };
 
-    return {ok: true,
+    return {
+        ok: true,
         package: {
-            manifest, snapshot, assets,
-        }};
+            manifest,
+            snapshot,
+            assets,
+        },
+    };
 };

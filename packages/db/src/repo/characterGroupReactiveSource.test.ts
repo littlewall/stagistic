@@ -48,7 +48,8 @@ describe('character group reactive source', () => {
                 outline: null,
                 createdAt: 1,
                 updatedAt: 1,
-            }, {
+            },
+            {
                 id: 'character-alice',
                 scriptId,
                 characterKey: 'ALICE',

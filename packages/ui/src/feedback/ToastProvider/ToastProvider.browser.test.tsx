@@ -3,11 +3,17 @@ import '../../../styles/tokens.css';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {
-    ToastProvider, type ToastVariant, useToastController,
+    ToastProvider,
+    type ToastVariant,
+    useToastController,
 } from './ToastProvider';
 
 const mountedRoots: Root[] = [];

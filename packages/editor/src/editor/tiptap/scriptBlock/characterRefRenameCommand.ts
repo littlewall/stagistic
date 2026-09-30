@@ -3,7 +3,10 @@ import type {Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {
-    type CharacterRefByKey, readNormalizedRefsFromAttrs, visitCharacterBlocks, writeRefsToNodeAttrs,
+    type CharacterRefByKey,
+    readNormalizedRefsFromAttrs,
+    visitCharacterBlocks,
+    writeRefsToNodeAttrs,
 } from '../../characters/characterRefUtils';
 import {applyTagMarkRename, getCharacterTagMarkType} from './characterTagMarkCommands';
 

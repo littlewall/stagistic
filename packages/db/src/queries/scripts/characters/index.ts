@@ -1,5 +1,8 @@
 export type {
-    ScriptCharacterGenderOption, ScriptCharacterGroupRef, ScriptCharacterRef, ScriptSpeakingEntityRef,
+    ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
+    ScriptCharacterRef,
+    ScriptSpeakingEntityRef,
 } from '../../../types';
 export {
     deleteScriptCharacterGendersByScriptId,

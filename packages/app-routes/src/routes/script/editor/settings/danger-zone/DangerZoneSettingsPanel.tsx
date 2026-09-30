@@ -1,5 +1,8 @@
 import {
-    DELETE_SCRIPT_CONFIRM_PHRASE, PanelHeader, SettingsGroup, TypeToConfirmAction,
+    DELETE_SCRIPT_CONFIRM_PHRASE,
+    PanelHeader,
+    SettingsGroup,
+    TypeToConfirmAction,
 } from '@stagistic/ui';
 import {useToastController} from '@stagistic/ui';
 import {useCallback, useState} from 'react';

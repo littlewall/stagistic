@@ -6,7 +6,9 @@ import {Decoration, DecorationSet} from '@tiptap/pm/view';
 import {findSearchResults} from './findSearchResults';
 import styles from './SearchExtension.module.css';
 import type {
-    EditorSearchSnapshot, SearchCriteria, SearchResult,
+    EditorSearchSnapshot,
+    SearchCriteria,
+    SearchResult,
 } from './types';
 import {DEFAULT_SEARCH_CRITERIA} from './types';
 

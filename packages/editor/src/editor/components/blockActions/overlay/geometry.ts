@@ -1,7 +1,9 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
-    SCRIPT_BLOCK_DOM_ID_ATTRIBUTE, SCRIPT_BLOCK_DOM_SELECTOR, SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE,
+    SCRIPT_BLOCK_DOM_ID_ATTRIBUTE,
+    SCRIPT_BLOCK_DOM_SELECTOR,
+    SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE,
 } from '../../../tiptap/scriptCore';
 import type {TopLevelBlockMetrics} from './types';
 

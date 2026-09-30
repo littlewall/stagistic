@@ -1,5 +1,10 @@
 import {
-    MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR, type MusicMode,
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
+    type MusicMode,
 } from '@stagistic/script';
 import {Extension} from '@tiptap/core';
 
@@ -17,7 +22,11 @@ import {
     resolveScriptTargetBlock,
 } from './musicCommands';
 import {
-    buildMoveOrphanMusicOut, buildRemoveMusicOutAtBlock, buildSetMusicOutAtBlock, findMusicAtomRange, resolveMusicOutCandidate,
+    buildMoveOrphanMusicOut,
+    buildRemoveMusicOutAtBlock,
+    buildSetMusicOutAtBlock,
+    findMusicAtomRange,
+    resolveMusicOutCandidate,
 } from './musicOutCommands';
 
 interface MusicCommandsExtensionOptions {

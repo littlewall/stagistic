@@ -1,5 +1,7 @@
 import {
-    type ScriptRepository, usePersistedDraft, useScriptTitlePageRecord,
+    type ScriptRepository,
+    usePersistedDraft,
+    useScriptTitlePageRecord,
 } from '@stagistic/app-core';
 import type {TitlePageSettings} from '@stagistic/script';
 import {useCallback} from 'react';

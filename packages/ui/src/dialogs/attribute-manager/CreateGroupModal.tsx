@@ -1,6 +1,12 @@
 import {normalizeCharacterKey} from '@stagistic/script';
 import {
-    type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState,
+    type ChangeEvent,
+    type FormEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
@@ -18,7 +24,10 @@ export interface CreateGroupModalProps {
 }
 
 export const CreateGroupModal = ({
-    isOpen, existingEntityNames, onClose, onCreate,
+    isOpen,
+    existingEntityNames,
+    onClose,
+    onCreate,
 }: CreateGroupModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');

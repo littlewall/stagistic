@@ -1,7 +1,9 @@
 import {buildStepkgEntries} from './buildEntries';
 import {STEPKG_EXTENSION} from './constants';
 import type {
-    BuildStepkgEntriesArgs, StepkgEntry, StepkgExportResult,
+    BuildStepkgEntriesArgs,
+    StepkgEntry,
+    StepkgExportResult,
 } from './contracts';
 import {writeStepkgArchive} from './writeArchive';
 
@@ -24,7 +26,10 @@ export const createStepkg = async (args: CreateStepkgArgs): Promise<StepkgExport
         const blob = await (args.writeArchive ?? writeStepkgArchive)(built.entries);
 
         return {
-            ok: true, blob, fileName: `${sanitizeFileName(args.snapshot.script.title)}${STEPKG_EXTENSION}`, manifest: built.manifest,
+            ok: true,
+            blob,
+            fileName: `${sanitizeFileName(args.snapshot.script.title)}${STEPKG_EXTENSION}`,
+            manifest: built.manifest,
         };
     } catch {
         return {ok: false, issues: [{code: 'archive_creation_failed', stage: 'archive'}]};

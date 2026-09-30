@@ -1,5 +1,8 @@
 import {
-    getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, type ScriptNode,
+    getScriptBlockId,
+    getScriptBlockNodeType,
+    isScriptBlockNode,
+    type ScriptNode,
 } from '@stagistic/script';
 
 type MoveResult = [ScriptNode[] | undefined, boolean];

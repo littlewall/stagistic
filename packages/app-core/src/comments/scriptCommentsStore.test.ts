@@ -1,8 +1,14 @@
 import {
-    createInMemoryReactiveQuerySource, type ScriptCommentMessage, type ScriptCommentThread, type ScriptRepository,
+    createInMemoryReactiveQuerySource,
+    type ScriptCommentMessage,
+    type ScriptCommentThread,
+    type ScriptRepository,
 } from '@stagistic/db';
 import {
-    describe, expect, it, vi,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
 import {createScriptCommentsStore} from './scriptCommentsStore';
@@ -22,13 +28,34 @@ const thread: ScriptCommentThread = {
 };
 const messages: ScriptCommentMessage[] = [
     {
-        id: 'm2', scriptId: 's1', threadId: 't1', authorId: 'local', body: 'reply', createdAt: 2, updatedAt: 2, editedAt: null,
+        id: 'm2',
+        scriptId: 's1',
+        threadId: 't1',
+        authorId: 'local',
+        body: 'reply',
+        createdAt: 2,
+        updatedAt: 2,
+        editedAt: null,
     },
     {
-        id: 'm1', scriptId: 's1', threadId: 't1', authorId: 'local', body: 'root', createdAt: 1, updatedAt: 1, editedAt: null,
+        id: 'm1',
+        scriptId: 's1',
+        threadId: 't1',
+        authorId: 'local',
+        body: 'root',
+        createdAt: 1,
+        updatedAt: 1,
+        editedAt: null,
     },
     {
-        id: 'x1', scriptId: 's1', threadId: 'other', authorId: 'local', body: 'other', createdAt: 1, updatedAt: 1, editedAt: null,
+        id: 'x1',
+        scriptId: 's1',
+        threadId: 'other',
+        authorId: 'local',
+        body: 'other',
+        createdAt: 1,
+        updatedAt: 1,
+        editedAt: null,
     },
 ];
 
@@ -60,11 +87,17 @@ describe('script comments store', () => {
         const store = createScriptCommentsStore(repository as unknown as ScriptRepository, 's1');
 
         await store.createThread({
-            id: 't-new', anchorKind: 'range', anchorBlockId: null, quotedText: 'Q', body: 'B',
+            id: 't-new',
+            anchorKind: 'range',
+            anchorBlockId: null,
+            quotedText: 'Q',
+            body: 'B',
         });
 
         expect(repository.createScriptCommentThread).toHaveBeenCalledWith('s1', expect.objectContaining({
-            id: 't-new', messageId: 'm-new-1', body: 'B',
+            id: 't-new',
+            messageId: 'm-new-1',
+            body: 'B',
         }));
     });
 
@@ -75,7 +108,9 @@ describe('script comments store', () => {
         await store.reply('t1', 'hi');
 
         expect(repository.addScriptCommentMessage).toHaveBeenCalledWith('s1', {
-            id: 'm-new-1', threadId: 't1', body: 'hi',
+            id: 'm-new-1',
+            threadId: 't1',
+            body: 'hi',
         });
     });
 

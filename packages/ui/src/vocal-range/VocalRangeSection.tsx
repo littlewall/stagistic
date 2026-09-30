@@ -1,5 +1,7 @@
 import {
-    formatPitch, parsePitch, type Pitch,
+    formatPitch,
+    parsePitch,
+    type Pitch,
 } from '@stagistic/script';
 import {useRef} from 'react';
 

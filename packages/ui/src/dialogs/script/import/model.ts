@@ -5,9 +5,15 @@ export interface ImportPayload {
 }
 
 export type SelectedFile = {
-    kind: 'stagistic', name: string, file?: File, text?: string,
+    kind: 'stagistic',
+    name: string,
+    file?: File,
+    text?: string,
 } | {
-    kind: 'stepkg', name: string, file?: File, bytes?: Uint8Array,
+    kind: 'stepkg',
+    name: string,
+    file?: File,
+    bytes?: Uint8Array,
 };
 
 export interface DropEvent {

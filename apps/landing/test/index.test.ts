@@ -2,7 +2,10 @@ import {execFileSync} from 'node:child_process';
 import {existsSync, readFileSync} from 'node:fs';
 
 import {
-    beforeAll, describe, expect, it,
+    beforeAll,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 const readSvgCanvas = (relativePath: string) => {
@@ -120,7 +123,8 @@ describe('landing page', () => {
 
     it('links feature descriptions to their specific editor guides', () => {
         const links = Array.from(homeHtml.matchAll(/<a href="([^"]+)"[^>]*>\s*([^<]+?)\s*<\/a>/g), ([
-            , href,
+            ,
+            href,
             label,
         ]) => ({
             href,

@@ -1,12 +1,19 @@
 import {trimOrFallback} from '@stagistic/script';
 import type {NewScriptShape} from '@stagistic/ui';
 import {
-    type Dispatch, type SetStateAction, useCallback, useMemo,
+    type Dispatch,
+    type SetStateAction,
+    useCallback,
+    useMemo,
 } from 'react';
 
 import type {AppToastPayload} from '../../routes/script/types';
 import type {
-    ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs,
+    ScriptImportFile,
+    ScriptToDelete,
+    ScriptToDuplicate,
+    ScriptToRename,
+    UseGlobalModalActionsArgs,
 } from './globalModalTypes';
 import {importStagisticFile} from './importStagisticFile';
 import {createInitialScriptDocument} from './initialScriptDocument';
@@ -125,7 +132,10 @@ export const useGlobalModalMutations = ({
         ],
     );
     const {
-        handlePeekStepkg, handleImportStepkgAsNew, handleReplaceWithStepkg, handleDownloadStepkgBackup,
+        handlePeekStepkg,
+        handleImportStepkgAsNew,
+        handleReplaceWithStepkg,
+        handleDownloadStepkgBackup,
     } = useStepkgPackageMutations({
         repository,
         navigate,
@@ -207,7 +217,10 @@ export const useGlobalModalMutations = ({
     );
     const handleDuplicate = useCallback(
         async (values: {
-            title: string, copySettings: boolean, copyAttributes: boolean, openInEditor: boolean,
+            title: string,
+            copySettings: boolean,
+            copyAttributes: boolean,
+            openInEditor: boolean,
         }) => {
             if (!scriptToDuplicate) {
                 return;

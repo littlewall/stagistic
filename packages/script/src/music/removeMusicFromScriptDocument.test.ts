@@ -22,7 +22,8 @@ describe('removeMusicFromScriptDocument', () => {
                     type: 'stageDirection',
                     attrs: {id: 'block-1'},
                     content: [
-                        {type: 'text', text: 'First'}, {
+                        {type: 'text', text: 'First'},
+                        {
                             type: 'musicStart',
                             attrs: {
                                 musicId: 'music-1',
@@ -42,7 +43,8 @@ describe('removeMusicFromScriptDocument', () => {
                     type: 'stageDirection',
                     attrs: {id: 'block-3'},
                     content: [
-                        {type: 'text', text: 'Second'}, {
+                        {type: 'text', text: 'Second'},
+                        {
                             type: 'musicStart',
                             attrs: {
                                 musicId: 'music-2',

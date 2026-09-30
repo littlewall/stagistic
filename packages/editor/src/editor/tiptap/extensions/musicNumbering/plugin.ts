@@ -14,7 +14,9 @@ import {
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
-    type EditorState, Plugin, PluginKey,
+    type EditorState,
+    Plugin,
+    PluginKey,
 } from '@tiptap/pm/state';
 import {Decoration, DecorationSet} from '@tiptap/pm/view';
 

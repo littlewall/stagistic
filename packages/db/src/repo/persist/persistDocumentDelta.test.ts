@@ -1,6 +1,8 @@
 import {asc, eq} from 'drizzle-orm';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -9,15 +11,21 @@ import {
     type RewriteScriptDocument,
 } from '../../blocks';
 import {
-    scriptActs, scriptBlocks, scriptScenes,
+    scriptActs,
+    scriptBlocks,
+    scriptScenes,
 } from '../../schema';
 import {
-    createTestDb, seedScript, type TestDb,
+    createTestDb,
+    seedScript,
+    type TestDb,
 } from '../../testing/createTestDb';
 import {createDocumentPersister} from './persistDocumentDelta';
 
 const doc = (blocks: {
-    id: string, type?: string, text: string,
+    id: string,
+    type?: string,
+    text: string,
 }[]): RewriteScriptDocument => ({
     type: 'doc',
     content: blocks.map(b => ({
@@ -35,7 +43,10 @@ const readBlocks = async (db: TestDb, scriptId: string) => {
         .orderBy(asc(scriptBlocks.blockOrder));
 
     return rows.map(r => ({
-        id: r.id, type: r.blockType, text: r.textContent, order: r.blockOrder,
+        id: r.id,
+        type: r.blockType,
+        text: r.textContent,
+        order: r.blockOrder,
     }));
 };
 
@@ -49,15 +60,25 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'scene', text: 'INT. ROOM',
-            }, {id: 'a1', text: 'Action one.'},
+                id: 'h1',
+                type: 'scene',
+                text: 'INT. ROOM',
+            },
+            {id: 'a1', text: 'Action one.'},
         ]));
 
         expect(await readBlocks(db, 's1')).toEqual([
             {
-                id: 'h1', type: 'scene', text: 'INT. ROOM', order: 'a0',
-            }, {
-                id: 'a1', type: 'stage_direction', text: 'Action one.', order: 'a1',
+                id: 'h1',
+                type: 'scene',
+                text: 'INT. ROOM',
+                order: 'a0',
+            },
+            {
+                id: 'a1',
+                type: 'stage_direction',
+                text: 'Action one.',
+                order: 'a1',
             },
         ]);
     });
@@ -74,7 +95,10 @@ describe('persistDocumentDelta', () => {
 
         expect(await readBlocks(db, 's1')).toEqual([
             {
-                id: 'a1', type: 'stage_direction', text: 'hello', order: 'a0',
+                id: 'a1',
+                type: 'stage_direction',
+                text: 'hello',
+                order: 'a0',
             },
         ]);
     });
@@ -88,22 +112,30 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'scene', text: 'A',
+                id: 'h1',
+                type: 'scene',
+                text: 'A',
             },
             {id: 'x', text: 'x'},
             {
-                id: 'h2', type: 'scene', text: 'B',
+                id: 'h2',
+                type: 'scene',
+                text: 'B',
             },
             {id: 'y', text: 'y'},
         ]));
 
         await persister.persist(db, doc([
             {
-                id: 'h2', type: 'scene', text: 'B',
+                id: 'h2',
+                type: 'scene',
+                text: 'B',
             },
             {id: 'y', text: 'y'},
             {
-                id: 'h1', type: 'scene', text: 'A',
+                id: 'h1',
+                type: 'scene',
+                text: 'A',
             },
             {id: 'x', text: 'x'},
         ]));
@@ -125,12 +157,16 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'a1', type: 'stageDirection', text: 'X',
+                id: 'a1',
+                type: 'stageDirection',
+                text: 'X',
             },
         ]));
         await persister.persist(db, doc([
             {
-                id: 'a1', type: 'character', text: 'X',
+                id: 'a1',
+                type: 'character',
+                text: 'X',
             },
         ]));
 
@@ -146,12 +182,17 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'scene', text: 'A',
-            }, {id: 'a1', text: 'one'},
+                id: 'h1',
+                type: 'scene',
+                text: 'A',
+            },
+            {id: 'a1', text: 'one'},
         ]));
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'scene', text: 'A',
+                id: 'h1',
+                type: 'scene',
+                text: 'A',
             },
         ]));
 
@@ -166,15 +207,20 @@ describe('persistDocumentDelta', () => {
         const persister = createDocumentPersister('s1');
         const sceneA = [
             {
-                id: 'h1', type: 'scene', text: 'A',
+                id: 'h1',
+                type: 'scene',
+                text: 'A',
             },
             {id: 'a1', text: 'one'},
             {id: 'a2', text: 'two'},
         ];
         const sceneB = [
             {
-                id: 'h2', type: 'scene', text: 'B',
-            }, {id: 'b1', text: 'bee'},
+                id: 'h2',
+                type: 'scene',
+                text: 'B',
+            },
+            {id: 'b1', text: 'bee'},
         ];
 
         await persister.persist(db, doc([...sceneA, ...sceneB]));
@@ -247,13 +293,19 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'act1', type: 'act', text: 'ACT ONE',
-            }, {id: 'a1', text: 'one'},
+                id: 'act1',
+                type: 'act',
+                text: 'ACT ONE',
+            },
+            {id: 'a1', text: 'one'},
         ]));
         await persister.persist(db, doc([
             {
-                id: 'act1', type: 'act', text: 'ACT 1 RENAMED',
-            }, {id: 'a1', text: 'one'},
+                id: 'act1',
+                type: 'act',
+                text: 'ACT 1 RENAMED',
+            },
+            {id: 'a1', text: 'one'},
         ]));
 
         const acts = await db.select().from(scriptActs).where(eq(scriptActs.scriptId, 's1'));
@@ -303,8 +355,11 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'scene', text: 'INT. ROOM',
-            }, {id: 'a1', text: 'Action.'},
+                id: 'h1',
+                type: 'scene',
+                text: 'INT. ROOM',
+            },
+            {id: 'a1', text: 'Action.'},
         ]));
 
         const storedBlocks = await db

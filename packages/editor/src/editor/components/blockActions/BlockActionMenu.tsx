@@ -4,7 +4,9 @@ import {type ReactNode} from 'react';
 import styles from '../EditorBlockActionsOverlay.module.css';
 import {MusicHitIcon, MusicRangeIcon} from '../MusicIcons';
 import type {
-    BlockActionCommand, BlockActionIcon, BlockActionItem,
+    BlockActionCommand,
+    BlockActionIcon,
+    BlockActionItem,
 } from './actionTypes';
 import {ContextMenu, type ContextMenuItem} from './ContextMenu';
 import type {BlockActionMenuProps} from './types';
@@ -43,7 +45,12 @@ const toContextMenuItem = (item: BlockActionItem, onExecute: (command: BlockActi
 };
 
 export const BlockActionMenu = ({
-    items, isMenuAbove, menuRef, menuStyle, onClose, onExecute,
+    items,
+    isMenuAbove,
+    menuRef,
+    menuStyle,
+    onClose,
+    onExecute,
 }: BlockActionMenuProps) => {
     return (
         <ContextMenu

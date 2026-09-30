@@ -4,9 +4,15 @@ import {Tooltip} from '../Tooltip/Tooltip';
 import styles from './InlineTooltip.module.css';
 
 export const InlineTooltip = ({
-    className, testId, label, tooltip,
+    className,
+    testId,
+    label,
+    tooltip,
 }: {
-    className?: string, testId?: string, label: ReactNode, tooltip: ReactNode,
+    className?: string,
+    testId?: string,
+    label: ReactNode,
+    tooltip: ReactNode,
 }) => (
     <Tooltip label={tooltip}>
         <button

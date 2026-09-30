@@ -2,16 +2,23 @@ import {joinBackward} from '@tiptap/pm/commands';
 import {Schema} from '@tiptap/pm/model';
 import {EditorState, TextSelection} from '@tiptap/pm/state';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {detectMergedBlocks} from './detectMergedBlocks';
 
 const block = {
-    group: 'block', content: 'inline*', attrs: {id: {default: null}}, toDOM: () => ['p', 0] as const,
+    group: 'block',
+    content: 'inline*',
+    attrs: {id: {default: null}},
+    toDOM: () => ['p', 0] as const,
 };
 const schema = new Schema({nodes: {
-    doc: {content: 'block+'}, text: {group: 'inline'}, dialogue: block,
+    doc: {content: 'block+'},
+    text: {group: 'inline'},
+    dialogue: block,
 }});
 const make = () => schema.node('doc', null, [
     schema.node('dialogue', {id: 'b1'}, [schema.text('One')]),

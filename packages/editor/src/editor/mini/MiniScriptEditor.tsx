@@ -5,7 +5,14 @@ import Text from '@tiptap/extension-text';
 import {EditorContent} from '@tiptap/react';
 import clsx from 'clsx';
 import {
-    type ReactElement, type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState,
+    type ReactElement,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useId,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
@@ -16,7 +23,10 @@ import {createEditorSnapshotStore} from '../live/store';
 import {createCharacterColorRefsBundle} from '../surface/editorSurfaceCache';
 import {useScriptEditorInstance} from '../surface/useScriptEditorInstance';
 import {
-    CharacterTagInputExtension, EditorRuntimeExtension, MusicNumberingExtension, SceneNumberingExtension,
+    CharacterTagInputExtension,
+    EditorRuntimeExtension,
+    MusicNumberingExtension,
+    SceneNumberingExtension,
 } from '../tiptap/extensions';
 import {DocumentWithSettings} from '../tiptap/extensions/DocumentExtension';
 import {CharacterTagMark, CommentAnchorMark} from '../tiptap/marks';
@@ -49,7 +59,9 @@ type MiniScriptEditorSurfaceProps = {
 };
 
 const MiniScriptEditorSurface = ({
-    className, document, musicNumberLabel,
+    className,
+    document,
+    musicNumberLabel,
 }: MiniScriptEditorSurfaceProps) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
     const characterColorRefs = useMemo(() => createCharacterColorRefsBundle(), []);
@@ -193,7 +205,10 @@ const MiniScriptEditorSurface = ({
 };
 
 export const MiniScriptEditor = ({
-    className, document, musicNumberLabel, staticFallback = null,
+    className,
+    document,
+    musicNumberLabel,
+    staticFallback = null,
 }: MiniScriptEditorProps): ReactElement | null => {
     const [isMounted, setIsMounted] = useState(false);
 

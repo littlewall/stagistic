@@ -3,7 +3,9 @@ import {Plugin} from '@tiptap/pm/state';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {
-    buildDeleteSelectionPreservingMusicAtoms, isMusicPillTarget, resolveTrailingMusicClickPosition,
+    buildDeleteSelectionPreservingMusicAtoms,
+    isMusicPillTarget,
+    resolveTrailingMusicClickPosition,
 } from './musicAtomSelection';
 import {
     isCaretBeforeTrailingMusic,
@@ -14,7 +16,9 @@ import {
 } from './musicCaret';
 import {resolveScriptTargetBlock} from './musicCommands';
 import {
-    buildSetMusicOutAtBlock, findMusicAtomRange, resolveMusicOutCandidate,
+    buildSetMusicOutAtBlock,
+    findMusicAtomRange,
+    resolveMusicOutCandidate,
 } from './musicOutCommands';
 
 /*

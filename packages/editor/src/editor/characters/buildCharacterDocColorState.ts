@@ -2,7 +2,10 @@ import type {PersistentCharacterRef} from '../contracts';
 import type {CharacterColorResolvers} from './characterColorPolicy';
 import {createCharacterColorResolvers, getUnconfirmedCharacterColor} from './characterColorPolicy';
 import {
-    type ActiveCharacterToken, type CharacterTokenEntry, type CharacterTokenScanResult, getCharacterTokenColorKey,
+    type ActiveCharacterToken,
+    type CharacterTokenEntry,
+    type CharacterTokenScanResult,
+    getCharacterTokenColorKey,
 } from './characterTokenScan';
 import {normalizePersistentCharacterRefs} from './persistentRefNormalization';
 
@@ -184,7 +187,9 @@ export const buildCharacterDocColorStateFromTokenScan = ({
         rememberedColorByKey,
     });
     const {
-        tokenEntries, tokenCountByKey, activeToken,
+        tokenEntries,
+        tokenCountByKey,
+        activeToken,
     } = tokenScan;
     const unconfirmedDraftColorByKey = buildUnconfirmedDraftColorByKey(tokenEntries, resolvers);
     const baseDisplayColorByKey = buildBaseDisplayColorByKey(tokenEntries, unconfirmedDraftColorByKey, resolvers, characterColorSaturation);

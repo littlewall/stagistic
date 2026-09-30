@@ -12,7 +12,9 @@ import {
 } from '@tiptap/pm/state';
 import type {EditorView} from '@tiptap/pm/view';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {characterTagComposeKey} from './composeState';

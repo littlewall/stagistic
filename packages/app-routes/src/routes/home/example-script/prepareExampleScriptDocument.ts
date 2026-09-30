@@ -161,7 +161,9 @@ const markTextRange = (content: ScriptNode[], from: number, to: number, mark: No
         const pieces = [
             {...child, text: child.text.slice(0, cutFrom)},
             {
-                ...child, text: child.text.slice(cutFrom, cutTo), marks: [...child.marks ?? [], mark],
+                ...child,
+                text: child.text.slice(cutFrom, cutTo),
+                marks: [...child.marks ?? [], mark],
             },
             {...child, text: child.text.slice(cutTo)},
         ];
@@ -177,7 +179,9 @@ const markTextRange = (content: ScriptNode[], from: number, to: number, mark: No
 export const anchorExampleComment = (
     document: ScriptDocument,
     thread: {
-        id: string, blockText: string, quote?: string,
+        id: string,
+        blockText: string,
+        quote?: string,
     },
 ): {document: ScriptDocument, blockId: string} => {
     const blockIndex = document.content.findIndex(node => {

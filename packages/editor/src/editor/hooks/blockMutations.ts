@@ -1,5 +1,10 @@
 import {
-    getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, resolveScriptBlockNodeType, type ScriptDocument, type ScriptNode,
+    getScriptBlockId,
+    getScriptBlockNodeType,
+    isScriptBlockNode,
+    resolveScriptBlockNodeType,
+    type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 
 export const setPlainTextContent = (nodes: ScriptNode[] | undefined, blockId: string, nextName: string): [ScriptNode[] | undefined, boolean] => {

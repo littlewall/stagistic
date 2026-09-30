@@ -23,7 +23,10 @@ import {
     SPACING_BEFORE_OPTIONS,
 } from '../constants';
 import {
-    clamp, formatLines, formatNumeric, getClosestStepValue,
+    clamp,
+    formatLines,
+    formatNumeric,
+    getClosestStepValue,
 } from '../math';
 import type {ElementSettingsPanelProps, ElementSettingsViewModel} from '../types';
 

@@ -1,6 +1,9 @@
 import type {VisualLine, VisualRun} from '../../visualLine';
 import {
-    type ContentsGeometry, MONO_FONT_FAMILY, SCORE_COLUMN_HEADER, SCRIPT_COLUMN_HEADER,
+    type ContentsGeometry,
+    MONO_FONT_FAMILY,
+    SCORE_COLUMN_HEADER,
+    SCRIPT_COLUMN_HEADER,
 } from './contentsGeometry';
 
 export const makeRun = (

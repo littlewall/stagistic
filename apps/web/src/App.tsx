@@ -1,13 +1,23 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
-    GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute,
+    GlobalModalsProvider,
+    HomeRoute,
+    ScriptEditorRoute,
+    ScriptExportRoute,
+    ScriptSettingsRoute,
+    ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {
-    lazy, Suspense, useEffect, useState,
+    lazy,
+    Suspense,
+    useEffect,
+    useState,
 } from 'react';
 import {
-    Navigate, Route, Routes,
+    Navigate,
+    Route,
+    Routes,
 } from 'react-router-dom';
 
 import {prepareLocalDbWithProgress} from './db';

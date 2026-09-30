@@ -1,5 +1,8 @@
 import type {
-    BlockCasing, BlockShortcut, BlockTextAlign, SceneNumberFormat,
+    BlockCasing,
+    BlockShortcut,
+    BlockTextAlign,
+    SceneNumberFormat,
 } from './options';
 
 export interface BlockSpacingSettings {

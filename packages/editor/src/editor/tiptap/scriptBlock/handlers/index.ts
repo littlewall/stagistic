@@ -7,7 +7,9 @@ import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scri
 import {createBlockContext} from '../context';
 import {deleteSelectionPreservingScenes, selectionSpansScene} from '../deleteSelectionPreservingScenes';
 import {
-    deleteEmptyBlockAfterScene, shouldBlockBackspace, shouldBlockForwardDelete,
+    deleteEmptyBlockAfterScene,
+    shouldBlockBackspace,
+    shouldBlockForwardDelete,
 } from '../sceneDeletionGuard';
 import {handleEnter} from './enter';
 import {handlePaste} from './paste';
@@ -15,11 +17,15 @@ import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
 import {handleTab} from './tab';
 import {handleTextInput, textInputHandlerMaps} from './textInput';
 import {
-    type BlockCasingMap, type BlockNextElementMap, type BlockShortcutMap,
+    type BlockCasingMap,
+    type BlockNextElementMap,
+    type BlockShortcutMap,
 } from './types';
 
 export type {
-    BlockCasingMap, BlockNextElementMap, BlockShortcutMap,
+    BlockCasingMap,
+    BlockNextElementMap,
+    BlockShortcutMap,
 };
 
 const hasShortcutModifier = (event: KeyboardEvent) => {
@@ -155,5 +161,7 @@ export const handleKeyDown = (editor: Editor, event: KeyboardEvent, blockShortcu
 };
 
 export {
-    handlePaste, handleTab, handleTextInput,
+    handlePaste,
+    handleTab,
+    handleTextInput,
 };

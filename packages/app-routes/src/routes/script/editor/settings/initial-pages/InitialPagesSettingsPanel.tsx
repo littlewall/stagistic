@@ -1,8 +1,14 @@
 import type {
-    CastOrderBy, InitialPagesSettings, InitialPagesSettingsPatch,
+    CastOrderBy,
+    InitialPagesSettings,
+    InitialPagesSettingsPatch,
 } from '@stagistic/script';
 import {
-    formControlStyles, PanelHeader, SettingsGroup, ToggleButtonGroup, type ToggleButtonGroupOption,
+    formControlStyles,
+    PanelHeader,
+    SettingsGroup,
+    ToggleButtonGroup,
+    type ToggleButtonGroupOption,
 } from '@stagistic/ui';
 import clsx from 'clsx';
 
@@ -18,7 +24,8 @@ const CAST_ORDER_OPTIONS: ToggleButtonGroupOption<CastOrderBy>[] = [
     {
         label: 'Name',
         value: 'name',
-    }, {
+    },
+    {
         label: 'Appearance',
         value: 'appearance',
     },
@@ -30,7 +37,8 @@ const BOOLEAN_OPTIONS: ToggleButtonGroupOption<BooleanOption>[] = [
     {
         label: 'Yes',
         value: 'yes',
-    }, {
+    },
+    {
         label: 'No',
         value: 'no',
     },

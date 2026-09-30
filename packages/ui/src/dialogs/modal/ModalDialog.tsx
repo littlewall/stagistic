@@ -30,7 +30,11 @@ interface ModalDialogProps {
 }
 
 export const ModalDialog = ({
-    isOpen, onClose, ariaLabel, children, panelClassName,
+    isOpen,
+    onClose,
+    ariaLabel,
+    children,
+    panelClassName,
 }: ModalDialogProps) => {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const restoreFocusRef = useRef<HTMLElement | null>(null);

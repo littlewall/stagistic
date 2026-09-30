@@ -1,6 +1,8 @@
 import {parseStagistic} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {InMemoryFileStorage} from '../fileStorage';
@@ -20,7 +22,11 @@ SING TO ME.
 
 const baseWrite = (): ScriptPackageWrite => ({
     script: {
-        id: 'script-1', title: 'Original', subtitle: null, createdAt: 1_000, updatedAt: 2_000,
+        id: 'script-1',
+        title: 'Original',
+        subtitle: null,
+        createdAt: 1_000,
+        updatedAt: 2_000,
     },
     document: parseStagistic(source).document,
     titlePage: {source: 'Original'},
@@ -59,18 +65,32 @@ const baseWrite = (): ScriptPackageWrite => ({
     ],
     locations: [
         {
-            id: 'l1', name: 'Kitchen', description: null, createdAt: 1_000, updatedAt: 1_000,
+            id: 'l1',
+            name: 'Kitchen',
+            description: null,
+            createdAt: 1_000,
+            updatedAt: 1_000,
         },
     ],
     scenes: [],
     attachments: [
         {
-            id: 'a1', filename: 'score.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1_000, updatedAt: 1_000,
+            id: 'a1',
+            filename: 'score.pdf',
+            mimeType: 'application/pdf',
+            sizeBytes: 3,
+            blob: new Blob(['pdf']),
+            createdAt: 1_000,
+            updatedAt: 1_000,
         },
     ],
     bindings: [
         {
-            musicId: 'm1', attachmentId: 'a1', role: 'integrated_score', sortOrder: 0, createdAt: 1_000,
+            musicId: 'm1',
+            attachmentId: 'a1',
+            role: 'integrated_score',
+            sortOrder: 0,
+            createdAt: 1_000,
         },
     ],
     comments: {
@@ -90,14 +110,22 @@ const baseWrite = (): ScriptPackageWrite => ({
         ],
         messages: [
             {
-                id: 'cm1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1_000, updatedAt: 1_000, editedAt: null,
+                id: 'cm1',
+                threadId: 't1',
+                authorId: 'local',
+                body: 'B',
+                createdAt: 1_000,
+                updatedAt: 1_000,
+                editedAt: null,
             },
         ],
     },
 });
 
 const makeRepository = (db: Awaited<ReturnType<typeof createTestDb>>['db'], fileStorage = new InMemoryFileStorage()) => createLocalPgliteRepository({
-    getLocalDb: () => Promise.resolve(db), syncToFs: () => Promise.resolve(), fileStorage,
+    getLocalDb: () => Promise.resolve(db),
+    syncToFs: () => Promise.resolve(),
+    fileStorage,
 });
 
 describe('restoreScriptFromPackage', () => {
@@ -116,7 +144,11 @@ describe('restoreScriptFromPackage', () => {
         const replacement: ScriptPackageWrite = {
             ...baseWrite(),
             script: {
-                id: 'script-1', title: 'Replaced', subtitle: null, createdAt: 1_000, updatedAt: 5_000,
+                id: 'script-1',
+                title: 'Replaced',
+                subtitle: null,
+                createdAt: 1_000,
+                updatedAt: 5_000,
             },
             characters: [
                 {
@@ -188,7 +220,13 @@ describe('restoreScriptFromPackage', () => {
             document: {type: 'doc'} as ScriptPackageWrite['document'],
             attachments: [
                 {
-                    id: 'a2', filename: 'new.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['new']), createdAt: 5_000, updatedAt: 5_000,
+                    id: 'a2',
+                    filename: 'new.pdf',
+                    mimeType: 'application/pdf',
+                    sizeBytes: 3,
+                    blob: new Blob(['new']),
+                    createdAt: 5_000,
+                    updatedAt: 5_000,
                 },
             ],
         };

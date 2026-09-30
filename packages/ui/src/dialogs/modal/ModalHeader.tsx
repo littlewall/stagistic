@@ -13,7 +13,9 @@ export interface ModalHeaderProps {
  * ModalDialog panel and take its gap; wrapping them in an element would collapse that spacing.
  */
 export const ModalHeader = ({
-    title, description, notes,
+    title,
+    description,
+    notes,
 }: ModalHeaderProps) => (
     <>
         <h2 className={styles.title}>{title}</h2>

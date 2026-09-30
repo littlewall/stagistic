@@ -1,5 +1,9 @@
 import type {
-    CommentThreadStatus, ScriptCommentMessage, ScriptCommentThread, ScriptCommentThreadSnapshot, ScriptRepository,
+    CommentThreadStatus,
+    ScriptCommentMessage,
+    ScriptCommentThread,
+    ScriptCommentThreadSnapshot,
+    ScriptRepository,
 } from '@stagistic/db';
 import {useLiveQuery} from '@tanstack/react-db';
 import {useMemo} from 'react';

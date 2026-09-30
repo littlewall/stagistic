@@ -13,7 +13,10 @@ interface UseCommentsEditorBridgeArgs {
 
 /** Thread refs and editor callbacks connecting the editor's comment anchors to the Comments panel. */
 export const useCommentsEditorBridge = ({
-    comments, panelState, revealPanel, isPanelOpen,
+    comments,
+    panelState,
+    revealPanel,
+    isPanelOpen,
 }: UseCommentsEditorBridgeArgs) => {
     const commentThreads = useMemo<readonly EditorCommentThreadRef[]>(
         () => comments.threads.map(thread => ({

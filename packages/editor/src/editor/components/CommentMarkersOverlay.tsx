@@ -1,6 +1,8 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type RefObject, useEffect, useState,
+    type RefObject,
+    useEffect,
+    useState,
 } from 'react';
 
 import {commentsPluginKey} from '../tiptap/extensions/comments';

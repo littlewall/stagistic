@@ -36,7 +36,9 @@ export const ElementSettingsPanel = ({
     });
 
     const {
-        numeric, preview, formatting,
+        numeric,
+        preview,
+        formatting,
     } = viewModel;
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx
         ?? DEFAULT_EDITOR_SETTINGS.typography.fontSizePx;

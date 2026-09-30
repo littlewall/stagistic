@@ -16,7 +16,9 @@ import type {EditorState, Transaction} from '@tiptap/pm/state';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {
-    type ActiveScriptBlock, findScriptBlockByIdFromState, getActiveScriptBlockFromState,
+    type ActiveScriptBlock,
+    findScriptBlockByIdFromState,
+    getActiveScriptBlockFromState,
 } from '../../scriptCore';
 import {findMusicAtomRange} from './musicOutCommands';
 

@@ -39,7 +39,9 @@ const groupByScene = (threads: readonly ScriptCommentThread[], anchors: Readonly
         }
 
         groups.push({
-            key, title: anchor?.sceneTitle || 'No scene', threads: [thread],
+            key,
+            title: anchor?.sceneTitle || 'No scene',
+            threads: [thread],
         });
     });
 
@@ -48,7 +50,9 @@ const groupByScene = (threads: readonly ScriptCommentThread[], anchors: Readonly
 
 /** Every thread matching the filter, in script order by scene, then Detached ones. */
 export const CommentsListView = ({
-    threads, anchors, renderCard,
+    threads,
+    anchors,
+    renderCard,
 }: CommentsListViewProps) => {
     const groups = groupByScene(threads, anchors);
     const detached = threads.filter(thread => !anchors.has(thread.id));

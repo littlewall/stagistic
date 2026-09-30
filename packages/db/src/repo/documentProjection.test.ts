@@ -1,17 +1,28 @@
 import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '@stagistic/script';
 import {asc, eq} from 'drizzle-orm';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
-    makeSceneId, rebuildScriptDocumentFromBlocks, type RewriteScriptDocument,
+    makeSceneId,
+    rebuildScriptDocumentFromBlocks,
+    type RewriteScriptDocument,
 } from '../blocks';
 import {
-    scriptBlockCharacterRefs, scriptBlocks, scriptCharacterGroupMembers, scriptCharacters, scriptLocations, scriptScenes,
+    scriptBlockCharacterRefs,
+    scriptBlocks,
+    scriptCharacterGroupMembers,
+    scriptCharacters,
+    scriptLocations,
+    scriptScenes,
 } from '../schema';
 import {
-    createTestDb, seedScript, type TestDb,
+    createTestDb,
+    seedScript,
+    type TestDb,
 } from '../testing/createTestDb';
 import {loadScriptDocumentFromProjection, rebuildScriptProjection} from './documentProjection';
 
@@ -91,7 +102,8 @@ describe('documentProjection', () => {
                     id: 'h1',
                     type: 'scene',
                     text: 'A renamed',
-                }, {id: 'a2', text: 'new'},
+                },
+                {id: 'a2', text: 'new'},
             ]),
         });
 
@@ -122,7 +134,8 @@ describe('documentProjection', () => {
                     id: 'h1',
                     type: 'scene',
                     text: 'INT. ROOM',
-                }, {id: 'a1', text: 'Action.'},
+                },
+                {id: 'a1', text: 'Action.'},
             ]),
         });
 
@@ -159,7 +172,8 @@ describe('documentProjection', () => {
                 characterKey: 'ANNA',
                 createdAt: 1,
                 updatedAt: 1,
-            }, {
+            },
+            {
                 id: 'group-1',
                 scriptId: 's1',
                 characterKey: 'ALL',

@@ -4,7 +4,9 @@ import {ModalDialog} from '../modal/ModalDialog';
 import styles from './ScriptSettingsModal.module.css';
 import type {ScriptSettingsModalProps} from './types';
 export type {
-    SettingsNavGroup, SettingsNavItem, SettingsNavSubItem,
+    SettingsNavGroup,
+    SettingsNavItem,
+    SettingsNavSubItem,
 } from './types';
 
 export const ScriptSettingsModal = ({

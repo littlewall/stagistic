@@ -5,7 +5,10 @@ import {Editor} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Text from '@tiptap/extension-text';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {ScriptBlockNodes} from '../../nodes';

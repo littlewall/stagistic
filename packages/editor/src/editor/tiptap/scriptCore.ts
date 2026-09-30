@@ -1,5 +1,7 @@
 import {
-    createNodeId, resolveScriptBlockNodeType, SCRIPT_BLOCK_NODE_TYPES,
+    createNodeId,
+    resolveScriptBlockNodeType,
+    SCRIPT_BLOCK_NODE_TYPES,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode, ResolvedPos} from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';

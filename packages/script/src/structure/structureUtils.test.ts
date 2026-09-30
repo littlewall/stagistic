@@ -1,10 +1,14 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {DEFAULT_EDITOR_SETTINGS} from '../settings';
 import {
-    getDefaultActName, normalizeActName, resolveStructureSettings,
+    getDefaultActName,
+    normalizeActName,
+    resolveStructureSettings,
 } from './structureUtils';
 
 describe('normalizeActName', () => {

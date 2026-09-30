@@ -2,10 +2,14 @@ import {useHotkey} from '@tanstack/react-hotkeys';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEditorState} from '@tiptap/react';
 import type {
-    ChangeEventHandler, KeyboardEventHandler, RefObject,
+    ChangeEventHandler,
+    KeyboardEventHandler,
+    RefObject,
 } from 'react';
 import {
-    useCallback, useEffect, useRef,
+    useCallback,
+    useEffect,
+    useRef,
 } from 'react';
 
 import {getEditorSearchSnapshot, getSceneCollapseSnapshot} from '../tiptap/extensions';
@@ -48,7 +52,10 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         selector: ({editor: stateEditor}) => {
             if (!stateEditor) {
                 return {
-                    query: '', currentIndex: -1, resultCount: 0, activeFrom: null,
+                    query: '',
+                    currentIndex: -1,
+                    resultCount: 0,
+                    activeFrom: null,
                 };
             }
 
@@ -70,7 +77,10 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
             && a.activeFrom === b.activeFrom,
         ),
     }) ?? {
-        query: '', currentIndex: -1, resultCount: 0, activeFrom: null,
+        query: '',
+        currentIndex: -1,
+        resultCount: 0,
+        activeFrom: null,
     };
 
     const onQueryChange = useCallback<ChangeEventHandler<HTMLInputElement>>(

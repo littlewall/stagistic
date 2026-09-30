@@ -2,7 +2,9 @@ import {eq} from 'drizzle-orm';
 
 import type {ExtractedMusicRow} from '../../blocks';
 import {
-    bulkUnassignScriptMusic, bulkUpsertScriptMusic, type DbClient,
+    bulkUnassignScriptMusic,
+    bulkUpsertScriptMusic,
+    type DbClient,
 } from '../../queries';
 import {scriptMusic} from '../../schema';
 

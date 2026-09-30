@@ -43,7 +43,8 @@ const script = {
             id: 'place-stage',
             name: 'Stage',
             firstAppearanceOrder: 2,
-        }, {
+        },
+        {
             id: 'place-home',
             name: 'Home',
             firstAppearanceOrder: 10,
@@ -297,7 +298,9 @@ describe('deriveBasicExportPlan', () => {
             ...script,
             characters: [
                 {
-                    id: 'c-alice', key: 'ALICE', displayName: 'Alice',
+                    id: 'c-alice',
+                    key: 'ALICE',
+                    displayName: 'Alice',
                 },
             ],
             doc: {
@@ -324,9 +327,20 @@ describe('deriveBasicExportPlan', () => {
             ...script,
             initialVocalRanges: [
                 {
-                    id: 'char-b', displayName: 'Bob', voiceType: 'baritone', low: 'C3', high: 'A4', firstAppearanceOrder: 1,
-                }, {
-                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6', firstAppearanceOrder: 8,
+                    id: 'char-b',
+                    displayName: 'Bob',
+                    voiceType: 'baritone',
+                    low: 'C3',
+                    high: 'A4',
+                    firstAppearanceOrder: 1,
+                },
+                {
+                    id: 'char-a',
+                    displayName: 'Anna',
+                    voiceType: null,
+                    low: 'A3',
+                    high: 'C6',
+                    firstAppearanceOrder: 8,
                 },
             ],
         });
@@ -341,9 +355,18 @@ describe('deriveBasicExportPlan', () => {
             kind: 'vocal-ranges',
             entries: [
                 {
-                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6',
-                }, {
-                    id: 'char-b', displayName: 'Bob', voiceType: 'baritone', low: 'C3', high: 'A4',
+                    id: 'char-a',
+                    displayName: 'Anna',
+                    voiceType: null,
+                    low: 'A3',
+                    high: 'C6',
+                },
+                {
+                    id: 'char-b',
+                    displayName: 'Bob',
+                    voiceType: 'baritone',
+                    low: 'C3',
+                    high: 'A4',
                 },
             ],
         });
@@ -362,9 +385,20 @@ describe('deriveBasicExportPlan', () => {
             ...script,
             initialVocalRanges: [
                 {
-                    id: 'char-b', displayName: 'Bob', voiceType: 'baritone', low: 'C3', high: 'A4', firstAppearanceOrder: 1,
-                }, {
-                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6', firstAppearanceOrder: 8,
+                    id: 'char-b',
+                    displayName: 'Bob',
+                    voiceType: 'baritone',
+                    low: 'C3',
+                    high: 'A4',
+                    firstAppearanceOrder: 1,
+                },
+                {
+                    id: 'char-a',
+                    displayName: 'Anna',
+                    voiceType: null,
+                    low: 'A3',
+                    high: 'C6',
+                    firstAppearanceOrder: 8,
                 },
             ],
         });
@@ -384,7 +418,12 @@ describe('deriveBasicExportPlan', () => {
             ...script,
             initialVocalRanges: [
                 {
-                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6', firstAppearanceOrder: 8,
+                    id: 'char-a',
+                    displayName: 'Anna',
+                    voiceType: null,
+                    low: 'A3',
+                    high: 'C6',
+                    firstAppearanceOrder: 8,
                 },
             ],
         });

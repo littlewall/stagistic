@@ -1,13 +1,20 @@
 import {
-    getScriptBlockNodeType, type ScriptDocument, type ScriptNode,
+    getScriptBlockNodeType,
+    type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {
-    isQuotedCharacterCueLine, isUppercaseSyntaxLine, shouldForceStageDirection, splitCharacterTokens,
+    isQuotedCharacterCueLine,
+    isUppercaseSyntaxLine,
+    shouldForceStageDirection,
+    splitCharacterTokens,
 } from '../syntax';
 import type {TitlePageSettings} from '../titlePage';
 import {serializeStagisticFrontmatter} from './frontmatter';
 import {
-    getText, quoteNameWhenRequired, serializeInlineContent,
+    getText,
+    quoteNameWhenRequired,
+    serializeInlineContent,
 } from './serializeInline';
 
 export interface SerializeStagisticOptions {
@@ -34,7 +41,9 @@ const serializeCharacterCue = (node: ScriptNode) => {
 const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     const blockType = getScriptBlockNodeType(node);
     const {
-        text, hitOut, outMarkers,
+        text,
+        hitOut,
+        outMarkers,
     } = serializeInlineContent(node.content, state, {includeOut: false});
     let serialized: string;
 

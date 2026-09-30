@@ -1,7 +1,10 @@
 import {CHARACTER_TAG_MARK_NAME} from '../characters';
 import {type ScriptNode} from '../document';
 import {
-    MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR,
+    MUSIC_MODE_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
 } from '../music';
 import type {SerializationState} from './serializeStagistic';
 

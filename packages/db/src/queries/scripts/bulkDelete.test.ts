@@ -1,19 +1,27 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../../testing/createTestDb';
 import {
-    deleteScriptAttachmentsByScriptId, insertAttachment, listScriptAttachments,
+    deleteScriptAttachmentsByScriptId,
+    insertAttachment,
+    listScriptAttachments,
 } from './attachments';
 import {deleteScriptCharacterGendersByScriptId, insertScriptCharacterGenders} from './characters/genders';
 import {listScriptCharacters} from './characters/read';
 import {deleteScriptCharactersByScriptId, insertScriptCharacters} from './characters/write';
 import {
-    deleteScriptLocationsByScriptId, insertScriptLocations, listScriptLocations,
+    deleteScriptLocationsByScriptId,
+    insertScriptLocations,
+    listScriptLocations,
 } from './locations';
 import {
-    deleteScriptMusicByScriptId, insertScriptMusic, listScriptMusic,
+    deleteScriptMusicByScriptId,
+    insertScriptMusic,
+    listScriptMusic,
 } from './music';
 
 describe('bulk delete-by-scriptId queries', () => {
@@ -41,7 +49,8 @@ describe('bulk delete-by-scriptId queries', () => {
                 vocalRangeHigh: null,
                 createdAt: now,
                 updatedAt: now,
-            }, {
+            },
+            {
                 id: 'c2',
                 scriptId: 'sc2',
                 characterKey: 'JUNO',
@@ -60,16 +69,38 @@ describe('bulk delete-by-scriptId queries', () => {
         ]);
         await insertScriptCharacterGenders(db, [
             {
-                id: 'g1', scriptId: 'sc1', genderKey: 'f', genderLabel: 'Female', createdAt: now, updatedAt: now,
-            }, {
-                id: 'g2', scriptId: 'sc2', genderKey: 'f', genderLabel: 'Female', createdAt: now, updatedAt: now,
+                id: 'g1',
+                scriptId: 'sc1',
+                genderKey: 'f',
+                genderLabel: 'Female',
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: 'g2',
+                scriptId: 'sc2',
+                genderKey: 'f',
+                genderLabel: 'Female',
+                createdAt: now,
+                updatedAt: now,
             },
         ]);
         await insertScriptLocations(db, [
             {
-                id: 'l1', scriptId: 'sc1', name: 'Kitchen', description: null, createdAt: now, updatedAt: now,
-            }, {
-                id: 'l2', scriptId: 'sc2', name: 'Attic', description: null, createdAt: now, updatedAt: now,
+                id: 'l1',
+                scriptId: 'sc1',
+                name: 'Kitchen',
+                description: null,
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: 'l2',
+                scriptId: 'sc2',
+                name: 'Attic',
+                description: null,
+                createdAt: now,
+                updatedAt: now,
             },
         ]);
         await insertScriptMusic(db, {

@@ -1,6 +1,9 @@
 import clsx from 'clsx';
 import {
-    type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement,
+    type ComponentPropsWithoutRef,
+    createElement,
+    type ElementType,
+    type ReactElement,
 } from 'react';
 
 import styles from './Skeleton.module.css';
@@ -20,7 +23,10 @@ const SHAPE_CLASS: Record<SkeletonShape, string> = {
 };
 
 export const Skeleton = <T extends ElementType = 'div'>({
-    as, shape = 'block', className, ...props
+    as,
+    shape = 'block',
+    className,
+    ...props
 }: SkeletonProps<T>): ReactElement => createElement(as ?? 'div', {
     'aria-hidden': true,
     ...props,

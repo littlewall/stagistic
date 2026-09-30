@@ -1,13 +1,25 @@
 import {
-    useEditorElementSelection, useEditorInstance, useEditorLiveMusic, useFocusEditorMusic,
+    useEditorElementSelection,
+    useEditorInstance,
+    useEditorLiveMusic,
+    useFocusEditorMusic,
 } from '@stagistic/editor';
 import {formatMusicNumber} from '@stagistic/script';
 import {
-    EditPencilIcon, IconButton, LinkSlashIcon, ListRow, SidebarActionsGroup, SidebarMiniHeader, Tooltip,
+    EditPencilIcon,
+    IconButton,
+    LinkSlashIcon,
+    ListRow,
+    SidebarActionsGroup,
+    SidebarMiniHeader,
+    Tooltip,
 } from '@stagistic/ui';
 import clsx from 'clsx';
 import {
-    type ReactNode, useCallback, useMemo, useState,
+    type ReactNode,
+    useCallback,
+    useMemo,
+    useState,
 } from 'react';
 
 import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attributes/attributeManagerMenu';
@@ -34,7 +46,10 @@ interface RowActionButtonProps {
 }
 
 const RowActionButton = ({
-    ariaLabel, tooltipLabel, onPress, children,
+    ariaLabel,
+    tooltipLabel,
+    onPress,
+    children,
 }: RowActionButtonProps) => (
     <Tooltip
         label={tooltipLabel}
@@ -64,7 +79,13 @@ interface MusicRowProps {
 }
 
 const MusicRow = ({
-    music, isActive, number, startBlockId, onFocus, onRequestUnassign, onOpenMusicManager,
+    music,
+    isActive,
+    number,
+    startBlockId,
+    onFocus,
+    onRequestUnassign,
+    onOpenMusicManager,
 }: MusicRowProps) => {
     const isAssigned = Boolean(music.assignmentLabel);
     const label = (
@@ -129,7 +150,11 @@ const MusicRow = ({
 };
 
 export const ScriptMusicSidebar = ({
-    header, music, isLoading = false, onAddMusic, onUnassignMusic,
+    header,
+    music,
+    isLoading = false,
+    onAddMusic,
+    onUnassignMusic,
 }: ScriptMusicSidebarProps) => {
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
@@ -142,7 +167,8 @@ export const ScriptMusicSidebar = ({
         () => new Map(
             documentMusic.map(
                 (music, index) => [
-                    music.musicId, {
+                    music.musicId,
+                    {
                         number: formatMusicNumber(music),
                         order: index,
                         startBlockId: music.startBlockId,

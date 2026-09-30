@@ -12,7 +12,10 @@ type ProgressPanelProps = {
 };
 
 export const ProgressPanel = ({
-    label, messages, progress, size = 'md',
+    label,
+    messages,
+    progress,
+    size = 'md',
 }: ProgressPanelProps) => {
     return (
         <div className={clsx(styles.panel, size === 'sm' && styles.small)}>

@@ -1,5 +1,8 @@
 import {
-    and, asc, eq, type InferInsertModel,
+    and,
+    asc,
+    eq,
+    type InferInsertModel,
 } from 'drizzle-orm';
 
 import {scriptLocations} from '../../schema';

@@ -62,7 +62,9 @@ export interface BasicExportConfig {
 export const BASIC_DEFAULTS: BasicExportConfig = {
     showNotes: true,
     characterFilter: {
-        mode: 'all', characterIds: [], preserveFullScriptPagination: true,
+        mode: 'all',
+        characterIds: [],
+        preserveFullScriptPagination: true,
     },
     pageBreaks: {
         sceneOnNewPage: true,

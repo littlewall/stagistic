@@ -3,7 +3,10 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useCallback, useRef} from 'react';
 
 import type {
-    EditorIndexSnapshot, EditorLiveScenePlacementSnapshot, EditorLiveSnapshot, EditorValueChangeMeta,
+    EditorIndexSnapshot,
+    EditorLiveScenePlacementSnapshot,
+    EditorLiveSnapshot,
+    EditorValueChangeMeta,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildSidebarProjectionFromIndex, type SidebarProjectionColorContext} from '../live/buildSidebarProjectionFromIndex';
@@ -11,11 +14,15 @@ import {type EditorSnapshotStore, EMPTY_SCENE_PLACEMENT} from '../live/store';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {buildScenePlacements} from '../runtime/buildScenePlacements';
 import {
-    getBlockUiEventsFromState, getEditorRuntimeFromState, getPaginationPluginState,
+    getBlockUiEventsFromState,
+    getEditorRuntimeFromState,
+    getPaginationPluginState,
 } from '../tiptap/extensions';
 import type {PaginationState} from '../tiptap/extensions/pagination/types';
 import {
-    ensureScriptBlockId, isScriptBlockNodeName, normalizeBlockNodeType,
+    ensureScriptBlockId,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
 } from '../tiptap/scriptCore';
 import type {UseEditorLifecycleArgs} from './editorLifecycleTypes';
 import type {useLatestRef} from './useLatestRef';

@@ -1,5 +1,7 @@
 import type {
-    TitlePageCredit, TitlePageLogo, TitlePageSettings,
+    TitlePageCredit,
+    TitlePageLogo,
+    TitlePageSettings,
 } from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
@@ -7,7 +9,9 @@ import type {DbClient} from '../queries';
 import * as dbQueries from '../queries';
 import type {ScriptTitlePageRepository} from '../scriptRepository';
 import type {
-    GetDb, RecordOutbox, SyncDb,
+    GetDb,
+    RecordOutbox,
+    SyncDb,
 } from './types';
 
 interface CreateTitlePageHandlersArgs {
@@ -136,7 +140,9 @@ export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, set
 };
 
 export const createTitlePageHandlers = ({
-    getDb, recordOutbox, syncDb,
+    getDb,
+    recordOutbox,
+    syncDb,
 }: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
     const load: ScriptTitlePageRepository['load'] = async scriptId => {
         const db = await getDb();

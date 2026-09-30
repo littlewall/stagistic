@@ -19,7 +19,14 @@ export type SearchControlProps = {
 
 export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
     ({
-        currentResult, resultCount, onPreviousResult, onNextResult, onClear, className, value, ...props
+        currentResult,
+        resultCount,
+        onPreviousResult,
+        onNextResult,
+        onClear,
+        className,
+        value,
+        ...props
     }, ref) => {
         const generatedInputId = useId();
         const inputId = props.id ?? generatedInputId;

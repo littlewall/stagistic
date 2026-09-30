@@ -1,10 +1,14 @@
 import type {
-    ScriptCharacterGenderOption, ScriptCharacterRef, ScriptRepository,
+    ScriptCharacterGenderOption,
+    ScriptCharacterRef,
+    ScriptRepository,
 } from '@stagistic/db';
 import {normalizeCharacterKey} from '@stagistic/script';
 
 import {
-    createReactiveCollection, createReactiveCollectionStatusStore, toDomainCollectionValue,
+    createReactiveCollection,
+    createReactiveCollectionStatusStore,
+    toDomainCollectionValue,
 } from '../collections';
 import {type CharacterField, persistCharacterFieldChanges} from './persistCharacterFieldChanges';
 

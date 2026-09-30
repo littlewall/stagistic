@@ -39,7 +39,10 @@ interface PgliteBootstrap {
 const DEFAULT_DATA_DIR = 'idb://stagistic-main';
 
 export const createPgliteBootstrap = ({
-    fsBundleUrl, wasmUrl, dataDir = DEFAULT_DATA_DIR, workerFactory,
+    fsBundleUrl,
+    wasmUrl,
+    dataDir = DEFAULT_DATA_DIR,
+    workerFactory,
 }: CreatePgliteBootstrapOptions): PgliteBootstrap => {
     if (workerFactory) {
         let dbPromise: Promise<LocalDb> | null = null;

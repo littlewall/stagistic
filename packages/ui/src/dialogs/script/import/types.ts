@@ -6,7 +6,10 @@ export interface ImportScriptFile {
 }
 
 export type StepkgPeekResult = {
-    ok: true, scriptId: string, packageTitle: string, existingLocalTitle: string | null,
+    ok: true,
+    scriptId: string,
+    packageTitle: string,
+    existingLocalTitle: string | null,
 } | {ok: false, message: string};
 
 export interface ImportDropZoneProps {
@@ -23,7 +26,9 @@ export interface UseImportScriptModalStateArgs {
     isOpen: boolean,
     onImportStagistic: (payload: ImportPayload) => void | Promise<void>,
     onImportStepkgAsNew: (payload: {
-        fileName: string, bytes: Uint8Array, title: string,
+        fileName: string,
+        bytes: Uint8Array,
+        title: string,
     }) => void | Promise<void>,
     onReplaceWithStepkg: (payload: {fileName: string, bytes: Uint8Array}) => void | Promise<void>,
     onDownloadStepkgBackup: (scriptId: string) => void | Promise<void>,

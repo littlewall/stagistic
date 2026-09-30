@@ -12,9 +12,14 @@ import {
 
 const characters = [
     {
-        id: 'alice', key: 'ALICE', displayName: 'Alice',
-    }, {
-        id: 'bob', key: 'BOB', displayName: 'Bob',
+        id: 'alice',
+        key: 'ALICE',
+        displayName: 'Alice',
+    },
+    {
+        id: 'bob',
+        key: 'BOB',
+        displayName: 'Bob',
     },
 ];
 
@@ -66,18 +71,26 @@ describe('filterScriptByCharacter', () => {
             {mode: 'only', characterIds: ['anna']},
             [
                 {
-                    id: 'anna', key: 'ANNA', displayName: 'Anna',
+                    id: 'anna',
+                    key: 'ANNA',
+                    displayName: 'Anna',
                 },
             ],
             [
                 {
-                    id: 'all', key: 'ALL', memberIds: ['anna'],
+                    id: 'all',
+                    key: 'ALL',
+                    memberIds: ['anna'],
                 },
                 {
-                    id: 'chorus', key: 'CHORUS', memberIds: ['bob'],
+                    id: 'chorus',
+                    key: 'CHORUS',
+                    memberIds: ['bob'],
                 },
                 {
-                    id: 'empty', key: 'EMPTY', memberIds: [],
+                    id: 'empty',
+                    key: 'EMPTY',
+                    memberIds: [],
                 },
             ],
         );

@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ScriptDocument} from '../document';
@@ -14,9 +16,14 @@ const doc: ScriptDocument = {
             attrs: {id: 'b1'},
             content: [
                 {
-                    type: 'text', text: 'Hello ', marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't1'}}],
-                }, {
-                    type: 'text', text: 'there', marks: [{type: 'bold'}, {type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't2'}}],
+                    type: 'text',
+                    text: 'Hello ',
+                    marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't1'}}],
+                },
+                {
+                    type: 'text',
+                    text: 'there',
+                    marks: [{type: 'bold'}, {type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't2'}}],
                 },
             ],
         },
@@ -25,7 +32,9 @@ const doc: ScriptDocument = {
             attrs: {id: 'b2'},
             content: [
                 {
-                    type: 'text', text: 'Exit', marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't1'}}],
+                    type: 'text',
+                    text: 'Exit',
+                    marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't1'}}],
                 },
             ],
         },
@@ -34,7 +43,9 @@ const doc: ScriptDocument = {
             attrs: {id: 'b3'},
             content: [
                 {
-                    type: 'text', text: 'x', marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: ''}}],
+                    type: 'text',
+                    text: 'x',
+                    marks: [{type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: ''}}],
                 },
             ],
         },

@@ -3,7 +3,9 @@ import {vi} from 'vite-plus/test';
 
 import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
 import type {
-    AttributeManagerCharacter, AttributeManagerCharacterWorkspaceId, AttributeManagerGroup,
+    AttributeManagerCharacter,
+    AttributeManagerCharacterWorkspaceId,
+    AttributeManagerGroup,
 } from './attributeManagerCharacterTypes';
 
 export const mountedRoots: Root[] = [];
@@ -17,7 +19,8 @@ export const CHARACTERS: AttributeManagerCharacter[] = [
         voiceType: null,
         vocalRangeLow: null,
         vocalRangeHigh: null,
-    }, {
+    },
+    {
         id: 'char-2',
         name: 'BORIS',
         color: '#aa9988',
@@ -35,7 +38,8 @@ export const GROUPS: AttributeManagerGroup[] = [
         color: '#778899',
         memberIds: [],
         usageCount: 2,
-    }, {
+    },
+    {
         id: 'group-2',
         name: 'ENSEMBLE',
         color: null,

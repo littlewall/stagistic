@@ -224,7 +224,10 @@ export const buildContentsPages = (
     const geometry = createContentsGeometry(settings, plan.showScoreColumn);
     const heading = HEADINGS[plan.variant];
     const cursor: Cursor = {
-        pages: [], current: [], y: 0, actName: null,
+        pages: [],
+        current: [],
+        y: 0,
+        actName: null,
     };
 
     startPage(cursor, geometry, heading);

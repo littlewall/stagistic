@@ -6,7 +6,10 @@ import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 

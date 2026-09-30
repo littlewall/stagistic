@@ -11,7 +11,10 @@ export type SwitchProps = Omit<RACSwitchProps, 'children' | 'className'> & {
 };
 
 export const Switch = ({
-    className, children, variant = 'default', ...props
+    className,
+    children,
+    variant = 'default',
+    ...props
 }: SwitchProps) => (
     <RACSwitch
         {...props}
