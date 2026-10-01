@@ -1,5 +1,6 @@
 /*
- * Singular geometry: the inline dot preview that shows the chosen page-break mark.
+ * Singular geometry: a three-line script fragment previewing the chosen
+ * character highlight. Mirrors the editor's CharacterTagDecorations rules.
  */
 .inlineRow {
     display: flex;
@@ -12,27 +13,61 @@
     }
 }
 
-.selectCompact {
-    --control-trigger-height: 30px;
+.preview {
+    --preview-tint-strength: 30%;
+    --preview-line-tint-strength: 14%;
 
-    width: max-content;
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    & p {
+        margin: 0;
+    }
 }
 
-.previewPrefix {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+:global(:root[data-theme = 'dark']) .preview {
+    --preview-tint-strength: 44%;
+    --preview-line-tint-strength: 22%;
+}
+
+.previewStage {
+    font-style: italic;
     color: var(--color-text-muted);
 }
 
-.previewDots {
-    display: inline-flex;
-    gap: var(--space-md);
-    align-items: center;
+.previewCue {
+    padding-left: 10ch;
 }
 
-.previewDot {
-    width: 10px;
-    height: 10px;
-    border: 1px solid color-mix(in oklch, var(--color-text) 14%, var(--color-surface));
-    border-radius: var(--radius-full);
+.previewLine {
+    justify-self: start;
+    margin-left: 4ch;
+}
+
+.previewName {
+    font-style: normal;
+}
+
+.preview:not([data-character-decoration = 'none']) .previewName {
+    text-decoration-color: oklch(from var(--preview-character-color, transparent) l calc(c * 1.4) h);
+    text-decoration-line: underline;
+    text-decoration-thickness: .09em;
+    text-underline-offset: .16em;
+}
+
+.preview[data-character-decoration ^= 'underline-tint'] .previewName {
+    background: color-mix(in oklch, var(--preview-character-color, transparent) var(--preview-tint-strength), transparent);
+    border-radius: var(--radius-xs);
+}
+
+.preview[data-character-decoration = 'underline-tint-lines'] .previewLine {
+    background: color-mix(in oklch, var(--preview-character-color, transparent) var(--preview-line-tint-strength), transparent);
 }

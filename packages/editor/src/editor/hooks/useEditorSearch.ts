@@ -1,3 +1,4 @@
+import {isApplePlatform} from '@stagistic/shared';
 import {useHotkey} from '@tanstack/react-hotkeys';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEditorState} from '@tiptap/react';
@@ -10,6 +11,7 @@ import {
     useCallback,
     useEffect,
     useRef,
+    useState,
 } from 'react';
 
 import {getEditorSearchSnapshot, getSceneCollapseSnapshot} from '../tiptap/extensions';
@@ -29,16 +31,29 @@ export interface UseEditorSearchResult {
     onClear: () => void,
     onPreviousResult: () => void,
     onNextResult: () => void,
+    isCaseSensitive: boolean,
+    onCaseSensitiveChange: (isCaseSensitive: boolean) => void,
+    replaceInputRef: RefObject<HTMLInputElement | null>,
+    isReplaceOpen: boolean,
+    onReplaceOpenChange: (isOpen: boolean) => void,
+    replacement: string,
+    canReplace: boolean,
+    onReplacementChange: ChangeEventHandler<HTMLInputElement>,
+    onReplace: () => void,
+    onReplaceAll: () => void,
 }
 
 const getWindowTarget = () => typeof window === 'undefined' ? null : window;
 
-const ownsAnotherEditingContext = (target: EventTarget | null, editorElement: HTMLElement, searchInput: HTMLInputElement | null) => {
+// VS Code's replace shortcut: Cmd+Alt+F on Apple (Cmd+H hides the app), Ctrl+H elsewhere.
+const REPLACE_HOTKEY = isApplePlatform() ? 'Mod+Alt+F' : 'Mod+H';
+
+const ownsAnotherEditingContext = (target: EventTarget | null, editorElement: HTMLElement, ownInputs: readonly (HTMLInputElement | null)[]) => {
     if (!(target instanceof HTMLElement)) {
         return false;
     }
 
-    if (editorElement.contains(target) || searchInput === target) {
+    if (editorElement.contains(target) || ownInputs.includes(target as HTMLInputElement)) {
         return false;
     }
 
@@ -47,6 +62,9 @@ const ownsAnotherEditingContext = (target: EventTarget | null, editorElement: HT
 
 export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchResult => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const replaceInputRef = useRef<HTMLInputElement>(null);
+    const pendingReplaceFocusRef = useRef(false);
+    const [isReplaceOpen, setIsReplaceOpen] = useState(false);
     const state = useEditorState({
         editor,
         selector: ({editor: stateEditor}) => {
@@ -56,6 +74,8 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                     currentIndex: -1,
                     resultCount: 0,
                     activeFrom: null,
+                    isCaseSensitive: false,
+                    isEditable: false,
                 };
             }
 
@@ -67,6 +87,8 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                 currentIndex: snapshot.currentIndex,
                 resultCount: snapshot.results.length,
                 activeFrom: active?.from ?? null,
+                isCaseSensitive: snapshot.criteria.caseSensitive,
+                isEditable: stateEditor.isEditable,
             };
         },
         equalityFn: (a, b) => Boolean(
@@ -74,14 +96,19 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
             && a.query === b.query
             && a.currentIndex === b.currentIndex
             && a.resultCount === b.resultCount
-            && a.activeFrom === b.activeFrom,
+            && a.activeFrom === b.activeFrom
+            && a.isCaseSensitive === b.isCaseSensitive
+            && a.isEditable === b.isEditable,
         ),
     }) ?? {
         query: '',
         currentIndex: -1,
         resultCount: 0,
         activeFrom: null,
+        isCaseSensitive: false,
+        isEditable: false,
     };
+    const [replacement, setReplacement] = useState('');
 
     const onQueryChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
         event => {
@@ -112,6 +139,35 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         inputRef.current?.focus();
     }, [editor]);
 
+    const onCaseSensitiveChange = useCallback((isCaseSensitive: boolean) => {
+        if (!editor) {
+            return;
+        }
+
+        editor.commands.setSearchCriteria({
+            ...getEditorSearchSnapshot(editor.state).criteria,
+            caseSensitive: isCaseSensitive,
+        });
+    }, [editor]);
+
+    const focusReplaceInput = useCallback(() => {
+        pendingReplaceFocusRef.current = false;
+        replaceInputRef.current?.focus();
+        replaceInputRef.current?.select();
+    }, []);
+
+    const onReplacementChange = useCallback<ChangeEventHandler<HTMLInputElement>>(event => {
+        setReplacement(event.target.value);
+    }, []);
+
+    const onReplace = useCallback(() => {
+        editor?.commands.replaceCurrentSearchResult(replacement);
+    }, [editor, replacement]);
+
+    const onReplaceAll = useCallback(() => {
+        editor?.commands.replaceAllSearchResults(replacement);
+    }, [editor, replacement]);
+
     const onInputKeyDown = useCallback<KeyboardEventHandler<HTMLInputElement>>(
         event => {
             if (event.nativeEvent.isComposing || event.key !== 'Enter') {
@@ -134,7 +190,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         event => {
             const editorElement = editor?.view.dom;
 
-            if (!editorElement || ownsAnotherEditingContext(event.target, editorElement, inputRef.current)) {
+            if (!editorElement || ownsAnotherEditingContext(event.target, editorElement, [inputRef.current, replaceInputRef.current])) {
                 return;
             }
 
@@ -149,6 +205,37 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
             stopPropagation: false,
         },
     );
+
+    useHotkey(
+        REPLACE_HOTKEY,
+        event => {
+            const editorElement = editor?.view.dom;
+
+            if (!editorElement || ownsAnotherEditingContext(event.target, editorElement, [inputRef.current, replaceInputRef.current])) {
+                return;
+            }
+
+            event.preventDefault();
+            pendingReplaceFocusRef.current = true;
+            setIsReplaceOpen(true);
+
+            if (replaceInputRef.current) {
+                focusReplaceInput();
+            }
+        },
+        {
+            enabled: Boolean(editor),
+            target: getWindowTarget(),
+            preventDefault: false,
+            stopPropagation: false,
+        },
+    );
+
+    useEffect(() => {
+        if (isReplaceOpen && pendingReplaceFocusRef.current) {
+            focusReplaceInput();
+        }
+    }, [focusReplaceInput, isReplaceOpen]);
 
     useEffect(() => {
         if (!editor || state.activeFrom === null) {
@@ -192,5 +279,15 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         onClear,
         onPreviousResult,
         onNextResult,
+        isCaseSensitive: state.isCaseSensitive,
+        onCaseSensitiveChange,
+        replaceInputRef,
+        isReplaceOpen,
+        onReplaceOpenChange: setIsReplaceOpen,
+        replacement,
+        canReplace: state.isEditable && state.resultCount > 0,
+        onReplacementChange,
+        onReplace,
+        onReplaceAll,
     };
 };

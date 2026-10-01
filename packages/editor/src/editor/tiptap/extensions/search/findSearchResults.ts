@@ -11,11 +11,20 @@ interface TextSegment {
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 
+// Inline atoms (music pills) break the text run so a match can never span — and a replace never delete — one.
+const INLINE_ATOM_PLACEHOLDER = '\uFFFC';
+
 const collectText = (block: ProseMirrorNode, blockFrom: number) => {
     const segments: TextSegment[] = [];
     let text = '';
 
     block.descendants((node, relativeFrom) => {
+        if (node.isInline && node.isLeaf && !node.isText) {
+            text += INLINE_ATOM_PLACEHOLDER;
+
+            return false;
+        }
+
         if (!node.isText || !node.text) {
             return true;
         }

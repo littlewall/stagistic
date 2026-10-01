@@ -4,9 +4,8 @@ import s from '../pages/index.module.css';
 ---
 
 <section class={s.forTheatre} id="creator">
-    <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
-        <div>
-            <h2 class={s.forTheatreTitle}>Built by a writer, for writers.</h2>
+    <div class={clsx(s.forTheatreInner, s.creatorInner, s.reveal)} data-reveal>
+        <div class={s.creatorHeading}>
             <img
                 src="/about/milan-zitka.jpg"
                 alt="Portrait of Milan Zítka"
@@ -16,6 +15,7 @@ import s from '../pages/index.module.css';
                 loading="lazy"
                 decoding="async"
             />
+            <h2 class={s.forTheatreTitle}>Built by a writer, for writers.</h2>
         </div>
         <div>
             <p class={s.forTheatreText}>

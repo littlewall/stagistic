@@ -4,7 +4,6 @@ import {useEffect} from 'react';
 export const useEditorCharacterSync = (
     editor: TiptapEditor | null,
     persistentCharacters: unknown,
-    characterColorSaturation: number | undefined,
 ) => {
     useEffect(() => {
         if (!editor) {
@@ -19,7 +18,6 @@ export const useEditorCharacterSync = (
     }, [
         editor,
         persistentCharacters,
-        characterColorSaturation,
     ]);
 
     useEffect(() => {

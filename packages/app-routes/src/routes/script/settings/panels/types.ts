@@ -2,6 +2,7 @@ import type {
     BlockCasing,
     BlockSettingsPatch,
     BlockShortcut,
+    CharacterDecoration,
     EditorSettings,
     EditorSettingsOverride,
     HeaderFooterSettingsPatch,
@@ -30,7 +31,7 @@ interface ElementResetHandlers {
 }
 
 export interface VisualPreferencesHandlers {
-    onUpdateCharacterColorSaturation: (value: number) => void,
+    onUpdateCharacterDecoration: (value: CharacterDecoration) => void,
 }
 
 export interface StructureHandlers {

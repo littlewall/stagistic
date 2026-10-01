@@ -9,14 +9,12 @@ import type {EditorSidebarCharacter} from './types';
 
 interface CharacterRowConfirmedProps {
     character: EditorSidebarCharacter,
-    characterColorSaturation?: number,
     onEditCharacter?: (characterId: string) => void,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
 }
 
 export const CharacterRowConfirmed = ({
     character,
-    characterColorSaturation,
     onEditCharacter,
     onSetCharacterColor,
 }: CharacterRowConfirmedProps) => {
@@ -26,7 +24,6 @@ export const CharacterRowConfirmed = ({
         character,
         isColorActionDisabled,
         onSetCharacterColor,
-        characterColorSaturation,
     });
 
     return (

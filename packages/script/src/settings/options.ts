@@ -60,20 +60,25 @@ export const formatSceneNumber = (sceneNumber: number, format: SceneNumberFormat
     return format === 'paren' ? `${sceneNumber})` : `${sceneNumber}.`;
 };
 
-export const CHARACTER_COLOR_SATURATION_MIN = 30;
-export const CHARACTER_COLOR_SATURATION_MAX = 60;
-export const CHARACTER_COLOR_SATURATION_DEFAULT = CHARACTER_COLOR_SATURATION_MAX;
-export const CHARACTER_COLOR_SATURATION_OPTIONS = [
-    30,
-    40,
-    50,
-    60,
+/** Fixed HSL saturation (percent) applied to every character color. */
+export const CHARACTER_COLOR_SATURATION = 65;
+
+/**
+ * How character names (cue blocks + stage-direction tags) are decorated on the
+ * script canvas. Each step adds to the previous one: underline → tinted names →
+ * tinted dialogue/lyrics lines spoken by that character. `none` drops all of it.
+ */
+export const CHARACTER_DECORATION_OPTIONS = [
+    'underline',
+    'underline-tint',
+    'underline-tint-lines',
+    'none',
 ] as const;
 
-export const clampCharacterColorSaturation = (value: number | null | undefined): number => {
-    if (!Number.isFinite(value)) {
-        return CHARACTER_COLOR_SATURATION_DEFAULT;
-    }
+export type CharacterDecoration = (typeof CHARACTER_DECORATION_OPTIONS)[number];
 
-    return Math.max(CHARACTER_COLOR_SATURATION_MIN, Math.min(CHARACTER_COLOR_SATURATION_MAX, Math.round(value as number)));
+export const DEFAULT_CHARACTER_DECORATION: CharacterDecoration = 'underline';
+
+export const isCharacterDecoration = (value: unknown): value is CharacterDecoration => {
+    return typeof value === 'string' && CHARACTER_DECORATION_OPTIONS.includes(value as CharacterDecoration);
 };

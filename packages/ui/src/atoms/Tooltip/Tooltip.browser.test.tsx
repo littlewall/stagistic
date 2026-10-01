@@ -58,7 +58,7 @@ afterEach(() => {
 });
 
 describe('Tooltip shortcut', () => {
-    it('shows the shortcut below the label', async () => {
+    it('shows the shortcut on the label line as a readable keycap', async () => {
         const trigger = await mountTooltip('⌘B');
 
         await warmPointerModality(trigger);
@@ -70,7 +70,14 @@ describe('Tooltip shortcut', () => {
 
         expect(tooltip.textContent).toBe('Bold⌘B');
         expect(shortcut?.textContent).toBe('⌘B');
-        expect(shortcut?.getBoundingClientRect().top).toBeGreaterThanOrEqual(label?.getBoundingClientRect().bottom ?? Infinity);
+
+        const shortcutBox = shortcut!.getBoundingClientRect();
+        const labelBox = label!.getBoundingClientRect();
+        const middle = (box: DOMRect) => box.top + box.height / 2;
+
+        expect(shortcutBox.left).toBeGreaterThan(labelBox.right);
+        expect(Math.abs(middle(shortcutBox) - middle(labelBox))).toBeLessThanOrEqual(1);
+        expect(getComputedStyle(shortcut!).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     });
 
     it('keeps a tooltip without a shortcut unchanged', async () => {

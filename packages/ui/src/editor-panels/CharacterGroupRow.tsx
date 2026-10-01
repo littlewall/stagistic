@@ -10,14 +10,12 @@ import type {EditorSidebarGroup} from './types';
 
 interface CharacterGroupRowProps {
     group: EditorSidebarGroup,
-    characterColorSaturation?: number,
     onEditGroup?: (groupId: string) => void,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void,
 }
 
 export const CharacterGroupRow = ({
     group,
-    characterColorSaturation,
     onEditGroup,
     onSetGroupColor,
 }: CharacterGroupRowProps) => {
@@ -27,7 +25,6 @@ export const CharacterGroupRow = ({
         character: group,
         isColorActionDisabled,
         onSetCharacterColor: onSetGroupColor,
-        characterColorSaturation,
     });
 
     return (

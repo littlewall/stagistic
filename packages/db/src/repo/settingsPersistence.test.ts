@@ -24,7 +24,7 @@ describe('settings persistence', () => {
         await handlers.saveScriptSettings('script-settings', {
             page: {marginTopPx: 72},
             typography: {fontSizePx: 16},
-            visual: {characterColorSaturation: 42},
+            visual: {characterDecoration: 'underline-tint-lines'},
             initialPages: {
                 castAndPlace: {castOrderBy: 'appearance', showOutline: false},
                 songs: {showCharactersInSongs: true},
@@ -46,7 +46,7 @@ describe('settings persistence', () => {
         const stored = await handlers.loadScriptSettings('script-settings');
 
         expect(stored?.page?.marginTopPx).toBe(72);
-        expect(stored?.visual?.characterColorSaturation).toBe(42);
+        expect(stored?.visual?.characterDecoration).toBe('underline-tint-lines');
         expect(stored?.initialPages).toEqual({
             castAndPlace: {castOrderBy: 'appearance', showOutline: false},
             songs: {showCharactersInSongs: true},

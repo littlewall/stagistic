@@ -22,7 +22,6 @@ interface UseSuggestionOverlayComputationArgs {
     canvasRef: RefObject<HTMLElement | null>,
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
     liveCountsByKey: ReadonlyMap<string, number>,
-    characterColorSaturation?: number,
     suppressedSelectionRef: MutableRefObject<SuppressedSelection | null>,
     suggestionOrderByKeyRef: MutableRefObject<ReadonlyMap<string, number>>,
     closeOverlay: () => void,
@@ -46,7 +45,6 @@ export const useSuggestionOverlayComputation = ({
     canvasRef,
     normalizedPersistentCharacters,
     liveCountsByKey,
-    characterColorSaturation,
     suppressedSelectionRef,
     suggestionOrderByKeyRef,
     closeOverlay,
@@ -83,7 +81,6 @@ export const useSuggestionOverlayComputation = ({
             liveCountsByKey,
             suppressedSelection: suppressedSelectionRef.current,
             previousOrderByKey: suggestionOrderByKeyRef.current,
-            characterColorSaturation,
         });
 
         if (!overlay || overlay.shouldKeepSuppressedSelection || !overlay.style || !overlay.suggestions || overlay.suggestions.length === 0) {
@@ -125,7 +122,6 @@ export const useSuggestionOverlayComputation = ({
         });
     }, [
         canvasRef,
-        characterColorSaturation,
         closeOverlay,
         editor,
         liveCountsByKey,

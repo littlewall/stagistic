@@ -2,10 +2,10 @@ import {normalizeCharacterColorHex} from '../../../characters/characterColors';
 import {getConfirmedCharacterColor, normalizePersistentCharacterRefs} from '../../../characters/colorResolver';
 import type {PersistentCharacterRef} from '../types';
 
-export const getPersistentColorByKey = (normalizedPersistentCharacters: readonly PersistentCharacterRef[], characterColorSaturation?: number) => {
+export const getPersistentColorByKey = (normalizedPersistentCharacters: readonly PersistentCharacterRef[]) => {
     return new Map(
         normalizedPersistentCharacters.map(character => {
-            return [character.key, getConfirmedCharacterColor(character.id, character.colorHex ?? null, characterColorSaturation)] as const;
+            return [character.key, getConfirmedCharacterColor(character.id, character.colorHex ?? null)] as const;
         }),
     );
 };

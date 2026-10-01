@@ -196,7 +196,7 @@ describe('editor search', () => {
         expect(await resultText()).toBe('1 / 3');
     });
 
-    it('shows zero results, disables navigation, and restores the search icon on clear', async () => {
+    it('shows zero results, disables navigation, and restores the search icon once cleared search loses focus', async () => {
         renderEditor();
 
         const input = await findSearchInput();
@@ -212,7 +212,80 @@ describe('editor search', () => {
         await poll(() => input.value === '' ? true : null, 'cleared search input');
 
         expect(input.value).toBe('');
+        // Clear keeps focus in the field, so search stays active until focus leaves it.
+        expect(await resultText()).toBe('0 / 0');
+
+        input.blur();
+
+        await poll(() => document.querySelector('label[aria-label="Focus search"]'), 'search icon');
         expect(document.querySelector('output[aria-label="Search result position"]')).toBeNull();
+    });
+
+    it('replaces the active result and then every remaining one from the replace row', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+        const input = await findSearchInput();
+
+        setSearchQuery(input, 'light');
+
+        expect(await resultText()).toBe('1 / 3');
+
+        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Toggle replace"]')!);
+
+        const replaceInput = await poll(() => document.querySelector<HTMLInputElement>('input[aria-label="Replace with"]'), 'replace input');
+
+        await userEvent.type(replaceInput, 'lamp');
+        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Replace"]')!);
+
+        expect(await waitForResult('1 / 2')).toBe('1 / 2');
+        expect(editor.getText()).toContain('lamp the lantern.');
+
+        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Replace all"]')!);
+
+        expect(await waitForResult('0 / 0')).toBe('0 / 0');
+        expect(editor.getText()).toContain('A lamp remains. lamp fades.');
+        expect(document.querySelector<HTMLButtonElement>('button[aria-label="Replace"]')?.disabled).toBe(true);
+    });
+
+    it('opens and focuses the replace row through the replace shortcut', async () => {
+        renderEditor();
+
+        await getEditor();
+        await findSearchInput();
+
+        const apple = platformModKey() === 'Meta';
+        const event = new KeyboardEvent('keydown', {
+            key: apple ? 'ƒ' : 'h',
+            code: apple ? 'KeyF' : 'KeyH',
+            metaKey: apple,
+            ctrlKey: !apple,
+            altKey: apple,
+            bubbles: true,
+            cancelable: true,
+        });
+
+        window.dispatchEvent(event);
+
+        const replaceInput = await poll(() => document.querySelector<HTMLInputElement>('input[aria-label="Replace with"]'), 'replace input');
+
+        await poll(() => document.activeElement === replaceInput ? true : null, 'focused replace input');
+
+        expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('narrows results with match case', async () => {
+        renderEditor();
+
+        const input = await findSearchInput();
+
+        setSearchQuery(input, 'light');
+
+        expect(await resultText()).toBe('1 / 3');
+
+        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Match case"]')!);
+
+        expect(await waitForResult('1 / 1')).toBe('1 / 1');
     });
 
     it('wraps button navigation between the last and first results', async () => {

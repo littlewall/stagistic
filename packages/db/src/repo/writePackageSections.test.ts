@@ -16,10 +16,10 @@ describe('tx-level package section writers', () => {
 
         await db.transaction(async tx => {
             await writeTitlePageFieldsTx(tx, 'sc1', {source: 'Original story', subtitle: 'A play'}, 1_000);
-            await writeScriptSettingsTx(tx, 'sc1', {visual: {characterColorSaturation: 0.5}}, 1_000);
+            await writeScriptSettingsTx(tx, 'sc1', {visual: {characterDecoration: 'underline-tint'}}, 1_000);
         });
 
         expect(await readTitlePageSettings(db, 'sc1')).toMatchObject({source: 'Original story', subtitle: 'A play'});
-        expect(await readScriptSettings(db, 'sc1')).toMatchObject({visual: {characterColorSaturation: 0.5}});
+        expect(await readScriptSettings(db, 'sc1')).toMatchObject({visual: {characterDecoration: 'underline-tint'}});
     });
 });

@@ -1,6 +1,10 @@
 import {Extension} from '@tiptap/core';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import {Plugin, PluginKey} from '@tiptap/pm/state';
+import {
+    Plugin,
+    PluginKey,
+    type Transaction,
+} from '@tiptap/pm/state';
 import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
 import {findSearchResults} from './findSearchResults';
@@ -12,7 +16,7 @@ import type {
 } from './types';
 import {DEFAULT_SEARCH_CRITERIA} from './types';
 
-type SearchMeta = {type: 'criteria', criteria: SearchCriteria} | {type: 'clear'} | {type: 'next'} | {type: 'previous'};
+type SearchMeta = {type: 'criteria', criteria: SearchCriteria} | {type: 'clear'} | {type: 'next'} | {type: 'previous'} | {type: 'replaced', origin: number};
 
 const editorSearchPluginKey = new PluginKey<EditorSearchSnapshot>('editor-search');
 
@@ -72,6 +76,14 @@ const buildUpdatedDocumentSnapshot = (document: ProseMirrorNode, previous: Edito
     return buildSnapshot(document, previous.criteria, results, currentIndex);
 };
 
+const replaceRange = (tr: Transaction, {from, to}: SearchResult, replacement: string) => {
+    if (replacement) {
+        tr.insertText(replacement, from, to);
+    } else {
+        tr.delete(from, to);
+    }
+};
+
 export const getEditorSearchSnapshot = (state: Parameters<PluginKey<EditorSearchSnapshot>['getState']>[0]) => {
     return editorSearchPluginKey.getState(state) ?? emptySnapshot;
 };
@@ -83,6 +95,8 @@ declare module '@tiptap/core' {
             clearSearch: () => ReturnType,
             goToNextSearchResult: () => ReturnType,
             goToPreviousSearchResult: () => ReturnType,
+            replaceCurrentSearchResult: (replacement: string) => ReturnType,
+            replaceAllSearchResults: (replacement: string) => ReturnType,
         },
     }
 }
@@ -124,6 +138,46 @@ export const SearchExtension = Extension.create({
 
                     return true;
                 },
+            replaceCurrentSearchResult:
+                replacement => ({
+                    tr,
+                    state,
+                    dispatch,
+                }) => {
+                    const snapshot = getEditorSearchSnapshot(state);
+                    const current = snapshot.results[snapshot.currentIndex];
+
+                    if (!current) {
+                        return false;
+                    }
+
+                    if (dispatch) {
+                        replaceRange(tr, current, replacement);
+                        // Activate the first match after the inserted text, so a replacement containing the query is skipped.
+                        tr.setMeta(editorSearchPluginKey, {type: 'replaced', origin: current.from + replacement.length} satisfies SearchMeta);
+                    }
+
+                    return true;
+                },
+            replaceAllSearchResults:
+                replacement => ({
+                    tr,
+                    state,
+                    dispatch,
+                }) => {
+                    const {results} = getEditorSearchSnapshot(state);
+
+                    if (results.length === 0) {
+                        return false;
+                    }
+
+                    if (dispatch) {
+                        // Back to front keeps earlier positions valid without remapping.
+                        [...results].reverse().forEach(result => replaceRange(tr, result, replacement));
+                    }
+
+                    return true;
+                },
         };
     },
 
@@ -138,6 +192,10 @@ export const SearchExtension = Extension.create({
 
                         if (meta?.type === 'criteria') {
                             return buildCriteriaSnapshot(tr.doc, meta.criteria, tr.selection.anchor);
+                        }
+
+                        if (meta?.type === 'replaced') {
+                            return buildCriteriaSnapshot(tr.doc, previous.criteria, meta.origin);
                         }
 
                         if (meta?.type === 'clear') {

@@ -27,7 +27,6 @@ export interface AttributeManagerCharactersPanelProps {
     initialSelectedGroupId?: string | null,
     initialWorkspaceId?: AttributeManagerCharacterWorkspaceId,
     isLoading?: boolean,
-    characterColorSaturation?: number,
     draftScopeKey?: string | null,
     deletingCharacterIds?: string[],
     renamingCharacterIds?: string[],

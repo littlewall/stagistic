@@ -1,5 +1,5 @@
 import {buildDefaultBlockSettings} from '../blocks/derived/defaultBlockSettings';
-import {CHARACTER_COLOR_SATURATION_DEFAULT} from './options';
+import {DEFAULT_CHARACTER_DECORATION} from './options';
 import type {
     EditorSettings,
     HeaderFooterAlignment,
@@ -43,7 +43,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         lineHeight: 1.2,
     },
     visual: {
-        characterColorSaturation: CHARACTER_COLOR_SATURATION_DEFAULT,
+        characterDecoration: DEFAULT_CHARACTER_DECORATION,
     },
     structure: {
         actDisplay: {

@@ -2,6 +2,7 @@ import type {ScriptCommentsState} from '@stagistic/app-core';
 import type {CommentBlockMerge, EditorCommentThreadRef} from '@stagistic/editor';
 import {useMemo} from 'react';
 
+import {matchesCommentFilter} from './filterThreads';
 import type {CommentsPanelState} from './useCommentsPanelState';
 
 interface UseCommentsEditorBridgeArgs {
@@ -18,16 +19,18 @@ export const useCommentsEditorBridge = ({
     revealPanel,
     isPanelOpen,
 }: UseCommentsEditorBridgeArgs) => {
+    const {filter, requestActivation} = panelState;
+    // The editor marks only what the panel lists, so the filter applies to both.
     const commentThreads = useMemo<readonly EditorCommentThreadRef[]>(
         () => comments.threads.map(thread => ({
             id: thread.id,
             status: thread.status === 'resolved' ? 'resolved' : 'open',
             anchorKind: thread.anchorKind === 'block' ? 'block' : 'range',
             anchorBlockId: thread.anchorBlockId,
+            isFilteredOut: !matchesCommentFilter(thread, filter),
         })),
-        [comments.threads],
+        [comments.threads, filter],
     );
-    const {requestActivation} = panelState;
     const {moveBlockAnchors} = comments;
 
     const callbacks = useMemo(

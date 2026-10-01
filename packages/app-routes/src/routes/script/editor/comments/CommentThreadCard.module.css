@@ -17,8 +17,8 @@
     border-color: var(--color-border);
 }
 
-/* Lit by hover (editor or card): a lighter tint than the active header, so the two never blur. */
-.highlighted .summary {
+/* Lit by hover (editor or card): only the head strip, a lighter tint than the active header. */
+.highlighted .summaryHead {
     background: color-mix(in oklch, var(--state-selected) 50%, transparent);
 }
 
@@ -57,6 +57,13 @@
     align-items: center;
     justify-content: space-between;
     font-size: var(--font-size-xs);
+}
+
+/* Full-width strip as tall as the active header, so lighting it never shifts the card. */
+.summaryHead {
+    min-height: var(--control-height-md);
+    margin: calc(var(--space-md) * -1) calc(var(--space-lg) * -1) 0;
+    padding: 0 var(--space-lg);
 }
 
 /* Tinted strip; clicking anywhere outside the menu collapses the card. */

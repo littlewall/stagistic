@@ -6,6 +6,7 @@
     --L-block-aside: .29;
     --L-block-centered: .23;
     --character-tag-tint-strength: 30%;
+    --character-line-tint-strength: 14%;
     --color-block-scene: oklch(from var(--base-neutral) var(--L-block-scene) calc(c * var(--C-block)) h);
     --color-block-stage-direction: oklch(from var(--base-neutral) var(--L-block-stage-direction) calc(c * var(--C-block)) h);
     --color-block-character: oklch(from var(--base-neutral) var(--L-block-character) calc(c * var(--C-block)) h);
@@ -32,6 +33,7 @@
     --L-block-aside: .82;
     --L-block-centered: .85;
     --character-tag-tint-strength: 44%;
+    --character-line-tint-strength: 22%;
 }
 
 .shellBody {

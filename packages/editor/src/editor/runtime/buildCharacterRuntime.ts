@@ -20,6 +20,7 @@ import type {
     EditorLiveCharacterSnapshot,
     PersistentCharacterRef,
 } from '../contracts';
+import {isScriptBlockNodeName} from '../tiptap/scriptCore';
 import type {EditorCharacterRuntime} from './editorRuntimeTypes';
 
 const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
@@ -33,36 +34,41 @@ interface BuildCharacterRuntimeArgs {
     doc: ProseMirrorNode,
     selectionFrom?: number | null,
     persistentCharacters?: readonly PersistentCharacterRef[],
-    characterColorSaturation?: number,
     colorByCharacterId?: ReadonlyMap<string, string>,
     rememberedColorByKey?: ReadonlyMap<string, string>,
-    characterTagClassNames?: {
-        tag: string,
-        separator: string,
-    },
+    characterTagClassNames?: CharacterTagClassNames,
 }
+
+interface CharacterTagClassNames {
+    tag: string,
+    separator: string,
+    /** Dialogue/lyrics block spoken by the preceding cue's first character. */
+    line?: string,
+}
+
+/** Blocks tinted with their speaker's color. */
+const SPEAKER_LINE_BLOCK_TYPES = new Set(['dialogue', 'lyrics']);
+
+/** Blocks that sit inside a speech without ending it (parentheticals). */
+const SPEAKER_PASSTHROUGH_BLOCK_TYPES = new Set(['aside']);
 
 const joinClassNames = (...classNames: Array<string | undefined>) => classNames
     .filter(Boolean)
     .join(' ');
 
+const resolveIdentityClassName = (tokenEntry: CharacterTokenEntry) => {
+    if (tokenEntry.characterId) {
+        return getCharacterTagIdClassName(tokenEntry.characterId);
+    }
+
+    return tokenEntry.key ? getCharacterTagKeyClassName(tokenEntry.key) : undefined;
+};
+
 const resolveCharacterTagDecorationAttributes = (
     tokenEntry: CharacterTokenEntry,
-    characterTagClassNames?: {
-        tag: string,
-        separator: string,
-    },
+    characterTagClassNames?: CharacterTagClassNames,
 ) => {
-    let identityClassName: string | undefined;
-
-    if (tokenEntry.characterId) {
-        identityClassName = getCharacterTagIdClassName(tokenEntry.characterId);
-    }
-
-    if (!identityClassName && tokenEntry.key) {
-        identityClassName = getCharacterTagKeyClassName(tokenEntry.key);
-    }
-
+    const identityClassName = resolveIdentityClassName(tokenEntry);
     const attributes: Record<string, string> = {
         class: joinClassNames(characterTagClassNames?.tag ?? 'characterTag', identityClassName),
     };
@@ -103,14 +109,66 @@ const resolveNameDecorationEnd = (
     return caretOffset;
 };
 
+/**
+ * Marks every dialogue/lyrics block with its speaker's identity class so the
+ * palette's `--character-tag-color` reaches it. A speech runs from a cue
+ * through dialogue, lyrics and asides; any other block ends it. Multi-character
+ * cues use the first character. Styling is opt-in via the highlight mode CSS.
+ */
+const pushSpeakerLineDecorations = (
+    doc: ProseMirrorNode,
+    tokenEntries: readonly CharacterTokenEntry[],
+    decorations: Decoration[],
+    lineClassName: string,
+) => {
+    const speakerClassByBlockStart = new Map<number, string>();
+
+    tokenEntries.forEach(tokenEntry => {
+        if (tokenEntry.source !== 'cue' || speakerClassByBlockStart.has(tokenEntry.blockStart)) {
+            return;
+        }
+
+        const identityClassName = resolveIdentityClassName(tokenEntry);
+
+        if (identityClassName) {
+            speakerClassByBlockStart.set(tokenEntry.blockStart, identityClassName);
+        }
+    });
+
+    if (speakerClassByBlockStart.size === 0) {
+        return;
+    }
+
+    let speakerClassName: string | null = null;
+
+    doc.descendants((node, pos) => {
+        if (!isScriptBlockNodeName(node.type.name)) {
+            return true;
+        }
+
+        const blockType = String(node.attrs.blockType ?? node.type.name);
+
+        if (blockType === 'character') {
+            speakerClassName = speakerClassByBlockStart.get(pos + 1) ?? null;
+        } else if (SPEAKER_LINE_BLOCK_TYPES.has(blockType)) {
+            if (speakerClassName) {
+                decorations.push(Decoration.node(pos, pos + node.nodeSize, {
+                    class: joinClassNames(lineClassName, speakerClassName),
+                }));
+            }
+        } else if (!SPEAKER_PASSTHROUGH_BLOCK_TYPES.has(blockType)) {
+            speakerClassName = null;
+        }
+
+        return false;
+    });
+};
+
 const buildCharacterDecorations = (
     doc: ProseMirrorNode,
     tokenEntries: readonly CharacterTokenEntry[],
     selectionFrom: number | null | undefined,
-    characterTagClassNames?: {
-        tag: string,
-        separator: string,
-    },
+    characterTagClassNames?: CharacterTagClassNames,
 ) => {
     if (tokenEntries.length === 0) {
         return DecorationSet.empty;
@@ -153,6 +211,8 @@ const buildCharacterDecorations = (
         ));
     });
 
+    pushSpeakerLineDecorations(doc, tokenEntries, decorations, characterTagClassNames?.line ?? 'characterLine');
+
     return DecorationSet.create(doc, decorations);
 };
 
@@ -160,7 +220,6 @@ export const buildCharacterRuntime = ({
     doc,
     selectionFrom,
     persistentCharacters,
-    characterColorSaturation,
     colorByCharacterId,
     rememberedColorByKey,
     characterTagClassNames,
@@ -172,7 +231,6 @@ export const buildCharacterRuntime = ({
     const colorState = buildCharacterDocColorStateFromTokenScan({
         tokenScan,
         persistentCharacters,
-        characterColorSaturation,
         colorByCharacterId,
         rememberedColorByKey,
     });

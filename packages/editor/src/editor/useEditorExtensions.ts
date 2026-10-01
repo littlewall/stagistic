@@ -120,22 +120,22 @@ export const useEditorExtensions = ({
     );
     const editorRuntimeExtension = useMemo(
         () => EditorRuntimeExtension.configure({
-            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
             persistentCharactersRef,
             characterTagClassNames: {
                 tag: characterTagStyles.characterTag,
                 separator: characterTagStyles.characterSeparator,
+                line: characterTagStyles.characterLine,
             },
         }),
         [
+            characterTagStyles.characterLine,
             characterTagStyles.characterSeparator,
             characterTagStyles.characterTag,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
             persistentCharactersRef,
-            resolvedSettings.visual.characterColorSaturation,
         ],
     );
     const characterRefSyncExtension = useMemo(

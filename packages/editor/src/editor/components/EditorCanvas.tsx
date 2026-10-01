@@ -7,6 +7,7 @@ import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
+import {useDismissActiveCommentOnAction} from '../comments/useDismissActiveCommentOnAction';
 import type {
     EditorMusicRemoveRequest,
     PersistentCharacterRef,
@@ -31,7 +32,6 @@ type EditorCanvasProps = {
     onMusicAssigned?: (musicId: string) => void,
     onOpenMusicManager?: (musicId: string) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
-    characterColorSaturation?: number,
     autoFocus?: boolean,
     style?: CSSProperties,
     headerFooter: HeaderFooterSettings,
@@ -47,7 +47,6 @@ export const EditorCanvas = ({
     onMusicAssigned,
     onOpenMusicManager,
     onRequestRemoveMusic,
-    characterColorSaturation,
     autoFocus,
     style,
     headerFooter,
@@ -56,6 +55,8 @@ export const EditorCanvas = ({
     blockShortcuts,
 }: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
+
+    useDismissActiveCommentOnAction(editor);
 
     return (
         <section className={styles.canvas} data-editor-scroll-container="true" ref={canvasRef} style={style}>
@@ -67,7 +68,6 @@ export const EditorCanvas = ({
                 editor={editor}
                 canvasRef={canvasRef}
                 persistentCharacters={persistentCharacters}
-                characterColorSaturation={characterColorSaturation}
             />
             <MusicSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />
             <MusicDraftSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />

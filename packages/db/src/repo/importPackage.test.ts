@@ -30,7 +30,7 @@ const write = (): ScriptPackageWrite => ({
     },
     document: parseStagistic(source).document,
     titlePage: {source: 'Original'},
-    settings: {visual: {characterColorSaturation: 0.4}},
+    settings: {visual: {characterDecoration: 'none'}},
     characters: [],
     groups: [],
     genders: [],
@@ -59,7 +59,7 @@ describe('createScriptFromPackage', () => {
 
         expect(source?.script.title).toBe('Imported');
         expect(source?.titlePage).toMatchObject({source: 'Original'});
-        expect(source?.settings).toMatchObject({visual: {characterColorSaturation: 0.4}});
+        expect(source?.settings).toMatchObject({visual: {characterDecoration: 'none'}});
         expect(source?.document.content.length ?? 0).toBeGreaterThan(0);
     });
 

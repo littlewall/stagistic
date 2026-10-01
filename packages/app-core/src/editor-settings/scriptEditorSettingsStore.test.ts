@@ -16,7 +16,7 @@ describe('script editor settings store', () => {
     it('confirms saves and deletes empty overrides through one source', async () => {
         const initial: ScriptEditorSettingsRecord = {
             scriptId: 'script-1',
-            settings: {visual: {characterColorSaturation: 0.5}},
+            settings: {visual: {characterDecoration: 'underline-tint'}},
         };
         const source = createInMemoryReactiveQuerySource([initial]);
         const saveScriptSettings = vi.fn((

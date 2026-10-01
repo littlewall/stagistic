@@ -1,4 +1,4 @@
-import {CHARACTER_COLOR_SATURATION_MAX, type ScriptDocument} from '@stagistic/script';
+import {type ScriptDocument} from '@stagistic/script';
 import type {Extensions} from '@tiptap/core';
 import HardBreak from '@tiptap/extension-hard-break';
 import Text from '@tiptap/extension-text';
@@ -38,7 +38,6 @@ import {
     buildMiniEditorCharacterPresentation,
     buildMiniEditorCharacters,
     mergeMiniEditorCharacters,
-    MINI_EDITOR_CHARACTER_SATURATION,
     syncMiniEditorCharacterRefs,
 } from './miniEditorCharacters';
 import {buildMiniEditorDocumentStructureSignature, MiniEditorGuardExtension} from './MiniEditorGuardExtension';
@@ -114,13 +113,13 @@ const MiniScriptEditorSurface = ({
             }),
             MusicNumberingExtension,
             EditorRuntimeExtension.configure({
-                characterColorSaturation: MINI_EDITOR_CHARACTER_SATURATION,
                 colorByCharacterIdRef: characterColorRefs.colorByCharacterIdRef,
                 rememberedColorByKeyRef: characterColorRefs.rememberedColorByKeyRef,
                 persistentCharactersRef: characterColorRefs.persistentCharactersRef,
                 characterTagClassNames: {
                     tag: characterTagStyles.characterTag,
                     separator: characterTagStyles.characterSeparator,
+                    line: characterTagStyles.characterLine,
                 },
             }),
             MiniMusicCaretExtension,
@@ -187,7 +186,6 @@ const MiniScriptEditorSurface = ({
             <div
                 className={clsx(styles.root, className)}
                 data-character-highlight="underline"
-                data-character-saturation={CHARACTER_COLOR_SATURATION_MAX}
                 data-character-tag-scope={characterTagScopeId}
                 data-mini-editor
                 ref={rootRef}

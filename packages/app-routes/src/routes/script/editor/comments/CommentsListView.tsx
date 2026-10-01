@@ -1,5 +1,6 @@
 import type {ScriptCommentThread} from '@stagistic/app-core';
-import type {CommentAnchorLocation} from '@stagistic/editor';
+import {type CommentAnchorLocation, useEditorSceneNumberFormat} from '@stagistic/editor';
+import {formatSceneNumber, type SceneNumberFormat} from '@stagistic/script';
 import type {ReactNode} from 'react';
 
 import styles from './ScriptCommentsSidebar.module.css';
@@ -16,7 +17,23 @@ interface SceneGroup {
     threads: ScriptCommentThread[],
 }
 
-const groupByScene = (threads: readonly ScriptCommentThread[], anchors: ReadonlyMap<string, CommentAnchorLocation>) => {
+/** Numbered like the editor's scene heading; the `none` format leaves the bare title. */
+const formatSceneTitle = (anchor: CommentAnchorLocation | undefined, format: SceneNumberFormat) => {
+    if (!anchor?.sceneBlockId || anchor.sceneNumber === null) {
+        return 'No scene';
+    }
+
+    const number = formatSceneNumber(anchor.sceneNumber, format);
+    const title = anchor.sceneTitle || 'Untitled scene';
+
+    return number ? `${number} ${title}` : title;
+};
+
+const groupByScene = (
+    threads: readonly ScriptCommentThread[],
+    anchors: ReadonlyMap<string, CommentAnchorLocation>,
+    format: SceneNumberFormat,
+) => {
     const anchored = threads
         .filter(thread => anchors.has(thread.id))
         .sort((left, right) => {
@@ -40,7 +57,7 @@ const groupByScene = (threads: readonly ScriptCommentThread[], anchors: Readonly
 
         groups.push({
             key,
-            title: anchor?.sceneTitle || 'No scene',
+            title: formatSceneTitle(anchor, format),
             threads: [thread],
         });
     });
@@ -54,7 +71,8 @@ export const CommentsListView = ({
     anchors,
     renderCard,
 }: CommentsListViewProps) => {
-    const groups = groupByScene(threads, anchors);
+    const sceneNumberFormat = useEditorSceneNumberFormat();
+    const groups = groupByScene(threads, anchors, sceneNumberFormat);
     const detached = threads.filter(thread => !anchors.has(thread.id));
 
     return (

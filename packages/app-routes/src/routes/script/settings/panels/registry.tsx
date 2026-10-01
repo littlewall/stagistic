@@ -47,8 +47,8 @@ export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
     ),
     [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: props => (
         <VisualPreferencesSettingsPanel
-            characterColorSaturation={props.resolvedScriptSettings.visual.characterColorSaturation}
-            onUpdateCharacterColorSaturation={props.visualPreferencesHandlers.onUpdateCharacterColorSaturation}
+            characterDecoration={props.resolvedScriptSettings.visual.characterDecoration}
+            onUpdateCharacterDecoration={props.visualPreferencesHandlers.onUpdateCharacterDecoration}
         />
     ),
     [SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS]: props => (

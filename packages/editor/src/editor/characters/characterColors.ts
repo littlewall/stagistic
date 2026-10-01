@@ -1,5 +1,5 @@
 import {
-    clampCharacterColorSaturation,
+    CHARACTER_COLOR_SATURATION,
     normalizeCharacterColorHex,
     normalizeCharacterKey,
 } from '@stagistic/script';
@@ -150,7 +150,7 @@ const toHexChannel = (value: number) => {
         .padStart(2, '0');
 };
 
-export const applyCharacterColorSaturation = (hexColor: string, saturationPercent: number) => {
+export const applyCharacterColorSaturation = (hexColor: string) => {
     const normalized = normalizeCharacterColorHex(hexColor);
 
     if (!normalized) {
@@ -158,7 +158,7 @@ export const applyCharacterColorSaturation = (hexColor: string, saturationPercen
     }
 
     const {hue, lightness} = rgbToHsl(hexToRgb(normalized));
-    const nextSaturation = clampCharacterColorSaturation(saturationPercent) / 100;
+    const nextSaturation = CHARACTER_COLOR_SATURATION / 100;
     const nextRgb = hslToRgb(hue, nextSaturation, lightness);
 
     return `#${toHexChannel(nextRgb.r)}${toHexChannel(nextRgb.g)}${toHexChannel(nextRgb.b)}`.toUpperCase();
@@ -166,15 +166,11 @@ export const applyCharacterColorSaturation = (hexColor: string, saturationPercen
 
 export {normalizeCharacterColorHex};
 
-export const getCharacterColor = (characterKey: string, saturationPercent?: number) => {
+export const getCharacterColor = (characterKey: string) => {
     const colorIndex = hashCharacterToken(characterKey) % CHARACTER_COLOR_PALETTE.length;
     const baseColor = CHARACTER_COLOR_PALETTE[colorIndex] ?? CHARACTER_COLOR_PALETTE[0];
 
-    if (saturationPercent === undefined) {
-        return baseColor;
-    }
-
-    return applyCharacterColorSaturation(baseColor, saturationPercent);
+    return applyCharacterColorSaturation(baseColor);
 };
 
 export const getCharacterColorVarName = (characterKey: string) => {

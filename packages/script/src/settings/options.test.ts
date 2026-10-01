@@ -5,12 +5,9 @@ import {
 } from 'vite-plus/test';
 
 import {
-    CHARACTER_COLOR_SATURATION_DEFAULT,
-    CHARACTER_COLOR_SATURATION_MAX,
-    CHARACTER_COLOR_SATURATION_MIN,
-    clampCharacterColorSaturation,
     formatSceneNumber,
     isBlockShortcut,
+    isCharacterDecoration,
     isSceneNumberFormat,
 } from './options';
 
@@ -74,29 +71,21 @@ describe('formatSceneNumber', () => {
     });
 });
 
-describe('clampCharacterColorSaturation', () => {
-    it('rounds in-range values to the nearest integer', () => {
-        expect(clampCharacterColorSaturation(45.4)).toBe(45);
-        expect(clampCharacterColorSaturation(45.6)).toBe(46);
+describe('isCharacterDecoration', () => {
+    it('accepts every decoration option', () => {
+        for (const value of [
+            'underline',
+            'underline-tint',
+            'underline-tint-lines',
+            'none',
+        ]) {
+            expect(isCharacterDecoration(value)).toBe(true);
+        }
     });
 
-    it('clamps below the minimum up to the minimum', () => {
-        expect(clampCharacterColorSaturation(10)).toBe(CHARACTER_COLOR_SATURATION_MIN);
-    });
-
-    it('clamps above the maximum down to the maximum', () => {
-        expect(clampCharacterColorSaturation(100)).toBe(CHARACTER_COLOR_SATURATION_MAX);
-    });
-
-    it('preserves the exact boundaries', () => {
-        expect(clampCharacterColorSaturation(CHARACTER_COLOR_SATURATION_MIN)).toBe(CHARACTER_COLOR_SATURATION_MIN);
-        expect(clampCharacterColorSaturation(CHARACTER_COLOR_SATURATION_MAX)).toBe(CHARACTER_COLOR_SATURATION_MAX);
-    });
-
-    it('falls back to the default for non-finite input', () => {
-        expect(clampCharacterColorSaturation(Number.NaN)).toBe(CHARACTER_COLOR_SATURATION_DEFAULT);
-        expect(clampCharacterColorSaturation(Number.POSITIVE_INFINITY)).toBe(CHARACTER_COLOR_SATURATION_DEFAULT);
-        expect(clampCharacterColorSaturation(null)).toBe(CHARACTER_COLOR_SATURATION_DEFAULT);
-        expect(clampCharacterColorSaturation(undefined)).toBe(CHARACTER_COLOR_SATURATION_DEFAULT);
+    it('rejects unknown values', () => {
+        expect(isCharacterDecoration('fill')).toBe(false);
+        expect(isCharacterDecoration(60)).toBe(false);
+        expect(isCharacterDecoration(undefined)).toBe(false);
     });
 });

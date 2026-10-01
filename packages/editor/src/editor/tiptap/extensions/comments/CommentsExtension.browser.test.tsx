@@ -189,6 +189,52 @@ describe('CommentsExtension', () => {
         expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).toBeNull();
     });
 
+    it('hides anchors the host filters out, like resolved ones', () => {
+        const {editor} = withComments();
+
+        editor.commands.setCommentThreads([
+            {
+                id: 't1',
+                status: 'open',
+                anchorKind: 'range',
+                anchorBlockId: null,
+                isFilteredOut: true,
+            },
+        ]);
+        expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).toBeNull();
+        expect(getCommentsState(editor.state).openThreadIdsByBlockId.size).toBe(0);
+    });
+
+    it('tints a resolved thread only while it is active', () => {
+        const {editor} = withComments();
+        const tinted = () => Array.from(editor.view.dom.querySelectorAll<HTMLElement>('[data-comment-block-active]')).map(element => element.textContent);
+
+        editor.commands.setCommentThreads([
+            {
+                id: 't1',
+                status: 'resolved',
+                anchorKind: 'range',
+                anchorBlockId: null,
+            },
+            {
+                id: 'tb',
+                status: 'resolved',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
+            },
+        ]);
+        expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).toBeNull();
+
+        editor.commands.setActiveCommentThread('t1');
+        expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).not.toBeNull();
+
+        editor.commands.setActiveCommentThread('tb');
+        expect(editor.view.dom.querySelector('[data-comment-anchor="t1"]')).toBeNull();
+        expect(tinted()).toEqual(['Hello world']);
+        // Still unmarked: no margin marker.
+        expect(getCommentsState(editor.state).openThreadIdsByBlockId.size).toBe(0);
+    });
+
     it('does not decorate anchors of unknown threads', () => {
         const {editor} = withComments();
 

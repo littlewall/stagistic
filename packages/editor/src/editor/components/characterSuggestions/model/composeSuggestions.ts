@@ -26,17 +26,15 @@ export type OverlayComputationArgs = {
     liveCountsByKey: ReadonlyMap<string, number>,
     suppressedSelection: SuppressedSelection | null,
     previousOrderByKey?: ReadonlyMap<string, number>,
-    characterColorSaturation?: number,
 };
 
 export const buildSuggestionEntries = (
     suggestionRows: ReturnType<typeof buildSuggestionRows>,
     persistentColorByKey: ReadonlyMap<string, string>,
-    characterColorSaturation?: number,
 ) => {
     return suggestionRows.map(([key]) => ({
         key,
-        color: persistentColorByKey.get(key) ?? getCharacterColor(key, characterColorSaturation),
+        color: persistentColorByKey.get(key) ?? getCharacterColor(key),
     }));
 };
 
@@ -51,7 +49,6 @@ export const computeCharacterTagComposeSuggestions = ({
     normalizedPersistentCharacters,
     liveCountsByKey,
     previousOrderByKey,
-    characterColorSaturation,
     compose,
 }: OverlayComputationArgs & {
     compose: NonNullable<ReturnType<typeof getCharacterTagComposeFromState>>,
@@ -131,11 +128,11 @@ export const computeCharacterTagComposeSuggestions = ({
         return null;
     }
 
-    const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters, characterColorSaturation);
+    const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters);
 
     return {
         shouldKeepSuppressedSelection: false,
         style,
-        suggestions: buildSuggestionEntries(suggestionRows, persistentColorByKey, characterColorSaturation),
+        suggestions: buildSuggestionEntries(suggestionRows, persistentColorByKey),
     };
 };

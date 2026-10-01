@@ -43,7 +43,12 @@ const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
         <meta property="og:site_name" content="Stagistic">
         <meta name="twitter:card" content="summary_large_image">
         <script is:inline>
-        document.documentElement.classList.add('js');
+            document.documentElement.classList.add('js');
+        </script>
+        <script
+            async
+            src="https://betterlytics.io/analytics.js"
+            data-site-id="stagistic-muplea51">
         </script>
     </head>
     <body>

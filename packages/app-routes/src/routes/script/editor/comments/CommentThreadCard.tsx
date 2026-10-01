@@ -3,6 +3,7 @@ import {Button, MoreActionsMenu} from '@stagistic/ui';
 import {
     type KeyboardEvent,
     type Ref,
+    useRef,
     useState,
 } from 'react';
 
@@ -184,6 +185,7 @@ export const CommentThreadCard = ({
     measureRef,
 }: CommentThreadCardProps) => {
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const isHoveredRef = useRef(false);
     const quote = thread?.quotedText ?? draftQuote ?? '';
     const [root, ...replies] = messages;
     const isResolved = thread?.status === 'resolved';
@@ -209,8 +211,19 @@ export const CommentThreadCard = ({
             aria-label="Comment"
             data-thread-id={thread.id}
             data-highlighted={isHighlighted ? 'true' : undefined}
-            onMouseEnter={() => onHover(true)}
-            onMouseLeave={() => onHover(false)}
+            // Movement, not mere entry: a closing menu or a card shifting under a still pointer must not light it.
+            onPointerMove={() => {
+                if (!isHoveredRef.current) {
+                    isHoveredRef.current = true;
+                    onHover(true);
+                }
+            }}
+            onPointerLeave={() => {
+                if (isHoveredRef.current) {
+                    isHoveredRef.current = false;
+                    onHover(false);
+                }
+            }}
         >
             {isActive ? (
                 <>

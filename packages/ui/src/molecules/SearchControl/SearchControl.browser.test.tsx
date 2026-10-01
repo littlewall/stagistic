@@ -16,7 +16,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {SearchControl} from './SearchControl';
+import {SearchControl, type SearchControlReplace} from './SearchControl';
 
 let mountedRoot: Root | null = null;
 
@@ -217,7 +217,7 @@ describe('SearchControl', () => {
 
         await userEvent.click(input);
 
-        const control = await waitForElement<HTMLElement>('[data-search-control]');
+        const control = await waitForElement<HTMLElement>('[data-search-surface]');
         const style = getComputedStyle(control);
 
         expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
@@ -308,5 +308,183 @@ describe('SearchControl', () => {
 
         expect(event.nativeEvent.isComposing).toBe(true);
         expect(onNextResult).not.toHaveBeenCalled();
+    });
+
+    it('hides case and replace affordances until handlers are supplied', async () => {
+        await mountSearchControl();
+
+        expect(document.querySelector('button[aria-label="Match case"]')).toBeNull();
+        expect(document.querySelector('button[aria-label="Toggle replace"]')).toBeNull();
+    });
+
+    it('shows the result count and match case once the field is focused, before typing', async () => {
+        const input = await mount(
+            <SearchControl
+                value=""
+                currentResult={0}
+                resultCount={0}
+                aria-label="Search script"
+                onCaseSensitiveChange={() => {}}
+                readOnly
+            />,
+        );
+
+        expect(document.querySelector('output[aria-label="Search result position"]')).toBeNull();
+        expect(document.querySelector('button[aria-label="Match case"]')).toBeNull();
+
+        await userEvent.click(input);
+
+        const position = await waitForElement<HTMLOutputElement>('output[aria-label="Search result position"]');
+
+        expect(position.textContent).toBe('0 / 0');
+        expect(document.querySelector('button[aria-label="Match case"]')).not.toBeNull();
+
+        input.blur();
+
+        await waitForElement<HTMLLabelElement>('label[aria-label="Focus search"]');
+        expect(document.querySelector('button[aria-label="Match case"]')).toBeNull();
+    });
+
+    it('toggles match case inside the search field', async () => {
+        const onCaseSensitiveChange = vi.fn();
+
+        await mount(
+            <SearchControl
+                value="light"
+                currentResult={1}
+                resultCount={2}
+                aria-label="Search script"
+                isCaseSensitive
+                onCaseSensitiveChange={onCaseSensitiveChange}
+                readOnly
+            />,
+        );
+
+        const toggle = await waitForElement<HTMLButtonElement>('button[aria-label="Match case"]');
+
+        expect(toggle.getAttribute('aria-pressed')).toBe('true');
+
+        await userEvent.click(toggle);
+
+        expect(onCaseSensitiveChange).toHaveBeenCalledWith(false);
+    });
+});
+
+const ReplaceHarness = (props: Partial<SearchControlReplace>) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <SearchControl
+            value="light"
+            currentResult={1}
+            resultCount={2}
+            aria-label="Search script"
+            readOnly
+            shortcuts={{toggleReplace: '⌥⌘F', replaceAll: '⌘↩'}}
+            replace={{
+                isOpen,
+                onOpenChange: setIsOpen,
+                value: 'lamp',
+                onChange: () => {},
+                onReplace: () => {},
+                onReplaceAll: () => {},
+                ...props,
+            }}
+        />
+    );
+};
+
+describe('SearchControl replace', () => {
+    const openReplace = async (props: Partial<SearchControlReplace> = {}) => {
+        const input = await mount(<ReplaceHarness {...props} />);
+        const toggle = await waitForElement<HTMLButtonElement>('button[aria-label="Toggle replace"]');
+
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(document.querySelector('input[aria-label="Replace with"]')).toBeNull();
+
+        await userEvent.click(toggle);
+
+        const replaceInput = await waitForElement<HTMLInputElement>('input[aria-label="Replace with"]');
+
+        return {
+            input,
+            toggle,
+            replaceInput,
+        };
+    };
+
+    it('expands the same surface over the content below, keeping the toolbar footprint', async () => {
+        const {
+            input,
+            toggle,
+            replaceInput,
+        } = await openReplace();
+        const slot = await waitForElement<HTMLElement>('[data-search-control]');
+        const surface = await waitForElement<HTMLElement>('[data-search-surface]');
+
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        expect(document.getElementById(toggle.getAttribute('aria-controls')!)?.contains(replaceInput)).toBe(true);
+        expect(surface.getBoundingClientRect().height).toBeGreaterThan(slot.getBoundingClientRect().height * 1.5);
+        expect(replaceInput.getBoundingClientRect().top).toBeGreaterThanOrEqual(input.getBoundingClientRect().bottom);
+        expect(Math.round(replaceInput.getBoundingClientRect().left)).toBe(Math.round(input.getBoundingClientRect().left));
+        expect(toggle.getBoundingClientRect().height).toBeGreaterThan(input.getBoundingClientRect().height);
+        expect(Number.parseFloat(getComputedStyle(input).paddingLeft)).toBeLessThanOrEqual(4);
+        expect(Number.parseFloat(getComputedStyle(replaceInput).paddingLeft)).toBeLessThanOrEqual(4);
+
+        await userEvent.click(toggle);
+
+        expect(document.querySelector('input[aria-label="Replace with"]')).toBeNull();
+    });
+
+    it('names each action with its shortcut in a tooltip', async () => {
+        const {toggle} = await openReplace();
+
+        await userEvent.hover(await waitForElement<HTMLButtonElement>('button[aria-label="Replace all"]'));
+
+        const replaceAllTooltip = await waitForElement<HTMLElement>('[role="tooltip"]');
+
+        expect(replaceAllTooltip.textContent).toBe('Replace all⌘↩');
+
+        await userEvent.hover(toggle);
+
+        await waitForElement<HTMLElement>('[role="tooltip"]');
+        expect([...document.querySelectorAll('[role="tooltip"]')].some(tooltip => tooltip.textContent === 'Hide replace⌥⌘F')).toBe(true);
+    });
+
+    it('collapses on Escape and returns focus to the search input', async () => {
+        const {input, replaceInput} = await openReplace();
+
+        replaceInput.focus();
+        await userEvent.keyboard('{Escape}');
+
+        expect(document.querySelector('input[aria-label="Replace with"]')).toBeNull();
+        expect(document.activeElement).toBe(input);
+    });
+
+    it('replaces the current result on Enter and all results on Mod+Enter or the buttons', async () => {
+        const onReplace = vi.fn();
+        const onReplaceAll = vi.fn();
+        const {replaceInput} = await openReplace({onReplace, onReplaceAll});
+
+        replaceInput.focus();
+        await userEvent.keyboard('{Enter}');
+        await userEvent.keyboard('{Control>}{Enter}{/Control}');
+        await userEvent.click(await waitForElement<HTMLButtonElement>('button[aria-label="Replace"]'));
+        await userEvent.click(await waitForElement<HTMLButtonElement>('button[aria-label="Replace all"]'));
+
+        expect(onReplace).toHaveBeenCalledTimes(2);
+        expect(onReplaceAll).toHaveBeenCalledTimes(2);
+    });
+
+    it('disables both actions and Enter without results', async () => {
+        const onReplace = vi.fn();
+        const {replaceInput} = await openReplace({onReplace, isDisabled: true});
+
+        replaceInput.focus();
+        await userEvent.keyboard('{Enter}');
+
+        expect(onReplace).not.toHaveBeenCalled();
+        expect(document.querySelector<HTMLButtonElement>('button[aria-label="Replace"]')?.disabled).toBe(true);
+        expect(document.querySelector<HTMLButtonElement>('button[aria-label="Replace all"]')?.disabled).toBe(true);
     });
 });

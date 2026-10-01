@@ -4,6 +4,7 @@ import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
 import styles from './CommentsExtension.module.css';
 import type {CommentsBaseState} from './commentsPluginState';
+import {isThreadMarked} from './isThreadMarked';
 import type {CommentAnchorLocation} from './types';
 
 /** Tints the whole block whose content starts at `contentFrom`; hover uses a lighter tint. */
@@ -47,12 +48,14 @@ export const buildDecorations = (doc: ProseMirrorNode, state: DecorationInput) =
     const hoveredBlockThreadIds = state.hoveredBlockId ? state.openThreadIdsByBlockId.get(state.hoveredBlockId) ?? [] : [];
     const hovered = new Set([...hoveredThreadIds, ...hoveredBlockThreadIds]);
     const toneOf = (threadId: string) => (threadId === state.activeThreadId ? 'active' : hovered.has(threadId) ? 'hovered' : null);
+    // Resolved or filtered-out threads stay unmarked, but still show what they belong to while active.
+    const isShown = (threadId: string) => threadId === state.activeThreadId || isThreadMarked(state.threads.get(threadId));
 
     [...hovered, ...state.activeThreadId ? [state.activeThreadId] : []].forEach(threadId => {
         const anchor = state.anchors.get(threadId);
         const tone = toneOf(threadId);
 
-        if (tone && anchor?.kind === 'block' && state.threads.get(threadId)?.status === 'open') {
+        if (tone && anchor?.kind === 'block' && isShown(threadId)) {
             const decoration = blockHighlight(doc, anchor.from, tone);
 
             if (decoration) {
@@ -69,7 +72,7 @@ export const buildDecorations = (doc: ProseMirrorNode, state: DecorationInput) =
         node.marks.forEach(mark => {
             const threadId = String(mark.attrs[COMMENT_THREAD_ID_ATTR] ?? '');
 
-            if (mark.type.name !== COMMENT_ANCHOR_MARK_NAME || state.threads.get(threadId)?.status !== 'open') {
+            if (mark.type.name !== COMMENT_ANCHOR_MARK_NAME || !isShown(threadId)) {
                 return;
             }
 

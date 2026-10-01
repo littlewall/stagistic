@@ -18,7 +18,6 @@ export interface UseScriptEditorCharactersArgs {
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
-    characterColorSaturation: number,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
 }
 

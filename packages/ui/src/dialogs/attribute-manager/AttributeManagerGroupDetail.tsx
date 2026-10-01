@@ -22,7 +22,6 @@ interface AttributeManagerGroupDetailProps {
     confirmedName: string,
     speakingEntities: Array<{id: string, name: string}>,
     characters: AttributeManagerCharacter[],
-    characterColorSaturation?: number,
     isDeleting: boolean,
     isRenaming: boolean,
     isColorUpdating: boolean,
@@ -39,7 +38,6 @@ export const AttributeManagerGroupDetail = ({
     confirmedName,
     speakingEntities,
     characters,
-    characterColorSaturation,
     isDeleting,
     isRenaming,
     isColorUpdating,
@@ -77,7 +75,6 @@ export const AttributeManagerGroupDetail = ({
         character: editorGroup,
         isColorActionDisabled,
         onSetCharacterColor: handleSetGroupColor,
-        characterColorSaturation,
     });
 
     const persistName = async () => {

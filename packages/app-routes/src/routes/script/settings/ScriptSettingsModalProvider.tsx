@@ -45,7 +45,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         resolvedScriptSettings,
         updateBlockSettings,
         resetBlockSettings,
-        updateCharacterColorSaturation,
+        updateCharacterDecoration,
         updateStructureSettings,
         updatePageSettings,
         updateHeaderFooterSettings,
@@ -120,7 +120,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characterCatalog,
         initialValue,
         resolvedScriptSettings,
-        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
     const musicState = useScriptMusicState(currentScriptId, musicCatalog);
@@ -142,7 +141,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characters: charactersContextValue,
         music: musicState.music,
         getMusicTitleDraft,
-        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
     });
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
     const draftSaveError = scriptSettingsDraftError ?? titlePageDraftError ?? scriptTitleDraftError;
@@ -231,7 +229,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             onResetBlockSettings: resetBlockSettings,
                             onUpdateBlockSettings: updateBlockSettings,
                         }}
-                        visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
+                        visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
                         structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
                         pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
                         headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
@@ -262,7 +260,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     characters={charactersContextValue}
                     characterItems={attributeManagerCharacters}
                     groupItems={attributeManagerGroups}
-                    characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
                     sceneItems={attributeManagerScenes}
                     firstSceneHeadingBlockId={firstSceneHeadingBlockId}
                     onDeleteScene={handleDeleteScene}

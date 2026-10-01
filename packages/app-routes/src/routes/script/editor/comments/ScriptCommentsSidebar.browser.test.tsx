@@ -11,7 +11,11 @@ import {
     ScriptEditor,
     useEditorInstance,
 } from '@stagistic/editor';
-import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import type {
+    SceneNumberFormat,
+    ScriptDocument,
+    ScriptNode,
+} from '@stagistic/script';
 import {ToastProvider} from '@stagistic/ui';
 import {
     useEffect,
@@ -193,6 +197,8 @@ interface HarnessProps {
     threads: ScriptCommentThread[],
     messages: ScriptCommentMessage[],
     isInitiallyOpen: boolean,
+    sceneNumberFormat?: SceneNumberFormat,
+    scriptScope?: string,
 }
 
 const Harness = ({
@@ -200,9 +206,11 @@ const Harness = ({
     threads,
     messages,
     isInitiallyOpen,
+    sceneNumberFormat,
+    scriptScope = 'script-1',
 }: HarnessProps) => {
     const comments = useFakeComments(threads, messages);
-    const panelState = useCommentsPanelState();
+    const panelState = useCommentsPanelState(scriptScope);
     const [isOpen, setIsOpen] = useState(isInitiallyOpen);
     const bridge = useCommentsEditorBridge({
         comments,
@@ -217,6 +225,7 @@ const Harness = ({
     return (
         <ScriptEditor
             document={{initialValue: content, commentThreads: bridge.commentThreads}}
+            settings={sceneNumberFormat ? {scriptSettings: {blocks: {scene: {sceneNumberFormat}}}} : undefined}
             callbacks={bridge.callbacks}
             layout={{
                 autoFocus: true,
@@ -265,6 +274,8 @@ const mount = async ({
     threads = [],
     messages = [],
     isInitiallyOpen = true,
+    sceneNumberFormat,
+    scriptScope,
 }: Partial<HarnessProps> = {}) => {
     const host = document.createElement('div');
 
@@ -282,6 +293,8 @@ const mount = async ({
                 threads={threads}
                 messages={messages}
                 isInitiallyOpen={isInitiallyOpen}
+                sceneNumberFormat={sceneNumberFormat}
+                scriptScope={scriptScope}
             />
         </ToastProvider>,
     );
@@ -301,26 +314,33 @@ const chooseMenuItem = async (label: string) => {
     await page.elementLocator(await poll(() => menuItem(label), `${label} item`)).click();
 };
 
-const displayDialog = () => document.querySelector<HTMLElement>('[role="dialog"][aria-label="Comments view and filter"]');
+const popoverDialog = (label: string) => document.querySelector<HTMLElement>(`[role="dialog"][aria-label^="${label}"]`);
+const filterTrigger = () => Array.from((panel() ?? document).querySelectorAll<HTMLElement>('button')).find(button => button.getAttribute('aria-label')?.startsWith('Comments filter'));
 
-const openDisplayDialog = async () => {
-    if (!displayDialog()) {
-        await page.elementLocator(await poll(() => findButton('Comments view and filter', panel() ?? document), 'display trigger')).click();
+const openPopover = async (label: string) => {
+    if (!popoverDialog(label)) {
+        const trigger = () => (label === 'Comments filter' ? filterTrigger() : findButton(label, panel() ?? document));
+
+        await page.elementLocator(await poll(trigger, `${label} trigger`)).click();
     }
 
-    return poll(() => displayDialog(), 'display dialog');
+    return poll(() => popoverDialog(label), `${label} dialog`);
+};
+
+const closePopover = async (label: string) => {
+    await userEvent.keyboard('{Escape}');
+    await poll(() => !popoverDialog(label), `${label} dialog closed`);
 };
 
 const chooseView = async (label: string) => {
-    const dialog = await openDisplayDialog();
+    const dialog = await openPopover('Comments settings');
 
     await page.elementLocator(await poll(() => findButton(label, dialog), `${label} view`)).click();
-    await userEvent.keyboard('{Escape}');
-    await poll(() => !displayDialog(), 'display dialog closed');
+    await closePopover('Comments settings');
 };
 
 const chooseStatus = async (label: string) => {
-    const dialog = await openDisplayDialog();
+    const dialog = await openPopover('Comments filter');
 
     await page.elementLocator(await poll(() => findButton('Comment status', dialog), 'status select')).click();
     await page
@@ -331,8 +351,7 @@ const chooseStatus = async (label: string) => {
             ),
         )
         .click();
-    await userEvent.keyboard('{Escape}');
-    await poll(() => !displayDialog(), 'display dialog closed');
+    await closePopover('Comments filter');
 };
 
 const chooseThreadAction = async (threadId: string, label: string) => {
@@ -354,6 +373,7 @@ const threeThreads = () => ({
 });
 
 afterEach(() => {
+    window.localStorage.clear();
     roots.forEach(root => root.unmount());
     roots.length = 0;
     document.body.innerHTML = '';
@@ -419,12 +439,105 @@ describe('ScriptCommentsSidebar', () => {
     it('resolving hides the thread from Open and shows it under Resolved', async () => {
         await mount(threeThreads());
 
+        await chooseStatus('Open');
         await page.elementLocator(await poll(() => card('t1'), 't1 card')).click();
         await chooseThreadAction('t1', 'Resolve');
         await poll(() => !card('t1'), 't1 hidden');
 
         await chooseStatus('Resolved');
         expect(await poll(() => card('t1'), 't1 under Resolved')).toBeTruthy();
+    });
+
+    it('defaults to All and dots the filter trigger only when narrowed', async () => {
+        await mount(threeThreads());
+
+        const hasDot = () => Boolean(filterTrigger()?.querySelector('[data-icon-popover-indicator]'));
+
+        await poll(() => filterTrigger(), 'filter trigger');
+        expect(hasDot()).toBe(false);
+
+        await chooseStatus('Open');
+        await poll(() => hasDot(), 'dot shown');
+
+        await chooseStatus('All');
+        await poll(() => !hasDot(), 'dot hidden');
+    });
+
+    it('remembers the view for every script and the filter per script', async () => {
+        const remount = async (scriptScope: string) => {
+            roots.forEach(root => root.unmount());
+            roots.length = 0;
+            document.body.innerHTML = '';
+            testWindow.__commentsEditor = null;
+
+            return mount({...threeThreads(), scriptScope});
+        };
+
+        await mount(threeThreads());
+        await chooseView('List');
+        await chooseStatus('Open');
+
+        await remount('script-1');
+        await poll(() => panel()?.querySelector('section[aria-label]'), 'List view kept');
+        expect(filterTrigger()?.querySelector('[data-icon-popover-indicator]')).toBeTruthy();
+
+        await remount('script-2');
+        await poll(() => panel()?.querySelector('section[aria-label]'), 'List view in another script');
+        expect(filterTrigger()?.querySelector('[data-icon-popover-indicator]')).toBeNull();
+    });
+
+    it('the status filter also hides editor underlines', async () => {
+        await mount(threeThreads());
+
+        await poll(() => document.querySelector('[data-comment-anchor="t1"]'), 't1 underline');
+        await chooseStatus('Resolved');
+        await poll(() => !document.querySelector('[data-comment-anchor]'), 'underlines hidden');
+    });
+
+    it('reopening the active resolved thread never lights another card', async () => {
+        const editor = await mount({
+            threads: [
+                thread('t1', {status: 'resolved'}),
+                thread('t2'),
+                thread('t3'),
+            ],
+            messages: [
+                message('m1', 't1', 'First note'),
+                message('m2', 't2', 'Second note'),
+                message('m3', 't3', 'Third note'),
+            ],
+        });
+        const seen: (string | null)[] = [];
+
+        await page.elementLocator(await poll(() => card('t1'), 't1 card')).click();
+        await poll(() => getCommentsState(editor.state).activeThreadId === 't1', 't1 active');
+        editor.on('transaction', ({editor: current}) => {
+            const active = getCommentsState(current.state).activeThreadId;
+
+            if (seen.at(-1) !== active) {
+                seen.push(active);
+            }
+        });
+
+        const lit: string[] = [];
+        const observer = new MutationObserver(() => {
+            document.querySelectorAll<HTMLElement>('article[data-highlighted="true"]').forEach(element => lit.push(element.dataset.threadId ?? ''));
+        });
+
+        observer.observe(document.body, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['data-highlighted'],
+        });
+        await chooseThreadAction('t1', 'Reopen');
+        await poll(() => testWindow.__comments?.threads[0]?.status === 'open', 'reopened');
+        await new Promise(resolve => window.setTimeout(resolve, 300));
+        observer.disconnect();
+
+        // The pointer lands on the next card when the menu closes; that must not light it.
+        expect(lit.filter(threadId => threadId !== 't1')).toEqual([]);
+        expect(seen.filter(threadId => threadId !== 't1')).toEqual([]);
+        expect(getCommentsState(editor.state).activeThreadId).toBe('t1');
     });
 
     it('a margin marker activates the first card of its block, in editor order', async () => {
@@ -453,6 +566,17 @@ describe('ScriptCommentsSidebar', () => {
         expect(blockCard.top).toBeLessThan(rangeCard.top);
     });
 
+    it('hovering a card lights it and its underline', async () => {
+        const editor = await mount(threeThreads());
+
+        await userEvent.hover(await poll(() => card('t2'), 't2 card'));
+        await poll(() => card('t2')?.dataset.highlighted === 'true', 't2 lit');
+        expect(getCommentsState(editor.state).hoveredThreadId).toBe('t2');
+
+        await userEvent.unhover(card('t2')!);
+        await poll(() => getCommentsState(editor.state).hoveredThreadId === null, 'hover cleared');
+    });
+
     it('hovering a margin marker lights every card of its block', async () => {
         await mount(threeThreads());
 
@@ -461,6 +585,13 @@ describe('ScriptCommentsSidebar', () => {
         await userEvent.hover(b1Marker);
         await poll(() => card('t1')?.dataset.highlighted === 'true', 't1 lit');
         expect(card('t2')?.dataset.highlighted).toBeUndefined();
+
+        // Only the head strip lights, not the whole card.
+        const summary = card('t1')!.querySelector<HTMLElement>('button[aria-expanded="false"]')!;
+        const isTinted = (element: Element) => getComputedStyle(element).backgroundColor !== 'rgba(0, 0, 0, 0)';
+
+        expect(isTinted(summary.firstElementChild!)).toBe(true);
+        expect(isTinted(summary)).toBe(false);
 
         await userEvent.unhover(b1Marker);
         await poll(() => card('t1')?.dataset.highlighted === undefined, 't1 unlit');
@@ -515,9 +646,27 @@ describe('ScriptCommentsSidebar', () => {
 
         await chooseView('List');
 
-        expect(await poll(() => findByText('INT. ROOM', panel() ?? document), 'scene heading')).toBeTruthy();
+        expect(await poll(() => findByText('1. INT. ROOM', panel() ?? document), 'numbered scene heading')).toBeTruthy();
         expect(await poll(() => findByText('Detached', panel() ?? document), 'Detached heading')).toBeTruthy();
         expect(findByText('gone words', panel() ?? document)).toBeTruthy();
+    });
+
+    it('List view numbers scenes in the script\'s scene number format', async () => {
+        await mount({
+            ...threeThreads(),
+            content: baseDocument([
+                scene('s1', 'INT. ROOM'),
+                dialogue('b1', 'Hello world', ['t1']),
+                scene('s2', 'EXT. YARD'),
+                dialogue('b2', 'Second line', ['t2']),
+            ]),
+            sceneNumberFormat: 'paren',
+        });
+
+        await chooseView('List');
+
+        expect(await poll(() => findByText('1) INT. ROOM', panel() ?? document), 'first scene')).toBeTruthy();
+        expect(await poll(() => findByText('2) EXT. YARD', panel() ?? document), 'second scene')).toBeTruthy();
     });
 
     it('Beside view keeps cards in document order without overlap', async () => {
@@ -591,7 +740,6 @@ describe('ScriptCommentsSidebar', () => {
         await chooseThreadAction('t9', 'Resolve');
         await poll(() => testWindow.__comments?.threads[0]?.status === 'resolved', 'resolved');
 
-        await chooseStatus('All');
         await page.elementLocator(await poll(() => card('t9'), 'detached card under All')).click();
         await chooseThreadAction('t9', 'Delete');
 

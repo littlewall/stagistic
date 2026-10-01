@@ -5,19 +5,35 @@
     white-space: nowrap;
 }
 
-:global([data-character-highlight = 'underline']) .characterTag {
+/* Underline: every mode except `none`. */
+:global([data-character-highlight ^= 'underline']) .characterTag {
     text-decoration-color: var(--character-tag-vivid-color);
     text-decoration-line: underline;
     text-decoration-thickness: .09em;
     text-underline-offset: .16em;
 }
 
-:global([data-character-highlight = 'underline']) .characterTag[data-character-id] {
+:global([data-character-highlight ^= 'underline']) .characterTag[data-character-id] {
     text-decoration-style: solid;
 }
 
-:global([data-character-highlight = 'underline']) .characterTag:not([data-character-id]) {
+:global([data-character-highlight ^= 'underline']) .characterTag:not([data-character-id]) {
     text-decoration-style: dashed;
+}
+
+/* Tint: cue names and stage-direction tags. */
+:global([data-character-highlight ^= 'underline-tint']) .characterTag {
+    background: color-mix(in oklch, var(--character-tag-color, transparent) var(--character-tag-tint-strength, 30%), transparent);
+    border-radius: 2px;
+    box-decoration-break: clone;
+}
+
+/* Lines: dialogue/lyrics tinted with their speaker's color. */
+:global([data-character-highlight = 'underline-tint-lines']) .characterLine {
+    background: color-mix(in oklch, var(--character-tag-color, transparent) var(--character-line-tint-strength, 14%), transparent);
+
+    /* Keep spacing-before and indents out of the band. */
+    background-clip: content-box;
 }
 
 .characterSeparator {

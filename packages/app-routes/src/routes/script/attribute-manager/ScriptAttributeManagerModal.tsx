@@ -1,4 +1,3 @@
-import type {EditorSettings} from '@stagistic/script';
 import {
     type AttributeManagerCharacter,
     AttributeManagerCharactersPanel,
@@ -46,7 +45,6 @@ interface ScriptAttributeManagerModalProps {
     characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
     characterItems: AttributeManagerCharacter[],
     groupItems: AttributeManagerGroup[],
-    characterColorSaturation: EditorSettings['visual']['characterColorSaturation'],
     sceneItems: AttributeManagerListItem[],
     firstSceneHeadingBlockId: string | null,
     onDeleteScene: (sceneHeadingBlockId: string) => Promise<void>,
@@ -73,7 +71,6 @@ export const ScriptAttributeManagerModal = ({
     characters,
     characterItems,
     groupItems,
-    characterColorSaturation,
     sceneItems,
     firstSceneHeadingBlockId,
     onDeleteScene,
@@ -141,7 +138,6 @@ export const ScriptAttributeManagerModal = ({
                         initialSelectedGroupId={selectedGroupId}
                         initialWorkspaceId={initialWorkspaceId}
                         isLoading={characters.isCharactersLoading}
-                        characterColorSaturation={characterColorSaturation}
                         draftScopeKey={currentScriptId}
                         deletingCharacterIds={characters.deletingCharacterIds}
                         renamingCharacterIds={characters.renamingCharacterIds}

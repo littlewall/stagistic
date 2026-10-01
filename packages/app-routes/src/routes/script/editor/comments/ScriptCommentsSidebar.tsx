@@ -5,9 +5,10 @@ import type {
 } from '@stagistic/app-core';
 import {type CommentAnchorLocation, useEditorComments} from '@stagistic/editor';
 import {
+    FilterIcon,
     IconPopover,
-    SearchOptionsIcon,
     Select,
+    SettingsIcon,
     SidebarMiniHeader,
     ToggleButtonGroup,
     useToastController,
@@ -22,7 +23,7 @@ import {
 import {CommentsBesideView} from './CommentsBesideView';
 import {CommentsListView} from './CommentsListView';
 import {CommentThreadCard} from './CommentThreadCard';
-import {matchesCommentFilter} from './filterThreads';
+import {isCommentFilterActive, matchesCommentFilter} from './filterThreads';
 import styles from './ScriptCommentsSidebar.module.css';
 import type {CommentStatusFilter, CommentsViewMode} from './types';
 import type {CommentsPanelState} from './useCommentsPanelState';
@@ -30,9 +31,9 @@ import type {CommentsPanelState} from './useCommentsPanelState';
 const VIEW_OPTIONS = [{value: 'beside', label: 'Anchored'}, {value: 'list', label: 'List'}] as const satisfies readonly {value: CommentsViewMode, label: string}[];
 
 const STATUS_OPTIONS = [
+    {value: 'all', label: 'All'},
     {value: 'open', label: 'Open'},
     {value: 'resolved', label: 'Resolved'},
-    {value: 'all', label: 'All'},
 ] as const satisfies readonly {value: CommentStatusFilter, label: string}[];
 
 const NO_ANCHORS: ReadonlyMap<string, CommentAnchorLocation> = new Map();
@@ -225,35 +226,45 @@ export const ScriptCommentsSidebar = ({
     );
 
     const isEmpty = visibleThreads.length === 0 && !draft;
+    const isFilterActive = isCommentFilterActive(filter);
 
     return (
         <div className={styles.content} data-comments-panel="true">
             <SidebarMiniHeader
                 navigation={header}
                 controls={(
-                    <IconPopover aria-label="Comments view and filter" icon={<SearchOptionsIcon aria-hidden="true" />} size="xs">
-                        <div className={styles.displayField}>
-                            <span className={styles.displayLabel}>View</span>
-                            <ToggleButtonGroup ariaLabel="Comments view" options={VIEW_OPTIONS} value={viewMode} onChange={setViewMode} />
-                        </div>
-                        <div className={styles.displayField}>
-                            <span className={styles.displayLabel}>Status</span>
-                            <Select
-                                ariaLabel="Comment status"
-                                variant="form"
-                                size="md"
-                                options={[...STATUS_OPTIONS]}
-                                value={filter.status}
-                                onChange={status => {
-                                    const option = STATUS_OPTIONS.find(item => item.value === status);
+                    <>
+                        <IconPopover aria-label="Comments settings" icon={<SettingsIcon aria-hidden="true" />} size="xs">
+                            <div className={styles.displayField}>
+                                <span className={styles.displayLabel}>View</span>
+                                <ToggleButtonGroup ariaLabel="Comments view" options={VIEW_OPTIONS} value={viewMode} onChange={setViewMode} />
+                            </div>
+                        </IconPopover>
+                        <IconPopover
+                            aria-label={isFilterActive ? 'Comments filter (active)' : 'Comments filter'}
+                            icon={<FilterIcon aria-hidden="true" />}
+                            size="xs"
+                            hasIndicator={isFilterActive}
+                        >
+                            <div className={styles.displayField}>
+                                <span className={styles.displayLabel}>Status</span>
+                                <Select
+                                    ariaLabel="Comment status"
+                                    variant="form"
+                                    size="md"
+                                    options={[...STATUS_OPTIONS]}
+                                    value={filter.status}
+                                    onChange={status => {
+                                        const option = STATUS_OPTIONS.find(item => item.value === status);
 
-                                    if (option) {
-                                        setFilter({...filter, status: option.value});
-                                    }
-                                }}
-                            />
-                        </div>
-                    </IconPopover>
+                                        if (option) {
+                                            setFilter({...filter, status: option.value});
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </IconPopover>
+                    </>
                 )}
             />
             {isEmpty ? (
