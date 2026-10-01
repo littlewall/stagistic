@@ -16,6 +16,7 @@ import {
     withMeta,
 } from './commentsPluginState';
 import {detectMergedBlocks} from './detectMergedBlocks';
+import {isThreadMarked} from './isThreadMarked';
 import type {
     CommentsExtensionCallbacks,
     CommentsPluginState,
@@ -241,7 +242,7 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                         const pluginState = commentsPluginKey.getState(view.state);
                         const threadIds = [...pluginState?.anchors.values() ?? []]
                             .filter(anchor => anchor.kind === 'range' && anchor.from <= pos && pos <= anchor.to)
-                            .filter(anchor => pluginState?.threads.get(anchor.threadId)?.status === 'open')
+                            .filter(anchor => isThreadMarked(pluginState?.threads.get(anchor.threadId)))
                             .map(anchor => anchor.threadId);
 
                         if (threadIds.length > 0) {

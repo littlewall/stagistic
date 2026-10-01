@@ -80,7 +80,7 @@ export const ScriptEditorRoute = () => {
         updateMusicRequest,
     } = musicState;
     const comments = useScriptComments(currentScriptId, scriptRepository);
-    const commentsPanelState = useCommentsPanelState();
+    const commentsPanelState = useCommentsPanelState(currentScriptId ?? 'new-script');
 
     const displayedCurrentScript = useMemo(() => currentScript ? {...currentScript, name: scriptTitleDraft} : null, [currentScript, scriptTitleDraft]);
 

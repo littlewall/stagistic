@@ -43,6 +43,7 @@ describe('buildCommentAnchorIndex', () => {
             blockId: 'b1',
             blockIndex: 1,
             sceneBlockId: 's1',
+            sceneNumber: 1,
             sceneTitle: 'INT. ROOM',
         });
         expect(doc.textBetween(t1!.from, t1!.to, '|')).toBe('world|Bye');

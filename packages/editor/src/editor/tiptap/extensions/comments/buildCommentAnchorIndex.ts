@@ -25,7 +25,11 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
     const index = new Map<string, CommentAnchorLocation>();
     const blockAnchorsByBlockId = groupBlockAnchors(threads);
     let blockIndex = -1;
-    let scene: {id: string, title: string} | null = null;
+    let scene: {
+        id: string,
+        number: number,
+        title: string,
+    } | null = null;
 
     doc.descendants((node, pos) => {
         if (!isScriptBlock(node)) {
@@ -37,15 +41,24 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
         const blockId = String(node.attrs.id);
 
         if (node.attrs.blockType === 'scene' || node.type.name === 'scene') {
-            scene = {id: blockId, title: node.textContent};
+            scene = {
+                id: blockId,
+                number: (scene?.number ?? 0) + 1,
+                title: node.textContent,
+            };
         }
 
         const contentFrom = pos + 1;
-        const currentScene: {id: string, title: string} | null = scene;
+        const currentScene: {
+            id: string,
+            number: number,
+            title: string,
+        } | null = scene;
         const base = {
             blockId,
             blockIndex,
             sceneBlockId: currentScene?.id ?? null,
+            sceneNumber: currentScene?.number ?? null,
             sceneTitle: currentScene?.title ?? '',
         };
 

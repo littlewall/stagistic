@@ -1,4 +1,8 @@
-import {coerceUnknownBlocksToStageDirections, type ScriptDocument} from '@stagistic/script';
+import {
+    coerceUnknownBlocksToStageDirections,
+    DEFAULT_SCENE_NUMBER_FORMAT,
+    type ScriptDocument,
+} from '@stagistic/script';
 import {
     type ReactNode,
     useEffect,
@@ -32,6 +36,7 @@ import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
+import {EditorSceneNumberFormatContext} from './sceneNumberFormatContext';
 import {type CharacterColorRefsBundle, createCharacterColorRefsBundle} from './surface/editorSurfaceCache';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
 import {useEditorExtensions} from './useEditorExtensions';
@@ -97,6 +102,7 @@ const Editor = ({
     const runtimeScriptSettings = useEditorRuntimeSettings(scriptSettings ?? resolvedInitialValue.attrs?.settings);
     const resolvedSettings = useMemo(() => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings), [runtimeGlobalSettings, runtimeScriptSettings]);
     const blockShortcuts = useMemo(() => getBlockShortcuts(resolvedSettings.blocks), [resolvedSettings.blocks]);
+    const sceneNumberFormat = resolvedSettings.blocks.scene?.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
     const blockNextElements = useMemo(() => getBlockNextElements(resolvedSettings.blocks), [resolvedSettings.blocks]);
 
     const initialContentSignature = useMemo(() => JSON.stringify(stripScriptSettings(resolvedInitialValue)), [resolvedInitialValue]);
@@ -285,33 +291,35 @@ const Editor = ({
         <EditorSnapshotStoreProvider store={liveStore}>
             <EditorInstanceProvider editor={editor}>
                 <EditorElementSelectionProvider editor={editor} rootRef={rootRef}>
-                    <EditorActCommandsProvider value={actCommands}>
-                        <EditorShell
-                            isCanvasReady={isInitialCanvasReady}
-                            canvas={{
-                                autoFocus,
-                                characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-                                editor,
-                                persistentCharacters,
-                                persistentMusic,
-                                onMusicAssigned,
-                                onOpenMusicManager,
-                                onRequestRemoveMusic,
-                                headerFooter: resolvedSettings.headerFooter,
-                                scriptTitle,
-                                draftDate,
-                                blockShortcuts,
-                                blockNextElements,
-                            }}
-                            layout={resolvedLayout}
-                            rootRef={rootRef}
-                            canvasHostRef={canvasHostRef}
-                            rootStyle={rootStyle}
-                            confirmedCharacterColorsById={confirmedCharacterColorsById}
-                            onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
-                            onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
-                        />
-                    </EditorActCommandsProvider>
+                    <EditorSceneNumberFormatContext.Provider value={sceneNumberFormat}>
+                        <EditorActCommandsProvider value={actCommands}>
+                            <EditorShell
+                                isCanvasReady={isInitialCanvasReady}
+                                canvas={{
+                                    autoFocus,
+                                    characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+                                    editor,
+                                    persistentCharacters,
+                                    persistentMusic,
+                                    onMusicAssigned,
+                                    onOpenMusicManager,
+                                    onRequestRemoveMusic,
+                                    headerFooter: resolvedSettings.headerFooter,
+                                    scriptTitle,
+                                    draftDate,
+                                    blockShortcuts,
+                                    blockNextElements,
+                                }}
+                                layout={resolvedLayout}
+                                rootRef={rootRef}
+                                canvasHostRef={canvasHostRef}
+                                rootStyle={rootStyle}
+                                confirmedCharacterColorsById={confirmedCharacterColorsById}
+                                onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+                                onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+                            />
+                        </EditorActCommandsProvider>
+                    </EditorSceneNumberFormatContext.Provider>
                 </EditorElementSelectionProvider>
             </EditorInstanceProvider>
         </EditorSnapshotStoreProvider>

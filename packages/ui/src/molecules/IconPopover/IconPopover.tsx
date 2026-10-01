@@ -15,6 +15,8 @@ export interface IconPopoverProps {
     children: ReactNode,
     size?: ComponentProps<typeof IconButton>['size'],
     placement?: PopoverProps['placement'],
+    /** Dot on the trigger: the panel holds a non-default setting. */
+    hasIndicator?: boolean,
 }
 
 /** Icon trigger opening a small non-modal panel of controls (not a menu of actions). */
@@ -24,13 +26,16 @@ export const IconPopover = ({
     children,
     size = 'sm',
     placement = 'bottom end',
+    hasIndicator = false,
 }: IconPopoverProps) => (
     <DialogTrigger>
         <IconButton
             size={size}
             aria-label={ariaLabel}
+            className={styles.trigger}
         >
             {icon}
+            {hasIndicator ? <span className={styles.indicator} data-icon-popover-indicator="true" aria-hidden="true" /> : null}
         </IconButton>
         <Popover
             className={styles.popover}

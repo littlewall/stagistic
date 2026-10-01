@@ -11,6 +11,7 @@ export {DarkThemeIcon} from './DarkThemeIcon';
 export {DownloadIcon} from './DownloadIcon';
 export {EditPencilIcon} from './EditPencilIcon';
 export {EyeIcon} from './EyeIcon';
+export {FilterIcon} from './FilterIcon';
 export {FolderIcon} from './FolderIcon';
 export {HomeIcon} from './HomeIcon';
 export {LightThemeIcon} from './LightThemeIcon';

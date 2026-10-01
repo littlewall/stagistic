@@ -9,6 +9,8 @@ export interface EditorCommentThreadRef {
     status: EditorCommentThreadStatus,
     anchorKind: EditorCommentAnchorKind,
     anchorBlockId: string | null,
+    /** Host filter hides it: no underline or margin marker unless active. */
+    isFilteredOut?: boolean,
 }
 
 export interface CommentAnchorLocation {
@@ -21,6 +23,8 @@ export interface CommentAnchorLocation {
     /** Index of the anchor's first block in document order; used for sorting. */
     blockIndex: number,
     sceneBlockId: string | null,
+    /** 1-based scene ordinal, as the editor numbers scenes; null before the first scene. */
+    sceneNumber: number | null,
     sceneTitle: string,
 }
 
@@ -45,12 +49,12 @@ export interface CommentTombstone {
 export interface CommentsPluginState {
     threads: ReadonlyMap<string, EditorCommentThreadRef>,
     anchors: ReadonlyMap<string, CommentAnchorLocation>,
-    /** Open threads grouped by the block their anchor starts in, in document order. */
+    /** Marked (open, not filtered out) threads grouped by the block their anchor starts in, in document order. */
     openThreadIdsByBlockId: ReadonlyMap<string, readonly string[]>,
     draft: CommentDraft | null,
     activeThreadId: string | null,
     hoveredThreadId: string | null,
-    /** Block whose margin marker is hovered; lights all of its open threads. */
+    /** Block whose margin marker is hovered; lights all of its marked threads. */
     hoveredBlockId: string | null,
     tombstones: ReadonlyMap<string, CommentTombstone>,
     mergedBlocks: readonly CommentBlockMerge[],

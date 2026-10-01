@@ -9,6 +9,7 @@ import {
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {buildCommentAnchorIndex} from './buildCommentAnchorIndex';
 import {buildDecorations} from './commentDecorations';
+import {isThreadMarked} from './isThreadMarked';
 import type {
     CommentAnchorLocation,
     CommentDraft,
@@ -38,7 +39,7 @@ const groupOpenThreadsByBlock = (anchors: ReadonlyMap<string, CommentAnchorLocat
     const grouped = new Map<string, string[]>();
 
     [...anchors.values()]
-        .filter(anchor => threads.get(anchor.threadId)?.status === 'open')
+        .filter(anchor => isThreadMarked(threads.get(anchor.threadId)))
         .sort((left, right) => left.from - right.from || (left.kind === 'block' ? -1 : 1))
         .forEach(anchor => grouped.set(anchor.blockId, [...grouped.get(anchor.blockId) ?? [], anchor.threadId]));
 
