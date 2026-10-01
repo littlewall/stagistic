@@ -145,7 +145,7 @@ const renderEditor = (scriptSettings?: EditorSettingsOverride) => {
 
 const SettingsHarness = () => {
     const [scriptSettings, setScriptSettings] = useState<EditorSettingsOverride>({
-        visual: {characterDecoration: 'underline'},
+        structure: {actDisplay: {linesBefore: 1}},
     });
 
     return (
@@ -153,7 +153,7 @@ const SettingsHarness = () => {
             <button
                 data-testid="replace-editor"
                 onClick={() => setScriptSettings({
-                    visual: {characterDecoration: 'none'},
+                    structure: {actDisplay: {linesBefore: 2}},
                 })}
                 type="button"
             >Replace editor

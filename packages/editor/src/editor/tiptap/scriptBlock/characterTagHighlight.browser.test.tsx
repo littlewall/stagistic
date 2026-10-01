@@ -269,4 +269,27 @@ describe('character decoration modes', () => {
         expect(getComputedStyle(tag).backgroundColor).toBe(TRANSPARENT);
         expect(getComputedStyle(line).backgroundColor).toBe(TRANSPARENT);
     });
+
+    it('switches modes without rebuilding the editor', async () => {
+        renderEditor(speechDoc(), 'underline');
+
+        const proseMirror = await poll(() => document.querySelector('.ProseMirror'), 'editor surface');
+        const root = mountedRoots[0];
+
+        root.render(
+            <ScriptEditor
+                document={{initialValue: speechDoc()}}
+                settings={{scriptSettings: {visual: {characterDecoration: 'none'}}}}
+                layout={{autoFocus: true}}
+            >
+                <ScriptEditor.LeftSidebar>
+                    <ConfirmCharacterButton />
+                </ScriptEditor.LeftSidebar>
+            </ScriptEditor>,
+        );
+
+        await poll(() => document.querySelector('[data-character-highlight="none"]'), 'none mode');
+
+        expect(document.querySelector('.ProseMirror')).toBe(proseMirror);
+    });
 });
