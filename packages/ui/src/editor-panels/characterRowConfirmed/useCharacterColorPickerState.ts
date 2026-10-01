@@ -1,4 +1,4 @@
-import {clampCharacterColorSaturation} from '@stagistic/script';
+import {CHARACTER_COLOR_SATURATION} from '@stagistic/script';
 import {
     useEffect,
     useMemo,
@@ -23,16 +23,14 @@ interface UseCharacterColorPickerStateArgs {
     character: EditorSidebarCharacter,
     isColorActionDisabled: boolean,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
-    characterColorSaturation?: number,
 }
 
 export const useCharacterColorPickerState = ({
     character,
     isColorActionDisabled,
     onSetCharacterColor,
-    characterColorSaturation,
 }: UseCharacterColorPickerStateArgs) => {
-    const resolvedColorSaturation = clampCharacterColorSaturation(characterColorSaturation);
+    const resolvedColorSaturation = CHARACTER_COLOR_SATURATION;
     const currentCharacterColorHex = normalizeHexColor(character.colorHex ?? character.color)
         ?? DEFAULT_COLOR_HEX;
     const colorTriggerRef = useRef<HTMLSpanElement | null>(null);

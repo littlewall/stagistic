@@ -1,6 +1,5 @@
 import {type EditorSettings} from '@stagistic/script';
 import {
-    clampCharacterColorSaturation,
     type EditorSettingsOverride,
     isSceneNumberFormat,
     normalizeEditorSettingsBlockType,
@@ -13,13 +12,6 @@ export const normalizeSettingsOverride = (settings: EditorSettingsOverride): Edi
     const nextSettings: EditorSettingsOverride = {
         ...settings,
     };
-
-    if (settings.visual?.characterColorSaturation !== undefined) {
-        nextSettings.visual = {
-            ...settings.visual,
-            characterColorSaturation: clampCharacterColorSaturation(settings.visual.characterColorSaturation),
-        };
-    }
 
     if (settings.structure) {
         const nextStructure: NonNullable<EditorSettingsOverride['structure']> = {};

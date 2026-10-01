@@ -97,7 +97,6 @@ const renderStructureManager = (
             characters={{} as never}
             characterItems={[]}
             groupItems={[]}
-            characterColorSaturation={50}
             sceneItems={sceneItems}
             firstSceneHeadingBlockId={firstSceneHeadingBlockId}
             onDeleteScene={deleteScene}
@@ -155,7 +154,6 @@ const renderMusicManager = (
             characters={{} as never}
             characterItems={[]}
             groupItems={[]}
-            characterColorSaturation={50}
             sceneItems={[]}
             firstSceneHeadingBlockId={null}
             onDeleteScene={() => Promise.resolve()}
@@ -301,7 +299,6 @@ describe('ScriptAttributeManagerModal group actions', () => {
                         usageCount: 1,
                     },
                 ]}
-                characterColorSaturation={50}
                 sceneItems={[]}
                 firstSceneHeadingBlockId={null}
                 onDeleteScene={() => Promise.resolve()}

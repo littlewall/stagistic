@@ -1,6 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {ScriptDocument} from '@stagistic/script';
+import type {CharacterDecoration, ScriptDocument} from '@stagistic/script';
 import {
     createRoot,
     type Root,
@@ -34,7 +34,7 @@ const characterDoc = (): ScriptDocument => ({
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (initialValue: ScriptDocument) => {
+const renderEditor = (initialValue: ScriptDocument, characterDecoration?: CharacterDecoration) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -44,7 +44,11 @@ const renderEditor = (initialValue: ScriptDocument) => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
+        <ScriptEditor
+            document={{initialValue}}
+            settings={characterDecoration ? {scriptSettings: {visual: {characterDecoration}}} : undefined}
+            layout={{autoFocus: true}}
+        >
             <ScriptEditor.LeftSidebar>
                 <ConfirmCharacterButton />
             </ScriptEditor.LeftSidebar>
@@ -203,5 +207,66 @@ describe('character tag highlight (underline mode)', () => {
 
         expect(getRelativeLuminance(canvas) - getRelativeLuminance(editorRoot))
             .toBeGreaterThan(0.01);
+    });
+});
+
+const speechDoc = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        {
+            type: 'character',
+            attrs: {id: 'ch-1'},
+            content: [{type: 'text', text: 'ANNA'}],
+        },
+        {
+            type: 'dialogue',
+            attrs: {id: 'dl-1'},
+            content: [{type: 'text', text: 'Hello there.'}],
+        },
+    ],
+});
+
+const TRANSPARENT = 'rgba(0, 0, 0, 0)';
+
+const findSpeech = async () => {
+    const tag = await poll(
+        () => document.querySelector<HTMLElement>('[data-character-key="ANNA"]'),
+        'character tag',
+    );
+    const line = await poll(
+        () => [...document.querySelectorAll<HTMLElement>('p')].find(element => element.textContent === 'Hello there.'),
+        'dialogue line',
+    );
+
+    return {tag, line};
+};
+
+describe('character decoration modes', () => {
+    it('tints names but not lines in underline-tint', async () => {
+        renderEditor(speechDoc(), 'underline-tint');
+
+        const {tag, line} = await findSpeech();
+
+        expect(getComputedStyle(tag).textDecorationLine).toContain('underline');
+        expect(getComputedStyle(tag).backgroundColor).not.toBe(TRANSPARENT);
+        expect(getComputedStyle(line).backgroundColor).toBe(TRANSPARENT);
+    });
+
+    it('tints the speaker lines in underline-tint-lines', async () => {
+        renderEditor(speechDoc(), 'underline-tint-lines');
+
+        const {line} = await findSpeech();
+
+        expect(getComputedStyle(line).backgroundColor).not.toBe(TRANSPARENT);
+    });
+
+    it('drops underline and tint in none', async () => {
+        renderEditor(speechDoc(), 'none');
+
+        const {tag, line} = await findSpeech();
+
+        expect(getComputedStyle(tag).textDecorationLine).toBe('none');
+        expect(getComputedStyle(tag).backgroundColor).toBe(TRANSPARENT);
+        expect(getComputedStyle(line).backgroundColor).toBe(TRANSPARENT);
     });
 });

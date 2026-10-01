@@ -1,5 +1,4 @@
 import {
-    CHARACTER_COLOR_SATURATION_MAX,
     collectScriptCharacterStats,
     extractCharacterKeys,
     type ScriptDocument,
@@ -12,8 +11,6 @@ import type {
     PersistentCharacterRef,
 } from '../contracts';
 import type {CharacterColorRefsBundle} from '../surface/editorSurfaceCache';
-
-export const MINI_EDITOR_CHARACTER_SATURATION = CHARACTER_COLOR_SATURATION_MAX;
 
 const getTextContent = (node: ScriptNode): string => {
     if (node.type === 'text') {
@@ -64,7 +61,6 @@ export const buildMiniEditorCharacterPresentation = (
             getConfirmedCharacterColor(
                 character.id,
                 character.colorHex ?? null,
-                MINI_EDITOR_CHARACTER_SATURATION,
             ),
         ]),
     );
@@ -102,7 +98,6 @@ export const syncMiniEditorCharacterRefs = (
     refs.persistentCharactersRef.current = characters;
     refs.colorByCharacterIdRef.current = presentation.colorByCharacterId;
     refs.rememberedColorByKeyRef.current = presentation.displayColorByKey;
-    refs.rememberedColorSaturationRef.current = MINI_EDITOR_CHARACTER_SATURATION;
 
     return presentation;
 };

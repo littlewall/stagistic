@@ -1,4 +1,8 @@
-import {type EditorSettingsOverride, type HeaderFooterAlignment} from '@stagistic/script';
+import {
+    type EditorSettingsOverride,
+    type HeaderFooterAlignment,
+    isCharacterDecoration,
+} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
 import type {DbClient} from '../../queries';
@@ -68,7 +72,7 @@ export const readScriptSettings = async (db: DbClient, scriptId: string): Promis
         settings.typography = toDefined({fontSizePx: pageLayout.fontSizePx, lineHeight: pageLayout.lineHeight});
     }
 
-    if (typeof visual?.characterColorSaturation === 'number') settings.visual = {characterColorSaturation: visual.characterColorSaturation};
+    if (isCharacterDecoration(visual?.characterDecoration)) settings.visual = {characterDecoration: visual.characterDecoration};
 
     if (structure) settings.structure = {actDisplay: toDefined({linesBefore: structure.actLinesBefore, linesAfter: structure.actLinesAfter})};
 
@@ -143,7 +147,7 @@ export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, sett
     if (settings.visual) {
         await dbQueries.insertScriptVisualPreferences(tx, {
             scriptId,
-            characterColorSaturation: settings.visual.characterColorSaturation,
+            characterDecoration: settings.visual.characterDecoration,
             createdAt: now,
             updatedAt: now,
         });
@@ -214,8 +218,8 @@ export const createSettingsHandlers = ({
          *    });
          *}
          *
-         *if (typeof visual?.characterColorSaturation === 'number') {
-         *    settings.visual = {characterColorSaturation: visual.characterColorSaturation};
+         *if (isCharacterDecoration(visual?.characterDecoration)) {
+         *    settings.visual = {characterDecoration: visual.characterDecoration};
          *}
          *
          *if (structure) {

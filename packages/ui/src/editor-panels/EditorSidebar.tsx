@@ -20,7 +20,6 @@ interface EditorSidebarData {
     confirmedCharacters: EditorSidebarCharacter[],
     groups: EditorSidebarGroup[],
     unconfirmedCharacters: EditorSidebarCharacter[],
-    characterColorSaturation?: number,
     isLoading?: boolean,
 }
 
@@ -54,7 +53,6 @@ export const EditorSidebar = ({
         confirmedCharacters,
         groups,
         unconfirmedCharacters,
-        characterColorSaturation,
         isLoading,
     } = data;
     const {
@@ -104,7 +102,6 @@ export const EditorSidebar = ({
                                         >
                                             <CharacterRowConfirmed
                                                 character={character}
-                                                characterColorSaturation={characterColorSaturation}
                                                 onEditCharacter={onEditCharacter}
                                                 onSetCharacterColor={onSetCharacterColor}
                                             />
@@ -131,7 +128,6 @@ export const EditorSidebar = ({
                                             >
                                                 <CharacterGroupRow
                                                     group={group}
-                                                    characterColorSaturation={characterColorSaturation}
                                                     onEditGroup={onEditGroup}
                                                     onSetGroupColor={onSetGroupColor}
                                                 />

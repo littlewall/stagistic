@@ -24,7 +24,6 @@ interface AttributeManagerCharacterDetailProps {
     character: AttributeManagerCharacter,
     confirmedName: string,
     characters: AttributeManagerCharacter[],
-    characterColorSaturation?: number,
     isDeleting: boolean,
     isRenaming: boolean,
     isColorUpdating: boolean,
@@ -42,7 +41,6 @@ export const AttributeManagerCharacterDetail = ({
     character,
     confirmedName,
     characters,
-    characterColorSaturation,
     isDeleting,
     isRenaming,
     isColorUpdating,
@@ -79,7 +77,6 @@ export const AttributeManagerCharacterDetail = ({
         character: editorCharacter,
         isColorActionDisabled,
         onSetCharacterColor,
-        characterColorSaturation,
     });
 
     const handleConfirmDelete = () => {

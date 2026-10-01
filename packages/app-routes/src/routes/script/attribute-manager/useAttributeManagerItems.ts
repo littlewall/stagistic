@@ -28,7 +28,6 @@ interface UseAttributeManagerItemsArgs {
     characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
     music: ReturnType<typeof useScriptMusicState>['music'],
     getMusicTitleDraft: (musicId: string, confirmedTitle: string) => string,
-    characterColorSaturation?: number,
 }
 
 export const useAttributeManagerItems = ({
@@ -37,7 +36,6 @@ export const useAttributeManagerItems = ({
     characters,
     music,
     getMusicTitleDraft,
-    characterColorSaturation,
 }: UseAttributeManagerItemsArgs) => {
     const liveCharacters = useEditorLiveCharacters();
     const liveMusic = useEditorLiveMusic();
@@ -49,7 +47,6 @@ export const useAttributeManagerItems = ({
             color: getConfirmedCharacterColor(
                 character.id,
                 normalizeCharacterColorHex(character.colorHex),
-                characterColorSaturation,
             ),
             outline: character.outline ?? null,
             voiceType: character.voiceType ?? null,
@@ -63,7 +60,6 @@ export const useAttributeManagerItems = ({
     }, [
         characters.confirmedCharacterRecords,
         characters.confirmedGroupRecords,
-        characterColorSaturation,
         liveCharacters.keyByCharacterId,
     ]);
     const groupItems = useMemo<AttributeManagerGroup[]>(() => {

@@ -35,7 +35,6 @@ export const computeCharacterSuggestions = ({
     liveCountsByKey,
     suppressedSelection,
     previousOrderByKey,
-    characterColorSaturation,
 }: OverlayComputationArgs): CharacterSuggestionsResult | null => {
     const compose = getCharacterTagComposeFromState(editor.state);
 
@@ -47,7 +46,6 @@ export const computeCharacterSuggestions = ({
             liveCountsByKey,
             suppressedSelection,
             previousOrderByKey,
-            characterColorSaturation,
             compose,
         });
     }
@@ -116,7 +114,7 @@ export const computeCharacterSuggestions = ({
         return null;
     }
 
-    const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters, characterColorSaturation);
+    const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters);
 
     const suggestionRows = buildSuggestionRows({
         counts: countsByConfirmedKey,
@@ -148,6 +146,6 @@ export const computeCharacterSuggestions = ({
     return {
         shouldKeepSuppressedSelection: false,
         style,
-        suggestions: buildSuggestionEntries(suggestionRows, persistentColorByKey, characterColorSaturation),
+        suggestions: buildSuggestionEntries(suggestionRows, persistentColorByKey),
     };
 };

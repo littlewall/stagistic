@@ -35,7 +35,7 @@ export const scriptSettingsVisualPreferences = pgTable('script_settings_visual_p
     scriptId: text('script_id')
         .primaryKey()
         .references(() => scripts.id, {onDelete: 'cascade'}),
-    characterColorSaturation: real('character_color_saturation'),
+    characterDecoration: text('character_decoration'),
     createdAt: bigint('created_at', {mode: 'number'}).notNull(),
     updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
 });

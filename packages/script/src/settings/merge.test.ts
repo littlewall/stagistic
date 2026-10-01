@@ -45,12 +45,12 @@ describe('mergeEditorSettings', () => {
     it('merges typography and visual overrides', () => {
         const result = mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, {
             typography: {fontSizePx: 22},
-            visual: {characterColorSaturation: 30},
+            visual: {characterDecoration: 'underline-tint'},
         });
 
         expect(result.typography.fontSizePx).toBe(22);
         expect(result.typography.lineHeight).toBe(DEFAULT_EDITOR_SETTINGS.typography.lineHeight);
-        expect(result.visual.characterColorSaturation).toBe(30);
+        expect(result.visual.characterDecoration).toBe('underline-tint');
     });
 
     it('merges a partial structure actDisplay patch', () => {

@@ -90,7 +90,6 @@ describe('createCharacterColorRefsBundle', () => {
 
         expect(bundle.colorByCharacterIdRef.current.size).toBe(0);
         expect(bundle.rememberedColorByKeyRef.current.size).toBe(0);
-        expect(bundle.rememberedColorSaturationRef.current).toBeNull();
         expect(bundle.persistentCharactersRef.current).toEqual([]);
     });
 });

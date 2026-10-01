@@ -32,7 +32,6 @@ type EditorCanvasProps = {
     onMusicAssigned?: (musicId: string) => void,
     onOpenMusicManager?: (musicId: string) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
-    characterColorSaturation?: number,
     autoFocus?: boolean,
     style?: CSSProperties,
     headerFooter: HeaderFooterSettings,
@@ -48,7 +47,6 @@ export const EditorCanvas = ({
     onMusicAssigned,
     onOpenMusicManager,
     onRequestRemoveMusic,
-    characterColorSaturation,
     autoFocus,
     style,
     headerFooter,
@@ -70,7 +68,6 @@ export const EditorCanvas = ({
                 editor={editor}
                 canvasRef={canvasRef}
                 persistentCharacters={persistentCharacters}
-                characterColorSaturation={characterColorSaturation}
             />
             <MusicSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />
             <MusicDraftSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />

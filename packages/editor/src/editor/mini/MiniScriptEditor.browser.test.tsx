@@ -396,7 +396,7 @@ describe('MiniScriptEditor', () => {
         ).toBe('6ch');
         expect(
             getComputedStyle(mara).getPropertyValue('--character-tag-color').trim(),
-        ).toBe(getConfirmedCharacterColor('mini-character:MARA', null, 60));
+        ).toBe(getConfirmedCharacterColor('mini-character:MARA', null));
     });
 
     it('keeps the music title editable without activating a menu', async () => {

@@ -1,7 +1,7 @@
 import {getCharacterColor} from '@stagistic/editor';
 import {
-    CHARACTER_COLOR_SATURATION_OPTIONS,
-    clampCharacterColorSaturation,
+    type CharacterDecoration,
+    isCharacterDecoration,
 } from '@stagistic/script';
 import {
     formControlStyles,
@@ -10,70 +10,68 @@ import {
     PanelHeader,
     SettingsGroup,
 } from '@stagistic/ui';
-import {useMemo} from 'react';
+import type {CSSProperties} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import styles from './VisualPreferencesSettingsPanel.module.css';
 
-const PREVIEW_CHARACTER_KEYS = [
-    'alex',
-    'sam',
-    'liam',
-    'zoe',
-    'nora',
-] as const;
+const DECORATION_OPTIONS: FormSelectOption[] = [
+    {value: 'underline', label: 'Underline'},
+    {value: 'underline-tint', label: 'Underline + tinted names'},
+    {value: 'underline-tint-lines', label: 'Underline + tinted names and lines'},
+    {value: 'none', label: 'None'},
+] satisfies Array<FormSelectOption & {value: CharacterDecoration}>;
 
-const SATURATION_OPTIONS: FormSelectOption[] = CHARACTER_COLOR_SATURATION_OPTIONS.map(value => ({
-    value,
-    label: `${value}%`,
-}));
+const toCharacterColorStyle = (characterKey: string) => ({
+    '--preview-character-color': getCharacterColor(characterKey),
+}) as CSSProperties;
+
+const ALEX_STYLE = toCharacterColorStyle('alex');
+const SAM_STYLE = toCharacterColorStyle('sam');
 
 interface VisualPreferencesSettingsPanelProps {
-    characterColorSaturation: number,
-    onUpdateCharacterColorSaturation: (value: number) => void,
+    characterDecoration: CharacterDecoration,
+    onUpdateCharacterDecoration: (value: CharacterDecoration) => void,
 }
 
 export const VisualPreferencesSettingsPanel = ({
-    characterColorSaturation,
-    onUpdateCharacterColorSaturation,
-}: VisualPreferencesSettingsPanelProps) => {
-    const normalizedSaturation = clampCharacterColorSaturation(characterColorSaturation);
-    const previewColors = useMemo(
-        () => PREVIEW_CHARACTER_KEYS.map(key => getCharacterColor(key, normalizedSaturation)),
-        [normalizedSaturation],
-    );
-
-    return (
-        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
-            <PanelHeader level={3} title="Visual preferences" />
+    characterDecoration,
+    onUpdateCharacterDecoration,
+}: VisualPreferencesSettingsPanelProps) => (
+    <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+        <PanelHeader level={3} title="Visual preferences" />
+        <div className={styles.inlineRow}>
             <div className={formControlStyles.field}>
-                <label className={formControlStyles.label} htmlFor="character-color-saturation">
-                    Character Color Saturation
+                <label className={formControlStyles.label} htmlFor="character-decoration">
+                    Character highlight
                 </label>
-                <div className={styles.inlineRow}>
-                    <FormSelect
-                        id="character-color-saturation"
-                        value={normalizedSaturation}
-                        options={SATURATION_OPTIONS}
-                        ariaLabel="Character color saturation"
-                        className={styles.selectCompact}
-                        onChange={value => {
-                            onUpdateCharacterColorSaturation(clampCharacterColorSaturation(Number(value)));
-                        }}
-                    />
-                    <span className={styles.previewPrefix}>Preview:</span>
-                    <div className={styles.previewDots}>
-                        {previewColors.map((color, index) => (
-                            <span
-                                key={`${PREVIEW_CHARACTER_KEYS[index]}-${color}`}
-                                className={styles.previewDot}
-                                style={{background: color}}
-                                aria-hidden="true"
-                            />
-                        ))}
-                    </div>
-                </div>
+                <FormSelect
+                    id="character-decoration"
+                    value={characterDecoration}
+                    options={DECORATION_OPTIONS}
+                    ariaLabel="Character highlight"
+                    width="content"
+                    onChange={value => {
+                        if (isCharacterDecoration(value)) {
+                            onUpdateCharacterDecoration(value);
+                        }
+                    }}
+                />
             </div>
-        </SettingsGroup>
-    );
-};
+            <div
+                className={styles.preview}
+                data-character-decoration={characterDecoration}
+                data-testid="character-decoration-preview"
+                aria-hidden="true"
+            >
+                <p className={styles.previewStage}>
+                    <span className={styles.previewName} style={SAM_STYLE}>SAM</span> enters.
+                </p>
+                <p className={styles.previewCue}>
+                    <span className={styles.previewName} style={ALEX_STYLE}>ALEX</span>
+                </p>
+                <p className={styles.previewLine} style={ALEX_STYLE}>Where were you?</p>
+            </div>
+        </div>
+    </SettingsGroup>
+);

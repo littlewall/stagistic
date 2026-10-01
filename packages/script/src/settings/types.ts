@@ -2,6 +2,7 @@ import type {
     BlockCasing,
     BlockShortcut,
     BlockTextAlign,
+    CharacterDecoration,
     SceneNumberFormat,
 } from './options';
 
@@ -54,7 +55,7 @@ export interface TypographySettings {
 }
 
 export interface VisualSettings {
-    characterColorSaturation: number,
+    characterDecoration: CharacterDecoration,
 }
 
 export interface StructureActDisplaySettings {

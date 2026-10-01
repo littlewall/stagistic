@@ -29,7 +29,6 @@ export const AttributeManagerCharactersPanel = ({
     initialSelectedGroupId,
     initialWorkspaceId = 'characters',
     isLoading = false,
-    characterColorSaturation,
     draftScopeKey = null,
     deletingCharacterIds = [],
     renamingCharacterIds = [],
@@ -190,7 +189,6 @@ export const AttributeManagerCharactersPanel = ({
                                 vocalRangeLow: null,
                                 vocalRangeHigh: null,
                             }))}
-                            characterColorSaturation={characterColorSaturation}
                             isDeleting={deletingCharacterIds.includes(selectedCharacter.id)}
                             isRenaming={renamingCharacterIds.includes(selectedCharacter.id)}
                             isColorUpdating={colorUpdatingCharacterIds.includes(selectedCharacter.id)}
@@ -210,7 +208,6 @@ export const AttributeManagerCharactersPanel = ({
                             confirmedName={selectedConfirmedGroup.name}
                             speakingEntities={allEntityNames}
                             characters={displayedCharacters}
-                            characterColorSaturation={characterColorSaturation}
                             isDeleting={deletingGroupIds.includes(selectedGroup.id)}
                             isRenaming={renamingGroupIds.includes(selectedGroup.id)}
                             isColorUpdating={colorUpdatingGroupIds.includes(selectedGroup.id)}

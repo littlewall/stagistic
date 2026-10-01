@@ -33,7 +33,6 @@ interface UseCharacterComputedArgs {
         confirmedGroupRecords: ScriptCharacterGroupRecord[],
         characterSnapshot: EditorLiveCharacterSnapshot | null,
         resolvedScriptSettings: EditorSettings,
-        characterColorSaturation: number,
     },
     pending: {
         confirmingCharacterKeys: string[],
@@ -72,7 +71,6 @@ export const useCharacterComputed = ({
         confirmedGroupRecords,
         characterSnapshot,
         resolvedScriptSettings,
-        characterColorSaturation,
     } = data;
     const {
         confirmingCharacterKeys,
@@ -179,7 +177,6 @@ export const useCharacterComputed = ({
                     color: getConfirmedCharacterColor(
                         character.id,
                         normalizedColorHex,
-                        characterColorSaturation,
                     ),
                     colorHex: normalizedColorHex ?? null,
                     genderKey: character.genderKey ?? null,
@@ -197,7 +194,6 @@ export const useCharacterComputed = ({
             });
         },
         [
-            characterColorSaturation,
             colorUpdatingCharacterIdSet,
             deletingCharacterIdSet,
             genderUpdatingCharacterIdSet,
@@ -220,7 +216,7 @@ export const useCharacterComputed = ({
                 .map(key => ({
                     key,
                     color: characterSnapshot?.displayColorByKey.get(key)
-                        ?? getCharacterColor(key, characterColorSaturation),
+                        ?? getCharacterColor(key),
                     isConfirmed: false,
                     isConfirmPending: confirmingCharacterSet.has(key),
                     isPending: confirmingCharacterSet.has(key),
@@ -228,7 +224,6 @@ export const useCharacterComputed = ({
         },
         [
             characterSnapshot?.displayColorByKey,
-            characterColorSaturation,
             confirmedCharacterSet,
             confirmingCharacterSet,
             includeSidebarLists,

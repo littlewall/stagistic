@@ -1,5 +1,6 @@
 import type {
     BlockShortcut,
+    CharacterDecoration,
     HeaderFooterSettings,
     ScriptBlockNodeType,
 } from '@stagistic/script';
@@ -17,10 +18,7 @@ import {
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
-import {
-    CHARACTER_HIGHLIGHT_ATTR,
-    DEFAULT_CHARACTER_HIGHLIGHT,
-} from '../../characters/characterHighlight';
+import {CHARACTER_HIGHLIGHT_ATTR} from '../../characters/characterHighlight';
 import type {
     EditorLayoutProps,
     EditorMusicRemoveRequest,
@@ -42,8 +40,8 @@ interface EditorShellCanvasProps {
     onMusicAssigned?: (musicId: string) => void,
     onOpenMusicManager?: (musicId: string) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
-    characterColorSaturation?: number,
     headerFooter: HeaderFooterSettings,
+    characterDecoration: CharacterDecoration,
     scriptTitle?: string,
     draftDate?: string,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
@@ -86,8 +84,8 @@ export const EditorShell = ({
         onMusicAssigned,
         onOpenMusicManager,
         onRequestRemoveMusic,
-        characterColorSaturation,
         headerFooter,
+        characterDecoration,
         scriptTitle,
         draftDate,
         blockShortcuts,
@@ -167,7 +165,7 @@ export const EditorShell = ({
             className={styles.root}
             data-character-tag-scope={characterTagScopeId}
             data-editor-ready={isCanvasReady ? 'true' : 'false'}
-            {...{[CHARACTER_HIGHLIGHT_ATTR]: DEFAULT_CHARACTER_HIGHLIGHT}}
+            {...{[CHARACTER_HIGHLIGHT_ATTR]: characterDecoration}}
             aria-busy={!isCanvasReady}
             ref={rootRef}
             style={rootStyle}
@@ -240,7 +238,6 @@ export const EditorShell = ({
                             onMusicAssigned={onMusicAssigned}
                             onOpenMusicManager={onOpenMusicManager}
                             onRequestRemoveMusic={onRequestRemoveMusic}
-                            characterColorSaturation={characterColorSaturation}
                             autoFocus={autoFocus}
                             headerFooter={headerFooter}
                             scriptTitle={scriptTitle}

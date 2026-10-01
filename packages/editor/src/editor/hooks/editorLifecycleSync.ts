@@ -176,7 +176,6 @@ export const useEditorLifecycleSync = ({
         (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => {
             const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
             const {projection, change} = resolveSidebarProjection(snapshot, {
-                characterColorSaturation: characters?.characterColorSaturation,
                 colorByCharacterId: characters?.colorByCharacterIdRef?.current,
                 rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
                 persistentCharacters: characters?.persistentCharactersRef?.current,
@@ -207,7 +206,6 @@ export const useEditorLifecycleSync = ({
             }
         },
         [
-            characters?.characterColorSaturation,
             characters?.colorByCharacterIdRef,
             characters?.rememberedColorByKeyRef,
             characters?.persistentCharactersRef,
@@ -227,7 +225,6 @@ export const useEditorLifecycleSync = ({
             const currentSnapshot = liveStore.getSnapshot();
             const fallbackProjection = snapshot
                 ? buildSidebarProjectionFromIndex(snapshot, {
-                    characterColorSaturation: characters?.characterColorSaturation,
                     colorByCharacterId: characters?.colorByCharacterIdRef?.current,
                     rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
                     persistentCharacters: characters?.persistentCharactersRef?.current,
@@ -253,7 +250,6 @@ export const useEditorLifecycleSync = ({
             }
         },
         [
-            characters?.characterColorSaturation,
             characters?.colorByCharacterIdRef,
             characters?.persistentCharactersRef,
             characters?.rememberedColorByKeyRef,

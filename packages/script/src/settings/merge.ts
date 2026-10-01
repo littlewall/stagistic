@@ -1,4 +1,5 @@
 import {normalizeEditorSettingsBlockType} from './normalize';
+import {isCharacterDecoration} from './options';
 import type {
     BlockSettings,
     BlockSpacingSettings,
@@ -6,7 +7,6 @@ import type {
     EditorSettingsOverride,
     PageSettings,
     TypographySettings,
-    VisualSettings,
 } from './types';
 
 export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<EditorSettingsOverride | null | undefined>): EditorSettings => {
@@ -76,20 +76,12 @@ export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<Ed
             next.typography = mergedTypography;
         }
 
-        if (override.visual) {
-            const mergedVisual = {
+        // Stored overrides may still carry retired keys; only accept known values.
+        if (isCharacterDecoration(override.visual?.characterDecoration)) {
+            next.visual = {
                 ...next.visual,
+                characterDecoration: override.visual.characterDecoration,
             };
-
-            for (const [key, value] of Object.entries(override.visual)) {
-                if (value === undefined) {
-                    continue;
-                }
-
-                mergedVisual[key as keyof VisualSettings] = value;
-            }
-
-            next.visual = mergedVisual;
         }
 
         if (override.structure) {

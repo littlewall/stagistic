@@ -151,7 +151,6 @@ const Editor = ({
         liveStore,
     } = useEditorCharacterColors({
         persistentCharacters,
-        characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         resolvedInitialValue,
         refs: surfaceRefsRef.current,
         liveStore: providedLiveStore,
@@ -195,10 +194,7 @@ const Editor = ({
         commentCallbacksRef,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
-    const initialDoc = useMemo<ScriptDocument>(
-        () => resolvedInitialValue,
-        [initialContentSignature],
-    );
+    const initialDoc = useMemo<ScriptDocument>(() => resolvedInitialValue, [initialContentSignature]);
     const {editor} = useScriptEditorInstance({
         surfaceCache,
         signature: surfaceSignature,
@@ -213,7 +209,7 @@ const Editor = ({
         }
     }, [commentThreads, editor]);
 
-    useEditorCharacterSync(editor, persistentCharacters, resolvedSettings.visual.characterColorSaturation);
+    useEditorCharacterSync(editor, persistentCharacters);
 
     const {
         scheduleAutosave,
@@ -282,7 +278,6 @@ const Editor = ({
             persistentCharactersRef,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
-            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         },
         requests,
     });
@@ -297,7 +292,6 @@ const Editor = ({
                                 isCanvasReady={isInitialCanvasReady}
                                 canvas={{
                                     autoFocus,
-                                    characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
                                     editor,
                                     persistentCharacters,
                                     persistentMusic,
@@ -305,6 +299,7 @@ const Editor = ({
                                     onOpenMusicManager,
                                     onRequestRemoveMusic,
                                     headerFooter: resolvedSettings.headerFooter,
+                                    characterDecoration: resolvedSettings.visual.characterDecoration,
                                     scriptTitle,
                                     draftDate,
                                     blockShortcuts,

@@ -38,7 +38,6 @@ export interface UseEditorLifecycleArgs {
         persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
         colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
         rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
-        characterColorSaturation?: number,
     },
     requests?: EditorStructureRequests,
 }

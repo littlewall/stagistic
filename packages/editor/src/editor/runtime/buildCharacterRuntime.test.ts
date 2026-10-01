@@ -6,6 +6,7 @@ import {
     it,
 } from 'vite-plus/test';
 
+import {getCharacterTagKeyClassName} from '../characters/characterColors';
 import {buildCharacterRuntime} from './buildCharacterRuntime';
 
 const schema = new Schema({
@@ -124,5 +125,80 @@ describe('buildCharacterRuntime', () => {
             .find(decoration => decoration.from === blockStart + firstToken.valueStart);
 
         expect(nameDecoration?.to).toBe(blockStart + firstToken.valueEnd);
+    });
+});
+
+const speechBlock = (blockType: string) => ({
+    group: 'block',
+    content: 'text*',
+    attrs: {
+        id: {default: null},
+        blockType: {default: blockType},
+        characterRefs: {default: null},
+    },
+    toDOM: () => ['p', 0] as const,
+    parseDOM: [{tag: 'p'}],
+});
+
+const speechSchema = new Schema({
+    nodes: {
+        doc: {content: 'block+'},
+        text: {group: 'inline'},
+        character: speechBlock('character'),
+        dialogue: speechBlock('dialogue'),
+        lyrics: speechBlock('lyrics'),
+        aside: speechBlock('aside'),
+        stageDirection: speechBlock('stageDirection'),
+    },
+    marks: {},
+});
+
+const speechNode = (type: string, text: string) => speechSchema.node(type, {id: `${type}-${text}`}, [speechSchema.text(text)]);
+
+const findLineClassByText = (doc: ReturnType<typeof speechSchema.node>, text: string) => {
+    const {decorations} = buildCharacterRuntime({
+        doc,
+        characterTagClassNames: {
+            tag: 'tag',
+            separator: 'sep',
+            line: 'line',
+        },
+    });
+    let classByText: string | undefined;
+
+    doc.forEach((node, offset) => {
+        if (node.textContent !== text) {
+            return;
+        }
+
+        const decoration = decorations.find(offset, offset + node.nodeSize)
+            .find(candidate => candidate.from === offset && candidate.to === offset + node.nodeSize);
+
+        classByText = (decoration as unknown as {type: {attrs: {class?: string}}} | undefined)?.type.attrs.class;
+    });
+
+    return classByText;
+};
+
+describe('buildCharacterRuntime speaker lines', () => {
+    const doc = speechSchema.node('doc', null, [
+        speechNode('character', 'ANNA / BOB'),
+        speechNode('dialogue', 'Hello.'),
+        speechNode('aside', 'beat'),
+        speechNode('lyrics', 'La la.'),
+        speechNode('stageDirection', 'She leaves.'),
+        speechNode('dialogue', 'Orphan line.'),
+    ]);
+
+    it('tags dialogue and lyrics with the first cue character, through asides', () => {
+        const expected = `line ${getCharacterTagKeyClassName('ANNA')}`;
+
+        expect(findLineClassByText(doc, 'Hello.')).toBe(expected);
+        expect(findLineClassByText(doc, 'La la.')).toBe(expected);
+    });
+
+    it('does not tag asides or lines after the speech ends', () => {
+        expect(findLineClassByText(doc, 'beat')).toBeUndefined();
+        expect(findLineClassByText(doc, 'Orphan line.')).toBeUndefined();
     });
 });

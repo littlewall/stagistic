@@ -5,7 +5,7 @@ import {
 } from '@stagistic/app-core';
 import {type ScriptBlockNodeType} from '@stagistic/script';
 import {
-    clampCharacterColorSaturation,
+    type CharacterDecoration,
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     type EditorSettingsOverride,
@@ -108,14 +108,12 @@ export const useScriptEditorSettingsDraft = ({
         });
     }, [draft.setDraft]);
 
-    const updateCharacterColorSaturation = useCallback((value: number) => {
-        const nextSaturation = clampCharacterColorSaturation(value);
-
+    const updateCharacterDecoration = useCallback((value: CharacterDecoration) => {
         draft.setDraft(previous => ({
             ...previous,
             visual: {
                 ...previous.visual,
-                characterColorSaturation: nextSaturation,
+                characterDecoration: value,
             },
         }));
     }, [draft.setDraft]);
@@ -192,7 +190,7 @@ export const useScriptEditorSettingsDraft = ({
         flushScriptSettings: draft.flush,
         updateBlockSettings,
         resetBlockSettings,
-        updateCharacterColorSaturation,
+        updateCharacterDecoration,
         updateStructureSettings,
         updatePageSettings,
         updateHeaderFooterSettings,
