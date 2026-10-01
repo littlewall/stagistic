@@ -412,3 +412,53 @@ describe('comment marker placement', () => {
         expect(Math.abs((rect.left + rect.right) / 2 - (railX + scrollbarX) / 2)).toBeLessThanOrEqual(1);
     });
 });
+
+describe('active comment dismissal', () => {
+    const activate = async (editor: Editor) => {
+        editor.commands.setActiveCommentThread('t1');
+        await poll(() => getCommentsState(editor.state).activeThreadId === 't1', 't1 active');
+    };
+
+    const mountWithActiveThread = async () => {
+        const {editor} = await mountEditor({
+            content: createDocument([dialogue('b1', 'Hello world', ['t1']), dialogue('b2', 'Second line')]),
+            commentThreads: [openRange('t1')],
+        });
+
+        await activate(editor);
+
+        return editor;
+    };
+
+    it('closes the active thread when a control outside the comment UI is used', async () => {
+        const editor = await mountWithActiveThread();
+        const search = await poll(() => document.querySelector<HTMLInputElement>('input[aria-label="Search script"]'), 'search input');
+
+        search.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
+
+        await activate(editor);
+        search.focus();
+
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
+    });
+
+    it('keeps the active thread for caret and selection in the editor text and for comment UI', async () => {
+        const editor = await mountWithActiveThread();
+        const text = editor.view.dom.querySelector('p, [data-block-id]') ?? editor.view.dom;
+
+        text.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+        placeCaret(editor, 'b2');
+
+        const panelButton = document.createElement('button');
+        const panel = document.createElement('div');
+
+        panel.dataset.commentsPanel = 'true';
+        panel.appendChild(panelButton);
+        document.body.appendChild(panel);
+        panelButton.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+
+        expect(getCommentsState(editor.state).activeThreadId).toBe('t1');
+    });
+});

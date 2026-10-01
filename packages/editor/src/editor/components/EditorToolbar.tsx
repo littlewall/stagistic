@@ -12,6 +12,7 @@ import {
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
 import {useEditorSearch} from '../hooks/useEditorSearch';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
+import {getToolbarShortcutLabels} from '../model/toolbarShortcutLabels';
 import {updateBlockType, updateBlockTypeForSelection} from '../tiptap/scriptBlock/commands';
 import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 import styles from './EditorToolbar.module.css';
@@ -39,6 +40,7 @@ const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
 const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
+    const searchShortcuts = getToolbarShortcutLabels();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -207,6 +209,19 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
                 onClear={search.onClear}
                 onPreviousResult={search.onPreviousResult}
                 onNextResult={search.onNextResult}
+                isCaseSensitive={search.isCaseSensitive}
+                onCaseSensitiveChange={search.onCaseSensitiveChange}
+                replace={{
+                    isOpen: search.isReplaceOpen,
+                    onOpenChange: search.onReplaceOpenChange,
+                    value: search.replacement,
+                    onChange: search.onReplacementChange,
+                    onReplace: search.onReplace,
+                    onReplaceAll: search.onReplaceAll,
+                    isDisabled: !search.canReplace,
+                    inputRef: search.replaceInputRef,
+                }}
+                shortcuts={searchShortcuts}
             />
         </div>
     );

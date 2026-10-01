@@ -11,18 +11,20 @@
 
 .content {
     display: inline-flex;
-    flex-direction: column;
-    gap: var(--space-xs);
+    gap: var(--space-md);
     align-items: center;
+    white-space: nowrap;
 }
 
+/* A quiet keycap beside the label: the chip separates it, the text stays nearly full strength. */
 .shortcut {
-    padding: 0;
-    font-family: var(--font-family-mono);
+    padding: var(--space-px) var(--space-sm);
+    font-family: inherit;
     font-size: var(--font-size-xxs);
-    font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-medium);
     line-height: var(--line-height-none);
-    color: color-mix(in oklch, var(--color-surface) 72%, transparent);
+    color: color-mix(in oklch, var(--color-surface) 88%, transparent);
     letter-spacing: var(--letter-spacing-normal);
-    background: transparent;
+    background: color-mix(in oklch, var(--color-surface) 16%, transparent);
+    border-radius: var(--radius-sm);
 }

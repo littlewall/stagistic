@@ -58,7 +58,12 @@ export {
 } from './molecules/Card/Card';
 export {ListPanel, type ListPanelProps} from './molecules/ListPanel/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow/ListRow';
-export {SearchControl, type SearchControlProps} from './molecules/SearchControl/SearchControl';
+export {
+    SearchControl,
+    type SearchControlProps,
+    type SearchControlReplace,
+    type SearchControlShortcuts,
+} from './molecules/SearchControl/SearchControl';
 export {
     ToggleButtonGroup,
     type ToggleButtonGroupOption,

@@ -1,9 +1,22 @@
-.control {
-    --search-control-width: 18.25rem;
+/* Holds the one-row footprint in the toolbar; the surface grows over the content below. */
+.slot {
+    --search-control-width: 20rem;
+    --search-row-height: calc(var(--control-trigger-height) - 2px);
 
-    box-sizing: border-box;
+    position: relative;
+    flex: none;
     width: var(--search-control-width);
     height: var(--control-trigger-height);
+}
+
+.control {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    align-items: stretch;
+    box-sizing: border-box;
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--control-trigger-radius);
@@ -23,10 +36,56 @@
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }
+
+    &[data-expanded] {
+        z-index: var(--menu-z-index);
+        background: var(--menu-bg);
+        border-color: var(--color-border);
+        box-shadow: var(--menu-shadow);
+    }
+}
+
+/* Full-height chevron column, as in VS Code's find widget; doubled class outranks IconButton's size. */
+.control .toggle {
+    flex: none;
+    align-self: stretch;
+    width: 1.25rem;
+    height: auto;
+    margin: var(--space-xs);
+    border-radius: calc(var(--control-trigger-radius) - var(--space-xs));
+
+    &[aria-expanded = 'true'] .toggleIcon {
+        transform: none;
+    }
+
+    & .toggleIcon {
+        transform: rotate(-90deg);
+        transition: transform var(--duration-normal) var(--ease-standard);
+    }
+}
+
+.rows {
+    display: grid;
+    flex: 1;
+    min-width: 0;
 }
 
 .input {
-    height: 100%;
+    height: var(--search-row-height);
+
+    /* `Input` pins its own control height; each row is the control minus the surface border. */
+    & input {
+        height: 100%;
+    }
+}
+
+/* Beside the chevron the text starts right after it, as in VS Code. */
+.control:has(.toggle) .input input {
+    padding-left: var(--space-sm);
+}
+
+.replaceRow {
+    border-top: 1px solid var(--color-border-subtle);
 }
 
 .actions {
@@ -36,9 +95,8 @@
     height: 100%;
     padding-right: var(--space-xs);
 
-    & > button[aria-expanded = 'true'] {
+    & > button[aria-pressed = 'true'] {
         color: var(--color-text);
-        background: var(--state-selected);
     }
 }
 

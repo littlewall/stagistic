@@ -12,7 +12,7 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {ScriptBlockNodes} from '../../nodes';
+import {MusicOutNode, ScriptBlockNodes} from '../../nodes';
 import {DocumentWithSettings} from '../DocumentExtension';
 import {findSearchResults} from './findSearchResults';
 import type {SearchCriteria} from './types';
@@ -54,6 +54,7 @@ const createDocument = (content: ScriptNode[]) => {
             Text,
             Bold,
             ...ScriptBlockNodes,
+            MusicOutNode,
         ],
     });
     const document = editor.state.doc;
@@ -81,6 +82,19 @@ describe('findSearchResults', () => {
         const [result] = findSearchResults(document, criteria('moonlight'));
 
         expect(document.textBetween(result.from, result.to)).toBe('moonlight');
+    });
+
+    it('does not match across an inline atom', () => {
+        const document = createDocument([
+            markedBlock('dialogue', 'd1', [
+                text('moon'),
+                {type: 'musicOut'},
+                text('light'),
+            ]),
+        ]);
+
+        expect(findSearchResults(document, criteria('moonlight'))).toEqual([]);
+        expect(findSearchResults(document, criteria('light'))).toHaveLength(1);
     });
 
     it('does not match across block boundaries', () => {

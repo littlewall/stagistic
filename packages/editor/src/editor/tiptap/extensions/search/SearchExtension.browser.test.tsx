@@ -173,6 +173,73 @@ describe('SearchExtension', () => {
         expect(editor.state.selection.from).toBe(expectedSelection);
     });
 
+    it('replaces the active occurrence and advances to the next one', () => {
+        const editor = createSearchEditor('light one light two light');
+
+        editor.commands.setTextSelection(1);
+        editor.commands.setSearchCriteria(criteria('light'));
+        editor.commands.goToNextSearchResult();
+        editor.commands.replaceCurrentSearchResult('Lights');
+
+        const snapshot = getEditorSearchSnapshot(editor.state);
+
+        expect(editor.state.doc.textContent).toBe('light one Lights two light');
+        expect(snapshot.results).toHaveLength(3);
+        expect(snapshot.currentIndex).toBe(2);
+    });
+
+    it('deletes the active occurrence for an empty replacement', () => {
+        const editor = createSearchEditor('light one light');
+
+        editor.commands.setTextSelection(1);
+        editor.commands.setSearchCriteria(criteria('light '));
+        editor.commands.replaceCurrentSearchResult('');
+
+        expect(editor.state.doc.textContent).toBe('one light');
+        expect(getEditorSearchSnapshot(editor.state).results).toEqual([]);
+    });
+
+    it('keeps the marks of a replaced occurrence', () => {
+        const editor = createSearchEditor('light');
+
+        editor.commands.setTextSelection({from: 1, to: 6});
+        editor.commands.setBold();
+        editor.commands.setSearchCriteria(criteria('light'));
+        editor.commands.replaceCurrentSearchResult('dark');
+
+        const replaced = editor.state.doc.nodeAt(1);
+
+        expect(replaced?.text).toBe('dark');
+        expect(replaced?.marks.map(mark => mark.type.name)).toEqual(['bold']);
+    });
+
+    it('replaces every occurrence in one transaction', () => {
+        const editor = createSearchEditor('light one LIGHT two light');
+        let transactions = 0;
+
+        editor.on('transaction', ({transaction}) => {
+            if (transaction.docChanged) {
+                transactions += 1;
+            }
+        });
+        editor.commands.setSearchCriteria(criteria('light'));
+        editor.commands.replaceAllSearchResults('lamp');
+
+        expect(editor.state.doc.textContent).toBe('lamp one lamp two lamp');
+        expect(transactions).toBe(1);
+        expect(getEditorSearchSnapshot(editor.state).results).toEqual([]);
+    });
+
+    it('does nothing to replace without results', () => {
+        const editor = createSearchEditor('night');
+
+        editor.commands.setSearchCriteria(criteria('light'));
+
+        expect(editor.commands.replaceCurrentSearchResult('lamp')).toBe(false);
+        expect(editor.commands.replaceAllSearchResults('lamp')).toBe(false);
+        expect(editor.state.doc.textContent).toBe('night');
+    });
+
     it('clears results and decorations', () => {
         const editor = createSearchEditor('light');
 

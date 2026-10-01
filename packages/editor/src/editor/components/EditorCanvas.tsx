@@ -7,6 +7,7 @@ import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
+import {useDismissActiveCommentOnAction} from '../comments/useDismissActiveCommentOnAction';
 import type {
     EditorMusicRemoveRequest,
     PersistentCharacterRef,
@@ -56,6 +57,8 @@ export const EditorCanvas = ({
     blockShortcuts,
 }: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
+
+    useDismissActiveCommentOnAction(editor);
 
     return (
         <section className={styles.canvas} data-editor-scroll-container="true" ref={canvasRef} style={style}>
