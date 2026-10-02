@@ -21,6 +21,7 @@ const editors: Editor[] = [];
 const criteria = (query: string): SearchCriteria => ({
     query,
     caseSensitive: false,
+    wholeWord: false,
     blockTypes: null,
 });
 

@@ -211,6 +211,8 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
                 onNextResult={search.onNextResult}
                 isCaseSensitive={search.isCaseSensitive}
                 onCaseSensitiveChange={search.onCaseSensitiveChange}
+                isWholeWord={search.isWholeWord}
+                onWholeWordChange={search.onWholeWordChange}
                 replace={{
                     isOpen: search.isReplaceOpen,
                     onOpenChange: search.onReplaceOpenChange,

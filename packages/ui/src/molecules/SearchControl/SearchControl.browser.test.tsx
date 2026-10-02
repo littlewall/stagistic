@@ -368,6 +368,29 @@ describe('SearchControl', () => {
 
         expect(onCaseSensitiveChange).toHaveBeenCalledWith(false);
     });
+
+    it('toggles match whole word inside the search field', async () => {
+        const onWholeWordChange = vi.fn();
+
+        await mount(
+            <SearchControl
+                value="light"
+                currentResult={1}
+                resultCount={2}
+                aria-label="Search script"
+                onWholeWordChange={onWholeWordChange}
+                readOnly
+            />,
+        );
+
+        const toggle = await waitForElement<HTMLButtonElement>('button[aria-label="Match whole word"]');
+
+        expect(toggle.getAttribute('aria-pressed')).toBe('false');
+
+        await userEvent.click(toggle);
+
+        expect(onWholeWordChange).toHaveBeenCalledWith(true);
+    });
 });
 
 const ReplaceHarness = (props: Partial<SearchControlReplace>) => {

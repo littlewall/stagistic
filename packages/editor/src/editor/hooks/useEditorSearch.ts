@@ -33,6 +33,8 @@ export interface UseEditorSearchResult {
     onNextResult: () => void,
     isCaseSensitive: boolean,
     onCaseSensitiveChange: (isCaseSensitive: boolean) => void,
+    isWholeWord: boolean,
+    onWholeWordChange: (isWholeWord: boolean) => void,
     replaceInputRef: RefObject<HTMLInputElement | null>,
     isReplaceOpen: boolean,
     onReplaceOpenChange: (isOpen: boolean) => void,
@@ -75,6 +77,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                     resultCount: 0,
                     activeFrom: null,
                     isCaseSensitive: false,
+                    isWholeWord: false,
                     isEditable: false,
                 };
             }
@@ -88,6 +91,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                 resultCount: snapshot.results.length,
                 activeFrom: active?.from ?? null,
                 isCaseSensitive: snapshot.criteria.caseSensitive,
+                isWholeWord: snapshot.criteria.wholeWord,
                 isEditable: stateEditor.isEditable,
             };
         },
@@ -98,6 +102,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
             && a.resultCount === b.resultCount
             && a.activeFrom === b.activeFrom
             && a.isCaseSensitive === b.isCaseSensitive
+            && a.isWholeWord === b.isWholeWord
             && a.isEditable === b.isEditable,
         ),
     }) ?? {
@@ -106,6 +111,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         resultCount: 0,
         activeFrom: null,
         isCaseSensitive: false,
+        isWholeWord: false,
         isEditable: false,
     };
     const [replacement, setReplacement] = useState('');
@@ -147,6 +153,17 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         editor.commands.setSearchCriteria({
             ...getEditorSearchSnapshot(editor.state).criteria,
             caseSensitive: isCaseSensitive,
+        });
+    }, [editor]);
+
+    const onWholeWordChange = useCallback((isWholeWord: boolean) => {
+        if (!editor) {
+            return;
+        }
+
+        editor.commands.setSearchCriteria({
+            ...getEditorSearchSnapshot(editor.state).criteria,
+            wholeWord: isWholeWord,
         });
     }, [editor]);
 
@@ -281,6 +298,8 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         onNextResult,
         isCaseSensitive: state.isCaseSensitive,
         onCaseSensitiveChange,
+        isWholeWord: state.isWholeWord,
+        onWholeWordChange,
         replaceInputRef,
         isReplaceOpen,
         onReplaceOpenChange: setIsReplaceOpen,

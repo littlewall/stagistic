@@ -14,6 +14,7 @@ import {ChevronDownIcon} from '../../icons/ui/ChevronDownIcon';
 import {ChevronUpIcon} from '../../icons/ui/ChevronUpIcon';
 import {CloseIcon} from '../../icons/ui/CloseIcon';
 import {SearchIcon} from '../../icons/ui/SearchIcon';
+import {WholeWordIcon} from '../../icons/ui/WholeWordIcon';
 import styles from './SearchControl.module.css';
 import {type SearchControlReplace, SearchReplaceRow} from './SearchReplaceRow';
 
@@ -34,9 +35,11 @@ export type SearchControlProps = {
     onPreviousResult?: () => void,
     onNextResult?: () => void,
     onClear?: () => void,
-    /** The case toggle renders only with a change handler. */
+    /** The case and whole-word toggles render only with a change handler. */
     isCaseSensitive?: boolean,
     onCaseSensitiveChange?: (isCaseSensitive: boolean) => void,
+    isWholeWord?: boolean,
+    onWholeWordChange?: (isWholeWord: boolean) => void,
     /** The expand chevron renders only when replace is supported. */
     replace?: SearchControlReplace,
     shortcuts?: SearchControlShortcuts,
@@ -51,6 +54,8 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
         onClear,
         isCaseSensitive = false,
         onCaseSensitiveChange,
+        isWholeWord = false,
+        onWholeWordChange,
         replace,
         shortcuts = {},
         className,
@@ -68,6 +73,7 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
         const isNavigationDisabled = !hasQuery || resultCount === 0;
         const hasClear = hasQuery && Boolean(onClear);
         const hasCaseToggle = isActive && Boolean(onCaseSensitiveChange);
+        const hasWholeWordToggle = isActive && Boolean(onWholeWordChange);
         const onSurfaceBlur = (event: ReactFocusEvent<HTMLDivElement>) => {
             if (!event.currentTarget.contains(event.relatedTarget)) {
                 setHasFocusWithin(false);
@@ -128,7 +134,24 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                         </IconButton>
                     </Tooltip>
                 ) : null}
-                {hasClear || hasCaseToggle ? (
+                {hasWholeWordToggle && onWholeWordChange ? (
+                    <Tooltip
+                        label="Match whole word"
+                        placement="bottom"
+                    >
+                        <IconButton
+                            size="xs"
+                            aria-label="Match whole word"
+                            aria-pressed={isWholeWord}
+                            isSelected={isWholeWord}
+                            preventFocusOnPress
+                            onPress={() => onWholeWordChange(!isWholeWord)}
+                        >
+                            <WholeWordIcon aria-hidden="true" />
+                        </IconButton>
+                    </Tooltip>
+                ) : null}
+                {hasClear || hasCaseToggle || hasWholeWordToggle ? (
                     <span
                         className={styles.divider}
                         data-search-divider=""
