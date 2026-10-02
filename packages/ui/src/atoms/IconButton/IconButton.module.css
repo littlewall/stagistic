@@ -117,4 +117,5 @@
 .iconButton[data-selected] {
     color: var(--color-text);
     background: var(--state-selected);
+    border-color: transparent;
 }

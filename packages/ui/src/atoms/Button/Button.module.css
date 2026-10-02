@@ -44,6 +44,7 @@
         width: var(--control-height-md);
         height: var(--control-height-md);
         padding: 0;
+        border-radius: var(--radius-sm);
     }
 
     &.primary {
@@ -82,7 +83,7 @@
 
         &[aria-pressed = 'true'] {
             background: var(--state-selected);
-            border-color: var(--color-text-muted);
+            border-color: transparent;
         }
 
         &[data-focus-visible] {

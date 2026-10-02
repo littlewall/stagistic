@@ -9,7 +9,7 @@
     color: var(--color-text-muted);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     outline: none;
 
     &[data-hovered],

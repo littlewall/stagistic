@@ -124,7 +124,6 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                     >
                         <IconButton
                             size="xs"
-                            shape="pill"
                             aria-label="Clear search"
                             onPress={onClear}
                         >
@@ -196,7 +195,6 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                     placement="bottom"
                 >
                     <IconButton
-                        shape="pill"
                         aria-label="Previous search result"
                         isDisabled={isNavigationDisabled}
                         preventFocusOnPress
@@ -211,7 +209,6 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                     placement="bottom"
                 >
                     <IconButton
-                        shape="pill"
                         aria-label="Next search result"
                         isDisabled={isNavigationDisabled}
                         preventFocusOnPress

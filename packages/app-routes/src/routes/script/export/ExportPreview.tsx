@@ -168,7 +168,6 @@ export const ExportPreview = () => {
                     <IconButton
                         variant="outline"
                         size="md"
-                        shape="pill"
                         aria-label="Zoom out"
                         isDisabled={!canExport || pageCount === 0}
                         onPress={() => setZoom(value => Math.max(0.5, value - 0.1))}
@@ -179,7 +178,6 @@ export const ExportPreview = () => {
                     <IconButton
                         variant="outline"
                         size="md"
-                        shape="pill"
                         aria-label="Zoom in"
                         isDisabled={!canExport || pageCount === 0}
                         onPress={() => setZoom(value => Math.min(1.5, value + 0.1))}
@@ -195,7 +193,6 @@ export const ExportPreview = () => {
                     <IconButton
                         variant="outline"
                         size="md"
-                        shape="pill"
                         aria-label="Previous page"
                         isDisabled={pageCount === 0 || currentPage === 1}
                         onPress={() => goToPage(currentPage - 1)}
@@ -232,7 +229,6 @@ export const ExportPreview = () => {
                     <IconButton
                         variant="outline"
                         size="md"
-                        shape="pill"
                         aria-label="Next page"
                         isDisabled={pageCount === 0 || currentPage === pageCount}
                         onPress={() => goToPage(currentPage + 1)}

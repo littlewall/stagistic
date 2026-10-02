@@ -30,7 +30,7 @@
     color: var(--color-text);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
 
     &:hover {
         background: var(--state-hover);
@@ -42,7 +42,7 @@
 
     &.open {
         background: var(--state-selected);
-        border-color: var(--state-selected-edge);
+        border-bottom-left-radius: 0;
 
         & .triggerIcon {
             opacity: 1;
@@ -92,6 +92,12 @@
             cursor: move;
         }
     }
+}
+
+.controls:has([data-block-action-menu].above) .actionTrigger,
+.controls:has([data-block-type-menu].above) .typeTrigger {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: var(--radius-sm);
 }
 
 .actionTrigger {
@@ -190,13 +196,16 @@
     align-items: stretch;
     min-width: 200px;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 0;
     border-radius: var(--radius-xl);
+    border-top-left-radius: 0;
     box-shadow: var(--shadow-popover);
 
     &.above {
         top: auto;
         bottom: anchor(top);
+        border-top-left-radius: var(--radius-xl);
+        border-bottom-left-radius: 0;
     }
 
     &.withSubmenu {

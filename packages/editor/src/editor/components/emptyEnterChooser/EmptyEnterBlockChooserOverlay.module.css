@@ -38,7 +38,6 @@
     &.active {
         color: var(--color-text);
         background: var(--state-selected);
-        border-color: var(--state-selected-edge);
     }
 }
 
