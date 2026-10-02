@@ -1,3 +1,4 @@
+import {Tooltip} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type RefObject,
@@ -124,35 +125,21 @@ export const CommentMarkersOverlay = ({editor, canvasRef}: CommentMarkersOverlay
         const count = marker.threadIds.length;
 
         return (
-            <button
-                key={marker.blockId}
-                type="button"
-                className={styles.marker}
-                style={{top: marker.top, left: marker.left}}
-                data-comment-marker-block-id={marker.blockId}
-                data-active={marker.isActive ? 'true' : undefined}
-                data-multiple={count > 1 ? 'true' : undefined}
-                aria-label={count === 0 ? 'New comment' : count === 1 ? '1 comment' : `${count} comments`}
-                onMouseEnter={() => editor.commands.setHoveredCommentBlock(marker.blockId)}
-                onMouseLeave={() => editor.commands.setHoveredCommentBlock(null)}
-                onMouseDown={event => event.preventDefault()}
-                onClick={() => {
-                    const activeThreadId = commentsPluginKey.getState(editor.state)?.activeThreadId ?? null;
-
-                    // Toggle: a second click on the marker of the active thread closes it.
-                    if (activeThreadId && marker.threadIds.includes(activeThreadId)) {
-                        editor.commands.setActiveCommentThread(null);
-
-                        return;
-                    }
-
-                    editor
-                        .chain()
-                        .setActiveCommentThread(marker.threadIds[0] ?? null)
-                        .requestCommentsReveal()
-                        .run();
-                }}
-            />
+            <Tooltip key={marker.blockId} label="Open comment" placement="left">
+                <button
+                    type="button"
+                    className={styles.marker}
+                    style={{top: marker.top, left: marker.left}}
+                    data-comment-marker-block-id={marker.blockId}
+                    data-active={marker.isActive ? 'true' : undefined}
+                    data-multiple={count > 1 ? 'true' : undefined}
+                    aria-label={count === 0 ? 'New comment' : count === 1 ? '1 comment' : `${count} comments`}
+                    onMouseEnter={() => editor.commands.setHoveredCommentBlock(marker.blockId)}
+                    onMouseLeave={() => editor.commands.setHoveredCommentBlock(null)}
+                    onMouseDown={event => event.preventDefault()}
+                    onClick={() => editor.commands.toggleCommentMarker(marker.threadIds)}
+                />
+            </Tooltip>
         );
     });
 };

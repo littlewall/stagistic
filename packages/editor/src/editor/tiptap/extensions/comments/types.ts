@@ -64,6 +64,8 @@ export interface CommentsPluginState {
 export interface CommentsExtensionCallbacks {
     /** Draft started or marker clicked: host should reveal the Comments panel. */
     onRequestReveal?: () => void,
+    /** Whether the Comments panel is visible; a marker click only closes a thread the panel shows. */
+    isPanelOpen?: () => boolean,
     /** Underline clicked; host highlights only if the panel is already open. */
     onAnchorClick?: (threadIds: readonly string[]) => void,
     onBlocksMerged?: (merges: readonly CommentBlockMerge[]) => void,

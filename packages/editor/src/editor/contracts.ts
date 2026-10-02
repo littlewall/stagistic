@@ -227,6 +227,8 @@ export interface EditorLifecycleCallbacks {
     onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void,
     /** A comment draft started or a margin marker was clicked: reveal the Comments panel. */
     onRequestRevealComments?: () => void,
+    /** Whether the Comments panel is visible; a marker click on the active thread then closes it instead of revealing. */
+    isCommentsPanelOpen?: () => boolean,
     /** An open comment underline was clicked (never opens the panel on its own). */
     onCommentAnchorClick?: (threadIds: readonly string[]) => void,
     /** Blocks were joined; block-anchored threads of `fromBlockId` belong to `toBlockId` now. */

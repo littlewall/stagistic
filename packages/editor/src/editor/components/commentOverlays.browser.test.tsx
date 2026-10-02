@@ -300,6 +300,21 @@ describe('comment margin markers', () => {
         expect(onRequestRevealComments).toHaveBeenCalledTimes(1);
     });
 
+    it('clicking the active thread marker reveals the panel again when it is closed', async () => {
+        const onRequestRevealComments = vi.fn();
+        const {editor} = await mountEditor({
+            content: createDocument([dialogue('b1', 'Hello', ['t1'])]),
+            commentThreads: [openRange('t1')],
+            callbacks: {onRequestRevealComments, isCommentsPanelOpen: () => false},
+        });
+
+        editor.commands.setActiveCommentThread('t1');
+        await page.elementLocator(await poll(() => marker('b1'), 'b1 marker')).click();
+
+        expect(getCommentsState(editor.state).activeThreadId).toBe('t1');
+        expect(onRequestRevealComments).toHaveBeenCalledTimes(1);
+    });
+
     it('clicking an underline reports the click but never requests reveal', async () => {
         const onRequestRevealComments = vi.fn();
         const onCommentAnchorClick = vi.fn();

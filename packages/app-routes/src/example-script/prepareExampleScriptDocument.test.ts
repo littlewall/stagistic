@@ -64,6 +64,12 @@ describe('prepareExampleScriptDocument', () => {
             ],
         ]);
         expect(snapshot.music[0]?.musicId).toBe(scoreMusicId);
+        // Thunderclap and Storm Underscore ride on stage directions, not on blocks of their own.
+        expect(['Thunderclap', 'Storm Underscore'].map(title => {
+            const startBlockId = snapshot.music.find(music => music.title === title)?.startBlockId;
+
+            return snapshot.blocks.find(block => block.blockId === startBlockId)?.textContent;
+        })).toEqual(['A thunderclap shakes the tower.', 'Wind howls through a broken window. The flame flickers.']);
         expect(snapshot.orphanMusicOutBlockIds).toEqual([]);
         expect(parsed.titlePage.credits).toHaveLength(2);
         expect(parsed.titlePage.draftDateMode).toBe('manual');

@@ -36,6 +36,7 @@ export const useCommentsEditorBridge = ({
     const callbacks = useMemo(
         () => ({
             onRequestRevealComments: revealPanel,
+            isCommentsPanelOpen: isPanelOpen,
             onCommentAnchorClick: (threadIds: readonly string[]) => {
                 // An underline never opens the panel; it only highlights while the panel is open.
                 if (isPanelOpen()) {
