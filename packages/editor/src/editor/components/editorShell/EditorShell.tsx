@@ -22,6 +22,7 @@ import {CHARACTER_HIGHLIGHT_ATTR} from '../../characters/characterHighlight';
 import type {
     EditorLayoutProps,
     EditorMusicRemoveRequest,
+    EditorSearchProps,
     PersistentCharacterRef,
     PersistentMusicRef,
 } from '../../contracts';
@@ -46,6 +47,7 @@ interface EditorShellCanvasProps {
     draftDate?: string,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
     blockNextElements?: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
+    search?: EditorSearchProps,
 }
 
 interface EditorShellProps {
@@ -90,6 +92,7 @@ export const EditorShell = ({
         draftDate,
         blockShortcuts,
         blockNextElements,
+        search,
     } = canvas;
     const {
         leftSidebarToggle,
@@ -214,6 +217,7 @@ export const EditorShell = ({
                             <EditorToolbar
                                 editor={editor}
                                 blockShortcuts={blockShortcuts}
+                                search={search}
                             />
                         </div>
                         {rightSidebarToggle ? (

@@ -50,6 +50,7 @@ const Editor = ({
     layout,
     requests,
     callbacks,
+    search,
     editorZoom = 1,
     surfaceCache,
     liveStore: providedLiveStore,
@@ -64,12 +65,7 @@ const Editor = ({
         draftDate,
     } = document;
     const {settings: globalSettings, scriptSettings} = settingsProps ?? {};
-    const {
-        onAutoSave,
-        onManualSave,
-        onDirtyChange,
-        autoSaveDelayMs,
-    } = save ?? {};
+    const {onManualSave} = save ?? {};
     const {
         autoFocus,
         leftSidebarToggle,
@@ -217,11 +213,9 @@ const Editor = ({
         setLatestValue,
         syncInitialValue,
     } = useEditorAutosave(editor, {
-        onAutoSave,
-        onManualSave,
-        onDirtyChange,
-        autoSaveDelayMs,
+        ...save,
         onValueChange,
+        scriptSettings,
     });
     const rootStyle = useMemo(
         () => buildEditorRootStyle({
@@ -304,6 +298,7 @@ const Editor = ({
                                     draftDate,
                                     blockShortcuts,
                                     blockNextElements,
+                                    search,
                                 }}
                                 layout={resolvedLayout}
                                 rootRef={rootRef}

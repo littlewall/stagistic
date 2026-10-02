@@ -22,7 +22,7 @@ Your play is not a screenplay with the camera removed. Most script software is b
 It runs in your browser, needs no account, and stores your scripts locally by default.
 
 <p align="center">
-  <img src="apps/landing/public/features/musical.png" alt="Lyrics formatted inside a musical script in Stagistic Editor" width="80%">
+  <img src="apps/landing/public/opengraph.jpg" alt="Stagistic Editor with the structure panel and a musical number with lyrics" width="100%">
 </p>
 
 # Features

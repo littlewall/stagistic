@@ -171,7 +171,8 @@ export const createLocalPgliteRepository = ({
             return characterHandlers.upsertScriptCharacterGenderWithId(scriptId, input);
         },
         loadLatest: scriptId => content.loadLatest(scriptId),
-        saveLatest: (scriptId, value) => content.saveLatest(scriptId, value),
+        saveLatest: (scriptId, value, metadata, settings) => content.saveLatest(scriptId, value, metadata, settings),
+        saveSummaryMetadata: (scriptId, document, metadata, settings) => content.saveSummaryMetadata(scriptId, document, metadata, settings),
         loadScriptSettings: scriptId => settingsHandlers.loadScriptSettings(scriptId),
         saveScriptSettings: (scriptId, settings) => settingsHandlers.saveScriptSettings(scriptId, settings),
         deleteScriptSettings: scriptId => settingsHandlers.deleteScriptSettings(scriptId),

@@ -21,6 +21,7 @@ const editors: Editor[] = [];
 const criteria = (query: string): SearchCriteria => ({
     query,
     caseSensitive: false,
+    wholeWord: false,
     blockTypes: null,
 });
 
@@ -252,6 +253,19 @@ describe('SearchExtension', () => {
         expect(snapshot.results).toEqual([]);
         expect(snapshot.currentIndex).toBe(-1);
         expect(snapshot.decorations.find()).toEqual([]);
+    });
+
+    it('keeps the block-type filter when cleared', () => {
+        const editor = createSearchEditor('light');
+
+        editor.commands.setSearchCriteria({
+            ...criteria('light'),
+            caseSensitive: true,
+            blockTypes: ['dialogue'],
+        });
+        editor.commands.clearSearch();
+
+        expect(getEditorSearchSnapshot(editor.state).criteria).toEqual({...criteria(''), blockTypes: ['dialogue']});
     });
 
     it('activates a result created after a zero-result search', () => {

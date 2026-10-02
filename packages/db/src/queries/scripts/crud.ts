@@ -1,6 +1,7 @@
 import {
     desc,
     eq,
+    sql,
 } from 'drizzle-orm';
 
 import {scripts} from '../../schema';
@@ -12,6 +13,7 @@ import type {
     UpdateActiveBlockPayload,
     UpdateScriptPayload,
     UpdateScriptSubtitlePayload,
+    UpdateScriptSummaryMetadataPayload,
     UpdateScriptTimestampPayload,
     UpdateScriptTitlePayload,
 } from './payloads';
@@ -23,6 +25,7 @@ const scriptSummarySelection = {
     createdAt: scripts.createdAt,
     updatedAt: scripts.updatedAt,
     activeBlockId: scripts.activeBlockId,
+    summaryMetadata: scripts.summaryMetadata,
 };
 
 /**
@@ -47,6 +50,7 @@ export const listScripts = async (
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
+        summaryMetadata: row.summaryMetadata,
     }));
 };
 
@@ -76,6 +80,7 @@ export const getScriptSummary = async (
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
+        summaryMetadata: row.summaryMetadata,
     };
 };
 
@@ -88,6 +93,7 @@ export const insertScript = async (db: DbClient, payload: InsertScriptPayload) =
         title: payload.title,
         createdAt: payload.createdAt,
         updatedAt: payload.updatedAt,
+        summaryMetadata: payload.summaryMetadata,
     });
 };
 
@@ -163,4 +169,18 @@ export const updateScriptTimestamp = async (db: DbClient, payload: UpdateScriptT
         .update(scripts)
         .set({updatedAt: payload.updatedAt})
         .where(eq(scripts.id, payload.scriptId));
+};
+
+export const updateScriptSummaryMetadata = async (db: DbClient, payload: UpdateScriptSummaryMetadataPayload) => {
+    await db
+        .update(scripts)
+        .set({summaryMetadata: payload.summaryMetadata, updatedAt: payload.updatedAt})
+        .where(eq(scripts.id, payload.scriptId));
+};
+
+export const invalidateScriptPageCount = async (db: DbClient, scriptId: string) => {
+    await db
+        .update(scripts)
+        .set({summaryMetadata: sql`jsonb_set(${scripts.summaryMetadata}, '{pageCount}', 'null'::jsonb)`})
+        .where(eq(scripts.id, scriptId));
 };

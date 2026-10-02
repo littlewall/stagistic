@@ -4,6 +4,8 @@ import type {DecorationSet} from '@tiptap/pm/view';
 export interface SearchCriteria {
     query: string,
     caseSensitive: boolean,
+    wholeWord: boolean,
+    /** Block types to search in; null or empty searches every block. */
     blockTypes: readonly ScriptBlockNodeType[] | null,
 }
 
@@ -24,5 +26,6 @@ export interface EditorSearchSnapshot {
 export const DEFAULT_SEARCH_CRITERIA: SearchCriteria = {
     query: '',
     caseSensitive: false,
+    wholeWord: false,
     blockTypes: null,
 };

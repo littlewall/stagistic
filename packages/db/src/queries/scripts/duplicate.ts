@@ -1,3 +1,4 @@
+import {buildScriptSummaryMetadata} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 import {eq, inArray} from 'drizzle-orm';
 
@@ -63,6 +64,15 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
     const sceneIds = sceneRows.map(row => row.id);
     const sceneLocationRows = sceneIds.length > 0 ? await db.select().from(scriptSceneLocations).where(inArray(scriptSceneLocations.sceneId, sceneIds)) : [];
     const speakingEntities = copyAttributes ? await listScriptSpeakingEntities(db, sourceScriptId) : [];
+    const [sourceScript] = await db.select({summaryMetadata: scripts.summaryMetadata}).from(scripts).where(eq(scripts.id, sourceScriptId));
+    const sourceMetadata = sourceScript?.summaryMetadata ?? buildScriptSummaryMetadata({
+        type: 'doc',
+        content: [...blockRows].sort((a, b) => a.blockOrder.localeCompare(b.blockOrder)).map(row => ({type: row.blockType})),
+    });
+
+    await db.update(scripts).set({
+        summaryMetadata: {...sourceMetadata, pageCount: copySettings ? sourceMetadata.pageCount : null},
+    }).where(eq(scripts.id, targetScriptId));
 
     const locationMap = new Map(locationRows.map(row => [row.id, uuidv7()]));
     const actMap = new Map(actRows.map(row => [row.id, uuidv7()]));

@@ -9,6 +9,7 @@
  *   layout     — auto-focus and sidebar slots (also accepted as React children)
  *   requests   — structural mutations driven from outside (insert/rename/move acts)
  *   callbacks  — value/index/active-block change notifications and block UI events
+ *   search     — host-persisted search preferences (the block-type filter)
  *
  * Data flows in via `document` and `settings`; changes flow back out via
  * `callbacks`. Save callbacks are wired separately so the editor can debounce
@@ -17,7 +18,9 @@
 import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
+    ScriptBlockNodeType,
     ScriptDocument,
+    ScriptSummaryMetadata,
 } from '@stagistic/script';
 import type {ReactNode} from 'react';
 
@@ -231,8 +234,9 @@ export interface EditorLifecycleCallbacks {
 }
 
 export interface EditorSaveCallbacks {
-    onAutoSave?: (value: ScriptDocument) => SaveResult,
-    onManualSave?: (value: ScriptDocument) => SaveResult,
+    onAutoSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
+    onManualSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
+    onSummaryMetadataChange?: (value: ScriptDocument, metadata: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
     onDirtyChange?: (isDirty: boolean) => void,
 }
 
@@ -270,6 +274,12 @@ export interface EditorDocumentProps {
     draftDate?: string,
 }
 
+export interface EditorSearchProps {
+    /** Block types search and replace are limited to; empty searches every block. */
+    blockTypes: readonly ScriptBlockNodeType[],
+    onBlockTypesChange: (blockTypes: readonly ScriptBlockNodeType[]) => void,
+}
+
 export interface EditorProps {
     document: EditorDocumentProps,
     settings?: EditorSettingsProps,
@@ -277,6 +287,8 @@ export interface EditorProps {
     layout?: EditorLayoutProps,
     requests?: EditorStructureRequests,
     callbacks?: EditorLifecycleCallbacks,
+    /** Search preferences the host persists (per script); search itself stays editor-owned. */
+    search?: EditorSearchProps,
     /**
      * Zooms the page canvas only: page width, render scale, pagination and
      * overlay placement. Chrome sizes from the shared tokens and never sees

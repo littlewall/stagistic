@@ -147,7 +147,7 @@ export const rebuildScriptProjection = async ({
         );
 
         if (afterPersist) {
-            await afterPersist(tx);
+            await afterPersist(tx, true);
         }
     });
 };

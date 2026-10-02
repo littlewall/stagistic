@@ -18,6 +18,7 @@ import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal'
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
 import {useSceneConversionState} from './editor/scene/useSceneConversionState';
 import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
+import {useSearchPreferences} from './editor/search/useSearchPreferences';
 import {useEditorSidebars, useScriptSidebarPanels} from './editor/sidebar';
 import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
@@ -41,6 +42,7 @@ export const ScriptEditorRoute = () => {
         saveIndicator,
         handleAutoSave,
         handleManualSave,
+        handleSummaryMetadataChange,
         editorSurfaceCache,
         editorSnapshotStore,
     } = useScriptWorkspace();
@@ -81,6 +83,7 @@ export const ScriptEditorRoute = () => {
     } = musicState;
     const comments = useScriptComments(currentScriptId, scriptRepository);
     const commentsPanelState = useCommentsPanelState(currentScriptId ?? 'new-script');
+    const searchPreferences = useSearchPreferences(currentScriptId ?? 'new-script');
 
     const displayedCurrentScript = useMemo(() => currentScript ? {...currentScript, name: scriptTitleDraft} : null, [currentScript, scriptTitleDraft]);
 
@@ -215,9 +218,11 @@ export const ScriptEditorRoute = () => {
                         draftDate: resolveDraftDate(titlePageDraft),
                     }}
                     scriptSettings={effectiveScriptSettingsDraft}
+                    search={searchPreferences}
                     save={{
                         onAutoSave: handleAutoSave,
                         onManualSave: handleManualSave,
+                        onSummaryMetadataChange: handleSummaryMetadataChange,
                         autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                     }}
                     requests={{

@@ -41,7 +41,6 @@ export const InlineMarksGroup = ({
                     isDisabled={!canUndo}
                 >
                     <IconButton
-                        shape="pill"
                         aria-label="Undo"
                         isDisabled={!canUndo}
                         onMouseDown={onUndoMouseDown}
@@ -55,7 +54,6 @@ export const InlineMarksGroup = ({
                     isDisabled={!canRedo}
                 >
                     <IconButton
-                        shape="pill"
                         aria-label="Redo"
                         isDisabled={!canRedo}
                         onMouseDown={onRedoMouseDown}
@@ -68,7 +66,6 @@ export const InlineMarksGroup = ({
             <div className={styles.group}>
                 <Tooltip label="Bold" shortcut={shortcuts.bold}>
                     <IconButton
-                        shape="pill"
                         isSelected={isBoldActive}
                         aria-label="Bold"
                         aria-pressed={isBoldActive}
@@ -79,7 +76,6 @@ export const InlineMarksGroup = ({
                 </Tooltip>
                 <Tooltip label="Italic" shortcut={shortcuts.italic}>
                     <IconButton
-                        shape="pill"
                         isSelected={isItalicActive}
                         aria-label="Italic"
                         aria-pressed={isItalicActive}
@@ -90,7 +86,6 @@ export const InlineMarksGroup = ({
                 </Tooltip>
                 <Tooltip label="Underline" shortcut={shortcuts.underline}>
                     <IconButton
-                        shape="pill"
                         isSelected={isUnderlineActive}
                         aria-label="Underline"
                         aria-pressed={isUnderlineActive}

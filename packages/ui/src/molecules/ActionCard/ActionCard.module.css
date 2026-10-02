@@ -85,20 +85,31 @@
     color: var(--color-status-danger);
 }
 
-.primary {
+.primary,
+.accent {
     border-color: var(--color-border);
-
-    &:hover:not(:disabled) .icon {
-        color: var(--color-surface);
-    }
 
     & .icon {
         box-sizing: border-box;
-        width: 28px;
-        height: 28px;
+        width: var(--space-4xl);
+        height: var(--space-4xl);
         padding: var(--space-sm);
+        border-radius: var(--radius-xs);
+    }
+}
+
+.primary {
+    & .icon,
+    &:hover:not(:disabled) .icon {
         color: var(--color-surface);
         background: var(--color-text);
-        border-radius: var(--radius-xs);
+    }
+}
+
+.accent {
+    & .icon,
+    &:hover:not(:disabled) .icon {
+        color: oklch(from var(--base-neutral) .155 c h);
+        background: var(--color-accent);
     }
 }

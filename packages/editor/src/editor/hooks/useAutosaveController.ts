@@ -5,12 +5,12 @@ import {
     useRef,
 } from 'react';
 
+import type {EditorSaveCallbacks} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {
     type AutosaveSchedulePayload,
     DEFAULT_AUTOSAVE_DELAY_MS,
     resolveSchedulePayload,
-    type SaveResult,
     toRevision,
 } from './autosaveControllerHelpers';
 import {useLatestRef} from './useLatestRef';
@@ -19,8 +19,8 @@ export type {AutosaveSchedulePayload, SaveResult} from './autosaveControllerHelp
 export {serializeDocumentForSave} from './autosaveControllerHelpers';
 
 type UseAutosaveControllerArgs = {
-    onAutoSave?: (value: ScriptDocument) => SaveResult,
-    onManualSave?: (value: ScriptDocument) => SaveResult,
+    onAutoSave?: EditorSaveCallbacks['onAutoSave'],
+    onManualSave?: EditorSaveCallbacks['onManualSave'],
     onDirtyChange?: (isDirty: boolean) => void,
     autoSaveDelayMs?: number,
     resolveLatestValue?: () => ScriptDocument | null,

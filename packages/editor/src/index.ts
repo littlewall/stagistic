@@ -34,6 +34,7 @@ export type {
     EditorProps,
     EditorSaveCallbacks,
     EditorSaveProps,
+    EditorSearchProps,
     EditorSettingsProps,
     EditorSidebarToggle,
     EditorStructureRequests,

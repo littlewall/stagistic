@@ -81,7 +81,6 @@ export const VocalRangeNoteControls = ({
                 isDisabled={!canAdjustOctave(which, -1)}
             >
                 <IconButton
-                    shape="pill"
                     aria-label="Octave down"
                     isDisabled={!canAdjustOctave(which, -1)}
                     onPress={() => onAdjustOctave(which, -1)}
@@ -97,7 +96,6 @@ export const VocalRangeNoteControls = ({
                 isDisabled={!canAdjustOctave(which, 1)}
             >
                 <IconButton
-                    shape="pill"
                     aria-label="Octave up"
                     isDisabled={!canAdjustOctave(which, 1)}
                     onPress={() => onAdjustOctave(which, 1)}
@@ -123,7 +121,6 @@ export const VocalRangeNoteControls = ({
                 isDisabled={!canToggleAccidental(which, -1)}
             >
                 <IconButton
-                    shape="pill"
                     isSelected={pitch.alter === -1}
                     aria-label="Flat"
                     aria-pressed={pitch.alter === -1}
@@ -143,7 +140,6 @@ export const VocalRangeNoteControls = ({
                 isDisabled={!canToggleAccidental(which, 1)}
             >
                 <IconButton
-                    shape="pill"
                     isSelected={pitch.alter === 1}
                     aria-label="Sharp"
                     aria-pressed={pitch.alter === 1}

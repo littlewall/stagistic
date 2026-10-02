@@ -45,7 +45,11 @@ export const createDocumentPersister = (scriptId: string) => {
         lastSavedMusicSignature = '';
     };
 
-    const persistImpl = async (db: DbClient, document: RewriteScriptDocument, afterPersist?: (tx: DbClient) => Promise<void>): Promise<void> => {
+    const persistImpl = async (
+        db: DbClient,
+        document: RewriteScriptDocument,
+        afterPersist?: (tx: DbClient, documentChanged: boolean) => Promise<void>,
+    ): Promise<void> => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
 
@@ -66,7 +70,7 @@ export const createDocumentPersister = (scriptId: string) => {
                     await reconcileMusic(tx);
 
                     if (afterPersist) {
-                        await afterPersist(tx);
+                        await afterPersist(tx, false);
                     }
                 });
             }
@@ -225,7 +229,7 @@ export const createDocumentPersister = (scriptId: string) => {
             await reconcileMusic(tx);
 
             if (afterPersist) {
-                await afterPersist(tx);
+                await afterPersist(tx, true);
             }
         });
 
@@ -233,7 +237,11 @@ export const createDocumentPersister = (scriptId: string) => {
         lastSavedMusicSignature = musicSignature;
     };
 
-    const persist = (db: DbClient, document: RewriteScriptDocument, afterPersist?: (tx: DbClient) => Promise<void>): Promise<void> => {
+    const persist = (
+        db: DbClient,
+        document: RewriteScriptDocument,
+        afterPersist?: (tx: DbClient, documentChanged: boolean) => Promise<void>,
+    ): Promise<void> => {
         const result = queue.then(() => persistImpl(db, document, afterPersist));
 
         /*

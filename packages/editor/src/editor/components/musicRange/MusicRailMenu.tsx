@@ -8,9 +8,9 @@ import type {EditorMusicRemoveRequest} from '../../contracts';
 import {
     canResetMusicEnd,
     formatFullMusicDisplayName,
-    resolveMusicBoundaryActions,
 } from '../blockActions/stageDirectionMusicActions';
 import {scrollToMusicRailBlock} from './musicRailDom';
+import {resolveMusicPassingThroughBlock} from './musicRangeModel';
 import styles from './MusicRangeOverlay.module.css';
 
 export type MusicRailMenuState = {
@@ -162,26 +162,25 @@ const buildBoundarySection = (
     snapshot: ScriptBlockIndexSnapshot,
     run: (action: () => void) => () => void,
 ): MenuSection | null => {
-    const blockType = snapshot.blocks.find(block => block.blockId === menu.blockId)?.blockType;
-    const action = blockType ? resolveMusicBoundaryActions({
-        editor,
-        blockId: menu.blockId,
-        blockType: blockType as never,
-    })[0] : null;
+    const music = resolveMusicPassingThroughBlock(snapshot, menu.blockId);
 
-    if (action?.kind !== 'submenu') {
+    if (menu.markerKind !== 'none' || !music) {
         return null;
     }
 
     return {
         id: 'boundary',
-        items: action.items.map(item => ({
-            id: item.id,
-            label: item.label,
-            // This menu gives the detail a line of its own, so it takes the whole name.
-            detail: item.detailFull ?? item.detail,
-            run: run(item.run),
-        })),
+        items: [
+            {
+                id: 'set-out',
+                label: 'Place music end here',
+                detail: music.title.trim() || undefined,
+                run: run(() => {
+                    editor.commands.setMusicOutAtBlock(menu.blockId);
+                    editor.commands.focus();
+                }),
+            },
+        ],
     };
 };
 

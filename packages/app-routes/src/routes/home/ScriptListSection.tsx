@@ -1,10 +1,8 @@
 import type {ScriptSummary} from '@stagistic/app-core';
 import {
-    ListPanel,
-    ListRow,
     ScriptActionsMenu,
-    ScriptIcon,
-    Text,
+    ScriptCard,
+    ScriptCardGrid,
 } from '@stagistic/ui';
 
 import {formatLastEdited} from '../../shared/formatLastEdited';
@@ -31,47 +29,26 @@ export const ScriptListSection = ({
 
     return (
         <section className={styles.listSection} aria-label="Scripts">
-            <ListPanel className={styles.scriptPanel}>
+            <ScriptCardGrid>
                 {scripts.map(script => (
-                    <ListRow
+                    <ScriptCard
                         key={script.id}
-                        size="library"
-                        interactive
-                        className={styles.scriptRow}
-                        trailing={(
-                            <span className={styles.actionsMenu}>
-                                <ScriptActionsMenu
-                                    scriptTitle={script.title}
-                                    onRename={() => onRenameScript(script)}
-                                    onDuplicate={() => onDuplicateScript(script)}
-                                    onDelete={() => onDeleteScript(script)}
-                                />
-                            </span>
+                        title={script.title}
+                        subtitle={script.subtitle}
+                        summaryMetadata={script.summaryMetadata}
+                        lastEdited={formatLastEdited(script.updatedAt)}
+                        onOpen={() => onOpenScript(script.id)}
+                        actions={(
+                            <ScriptActionsMenu
+                                scriptTitle={script.title}
+                                onRename={() => onRenameScript(script)}
+                                onDuplicate={() => onDuplicateScript(script)}
+                                onDelete={() => onDeleteScript(script)}
+                            />
                         )}
-                    >
-                        <button
-                            type="button"
-                            className={styles.scriptOpenButton}
-                            onClick={() => onOpenScript(script.id)}
-                        >
-                            <ScriptIcon className={styles.scriptIcon} aria-hidden="true" />
-                            <span className={styles.scriptInfo}>
-                                <span className={styles.scriptTitle}>{script.title}</span>
-                                {script.subtitle ? (
-                                    <span className={styles.scriptSubtitle}>{script.subtitle}</span>
-                                ) : null}
-                            </span>
-                            <Text
-                                variant="muted"
-                                size="sm"
-                                className={styles.scriptMeta}
-                            >
-                                {formatLastEdited(script.updatedAt)}
-                            </Text>
-                        </button>
-                    </ListRow>
+                    />
                 ))}
-            </ListPanel>
+            </ScriptCardGrid>
         </section>
     );
 };

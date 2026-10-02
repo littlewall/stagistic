@@ -1,6 +1,7 @@
 import type {
     EditorSettingsOverride,
     ScriptDocument,
+    ScriptSummaryMetadata,
     TitlePageSettings,
 } from '@stagistic/script';
 
@@ -274,7 +275,18 @@ export interface ScriptRepository {
     upsertScriptCharacterGender(scriptId: string, label: string): Promise<ScriptCharacterGenderOption | null>,
     upsertScriptCharacterGenderWithId(scriptId: string, input: UpsertScriptCharacterGenderWithIdInput): Promise<ScriptCharacterGenderOption | null>,
     loadLatest(scriptId: string): Promise<ScriptDocument | null>,
-    saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,
+    saveLatest(
+        scriptId: string,
+        value: ScriptDocument,
+        metadata?: ScriptSummaryMetadata,
+        expectedSettings?: EditorSettingsOverride | null,
+    ): Promise<void>,
+    saveSummaryMetadata(
+        scriptId: string,
+        expectedDocument: ScriptDocument,
+        metadata: ScriptSummaryMetadata,
+        expectedSettings?: EditorSettingsOverride | null,
+    ): Promise<boolean>,
     loadScriptSettings(scriptId: string): Promise<EditorSettingsOverride | null>,
     saveScriptSettings(scriptId: string, settings: EditorSettingsOverride): Promise<void>,
     deleteScriptSettings(scriptId: string): Promise<void>,

@@ -122,6 +122,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const {
         handleAutoSave,
         handleManualSave,
+        handleSummaryMetadataChange,
     } = useScriptSaveHandlers({
         context: {
             currentScript,
@@ -155,5 +156,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         editorLoadState,
         handleAutoSave,
         handleManualSave,
+        handleSummaryMetadataChange,
     };
 };

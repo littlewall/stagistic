@@ -11,6 +11,10 @@ interface TextSegment {
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 
+// Unicode-aware word boundaries: `\b` treats non-ASCII letters (č, í) as separators.
+const WORD_START = '(?<![\\p{L}\\p{M}\\p{N}_])';
+const WORD_END = '(?![\\p{L}\\p{M}\\p{N}_])';
+
 // Inline atoms (music pills) break the text run so a match can never span — and a replace never delete — one.
 const INLINE_ATOM_PLACEHOLDER = '\uFFFC';
 
@@ -61,7 +65,11 @@ export const findSearchResults = (document: ProseMirrorNode, criteria: SearchCri
         return [];
     }
 
-    const expression = new RegExp(escapeRegExp(criteria.query), criteria.caseSensitive ? 'gu' : 'giu');
+    const pattern = escapeRegExp(criteria.query);
+    const expression = new RegExp(
+        criteria.wholeWord ? `${WORD_START}${pattern}${WORD_END}` : pattern,
+        criteria.caseSensitive ? 'gu' : 'giu',
+    );
     const results: SearchResult[] = [];
 
     document.descendants((node, from) => {
@@ -71,7 +79,7 @@ export const findSearchResults = (document: ProseMirrorNode, criteria: SearchCri
 
         const blockType = normalizeBlockNodeType(node.type.name);
 
-        if (criteria.blockTypes && !criteria.blockTypes.includes(blockType)) {
+        if (criteria.blockTypes?.length && !criteria.blockTypes.includes(blockType)) {
             return false;
         }
 

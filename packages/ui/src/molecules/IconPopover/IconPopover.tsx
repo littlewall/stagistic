@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type {ComponentProps, ReactNode} from 'react';
 import {
     Dialog,
@@ -17,6 +18,8 @@ export interface IconPopoverProps {
     placement?: PopoverProps['placement'],
     /** Dot on the trigger: the panel holds a non-default setting. */
     hasIndicator?: boolean,
+    onOpenChange?: (isOpen: boolean) => void,
+    className?: string,
 }
 
 /** Icon trigger opening a small non-modal panel of controls (not a menu of actions). */
@@ -27,12 +30,14 @@ export const IconPopover = ({
     size = 'sm',
     placement = 'bottom end',
     hasIndicator = false,
+    onOpenChange,
+    className,
 }: IconPopoverProps) => (
-    <DialogTrigger>
+    <DialogTrigger onOpenChange={onOpenChange}>
         <IconButton
             size={size}
             aria-label={ariaLabel}
-            className={styles.trigger}
+            className={clsx(styles.trigger, className)}
         >
             {icon}
             {hasIndicator ? <span className={styles.indicator} data-icon-popover-indicator="true" aria-hidden="true" /> : null}

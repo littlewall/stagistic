@@ -9,7 +9,7 @@ import {
 
 import styles from './ActionCard.module.css';
 
-type ActionCardVariant = 'default' | 'primary';
+type ActionCardVariant = 'default' | 'primary' | 'accent';
 
 export type ActionCardProps<T extends ElementType = 'button'> = {
     as?: T,
@@ -24,6 +24,7 @@ export type ActionCardProps<T extends ElementType = 'button'> = {
 const VARIANT_CLASS: Record<ActionCardVariant, string> = {
     default: styles.default,
     primary: styles.primary,
+    accent: styles.accent,
 };
 
 export const ActionCard = <T extends ElementType = 'button'>({

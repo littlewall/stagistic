@@ -1,6 +1,5 @@
-import {useCallback, useState} from 'react';
-
 import {SIDEBAR_PREFERENCES_STORAGE_KEY} from '../../../../shared/storageKeys';
+import {useLocalPreference} from '../../../../shared/useLocalPreference';
 import type {SidebarPanelId} from './types';
 
 /*
@@ -25,24 +24,6 @@ export const getSidebarPreferenceKey = (panelId: SidebarPanelId, name: string, s
     return `${SIDEBAR_PREFERENCES_STORAGE_KEY}:${panelId}:${name}:${suffix}`;
 };
 
-const readPreference = <T>(key: string, parse: (value: unknown) => T | undefined): T | undefined => {
-    try {
-        const raw = window.localStorage.getItem(key);
-
-        return raw === null ? undefined : parse(JSON.parse(raw));
-    } catch {
-        return undefined;
-    }
-};
-
-const writePreference = (key: string, value: unknown) => {
-    try {
-        window.localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-        // Ignore storage write failures in constrained environments.
-    }
-};
-
 /** useState for one sidebar panel preference, persisted in localStorage under its scope. */
 export const useSidebarPreference = <T>({
     panelId,
@@ -50,24 +31,8 @@ export const useSidebarPreference = <T>({
     scope,
     defaultValue,
     parse,
-}: UseSidebarPreferenceArgs<T>) => {
-    const key = getSidebarPreferenceKey(panelId, name, scope);
-    const [entry, setEntry] = useState(() => ({key, value: readPreference(key, parse) ?? defaultValue}));
-    let {value} = entry;
-
-    // Switching scripts swaps the key; re-read during render so the old script's value never shows.
-    if (entry.key !== key) {
-        value = readPreference(key, parse) ?? defaultValue;
-        setEntry({key, value});
-    }
-
-    const setValue = useCallback(
-        (next: T) => {
-            setEntry({key, value: next});
-            writePreference(key, next);
-        },
-        [key],
-    );
-
-    return [value, setValue] as const;
-};
+}: UseSidebarPreferenceArgs<T>) => useLocalPreference({
+    key: getSidebarPreferenceKey(panelId, name, scope),
+    defaultValue,
+    parse,
+});

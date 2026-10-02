@@ -92,7 +92,6 @@ export const SearchReplaceRow = ({
                             placement="bottom"
                         >
                             <IconButton
-                                shape="pill"
                                 aria-label="Replace"
                                 isDisabled={replace.isDisabled}
                                 preventFocusOnPress
@@ -107,7 +106,6 @@ export const SearchReplaceRow = ({
                             placement="bottom"
                         >
                             <IconButton
-                                shape="pill"
                                 aria-label="Replace all"
                                 isDisabled={replace.isDisabled}
                                 preventFocusOnPress

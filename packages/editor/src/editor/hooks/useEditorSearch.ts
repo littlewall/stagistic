@@ -1,3 +1,4 @@
+import type {ScriptBlockNodeType} from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {useHotkey} from '@tanstack/react-hotkeys';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -14,11 +15,14 @@ import {
     useState,
 } from 'react';
 
+import type {EditorSearchProps} from '../contracts';
 import {getEditorSearchSnapshot, getSceneCollapseSnapshot} from '../tiptap/extensions';
 import {findCollapsedSceneContainingPosition} from '../tiptap/extensions/sceneCollapse/sceneCollapseModel';
 
 interface UseEditorSearchArgs {
     editor: TiptapEditor | null,
+    /** Host-owned block filter; without it the filter lives only as long as the editor. */
+    search?: EditorSearchProps,
 }
 
 export interface UseEditorSearchResult {
@@ -33,6 +37,10 @@ export interface UseEditorSearchResult {
     onNextResult: () => void,
     isCaseSensitive: boolean,
     onCaseSensitiveChange: (isCaseSensitive: boolean) => void,
+    isWholeWord: boolean,
+    onWholeWordChange: (isWholeWord: boolean) => void,
+    blockTypes: readonly ScriptBlockNodeType[],
+    onBlockTypesChange: (blockTypes: readonly ScriptBlockNodeType[]) => void,
     replaceInputRef: RefObject<HTMLInputElement | null>,
     isReplaceOpen: boolean,
     onReplaceOpenChange: (isOpen: boolean) => void,
@@ -42,6 +50,14 @@ export interface UseEditorSearchResult {
     onReplace: () => void,
     onReplaceAll: () => void,
 }
+
+const NO_BLOCK_TYPES: readonly ScriptBlockNodeType[] = [];
+
+const isSameBlockTypes = (current: readonly ScriptBlockNodeType[] | null, next: readonly ScriptBlockNodeType[]) => {
+    const types = current ?? NO_BLOCK_TYPES;
+
+    return types.length === next.length && next.every(type => types.includes(type));
+};
 
 const getWindowTarget = () => typeof window === 'undefined' ? null : window;
 
@@ -60,11 +76,14 @@ const ownsAnotherEditingContext = (target: EventTarget | null, editorElement: HT
     return Boolean(target.closest('input, textarea, [contenteditable="true"], [role="dialog"]'));
 };
 
-export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchResult => {
+export const useEditorSearch = ({editor, search}: UseEditorSearchArgs): UseEditorSearchResult => {
     const inputRef = useRef<HTMLInputElement>(null);
     const replaceInputRef = useRef<HTMLInputElement>(null);
     const pendingReplaceFocusRef = useRef(false);
     const [isReplaceOpen, setIsReplaceOpen] = useState(false);
+    const [localBlockTypes, setLocalBlockTypes] = useState(NO_BLOCK_TYPES);
+    const blockTypes = search?.blockTypes ?? localBlockTypes;
+    const onBlockTypesChange = search?.onBlockTypesChange ?? setLocalBlockTypes;
     const state = useEditorState({
         editor,
         selector: ({editor: stateEditor}) => {
@@ -75,6 +94,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                     resultCount: 0,
                     activeFrom: null,
                     isCaseSensitive: false,
+                    isWholeWord: false,
                     isEditable: false,
                 };
             }
@@ -88,6 +108,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                 resultCount: snapshot.results.length,
                 activeFrom: active?.from ?? null,
                 isCaseSensitive: snapshot.criteria.caseSensitive,
+                isWholeWord: snapshot.criteria.wholeWord,
                 isEditable: stateEditor.isEditable,
             };
         },
@@ -98,6 +119,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
             && a.resultCount === b.resultCount
             && a.activeFrom === b.activeFrom
             && a.isCaseSensitive === b.isCaseSensitive
+            && a.isWholeWord === b.isWholeWord
             && a.isEditable === b.isEditable,
         ),
     }) ?? {
@@ -106,6 +128,7 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         resultCount: 0,
         activeFrom: null,
         isCaseSensitive: false,
+        isWholeWord: false,
         isEditable: false,
     };
     const [replacement, setReplacement] = useState('');
@@ -149,6 +172,30 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
             caseSensitive: isCaseSensitive,
         });
     }, [editor]);
+
+    const onWholeWordChange = useCallback((isWholeWord: boolean) => {
+        if (!editor) {
+            return;
+        }
+
+        editor.commands.setSearchCriteria({
+            ...getEditorSearchSnapshot(editor.state).criteria,
+            wholeWord: isWholeWord,
+        });
+    }, [editor]);
+
+    // The filter is owned outside the plugin (it outlives a search), so it is pushed into the criteria.
+    useEffect(() => {
+        if (!editor || editor.isDestroyed) {
+            return;
+        }
+
+        const criteria = getEditorSearchSnapshot(editor.state).criteria;
+
+        if (!isSameBlockTypes(criteria.blockTypes, blockTypes)) {
+            editor.commands.setSearchCriteria({...criteria, blockTypes});
+        }
+    }, [blockTypes, editor]);
 
     const focusReplaceInput = useCallback(() => {
         pendingReplaceFocusRef.current = false;
@@ -281,6 +328,10 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         onNextResult,
         isCaseSensitive: state.isCaseSensitive,
         onCaseSensitiveChange,
+        isWholeWord: state.isWholeWord,
+        onWholeWordChange,
+        blockTypes,
+        onBlockTypesChange,
         replaceInputRef,
         isReplaceOpen,
         onReplaceOpenChange: setIsReplaceOpen,

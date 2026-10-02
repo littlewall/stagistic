@@ -4,12 +4,13 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {
     EditorBlockUiEvent,
     EditorIndexSnapshot,
+    EditorSaveCallbacks,
     EditorStructureRequests,
     EditorValueChangeMeta,
     PersistentCharacterRef,
 } from '../contracts';
 import type {EditorSnapshotStore} from '../live/store';
-import type {AutosaveSchedulePayload, SaveResult} from './useAutosaveController';
+import type {AutosaveSchedulePayload} from './useAutosaveController';
 
 export interface UseEditorLifecycleArgs {
     editor: {
@@ -25,7 +26,7 @@ export interface UseEditorLifecycleArgs {
         scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
     },
     save: {
-        onManualSave?: (value: ScriptDocument) => SaveResult,
+        onManualSave?: EditorSaveCallbacks['onManualSave'],
         handleManualSave: () => Promise<void>,
     },
     callbacks: {

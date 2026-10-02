@@ -1,4 +1,8 @@
-import type {ScriptDocument} from '@stagistic/script';
+import type {
+    EditorSettingsOverride,
+    ScriptDocument,
+    ScriptSummaryMetadata,
+} from '@stagistic/script';
 import {useCallback} from 'react';
 
 import type {
@@ -12,7 +16,18 @@ interface SaveIndicatorControls {
 }
 
 interface SaveRepository {
-    saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
+    saveLatest: (
+        scriptId: string,
+        value: ScriptDocument,
+        metadata?: ScriptSummaryMetadata,
+        expectedSettings?: EditorSettingsOverride | null,
+    ) => Promise<unknown>,
+    saveSummaryMetadata: (
+        scriptId: string,
+        value: ScriptDocument,
+        metadata: ScriptSummaryMetadata,
+        expectedSettings?: EditorSettingsOverride | null,
+    ) => Promise<boolean>,
 }
 
 interface UseScriptSaveHandlersArgs {
@@ -42,14 +57,14 @@ export const useScriptSaveHandlers = ({
     const {saveIndicatorControls} = state;
     const {startSaveIndicator, finishSaveIndicator} = saveIndicatorControls;
 
-    const handleAutoSave = useCallback(async (value: ScriptDocument) => {
+    const handleAutoSave = useCallback(async (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => {
         if (!currentScriptId) {
             return false;
         }
 
         try {
             startSaveIndicator();
-            await scriptRepository.saveLatest(currentScriptId, value);
+            await scriptRepository.saveLatest(currentScriptId, value, metadata, expectedSettings);
             finishSaveIndicator(true);
 
             return true;
@@ -74,14 +89,14 @@ export const useScriptSaveHandlers = ({
         startSaveIndicator,
     ]);
 
-    const handleManualSave = useCallback(async (value: ScriptDocument) => {
+    const handleManualSave = useCallback(async (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => {
         if (!currentScript || !currentScriptId) {
             return false;
         }
 
         try {
             startSaveIndicator();
-            await scriptRepository.saveLatest(currentScriptId, value);
+            await scriptRepository.saveLatest(currentScriptId, value, metadata, expectedSettings);
             addToast({
                 title: 'Script saved',
                 description: currentScript.name,
@@ -112,8 +127,31 @@ export const useScriptSaveHandlers = ({
         startSaveIndicator,
     ]);
 
+    const handleSummaryMetadataChange = useCallback(async (
+        value: ScriptDocument,
+        metadata: ScriptSummaryMetadata,
+        expectedSettings?: EditorSettingsOverride | null,
+    ) => {
+        if (!currentScriptId) {
+            return false;
+        }
+
+        try {
+            return await scriptRepository.saveSummaryMetadata(currentScriptId, value, metadata, expectedSettings);
+        } catch {
+            setStorageError('Failed to save script metadata.');
+
+            return false;
+        }
+    }, [
+        currentScriptId,
+        scriptRepository,
+        setStorageError,
+    ]);
+
     return {
         handleAutoSave,
         handleManualSave,
+        handleSummaryMetadataChange,
     };
 };

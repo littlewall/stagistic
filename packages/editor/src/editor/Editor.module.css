@@ -99,7 +99,7 @@
     color: var(--color-text-muted);
     background: transparent;
     border: 0;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard);
 
     &:hover {

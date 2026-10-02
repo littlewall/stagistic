@@ -20,6 +20,7 @@ import type {SearchCriteria} from './types';
 const criteria = (query: string): SearchCriteria => ({
     query,
     caseSensitive: false,
+    wholeWord: false,
     blockTypes: null,
 });
 
@@ -114,10 +115,25 @@ describe('findSearchResults', () => {
         const results = findSearchResults(document, {
             query: 'Light',
             caseSensitive: true,
+            wholeWord: false,
             blockTypes: ['dialogue'],
         });
 
         expect(results).toMatchObject([{blockId: 'd1', blockType: 'dialogue'}]);
+    });
+
+    it('searches every block for an empty block-type filter', () => {
+        const document = createDocument([block('dialogue', 'd1', 'light'), block('stageDirection', 's1', 'light')]);
+
+        expect(findSearchResults(document, {...criteria('light'), blockTypes: []})).toHaveLength(2);
+    });
+
+    it('matches whole words with Unicode-aware boundaries', () => {
+        const document = createDocument([block('dialogue', 'd1', 'Light lights flight líght light_ light.')]);
+        const results = findSearchResults(document, {...criteria('light'), wholeWord: true});
+
+        expect(results).toHaveLength(2);
+        expect(findSearchResults(createDocument([block('dialogue', 'd1', 'čaj čajník')]), {...criteria('čaj'), wholeWord: true})).toHaveLength(1);
     });
 
     it('returns no results for an empty query', () => {
