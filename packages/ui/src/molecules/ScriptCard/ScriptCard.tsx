@@ -94,7 +94,6 @@ export const ScriptCard = ({
     className,
 }: ScriptCardProps) => {
     const titleId = useId();
-    const pageCount = summaryMetadata?.pageCount;
 
     return (
         <article className={clsx(styles.card, className)} aria-labelledby={titleId}>
@@ -106,9 +105,6 @@ export const ScriptCard = ({
                     {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
                 </div>
                 <div className={styles.headerActions}>
-                    <span className={styles.pages}>
-                        <strong>{pageCount ?? '—'}</strong> {pageCount === 1 ? 'page' : 'pages'}
-                    </span>
                     {actions ? <div className={styles.actions}>{actions}</div> : null}
                 </div>
             </header>
