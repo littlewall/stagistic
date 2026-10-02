@@ -17,15 +17,11 @@ interface UseEditorRedirectsArgs {
     navigation: {
         navigate: NavigateFunction,
     },
-    requests: {
-        seedDefaultScript: () => Promise<void>,
-    },
 }
 
 export const useEditorRedirects = ({
     state,
     navigation,
-    requests,
 }: UseEditorRedirectsArgs) => {
     const {
         scriptsLoading,
@@ -35,7 +31,6 @@ export const useEditorRedirects = ({
         scriptId,
     } = state;
     const {navigate} = navigation;
-    const {seedDefaultScript} = requests;
 
     useEffect(() => {
         if (scriptsLoading) {
@@ -47,7 +42,7 @@ export const useEditorRedirects = ({
         }
 
         if (recentScriptsData.length === 0 && !currentScript) {
-            void seedDefaultScript();
+            void navigate('/', {replace: true});
 
             return;
         }
@@ -70,6 +65,5 @@ export const useEditorRedirects = ({
         scriptsLoading,
         scriptsError,
         scriptId,
-        seedDefaultScript,
     ]);
 };
