@@ -1,6 +1,5 @@
 import {
     useRecentScripts,
-    useScriptActions,
     useScriptCharacterCatalog,
     useScriptEditorSettingsRecord,
     useScriptMusic,
@@ -18,7 +17,6 @@ import {useEditorRedirects} from './useEditorRedirects';
 import {useSaveIndicator} from './useSaveIndicator';
 import {useScriptLoader} from './useScriptLoader';
 import {useScriptSaveHandlers} from './useScriptSaveHandlers';
-import {useSeedDefaultScript} from './useSeedDefaultScript';
 
 export const useScriptEditorController = (scriptId: string | undefined): ScriptEditorController => {
     const navigate = useNavigate();
@@ -33,7 +31,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         error: currentScriptError,
     } = useScriptSummary(scriptId);
     const scriptRepository = useScriptRepository();
-    const scriptActions = useScriptActions();
     const {
         initialValue,
         initialIndexSnapshot,
@@ -64,13 +61,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const isSidebarDataLoading = characterCatalog.isLoading || musicCatalog.isLoading;
     const sidebarDataError = characterCatalog.error ?? musicCatalog.error;
 
-    const seedDefaultScript = useSeedDefaultScript(
-        scriptActions,
-        navigate,
-        addToast,
-        setStorageError,
-    );
-
     useEditorRedirects({
         state: {
             scriptsLoading,
@@ -81,9 +71,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         },
         navigation: {
             navigate,
-        },
-        requests: {
-            seedDefaultScript,
         },
     });
 
