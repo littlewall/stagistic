@@ -13,11 +13,19 @@ import {CaseSensitiveIcon} from '../../icons/ui/CaseSensitiveIcon';
 import {ChevronDownIcon} from '../../icons/ui/ChevronDownIcon';
 import {ChevronUpIcon} from '../../icons/ui/ChevronUpIcon';
 import {CloseIcon} from '../../icons/ui/CloseIcon';
+import {FilterIcon} from '../../icons/ui/FilterIcon';
 import {SearchIcon} from '../../icons/ui/SearchIcon';
 import {WholeWordIcon} from '../../icons/ui/WholeWordIcon';
+import {IconPopover} from '../IconPopover/IconPopover';
 import styles from './SearchControl.module.css';
+import {
+    isSearchFilterActive,
+    type SearchControlFilter,
+    SearchFilterList,
+} from './SearchFilterList';
 import {type SearchControlReplace, SearchReplaceRow} from './SearchReplaceRow';
 
+export type {SearchControlFilter, SearchControlFilterOption} from './SearchFilterList';
 export type {SearchControlReplace} from './SearchReplaceRow';
 
 /** Platform-formatted shortcut labels shown in the button tooltips. */
@@ -40,6 +48,8 @@ export type SearchControlProps = {
     onCaseSensitiveChange?: (isCaseSensitive: boolean) => void,
     isWholeWord?: boolean,
     onWholeWordChange?: (isWholeWord: boolean) => void,
+    /** Filter panel behind a funnel button; its dot marks an active filter. */
+    filter?: SearchControlFilter,
     /** The expand chevron renders only when replace is supported. */
     replace?: SearchControlReplace,
     shortcuts?: SearchControlShortcuts,
@@ -56,6 +66,7 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
         onCaseSensitiveChange,
         isWholeWord = false,
         onWholeWordChange,
+        filter,
         replace,
         shortcuts = {},
         className,
@@ -67,13 +78,20 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
         const inputId = props.id ?? generatedInputId;
         const isReplaceOpen = Boolean(replace?.isOpen);
         const [hasFocusWithin, setHasFocusWithin] = useState(false);
+        const [isFilterOpen, setIsFilterOpen] = useState(false);
         const hasQuery = typeof value === 'string' && value.length > 0;
-        // Focus or an open replace row activates search: the count and its options show before any typing.
-        const isActive = hasQuery || hasFocusWithin || isReplaceOpen;
+        /*
+         * Focus or an open replace row activates search: the count and its options show before any typing.
+         * The filter panel renders outside the surface, so its open state keeps search active too.
+         */
+        const isActive = hasQuery || hasFocusWithin || isReplaceOpen || isFilterOpen;
+        const isFilterActive = Boolean(filter && isSearchFilterActive(filter));
         const isNavigationDisabled = !hasQuery || resultCount === 0;
         const hasClear = hasQuery && Boolean(onClear);
         const hasCaseToggle = isActive && Boolean(onCaseSensitiveChange);
         const hasWholeWordToggle = isActive && Boolean(onWholeWordChange);
+        // An active filter stays visible at rest: it changes what every later search finds.
+        const hasFilter = Boolean(filter) && (isActive || isFilterActive);
         const onSurfaceBlur = (event: ReactFocusEvent<HTMLDivElement>) => {
             if (!event.currentTarget.contains(event.relatedTarget)) {
                 setHasFocusWithin(false);
@@ -151,7 +169,20 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                         </IconButton>
                     </Tooltip>
                 ) : null}
-                {hasClear || hasCaseToggle || hasWholeWordToggle ? (
+                {hasFilter && filter ? (
+                    <IconPopover
+                        aria-label={isFilterActive ? 'Search filter (active)' : 'Search filter'}
+                        icon={<FilterIcon aria-hidden="true" />}
+                        size="xs"
+                        placement="bottom"
+                        hasIndicator={isFilterActive}
+                        className={styles.filterTrigger}
+                        onOpenChange={setIsFilterOpen}
+                    >
+                        <SearchFilterList filter={filter} />
+                    </IconPopover>
+                ) : null}
+                {hasClear || hasCaseToggle || hasWholeWordToggle || hasFilter ? (
                     <span
                         className={styles.divider}
                         data-search-divider=""

@@ -198,8 +198,9 @@ export const SearchExtension = Extension.create({
                             return buildCriteriaSnapshot(tr.doc, previous.criteria, meta.origin);
                         }
 
+                        // The block filter is a per-script setting, not part of one search: clearing keeps it.
                         if (meta?.type === 'clear') {
-                            return buildSnapshot(tr.doc, DEFAULT_SEARCH_CRITERIA, [], -1);
+                            return buildSnapshot(tr.doc, {...DEFAULT_SEARCH_CRITERIA, blockTypes: previous.criteria.blockTypes}, [], -1);
                         }
 
                         if (meta?.type === 'next') {

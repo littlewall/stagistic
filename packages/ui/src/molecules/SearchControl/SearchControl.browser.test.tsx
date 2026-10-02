@@ -511,3 +511,141 @@ describe('SearchControl replace', () => {
         expect(document.querySelector<HTMLButtonElement>('button[aria-label="Replace all"]')?.disabled).toBe(true);
     });
 });
+
+const FILTER_OPTIONS = [
+    {value: 'scene', label: 'Scene'},
+    {value: 'dialogue', label: 'Dialogue'},
+    {value: 'lyrics', label: 'Lyrics'},
+] as const;
+
+const FilterHarness = ({
+    initial = [],
+    query = 'light',
+    onChange,
+}: {
+    initial?: string[],
+    query?: string,
+    onChange?: (value: string[]) => void,
+}) => {
+    const [value, setValue] = useState<string[]>(initial);
+
+    return (
+        <SearchControl
+            value={query}
+            currentResult={1}
+            resultCount={2}
+            aria-label="Search script"
+            filter={{
+                label: 'Search in',
+                allLabel: 'All blocks',
+                options: FILTER_OPTIONS,
+                value,
+                onChange: next => {
+                    setValue(next);
+                    onChange?.(next);
+                },
+            }}
+            readOnly
+        />
+    );
+};
+
+const openFilter = async () => {
+    await userEvent.click(await waitForElement<HTMLButtonElement>('button[aria-label^="Search filter"]'));
+
+    return waitForElement<HTMLElement>('[role="listbox"][aria-label="Search in"]');
+};
+
+describe('SearchControl filter', () => {
+    it('shows no dot while nothing is filtered and reads every option as included', async () => {
+        await mount(<FilterHarness />);
+
+        const trigger = await waitForElement<HTMLButtonElement>('button[aria-label="Search filter"]');
+
+        expect(trigger.querySelector('[data-icon-popover-indicator]')).toBeNull();
+
+        const list = await openFilter();
+
+        expect(list.hasAttribute('data-all')).toBe(true);
+        expect(list.querySelectorAll('[aria-selected="true"]')).toHaveLength(0);
+        expect(document.body.textContent).toContain('All blocks');
+    });
+
+    it('narrows to the picked options and marks the trigger with a dot', async () => {
+        const onChange = vi.fn();
+
+        await mount(<FilterHarness onChange={onChange} />);
+        await openFilter();
+        await userEvent.click(await waitForElement<HTMLElement>('[role="option"][data-key="dialogue"]'));
+
+        expect(onChange).toHaveBeenLastCalledWith(['dialogue']);
+        expect(document.querySelector('button[aria-label="Search filter (active)"] [data-icon-popover-indicator]')).not.toBeNull();
+        expect(document.body.textContent).toContain('1 of 3');
+    });
+
+    it('reports selecting every option as no filter, and resets to none', async () => {
+        const onChange = vi.fn();
+
+        await mount(
+            <FilterHarness
+                initial={['scene', 'dialogue']}
+                onChange={onChange}
+            />,
+        );
+        await openFilter();
+        await userEvent.click(await waitForElement<HTMLElement>('[role="option"][data-key="lyrics"]'));
+
+        expect(onChange).toHaveBeenLastCalledWith([]);
+
+        await userEvent.click(await waitForElement<HTMLElement>('[role="option"][data-key="lyrics"]'));
+        await userEvent.click(await waitForElement<HTMLButtonElement>('[role="dialog"] button'));
+
+        expect(onChange).toHaveBeenLastCalledWith([]);
+    });
+
+    it('allows unchecking the last option, which searches everything again', async () => {
+        const onChange = vi.fn();
+
+        await mount(
+            <FilterHarness
+                initial={['dialogue']}
+                onChange={onChange}
+            />,
+        );
+        await openFilter();
+        await userEvent.click(await waitForElement<HTMLElement>('[role="option"][data-key="dialogue"]'));
+
+        expect(onChange).toHaveBeenLastCalledWith([]);
+        expect(document.querySelector('[data-icon-popover-indicator]')).toBeNull();
+    });
+
+    it('closes on Escape without clearing the filter', async () => {
+        const onChange = vi.fn();
+
+        await mount(
+            <FilterHarness
+                initial={['dialogue']}
+                onChange={onChange}
+            />,
+        );
+        await openFilter();
+        (await waitForElement<HTMLElement>('[role="option"][data-key="scene"]')).focus();
+        await userEvent.keyboard('{Escape}');
+
+        expect(onChange).not.toHaveBeenCalled();
+        expect(document.querySelector('[role="listbox"]')).toBeNull();
+        expect(document.querySelector('button[aria-label="Search filter (active)"]')).not.toBeNull();
+    });
+
+    it('keeps an active filter visible while search is at rest', async () => {
+        await mount(
+            <FilterHarness
+                initial={['dialogue']}
+                query=""
+            />,
+        );
+
+        expect(document.querySelector('button[aria-label="Search filter (active)"]')).not.toBeNull();
+        expect(document.querySelector('button[aria-label="Match case"]')).toBeNull();
+    });
+});

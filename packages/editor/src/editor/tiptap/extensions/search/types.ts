@@ -5,6 +5,7 @@ export interface SearchCriteria {
     query: string,
     caseSensitive: boolean,
     wholeWord: boolean,
+    /** Block types to search in; null or empty searches every block. */
     blockTypes: readonly ScriptBlockNodeType[] | null,
 }
 

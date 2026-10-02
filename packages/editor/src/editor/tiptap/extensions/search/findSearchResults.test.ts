@@ -122,6 +122,12 @@ describe('findSearchResults', () => {
         expect(results).toMatchObject([{blockId: 'd1', blockType: 'dialogue'}]);
     });
 
+    it('searches every block for an empty block-type filter', () => {
+        const document = createDocument([block('dialogue', 'd1', 'light'), block('stageDirection', 's1', 'light')]);
+
+        expect(findSearchResults(document, {...criteria('light'), blockTypes: []})).toHaveLength(2);
+    });
+
     it('matches whole words with Unicode-aware boundaries', () => {
         const document = createDocument([block('dialogue', 'd1', 'Light lights flight líght light_ light.')]);
         const results = findSearchResults(document, {...criteria('light'), wholeWord: true});

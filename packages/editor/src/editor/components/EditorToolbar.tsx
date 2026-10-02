@@ -1,15 +1,22 @@
 import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
-import {SearchControl, useDropdownDismiss} from '@stagistic/ui';
+import {
+    SearchControl,
+    type SearchControlFilter,
+    useDropdownDismiss,
+} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MouseEvent as ReactMouseEvent,
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
 
-import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
+import {BLOCKS, BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
+import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
+import type {EditorSearchProps} from '../contracts';
 import {useEditorSearch} from '../hooks/useEditorSearch';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {getToolbarShortcutLabels} from '../model/toolbarShortcutLabels';
@@ -29,6 +36,7 @@ import {useToolbarState} from './toolbar/useToolbarState';
 interface EditorToolbarProps {
     editor: TiptapEditor | null,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
+    search?: EditorSearchProps,
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
@@ -39,12 +47,32 @@ const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
 
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
-const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
+const SEARCH_BLOCK_OPTIONS = BLOCKS.map(block => ({
+    value: block.type,
+    label: block.label,
+    icon: BLOCK_ICONS[block.type],
+}));
+
+const EditorToolbar = ({
+    editor,
+    blockShortcuts,
+    search: searchProps,
+}: EditorToolbarProps) => {
     const searchShortcuts = getToolbarShortcutLabels();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const search = useEditorSearch({editor});
+    const search = useEditorSearch({editor, search: searchProps});
+    const {blockTypes, onBlockTypesChange} = search;
+    const searchFilter = useMemo<SearchControlFilter>(() => ({
+        label: 'Search in',
+        allLabel: 'All blocks',
+        options: SEARCH_BLOCK_OPTIONS,
+        value: blockTypes,
+        onChange: values => onBlockTypesChange(
+            SEARCH_BLOCK_OPTIONS.filter(option => values.includes(option.value)).map(option => option.value),
+        ),
+    }), [blockTypes, onBlockTypesChange]);
     const {
         activeType,
         activeBlockInfo,
@@ -213,6 +241,7 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
                 onCaseSensitiveChange={search.onCaseSensitiveChange}
                 isWholeWord={search.isWholeWord}
                 onWholeWordChange={search.onWholeWordChange}
+                filter={searchFilter}
                 replace={{
                     isOpen: search.isReplaceOpen,
                     onOpenChange: search.onReplaceOpenChange,

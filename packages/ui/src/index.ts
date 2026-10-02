@@ -60,6 +60,8 @@ export {ListPanel, type ListPanelProps} from './molecules/ListPanel/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow/ListRow';
 export {
     SearchControl,
+    type SearchControlFilter,
+    type SearchControlFilterOption,
     type SearchControlProps,
     type SearchControlReplace,
     type SearchControlShortcuts,

@@ -79,7 +79,7 @@ export const findSearchResults = (document: ProseMirrorNode, criteria: SearchCri
 
         const blockType = normalizeBlockNodeType(node.type.name);
 
-        if (criteria.blockTypes && !criteria.blockTypes.includes(blockType)) {
+        if (criteria.blockTypes?.length && !criteria.blockTypes.includes(blockType)) {
             return false;
         }
 

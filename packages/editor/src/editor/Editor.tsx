@@ -50,6 +50,7 @@ const Editor = ({
     layout,
     requests,
     callbacks,
+    search,
     editorZoom = 1,
     surfaceCache,
     liveStore: providedLiveStore,
@@ -304,6 +305,7 @@ const Editor = ({
                                     draftDate,
                                     blockShortcuts,
                                     blockNextElements,
+                                    search,
                                 }}
                                 layout={resolvedLayout}
                                 rootRef={rootRef}

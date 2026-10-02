@@ -1,6 +1,6 @@
 /* Holds the one-row footprint in the toolbar; the surface grows over the content below. */
 .slot {
-    --search-control-width: 20rem;
+    --search-control-width: 23rem;
     --search-row-height: calc(var(--control-trigger-height) - 2px);
 
     position: relative;
@@ -124,5 +124,129 @@
     & svg {
         width: var(--icon-size-sm);
         height: var(--icon-size-sm);
+    }
+}
+
+/* Toggled-on look while its panel is open, as the pressed match toggles. */
+.filterTrigger[aria-expanded = 'true'] {
+    color: var(--color-text);
+    background: var(--state-hover);
+}
+
+.filterHead {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 1.25rem;
+}
+
+.filterLabel {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+}
+
+.filterSummary {
+    color: var(--color-text-placeholder);
+}
+
+.filterReset {
+    cursor: pointer;
+    margin-right: calc(-1 * var(--space-sm));
+    padding: var(--space-px) var(--space-sm);
+    font: inherit;
+    font-size: var(--font-size-xs);
+    color: var(--color-text);
+    background: var(--state-hover);
+    border: none;
+    border-radius: var(--radius-sm);
+    outline: none;
+
+    &[data-hovered] {
+        background: var(--color-surface-raised);
+    }
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+}
+
+.filterList {
+    display: flex;
+    flex-direction: column;
+    min-width: 12rem;
+    margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-sm)) 0;
+    outline: none;
+}
+
+.filterOption {
+    cursor: pointer;
+    display: flex;
+    gap: var(--menu-item-gap);
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0 var(--space-sm);
+    font-size: var(--menu-item-font-size);
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    outline: none;
+
+    &[data-hovered],
+    &[data-focus-visible] {
+        background: var(--state-hover);
+    }
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: calc(-1 * var(--focus-ring-width));
+    }
+
+    &[data-selected] {
+        color: var(--color-text);
+    }
+}
+
+.filterIcon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+
+    & svg {
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.filterOptionLabel {
+    flex: 1;
+}
+
+.filterCheck {
+    flex: none;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    color: var(--color-text);
+    opacity: 0;
+
+    [data-selected] > & {
+        opacity: 1;
+    }
+}
+
+/* With no filter every block is searched: rows read as included, checks stay faint. */
+.filterList[data-all] {
+    & .filterOption {
+        color: var(--color-text);
+    }
+
+    & .filterCheck {
+        opacity: .28;
     }
 }
