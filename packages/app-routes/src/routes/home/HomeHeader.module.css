@@ -1,0 +1,17 @@
+.brand {
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-snug);
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+.mark {
+    display: block;
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+}

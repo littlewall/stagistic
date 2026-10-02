@@ -120,5 +120,10 @@ export const compiledMigrations = [
         "id": "0023_character_decoration",
         "checksum": "9a177d834056b1e8ef52f135b010cdc74cd09cebb5edc474d8706213973ac215",
         "sql": "ALTER TABLE \"script_settings_visual_preferences\" DROP COLUMN \"character_color_saturation\";\nALTER TABLE \"script_settings_visual_preferences\" ADD COLUMN \"character_decoration\" text;\n"
+    },
+    {
+        "id": "0024_script_summary_metadata",
+        "checksum": "909b871b33fef73ff0111abb5085c54a6eaef9f6509e9c413294ec33e09a4a53",
+        "sql": "ALTER TABLE scripts ADD COLUMN summary_metadata jsonb;\n\nWITH ordered_blocks AS (\n    SELECT script_id, block_type,\n        sum(CASE WHEN block_type = 'act' THEN 1 ELSE 0 END) OVER (\n            PARTITION BY script_id ORDER BY block_order, id ROWS UNBOUNDED PRECEDING\n        ) AS act_index\n    FROM script_blocks\n), scene_counts AS (\n    SELECT script_id, act_index,\n        count(*) FILTER (WHERE block_type = 'scene') AS scene_count\n    FROM ordered_blocks\n    GROUP BY script_id, act_index\n), summaries AS (\n    SELECT script_id, sum(scene_count) AS scene_count,\n        jsonb_agg(scene_count ORDER BY act_index) FILTER (WHERE act_index > 0) AS act_scene_counts,\n        sum(scene_count) FILTER (WHERE act_index = 0) AS unassigned_scene_count\n    FROM scene_counts\n    GROUP BY script_id\n)\nUPDATE scripts AS target\nSET summary_metadata = jsonb_build_object(\n    'pageCount', NULL,\n    'sceneCount', coalesce(summaries.scene_count, 0),\n    'actSceneCounts', coalesce(summaries.act_scene_counts, '[]'::jsonb),\n    'unassignedSceneCount', coalesce(summaries.unassigned_scene_count, 0)\n)\nFROM scripts AS source LEFT JOIN summaries ON summaries.script_id = source.id\nWHERE target.id = source.id;\n"
     }
 ] as const;

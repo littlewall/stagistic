@@ -22,6 +22,7 @@ import {useEditorInstance} from '../context';
 import type {EditorProps} from '../contracts';
 import ScriptEditor from '../Editor';
 import {type EditorCommentThreadRef, getCommentsState} from '../tiptap/extensions/comments';
+import commentStyles from '../tiptap/extensions/comments/CommentsExtension.module.css';
 import {findScriptBlockByIdFromState} from '../tiptap/scriptCore';
 import {resolveMusicRailLeft} from './musicRange/musicRailDom';
 
@@ -444,12 +445,60 @@ describe('active comment dismissal', () => {
         expect(getCommentsState(editor.state).activeThreadId).toBeNull();
     });
 
-    it('keeps the active thread for caret and selection in the editor text and for comment UI', async () => {
+    it('closes the active thread and clears its tint when the caret leaves its text', async () => {
         const editor = await mountWithActiveThread();
-        const text = editor.view.dom.querySelector('p, [data-block-id]') ?? editor.view.dom;
 
-        text.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+        expect(editor.view.dom.querySelector(`.${commentStyles.anchorActive}`)).not.toBeNull();
         placeCaret(editor, 'b2');
+
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
+        expect(editor.view.dom.querySelector(`.${commentStyles.anchorActive}`)).toBeNull();
+    });
+
+    it('closes the active thread when a text selection leaves its anchor', async () => {
+        const editor = await mountWithActiveThread();
+        const anchor = getCommentsState(editor.state).anchors.get('t1')!;
+
+        selectRange(editor, anchor.from + 1, anchor.to + 2);
+
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
+    });
+
+    it('closes the active thread when unannotated text is clicked without moving the caret', async () => {
+        const editor = await mountWithActiveThread();
+
+        placeCaret(editor, 'b2');
+        await activate(editor);
+        editor.view.someProp('handleClick', handler => handler(editor.view, editor.state.selection.from, new MouseEvent('click')));
+
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
+    });
+
+    it('opens an inline comment on click and closes it when another block is clicked', async () => {
+        const {editor} = await mountEditor({
+            content: createDocument([dialogue('b1', 'Hello world', ['t1']), dialogue('b2', 'Second line')]),
+            commentThreads: [openRange('t1')],
+            callbacks: {onCommentAnchorClick: threadIds => editor.commands.setActiveCommentThread(threadIds[0] ?? null)},
+        });
+        const anchor = await poll(() => editor.view.dom.querySelector<HTMLElement>('[data-comment-anchor="t1"]'), 'inline comment');
+
+        await page.elementLocator(anchor).click();
+        expect(getCommentsState(editor.state).activeThreadId).toBe('t1');
+
+        const block = findScriptBlockByIdFromState(editor.state, 'b2')!;
+        const otherBlock = editor.view.nodeDOM(block.from - 1) as HTMLElement;
+
+        await page.elementLocator(otherBlock).click();
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
+        expect(editor.view.dom.querySelector(`.${commentStyles.anchorActive}`)).toBeNull();
+    });
+
+    it('keeps the active thread for caret and selection within its anchor and for comment UI', async () => {
+        const editor = await mountWithActiveThread();
+        const anchor = getCommentsState(editor.state).anchors.get('t1')!;
+
+        editor.commands.setTextSelection(anchor.from + 1);
+        selectRange(editor, anchor.from + 1, anchor.to - 1);
 
         const panelButton = document.createElement('button');
         const panel = document.createElement('div');

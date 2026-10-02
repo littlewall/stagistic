@@ -1,7 +1,10 @@
 import type {
     DerivedMusic,
+    IndexedScriptBlock,
     ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
+
+import {resolveMusicOutCandidate} from '../../tiptap/extensions/music/musicOutCommands';
 
 export type MusicRailMarkerKind = 'none' | 'start' | 'hit' | 'end' | 'shared' | 'orphan';
 export type MusicRailEndTone = 'explicit' | 'implicit' | 'orphan';
@@ -47,6 +50,26 @@ const resolveMarkerKind = (
     return start ? 'start' : 'none';
 };
 
+const musicPassesThroughBlock = (
+    music: DerivedMusic | null,
+    block: IndexedScriptBlock | undefined,
+    blocksById: ReadonlyMap<string, IndexedScriptBlock>,
+) => {
+    if (!music || !block || block.blockType === 'act' || block.blockType === 'scene') {
+        return false;
+    }
+
+    const start = blocksById.get(music.startBlockId);
+    const end = blocksById.get(music.effectiveEndBlockId);
+
+    return music.mode === 'open'
+        && start !== undefined
+        && end !== undefined
+        && start.sceneBlockId === block.sceneBlockId
+        && start.orderNo < block.orderNo
+        && block.orderNo < end.orderNo;
+};
+
 export const buildMusicRailBoundaries = (
     snapshot: ScriptBlockIndexSnapshot,
     sites: readonly MusicRailBoundarySite[],
@@ -90,7 +113,9 @@ export const buildMusicRailBoundaries = (
                     : end
                         ? 'implicit'
                         : null;
-            const canAddMusic = block?.blockType === 'stageDirection' && !site.hasMusicStart;
+            const canPlaceEnd = !site.hasMusicStart
+                && !site.hasMusicOut
+                && musicPassesThroughBlock(candidate, block, blocksById);
 
             if (start?.mode === 'open') {
                 latestOpenByScene.set(sceneBlockId, start);
@@ -104,7 +129,7 @@ export const buildMusicRailBoundaries = (
                 startMode: start?.mode ?? null,
                 startMusicId: start?.musicId ?? null,
                 endMusicId: end?.musicId ?? null,
-                hasActions: canAddMusic || site.hasMusicOut || candidate !== null,
+                hasActions: start !== null || endTone !== null || canPlaceEnd,
             };
         });
 };
@@ -162,4 +187,17 @@ export const canDropMusicOutAtBoundary = (
         }, null);
 
     return nextStartOrder === null || target.orderNo <= nextStartOrder;
+};
+
+export const resolveMusicPassingThroughBlock = (
+    snapshot: ScriptBlockIndexSnapshot,
+    blockId: string,
+): DerivedMusic | null => {
+    const music = resolveMusicOutCandidate(snapshot, blockId);
+    const blocksById = new Map(snapshot.blocks.map(block => [block.blockId, block] as const));
+
+    return musicPassesThroughBlock(music, blocksById.get(blockId), blocksById)
+        && canDropMusicOutAtBoundary(snapshot, music?.musicId ?? null, blockId)
+        ? music
+        : null;
 };

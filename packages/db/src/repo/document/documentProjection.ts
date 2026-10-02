@@ -20,7 +20,7 @@ export interface LoadedProjectionDocument extends LoadedScriptDocument {
 }
 
 export interface SaveScriptDocumentOptions {
-    afterPersist?: (tx: DbClient) => Promise<void>,
+    afterPersist?: (tx: DbClient, documentChanged: boolean) => Promise<void>,
 }
 
 export interface ScriptDocumentSource {
@@ -80,6 +80,7 @@ export const loadScriptDocumentFromProjection = async (db: DbClient, scriptId: s
 
 export const createSqlScriptDocumentProjectionWriter = ({getDb}: CreateSqlScriptDocumentProjectionWriterArgs): ScriptDocumentProjectionWriter => {
     const persisters = new Map<string, ReturnType<typeof createDocumentPersister>>();
+    const baselineLoads = new Map<string, Promise<void>>();
 
     const getPersister = (scriptId: string) => {
         let persister = persisters.get(scriptId);
@@ -96,10 +97,23 @@ export const createSqlScriptDocumentProjectionWriter = ({getDb}: CreateSqlScript
         const baseline = extractScriptBlocks(scriptId, document);
 
         getPersister(scriptId).setBaseline(baseline.blocks, orderKeyByBlockId);
+        baselineLoads.set(scriptId, Promise.resolve());
     };
 
     const updateFromDocument: ScriptDocumentProjectionWriter['updateFromDocument'] = async (scriptId, document, options) => {
         const db = await getDb();
+        let baselineLoad = baselineLoads.get(scriptId);
+
+        if (!baselineLoad) {
+            baselineLoad = loadScriptDocumentFromProjection(db, scriptId).then(loaded => {
+                if (loaded) {
+                    seedBaseline(scriptId, loaded.document, loaded.orderKeyByBlockId);
+                }
+            });
+            baselineLoads.set(scriptId, baselineLoad);
+        }
+
+        await baselineLoad;
 
         await getPersister(scriptId).persist(db, document, options?.afterPersist);
     };

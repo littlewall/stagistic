@@ -20,6 +20,7 @@ import type {
     ScriptBlockIndexSnapshot,
     ScriptBlockNodeType,
     ScriptDocument,
+    ScriptSummaryMetadata,
 } from '@stagistic/script';
 import type {ReactNode} from 'react';
 
@@ -233,8 +234,9 @@ export interface EditorLifecycleCallbacks {
 }
 
 export interface EditorSaveCallbacks {
-    onAutoSave?: (value: ScriptDocument) => SaveResult,
-    onManualSave?: (value: ScriptDocument) => SaveResult,
+    onAutoSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
+    onManualSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
+    onSummaryMetadataChange?: (value: ScriptDocument, metadata: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
     onDirtyChange?: (isDirty: boolean) => void,
 }
 

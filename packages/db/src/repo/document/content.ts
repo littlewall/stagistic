@@ -1,15 +1,21 @@
+import {buildScriptSummaryMetadata} from '@stagistic/script';
+
 import * as dbQueries from '../../queries';
 import type {ScriptRepository} from '../../types/scriptRepository';
+import {readScriptSettings} from '../config/config';
+import {getScriptLayoutFingerprint} from '../config/layoutFingerprint';
 import type {
     GetDb,
     RecordOutbox,
     SyncDb,
 } from '../types';
 import {createProjectedTableDocumentSource, createSqlScriptDocumentProjectionWriter} from './documentProjection';
+import {createSaveSummaryMetadataHandler} from './summaryMetadata';
 
 type ContentHandlers = {
     loadLatest: ScriptRepository['loadLatest'],
     saveLatest: ScriptRepository['saveLatest'],
+    saveSummaryMetadata: ScriptRepository['saveSummaryMetadata'],
 };
 
 interface CreateContentHandlersArgs {
@@ -36,8 +42,9 @@ export const createContentHandlers = ({
         return loaded.document;
     };
 
-    const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
+    const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value, metadata, expectedSettings) => {
         const now = Date.now();
+        const derivedMetadata = metadata ?? buildScriptSummaryMetadata(value);
 
         /*
          * Granular persist: diff the document against the last-saved blocks and
@@ -45,10 +52,20 @@ export const createContentHandlers = ({
          * Timestamp + outbox ride in the same transaction as the delta.
          */
         await documentSource.save(scriptId, value, {
-            afterPersist: async tx => {
-                await dbQueries.updateScriptTimestamp(tx, {
+            afterPersist: async (tx, documentChanged) => {
+                const layoutMatches = expectedSettings === undefined
+                    || getScriptLayoutFingerprint(await readScriptSettings(tx, scriptId)) === getScriptLayoutFingerprint(expectedSettings);
+                const previousMetadata = metadata?.pageCount == null && !documentChanged && layoutMatches
+                    ? (await dbQueries.getScriptSummary(tx, scriptId))?.summaryMetadata
+                    : null;
+
+                await dbQueries.updateScriptSummaryMetadata(tx, {
                     scriptId,
                     updatedAt: now,
+                    summaryMetadata: {
+                        ...derivedMetadata,
+                        pageCount: layoutMatches ? previousMetadata?.pageCount ?? derivedMetadata.pageCount : null,
+                    },
                 });
 
                 await recordOutbox(
@@ -75,5 +92,6 @@ export const createContentHandlers = ({
     return {
         loadLatest,
         saveLatest,
+        saveSummaryMetadata: createSaveSummaryMetadataHandler({getDb, syncDb}),
     };
 };

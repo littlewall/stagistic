@@ -27,6 +27,8 @@ export interface PaginationPluginState {
     forceRecalcToken: number,
     /** False until the first real (measured) recalc has been dispatched. */
     hasComputed: boolean,
+    /** False for a changed document or layout that still needs fallback heights. */
+    hasMeasuredLayout: boolean,
 }
 
 export interface PaginationOptions {
@@ -47,6 +49,8 @@ export interface PaginationStorage {
     optionsVersion: number,
     state: PaginationState,
     forceRecalcToken: number,
+    /** Recalculate now; false means the current document could not be measured. */
+    flushRecalc?: () => boolean,
 }
 
 export interface BlockLine {

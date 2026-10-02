@@ -62,7 +62,7 @@ export const deriveIntegratedScoreExportPlan = (
             ...plan.leadingPages,
             initialPages: plan.leadingPages.initialPages.map(page => {
                 if (page.kind === 'contents') {
-                    return {...page, showScoreColumn: true};
+                    return {...page, showScoreColumn: page.variant !== 'scenes'};
                 }
 
                 return page;

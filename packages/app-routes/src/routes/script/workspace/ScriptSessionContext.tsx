@@ -1,8 +1,10 @@
 import {type useScriptRepository} from '@stagistic/app-core';
 import {
     type EditorSettings,
+    type EditorSettingsOverride,
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
+    type ScriptSummaryMetadata,
 } from '@stagistic/script';
 import {
     createContext,
@@ -17,7 +19,7 @@ export interface ScriptSessionContextValue {
     scriptRepository: ScriptRepository,
     resolvedScriptSettings: EditorSettings,
     indexSnapshot: ScriptBlockIndexSnapshot | null,
-    handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
+    handleAutoSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
 }
 
 const ScriptSessionContext = createContext<ScriptSessionContextValue | null>(null);

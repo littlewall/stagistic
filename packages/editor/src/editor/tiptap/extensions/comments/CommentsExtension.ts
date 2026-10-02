@@ -240,6 +240,12 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                     decorations: state => commentsPluginKey.getState(state)?.decorations,
                     handleClick: (view, pos) => {
                         const pluginState = commentsPluginKey.getState(view.state);
+                        const activeAnchor = pluginState?.activeThreadId ? pluginState.anchors.get(pluginState.activeThreadId) : undefined;
+
+                        if (activeAnchor && (pos < activeAnchor.from || pos > activeAnchor.to)) {
+                            view.dispatch(withMeta(view.state.tr, {type: 'active', threadId: null}));
+                        }
+
                         const threadIds = [...pluginState?.anchors.values() ?? []]
                             .filter(anchor => anchor.kind === 'range' && anchor.from <= pos && pos <= anchor.to)
                             .filter(anchor => isThreadMarked(pluginState?.threads.get(anchor.threadId)))

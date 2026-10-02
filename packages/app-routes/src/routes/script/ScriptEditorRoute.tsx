@@ -42,6 +42,7 @@ export const ScriptEditorRoute = () => {
         saveIndicator,
         handleAutoSave,
         handleManualSave,
+        handleSummaryMetadataChange,
         editorSurfaceCache,
         editorSnapshotStore,
     } = useScriptWorkspace();
@@ -221,6 +222,7 @@ export const ScriptEditorRoute = () => {
                     save={{
                         onAutoSave: handleAutoSave,
                         onManualSave: handleManualSave,
+                        onSummaryMetadataChange: handleSummaryMetadataChange,
                         autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                     }}
                     requests={{

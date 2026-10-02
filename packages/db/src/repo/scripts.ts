@@ -1,4 +1,4 @@
-import type {ScriptDocument} from '@stagistic/script';
+import {buildScriptSummaryMetadata, type ScriptDocument} from '@stagistic/script';
 import {
     trimOrFallback,
     uuidv7,
@@ -47,6 +47,7 @@ export const createScriptsHandlers = ({
                 title: trimOrFallback(title, 'Untitled script'),
                 createdAt: timestamp,
                 updatedAt: timestamp,
+                summaryMetadata: buildScriptSummaryMetadata(initialContent ?? {type: 'doc', content: []}),
             });
 
             if (initialContent) {

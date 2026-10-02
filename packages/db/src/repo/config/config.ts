@@ -15,6 +15,7 @@ import type {
 } from '../types';
 import {normalizeSettingsBlockType} from './configBlockTypes';
 import {buildConfigRows, hydrateBlockSettings} from './configRows';
+import {getScriptLayoutFingerprint} from './layoutFingerprint';
 
 type SettingsHandlers = Pick<ScriptRepository, 'loadScriptSettings' | 'saveScriptSettings' | 'deleteScriptSettings'>;
 
@@ -109,6 +110,8 @@ export const readScriptSettings = async (db: DbClient, scriptId: string): Promis
 };
 
 export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, settings: EditorSettingsOverride, now: number): Promise<void> => {
+    const previous = await readScriptSettings(tx, scriptId);
+    const layoutChanged = getScriptLayoutFingerprint(previous) !== getScriptLayoutFingerprint(settings);
     const headerFooterRows = (['header', 'footer'] as const).flatMap(area => ALIGNMENTS.flatMap(alignment => {
         const cell = settings.headerFooter?.[area]?.[alignment];
 
@@ -179,6 +182,10 @@ export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, sett
         scriptId,
         rows: buildConfigRows(scriptId, settings, now),
     });
+    if (layoutChanged) {
+        await dbQueries.invalidateScriptPageCount(tx, scriptId);
+    }
+
     await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
 };
 
@@ -310,6 +317,7 @@ export const createSettingsHandlers = ({
 
         await db.transaction(async tx => {
             await dbQueries.deleteScriptSettings(tx, scriptId);
+            await dbQueries.invalidateScriptPageCount(tx, scriptId);
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
             await recordOutbox(
                 {

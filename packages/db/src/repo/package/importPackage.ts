@@ -1,3 +1,4 @@
+import {buildScriptSummaryMetadata} from '@stagistic/script';
 import {eq} from 'drizzle-orm';
 
 import type {DbClient} from '../../queries';
@@ -116,6 +117,11 @@ const writePackageDomainRowsTx = async (
         sourceDocument: input.document,
         trigger: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
         context: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
+    });
+    await dbQueries.updateScriptSummaryMetadata(tx, {
+        scriptId,
+        updatedAt: now,
+        summaryMetadata: buildScriptSummaryMetadata(input.document),
     });
     await dbQueries.bulkInsertScriptCommentThreads(
         tx,

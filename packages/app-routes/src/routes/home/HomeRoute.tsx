@@ -23,9 +23,9 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import {AppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {buildHomeDashboardModel, type ScriptSort} from './homeDashboardModel';
+import {HomeHeader} from './HomeHeader';
 import styles from './HomeRoute.module.css';
 import {ScriptListSection} from './ScriptListSection';
 
@@ -141,14 +141,7 @@ export const HomeRoute = () => {
     }
 
     return (
-        <AppLayout
-            header={(
-                <AppHeader
-                    contentInset="page"
-                    showScriptActions={false}
-                />
-            )}
-        >
+        <AppLayout header={<HomeHeader />}>
             <PageContainer variant="standard">
                 <div className={styles.content}>
                     <Text
@@ -164,7 +157,7 @@ export const HomeRoute = () => {
                     >
                         <ActionCard
                             type="button"
-                            variant={hasScripts ? 'primary' : 'default'}
+                            variant={hasScripts ? 'accent' : 'default'}
                             icon={<PlusIcon aria-hidden="true" />}
                             title="New script"
                             description="Start with an empty theatre or musical script."
@@ -180,7 +173,7 @@ export const HomeRoute = () => {
                         {!hasScripts ? (
                             <ActionCard
                                 type="button"
-                                variant="primary"
+                                variant="accent"
                                 icon={<ScriptIcon aria-hidden="true" />}
                                 title="Create example script"
                                 description="Explore the editor with a pre-filled script."

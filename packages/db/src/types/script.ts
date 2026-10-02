@@ -21,6 +21,7 @@ export type Script = InferSelectModel<typeof scripts>;
 
 export interface ScriptSummary extends Pick<Script, 'id' | 'title' | 'createdAt' | 'updatedAt'> {
     activeBlockId?: Script['activeBlockId'],
+    summaryMetadata?: Script['summaryMetadata'],
     subtitle: string | null,
 }
 

@@ -3,7 +3,7 @@ import {useEffect} from 'react';
 
 import {commentsPluginKey} from '../tiptap/extensions/comments';
 
-/* Controls a user acts with; plain editor text (caret, selection) is deliberately not one. */
+/* Controls outside comments; editor caret and selection changes are handled separately. */
 const ACTION_SELECTOR = [
     'button',
     'a[href]',
@@ -61,13 +61,37 @@ export const useDismissActiveCommentOnAction = (editor: TiptapEditor | null) => 
             editor.commands.setActiveCommentThread(null);
         };
 
+        const dismissOnSelection = () => {
+            if (editor.isDestroyed) {
+                return;
+            }
+
+            const state = commentsPluginKey.getState(editor.state);
+            const threadId = state?.activeThreadId;
+
+            if (!threadId) {
+                return;
+            }
+
+            const anchor = state.anchors.get(threadId);
+            const {selection} = editor.state;
+
+            if (anchor && selection.from >= anchor.from && selection.to <= anchor.to) {
+                return;
+            }
+
+            editor.commands.setActiveCommentThread(null);
+        };
+
         // Capture: a control may stop propagation; focusin covers keyboard routes such as Mod+F.
         document.addEventListener('pointerdown', dismiss, true);
         document.addEventListener('focusin', dismiss, true);
+        editor.on('selectionUpdate', dismissOnSelection);
 
         return () => {
             document.removeEventListener('pointerdown', dismiss, true);
             document.removeEventListener('focusin', dismiss, true);
+            editor.off('selectionUpdate', dismissOnSelection);
         };
     }, [editor]);
 };

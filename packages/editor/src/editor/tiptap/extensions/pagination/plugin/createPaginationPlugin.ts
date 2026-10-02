@@ -46,6 +46,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     pagination: createInitialPaginationState(storage.options),
                     forceRecalcToken: storage.forceRecalcToken,
                     hasComputed: false,
+                    hasMeasuredLayout: false,
                 };
             },
             apply: (tr, pluginState: PaginationPluginState) => {
@@ -63,12 +64,13 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     return meta;
                 }
 
-                if (controlMeta && typeof controlMeta.forceRecalcToken === 'number' && controlMeta.forceRecalcToken !== pluginState.forceRecalcToken) {
+                if (controlMeta && typeof controlMeta.forceRecalcToken === 'number') {
                     storage.forceRecalcToken = controlMeta.forceRecalcToken;
 
                     return {
                         ...pluginState,
                         forceRecalcToken: controlMeta.forceRecalcToken,
+                        hasMeasuredLayout: false,
                     };
                 }
 
@@ -78,6 +80,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                         pagination: pluginState.pagination,
                         forceRecalcToken: pluginState.forceRecalcToken,
                         hasComputed: pluginState.hasComputed,
+                        hasMeasuredLayout: false,
                     };
                 }
 
@@ -101,9 +104,21 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
             let recalcFrameId = 0;
             let deferredTypingTimeout: number | null = null;
 
+            const clearPendingRecalc = () => {
+                if (recalcFrameId) {
+                    window.cancelAnimationFrame(recalcFrameId);
+                    recalcFrameId = 0;
+                }
+
+                if (deferredTypingTimeout !== null) {
+                    window.clearTimeout(deferredTypingTimeout);
+                    deferredTypingTimeout = null;
+                }
+            };
+
             const runRecalc = () => {
                 if (destroyed) {
-                    return;
+                    return false;
                 }
 
                 /*
@@ -114,16 +129,18 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                  * dimensions and reschedules.
                  */
                 if (!view.dom.isConnected || view.dom.clientWidth === 0) {
-                    return;
+                    return false;
                 }
 
                 if (isRecalcRunning) {
                     needsRecalc = true;
 
-                    return;
+                    return false;
                 }
 
                 isRecalcRunning = true;
+
+                let hasMeasuredLayout: boolean;
 
                 do {
                     needsRecalc = false;
@@ -153,6 +170,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     );
 
                     blockCache = nextCache;
+                    hasMeasuredLayout = !usedFallbackMeasurements;
 
                     storage.state = pagination;
 
@@ -161,6 +179,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                         pagination,
                         forceRecalcToken: storage.forceRecalcToken,
                         hasComputed: true,
+                        hasMeasuredLayout,
                     });
 
                     view.dispatch(tr);
@@ -177,21 +196,31 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                 } while (needsRecalc && !destroyed);
 
                 isRecalcRunning = false;
+
+                return hasMeasuredLayout;
             };
+
+            const flushRecalc = () => {
+                clearPendingRecalc();
+
+                const {options} = storage;
+
+                if (view.dom.clientWidth <= options.marginLeft + options.marginRight
+                    || options.pageHeight <= options.marginTop + options.marginBottom) {
+                    return false;
+                }
+
+                return runRecalc();
+            };
+
+            storage.flushRecalc = flushRecalc;
 
             const scheduleImmediateRecalc = () => {
                 if (destroyed) {
                     return;
                 }
 
-                if (deferredTypingTimeout !== null) {
-                    window.clearTimeout(deferredTypingTimeout);
-                    deferredTypingTimeout = null;
-                }
-
-                if (recalcFrameId) {
-                    window.cancelAnimationFrame(recalcFrameId);
-                }
+                clearPendingRecalc();
 
                 recalcFrameId = window.requestAnimationFrame(() => {
                     recalcFrameId = 0;
@@ -257,14 +286,9 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                 },
                 destroy: () => {
                     destroyed = true;
-                    if (recalcFrameId) {
-                        window.cancelAnimationFrame(recalcFrameId);
-                        recalcFrameId = 0;
-                    }
-
-                    if (deferredTypingTimeout !== null) {
-                        window.clearTimeout(deferredTypingTimeout);
-                        deferredTypingTimeout = null;
+                    clearPendingRecalc();
+                    if (storage.flushRecalc === flushRecalc) {
+                        delete storage.flushRecalc;
                     }
 
                     resizeObserver?.disconnect();

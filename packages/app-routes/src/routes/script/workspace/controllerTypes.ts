@@ -6,6 +6,7 @@ import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
     ScriptDocument,
+    ScriptSummaryMetadata,
 } from '@stagistic/script';
 import type {ScriptSyncState} from '@stagistic/ui';
 
@@ -30,8 +31,9 @@ export type ScriptEditorController = {
     shouldAutoFocus: boolean,
     saveIndicator: ScriptSyncState,
     editorLoadState: EditorLoadState,
-    handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
-    handleManualSave: (value: ScriptDocument) => Promise<boolean>,
+    handleAutoSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
+    handleManualSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
+    handleSummaryMetadataChange: (value: ScriptDocument, metadata: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
 };
 
 const hasDefinedLeaf = (value: unknown): boolean => {

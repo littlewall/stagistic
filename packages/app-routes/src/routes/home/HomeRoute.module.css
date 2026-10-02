@@ -1,6 +1,6 @@
 /*
- * Residual route layout + row content.
- * Every shared pattern (start card, list panel/row, search, skeleton, notices)
+ * Residual route layout.
+ * Every shared pattern (start card, script card, search, skeleton, notices)
  * now comes from `@stagistic/ui`; what is left is singular to this route.
  */
 
@@ -48,99 +48,6 @@
     width: 148px;
 }
 
-/* Two classes deep so the translucent library surface outranks `ListPanel`'s own default. */
-.listSection .scriptPanel {
-    --list-bg: color-mix(in oklch, var(--color-surface) 70%, transparent);
-}
-
-/*
- * `ListRow` carries the row shell, its height and its hover; the divider and the
- * icon echo are the route's. The row's inset lives on the open button rather than
- * on the row, because opening a script is a whole-row click target — a row that
- * padded itself would leave a 26px dead band the pointer falls through.
- */
-.scriptRow {
-    --list-row-padding: 0;
-    --list-row-gap: 0;
-
-    align-items: stretch;
-    border-bottom: 1px solid var(--color-border-subtle);
-
-    &:last-child {
-        border-bottom: none;
-    }
-
-    &:hover .scriptIcon {
-        color: var(--color-text);
-    }
-}
-
-.scriptOpenButton {
-    cursor: pointer;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: var(--space-lg);
-    align-items: center;
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    padding: var(--space-lg) var(--space-xl);
-    font: inherit;
-    color: inherit;
-    text-align: left;
-    background: transparent;
-    border: 0;
-    outline: none;
-
-    &:focus-visible {
-        box-shadow: inset 0 0 0 2px var(--color-focus-ring);
-    }
-}
-
-.actionsMenu {
-    display: flex;
-    align-items: center;
-    margin-right: var(--space-md);
-}
-
-.scriptIcon {
-    width: var(--icon-size-lg);
-    height: var(--icon-size-lg);
-    color: var(--color-text-muted);
-    transition: color var(--duration-normal) var(--ease-standard);
-}
-
-.scriptInfo {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-    min-width: 0;
-}
-
-.scriptTitle,
-.scriptSubtitle {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.scriptTitle {
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
-}
-
-.scriptSubtitle {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-}
-
-.scriptMeta {
-    min-width: 116px;
-    font-size: var(--font-size-sm);
-    text-align: right;
-}
-
 .noResults {
     padding: var(--space-5xl) 0;
 }
@@ -183,9 +90,5 @@
 
     .sortSelect {
         width: 100%;
-    }
-
-    .scriptMeta {
-        display: none;
     }
 }
