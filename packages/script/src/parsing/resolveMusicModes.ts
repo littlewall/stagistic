@@ -1,5 +1,5 @@
 import {type ScriptNode} from '../document';
-import {MUSIC_MODE_ATTR} from '../music';
+import {MUSIC_MODE_ATTR, MUSIC_START_NODE_NAME} from '../music';
 import {type ParsedStageBlock} from './inline';
 import {StagisticParseError} from './types';
 
@@ -11,6 +11,11 @@ const getSingleMusicMarker = (block: ParsedBlock) => {
 
 const isPureMusicBlock = (block: ParsedBlock, role: 'start' | 'out') => {
     return getSingleMusicMarker(block)?.role === role && block.node.content?.length === 1;
+};
+
+// A hit marker closes its block: `@@music N "…"` may follow text, as serializeStagistic writes it.
+const endsWithMusicStart = (block: ParsedBlock) => {
+    return getSingleMusicMarker(block)?.role === 'start' && block.node.content?.at(-1)?.type === MUSIC_START_NODE_NAME;
 };
 
 export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
@@ -36,7 +41,7 @@ export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
         const next = blocks[index + 1];
         const nextMarker = next ? getSingleMusicMarker(next) : null;
         const isHit =
-            marker?.role === 'start' && isPureMusicBlock(block, 'start') && next && isPureMusicBlock(next, 'out') && nextMarker?.number === marker.number;
+            marker?.role === 'start' && endsWithMusicStart(block) && next && isPureMusicBlock(next, 'out') && nextMarker?.number === marker.number;
 
         if (isHit) {
             const musicNode = block.node.content?.at(-1);

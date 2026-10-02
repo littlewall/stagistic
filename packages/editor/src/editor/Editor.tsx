@@ -85,6 +85,7 @@ const Editor = ({
         onRequestDeleteScene,
         onRequestConvertScene,
         onRequestRevealComments,
+        isCommentsPanelOpen,
         onCommentAnchorClick,
         onCommentBlocksMerged,
     } = callbacks ?? {};
@@ -129,6 +130,7 @@ const Editor = ({
 
     const commentCallbacksRef = useCommentCallbacksRef({
         onRequestReveal: onRequestRevealComments,
+        isPanelOpen: isCommentsPanelOpen,
         onAnchorClick: onCommentAnchorClick,
         onBlocksMerged: onCommentBlocksMerged,
     });

@@ -88,9 +88,7 @@ ELI
 (amazed)
 It worked.
 
-A thunderclap shakes the tower.
-
-@@music 2 "Thunderclap"
+A thunderclap shakes the tower. @@music 2 "Thunderclap"
 
 @@out 2
 
@@ -100,9 +98,7 @@ A thunderclap shakes the tower.
 
 ## Broken window
 
-@@music 3 "Storm Underscore"
-
-Wind howls through a broken window. The flame flickers.
+@@music 3 "Storm Underscore" Wind howls through a broken window. The flame flickers.
 
 ELI
 The storm is putting it out!

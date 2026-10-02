@@ -39,6 +39,11 @@ declare module '@tiptap/core' {
             setHoveredCommentBlock: (blockId: string | null) => ReturnType,
             /** Asks the host to reveal the Comments panel (margin marker click). */
             requestCommentsReveal: () => ReturnType,
+            /**
+             * Margin marker click: opens the block's first thread and reveals the panel,
+             * or closes the active thread when the panel already shows it.
+             */
+            toggleCommentMarker: (threadIds: readonly string[]) => ReturnType,
         },
     }
 }
@@ -185,6 +190,27 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                 () => ({dispatch}) => {
                     if (dispatch) {
                         this.options.getCallbacks().onRequestReveal?.();
+                    }
+
+                    return true;
+                },
+            toggleCommentMarker:
+                threadIds => ({
+                    tr,
+                    state,
+                    dispatch,
+                }) => {
+                    const callbacks = this.options.getCallbacks();
+                    const activeThreadId = getCommentsState(state).activeThreadId;
+                    // A hidden panel cannot show the active thread, so the click reveals it again.
+                    const isClosing = activeThreadId !== null && threadIds.includes(activeThreadId) && (callbacks.isPanelOpen?.() ?? true);
+
+                    if (dispatch) {
+                        dispatch(withMeta(tr, {type: 'active', threadId: isClosing ? null : threadIds[0] ?? null}));
+
+                        if (!isClosing) {
+                            callbacks.onRequestReveal?.();
+                        }
                     }
 
                     return true;

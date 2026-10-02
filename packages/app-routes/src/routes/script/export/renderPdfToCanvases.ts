@@ -4,7 +4,9 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const renderPage = async (page: pdfjs.PDFPageProxy, scale: number): Promise<HTMLCanvasElement> => {
-    const viewport = page.getViewport({scale});
+    // Render at device resolution so the preview stays sharp on HiDPI screens.
+    const pixelRatio = window.devicePixelRatio || 1;
+    const viewport = page.getViewport({scale: scale * pixelRatio});
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
 
@@ -14,8 +16,8 @@ const renderPage = async (page: pdfjs.PDFPageProxy, scale: number): Promise<HTML
 
     canvas.width = Math.ceil(viewport.width);
     canvas.height = Math.ceil(viewport.height);
-    canvas.style.width = `${viewport.width}px`;
-    canvas.style.height = `${viewport.height}px`;
+    canvas.style.width = `${canvas.width / pixelRatio}px`;
+    canvas.style.height = `${canvas.height / pixelRatio}px`;
 
     await page.render({
         canvas,

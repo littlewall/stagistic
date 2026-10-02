@@ -11,6 +11,7 @@ import {
     MUSIC_OUT_NODE_NAME,
     MUSIC_START_NODE_NAME,
     type ScriptNode,
+    serializeStagistic,
 } from '..';
 import {parseStagistic} from './parseStagistic';
 import {StagisticParseError} from './types';
@@ -153,6 +154,19 @@ The lights return. @@out 1
         expect(openMusic?.attrs?.[MUSIC_MODE_ATTR]).toBe('open');
         expect(musicOut).toBeTruthy();
         expect(hitMusic?.attrs?.[MUSIC_MODE_ATTR]).toBe('hit');
+    });
+
+    it('parses a hit that closes a stage direction and round-trips it', () => {
+        const source = 'A thunderclap shakes the tower. @@music 1 "Thunderclap"\n\n@@out 1';
+        const result = parseStagistic(source);
+        const block = result.document.content[0];
+        const hit = block.content?.at(-1);
+
+        expect(result.document.content).toHaveLength(1);
+        expect(getText(block).trim()).toBe('A thunderclap shakes the tower.');
+        expect(hit?.type).toBe(MUSIC_START_NODE_NAME);
+        expect(hit?.attrs?.[MUSIC_MODE_ATTR]).toBe('hit');
+        expect(serializeStagistic(result.document, {scriptTitle: 'Test'})).toContain(source);
     });
 
     it('parses uppercase lines as character cues unless ! forces a stage direction', () => {
