@@ -115,10 +115,10 @@ describe('ScriptListSection cards', () => {
         expect(actions.onOpenScript).not.toHaveBeenCalled();
     });
 
-    it('renders the stored page count and proportional act distribution', async () => {
+    it('renders the proportional act distribution without a page count', async () => {
         await mountScripts([script]);
 
-        expect(document.body.textContent).toContain('42 pages');
+        expect(document.body.textContent).not.toMatch(/\bpages?\b/);
         expect(document.body.textContent).toContain('Act I · 2 scenes');
         expect(document.body.textContent).toContain('Act II · 6 scenes');
 
@@ -144,7 +144,6 @@ describe('ScriptListSection cards', () => {
 
         const structure = document.querySelector('[aria-label="Script structure"]');
 
-        expect(document.body.textContent).toContain('— pages');
         expect(structure?.textContent).toBe(`${sceneCount} scenes`);
         expect(structure?.querySelector('[aria-hidden="true"]')?.getBoundingClientRect().width)
             .toBeGreaterThan(0);
@@ -159,7 +158,6 @@ describe('ScriptListSection cards', () => {
             },
         ]);
 
-        expect(document.body.textContent).toContain('— pages');
         expect(document.querySelector('[aria-label="Script structure"]')?.textContent).toBe('— scenes');
     });
 
@@ -176,7 +174,6 @@ describe('ScriptListSection cards', () => {
             },
         ]);
 
-        expect(document.body.textContent).toContain('1 page');
         expect(document.body.textContent).toContain('Before Act I · 2 scenes');
         expect(document.body.textContent).toContain('Act I · 0 scenes');
         expect(document.body.textContent).toContain('Act II · 1 scene');
@@ -229,9 +226,10 @@ describe('ScriptListSection cards', () => {
 
         expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth);
         expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390);
-        expect(card.textContent).toContain('0 pages');
         expect(card.textContent).toContain('Act XII · 1 scene');
-        expect(getComputedStyle(header).backgroundColor).not.toBe(getComputedStyle(card).backgroundColor);
+        expect(getComputedStyle(header).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(header).borderBottomStyle).toBe('solid');
+        expect(getComputedStyle(card.querySelector('footer') as HTMLElement).borderTopStyle).toBe('none');
         expect(getComputedStyle(card).borderTopColor).toBe(getComputedStyle(probe).borderTopColor);
         expect(card.querySelector('h2')?.scrollHeight).toBe(card.querySelector('h2')?.clientHeight);
     });
