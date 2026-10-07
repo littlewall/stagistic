@@ -1,6 +1,6 @@
 # Stagistic documentation
 
-Static Astro/Starlight application for `https://docs.stagistic.com`, using [Lucode Starlight](https://lucas-labs.github.io/lucode-starlight-theme/) for its layout and component styles. The shell and section overviews are in place. Characters has six task guides, Writing your script has seven and Acts and scenes has six ready for editorial review; other categories and the syntax migration remain preparatory.
+Static Astro/Starlight application for `https://docs.stagistic.com`, using [Lucode Starlight](https://lucas-labs.github.io/lucode-starlight-theme/) for its layout and component styles. The shell and section overviews are in place. Characters has six task guides, Writing your script has seven, Acts and scenes has six and Scripts and files has seven ready for editorial review; other categories and the syntax migration remain preparatory.
 
 ## Local development
 
@@ -85,6 +85,7 @@ The SVGs in `public/icons/editor/` use the actual editor icon paths, with a cons
 | `collapse-scene.svg` | `NavArrowDown` from `iconoir-react`, used by the UI's `ChevronDownIcon` |
 | `block-actions.svg` | `MoreHorizontalIcon` in `packages/editor/src/editor/components/blockActions/BlockActionMenu.tsx` |
 | `drag-scene.svg` | Static dot-grid representation of `.dragHandle` in `packages/app-routes/src/routes/script/editor/structure/ScriptStructureSidebar.module.css` |
+| `home.svg`, `download.svg`, `script-actions.svg` | `Home`, `Download`, `MoreHoriz` from `iconoir-react`, used by `HomeIcon`, `DownloadIcon`, `MoreIcon` |
 
 Use this pattern in future categories too. Check the actual control's icon and label first; an icon that changes with the current block type needs contextual explanation rather than a single fixed image. Structure uses **Add to structure → Add act**; scenes are created with the Scene block type. The dot-grid drag asset represents a CSS-drawn handle, rather than an SVG supplied by the application.
 

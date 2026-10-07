@@ -24,10 +24,22 @@ export const documentationSections: DocumentationSection[] = [
             {
                 label: 'User guide',
                 items: [
-                    'editor/scripts',
                     'editor/music',
                     'editor/review',
                     'editor/export',
+                ],
+            },
+            {
+                label: 'Scripts and files',
+                items: [
+                    {label: 'Overview', slug: 'editor/scripts'},
+                    'editor/scripts/create',
+                    'editor/scripts/find',
+                    'editor/scripts/copies',
+                    'editor/scripts/saving',
+                    'editor/scripts/download',
+                    'editor/scripts/import',
+                    'editor/scripts/delete',
                 ],
             },
             {

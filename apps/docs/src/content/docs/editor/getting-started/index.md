@@ -10,6 +10,8 @@ This section is being prepared. It will introduce the workspace and take you thr
 | Your task | Where to look |
 | --- | --- |
 | Start or manage a script | [Scripts and files](/editor/scripts/) |
+| Open a downloaded script or restore a backup | [Import or restore a script](/editor/scripts/import/) |
+| Understand saving or keep a portable file | [Saving and storage](/editor/scripts/saving/) and [Download a script file](/editor/scripts/download/) |
 | Write dialogue or stage directions | [Writing your script](/editor/writing/) |
 | Change the writing flow or number shortcuts | [Customize your writing flow](/editor/writing/customize-flow/) |
 | Organize acts and scenes | [Acts and scenes](/editor/structure/) |
