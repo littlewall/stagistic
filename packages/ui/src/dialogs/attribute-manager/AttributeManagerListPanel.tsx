@@ -21,6 +21,8 @@ export interface AttributeManagerListItem {
         label: string,
     },
     subtitle?: string | null,
+    /** Shown before the title in the detail header, e.g. a music number. */
+    detailTitlePrefix?: string | null,
     detailSubtitle?: string | null,
     /** Trailing glyph, e.g. a music-kind icon. */
     icon?: ReactNode,
@@ -215,7 +217,10 @@ export const AttributeManagerListPanel = ({
                         <header className={styles.detailHeader}>
                             <div className={styles.detailIdentity}>
                                 {!hideDetailTypeLabel ? <p className={styles.detailType}>{detailTypeLabel}</p> : null}
-                                <h3 className={clsx(styles.detailTitle, wrapDetailTitle && styles.detailTitleWrapped)}>{selectedItem.title}</h3>
+                                <h3 className={clsx(styles.detailTitle, wrapDetailTitle && styles.detailTitleWrapped)}>
+                                    {selectedItem.detailTitlePrefix ? `${selectedItem.detailTitlePrefix} ` : null}
+                                    {selectedItem.title}
+                                </h3>
                                 {selectedItem.detailSubtitle ? <p className={styles.detailSubtitle}>{selectedItem.detailSubtitle}</p> : null}
                             </div>
                             <div className={styles.detailHeaderAside}>

@@ -27,7 +27,7 @@ const block = (
 });
 
 describe('buildAttributeManagerMusicItems', () => {
-    it('keeps act grouping and scene subtitles in the live editor path', () => {
+    it('keeps act grouping and act · scene subtitles in the live editor path', () => {
         const documentMusic: EditorLiveMusicSnapshot = [
             {
                 musicId: 'music-1',
@@ -87,11 +87,12 @@ describe('buildAttributeManagerMusicItems', () => {
 
         expect(item).toMatchObject({
             group: {id: 'act-2', label: 'ACT II'},
-            detailSubtitle: '2. Night',
+            detailTitlePrefix: '2)',
+            detailSubtitle: 'ACT II · 2. Night',
         });
     });
 
-    it('groups assigned music under its containing act and exposes its scene subtitle', () => {
+    it('groups assigned music under its containing act and exposes its act · scene subtitle', () => {
         const document: ScriptDocument = {
             type: 'doc',
             content: [
@@ -128,7 +129,8 @@ describe('buildAttributeManagerMusicItems', () => {
             id: 'music-1',
             title: 'Opening number',
             group: {id: 'act-2', label: 'ACT II'},
-            detailSubtitle: '2. Night',
+            detailTitlePrefix: '2)',
+            detailSubtitle: 'ACT II · 2. Night',
         });
         expect(item?.detailMetadata).toBeUndefined();
     });

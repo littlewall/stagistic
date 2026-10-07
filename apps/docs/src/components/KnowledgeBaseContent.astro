@@ -1,0 +1,22 @@
+---
+import {ContainerSection} from 'lucode-starlight/components';
+import MarkdownContent from 'lucode-starlight/components/overrides/MarkdownContent.astro';
+
+import KnowledgeBaseDirectory from './KnowledgeBaseDirectory.astro';
+
+const {hasSidebar} = Astro.locals.starlightRoute;
+const isDirectory = Astro.url.pathname === '/';
+---
+
+{
+    hasSidebar ? (
+        <MarkdownContent><slot /></MarkdownContent>
+    ) : (
+        <ContainerSection>
+            <MarkdownContent>
+                <slot />
+                {isDirectory && <KnowledgeBaseDirectory />}
+            </MarkdownContent>
+        </ContainerSection>
+    )
+}

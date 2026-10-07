@@ -14,7 +14,10 @@ dist
 build
 .next
 out
-docs
+
+# Local design previews; authored documentation lives in docs/ and apps/docs/.
+/docs/designs/
+/docs/mockups/
 
 # Tauri (desktop)
 apps/desktop/src-tauri/target

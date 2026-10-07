@@ -15,6 +15,12 @@ import {
 
 import type {ScriptMusicListItem} from '../editor/music';
 
+const formatMusicLocation = (actLabel: string | null, sceneLabel: string | null) => {
+    const location = [actLabel, sceneLabel].filter(Boolean).join(' · ');
+
+    return location || null;
+};
+
 export const buildAttributeManagerMusicItemsFromLive = (
     documentMusic: EditorLiveMusicSnapshot,
     structure: EditorLiveStructureSnapshot,
@@ -37,15 +43,19 @@ export const buildAttributeManagerMusicItemsFromLive = (
             ? `${sceneNumber ?? '–'}. ${scene.title || 'Untitled scene'}`
             : null;
 
+        const group = act?.kind === 'act'
+            ? {id: act.blockId, label: act.name || 'Untitled act'}
+            : undefined;
+        const number = formatMusicNumber(music);
+
         return {
             id: music.musicId,
-            number: formatMusicNumber(music),
+            number,
             title: catalogMusic?.title || music.title || 'Untitled music',
-            group: act?.kind === 'act'
-                ? {id: act.blockId, label: act.name || 'Untitled act'}
-                : undefined,
+            group,
             icon: kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
-            detailSubtitle: sceneLabel,
+            detailTitlePrefix: number,
+            detailSubtitle: formatMusicLocation(group?.label ?? null, sceneLabel),
         };
     });
     const unassignedItems = music
@@ -87,15 +97,19 @@ export const buildAttributeManagerMusicItems = (
             ? `${sceneNumber ?? '–'}. ${scene.textContent || 'Untitled scene'}`
             : null;
 
+        const group = act?.blockType === 'act'
+            ? {id: act.blockId, label: act.textContent || 'Untitled act'}
+            : undefined;
+        const number = formatMusicNumber(music);
+
         return {
             id: music.musicId,
-            number: formatMusicNumber(music),
+            number,
             title: catalogMusic?.title || music.title || 'Untitled music',
-            group: act?.blockType === 'act'
-                ? {id: act.blockId, label: act.textContent || 'Untitled act'}
-                : undefined,
+            group,
             icon: kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
-            detailSubtitle: sceneLabel,
+            detailTitlePrefix: number,
+            detailSubtitle: formatMusicLocation(group?.label ?? null, sceneLabel),
         };
     });
     const unassignedItems = music

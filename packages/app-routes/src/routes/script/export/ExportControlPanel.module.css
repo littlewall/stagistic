@@ -24,3 +24,10 @@
     font-weight: var(--font-weight-medium);
     color: var(--color-text);
 }
+
+/* Template choice stays visible above the collapsible option sections. */
+.template {
+    display: grid;
+    gap: var(--space-lg);
+    padding: 0 var(--space-3xl) var(--space-2xl);
+}

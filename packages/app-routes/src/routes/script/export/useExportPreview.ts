@@ -86,7 +86,7 @@ export const useExportPreview = <TConfig>({
                     setArtifact(blob);
                     setStatus('idle');
                     onArtifact?.(blob);
-                } catch (error) {
+                } catch {
                     if (controller.signal.aborted || runRef.current !== runId) {
                         return;
                     }

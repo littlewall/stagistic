@@ -58,6 +58,7 @@ export const CreateGroupModal = ({
 
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
+        setIsTouched(true);
     }, []);
     const handleSubmit = useCallback(
         async (event: FormEvent) => {
@@ -114,7 +115,6 @@ export const CreateGroupModal = ({
                         aria-describedby={errorId}
                         aria-invalid={isErrorVisible}
                         onChange={handleNameChange}
-                        onBlur={() => setIsTouched(true)}
                     />
                 </div>
                 {errorId ? (

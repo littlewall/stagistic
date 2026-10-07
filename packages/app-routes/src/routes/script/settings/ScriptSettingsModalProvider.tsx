@@ -142,7 +142,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         music: musicState.music,
         getMusicTitleDraft,
     });
-    const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
+    const shortcutPrefix = isApplePlatform() ? 'Control' : 'Alt';
     const draftSaveError = scriptSettingsDraftError ?? titlePageDraftError ?? scriptTitleDraftError;
     const isEditorPresentationHydrated = isScriptSettingsHydrated && isTitlePageHydrated && isScriptTitleHydrated;
     const retryFailedDrafts = () => {

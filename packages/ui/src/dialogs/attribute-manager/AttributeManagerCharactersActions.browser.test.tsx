@@ -134,6 +134,21 @@ describe('AttributeManagerCharactersPanel character actions', () => {
         expect(onCreateCharacter).not.toHaveBeenCalled();
     });
 
+    it('closes the empty create character modal on the first cancel click', async () => {
+        const {onCreateCharacter} = renderPanel();
+
+        await page.elementLocator(await waitForElement('[aria-label="Create characters"]')).click();
+
+        const input = await waitForElement<HTMLInputElement>('#create-character-name');
+
+        await expect.poll(() => document.activeElement).toBe(input);
+        await page.elementLocator(findButtonByText('Cancel')).click();
+
+        await expect.poll(() => document.querySelector('#create-character-name')).toBeNull();
+        expect(document.querySelector('#create-character-error')).toBeNull();
+        expect(onCreateCharacter).not.toHaveBeenCalled();
+    });
+
     it('rejects a character name that duplicates a group', async () => {
         const {onCreateCharacter} = renderPanel(undefined, vi.fn(), CHARACTERS, 'characters', undefined, GROUPS);
 
