@@ -8,13 +8,16 @@ const options = Object.entries(EXPORT_TEMPLATES).map(([value, template]) => ({
 }));
 
 export const TemplatePicker = ({
+    id,
     value,
     onChange,
 }: {
+    id?: string,
     value: string,
     onChange: (value: string) => void,
 }) => (
     <FormSelect
+        id={id}
         value={value}
         options={options}
         ariaLabel="Export template"

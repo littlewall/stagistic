@@ -80,8 +80,6 @@ const findSectionRegion = (trigger: HTMLButtonElement) => {
     return regionId ? document.getElementById(regionId) : null;
 };
 
-const findDisclosure = (trigger: HTMLButtonElement) => trigger.closest('h2')?.parentElement ?? null;
-
 const centerY = (element: HTMLElement) => {
     const bounds = element.getBoundingClientRect();
 
@@ -95,35 +93,28 @@ afterEach(() => {
 });
 
 describe('Export accordion', () => {
-    it('composes template selection as a peer section with standard interface typography', async () => {
+    it('keeps template selection always visible above the disclosure sections', async () => {
         mountExportControlPanel();
 
         await waitFor(() => document.querySelector<HTMLHeadingElement>('h1'));
 
-        const templateTrigger = findButton('Template');
         const contentTrigger = findButton('Content');
+        const templateSelect = await waitFor(() => document.querySelector<HTMLButtonElement>(
+            'button[aria-label="Export template"]',
+        ));
 
-        expect(templateTrigger).not.toBeNull();
+        expect(findButton('Template')).toBeNull();
         expect(contentTrigger).not.toBeNull();
 
-        if (!templateTrigger || !contentTrigger) {
+        if (!contentTrigger) {
             return;
         }
 
-        const templateSection = findDisclosure(templateTrigger);
-        const contentSection = findDisclosure(contentTrigger);
-
-        expect(templateSection?.parentElement).toBe(contentSection?.parentElement);
-
-        await userEvent.click(templateTrigger);
-
-        const templateSelect = await waitFor(() => templateSection?.querySelector<HTMLButtonElement>(
-            'button[aria-label="Export template"]',
-        ));
-        const interfaceFont = getComputedStyle(contentTrigger).fontFamily;
-
-        expect(getComputedStyle(templateTrigger).fontFamily).toBe(interfaceFont);
-        expect(getComputedStyle(templateSelect).fontFamily).toBe(interfaceFont);
+        expect(templateSelect.closest('[role="region"]')).toBeNull();
+        expect(templateSelect.getBoundingClientRect().height).toBeGreaterThan(0);
+        expect(templateSelect.getBoundingClientRect().bottom)
+            .toBeLessThanOrEqual(contentTrigger.getBoundingClientRect().top);
+        expect(getComputedStyle(templateSelect).fontFamily).toBe(getComputedStyle(contentTrigger).fontFamily);
     });
 
     it('shows a visible boundary around every export select', async () => {
@@ -131,17 +122,14 @@ describe('Export accordion', () => {
 
         await waitFor(() => document.querySelector<HTMLHeadingElement>('h1'));
 
-        const templateTrigger = findButton('Template');
         const openingPagesTrigger = findButton('Opening pages');
 
-        expect(templateTrigger).not.toBeNull();
         expect(openingPagesTrigger).not.toBeNull();
 
-        if (!templateTrigger || !openingPagesTrigger) {
+        if (!openingPagesTrigger) {
             return;
         }
 
-        await userEvent.click(templateTrigger);
         await userEvent.click(openingPagesTrigger);
 
         const selects = await waitFor(() => {
@@ -149,13 +137,14 @@ describe('Export accordion', () => {
                 'button[aria-haspopup="listbox"]',
             ));
 
-            return elements.length === 3 ? elements : null;
+            return elements.length === 4 ? elements : null;
         });
 
         expect(selects.map(select => select.getAttribute('aria-label'))).toEqual([
             'Export template',
             'Blank page count',
             'Order characters by',
+            'Show contents as',
         ]);
 
         for (const select of selects) {
@@ -167,31 +156,27 @@ describe('Export accordion', () => {
         }
     });
 
-    it('uses four full-width disclosure sections without collapsed spacing or reset controls', async () => {
+    it('uses three full-width disclosure sections without collapsed spacing or reset controls', async () => {
         mountExportControlPanel();
 
         const pageHeading = await waitFor(() => document.querySelector<HTMLHeadingElement>('h1'));
         const panel = pageHeading.parentElement?.parentElement;
-        const templateTrigger = findButton('Template');
         const contentTrigger = findButton('Content');
         const openingPagesTrigger = findButton('Opening pages');
         const pageFlowTrigger = findButton('Page flow');
 
-        expect(templateTrigger).not.toBeNull();
         expect(contentTrigger).not.toBeNull();
         expect(openingPagesTrigger).not.toBeNull();
         expect(pageFlowTrigger).not.toBeNull();
 
-        if (!panel || !templateTrigger || !contentTrigger || !openingPagesTrigger || !pageFlowTrigger) {
+        if (!panel || !contentTrigger || !openingPagesTrigger || !pageFlowTrigger) {
             return;
         }
 
-        expect(templateTrigger.getAttribute('aria-expanded')).toBe('false');
         expect(contentTrigger.getAttribute('aria-expanded')).toBe('false');
         expect(openingPagesTrigger.getAttribute('aria-expanded')).toBe('false');
         expect(pageFlowTrigger.getAttribute('aria-expanded')).toBe('false');
         for (const trigger of [
-            templateTrigger,
             contentTrigger,
             openingPagesTrigger,
             pageFlowTrigger,

@@ -58,6 +58,7 @@ export const CreateCharacterModal = ({
 
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
+        setIsTouched(true);
     }, []);
 
     const handleSubmit = useCallback(
@@ -108,7 +109,6 @@ export const CreateCharacterModal = ({
                         placeholder="Character name"
                         aria-describedby={errorId}
                         aria-invalid={isErrorVisible}
-                        onBlur={() => setIsTouched(true)}
                     />
                 </div>
                 {errorId ? (

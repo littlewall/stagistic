@@ -33,6 +33,7 @@ const {
     },
     scriptsState: {
         summaries: [] as ScriptSummary[],
+        isLoading: false,
     },
     scriptActions: {
         createScript: vi.fn(),
@@ -47,7 +48,7 @@ vi.mock('@stagistic/app-core', async importOriginal => {
         ...original,
         useScripts: () => ({
             scriptSummaries: scriptsState.summaries,
-            isLoading: false,
+            isLoading: scriptsState.isLoading,
             error: null,
             refreshScripts: vi.fn(),
             ...scriptActions,
@@ -173,6 +174,7 @@ afterEach(() => {
     roots.length = 0;
     document.body.innerHTML = '';
     scriptsState.summaries = [];
+    scriptsState.isLoading = false;
     headerProps.showScriptActions = null;
     Object.values(modalActions).forEach(action => action.mockReset());
     Object.values(scriptActions).forEach(action => action.mockReset());
@@ -296,6 +298,21 @@ describe('HomeRoute', () => {
                 'Two draft',
                 'One draft',
             ]);
+    });
+
+    it('hides the example action while scripts are loading', async () => {
+        scriptsState.isLoading = true;
+
+        mountHome();
+        await waitForText('New script');
+
+        const startActions = document.querySelector<HTMLElement>(
+            '[role="group"][aria-label="Start a script"]',
+        );
+
+        expect(findButton('Create example script')).toBeUndefined();
+        expect(getComputedStyle(startActions as HTMLElement).gridTemplateColumns.split(' '))
+            .toHaveLength(2);
     });
 
     it('prioritizes a new script and removes the example action from a populated library', async () => {

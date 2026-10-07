@@ -55,7 +55,8 @@ export const HomeRoute = () => {
     const [sort, setSort] = useState<ScriptSort>('newest');
     const [isCreatingExample, setIsCreatingExample] = useState(false);
     const [exampleError, setExampleError] = useState<string | null>(null);
-    const hasScripts = scriptSummaries.length > 0;
+    /* Offer the example only once the library is known to be empty, so it never flashes during loading. */
+    const showExampleAction = !scriptsLoading && !error && scriptSummaries.length === 0;
     const showLibraryTools = scriptSummaries.length >= 5;
 
     const dashboard = useMemo(
@@ -151,13 +152,13 @@ export const HomeRoute = () => {
                         Scripts
                     </Text>
                     <div
-                        className={clsx(styles.startActions, hasScripts && styles.startActionsPopulated)}
+                        className={clsx(styles.startActions, !showExampleAction && styles.startActionsPopulated)}
                         role="group"
                         aria-label="Start a script"
                     >
                         <ActionCard
                             type="button"
-                            variant={hasScripts ? 'accent' : 'default'}
+                            variant={showExampleAction ? 'default' : 'accent'}
                             icon={<PlusIcon aria-hidden="true" />}
                             title="New script"
                             description="Start with an empty theatre or musical script."
@@ -170,7 +171,7 @@ export const HomeRoute = () => {
                             description="Bring in an existing script file."
                             onClick={openImportScript}
                         />
-                        {!hasScripts ? (
+                        {showExampleAction ? (
                             <ActionCard
                                 type="button"
                                 variant="accent"
