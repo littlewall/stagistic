@@ -1,0 +1,233 @@
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/courier-prime/400.css';
+
+:root {
+    --sl-font: 'IBM Plex Sans Variable', system-ui, sans-serif;
+    --sl-font-mono: 'Courier Prime', 'Courier New', monospace;
+    --kb-neutral: oklch(.4918 .0118 238.71);
+    --kb-white: #fff;
+    --kb-paper: oklch(.9591 .0074 80.72);
+    --kb-action: oklch(.854 .1432 89.53);
+    --kb-focus: oklch(.9106 .0863 90.83);
+    --kb-header-bg: oklch(from var(--kb-neutral) .25 c h);
+    --kb-header-text: var(--kb-paper);
+    --kb-header-border: oklch(from var(--kb-paper) l c h / .18);
+    --sl-color-accent-low: color-mix(in oklch, var(--kb-focus) 50%, var(--kb-white));
+    --sl-color-accent: oklch(from var(--kb-neutral) .38 c h);
+    --sl-color-accent-high: oklch(from var(--kb-neutral) .2 c h);
+    --sl-color-white: oklch(from var(--kb-neutral) .2 c h);
+    --sl-color-gray-1: oklch(from var(--kb-neutral) .3 c h);
+    --sl-color-gray-2: var(--kb-neutral);
+    --sl-color-gray-3: oklch(from var(--kb-neutral) .56 c h);
+    --sl-color-gray-4: oklch(from var(--kb-neutral) .72 c h);
+    --sl-color-gray-5: color-mix(in oklch, var(--kb-neutral) 20%, var(--kb-white));
+    --sl-color-gray-6: var(--kb-paper);
+    --sl-color-gray-7: color-mix(in oklch, var(--kb-paper) 40%, var(--kb-white));
+    --sl-color-black: var(--kb-white);
+    --sl-color-bg-sidebar: var(--sl-color-gray-7);
+    --sl-color-bg-inline-code: var(--sl-color-gray-7);
+    --sl-color-text-accent: var(--sl-color-accent-high);
+    --sl-content-width: 48rem;
+    --sl-nav-height: 3.5rem;
+    --sl-nav-pad-y: .5rem;
+}
+
+:root[data-theme = 'light'] {
+    --foreground: var(--sl-color-white);
+    --background: var(--kb-white);
+    --gray-1: var(--sl-color-gray-1);
+    --gray-2: var(--sl-color-gray-2);
+    --gray-3: var(--sl-color-gray-3);
+    --gray-4: var(--sl-color-gray-4);
+    --gray-5: var(--sl-color-gray-5);
+    --gray-6: var(--sl-color-gray-6);
+    --gray-7: var(--sl-color-gray-7);
+    --primary: var(--kb-action);
+    --primary-foreground: var(--foreground);
+    --secondary: var(--sl-color-gray-7);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--sl-color-gray-7);
+    --muted-foreground: var(--kb-neutral);
+    --accent: var(--sl-color-gray-6);
+    --accent-foreground: var(--foreground);
+    --border: var(--sl-color-gray-5);
+    --input: var(--border);
+    --ring: var(--kb-focus);
+    --card: var(--kb-white);
+    --card-foreground: var(--foreground);
+    --popover-background: var(--kb-white);
+    --popover-foreground: var(--foreground);
+    --code-background: var(--sl-color-gray-7);
+    --markdown-foreground: var(--sl-color-gray-1);
+    --header-height: 3.5rem;
+    --container-max-width: 100rem;
+    --sl-color-text-accent: var(--sl-color-accent-high);
+    --sl-color-bg-inline-code: var(--sl-color-gray-7);
+    --sl-color-bg-sidebar: var(--sl-color-gray-7);
+}
+
+:root [data-slot = 'layout'] > header {
+    color: var(--kb-header-text);
+    background-color: var(--kb-header-bg);
+    border-bottom: 1px solid var(--kb-header-border);
+}
+
+.knowledgeBaseHeader [data-open-modal] {
+    color: var(--kb-header-text);
+    background-color: oklch(from var(--kb-header-bg) .3 c h);
+    border-color: var(--kb-header-border);
+}
+
+.knowledgeBaseHeader [data-open-modal]:hover {
+    color: var(--kb-header-text);
+    background-color: oklch(from var(--kb-header-bg) .35 c h);
+    border-color: var(--kb-focus);
+}
+
+.knowledgeBaseHeader [data-open-modal]:focus-visible {
+    outline: 2px solid var(--kb-focus);
+    outline-offset: 3px;
+}
+
+.knowledgeBaseHeader [data-open-modal] > kbd {
+    color: var(--kb-header-text);
+    background-color: oklch(from var(--kb-header-bg) .35 c h);
+}
+
+.knowledgeBaseHeader dialog {
+    background-color: var(--kb-white);
+}
+
+[data-slot = 'layout'] .aside {
+    background-color: var(--sl-color-bg-sidebar);
+}
+
+.sidebar,
+.links-docs {
+    font-family: var(--sl-font-system);
+}
+
+.sidebar .entry-link {
+    height: auto;
+    min-height: 1.875rem;
+}
+
+.sidebar .entry-link-inner {
+    min-width: 0;
+    height: auto;
+    padding-block: .375rem;
+    overflow-wrap: anywhere;
+}
+
+.sidebar .entry-title {
+    font-size: .875rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+}
+
+.links-docs .entry-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.5rem;
+}
+
+.sidebar .sidebar-spacer,
+.sidebar .sidebar-border-gradient,
+.sidebar .sidebar-fade-top,
+.sidebar .sidebar-fade-bottom {
+    display: none;
+}
+
+.hero [data-variant = 'default']:hover {
+    background-color: oklch(from var(--kb-action) .8 c h);
+}
+
+.starlight-aside--note {
+    --aside-background: var(--sl-color-gray-7);
+    --aside-border: var(--sl-color-gray-5);
+    --aside-title: var(--sl-color-gray-1);
+    --aside-content: var(--sl-color-gray-1);
+
+    color: var(--sl-color-gray-1);
+    background-color: var(--sl-color-gray-7);
+    border-color: var(--sl-color-gray-5);
+}
+
+.sl-markdown-content kbd {
+    gap: .375rem;
+    margin: 0;
+    font-size: .8125rem;
+    white-space: nowrap;
+    background-color: var(--kb-white);
+    box-shadow: 0 1px 0 var(--border);
+}
+
+.sl-markdown-content .kb-editor-icon {
+    display: inline-block;
+    width: 1.125em;
+    height: 1.125em;
+    margin: 0;
+    vertical-align: -.1875em;
+}
+
+[data-slot = 'doc-title'] {
+    width: 100%;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+:root [data-slot = 'doc-title'] [data-slot = 'doc-title-header'] h1 {
+    flex: 1;
+    min-width: 0;
+}
+
+:root [data-slot = 'doc-title'] > [slot = 'doc-title-description'] {
+    width: 100%;
+    max-width: none;
+    text-wrap: wrap;
+}
+
+.kb-page-title {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing) * 2);
+}
+
+.kb-page-title h1 {
+    scroll-margin: 5rem;
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 600;
+    line-height: 2.25rem;
+    color: var(--foreground);
+    letter-spacing: var(--tracking-tight);
+}
+
+.kb-page-description {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.75rem;
+    color: var(--muted-foreground);
+}
+
+.kb-page-description code {
+    padding: .25rem .5rem;
+    font-family: var(--sl-font-mono);
+    font-size: .875em;
+    background-color: var(--sl-color-bg-inline-code);
+    border-radius: calc(var(--radius) - 4px);
+}
+
+@media (max-width: 49.999em) {
+    :root[data-theme = 'light'] {
+        --header-height: 7.5rem;
+        --sl-nav-height: 7.5rem;
+    }
+}
+
+@media print {
+    :root [data-slot = 'layout'] > header {
+        color: #000;
+        background-color: var(--kb-white);
+    }
+}

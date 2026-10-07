@@ -1,0 +1,11 @@
+---
+import {CardGrid, LinkCard} from '@astrojs/starlight/components';
+
+import {documentationSections} from '../navigation/sections';
+---
+
+<CardGrid>
+    {documentationSections.map(({label, href, description}) => (
+        <LinkCard title={label} {href} {description} />
+    ))}
+</CardGrid>
