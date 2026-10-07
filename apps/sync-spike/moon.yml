@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Temporary Phase 0 spike (see README.md). No unit tests.
+workspace:
+  inheritedTasks:
+    exclude: ['test']
+
+tasks:
+  bench:
+    command: './run-matrix.sh'
+    options:
+      cache: false

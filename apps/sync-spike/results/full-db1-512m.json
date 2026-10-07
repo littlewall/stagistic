@@ -1,0 +1,88 @@
+{
+  "config": {
+    "DOCS": 50,
+    "CLIENTS_PER_DOC": 2,
+    "EDIT_SECONDS": 60,
+    "EDIT_INTERVAL_MS": 1000,
+    "DB_LATENCY_MS": 1,
+    "CLIENT_LATENCY_MS": 25
+  },
+  "baseline": {
+    "rssMb": 48.05078125
+  },
+  "idle": {
+    "rssMb": 153.8984375,
+    "connectionsOpen": 100,
+    "documentsLoaded": 50,
+    "db": {
+      "active": 2,
+      "max": 100,
+      "states": 50,
+      "statesBytes": 3034344,
+      "updates": 0
+    }
+  },
+  "load": {
+    "edits": 6020,
+    "editsPerSecond": 100.33333333333333,
+    "latencyMs": {
+      "count": 5843,
+      "p50": 28.599958000002516,
+      "p95": 33.694500000001426,
+      "p99": 48.44770900000003,
+      "max": 120.50066700000025
+    },
+    "cpuPercent": 10.765772484101884,
+    "rssMb": 178.9296875,
+    "storeMs": {
+      "count": 300,
+      "p50": 5.186499999996158,
+      "p95": 10.467957999993814,
+      "p99": 35.793250000002445,
+      "max": 47.52150000000256
+    },
+    "appendMs": {
+      "count": 0,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0
+    },
+    "dbWrites": 300,
+    "dbWriteBytes": 18709064,
+    "db": {
+      "active": 5,
+      "max": 100,
+      "states": 50,
+      "statesBytes": 3169355,
+      "updates": 0
+    }
+  },
+  "longSync": {
+    "syncMs": 138.97933300001023,
+    "blocks": 10201,
+    "stateBytes": 1055784,
+    "receivedBytes": 1056019,
+    "receivedDeflatedBytes": 170387
+  },
+  "reload": {
+    "reconnectMs": {
+      "count": 50,
+      "p50": 81.16829200000211,
+      "p95": 123.22279100000742,
+      "p99": 162.64604199999303,
+      "max": 162.64604199999303
+    },
+    "loadMs": {
+      "count": 50,
+      "p50": 4.531208000000333,
+      "p95": 12.200167000002693,
+      "p99": 24.194790999987163,
+      "max": 24.194790999987163
+    }
+  },
+  "afterUnload": {
+    "rssMb": 179.4140625,
+    "documentsLoaded": 0
+  }
+}

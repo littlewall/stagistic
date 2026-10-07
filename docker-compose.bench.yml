@@ -1,0 +1,86 @@
+# Phase 0 sync spike bench. Resource limits approximate the UpCloud plans
+# (Starter 2 GB server, Developer 1 GB DB); Docker CPU != UpCloud CPU, so read
+# RSS and relative numbers. See apps/sync-spike/README.md.
+#
+#   docker compose -f docker-compose.bench.yml up -d postgres toxiproxy s3 server
+#   docker compose -f docker-compose.bench.yml run --rm bench
+name: stagistic-sync-bench
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: sync_spike
+      POSTGRES_USER: stagistic
+      POSTGRES_PASSWORD: stagistic
+    command: ['postgres', '-c', 'max_connections=100', '-c', 'shared_buffers=128MB']
+    cpus: 1
+    mem_limit: 1g
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U stagistic -d sync_spike']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.12.0
+    command: ['-host=0.0.0.0', '-config=/config/toxiproxy.json']
+    volumes:
+      - ./apps/sync-spike/toxiproxy.json:/config/toxiproxy.json:ro
+    ports:
+      - '8474:8474'
+      - '8001:8001'
+
+  # MinIO no longer publishes images; RustFS is S3-compatible for the presign check.
+  s3:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: spike
+      RUSTFS_SECRET_KEY: spike-secret
+    command: ['/data']
+    ports:
+      - '9000:9000'
+
+  # Node comparison: SERVER_IMAGE=node:24-alpine SERVER_CMD='node --expose-gc apps/sync-spike/dist/server.node.js'
+  # (bundle first: bun build apps/sync-spike/src/server.node.ts --target=node --outfile=apps/sync-spike/dist/server.node.js)
+  server:
+    image: ${SERVER_IMAGE:-oven/bun:1.4.2}
+    working_dir: /repo
+    command: ${SERVER_CMD:-bun apps/sync-spike/src/server.ts}
+    environment:
+      PORT: '1234'
+      DATABASE_URL: postgres://stagistic:stagistic@toxiproxy:5433/sync_spike
+      DB_POOL: ${DB_POOL:-8}
+      PERSISTENCE: ${PERSISTENCE:-full}
+      PER_MESSAGE_DEFLATE: ${PER_MESSAGE_DEFLATE:-0}
+    volumes:
+      - ./:/repo:ro
+    ports:
+      - '1234:1234'
+    cpus: 1
+    mem_limit: ${SERVER_MEM:-1g}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      toxiproxy:
+        condition: service_started
+
+  bench:
+    image: oven/bun:1.4.2
+    working_dir: /repo
+    command: ['bun', 'apps/sync-spike/src/bench.ts']
+    environment:
+      SYNC_URL: ws://toxiproxy:8001
+      METRICS_URL: http://server:1234
+      TOXIPROXY_URL: http://toxiproxy:8474
+      S3_URL: http://s3:9000
+      DOCS: ${DOCS:-50}
+      CLIENTS_PER_DOC: ${CLIENTS_PER_DOC:-2}
+      EDIT_SECONDS: ${EDIT_SECONDS:-60}
+      DB_LATENCY_MS: ${DB_LATENCY_MS:-1}
+      CLIENT_LATENCY_MS: ${CLIENT_LATENCY_MS:-25}
+    volumes:
+      - ./:/repo:ro
+    profiles: ['bench']
+    depends_on:
+      - server

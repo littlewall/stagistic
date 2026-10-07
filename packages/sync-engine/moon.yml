@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits `lint` + `typecheck`. Node tests run from the package root; browser
+# tests cover BroadcastChannel, leader handoff and the editor binding.
+tasks:
+  test:
+    command: 'vp test run --dir .'
+    options:
+      cache: false
+      mergeArgs: 'replace'
+
+  test-browser:
+    command: 'vp test run -c vitest.browser.config.ts'
+    options:
+      cache: false

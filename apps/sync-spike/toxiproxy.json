@@ -1,0 +1,14 @@
+[
+    {
+        "name": "pg",
+        "listen": "0.0.0.0:5433",
+        "upstream": "postgres:5432",
+        "enabled": true
+    },
+    {
+        "name": "ws",
+        "listen": "0.0.0.0:8001",
+        "upstream": "server:1234",
+        "enabled": true
+    }
+]
