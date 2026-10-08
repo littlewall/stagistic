@@ -1,0 +1,92 @@
+{
+  "config": {
+    "DOCS": 50,
+    "CLIENTS_PER_DOC": 2,
+    "EDIT_SECONDS": 60,
+    "EDIT_INTERVAL_MS": 1000,
+    "DB_LATENCY_MS": 1,
+    "CLIENT_LATENCY_MS": 25
+  },
+  "baseline": {
+    "rssMb": 54.67578125,
+    "heapUsedMb": 7.7103424072265625,
+    "runtime": "deno"
+  },
+  "idle": {
+    "rssMb": 218.50390625,
+    "heapUsedMb": 71.09212493896484,
+    "connectionsOpen": 100,
+    "documentsLoaded": 50,
+    "db": {
+      "active": 2,
+      "max": 100,
+      "states": 100,
+      "statesBytes": 6254884,
+      "updates": 0
+    }
+  },
+  "load": {
+    "edits": 5986,
+    "editsPerSecond": 99.76666666666667,
+    "latencyMs": {
+      "count": 5797,
+      "p50": 28.905208000003768,
+      "p95": 32.270000000004075,
+      "p99": 38.42387500000041,
+      "max": 75.94645799999853
+    },
+    "cpuPercent": 12.921899991505867,
+    "rssMb": 184.59375,
+    "storeMs": {
+      "count": 300,
+      "p50": 5.308707999996841,
+      "p95": 10.344416000007186,
+      "p99": 46.356041999999434,
+      "max": 48.62308299999859
+    },
+    "appendMs": {
+      "count": 0,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0
+    },
+    "dbWrites": 300,
+    "dbWriteBytes": 18675196,
+    "db": {
+      "active": 4,
+      "max": 100,
+      "states": 100,
+      "statesBytes": 6388892,
+      "updates": 0
+    }
+  },
+  "longSync": {
+    "syncMs": 144.36866599999485,
+    "blocks": 10201,
+    "stateBytes": 1055784,
+    "receivedBytes": 1056109,
+    "receivedDeflatedBytes": 170481
+  },
+  "reload": {
+    "reconnectMs": {
+      "count": 50,
+      "p50": 73.17816599999787,
+      "p95": 88.05216700000165,
+      "p99": 92.14270900000702,
+      "max": 92.14270900000702
+    },
+    "loadMs": {
+      "count": 50,
+      "p50": 3.6757090000028256,
+      "p95": 6.434666000001016,
+      "p99": 12.434290999997756,
+      "max": 12.434290999997756
+    }
+  },
+  "afterUnload": {
+    "rssMb": 305.26953125,
+    "heapUsedMb": 10.533416748046875,
+    "documentsLoaded": 0
+  }
+}

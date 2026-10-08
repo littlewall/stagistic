@@ -110,7 +110,7 @@ export const snapshot = async () => {
     const wallMs = performance.now() - metrics.wallStart;
 
     return {
-        runtime: typeof Bun === 'undefined' ? 'node' : 'bun',
+        runtime: RUNTIME,
         strategy: STRATEGY,
         perMessageDeflate: PER_MESSAGE_DEFLATE,
         rssMb: process.memoryUsage().rss / 1024 / 1024,
@@ -127,6 +127,8 @@ export const snapshot = async () => {
         db: await db.stats(),
     };
 };
+
+export const RUNTIME = typeof Bun !== 'undefined' ? 'bun' : 'Deno' in globalThis ? 'deno' : 'node';
 
 export const collectGarbage = () => {
     if (typeof Bun !== 'undefined') {

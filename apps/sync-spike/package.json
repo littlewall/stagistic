@@ -10,6 +10,7 @@
         "@hocuspocus/server": "4.7.0",
         "@stagistic/sync-engine": "workspace:*",
         "aws4fetch": "^1.0.20",
+        "hono": "^4.13.13",
         "postgres": "^3.4.9",
         "toxiproxy-node-client": "^4.1.0",
         "ws": "^8.22.0",

@@ -1,11 +1,11 @@
 # Cloud sync — fáze 0: výsledky spiku
 
-Stav: měřeno 7. 10. 2026 lokálně (Docker Desktop, Apple Silicon). **Rozhodnutí: GO** s Yjs + Hocuspocus na Bunu, persistence plným stavem, `perMessageDeflate` zapnout.
+Stav: měřeno 7. 10. 2026 lokálně (Docker Desktop, Apple Silicon). **Rozhodnutí: GO** s Yjs + Hocuspocus, persistence plným stavem, bez `perMessageDeflate`. Runtime: **Deno + Hono** (změna z Bunu 8. 10. 2026, viz Deno níže).
 
 Docker ≠ CPU UpCloudu: rozhodují RSS a relativní čísla. Kontrolní měření na UpCloud ve fázi 7.
 
 ## Sestava
-- `docker-compose.bench.yml`: `postgres:17-alpine` (1 vCPU, 1 GB, `max_connections=100`), server `oven/bun:1.4.2` (1 vCPU, 1 GB / 512 MB), Toxiproxy, RustFS (S3).
+- `docker-compose.bench.yml`: `postgres:17-alpine` (1 vCPU, 1 GB, `max_connections=100`), server `oven/bun:1.4.2`, `node:24-alpine` nebo `denoland/deno:2.9.7` (1 vCPU, 1 GB / 512 MB), Toxiproxy, RustFS (S3).
 - Latence: server↔DB 1 a 5 ms, klient↔server 25 ms (12 + 13 ms v obou směrech).
 - Zátěž: 50 dokumentů × 2 klienti = 100 WebSocketů. Každý dokument 30 scén × 10 replik (~600 bloků, ~60 KB stavu). Každý klient 1 úprava/s po dobu 60 s (~100 úprav/s celkem).
 - Dlouhý skript: 200 scén × 25 replik = 10 201 bloků, stav 1,03 MB.
@@ -46,6 +46,25 @@ Cíl: co nejmenší spotřeba CPU a RAM, ne velikost image. Stejná zátěž jak
 - Holý `alpine:3.22` bez `libstdc++` binárku nespustí.
 - **Provoz na VPS (otevřené, rozhodne fáze 7)**: preference Debian + Docker s image `distroless/cc` + zkompilovaná glibc binárka kvůli snadnému škálování na další VPS. Bez Dockeru (binárka pod systemd) by se ušetřily desítky MB RAM za `dockerd` + `containerd`; PM2 stojí podobně jako Docker a nic navíc nepřináší.
 
+## Deno 2.9.7 + Hono (8. 10. 2026)
+Stejná zátěž (plný stav, DB 1 ms), `apps/sync-spike/results/img-deno*.json`. Jeden běh na variantu, rozdíly do ~2 p. b. CPU a ~20 MB RSS jsou šum.
+
+| Varianta | RSS bez dokumentů | RSS 50 dok. / 100 spojení | CPU při zátěži | Latence p95 | Store p95 |
+|---|---|---|---|---|---|
+| Bun, zdrojáky (pro srovnání) | 47 MB | 158 MB | 8,9 % | 31 ms | 8,5 ms |
+| Node 24 (pro srovnání) | 72 MB | 171 MB | 16,7 % | 37 ms | 22 ms |
+| Deno, `Deno.serve` + Hono `upgradeWebSocket` (`server.deno.ts`) | 64 MB | 179 MB | 11,9 % | 32 ms | 10,0 ms |
+| totéž jako `deno compile` binárka, `distroless/cc` (image 140 MB) | 55 MB | 219 MB | 12,9 % | 32 ms | 10,3 ms |
+| Deno, `node:http` + `ws` (`server.deno-ws.ts`) | 66 MB | 168 MB | 13,6 % | 32 ms | 9,9 ms |
+| totéž s `perMessageDeflate` | 66 MB | 196 MB | 15,1 % | 33 ms | 10,1 ms |
+
+- Hocuspocus na Denu běží bez úprav: `hocuspocus.handleConnection` přijme nativní WebSocket z `Deno.upgradeWebSocket` i socket z `ws`. Sync, reload i dlouhý skript prošly.
+- Oproti Bunu ~+3 p. b. CPU a ~+15 MB RSS při startu, store p95 stejný. Oproti Node výrazně lépe (store p95 poloviční, CPU −30 %).
+- **`Deno.upgradeWebSocket` nevyjedná `permessage-deflate`** (ověřeno hlavičkou `Sec-WebSocket-Extensions`). Komprese funguje přes `node:http` + `ws` pod Denem. Stojí ~1,5 p. b. CPU a ~30 MB RSS (zlib kontexty na spojení).
+- Adaptér `Server` z `@hocuspocus/server` (crossws) pod Denem odmítne běžet („Node.js adapter in an incompatible environment“). Spojení se proto zapojí ručně přes `handleConnection`.
+- `deno compile` neumí pnpm symlinky (nenajde peer `yjs`). Nejdřív `deno bundle`, pak `deno compile --no-check` bundlu. Binárka šetří ~10 MB při startu, ale je o 25 MB větší než Bun (105 MB).
+- Paměť v čase (tabulka níže): V8 drží haldu po špičce déle než JSC. V jednom cyklu nebyl GC ani po 5 min nečinnosti (halda 105 MB). Klid po GC je 137–200 MB oproti 120–148 MB u Bunu, vynucený GC 155 MB. Únik to není: halda se vrátí na 4–6 MB.
+
 ## Paměť v čase (8. 10. 2026)
 `apps/sync-spike/src/memtest.ts`: 3 cykly (50 dok. × 2 klienti, 20 s psaní, odpojení), po každém 4,5 min nečinnosti, vzorek každých 30 s, **bez vynuceného GC**. Data: `apps/sync-spike/results/memtest.log`.
 
@@ -53,6 +72,7 @@ Cíl: co nejmenší spotřeba CPU a RAM, ne velikost image. Stejná zátěž jak
 |---|---|---|---|---|
 | glibc (distroless) | 47 MB | 203 / 214 / 232 MB | 120 / 133 / 148 MB | 127 MB |
 | musl (alpine) | 49 MB | 205 / 219 / 219 MB | 127 / 125 / 140 MB | 122 MB |
+| Deno 2.9.7 (zdrojáky) | 49 MB | 189 / 229 / 236 MB | 137 / 231 (bez GC) / 200 MB | 155 MB |
 
 Jak to číst:
 - **Halda JS** (živé objekty) po odpojení klientů klesne z ~80 MB na 4–5 MB. GC ji uklidí sám, ale líně: v klidu za 30 s až 4 min.
@@ -64,7 +84,7 @@ Jak to číst:
 
 | Kritérium | Výsledek |
 |---|---|
-| RSS v klidu < 80 MB | ✔ 40–47 MB po startu. Po špičce se RSS vrací na 120–150 MB (viz Paměť v čase); na Starter 2 GB s velkou rezervou. |
+| RSS v klidu < 80 MB | ✔ 40–47 MB (Bun), 55–66 MB (Deno) po startu. Po špičce se RSS vrací na 120–150 MB (viz Paměť v čase); na Starter 2 GB s velkou rezervou. |
 | p95 store < 50 ms při 1 ms do DB | ✔ 9–11 ms (plný stav), 17 ms při 5 ms |
 | Konvergence bez ztráty | ✔ testy: taby přes `BroadcastChannel`, předání leadera, výpadek sítě, dva editory |
 | Nahrazení bez duplicit | ✔ třetí klient i navázaný editor vidí přesně lokální obsah, počet bloků sedí |
@@ -80,9 +100,9 @@ Jak to číst:
 - Starý klient a neznámý uzel: **navázání starého schématu uzel ze sdíleného dokumentu smaže** (y-tiptap neznámý typ odstraní). Schema gate (jen čtení, bez `ySyncPlugin`) je proto povinná, ne volitelná.
 
 ## Rozhodnutí
-1. **Bun**, ne Node: nižší RSS (47 vs. 72 MB), poloviční store p95, o 40 % méně CPU. Na VPS jako zkompilovaná binárka (v Dockeru, nebo pod systemd; rozhodne fáze 7).
+1. **Deno + Hono** (8. 10. 2026 místo Bunu, kvůli stabilitě). Proti Bunu ~+3 p. b. CPU a ~+15–50 MB RSS, proti Node lepší ve všem. Na 2 GB VPS s rezervou. HTTP i WebSocket přes `Deno.serve` + Hono (`server.deno.ts`), `node:http` + `ws` se nepoužije. Image `denoland/deno`, nebo `deno compile` na `distroless/cc` (rozhodne fáze 7).
 2. **Persistence plným stavem** (`@hocuspocus/extension-database`, debounce 2 s, maxDebounce 10 s). Inkrementální log šetří bajty, ale 20× víc zápisů, pomalejší load a kompakce. Vrátit se k němu, až objem zápisů začne vadit (dlouhý skript 1 MB při psaní = až 6 MB/min).
-3. **`perMessageDeflate` zapnout**: úvodní sync −84 %, bez měřitelné ceny.
+3. **Bez `perMessageDeflate`** (8. 10. 2026): aplikace je desktop-only a local-first, server posílá jen rozdíly. Celý dokument jde jen při prvním syncu na novém zařízení (dlouhý skript 1 MB), to smí trvat déle. Zapnout jde později jen na serveru (prohlížeč kompresi nabízí vždy), přes `server.deno-ws.ts`.
 4. Pool DB 5–10 platí.
 
 ## Zjištění pro další fáze

@@ -1,0 +1,92 @@
+{
+  "config": {
+    "DOCS": 50,
+    "CLIENTS_PER_DOC": 2,
+    "EDIT_SECONDS": 60,
+    "EDIT_INTERVAL_MS": 1000,
+    "DB_LATENCY_MS": 1,
+    "CLIENT_LATENCY_MS": 25
+  },
+  "baseline": {
+    "rssMb": 64.4140625,
+    "heapUsedMb": 8.960609436035156,
+    "runtime": "deno"
+  },
+  "idle": {
+    "rssMb": 178.96875,
+    "heapUsedMb": 72.43849182128906,
+    "connectionsOpen": 100,
+    "documentsLoaded": 50,
+    "db": {
+      "active": 2,
+      "max": 100,
+      "states": 61,
+      "statesBytes": 4696058,
+      "updates": 0
+    }
+  },
+  "load": {
+    "edits": 6002,
+    "editsPerSecond": 100.03333333333333,
+    "latencyMs": {
+      "count": 5816,
+      "p50": 28.601125000001048,
+      "p95": 32.40245899999718,
+      "p99": 49.69750000000204,
+      "max": 394.4327080000003
+    },
+    "cpuPercent": 11.905263405801257,
+    "rssMb": 185.16015625,
+    "storeMs": {
+      "count": 300,
+      "p50": 4.8767920000100276,
+      "p95": 9.971166000002995,
+      "p99": 30.58104099999764,
+      "max": 39.39141699999891
+    },
+    "appendMs": {
+      "count": 0,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0
+    },
+    "dbWrites": 300,
+    "dbWriteBytes": 18708745,
+    "db": {
+      "active": 5,
+      "max": 100,
+      "states": 61,
+      "statesBytes": 4830891,
+      "updates": 0
+    }
+  },
+  "longSync": {
+    "syncMs": 127.68424999999115,
+    "blocks": 10201,
+    "stateBytes": 1055784,
+    "receivedBytes": 1056113,
+    "receivedDeflatedBytes": 170484
+  },
+  "reload": {
+    "reconnectMs": {
+      "count": 50,
+      "p50": 72.82358299999032,
+      "p95": 84.5815830000065,
+      "p99": 110.30891699998756,
+      "max": 110.30891699998756
+    },
+    "loadMs": {
+      "count": 50,
+      "p50": 3.386624999999185,
+      "p95": 6.483249999990221,
+      "p99": 13.386459000001196,
+      "max": 13.386459000001196
+    }
+  },
+  "afterUnload": {
+    "rssMb": 223.49609375,
+    "heapUsedMb": 11.790031433105469,
+    "documentsLoaded": 0
+  }
+}

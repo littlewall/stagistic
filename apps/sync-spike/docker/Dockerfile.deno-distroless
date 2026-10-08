@@ -1,0 +1,4 @@
+# `deno compile` binary (glibc) on distroless/cc (no shell, no package manager).
+FROM gcr.io/distroless/cc-debian12:nonroot
+COPY dist/server-deno-linux-arm64 /app/server
+ENTRYPOINT ["/app/server"]

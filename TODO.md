@@ -4,6 +4,7 @@
 - [x] `packages/sync-engine` core: codec (JSON ↔ Y), seed, classify, scene diff, replace content, tab sync
 - [x] Unit tests for core (node)
 - [x] `apps/sync-spike` server: Bun + Hocuspocus + Postgres persistence + metrics
+- [x] Deno 2.9.7 + Hono variant measured; runtime switched to Deno + Hono (`docs/sync-spike-results.md`)
 - [x] `apps/sync-spike` headless bench clients (50 docs / 100 conns)
 - [x] `docker-compose.bench.yml` (postgres:17, server, toxiproxy, S3)
 - [x] Browser spike tests: BroadcastChannel, leader handoff, offline merge, classification, replace w/o duplicates, old client + unknown node, UniqueID, projection = Y.Doc

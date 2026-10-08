@@ -35,3 +35,8 @@ run img-compiled-musl    PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=sync-spik
 run img-compiled-glibc   PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=sync-spike:distroless
 
 run node-full-db1    PERSISTENCE=full        DB_LATENCY_MS=1 SERVER_IMAGE=node:24-alpine "SERVER_CMD=node --expose-gc apps/sync-spike/dist/server.node.js"
+run img-deno             PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=denoland/deno:2.9.7 "SERVER_CMD=deno run -A --sloppy-imports --v8-flags=--expose-gc apps/sync-spike/src/server.deno.ts"
+run img-deno-compiled    PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=sync-spike:deno-distroless
+# Deno.upgradeWebSocket does not negotiate permessage-deflate; node:http + ws does.
+run img-deno-ws          PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=denoland/deno:2.9.7 "SERVER_CMD=deno run -A --sloppy-imports --v8-flags=--expose-gc apps/sync-spike/src/server.deno-ws.ts"
+run img-deno-ws-deflate  PERSISTENCE=full DB_LATENCY_MS=1 PER_MESSAGE_DEFLATE=1 SERVER_IMAGE=denoland/deno:2.9.7 "SERVER_CMD=deno run -A --sloppy-imports --v8-flags=--expose-gc apps/sync-spike/src/server.deno-ws.ts"
