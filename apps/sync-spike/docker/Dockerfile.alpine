@@ -1,0 +1,6 @@
+# Compiled musl binary on bare Alpine (verified variant for the VPS).
+FROM alpine:3.22
+RUN apk add --no-cache libstdc++ libgcc && adduser -D -H -u 10001 app
+COPY dist/server-linux-arm64-musl /app/server
+USER app
+ENTRYPOINT ["/app/server"]

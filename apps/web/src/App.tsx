@@ -1,4 +1,4 @@
-import {ScriptRepositoryProvider} from '@stagistic/app-core';
+import {ScriptDocumentSyncProvider, ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
     GlobalModalsProvider,
     HomeRoute,
@@ -7,6 +7,7 @@ import {
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
+import type {SyncEngineClient} from '@stagistic/sync-engine';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {
     useEffect,
@@ -25,6 +26,7 @@ import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
+    const [documentSync, setDocumentSync] = useState<SyncEngineClient | null>(null);
     const [bootProgress, setBootProgress] = useState(0);
     const [bootStatus, setBootStatus] = useState('Preparing');
 
@@ -59,6 +61,7 @@ const BootedApp = () => {
                 return;
             }
 
+            setDocumentSync(repositoryModule.documentSync);
             setScriptRepository(repositoryModule.scriptRepository);
         };
 
@@ -75,20 +78,22 @@ const BootedApp = () => {
 
     return (
         <ScriptRepositoryProvider repository={scriptRepository}>
-            <ToastProvider>
-                <GlobalModalsProvider>
-                    <Routes>
-                        <Route path="/" element={<HomeRoute />} />
-                        <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
-                            <Route index element={<Navigate to="editor" replace />} />
-                            <Route path="editor" element={<ScriptEditorRoute />} />
-                            <Route path="export" element={<ScriptExportRoute />} />
-                        </Route>
-                        <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                </GlobalModalsProvider>
-            </ToastProvider>
+            <ScriptDocumentSyncProvider client={documentSync}>
+                <ToastProvider>
+                    <GlobalModalsProvider>
+                        <Routes>
+                            <Route path="/" element={<HomeRoute />} />
+                            <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                                <Route index element={<Navigate to="editor" replace />} />
+                                <Route path="editor" element={<ScriptEditorRoute />} />
+                                <Route path="export" element={<ScriptExportRoute />} />
+                            </Route>
+                            <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </GlobalModalsProvider>
+                </ToastProvider>
+            </ScriptDocumentSyncProvider>
         </ScriptRepositoryProvider>
     );
 };

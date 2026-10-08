@@ -2,12 +2,14 @@ import type {
     useScriptCharacterCatalog,
     useScriptMusic,
 } from '@stagistic/app-core';
+import type {EditorCollaboration} from '@stagistic/editor';
 import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
     ScriptDocument,
     ScriptSummaryMetadata,
 } from '@stagistic/script';
+import type {OpenedScript} from '@stagistic/sync-engine';
 import type {ScriptSyncState} from '@stagistic/ui';
 
 import type {CurrentScriptItem} from './types';
@@ -29,6 +31,9 @@ export type ScriptEditorController = {
     initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,
     storageError: string | null,
     shouldAutoFocus: boolean,
+    replica: OpenedScript | null,
+    collaboration: EditorCollaboration | undefined,
+    isReadOnly: boolean,
     saveIndicator: ScriptSyncState,
     editorLoadState: EditorLoadState,
     handleAutoSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,

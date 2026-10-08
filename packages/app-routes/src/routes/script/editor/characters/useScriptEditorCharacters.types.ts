@@ -6,6 +6,7 @@ import {type EditorSettings} from '@stagistic/script';
 import {
     type ScriptDocument,
 } from '@stagistic/script';
+import type {OpenedScript} from '@stagistic/sync-engine';
 
 import type {
     CharacterGenderOption,
@@ -19,6 +20,8 @@ export interface UseScriptEditorCharactersArgs {
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
+    /** Bound Y.Doc replica: document changes become Y ops instead of an editor remount. */
+    replica?: OpenedScript | null,
 }
 
 export interface UseScriptEditorCharactersResult {

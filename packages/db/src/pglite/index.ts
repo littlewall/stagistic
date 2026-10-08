@@ -1,4 +1,5 @@
 export {
+    createLocalDb,
     createPgliteBootstrap,
     type DbBootstrapStep,
     type DbBootstrapUpdate,

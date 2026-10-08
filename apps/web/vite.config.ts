@@ -19,6 +19,12 @@ export default defineConfig({
         exclude: ['@electric-sql/pglite'],
     },
     resolve: {
+        // One Yjs instance across editor, engine and replicas (duplicates break Y type identity).
+        dedupe: [
+            'yjs',
+            'y-protocols',
+            'lib0',
+        ],
         tsconfigPaths: true,
         alias: [{find: /^@pglite-data/, replacement: pgliteDataPath}, {find: /^@pglite-wasm/, replacement: pgliteWasmPath}],
     },

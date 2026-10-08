@@ -2,6 +2,7 @@ import {MUSIC_OUT_NODE_NAME} from '@stagistic/script';
 import {Plugin} from '@tiptap/pm/state';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
+import {localTransactions} from '../../collab/remoteTransactions';
 import {
     buildDeleteSelectionPreservingMusicAtoms,
     isMusicPillTarget,
@@ -27,8 +28,9 @@ import {
  */
 export const createMusicBoundaryPlugin = () => new Plugin({
     appendTransaction: (transactions, _oldState, newState) => {
+        // Only local edits move the caret; remote edits just map it.
         if (
-            !transactions.some(transaction => {
+            !localTransactions(transactions).some(transaction => {
                 return transaction.selectionSet || transaction.docChanged;
             })
         ) {

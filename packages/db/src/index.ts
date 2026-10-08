@@ -81,6 +81,7 @@ export * from './blocks';
 
 // ─── Local repository ──────────────────────────────────────────────────────────
 export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
+export {createScriptBodyProjectionStore, type ScriptBodyProjectionStore} from './repo/document/bodyProjectionStore';
 export {
     createProjectedTableDocumentSource,
     createSqlScriptDocumentProjectionWriter,

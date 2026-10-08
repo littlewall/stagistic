@@ -19,7 +19,7 @@ type UseScriptEditorInstanceArgs = {
     surfaceCache?: EditorSurfaceCache,
     signature: string,
     extensions: Extensions,
-    content: ScriptDocument,
+    content: ScriptDocument | undefined,
     characterColorRefs: CharacterColorRefsBundle,
 };
 

@@ -2,6 +2,7 @@ import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR} from '@stagistic/scrip
 import {Extension} from '@tiptap/core';
 import {Plugin} from '@tiptap/pm/state';
 
+import {isRemoteTransaction} from '../../collab/remoteTransactions';
 import {
     applyMeta,
     type CommentsBaseState,
@@ -243,7 +244,8 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                             return isAppended || previous.mergedBlocks.length === 0 ? previous : {...previous, mergedBlocks: []};
                         }
 
-                        const isHistory = Boolean(tr.getMeta('history$'));
+                        // Undo/redo and remote replicas report their own merges.
+                        const isHistory = Boolean(tr.getMeta('history$')) || isRemoteTransaction(tr);
                         const detectedMerges =
                             tr.docChanged && !isHistory && tr.doc.childCount < oldState.doc.childCount
                                 ? detectMergedBlocks(oldState.doc, tr.doc, tr.mapping)

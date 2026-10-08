@@ -3,6 +3,7 @@ import {getMarkRange} from '@tiptap/core';
 import {Plugin} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
+import {localTransactions} from '../../collab/remoteTransactions';
 import {
     characterTagComposeKey,
     detectCompose,
@@ -62,6 +63,11 @@ export const createCharacterTagComposePlugin = (
             },
         },
         appendTransaction: (transactions, oldState, newState) => {
+            // Commits follow local typing only; remote edits must not commit a tag here.
+            if (localTransactions(transactions).length === 0) {
+                return null;
+            }
+
             const compose = getCharacterTagComposeFromState(newState);
 
             if (compose && compose.query.trim().length > 0) {

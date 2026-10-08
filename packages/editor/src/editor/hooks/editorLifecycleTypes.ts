@@ -21,6 +21,8 @@ export interface UseEditorLifecycleArgs {
     document: {
         initialValue: ScriptDocument,
         initialSerialized: string,
+        /** Content comes from a bound Y.Doc: never `setContent` it. */
+        isCollaborative?: boolean,
         setLatestValue: (value: ScriptDocument, revision?: number) => void,
         syncInitialValue: (value: ScriptDocument, initialSerialized: string, revision?: number) => void,
         scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,

@@ -5,6 +5,7 @@ import {
 } from '@stagistic/script';
 import {type Extensions} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
+import Collaboration from '@tiptap/extension-collaboration';
 import History from '@tiptap/extension-history';
 import Italic from '@tiptap/extension-italic';
 import Text from '@tiptap/extension-text';
@@ -13,6 +14,7 @@ import UniqueID from '@tiptap/extension-unique-id';
 import {useMemo, useRef} from 'react';
 
 import type {
+    EditorCollaboration,
     EditorMusicCreateRequest,
     EditorMusicRemoveRequest,
     PersistentCharacterRef,
@@ -71,6 +73,7 @@ type UseEditorExtensionsArgs = {
     onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void,
     commentCallbacksRef?: {current: CommentsExtensionCallbacks},
     enableBlockUiEvents?: boolean,
+    collaboration?: EditorCollaboration,
 };
 
 export const useEditorExtensions = ({
@@ -89,6 +92,7 @@ export const useEditorExtensions = ({
     onRequestConvertScene,
     commentCallbacksRef,
     enableBlockUiEvents,
+    collaboration,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(null);
 
@@ -206,12 +210,19 @@ export const useEditorExtensions = ({
         });
     }, []);
 
+    const historyExtension = useMemo(
+        () => collaboration
+            ? Collaboration.configure({document: collaboration.document, field: collaboration.field})
+            : History,
+        [collaboration],
+    );
+
     return useMemo(() => {
         const extensions: Extensions = [
             DocumentWithSettings,
             paginationExtension,
             Text,
-            History,
+            historyExtension,
             Bold,
             Italic,
             Underline,
@@ -259,6 +270,7 @@ export const useEditorExtensions = ({
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
+        historyExtension,
         scriptBehaviorExtension,
         paginationExtension,
         uniqueIdExtension,

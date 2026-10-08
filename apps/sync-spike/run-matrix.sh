@@ -26,4 +26,12 @@ run full-db1-deflate PERSISTENCE=full        DB_LATENCY_MS=1 PER_MESSAGE_DEFLATE
 run full-db1-512m    PERSISTENCE=full        DB_LATENCY_MS=1 SERVER_MEM=512m
 
 bun build apps/sync-spike/src/server.node.ts --target=node --outfile=apps/sync-spike/dist/server.node.js >/dev/null
+
+# Runtime/image variants (CPU + RAM), all full persistence, DB 1 ms.
+run img-bun-debian       PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=oven/bun:1.4.2
+run img-bun-alpine       PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=oven/bun:1.4.2-alpine
+run img-bun-alpine-smol  PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=oven/bun:1.4.2-alpine "SERVER_CMD=bun --smol apps/sync-spike/src/server.ts"
+run img-compiled-musl    PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=sync-spike:alpine
+run img-compiled-glibc   PERSISTENCE=full DB_LATENCY_MS=1 SERVER_IMAGE=sync-spike:distroless
+
 run node-full-db1    PERSISTENCE=full        DB_LATENCY_MS=1 SERVER_IMAGE=node:24-alpine "SERVER_CMD=node --expose-gc apps/sync-spike/dist/server.node.js"

@@ -13,9 +13,11 @@
         "@stagistic/export": "workspace:*",
         "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
+        "@stagistic/sync-engine": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "clsx": "^2.1.1",
-        "pdfjs-dist": "^5.4.394"
+        "pdfjs-dist": "^5.4.394",
+        "yjs": "^13.6.33"
     },
     "peerDependencies": {
         "react": "^19.0.0",

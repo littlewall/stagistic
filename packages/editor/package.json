@@ -12,6 +12,7 @@
         "@tanstack/react-hotkeys": "^0.3.0",
         "@tiptap/core": "^3.19.0",
         "@tiptap/extension-bold": "^3.19.0",
+        "@tiptap/extension-collaboration": "3.19.0",
         "@tiptap/extension-document": "^3.19.0",
         "@tiptap/extension-hard-break": "^3.19.0",
         "@tiptap/extension-history": "^3.19.0",
@@ -21,7 +22,9 @@
         "@tiptap/extension-unique-id": "^3.19.0",
         "@tiptap/pm": "^3.19.0",
         "@tiptap/react": "^3.19.0",
-        "clsx": "^2.1.1"
+        "@tiptap/y-tiptap": "^3.0.9",
+        "clsx": "^2.1.1",
+        "yjs": "^13.6.33"
     },
     "peerDependencies": {
         "react": "^19.0.0",

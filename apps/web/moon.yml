@@ -29,3 +29,10 @@ tasks:
     command: 'vp test run -c vitest.browser.config.ts'
     options:
       cache: false
+
+  # Multi-tab Playwright tests against the production build.
+  test-e2e:
+    command: 'vp test run -c vitest.e2e.config.ts'
+    deps: ['~:build']
+    options:
+      cache: false

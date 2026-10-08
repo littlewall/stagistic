@@ -19,7 +19,6 @@ import {
     getEditorCssVars,
     resolveEditorSettings,
     selectEditorRebuildSettings,
-    stripScriptSettings,
 } from './editorSettings';
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
@@ -29,6 +28,7 @@ import {useCommentCallbacksRef} from './hooks/useCommentCallbacksRef';
 import {useEditorAutosave} from './hooks/useEditorAutosave';
 import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
+import {useEditorReadOnly, useInitialContentSignature} from './hooks/useEditorCollaborationMode';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
 import {useInitialCanvasReady} from './hooks/usePaginationReady';
@@ -58,6 +58,8 @@ const Editor = ({
 }: EditorProps & {children?: ReactNode}) => {
     const {
         initialValue,
+        collaboration,
+        readOnly = false,
         persistentCharacters = [],
         persistentMusic = [],
         commentThreads,
@@ -102,7 +104,7 @@ const Editor = ({
     const sceneNumberFormat = resolvedSettings.blocks.scene?.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
     const blockNextElements = useMemo(() => getBlockNextElements(resolvedSettings.blocks), [resolvedSettings.blocks]);
 
-    const initialContentSignature = useMemo(() => JSON.stringify(stripScriptSettings(resolvedInitialValue)), [resolvedInitialValue]);
+    const initialContentSignature = useInitialContentSignature(collaboration, resolvedInitialValue);
     const surfaceSignature = useMemo(
         () => JSON.stringify({
             content: initialContentSignature,
@@ -191,13 +193,15 @@ const Editor = ({
         onRequestConvertScene,
         commentCallbacksRef,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
+        collaboration,
     });
     const initialDoc = useMemo<ScriptDocument>(() => resolvedInitialValue, [initialContentSignature]);
     const {editor} = useScriptEditorInstance({
         surfaceCache,
         signature: surfaceSignature,
         extensions,
-        content: initialDoc,
+        // Bound editors render the Y.Doc; initial content would be written into it.
+        content: collaboration ? undefined : initialDoc,
         characterColorRefs: surfaceRefsRef.current,
     });
 
@@ -208,6 +212,8 @@ const Editor = ({
     }, [commentThreads, editor]);
 
     useEditorCharacterSync(editor, persistentCharacters);
+
+    useEditorReadOnly(editor, readOnly);
 
     const {
         scheduleAutosave,
@@ -256,6 +262,7 @@ const Editor = ({
         document: {
             initialValue: resolvedInitialValue,
             initialSerialized,
+            isCollaborative: Boolean(collaboration),
             setLatestValue,
             syncInitialValue,
             scheduleAutosave,

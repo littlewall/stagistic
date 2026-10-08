@@ -14,6 +14,7 @@ export const useScriptEditorCharacters = ({
     initialValue,
     resolvedScriptSettings,
     handleAutoSave,
+    replica = null,
 }: UseScriptEditorCharactersArgs): UseScriptEditorCharactersResult => {
     const {
         editor,
@@ -58,6 +59,7 @@ export const useScriptEditorCharacters = ({
         setEditorOverrideValue: editor.setEditorOverrideValue,
         handleAutoSave,
         getCharacterNameForBlockType,
+        replicaBody: replica?.body ?? null,
     });
 
     const {

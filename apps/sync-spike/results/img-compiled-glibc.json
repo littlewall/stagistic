@@ -1,0 +1,92 @@
+{
+  "config": {
+    "DOCS": 50,
+    "CLIENTS_PER_DOC": 2,
+    "EDIT_SECONDS": 60,
+    "EDIT_INTERVAL_MS": 1000,
+    "DB_LATENCY_MS": 1,
+    "CLIENT_LATENCY_MS": 25
+  },
+  "baseline": {
+    "rssMb": 39.7421875,
+    "heapUsedMb": 2.882931709289551,
+    "runtime": "bun"
+  },
+  "idle": {
+    "rssMb": 144.37890625,
+    "heapUsedMb": 64.18042182922363,
+    "connectionsOpen": 100,
+    "documentsLoaded": 50,
+    "db": {
+      "active": 2,
+      "max": 100,
+      "states": 50,
+      "statesBytes": 3036868,
+      "updates": 0
+    }
+  },
+  "load": {
+    "edits": 5972,
+    "editsPerSecond": 99.53333333333333,
+    "latencyMs": {
+      "count": 5768,
+      "p50": 28.598125000000437,
+      "p95": 34.881625000001804,
+      "p99": 112.64283299999079,
+      "max": 517.6938749999972
+    },
+    "cpuPercent": 11.618696647831202,
+    "rssMb": 169.92578125,
+    "storeMs": {
+      "count": 300,
+      "p50": 5.146042000000307,
+      "p95": 11.063208999999915,
+      "p99": 41.72791599999982,
+      "max": 73.12712499999907
+    },
+    "appendMs": {
+      "count": 0,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0
+    },
+    "dbWrites": 300,
+    "dbWriteBytes": 18720558,
+    "db": {
+      "active": 3,
+      "max": 100,
+      "states": 50,
+      "statesBytes": 3170887,
+      "updates": 0
+    }
+  },
+  "longSync": {
+    "syncMs": 133.86374999998952,
+    "blocks": 10201,
+    "stateBytes": 1055784,
+    "receivedBytes": 1056113,
+    "receivedDeflatedBytes": 170480
+  },
+  "reload": {
+    "reconnectMs": {
+      "count": 50,
+      "p50": 73.76499999999942,
+      "p95": 86.03991700000188,
+      "p99": 155.75416700000642,
+      "max": 155.75416700000642
+    },
+    "loadMs": {
+      "count": 50,
+      "p50": 3.8221250000060536,
+      "p95": 7.164709000004223,
+      "p99": 8.657417000009445,
+      "max": 8.657417000009445
+    }
+  },
+  "afterUnload": {
+    "rssMb": 147.66796875,
+    "heapUsedMb": 8.962385177612305,
+    "documentsLoaded": 0
+  }
+}

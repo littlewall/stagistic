@@ -1,4 +1,5 @@
 export {toScriptListItem} from './mappers';
+export {ScriptDocumentSyncProvider, useScriptDocumentSync} from './ScriptDocumentSyncProvider';
 export {
     ScriptRepositoryProvider,
     useScriptRepository,

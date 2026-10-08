@@ -18,6 +18,7 @@ export type {
     DeleteSceneRequest,
     EditorBlockUiEvent,
     EditorBlockUiEventType,
+    EditorCollaboration,
     EditorDocumentProps,
     EditorIndexSnapshot,
     EditorLayoutProps,

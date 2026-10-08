@@ -23,6 +23,7 @@ import type {
     ScriptSummaryMetadata,
 } from '@stagistic/script';
 import type {ReactNode} from 'react';
+import type {Doc as YDoc} from 'yjs';
 
 import type {SaveResult} from './hooks/useAutosaveController';
 import type {EditorSnapshotStore} from './live/store';
@@ -266,8 +267,22 @@ export interface EditorLayoutProps {
     sidebarWidth?: string,
 }
 
+/**
+ * Binds the editor to a shared Y.Doc replica (tabs, later the cloud): the doc is
+ * the source of truth, `initialValue` only seeds derived UI state. Undo/redo
+ * come from the Y binding instead of History.
+ */
+export interface EditorCollaboration {
+    document: YDoc,
+    /** Y.XmlFragment name holding the body. */
+    field: string,
+}
+
 export interface EditorDocumentProps {
     initialValue: ScriptDocument,
+    collaboration?: EditorCollaboration,
+    /** Shows the document without accepting edits (e.g. written by a newer schema). */
+    readOnly?: boolean,
     persistentCharacters?: readonly PersistentCharacterRef[],
     persistentMusic?: readonly PersistentMusicRef[],
     /** Host-owned comment thread facts (status, block anchor); content stays in the host. */

@@ -3,6 +3,7 @@ import type {
     ScriptDocument,
     ScriptSummaryMetadata,
 } from '@stagistic/script';
+import type {OpenedScript} from '@stagistic/sync-engine';
 import {useCallback} from 'react';
 
 import type {
@@ -43,6 +44,11 @@ interface UseScriptSaveHandlersArgs {
     state: {
         saveIndicatorControls: SaveIndicatorControls,
     },
+    document?: {
+        /** Bound Y.Doc replica: the engine owns the projection, saving = flushing it. */
+        replica: OpenedScript | null,
+        isReadOnly: boolean,
+    },
 }
 
 export const useScriptSaveHandlers = ({
@@ -50,21 +56,44 @@ export const useScriptSaveHandlers = ({
     repository,
     notifications,
     state,
+    document: documentState,
 }: UseScriptSaveHandlersArgs) => {
+    const replica = documentState?.replica ?? null;
+    const isReadOnly = documentState?.isReadOnly ?? false;
     const {currentScript, currentScriptId} = context;
     const scriptRepository = repository;
     const {setStorageError, addToast} = notifications;
     const {saveIndicatorControls} = state;
     const {startSaveIndicator, finishSaveIndicator} = saveIndicatorControls;
 
+    const persist = useCallback(async (
+        scriptId: string,
+        value: ScriptDocument,
+        metadata?: ScriptSummaryMetadata,
+        expectedSettings?: EditorSettingsOverride | null,
+    ) => {
+        if (!replica) {
+            await scriptRepository.saveLatest(scriptId, value, metadata, expectedSettings);
+
+            return;
+        }
+
+        // The value is already in the replica; wait until the engine projected it.
+        await replica.flush();
+
+        if (metadata?.pageCount != null) {
+            await scriptRepository.saveSummaryMetadata(scriptId, value, metadata, expectedSettings);
+        }
+    }, [replica, scriptRepository]);
+
     const handleAutoSave = useCallback(async (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => {
-        if (!currentScriptId) {
+        if (!currentScriptId || isReadOnly) {
             return false;
         }
 
         try {
             startSaveIndicator();
-            await scriptRepository.saveLatest(currentScriptId, value, metadata, expectedSettings);
+            await persist(currentScriptId, value, metadata, expectedSettings);
             finishSaveIndicator(true);
 
             return true;
@@ -84,19 +113,20 @@ export const useScriptSaveHandlers = ({
         addToast,
         currentScriptId,
         finishSaveIndicator,
-        scriptRepository,
+        isReadOnly,
+        persist,
         setStorageError,
         startSaveIndicator,
     ]);
 
     const handleManualSave = useCallback(async (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => {
-        if (!currentScript || !currentScriptId) {
+        if (!currentScript || !currentScriptId || isReadOnly) {
             return false;
         }
 
         try {
             startSaveIndicator();
-            await scriptRepository.saveLatest(currentScriptId, value, metadata, expectedSettings);
+            await persist(currentScriptId, value, metadata, expectedSettings);
             addToast({
                 title: 'Script saved',
                 description: currentScript.name,
@@ -122,7 +152,8 @@ export const useScriptSaveHandlers = ({
         currentScript,
         currentScriptId,
         finishSaveIndicator,
-        scriptRepository,
+        isReadOnly,
+        persist,
         setStorageError,
         startSaveIndicator,
     ]);
@@ -132,11 +163,14 @@ export const useScriptSaveHandlers = ({
         metadata: ScriptSummaryMetadata,
         expectedSettings?: EditorSettingsOverride | null,
     ) => {
-        if (!currentScriptId) {
+        if (!currentScriptId || isReadOnly) {
             return false;
         }
 
         try {
+            // The engine may not have projected the latest typing yet.
+            await replica?.flush();
+
             return await scriptRepository.saveSummaryMetadata(currentScriptId, value, metadata, expectedSettings);
         } catch {
             setStorageError('Failed to save script metadata.');
@@ -145,6 +179,8 @@ export const useScriptSaveHandlers = ({
         }
     }, [
         currentScriptId,
+        isReadOnly,
+        replica,
         scriptRepository,
         setStorageError,
     ]);

@@ -5,7 +5,9 @@ import {
     type ScriptDocument,
     unlinkCharacterRefInScriptDocument,
 } from '@stagistic/script';
+import {applyBodyChange} from '@stagistic/sync-engine';
 import {useCallback} from 'react';
+import type {Doc as YDoc} from 'yjs';
 
 interface UseCharacterDocumentActionsArgs {
     getEditorValue: () => ScriptDocument | null,
@@ -13,6 +15,7 @@ interface UseCharacterDocumentActionsArgs {
     setEditorOverrideValue: (value: ScriptDocument | null) => void,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
+    replicaBody?: YDoc | null,
 }
 
 export const useCharacterDocumentActions = ({
@@ -21,6 +24,7 @@ export const useCharacterDocumentActions = ({
     setEditorOverrideValue,
     handleAutoSave,
     getCharacterNameForBlockType,
+    replicaBody = null,
 }: UseCharacterDocumentActionsArgs) => {
     const applyChange = useCallback(async (change: {
         value: ScriptDocument,
@@ -30,12 +34,31 @@ export const useCharacterDocumentActions = ({
             return true;
         }
 
+        if (replicaBody) {
+            /*
+             * Callers derive `change` synchronously from getEditorValue(), so it
+             * is still the base: write only the blocks the change touched. The
+             * bound editor re-renders from the Y.Doc; no remount.
+             */
+            const base = getEditorValue();
+
+            if (base) {
+                applyBodyChange(replicaBody, base, change.value);
+            }
+
+            setEditorValue(change.value);
+
+            return handleAutoSave(change.value);
+        }
+
         setEditorValue(change.value);
         setEditorOverrideValue(change.value);
 
         return handleAutoSave(change.value);
     }, [
+        getEditorValue,
         handleAutoSave,
+        replicaBody,
         setEditorOverrideValue,
         setEditorValue,
     ]);

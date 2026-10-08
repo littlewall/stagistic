@@ -22,6 +22,7 @@ import {
     transactionTouchesCharacterBlocks,
     transactionTouchesCharacterTags,
 } from '../../runtime/transactionGuards';
+import {localTransactions} from '../collab/remoteTransactions';
 import {
     applyTagMarkIdChange,
     getCharacterTagMarkType,
@@ -215,11 +216,13 @@ export const CharacterRefSyncExtension = Extension.create<{
 
         return [
             new Plugin({
-                appendTransaction: (transactions, oldState, newState) => {
-                    if (transactions.some(transaction => transaction.getMeta(CHARACTER_REF_SYNC_META_KEY) === true)) {
+                appendTransaction: (allTransactions, oldState, newState) => {
+                    if (allTransactions.some(transaction => transaction.getMeta(CHARACTER_REF_SYNC_META_KEY) === true)) {
                         return null;
                     }
 
+                    // Remote replicas already synced their own refs.
+                    const transactions = localTransactions(allTransactions);
                     const shouldSync = transactions.some(transaction => {
                         return transactionTouchesCharacterBlocks(transaction, oldState.doc, newState.doc)
                             || transactionTouchesCharacterTags(transaction, oldState.doc, newState.doc);

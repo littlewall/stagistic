@@ -39,6 +39,8 @@ export const ScriptEditorRoute = () => {
         initialIndexSnapshot,
         storageError,
         shouldAutoFocus,
+        collaboration,
+        isReadOnly,
         saveIndicator,
         handleAutoSave,
         handleManualSave,
@@ -211,6 +213,8 @@ export const ScriptEditorRoute = () => {
                     liveStore={editorSnapshotStore}
                     document={{
                         initialValue: resolvedEditorInitialValue,
+                        collaboration,
+                        readOnly: isReadOnly,
                         persistentCharacters: normalizedSpeakingEntityRecords,
                         persistentMusic: music,
                         commentThreads: commentsBridge.commentThreads,

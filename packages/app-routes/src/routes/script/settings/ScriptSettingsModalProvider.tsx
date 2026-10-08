@@ -38,6 +38,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         musicCatalog,
         initialValue,
         handleAutoSave,
+        replica,
     } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
@@ -121,6 +122,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         initialValue,
         resolvedScriptSettings,
         handleAutoSave,
+        replica,
     });
     const musicState = useScriptMusicState(currentScriptId, musicCatalog);
     const {

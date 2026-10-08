@@ -18,6 +18,7 @@ export default defineConfig({
             '**/node_modules/**',
             '**/.git/**',
             '**/*.browser.{test,spec}.{ts,tsx}',
+            '**/*.e2e.test.ts',
         ],
     },
 });

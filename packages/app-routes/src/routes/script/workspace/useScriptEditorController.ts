@@ -1,6 +1,7 @@
 import {
     useRecentScripts,
     useScriptCharacterCatalog,
+    useScriptDocumentSync,
     useScriptEditorSettingsRecord,
     useScriptMusic,
     useScriptRepository,
@@ -31,13 +32,17 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         error: currentScriptError,
     } = useScriptSummary(scriptId);
     const scriptRepository = useScriptRepository();
+    const documentSync = useScriptDocumentSync();
     const {
         initialValue,
         initialIndexSnapshot,
         storageError,
         shouldAutoFocus,
         setStorageError,
-    } = useScriptLoader(currentScript?.id ?? null, scriptRepository);
+        replica,
+        collaboration,
+        isReadOnly,
+    } = useScriptLoader(currentScript?.id ?? null, scriptRepository, documentSync);
     const {
         saveIndicator,
         startSaveIndicator,
@@ -126,6 +131,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
                 finishSaveIndicator,
             },
         },
+        document: {replica, isReadOnly},
     });
 
     return {
@@ -139,6 +145,9 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         initialIndexSnapshot,
         storageError,
         shouldAutoFocus,
+        replica,
+        collaboration,
+        isReadOnly,
         saveIndicator,
         editorLoadState,
         handleAutoSave,

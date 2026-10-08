@@ -12,6 +12,7 @@ import {
     doc,
 } from '../testing/fixtures';
 import {
+    applyBodyChange,
     bodyDocToScriptDocument,
     getBodyFragment,
     replaceBodyContent,
@@ -97,5 +98,51 @@ describe('bodyCodec', () => {
 
         expect(merged).toEqual(bodyDocToScriptDocument(right));
         expect(merged.content.map(node => node.content?.[0]?.text)).toEqual(['One left', 'Two right']);
+    });
+});
+
+describe('applyBodyChange', () => {
+    it('writes only blocks changed between base and next, keeping concurrent edits elsewhere', () => {
+        const ydoc = new Y.Doc();
+        const base = doc(
+            block('scene', 's1', 'SCENE'),
+            block('character', 'c1', 'HAMLET'),
+            block('dialogue', 'd1', 'To be'),
+            block('character', 'c2', 'HAMLET'),
+            block('dialogue', 'd2', 'Or not'),
+        );
+
+        seedBodyDoc(ydoc, base);
+        // Another replica typed into d1 after `base` was taken.
+        blockText(ydoc, 2).insert(5, ', or not to be');
+
+        // Rename HAMLET -> PRINCE, delete d2/c2, add a stage direction after s1.
+        const next = doc(
+            block('scene', 's1', 'SCENE'),
+            block('stageDirection', 'e1', 'Enter.'),
+            block('character', 'c1', 'PRINCE'),
+            block('dialogue', 'd1', 'To be'),
+        );
+
+        applyBodyChange(ydoc, base, next);
+
+        expect(bodyDocToScriptDocument(ydoc).content.map(node => [node.attrs?.id, node.content?.[0]?.text])).toEqual([
+            ['s1', 'SCENE'],
+            ['e1', 'Enter.'],
+            ['c1', 'PRINCE'],
+            ['d1', 'To be, or not to be'],
+        ]);
+    });
+
+    it('is a no-op when nothing changed', () => {
+        const ydoc = new Y.Doc();
+        const base = doc(block('scene', 's1', 'A'));
+
+        seedBodyDoc(ydoc, base);
+
+        const before = Y.encodeStateVector(ydoc);
+
+        applyBodyChange(ydoc, base, base);
+        expect(Y.encodeStateVector(ydoc)).toEqual(before);
     });
 });

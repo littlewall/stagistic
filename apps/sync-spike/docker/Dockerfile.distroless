@@ -1,0 +1,4 @@
+# Compiled glibc binary on distroless/cc (no shell, no package manager).
+FROM gcr.io/distroless/cc-debian12:nonroot
+COPY dist/server-linux-arm64 /app/server
+ENTRYPOINT ["/app/server"]

@@ -193,3 +193,77 @@ export const replaceBodyContent = (doc: Y.Doc, document: ScriptDocument, origin:
         fragment.insert(0, jsonNodesToYXml(document.content));
     }, origin);
 };
+
+const blockIdOf = (node: ScriptNode) => (typeof node.attrs?.id === 'string' ? node.attrs.id : null);
+
+const findBlockIndex = (fragment: Y.XmlFragment, blockId: string) => {
+    let index = 0;
+
+    for (const item of fragment.toArray()) {
+        if (item instanceof Y.XmlElement && item.getAttribute('id') === blockId) {
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1;
+};
+
+/**
+ * Applies a change made outside the editor (character rename, scene delete …)
+ * as a three-way block diff: only blocks that differ between `base` (what the
+ * change was computed from) and `next` are written, so concurrent edits from
+ * other replicas in untouched blocks survive. Changed blocks are replaced
+ * whole; blocks deleted concurrently stay deleted.
+ */
+export const applyBodyChange = (doc: Y.Doc, base: ScriptDocument, next: ScriptDocument, origin: unknown = null) => {
+    const fragment = getBodyFragment(doc);
+    const baseById = new Map(base.content.flatMap(node => {
+        const id = blockIdOf(node);
+
+        return id ? [[id, JSON.stringify(node)] as const] : [];
+    }));
+    const nextIds = new Set(next.content.map(blockIdOf).filter((id): id is string => id !== null));
+
+    doc.transact(() => {
+        for (const id of baseById.keys()) {
+            if (!nextIds.has(id)) {
+                const index = findBlockIndex(fragment, id);
+
+                if (index >= 0) {
+                    fragment.delete(index, 1);
+                }
+            }
+        }
+
+        let previousId: string | null = null;
+
+        for (const node of next.content) {
+            const id = blockIdOf(node);
+
+            if (!id) {
+                continue;
+            }
+
+            const baseJson = baseById.get(id);
+
+            if (baseJson === undefined) {
+                const anchor = previousId === null ? -1 : findBlockIndex(fragment, previousId);
+
+                fragment.insert(anchor + 1, jsonNodesToYXml([node]));
+            } else if (baseJson !== JSON.stringify(node)) {
+                const index = findBlockIndex(fragment, id);
+
+                if (index >= 0) {
+                    fragment.delete(index, 1);
+                    fragment.insert(index, jsonNodesToYXml([node]));
+                }
+            }
+
+            if (findBlockIndex(fragment, id) >= 0) {
+                previousId = id;
+            }
+        }
+    }, origin);
+};

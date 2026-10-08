@@ -15,6 +15,20 @@ shape or meaning changes: node/mark types, attrs, cue/character-tag representati
 or document-to-projection semantics. Do not bump it for DB-only projection changes,
 metadata columns, UI, autosave internals, or export layout changes.
 
+## Y.Doc script bodies (sync engine)
+The web app keeps each script body in a Y.Doc (`packages/sync-engine`); the
+`script_blocks` projection is a cache written only by the engine.
+- `schemaVersion` lives in the script's meta Y.Doc. A client opens newer docs
+  read-only (never bind the editor: y-tiptap deletes unknown nodes). Body
+  migrations must be idempotent: two replicas may run them concurrently.
+- A Y.Doc is created from JSON exactly once (seed); load-time normalization
+  belongs in `prepareSeedDocument`, never in the editor or loader.
+- Plugins with `appendTransaction` (and other edit follow-ups) must skip remote
+  transactions (`localTransactions` / `isRemoteTransaction`) and be idempotent.
+- Document changes made outside the editor go through `applyBodyChange`
+  (three-way, per block); replacing a projection outside the engine must call
+  `notifyBodyReplaced`. Never reset Y history to replace content.
+
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.
 - Typecheck: `moon run root:typecheck` (whole graph) or `moon run <project>:typecheck`.

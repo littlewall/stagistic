@@ -40,6 +40,7 @@ export const useEditorLifecycle = ({
     const {
         initialValue,
         initialSerialized,
+        isCollaborative = false,
         setLatestValue,
         syncInitialValue,
         scheduleAutosave,
@@ -191,15 +192,24 @@ export const useEditorLifecycle = ({
 
         if (!isRestoredSurface) {
             isApplyingInitialRef.current = true;
-            instance
-                .chain()
-                .setContent(initialValue, {emitUpdate: false})
-                .command(({tr}) => {
-                    tr.setMeta('addToHistory', false);
 
-                    return true;
-                })
-                .run();
+            /*
+             * A bound editor already shows the Y.Doc (seeded and normalized once
+             * by the engine). Setting content here would rewrite the shared doc
+             * on every open; only attribute-level fixups below are safe.
+             */
+            if (!isCollaborative) {
+                instance
+                    .chain()
+                    .setContent(initialValue, {emitUpdate: false})
+                    .command(({tr}) => {
+                        tr.setMeta('addToHistory', false);
+
+                        return true;
+                    })
+                    .run();
+            }
+
             sanitizeScriptBlocks(instance);
 
             const syncCommands = instance.commands as {syncCharacterRefs?: () => boolean};
@@ -250,6 +260,7 @@ export const useEditorLifecycle = ({
         instance,
         initialSerialized,
         initialValue,
+        isCollaborative,
         onIndexChangeRef,
         syncRuntimeSnapshotFromEditor,
         syncInitialValue,

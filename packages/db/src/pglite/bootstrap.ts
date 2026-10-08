@@ -8,6 +8,9 @@ import {runPgliteMigrations} from './migrations';
 
 export type LocalDb = PgliteDatabase<typeof dbSchema>;
 
+/** Drizzle over a PGlite instance owned by the caller (the leader worker). */
+export const createLocalDb = (client: PGlite): LocalDb => drizzle({client, schema: dbSchema});
+
 export type DbBootstrapStep = 'fs-bundle' | 'wasm' | 'client' | 'migrations' | 'ready';
 
 export type DbBootstrapUpdate = {

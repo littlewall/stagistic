@@ -9,6 +9,7 @@ import type {
     PersistentMusicRef,
 } from '../../../contracts';
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
+import {localTransactions} from '../../collab/remoteTransactions';
 import {getActiveScriptBlockFromState} from '../../scriptCore';
 import {
     blockHasMusicStart,
@@ -89,6 +90,11 @@ export const createMusicComposePlugin = (
         },
         appendTransaction: (transactions, oldState, newState) => {
             if (transactions.some(transaction => transaction.getMeta(MUSIC_COMPOSE_CLOSE_META) === true)) {
+                return null;
+            }
+
+            // A remote edit never closes the local compose (and must not delete text).
+            if (localTransactions(transactions).length === 0) {
                 return null;
             }
 
