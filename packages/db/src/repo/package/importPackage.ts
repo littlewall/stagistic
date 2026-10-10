@@ -193,6 +193,11 @@ const saveAttachmentBlobs = async (
     const savedKeys: string[] = [];
 
     for (const attachment of input.attachments) {
+        if (attachment.existingStorageKey !== undefined) {
+            storageKeyByAttachment.set(attachment.id, attachment.existingStorageKey);
+            continue;
+        }
+
         const key = await fileStorage.save(attachment.blob);
 
         storageKeyByAttachment.set(attachment.id, key);
@@ -305,7 +310,11 @@ export const createImportPackageHandler = ({
         }
 
         await syncDb();
-        await deleteBlobsBestEffort(fileStorage, removedStorageKeys, 'a replaced blob');
+        await deleteBlobsBestEffort(
+            fileStorage,
+            await dbQueries.filterUnreferencedStorageKeys(db, removedStorageKeys),
+            'a replaced blob',
+        );
     };
 
     return {createScriptFromPackage, restoreScriptFromPackage};

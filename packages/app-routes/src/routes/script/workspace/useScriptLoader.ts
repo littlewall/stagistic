@@ -30,6 +30,7 @@ type ScriptLoaderRepository = {
 export const useScriptLoader = (
     currentScriptId: string | null,
     scriptRepository: ScriptLoaderRepository,
+    {isReadOnly = false}: {isReadOnly?: boolean} = {},
 ): ScriptLoaderResult => {
     const [initialValue, setInitialValue] = useState<ScriptDocument | null | undefined>(undefined);
     const [initialIndexSnapshot, setInitialIndexSnapshot] = useState<ScriptBlockIndexSnapshot | null | undefined>(undefined);
@@ -71,7 +72,7 @@ export const useScriptLoader = (
 
                 const coerced = coerceUnknownBlocksToStageDirections(stored);
 
-                if (coerced.changed) {
+                if (coerced.changed && !isReadOnly) {
                     await scriptRepository.saveLatest(currentScriptId, coerced.value);
                 }
 
@@ -101,7 +102,11 @@ export const useScriptLoader = (
         return () => {
             isActive = false;
         };
-    }, [currentScriptId, scriptRepository]);
+    }, [
+        currentScriptId,
+        isReadOnly,
+        scriptRepository,
+    ]);
 
     return {
         initialValue,

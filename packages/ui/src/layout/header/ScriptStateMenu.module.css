@@ -1,0 +1,161 @@
+/*
+ * App-bar control choosing the shown script state: the current script or a
+ * stored, read-only draft or version.
+ */
+.root {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.trigger,
+.restoreTrigger {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-xs);
+    align-items: center;
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+
+    &[data-hovered],
+    &[data-pressed] {
+        color: var(--color-text);
+        background: var(--state-hover);
+    }
+
+    &[data-focus-visible] {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 1px;
+    }
+}
+
+.triggerStored {
+    color: var(--color-text);
+    background: var(--color-surface-accent);
+    border-color: var(--color-border-subtle);
+}
+
+.triggerLabel {
+    overflow: hidden;
+    max-width: 200px;
+    text-overflow: ellipsis;
+}
+
+.chevron {
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+}
+
+.restoreTrigger {
+    border-color: var(--color-border);
+}
+
+.popover {
+    overflow: auto;
+    max-height: min(480px, var(--visual-viewport-height, 80vh));
+    padding: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+.filter {
+    padding: var(--space-md) var(--space-md) 0;
+}
+
+.filterInput {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    outline: none;
+
+    &[data-focused] {
+        border-color: var(--color-focus-ring);
+    }
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 240px;
+    max-width: 320px;
+    padding: var(--space-md);
+    font-size: var(--font-size-md);
+    outline: none;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.sectionHeader {
+    padding: var(--space-xs) var(--space-lg);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.item {
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    outline: none;
+
+    &[data-focused],
+    &[data-hovered] {
+        background: var(--state-hover);
+    }
+}
+
+.itemText {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-px) * 2);
+    min-width: 0;
+}
+
+.itemLabel,
+.itemDetail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.itemDetail {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.currentMark {
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+}

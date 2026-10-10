@@ -46,4 +46,6 @@ export interface AttributeManagerCharactersPanelProps {
     onDeleteGroup?: (groupId: string) => void | Promise<unknown>,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void | Promise<unknown>,
     onChangeGroupMemberIds?: (groupId: string, memberIds: string[]) => void | Promise<unknown>,
+    /** Browse only: no creating, and the detail cannot be edited. */
+    isReadOnly?: boolean,
 }

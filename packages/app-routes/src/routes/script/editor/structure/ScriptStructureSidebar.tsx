@@ -25,6 +25,7 @@ import {
 } from 'react';
 
 import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attribute-manager/attributeManagerMenu';
+import {useScriptReadOnlyState} from '../../workspace/ScriptAccessContext';
 import {useScriptSession} from '../../workspace/ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import styles from './ScriptStructureSidebar.module.css';
@@ -54,6 +55,7 @@ interface ScriptStructureSidebarProps {
 
 export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) => {
     const {currentScriptId, indexSnapshot} = useScriptSession();
+    const {isReadOnly} = useScriptReadOnlyState();
     const {setActiveBlock} = useScriptActions();
     const actCommands = useEditorActCommands();
     const liveStructure = useEditorLiveStructure();
@@ -113,9 +115,9 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         setActNamePreviewById({});
     }, [currentScriptId, flushPendingActiveBlockPersist]);
 
-    // Debounced persist on active block change
+    // Debounced persist on active block change; a saved draft or version never writes.
     useEffect(() => {
-        if (!currentScriptId || lastPersistedActiveBlockIdsRef.current.get(currentScriptId) === liveActiveBlockId) {
+        if (isReadOnly || !currentScriptId || lastPersistedActiveBlockIdsRef.current.get(currentScriptId) === liveActiveBlockId) {
             return;
         }
 
@@ -131,6 +133,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         clearPendingPersistTimer,
         currentScriptId,
         flushPendingActiveBlockPersist,
+        isReadOnly,
         liveActiveBlockId,
     ]);
 
@@ -253,7 +256,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
                 navigation={header}
                 controls={(
                     <SidebarActionsGroup>
-                        <StructureSidebarContextActions />
+                        {isReadOnly ? null : <StructureSidebarContextActions />}
                         <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_STRUCTURE} />
                     </SidebarActionsGroup>
                 )}
@@ -282,6 +285,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
                                                 onNamePreview={handleActNamePreview}
                                                 onNamePreviewClear={handleActNamePreviewClear}
                                                 onDelete={handleDeleteAct}
+                                                isReadOnly={isReadOnly}
                                             />
                                         ) : (
                                             <StructureRowAct
@@ -294,6 +298,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
                                                 onNamePreview={handleActNamePreview}
                                                 onNamePreviewClear={handleActNamePreviewClear}
                                                 onDelete={handleDeleteAct}
+                                                isReadOnly={isReadOnly}
                                             />
                                         ))}
                                     {group.scenes.map((scene, idx) => {
@@ -309,6 +314,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
                                                 groupId={group.groupId}
                                                 isActive={scene.blockId === activeSceneBlockId}
                                                 startPage={placement?.startPage}
+                                                isReadOnly={isReadOnly}
                                                 onFocus={handleSceneFocus}
                                             />
                                         );

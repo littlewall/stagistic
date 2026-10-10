@@ -83,6 +83,8 @@ export interface AttributeManagerListPanelProps {
     /** When provided, renders custom detail-body content for the selected item instead of the placeholder. */
     renderDetail?: (item: AttributeManagerListItem) => ReactNode,
     renderDetailAction?: (item: AttributeManagerListItem) => ReactNode,
+    /** Browse only: the detail body cannot be edited. */
+    isReadOnly?: boolean,
 }
 
 export const AttributeManagerListPanel = ({
@@ -98,6 +100,7 @@ export const AttributeManagerListPanel = ({
     createAction,
     renderDetail,
     renderDetailAction,
+    isReadOnly = false,
 }: AttributeManagerListPanelProps) => {
     const [selectedItemId, setSelectedItemId] = useState<string | null>(initialSelectedItemId ?? null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -240,7 +243,7 @@ export const AttributeManagerListPanel = ({
                                 {renderDetailAction?.(selectedItem)}
                             </div>
                         </header>
-                        <div className={styles.detailBody}>{renderDetail?.(selectedItem)}</div>
+                        <div className={styles.detailBody} inert={isReadOnly}>{renderDetail?.(selectedItem)}</div>
                     </>
                 ) : (
                     <div className={styles.emptyDetail}>

@@ -24,6 +24,8 @@ export type {
     ScriptMusicAttachmentBinding,
     ScriptScene,
     ScriptSettingsBlock,
+    ScriptSnapshot,
+    ScriptSnapshotKind,
     ScriptSummary,
     ScriptTitlePageField,
 } from './script';

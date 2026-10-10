@@ -38,6 +38,7 @@ import {
     MusicNumberingExtension,
     MusicRailExtension,
     PlaceholderExtension,
+    ReadOnlyGuardExtension,
     SceneCollapseExtension,
     SceneCommandsExtension,
     SceneGuardExtension,
@@ -71,6 +72,7 @@ type UseEditorExtensionsArgs = {
     onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void,
     commentCallbacksRef?: {current: CommentsExtensionCallbacks},
     enableBlockUiEvents?: boolean,
+    isReadOnly?: boolean,
 };
 
 export const useEditorExtensions = ({
@@ -89,6 +91,7 @@ export const useEditorExtensions = ({
     onRequestConvertScene,
     commentCallbacksRef,
     enableBlockUiEvents,
+    isReadOnly = false,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(null);
 
@@ -244,6 +247,10 @@ export const useEditorExtensions = ({
             extensions.push(BlockUiEventsExtension);
         }
 
+        if (isReadOnly) {
+            extensions.push(ReadOnlyGuardExtension);
+        }
+
         return extensions;
     }, [
         characterRefSyncExtension,
@@ -259,6 +266,7 @@ export const useEditorExtensions = ({
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
+        isReadOnly,
         scriptBehaviorExtension,
         paginationExtension,
         uniqueIdExtension,

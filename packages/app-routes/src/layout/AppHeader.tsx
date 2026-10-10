@@ -8,6 +8,7 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
+import {getScriptBasePath, useScriptReadOnlyState} from '../routes/script/workspace/ScriptAccessContext';
 
 type AppHeaderProps = Pick<UIAppHeaderProps, 'contentInset' | 'isFullWidth' | 'scriptControls'> & {
     showScriptActions?: boolean,
@@ -37,12 +38,14 @@ type ScriptEditorAppHeaderProps = Omit<
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
+    const {basePath} = useScriptReadOnlyState();
 
     return (
         <UIScriptEditorAppHeader
             {...props}
             onHome={() => void navigate('/')}
-            onSelectView={(view: ScriptView) => void navigate(`/script/${props.currentScript.id}/${view}`)}
+            // A saved draft or version keeps its own path when switching between Editor and Export.
+            onSelectView={(view: ScriptView) => void navigate(`${basePath ?? getScriptBasePath(props.currentScript.id)}/${view}`)}
         />
     );
 };

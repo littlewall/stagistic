@@ -24,6 +24,7 @@ import {
 
 import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attribute-manager/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
+import {useScriptReadOnlyState} from '../../workspace/ScriptAccessContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';
 import styles from './ScriptMusicSidebar.module.css';
@@ -74,7 +75,8 @@ interface MusicRowProps {
     number: string | null,
     startBlockId: string | null,
     onFocus: (blockId: string) => void,
-    onRequestUnassign: (music: ScriptMusicListItem) => void,
+    /** Absent for a saved draft or version, where music stays assigned. */
+    onRequestUnassign?: (music: ScriptMusicListItem) => void,
     onOpenMusicManager: (musicId: string) => void,
 }
 
@@ -109,7 +111,7 @@ const MusicRow = ({
             className={clsx(styles.row, !startBlockId && styles.staticRow)}
             trailing={(
                 <span className={styles.actions}>
-                    {isAssigned ? (
+                    {isAssigned && onRequestUnassign ? (
                         <RowActionButton
                             ariaLabel={`Unassign ${music.title}`}
                             tooltipLabel="Unassign music"
@@ -161,6 +163,7 @@ export const ScriptMusicSidebar = ({
     const focusMusic = useFocusEditorMusic();
     const documentMusic = useEditorLiveMusic();
     const {openAttributeManagerMusic} = useScriptSettingsModal();
+    const {isReadOnly} = useScriptReadOnlyState();
     const [unassignTarget, setUnassignTarget] = useState<ScriptMusicListItem | null>(null);
 
     const musicMetadataById = useMemo(
@@ -235,7 +238,7 @@ export const ScriptMusicSidebar = ({
                     number={musicMetadataById.get(music.id)?.number ?? null}
                     startBlockId={musicMetadataById.get(music.id)?.startBlockId ?? null}
                     onFocus={focusMusic}
-                    onRequestUnassign={setUnassignTarget}
+                    onRequestUnassign={isReadOnly ? undefined : setUnassignTarget}
                     onOpenMusicManager={openAttributeManagerMusic}
                 />
             ))}
@@ -246,7 +249,7 @@ export const ScriptMusicSidebar = ({
         <div className={styles.content}>
             <SidebarMiniHeader
                 navigation={header}
-                actions={<MusicSidebarContextActions onAddMusic={onAddMusic} />}
+                actions={isReadOnly ? undefined : <MusicSidebarContextActions onAddMusic={onAddMusic} />}
                 controls={(
                     <SidebarActionsGroup>
                         <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_MUSIC} />

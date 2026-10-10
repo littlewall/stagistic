@@ -26,6 +26,8 @@ export interface AttributeManagerPlacesPanelProps {
     onCreatePlace: (name: string) => AttributeManagerPlace | null | Promise<AttributeManagerPlace | null>,
     onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>,
     onDeletePlace: (placeId: string) => void | Promise<unknown>,
+    /** Browse only: no creating, and the detail cannot be edited. */
+    isReadOnly?: boolean,
 }
 
 export const AttributeManagerPlacesPanel = ({
@@ -35,6 +37,7 @@ export const AttributeManagerPlacesPanel = ({
     onCreatePlace,
     onRenamePlace,
     onDeletePlace,
+    isReadOnly = false,
 }: AttributeManagerPlacesPanelProps) => {
     const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -101,11 +104,12 @@ export const AttributeManagerPlacesPanel = ({
                             aria-label="Search places"
                         />
                     </div>
-                    <Tooltip label="Create place">
+                    <Tooltip label="Create place" isDisabled={isReadOnly}>
                         <Button
                             className={styles.addButton}
                             variant="ghost"
                             size="sm"
+                            isDisabled={isReadOnly}
                             aria-label="Create place"
                             onPress={() => setIsCreateOpen(true)}
                         >
@@ -138,6 +142,7 @@ export const AttributeManagerPlacesPanel = ({
             <section
                 className={styles.detail}
                 aria-label="Place detail"
+                inert={isReadOnly}
             >
                 {selectedPlace && selectedConfirmedPlace ? (
                     <AttributeManagerPlaceDetail

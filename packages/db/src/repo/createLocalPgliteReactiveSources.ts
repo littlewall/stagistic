@@ -10,6 +10,7 @@ import type {
     ScriptLocation,
     ScriptMusic,
     ScriptMusicAttachmentBinding,
+    ScriptSnapshot,
     ScriptSummary,
 } from '../types';
 import type {
@@ -28,6 +29,7 @@ interface CreateLocalPgliteReactiveSourcesArgs {
     listMusic: (scriptId: string) => Promise<ScriptMusic[]>,
     listCommentThreads: (scriptId: string) => Promise<ScriptCommentThread[]>,
     listCommentMessages: (scriptId: string) => Promise<ScriptCommentMessage[]>,
+    listSnapshots: (scriptId: string) => Promise<ScriptSnapshot[]>,
     listLocations: (scriptId: string) => Promise<ScriptLocation[]>,
     listSceneLocations: (scriptId: string) => Promise<ScriptSceneLocationAssignment[]>,
     loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>,
@@ -61,6 +63,7 @@ export const createLocalPgliteReactiveSources = ({
     listMusic,
     listCommentThreads,
     listCommentMessages,
+    listSnapshots,
     listLocations,
     listSceneLocations,
     loadTitlePage,
@@ -262,6 +265,18 @@ export const createLocalPgliteReactiveSources = ({
             watchParams: [scriptId],
         });
     });
+    const getScriptSnapshotsSource = createScriptSourceRegistry<ScriptSnapshot>(scriptId => {
+        return createPgliteReactiveQuerySource({
+            getDb,
+            readRows: () => listSnapshots(scriptId),
+            watchQuery: `
+                SELECT id, script_id, kind, number, name, note, created_at, updated_at
+                FROM script_snapshots
+                WHERE script_id = $1
+            `,
+            watchParams: [scriptId],
+        });
+    });
 
     return {
         scriptSummaries,
@@ -277,5 +292,6 @@ export const createLocalPgliteReactiveSources = ({
         getScriptMusicAttachmentBindingsSource,
         getScriptCommentThreadsSource,
         getScriptCommentMessagesSource,
+        getScriptSnapshotsSource,
     };
 };

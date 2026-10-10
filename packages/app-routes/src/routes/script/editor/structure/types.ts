@@ -12,6 +12,8 @@ export interface StructureRowSceneProps {
     isActive: boolean,
     /** 1-based page the scene starts on; omitted until pagination has measured. */
     startPage?: number,
+    /** A saved draft or version: the scene can be focused but not dragged. */
+    isReadOnly?: boolean,
     onFocus: (blockId: string) => void,
 }
 
@@ -24,6 +26,8 @@ export interface StructureRowActContentProps {
     onNamePreview: (blockId: string, nextName: string) => void,
     onNamePreviewClear: (blockId: string) => void,
     onDelete: (blockId: string) => void,
+    /** A saved draft or version: the name shows but cannot change, and there is no delete. */
+    isReadOnly?: boolean,
 }
 
 export interface StructureRowActProps extends StructureRowActContentProps {

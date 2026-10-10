@@ -30,6 +30,8 @@ export interface CommentThreadCardProps {
     onDeleteMessage: (messageId: string) => void,
     onToggleResolved: () => void,
     onDeleteThread: () => void,
+    /** A saved draft or version: comments can be read but not changed. */
+    isReadOnly?: boolean,
     measureRef?: Ref<HTMLElement>,
 }
 
@@ -106,6 +108,7 @@ const Composer = ({
 interface MessageProps {
     message: ScriptCommentMessage,
     isEditing: boolean,
+    isReadOnly: boolean,
     onStartEdit: () => void,
     onStopEdit: () => void,
     onEdit: (body: string) => void,
@@ -139,6 +142,7 @@ const MessageBody = ({
 const Reply = ({
     message,
     isEditing,
+    isReadOnly,
     onStartEdit,
     onStopEdit,
     onEdit,
@@ -148,18 +152,20 @@ const Reply = ({
         <span className={styles.railPoint} aria-hidden="true" />
         <div className={styles.replyHead}>
             <time className={styles.time}>{formatCommentTime(message.createdAt)}</time>
-            <MoreActionsMenu
-                aria-label="Reply actions"
-                items={[
-                    {id: 'edit', label: 'Edit'},
-                    {
-                        id: 'delete',
-                        label: 'Delete',
-                        tone: 'danger',
-                    },
-                ]}
-                onAction={id => (id === 'edit' ? onStartEdit() : onDelete())}
-            />
+            {isReadOnly ? null : (
+                <MoreActionsMenu
+                    aria-label="Reply actions"
+                    items={[
+                        {id: 'edit', label: 'Edit'},
+                        {
+                            id: 'delete',
+                            label: 'Delete',
+                            tone: 'danger',
+                        },
+                    ]}
+                    onAction={id => (id === 'edit' ? onStartEdit() : onDelete())}
+                />
+            )}
         </div>
         <MessageBody message={message} isEditing={isEditing} onStopEdit={onStopEdit} onEdit={onEdit} />
     </div>
@@ -182,6 +188,7 @@ export const CommentThreadCard = ({
     onDeleteMessage,
     onToggleResolved,
     onDeleteThread,
+    isReadOnly = false,
     measureRef,
 }: CommentThreadCardProps) => {
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -233,35 +240,37 @@ export const CommentThreadCard = ({
                         <span className={styles.label}>{isResolved ? 'Resolved' : 'Comment'}</span>
                         <span className={styles.headerMeta}>
                             <time className={styles.time}>{time}</time>
-                            <MoreActionsMenu
-                                aria-label="More actions"
-                                items={[
-                                    {id: 'edit', label: 'Edit'},
-                                    {id: 'status', label: isResolved ? 'Reopen' : 'Resolve'},
-                                    {
-                                        id: 'delete',
-                                        label: 'Delete',
-                                        tone: 'danger',
-                                    },
-                                ]}
-                                onAction={id => {
-                                    if (id === 'edit') {
-                                        if (root) {
-                                            setEditingMessageId(root.id);
+                            {isReadOnly ? null : (
+                                <MoreActionsMenu
+                                    aria-label="More actions"
+                                    items={[
+                                        {id: 'edit', label: 'Edit'},
+                                        {id: 'status', label: isResolved ? 'Reopen' : 'Resolve'},
+                                        {
+                                            id: 'delete',
+                                            label: 'Delete',
+                                            tone: 'danger',
+                                        },
+                                    ]}
+                                    onAction={id => {
+                                        if (id === 'edit') {
+                                            if (root) {
+                                                setEditingMessageId(root.id);
+                                            }
+
+                                            return;
                                         }
 
-                                        return;
-                                    }
+                                        if (id === 'status') {
+                                            onToggleResolved();
 
-                                    if (id === 'status') {
-                                        onToggleResolved();
+                                            return;
+                                        }
 
-                                        return;
-                                    }
-
-                                    onDeleteThread();
-                                }}
-                            />
+                                        onDeleteThread();
+                                    }}
+                                />
+                            )}
                         </span>
                     </header>
                     <div className={styles.content}>
@@ -281,6 +290,7 @@ export const CommentThreadCard = ({
                                         key={message.id}
                                         message={message}
                                         isEditing={editingMessageId === message.id}
+                                        isReadOnly={isReadOnly}
                                         onStartEdit={() => setEditingMessageId(message.id)}
                                         onStopEdit={() => setEditingMessageId(null)}
                                         onEdit={body => onEditMessage(message.id, body)}
@@ -289,7 +299,7 @@ export const CommentThreadCard = ({
                                 ))}
                             </div>
                         ) : null}
-                        {isResolved ? null : (
+                        {isResolved || isReadOnly ? null : (
                             <div className={styles.replyComposer}>
                                 <Composer label="Reply" submitLabel="Reply" placeholder="Write a reply…" onSubmit={onReply} />
                             </div>

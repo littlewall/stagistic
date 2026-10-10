@@ -90,7 +90,7 @@ describe('mapStepkgSnapshotToPackageWrite', () => {
 
         expect(write.script.subtitle).toBe('sub');
         expect(write.script.updatedAt).toBe(new Date('2026-09-18T11:00:00.000Z').getTime());
-        expect(write.attachments[0]?.blob.size).toBe(3);
+        expect(write.attachments[0]?.blob?.size).toBe(3);
         expect(write.bindings[0]).toMatchObject({
             musicId: 'm1',
             attachmentId: 'a1',

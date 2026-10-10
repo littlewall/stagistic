@@ -1,0 +1,90 @@
+/*
+ * Dialogs for stored drafts and versions: save, restore and manage.
+ */
+.form {
+    composes: form from '../modal/dialogForm.module.css';
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.label {
+    composes: label from '../modal/dialogForm.module.css';
+}
+
+.input {
+    composes: input from '../modal/dialogForm.module.css';
+}
+
+.editingLabel {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.empty {
+    margin: var(--space-lg) 0;
+    color: var(--color-text-muted);
+}
+
+.stateList {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    max-height: min(420px, 60vh);
+    margin: var(--space-lg) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stateRow {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.stateText {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-px) * 2);
+    min-width: 0;
+}
+
+.stateLabel,
+.stateDetail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stateLabel {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.stateDetail {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.stateActions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.confirmText {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}

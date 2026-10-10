@@ -1,0 +1,10 @@
+/*
+ * Settings of a saved draft or version: the panel stays readable but inert.
+ */
+.panelContent {
+    display: contents;
+}
+
+.readOnlyNotice {
+    margin-block-end: var(--space-xl);
+}

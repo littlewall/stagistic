@@ -186,6 +186,8 @@ export type ScriptEditorAppHeaderProps = {
     isFullWidth?: boolean,
     activeView: ScriptView,
     onSelectView: (view: ScriptView) => void,
+    /** Chooses the shown script state (current, draft or version); sits after the title. */
+    scriptState?: ReactNode,
 };
 
 export const ScriptEditorAppHeader = ({
@@ -199,6 +201,7 @@ export const ScriptEditorAppHeader = ({
     isFullWidth = true,
     activeView,
     onSelectView,
+    scriptState,
 }: ScriptEditorAppHeaderProps) => {
     return (
         <AppHeader
@@ -290,6 +293,7 @@ export const ScriptEditorAppHeader = ({
                         />
                         <SyncIndicator state={scriptSyncState} />
                     </div>
+                    {scriptState}
                 </>
             )}
         />

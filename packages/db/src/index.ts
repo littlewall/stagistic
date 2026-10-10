@@ -1,4 +1,5 @@
 // ─── Types & repository contracts ──────────────────────────────────────────────
+export {InvalidScriptSnapshotError} from './repo/snapshots';
 export type {
     CommentAnchorKind,
     CommentThreadStatus,
@@ -22,6 +23,8 @@ export type {
     ScriptMusicAttachmentBinding,
     ScriptScene,
     ScriptSettingsBlock,
+    ScriptSnapshot,
+    ScriptSnapshotKind,
     ScriptSpeakingEntityRef,
     ScriptSummary,
     ScriptTitlePageField,
@@ -47,6 +50,7 @@ export type {
     CreateScriptLocationInput,
     CreateScriptLocationWithIdInput,
     CreateScriptMusicInput,
+    CreateScriptSnapshotInput,
     CreateScriptWithIdInput,
     DuplicateScriptInput,
     DuplicateScriptWithIdInput,
@@ -60,9 +64,11 @@ export type {
     ScriptMusicRepository,
     ScriptRepository,
     ScriptSceneLocationAssignment,
+    ScriptSnapshotsRepository,
     ScriptTitlePageRecord,
     ScriptTitlePageRepository,
     UpdateScriptMusicInput,
+    UpdateScriptSnapshotInput,
 } from './types/scriptRepository';
 
 // ─── Schema ────────────────────────────────────────────────────────────────────
@@ -93,6 +99,11 @@ export {
     type ScriptDocumentProjectionWriter,
     type ScriptDocumentSource,
 } from './repo/document/documentProjection';
+export {
+    createReadOnlyScriptRepository,
+    createReadThroughFileStorage,
+    ReadOnlyScriptRepositoryError,
+} from './repo/readOnlyScriptRepository';
 
 // ─── Reactive sources ──────────────────────────────────────────────────────────
 export * from './reactive';

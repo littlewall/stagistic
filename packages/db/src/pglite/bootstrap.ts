@@ -24,6 +24,11 @@ interface CreatePgliteBootstrapOptions {
     wasmUrl: string,
     dataDir?: string,
     workerFactory?: () => Worker,
+    /*
+     * PGliteWorker elects one leader per id across tabs (default: worker URL +
+     * dataDir). Pass a unique id for a database that must stay private to a tab.
+     */
+    workerId?: string,
 }
 
 interface PgliteBootstrap {
@@ -43,6 +48,7 @@ export const createPgliteBootstrap = ({
     wasmUrl,
     dataDir = DEFAULT_DATA_DIR,
     workerFactory,
+    workerId,
 }: CreatePgliteBootstrapOptions): PgliteBootstrap => {
     if (workerFactory) {
         let dbPromise: Promise<LocalDb> | null = null;
@@ -55,6 +61,7 @@ export const createPgliteBootstrap = ({
                         dataDir,
                         extensions: {live},
                         relaxedDurability: true,
+                        ...workerId ? {id: workerId} : {},
                     });
 
                     workerInstanceRef = workerInstance;

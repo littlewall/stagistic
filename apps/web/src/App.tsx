@@ -1,4 +1,4 @@
-import {ScriptRepositoryProvider} from '@stagistic/app-core';
+import {ScriptRepositoryProvider, type SnapshotViewRepository} from '@stagistic/app-core';
 import {
     GlobalModalsProvider,
     HomeRoute,
@@ -25,6 +25,7 @@ import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
+    const [snapshotViews, setSnapshotViews] = useState<SnapshotViewRepository | null>(null);
     const [bootProgress, setBootProgress] = useState(0);
     const [bootStatus, setBootStatus] = useState('Preparing');
 
@@ -59,6 +60,7 @@ const BootedApp = () => {
                 return;
             }
 
+            setSnapshotViews(repositoryModule.snapshotViews);
             setScriptRepository(repositoryModule.scriptRepository);
         };
 
@@ -74,12 +76,20 @@ const BootedApp = () => {
     }
 
     return (
-        <ScriptRepositoryProvider repository={scriptRepository}>
+        <ScriptRepositoryProvider
+            repository={scriptRepository}
+            snapshotViews={snapshotViews}
+        >
             <ToastProvider>
                 <GlobalModalsProvider>
                     <Routes>
                         <Route path="/" element={<HomeRoute />} />
                         <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                            <Route index element={<Navigate to="editor" replace />} />
+                            <Route path="editor" element={<ScriptEditorRoute />} />
+                            <Route path="export" element={<ScriptExportRoute />} />
+                        </Route>
+                        <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                             <Route index element={<Navigate to="editor" replace />} />
                             <Route path="editor" element={<ScriptEditorRoute />} />
                             <Route path="export" element={<ScriptExportRoute />} />

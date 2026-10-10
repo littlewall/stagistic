@@ -13,10 +13,13 @@ import {useNavigate} from 'react-router-dom';
 
 import type {ScriptEditorController} from './controllerTypes';
 import {deriveEditorLoadState} from './editorLoadState';
+import {useScriptAccess} from './ScriptAccessContext';
 import {useEditorRedirects} from './useEditorRedirects';
 import {useSaveIndicator} from './useSaveIndicator';
 import {useScriptLoader} from './useScriptLoader';
 import {useScriptSaveHandlers} from './useScriptSaveHandlers';
+
+const readOnlySave = () => Promise.resolve(true);
 
 export const useScriptEditorController = (scriptId: string | undefined): ScriptEditorController => {
     const navigate = useNavigate();
@@ -31,13 +34,14 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         error: currentScriptError,
     } = useScriptSummary(scriptId);
     const scriptRepository = useScriptRepository();
+    const {isReadOnly} = useScriptAccess();
     const {
         initialValue,
         initialIndexSnapshot,
         storageError,
         shouldAutoFocus,
         setStorageError,
-    } = useScriptLoader(currentScript?.id ?? null, scriptRepository);
+    } = useScriptLoader(currentScript?.id ?? null, scriptRepository, {isReadOnly});
     const {
         saveIndicator,
         startSaveIndicator,
@@ -128,6 +132,27 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         },
     });
 
+    /*
+     * A stored draft or version never saves; the editor still reports values,
+     * so its handlers resolve as if everything were already persisted.
+     */
+    const saveHandlers = useMemo(() => isReadOnly
+        ? {
+            handleAutoSave: readOnlySave,
+            handleManualSave: readOnlySave,
+            handleSummaryMetadataChange: readOnlySave,
+        }
+        : {
+            handleAutoSave,
+            handleManualSave,
+            handleSummaryMetadataChange,
+        }, [
+        handleAutoSave,
+        handleManualSave,
+        handleSummaryMetadataChange,
+        isReadOnly,
+    ]);
+
     return {
         scriptsLoading,
         scriptsError,
@@ -141,8 +166,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         shouldAutoFocus,
         saveIndicator,
         editorLoadState,
-        handleAutoSave,
-        handleManualSave,
-        handleSummaryMetadataChange,
+        ...saveHandlers,
     };
 };

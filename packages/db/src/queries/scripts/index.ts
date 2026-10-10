@@ -12,4 +12,5 @@ export * from './music';
 export * from './outbox';
 export * from './sceneLocations';
 export * from './scenes';
+export * from './snapshots';
 export * from './titlePageFields';
