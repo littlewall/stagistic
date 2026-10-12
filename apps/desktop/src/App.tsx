@@ -1,4 +1,4 @@
-import {ScriptRepositoryProvider} from '@stagistic/app-core';
+import {ScriptDocumentSyncProvider, ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
     GlobalModalsProvider,
     HomeRoute,
@@ -7,6 +7,7 @@ import {
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
+import type {SyncEngineClient} from '@stagistic/sync-engine';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {getCurrentWindow} from '@tauri-apps/api/window';
 import {useEffect, useState} from 'react';
@@ -41,6 +42,7 @@ const AppRoutes = () => {
 
 const App = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
+    const [documentSync, setDocumentSync] = useState<SyncEngineClient | null>(null);
     const [bootProgress, setBootProgress] = useState(0);
     const [bootStatus, setBootStatus] = useState('Preparing');
 
@@ -81,6 +83,7 @@ const App = () => {
                 return;
             }
 
+            setDocumentSync(repositoryModule.documentSync);
             setScriptRepository(repositoryModule.scriptRepository);
         };
 
@@ -119,11 +122,13 @@ const App = () => {
 
     return (
         <ScriptRepositoryProvider repository={scriptRepository}>
-            <ToastProvider>
-                <GlobalModalsProvider>
-                    <AppRoutes />
-                </GlobalModalsProvider>
-            </ToastProvider>
+            <ScriptDocumentSyncProvider client={documentSync}>
+                <ToastProvider>
+                    <GlobalModalsProvider>
+                        <AppRoutes />
+                    </GlobalModalsProvider>
+                </ToastProvider>
+            </ScriptDocumentSyncProvider>
         </ScriptRepositoryProvider>
     );
 };

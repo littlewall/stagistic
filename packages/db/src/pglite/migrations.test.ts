@@ -293,23 +293,27 @@ describe('runPgliteMigrations', () => {
         const blocks = await client.query<{contentJson: string}>(
             'SELECT content_json AS "contentJson" FROM script_blocks',
         );
-        const outbox = await client.query<{opType: string, payloadJson: string}>(
-            'SELECT op_type AS "opType", payload_json AS "payloadJson" FROM sync_outbox',
-        );
-        const oldTables = await client.query<{cues: string | null, attachments: string | null}>(
+        const oldTables = await client.query<{
+            cues: string | null,
+            attachments: string | null,
+            outbox: string | null,
+        }>(
             `SELECT
                 to_regclass('script_cues')::text AS cues,
-                to_regclass('script_cue_attachments')::text AS attachments`,
+                to_regclass('script_cue_attachments')::text AS attachments,
+                to_regclass('sync_outbox')::text AS outbox`,
         );
 
         expect(music.rows).toEqual([{id: 'music-1'}]);
         expect(bindings.rows).toEqual([{musicId: 'music-1'}]);
         expect(blocks.rows[0]?.contentJson).toContain('"type":"musicStart"');
         expect(blocks.rows[0]?.contentJson).toContain('"musicId":"music-1"');
-        expect(outbox.rows[0]?.opType).toBe('music.update');
-        expect(outbox.rows[0]?.payloadJson).toContain('"operationType":"music.update"');
-        expect(outbox.rows[0]?.payloadJson).toContain('"entityKey":"music:music-1"');
-        expect(outbox.rows[0]?.payloadJson).toContain('"musicId":"music-1"');
-        expect(oldTables.rows).toEqual([{cues: null, attachments: null}]);
+        expect(oldTables.rows).toEqual([
+            {
+                cues: null,
+                attachments: null,
+                outbox: null,
+            },
+        ]);
     });
 });

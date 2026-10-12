@@ -10,7 +10,6 @@ import * as dbQueries from '../../queries';
 import type {ScriptRepository} from '../../types/scriptRepository';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from '../types';
 import {normalizeSettingsBlockType} from './configBlockTypes';
@@ -21,7 +20,6 @@ type SettingsHandlers = Pick<ScriptRepository, 'loadScriptSettings' | 'saveScrip
 
 interface CreateSettingsHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
 }
 
@@ -191,7 +189,6 @@ export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, sett
 
 export const createSettingsHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateSettingsHandlersArgs): SettingsHandlers => {
     const loadScriptSettings: SettingsHandlers['loadScriptSettings'] = async scriptId => {
@@ -292,16 +289,6 @@ export const createSettingsHandlers = ({
 
         await db.transaction(async tx => {
             await writeScriptSettingsTx(tx, scriptId, settings, now);
-            await recordOutbox(
-                {
-                    scriptId,
-                    entityKey: `script:${scriptId}:settings`,
-                    opType: 'config.save',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({scriptId, updatedAt: now}),
-                },
-                tx,
-            );
         });
 
         /*
@@ -319,16 +306,6 @@ export const createSettingsHandlers = ({
             await dbQueries.deleteScriptSettings(tx, scriptId);
             await dbQueries.invalidateScriptPageCount(tx, scriptId);
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox(
-                {
-                    scriptId,
-                    entityKey: `script:${scriptId}:settings`,
-                    opType: 'config.delete',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({scriptId, deletedAt: now}),
-                },
-                tx,
-            );
         });
 
         await syncDb();

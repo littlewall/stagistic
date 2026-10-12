@@ -10,7 +10,7 @@ import {
     scriptMusic,
     scriptMusicAttachments,
 } from './music';
-import {scripts, syncOutbox} from './scripts';
+import {scripts} from './scripts';
 import {
     scriptSettingsBlocks,
     scriptSettingsHeadersFooters,
@@ -39,7 +39,7 @@ export {
     scriptMusic,
     scriptMusicAttachments,
 } from './music';
-export {scripts, syncOutbox} from './scripts';
+export {scripts} from './scripts';
 export {
     scriptSettingsBlocks,
     scriptSettingsHeadersFooters,
@@ -58,7 +58,6 @@ export {
 
 export const dbSchema = {
     scripts,
-    syncOutbox,
     scriptSettingsPageLayout,
     scriptSettingsVisualPreferences,
     scriptSettingsStructure,

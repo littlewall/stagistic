@@ -11,13 +11,11 @@ import {writeTitlePageFieldsTx} from '../config/titlePage';
 import {LEGACY_TO_BLOCKS_TRIGGERS, migrateScriptDocumentToBlocks} from '../document/migration/legacyToBlocks';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from '../types';
 
 interface CreateImportPackageHandlerArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
     fileStorage: FileStorage,
 }
@@ -212,7 +210,6 @@ const deleteBlobsBestEffort = async (fileStorage: FileStorage, keys: string[], c
 
 export const createImportPackageHandler = ({
     getDb,
-    recordOutbox,
     syncDb,
     fileStorage,
 }: CreateImportPackageHandlerArgs) => {
@@ -239,17 +236,6 @@ export const createImportPackageHandler = ({
                 }
 
                 await writePackageDomainRowsTx(tx, scriptId, input, storageKeyByAttachment, now);
-
-                await recordOutbox(
-                    {
-                        scriptId,
-                        entityKey: `script:${scriptId}`,
-                        opType: 'script.import',
-                        occurredAt: now,
-                        payloadJson: JSON.stringify({scriptId, createdAt: input.script.createdAt}),
-                    },
-                    tx,
-                );
             });
         } catch (error) {
             await deleteBlobsBestEffort(fileStorage, savedKeys, 'an uncommitted blob');
@@ -287,17 +273,6 @@ export const createImportPackageHandler = ({
                 await dbQueries.deleteScriptAttachmentsByScriptId(tx, scriptId);
 
                 await writePackageDomainRowsTx(tx, scriptId, input, storageKeyByAttachment, now);
-
-                await recordOutbox(
-                    {
-                        scriptId,
-                        entityKey: `script:${scriptId}`,
-                        opType: 'script.restore',
-                        occurredAt: now,
-                        payloadJson: JSON.stringify({scriptId, updatedAt: now}),
-                    },
-                    tx,
-                );
             });
         } catch (error) {
             await deleteBlobsBestEffort(fileStorage, savedKeys, 'an uncommitted blob');

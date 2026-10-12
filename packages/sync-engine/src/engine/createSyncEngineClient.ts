@@ -6,6 +6,7 @@ import {
     type CreateBroadcastSyncOptions,
 } from '../tabs/broadcastSync';
 import {isBodyDocEmpty} from '../ydoc/bodyCodec';
+import {isEmptyChanges, type RecordChanges} from '../ydoc/recordsCodec';
 import {
     bodyDocName,
     type ControlChannelFactory,
@@ -15,6 +16,7 @@ import {
     metaDocName,
     type OpenResult,
 } from './protocol';
+import type {RecordsKind} from './scriptRecords';
 
 /*
  * Tab side of the engine: Y.Doc replicas kept in sync with the leader over
@@ -34,7 +36,12 @@ export interface OpenedScript {
 
 export interface SyncEngineClient {
     openScript(scriptId: string): Promise<OpenedScript>,
-    notifyBodyReplaced(scriptId: string): Promise<void>,
+    /** Mirrors a repository mutation (projection before/after) into the script's Y.Doc. */
+    applyRecordChanges(scriptId: string, kind: RecordsKind, changes: RecordChanges): Promise<void>,
+    /** Resolves once the projection holds the script (incl. this tab's open replica). */
+    flushScript(scriptId: string): Promise<void>,
+    /** The projection was rewritten outside the engine (package restore). */
+    notifyScriptReplaced(scriptId: string): Promise<void>,
     notifyScriptDeleted(scriptId: string): Promise<void>,
     destroy(): void,
 }
@@ -211,8 +218,28 @@ export const createSyncEngineClient = ({
 
     return {
         openScript,
-        notifyBodyReplaced: async scriptId => {
-            await send({type: 'body-replaced', scriptId});
+        applyRecordChanges: async (scriptId, kind, changes) => {
+            if (!isEmptyChanges(changes)) {
+                await send({
+                    type: 'apply-records',
+                    scriptId,
+                    kind,
+                    changes,
+                });
+            }
+        },
+        flushScript: async scriptId => {
+            const replica = replicas.get(scriptId);
+
+            // Include this tab's edits that may still be on their way to the engine.
+            await send({
+                type: 'flush',
+                scriptId,
+                ...replica ? {stateVector: Y.encodeStateVector(replica.body)} : {},
+            });
+        },
+        notifyScriptReplaced: async scriptId => {
+            await send({type: 'script-replaced', scriptId});
         },
         notifyScriptDeleted: async scriptId => {
             await send({type: 'script-deleted', scriptId});

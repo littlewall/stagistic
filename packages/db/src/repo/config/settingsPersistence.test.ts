@@ -17,7 +17,6 @@ describe('settings persistence', () => {
 
         const handlers = createSettingsHandlers({
             getDb: () => Promise.resolve(db),
-            recordOutbox: () => Promise.resolve(),
             syncDb: () => Promise.resolve(),
         });
 
@@ -63,7 +62,6 @@ describe('settings persistence', () => {
 
         const handlers = createTitlePageHandlers({
             getDb: () => Promise.resolve(db),
-            recordOutbox: () => Promise.resolve(),
             syncDb: () => Promise.resolve(),
         });
 
@@ -105,7 +103,6 @@ describe('settings persistence', () => {
         let syncCount = 0;
         const handlers = createTitlePageHandlers({
             getDb: () => Promise.resolve(db),
-            recordOutbox: () => Promise.resolve(),
             syncDb: () => {
                 syncCount += 1;
 
@@ -128,7 +125,6 @@ describe('settings persistence', () => {
         let syncCount = 0;
         const handlers = createSettingsHandlers({
             getDb: () => Promise.resolve(db),
-            recordOutbox: () => Promise.resolve(),
             syncDb: () => {
                 syncCount += 1;
 

@@ -1,3 +1,4 @@
+import type {RecordChanges} from '../ydoc/recordsCodec';
 import {
     type ControlChannel,
     type EngineMessage,
@@ -5,11 +6,13 @@ import {
     isEngineMessage,
     type OpenResult,
 } from './protocol';
+import type {RecordsKind} from './scriptRecords';
 
 export interface EngineRequestHandlers {
     open(scriptId: string): Promise<OpenResult>,
-    flush(scriptId: string, stateVector: Uint8Array): Promise<void>,
-    bodyReplaced(scriptId: string): Promise<void>,
+    flush(scriptId: string, stateVector?: Uint8Array): Promise<void>,
+    applyRecords(scriptId: string, kind: RecordsKind, changes: RecordChanges): Promise<void>,
+    scriptReplaced(scriptId: string): Promise<void>,
     scriptDeleted(scriptId: string): Promise<void>,
 }
 
@@ -40,8 +43,11 @@ export const serveEngineRequests = (
                 case 'flush':
                     await handlers.flush(request.scriptId, request.stateVector);
                     break;
-                case 'body-replaced':
-                    await handlers.bodyReplaced(request.scriptId);
+                case 'apply-records':
+                    await handlers.applyRecords(request.scriptId, request.kind, request.changes);
+                    break;
+                case 'script-replaced':
+                    await handlers.scriptReplaced(request.scriptId);
                     break;
                 case 'script-deleted':
                     await handlers.scriptDeleted(request.scriptId);

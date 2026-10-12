@@ -1,6 +1,5 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {
-    afterEach,
     describe,
     expect,
     it,
@@ -8,98 +7,44 @@ import {
 import * as Y from 'yjs';
 
 import {
+    cleanups,
+    createChannels,
+    ENGINE_TEST_SCHEMA,
+    eventually,
+    startClient,
+    startEngine,
+} from '../testing/engineHarness';
+import {
     block,
     blockText,
     doc,
 } from '../testing/fixtures';
+import {createMemoryProjectionStore} from '../testing/memoryProjectionStore';
 import {bodyDocToScriptDocument, getBodyFragment} from '../ydoc/bodyCodec';
 import {getMetaMap, SCHEMA_VERSION_KEY} from '../ydoc/mapCodec';
-import {
-    createSyncEngine,
-    type ProjectionStore,
-    type SyncEngine,
-} from './createSyncEngine';
-import {createSyncEngineClient, type SyncEngineClient} from './createSyncEngineClient';
+import {createSyncEngine} from './createSyncEngine';
+import type {SyncEngineClient} from './createSyncEngineClient';
+import type {SyncEngine} from './engineTypes';
 import {createMemoryDocPersistence} from './persistence';
 import {bodyDocName, metaDocName} from './protocol';
 
-const SCHEMA = 4;
-
-/** Real (Node) BroadcastChannels, namespaced per test. */
-const createChannels = () => {
-    const ns = crypto.randomUUID();
-
-    return {
-        controlChannelFactory: () => new BroadcastChannel(`${ns}:engine`) as never,
-        docChannelFactory: (name: string) => new BroadcastChannel(`${ns}:${name}`) as never,
-    };
-};
+const SCHEMA = ENGINE_TEST_SCHEMA;
 
 const createStore = (initial: Record<string, ScriptDocument> = {}) => {
-    const documents = new Map(Object.entries(initial));
-    const writes: Array<{scriptId: string, document: ScriptDocument}> = [];
-    const store: ProjectionStore = {
-        loadDocument: scriptId => Promise.resolve(documents.get(scriptId) ?? null),
-        writeDocument: (scriptId, document) => {
-            documents.set(scriptId, document);
-            writes.push({scriptId, document});
-
-            return Promise.resolve();
-        },
-    };
+    const {
+        store,
+        documents,
+        documentWrites,
+    } = createMemoryProjectionStore(initial);
 
     return {
         store,
         documents,
-        writes,
+        writes: documentWrites,
     };
 };
 
 const texts = (document: ScriptDocument | undefined) => document?.content.map(node => node.content?.[0]?.text ?? '');
-
-const eventually = async (check: () => boolean, timeoutMs = 3_000) => {
-    const deadline = Date.now() + timeoutMs;
-
-    while (!check()) {
-        if (Date.now() > deadline) {
-            throw new Error('condition not met in time');
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 10));
-    }
-};
-
-const cleanups: Array<() => Promise<void> | void> = [];
-
-afterEach(async () => {
-    for (const cleanup of cleanups.splice(0).reverse()) {
-        await cleanup();
-    }
-});
-
-const startEngine = (args: Omit<Parameters<typeof createSyncEngine>[0], 'clientSchemaVersion'> & {clientSchemaVersion?: number}) => {
-    const engine = createSyncEngine({
-        clientSchemaVersion: SCHEMA,
-        projectionDelayMs: 20,
-        ...args,
-    });
-
-    cleanups.push(() => engine.stop());
-
-    return engine;
-};
-
-const startClient = (channels: ReturnType<typeof createChannels>) => {
-    const client = createSyncEngineClient({
-        ...channels,
-        retryMs: 50,
-        timeoutMs: 3_000,
-    });
-
-    cleanups.push(() => client.destroy());
-
-    return client;
-};
 
 const SCRIPT = 's1';
 const stored = () => doc(block('scene', 'h1', 'INT. HALL'), block('dialogue', 'd1', 'Hello'));
@@ -229,7 +174,7 @@ describe('sync engine', () => {
         const tab = await client.openScript(SCRIPT);
 
         documents.set(SCRIPT, doc(block('scene', 'r1', 'RESTORED'), block('stageDirection', 'r2', 'Lights.')));
-        await client.notifyBodyReplaced(SCRIPT);
+        await client.notifyScriptReplaced(SCRIPT);
 
         await eventually(() => texts(bodyDocToScriptDocument(tab.body))?.[0] === 'RESTORED');
         expect(getBodyFragment(tab.body).length).toBe(2);

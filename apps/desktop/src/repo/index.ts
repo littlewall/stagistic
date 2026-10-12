@@ -1,12 +1,21 @@
-import {createLocalPgliteRepository, type ScriptRepository} from '@stagistic/db';
+import {
+    createLocalPgliteRepository,
+    type ScriptRepository,
+    withDocumentSync,
+} from '@stagistic/db';
+import {createSyncEngineClient} from '@stagistic/sync-engine';
 
 import {getLocalDb, syncToFs} from '~db';
 
 import {TauriFsFileStorage} from '../fileStorage/TauriFsFileStorage';
 
-export const scriptRepository: ScriptRepository = createLocalPgliteRepository({
+/** Tab side of the sync engine running in the PGlite leader worker. */
+export const documentSync = createSyncEngineClient();
+
+/** Local repository whose script content and records are mirrored into Y.Docs. */
+export const scriptRepository: ScriptRepository = withDocumentSync(createLocalPgliteRepository({
     getLocalDb,
     syncToFs,
     fileStorage: new TauriFsFileStorage(),
-});
+}), {getDb: getLocalDb, documents: documentSync});
 export type {ScriptRepository} from '@stagistic/db';

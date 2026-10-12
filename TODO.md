@@ -24,9 +24,15 @@
 - [x] Tests: engine/client node, editor collab browser, two-tab browser test
 
 ## Phases 2–6 — local only (Postgres, RustFS, Mailpit, Caddy + mkcert `*.stagistic.local`)
-- [ ] 2. Metadata + comments in Y docs, duplicate over Y.Doc, drop outbox
+- [x] 2. Metadata + comments in Y docs, duplicate over Y.Doc, drop outbox
+  - [x] sync-engine: records codec (three-way apply, replace, projection diff, dedupe) + meta/comments docs in engine
+  - [x] db: records <-> rows (`repo/records`), projection store, `withDocumentSync` capture of repository mutations
+  - [x] Duplicate flushes the source (incl. the tab's open replica) before copying
+  - [x] Drop outbox (`sync_outbox` migration 0025) and dead pre-refactor copies in `packages/db/src/repo`
+  - [x] `characterKey` (and gender key, location name) dedupe in the engine
+  - [x] Desktop runs the engine too (same worker wiring as web)
 - [ ] 3. Identity (Better Auth, Mailpit, Turnstile test keys)
-- [ ] 4. Collab server (Hocuspocus + REST)
+- [ ] 4. Collab server (Hocuspocus + REST, server-side projection of meta/comments into Postgres tables)
 - [ ] 5. Account + cloud sync in client
 - [ ] 6. Attachments to S3 (RustFS)
 

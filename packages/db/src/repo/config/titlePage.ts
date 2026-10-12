@@ -10,13 +10,11 @@ import * as dbQueries from '../../queries';
 import type {ScriptTitlePageRepository} from '../../types/scriptRepository';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from '../types';
 
 interface CreateTitlePageHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
 }
 
@@ -141,7 +139,6 @@ export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, set
 
 export const createTitlePageHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
     const load: ScriptTitlePageRepository['load'] = async scriptId => {
@@ -156,16 +153,6 @@ export const createTitlePageHandlers = ({
 
         await db.transaction(async tx => {
             await writeTitlePageFieldsTx(tx, scriptId, settings, now);
-            await recordOutbox(
-                {
-                    scriptId,
-                    entityKey: `script:${scriptId}:title-page`,
-                    opType: 'title-page.save',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({scriptId, updatedAt: now}),
-                },
-                tx,
-            );
         });
 
         /*
@@ -186,16 +173,6 @@ export const createTitlePageHandlers = ({
                 subtitle: null,
                 updatedAt: now,
             });
-            await recordOutbox(
-                {
-                    scriptId,
-                    entityKey: `script:${scriptId}:title-page`,
-                    opType: 'title-page.delete',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({scriptId, deletedAt: now}),
-                },
-                tx,
-            );
         });
 
         await syncDb();

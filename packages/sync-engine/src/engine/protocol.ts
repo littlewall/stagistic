@@ -1,3 +1,6 @@
+import type {RecordChanges} from '../ydoc/recordsCodec';
+import type {RecordsKind} from './scriptRecords';
+
 /*
  * Control protocol between tabs (clients) and the leader's engine, over one
  * BroadcastChannel. Document content never travels here: it uses the
@@ -8,6 +11,7 @@ export const ENGINE_CHANNEL_NAME = 'stagistic-sync-engine';
 
 export const bodyDocName = (scriptId: string) => `script/${scriptId}/body`;
 export const metaDocName = (scriptId: string) => `script/${scriptId}/meta`;
+export const commentsDocName = (scriptId: string) => `script/${scriptId}/comments`;
 
 export type EngineRequest =
     | {
@@ -15,16 +19,24 @@ export type EngineRequest =
         requestId: string,
         scriptId: string,
     }
-    /** Waits until the engine has `stateVector`, then writes the projection. */
+    /** Waits until the engine has the body `stateVector` (if given), then writes the projection. */
     | {
         type: 'flush',
         requestId: string,
         scriptId: string,
-        stateVector: Uint8Array,
+        stateVector?: Uint8Array,
+    }
+    /** A repository mutation changed records in the projection; mirror it into the Y.Doc. */
+    | {
+        type: 'apply-records',
+        requestId: string,
+        scriptId: string,
+        kind: RecordsKind,
+        changes: RecordChanges,
     }
     /** The projection was rewritten outside the engine (package restore). */
     | {
-        type: 'body-replaced',
+        type: 'script-replaced',
         requestId: string,
         scriptId: string,
     }

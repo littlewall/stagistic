@@ -11,19 +11,16 @@ import {
 } from './document/migration/legacyToBlocks';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from './types';
 
 interface CreateScriptsHandlersArgs {
     getDb: GetDb,
-    recordOutbox?: RecordOutbox,
     syncDb?: SyncDb,
 }
 
 export const createScriptsHandlers = ({
     getDb,
-    recordOutbox = () => Promise.resolve(),
     syncDb = () => Promise.resolve(),
 }: CreateScriptsHandlersArgs) => {
     const createWithId = async ({
@@ -66,14 +63,6 @@ export const createScriptsHandlers = ({
                     activeBlockId,
                 });
             }
-
-            await recordOutbox({
-                scriptId: id,
-                entityKey: `script:${id}`,
-                opType: 'script.create',
-                occurredAt: timestamp,
-                payloadJson: JSON.stringify({scriptId: id, createdAt: timestamp}),
-            }, tx);
         });
         await syncDb();
     };
@@ -100,17 +89,6 @@ export const createScriptsHandlers = ({
                 copySettings: input.copySettings,
                 copyAttributes: input.copyAttributes,
             });
-            await recordOutbox({
-                scriptId: input.targetScriptId,
-                entityKey: `script:${input.targetScriptId}`,
-                opType: 'script.duplicate',
-                occurredAt: now,
-                payloadJson: JSON.stringify({
-                    sourceScriptId,
-                    targetScriptId: input.targetScriptId,
-                    createdAt: now,
-                }),
-            }, tx);
         });
         await syncDb();
     };
@@ -151,17 +129,6 @@ export const createScriptsHandlers = ({
                     subtitle: trimmedSubtitle.length > 0 ? trimmedSubtitle : null,
                     updatedAt: now,
                 });
-                await recordOutbox({
-                    scriptId,
-                    entityKey: `script:${scriptId}`,
-                    opType: 'script.rename',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({
-                        scriptId,
-                        title: nextTitle,
-                        updatedAt: now,
-                    }),
-                }, tx);
             });
             await syncDb();
         },
@@ -177,17 +144,6 @@ export const createScriptsHandlers = ({
                     title: nextTitle,
                     updatedAt: now,
                 });
-                await recordOutbox({
-                    scriptId,
-                    entityKey: `script:${scriptId}`,
-                    opType: 'script.title.rename',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({
-                        scriptId,
-                        title: nextTitle,
-                        updatedAt: now,
-                    }),
-                }, tx);
             });
             await syncDb();
         },
@@ -211,40 +167,20 @@ export const createScriptsHandlers = ({
         duplicateWithId,
         delete: async (scriptId: string) => {
             const db = await getDb();
-            const now = Date.now();
 
             await db.transaction(async tx => {
                 await dbQueries.deleteScript(tx, scriptId);
-                await recordOutbox({
-                    scriptId,
-                    entityKey: `script:${scriptId}`,
-                    opType: 'script.delete',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({scriptId, deletedAt: now}),
-                }, tx);
             });
             await syncDb();
         },
         setActiveBlock: async (scriptId: string, blockId: string | null) => {
             const db = await getDb();
-            const now = Date.now();
 
             await db.transaction(async tx => {
                 await dbQueries.updateActiveBlock(tx, {
                     scriptId,
                     activeBlockId: blockId,
                 });
-                await recordOutbox({
-                    scriptId,
-                    entityKey: `script:${scriptId}`,
-                    opType: 'script.active-block.set',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({
-                        scriptId,
-                        blockId,
-                        updatedAt: now,
-                    }),
-                }, tx);
             });
             await syncDb();
         },

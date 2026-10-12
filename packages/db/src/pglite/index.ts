@@ -7,3 +7,4 @@ export {
     type LocalDb,
 } from './bootstrap';
 export {runPgliteMigrations} from './migrations';
+export {startPgliteSyncEngine} from './startSyncEngine';

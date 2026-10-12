@@ -75,7 +75,6 @@ const setup = async (fileStorage: FileStorage = new InMemoryFileStorage()) => {
 
     const handlers = createAttachmentHandlers({
         getDb: () => Promise.resolve(db),
-        recordOutbox: () => Promise.resolve(),
         syncDb: () => Promise.resolve(),
         fileStorage,
     });

@@ -5,20 +5,17 @@ import type {FileStorage} from '../storage/fileStorage';
 import type {ScriptAttachmentsRepository} from '../types/scriptRepository';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from './types';
 
 interface CreateAttachmentHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
     fileStorage: FileStorage,
 }
 
 export const createAttachmentHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
     fileStorage,
 }: CreateAttachmentHandlersArgs): ScriptAttachmentsRepository => {
@@ -77,21 +74,6 @@ export const createAttachmentHandlers = ({
                 }
 
                 await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-                await recordOutbox({
-                    scriptId,
-                    entityKey: `music:${musicId}:attachment:${role}`,
-                    opType: 'musicAttachment.set',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({
-                        scriptId,
-                        musicId,
-                        role,
-                        attachmentId,
-                        replacedAttachmentId: previous?.id ?? null,
-                        filename,
-                        updatedAt: now,
-                    }),
-                }, tx);
 
                 return orphanedStorageKey;
             });
@@ -139,19 +121,6 @@ export const createAttachmentHandlers = ({
             }
 
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `music:${musicId}:attachment:${role}`,
-                opType: 'musicAttachment.remove',
-                occurredAt: now,
-                payloadJson: JSON.stringify({
-                    scriptId,
-                    musicId,
-                    role,
-                    attachmentId: attachment.id,
-                    updatedAt: now,
-                }),
-            }, tx);
 
             return {
                 storageKey: remaining === 0 ? attachment.storageKey : null,

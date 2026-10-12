@@ -96,15 +96,6 @@ export interface ReplaceScriptConfigBlocksPayload {
     rows: ScriptConfigReplacementRow[],
 }
 
-export interface InsertOutboxPayload {
-    id: string,
-    scriptId: string | null,
-    opType: string | null,
-    payloadJson: string | null,
-    createdAt: number | null,
-    status: string,
-}
-
 export interface UpsertScriptCharacterPayload {
     id: string,
     scriptId: string,

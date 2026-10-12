@@ -6,7 +6,6 @@ import {readScriptSettings} from '../config/config';
 import {getScriptLayoutFingerprint} from '../config/layoutFingerprint';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from '../types';
 import {createProjectedTableDocumentSource, createSqlScriptDocumentProjectionWriter} from './documentProjection';
@@ -20,13 +19,11 @@ type ContentHandlers = {
 
 interface CreateContentHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
 }
 
 export const createContentHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateContentHandlersArgs): ContentHandlers => {
     const projectionWriter = createSqlScriptDocumentProjectionWriter({getDb});
@@ -67,17 +64,6 @@ export const createContentHandlers = ({
                         pageCount: layoutMatches ? previousMetadata?.pageCount ?? derivedMetadata.pageCount : null,
                     },
                 });
-
-                await recordOutbox(
-                    {
-                        scriptId,
-                        entityKey: `script:${scriptId}:document`,
-                        opType: 'latest.save',
-                        occurredAt: now,
-                        payloadJson: JSON.stringify({scriptId, updatedAt: now}),
-                    },
-                    tx,
-                );
             },
         });
 

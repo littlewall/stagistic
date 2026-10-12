@@ -1,7 +1,6 @@
-import type {ScriptDocument} from '@stagistic/script';
 import * as Y from 'yjs';
 
-import {createBroadcastSync, type CreateBroadcastSyncOptions} from '../tabs/broadcastSync';
+import {createBroadcastSync} from '../tabs/broadcastSync';
 import {
     bodyDocToScriptDocument,
     isBodyDocEmpty,
@@ -14,69 +13,50 @@ import {
     resolveSchemaGate,
     SCHEMA_VERSION_KEY,
 } from '../ydoc/mapCodec';
-import type {DocPersistence} from './persistence';
+import {
+    applyRecordChanges,
+    dedupeRecords,
+    projectionUpserts,
+    readRecords,
+    replaceRecords,
+} from '../ydoc/recordsCodec';
+import {
+    type CreateSyncEngineArgs,
+    DEDUPE_ORIGIN,
+    RECORDS_ORIGIN,
+    REPLACE_ORIGIN,
+    type ScriptEntry,
+    SEED_ORIGIN,
+    SEEDED_KEY,
+    SYNC_STATE_MAP,
+    type SyncEngine,
+} from './engineTypes';
 import {prepareSeedDocument} from './prepareSeed';
+import {createProjectionLane, createProjectionQueue} from './projectionLane';
 import {
     bodyDocName,
-    type ControlChannelFactory,
+    commentsDocName,
     createControlChannel,
     metaDocName,
-    type OpenResult,
 } from './protocol';
+import {
+    BODY_DEPENDENT_COLLECTIONS,
+    META_DEDUPE_RULES,
+    RECORD_COLLECTIONS,
+    RECORD_KINDS,
+    type RecordsKind,
+} from './scriptRecords';
 import {serveEngineRequests} from './serveEngineRequests';
-import {stateVectorCovers} from './stateVectorCovers';
+import {waitForStateVector} from './stateVectorCovers';
 
 /*
  * Local sync engine. Runs only in the PGlite leader worker (one per browser
  * profile), so it is the single writer of Y.Doc seeds and of the projection:
- * - seeds a script's body Y.Doc from the projection exactly once (invariant 1)
+ * - seeds a script's Y.Docs (body, meta, comments) from the projection exactly once
  * - persists Y.Docs in IndexedDB and serves tab replicas over BroadcastChannel
- * - writes the projection (debounced) from the Y.Doc (invariant 4)
+ * - writes the projection (debounced) from the Y.Docs
+ * - mirrors repository mutations of records into the Y.Docs (`applyRecords`)
  */
-
-export interface ProjectionStore {
-    loadDocument(scriptId: string): Promise<ScriptDocument | null>,
-    writeDocument(scriptId: string, document: ScriptDocument): Promise<void>,
-}
-
-export interface CreateSyncEngineArgs {
-    store: ProjectionStore,
-    persistence: DocPersistence,
-    clientSchemaVersion: number,
-    controlChannelFactory?: ControlChannelFactory,
-    docChannelFactory?: CreateBroadcastSyncOptions['channelFactory'],
-    projectionDelayMs?: number,
-    projectionMaxDelayMs?: number,
-    flushTimeoutMs?: number,
-    log?: (message: string, error?: unknown) => void,
-}
-
-export const SEED_ORIGIN = 'sync-engine:seed';
-export const REPLACE_ORIGIN = 'sync-engine:replace';
-
-interface ScriptEntry {
-    scriptId: string,
-    body: Y.Doc,
-    meta: Y.Doc,
-    dispose: () => Promise<void>,
-    timer: ReturnType<typeof setTimeout> | null,
-    firstPendingAt: number | null,
-    writes: Promise<void>,
-    /** Body changed since the last projection write. */
-    dirty: boolean,
-    /** Seeded from the projection when this entry was created. */
-    seededOnOpen: boolean,
-}
-
-export interface SyncEngine {
-    readonly engineId: string,
-    /** Opens (and seeds once) a script; used by the control channel and tests. */
-    open(scriptId: string): Promise<OpenResult>,
-    flush(scriptId: string, stateVector?: Uint8Array): Promise<void>,
-    bodyReplaced(scriptId: string): Promise<void>,
-    scriptDeleted(scriptId: string): Promise<void>,
-    stop(): Promise<void>,
-}
 
 export const createSyncEngine = ({
     store,
@@ -93,67 +73,93 @@ export const createSyncEngine = ({
     const entries = new Map<string, Promise<ScriptEntry>>();
     const channel = controlChannelFactory();
 
-    const isWritable = (entry: ScriptEntry) => resolveSchemaGate(readSchemaVersion(entry.meta), clientSchemaVersion) === 'writable';
+    // An older engine must not project content it does not understand.
+    const isWritable = (entry: ScriptEntry) => resolveSchemaGate(readSchemaVersion(entry.records.meta), clientSchemaVersion) === 'writable';
 
-    const writeProjection = (entry: ScriptEntry, {force = false} = {}) => {
-        if (entry.timer) {
-            clearTimeout(entry.timer);
-            entry.timer = null;
+    const projectRecords = async (entry: ScriptEntry, kind: RecordsKind) => {
+        const current = readRecords(entry.records[kind], RECORD_COLLECTIONS[kind]);
+        const upserts = projectionUpserts(entry.projected[kind], current);
+
+        for (const [collection, ids] of Object.entries(entry.forced[kind])) {
+            for (const id of Object.keys(ids)) {
+                upserts[collection] ??= {};
+                upserts[collection][id] = current[collection]?.[id] ?? null;
+            }
         }
 
-        entry.firstPendingAt = null;
+        entry.projected[kind] = current;
+        entry.forced[kind] = {};
 
-        if (!entry.dirty && !force) {
-            return entry.writes;
+        if (Object.values(upserts).some(records => Object.keys(records).length > 0)) {
+            await store.writeRecords(entry.scriptId, kind, upserts);
         }
-
-        entry.dirty = false;
-        entry.writes = entry.writes
-            .then(async () => {
-                // An older engine must not project content it does not understand.
-                if (isWritable(entry)) {
-                    await store.writeDocument(entry.scriptId, bodyDocToScriptDocument(entry.body));
-                }
-            })
-            .catch(error => log(`projection failed for ${entry.scriptId}`, error));
-
-        return entry.writes;
     };
 
-    const scheduleProjection = (entry: ScriptEntry) => {
-        const now = Date.now();
+    const projectBody = async (entry: ScriptEntry) => {
+        await store.writeDocument(entry.scriptId, bodyDocToScriptDocument(entry.body));
 
-        entry.dirty = true;
-        entry.firstPendingAt ??= now;
+        // Rows like scene metadata attach to body-derived rows: re-apply them.
+        const current = readRecords(entry.records.meta, BODY_DEPENDENT_COLLECTIONS);
 
-        if (entry.timer) {
-            clearTimeout(entry.timer);
+        await store.writeRecords(entry.scriptId, 'meta', current);
+    };
+
+    const createLanes = (entry: ScriptEntry): ScriptEntry['lanes'] => {
+        const lane = (project: () => Promise<void>) => createProjectionLane({
+            queue: entry.queue,
+            project: async () => {
+                if (isWritable(entry)) {
+                    await project();
+                }
+            },
+            delayMs: projectionDelayMs,
+            maxDelayMs: projectionMaxDelayMs,
+        });
+
+        return {
+            body: lane(() => projectBody(entry)),
+            meta: lane(() => projectRecords(entry, 'meta')),
+            comments: lane(() => projectRecords(entry, 'comments')),
+        };
+    };
+
+    const seedRecords = async (scriptId: string, kind: RecordsKind, doc: Y.Doc) => {
+        const state = doc.getMap<unknown>(SYNC_STATE_MAP);
+
+        if (state.get(SEEDED_KEY) !== true) {
+            const snapshot = await store.loadRecords(scriptId, kind);
+
+            doc.transact(() => {
+                replaceRecords(doc, snapshot, RECORD_COLLECTIONS[kind]);
+                state.set(SEEDED_KEY, true);
+            }, SEED_ORIGIN);
         }
 
-        const delay = Math.max(0, Math.min(projectionDelayMs, entry.firstPendingAt + projectionMaxDelayMs - now));
-
-        entry.timer = setTimeout(() => void writeProjection(entry), delay);
+        return readRecords(doc, RECORD_COLLECTIONS[kind]);
     };
 
     const createEntry = async (scriptId: string): Promise<ScriptEntry> => {
         const body = new Y.Doc({gc: true});
         const meta = new Y.Doc({gc: true});
-        const [bodyStore, metaStore] = await Promise.all([
+        const comments = new Y.Doc({gc: true});
+        const stores = await Promise.all([
             persistence.bind(bodyDocName(scriptId), body),
             persistence.bind(metaDocName(scriptId), meta),
+            persistence.bind(commentsDocName(scriptId), comments),
         ]);
         const metaMap = getMetaMap(meta);
-        const entry: ScriptEntry = {
+        const entry = {
             scriptId,
             body,
-            meta,
-            timer: null,
-            firstPendingAt: null,
-            writes: Promise.resolve(),
-            dirty: false,
+            records: {meta, comments},
+            projected: {meta: {}, comments: {}},
+            forced: {meta: {}, comments: {}},
+            queue: createProjectionQueue(log, scriptId),
             seededOnOpen: false,
             dispose: async () => {},
-        };
+        } as Omit<ScriptEntry, 'lanes'> as ScriptEntry;
+
+        entry.lanes = createLanes(entry);
 
         if (isBodyDocEmpty(body)) {
             const seed = prepareSeedDocument(await store.loadDocument(scriptId));
@@ -163,8 +169,6 @@ export const createSyncEngine = ({
             }, SEED_ORIGIN);
             seedBodyDoc(body, seed, SEED_ORIGIN);
             entry.seededOnOpen = true;
-            // Normalization may have changed the stored document.
-            await writeProjection(entry, {force: true});
         } else {
             const stored = readSchemaVersion(meta);
 
@@ -174,23 +178,54 @@ export const createSyncEngine = ({
             }
         }
 
-        const bodySync = createBroadcastSync(body, bodyDocName(scriptId), {channelFactory: docChannelFactory});
-        const metaSync = createBroadcastSync(meta, metaDocName(scriptId), {channelFactory: docChannelFactory});
+        for (const kind of RECORD_KINDS) {
+            entry.projected[kind] = await seedRecords(scriptId, kind, entry.records[kind]);
+        }
+
+        if (entry.seededOnOpen) {
+            // Normalization may have changed the stored document.
+            await entry.lanes.body.write({force: true});
+        }
+
+        const syncs = [
+            createBroadcastSync(body, bodyDocName(scriptId), {channelFactory: docChannelFactory}),
+            createBroadcastSync(meta, metaDocName(scriptId), {channelFactory: docChannelFactory}),
+            createBroadcastSync(comments, commentsDocName(scriptId), {channelFactory: docChannelFactory}),
+        ];
         const onBodyUpdate = (_update: Uint8Array, origin: unknown) => {
             if (origin !== SEED_ORIGIN) {
-                scheduleProjection(entry);
+                entry.lanes.body.schedule();
             }
         };
+        const recordListeners = RECORD_KINDS.map(kind => {
+            const doc = entry.records[kind];
+            const listener = (_update: Uint8Array, origin: unknown) => {
+                if (origin === SEED_ORIGIN || origin === REPLACE_ORIGIN) {
+                    return;
+                }
+
+                if (kind === 'meta' && origin !== DEDUPE_ORIGIN && isWritable(entry)) {
+                    dedupeRecords(doc, META_DEDUPE_RULES, DEDUPE_ORIGIN);
+                }
+
+                entry.lanes[kind].schedule();
+            };
+
+            doc.on('update', listener);
+
+            return () => doc.off('update', listener);
+        });
 
         body.on('update', onBodyUpdate);
 
         entry.dispose = async () => {
             body.off('update', onBodyUpdate);
-            bodySync.destroy();
-            metaSync.destroy();
-            await Promise.all([bodyStore.destroy(), metaStore.destroy()]);
+            recordListeners.forEach(off => off());
+            syncs.forEach(sync => sync.destroy());
+            await Promise.all(stores.map(item => item.destroy()));
             body.destroy();
             meta.destroy();
+            comments.destroy();
         };
 
         return entry;
@@ -208,46 +243,54 @@ export const createSyncEngine = ({
         return entry;
     };
 
+    const writeAll = async (entry: ScriptEntry) => {
+        await entry.lanes.body.write();
+        await entry.lanes.meta.write();
+        await entry.lanes.comments.write();
+    };
+
     const open: SyncEngine['open'] = async scriptId => {
         const entry = await getEntry(scriptId);
 
-        return {schemaVersion: readSchemaVersion(entry.meta)};
+        return {schemaVersion: readSchemaVersion(entry.records.meta)};
     };
-
-    const waitForState = (doc: Y.Doc, stateVector: Uint8Array) => new Promise<void>(resolve => {
-        if (stateVectorCovers(Y.encodeStateVector(doc), stateVector)) {
-            resolve();
-
-            return;
-        }
-
-        const timeout = setTimeout(() => {
-            doc.off('update', check);
-            log('flush timed out waiting for replica updates');
-            resolve();
-        }, flushTimeoutMs);
-        const check = () => {
-            if (stateVectorCovers(Y.encodeStateVector(doc), stateVector)) {
-                clearTimeout(timeout);
-                doc.off('update', check);
-                resolve();
-            }
-        };
-
-        doc.on('update', check);
-    });
 
     const flush: SyncEngine['flush'] = async (scriptId, stateVector) => {
         const entry = await getEntry(scriptId);
 
         if (stateVector) {
-            await waitForState(entry.body, stateVector);
+            await waitForStateVector(entry.body, stateVector, flushTimeoutMs, () => log('flush timed out waiting for replica updates'));
         }
 
-        await writeProjection(entry);
+        await writeAll(entry);
     };
 
-    const bodyReplaced: SyncEngine['bodyReplaced'] = async scriptId => {
+    const applyRecords: SyncEngine['applyRecords'] = async (scriptId, kind, changes) => {
+        const entry = await getEntry(scriptId);
+
+        if (!isWritable(entry)) {
+            log(`ignored record changes of read-only script ${scriptId}`);
+
+            return;
+        }
+
+        const touched = applyRecordChanges(entry.records[kind], changes, RECORDS_ORIGIN);
+
+        /*
+         * The projection already holds the local values; re-write touched rows
+         * from Y anyway, in case a concurrent remote edit won a field.
+         */
+        for (const [collection, ids] of Object.entries(touched)) {
+            entry.forced[kind][collection] = {
+                ...entry.forced[kind][collection],
+                ...Object.fromEntries(ids.map(id => [id, null])),
+            };
+        }
+
+        await entry.lanes[kind].write({force: true});
+    };
+
+    const scriptReplaced: SyncEngine['scriptReplaced'] = async scriptId => {
         const existed = entries.has(scriptId);
         const entry = await getEntry(scriptId);
 
@@ -260,7 +303,15 @@ export const createSyncEngine = ({
 
         // Replace as Y ops on top of the history, never a reset (invariant 8).
         replaceBodyContent(entry.body, prepareSeedDocument(stored), REPLACE_ORIGIN);
-        await writeProjection(entry, {force: true});
+
+        for (const kind of RECORD_KINDS) {
+            const doc = entry.records[kind];
+
+            replaceRecords(doc, await store.loadRecords(scriptId, kind), RECORD_COLLECTIONS[kind], REPLACE_ORIGIN);
+            entry.projected[kind] = readRecords(doc, RECORD_COLLECTIONS[kind]);
+        }
+
+        await entry.lanes.body.write({force: true});
     };
 
     const scriptDeleted: SyncEngine['scriptDeleted'] = async scriptId => {
@@ -271,21 +322,23 @@ export const createSyncEngine = ({
         if (entry) {
             const resolved = await entry;
 
-            if (resolved.timer) {
-                clearTimeout(resolved.timer);
-            }
-
-            await resolved.writes;
+            Object.values(resolved.lanes).forEach(lane => lane.cancel());
+            await resolved.queue.idle();
             await resolved.dispose();
         }
 
-        await Promise.all([persistence.clear(bodyDocName(scriptId)), persistence.clear(metaDocName(scriptId))]);
+        await Promise.all([
+            bodyDocName,
+            metaDocName,
+            commentsDocName,
+        ].map(name => persistence.clear(name(scriptId))));
     };
 
     const server = serveEngineRequests(channel, {
         open,
         flush,
-        bodyReplaced,
+        applyRecords,
+        scriptReplaced,
         scriptDeleted,
     }, log);
 
@@ -301,7 +354,7 @@ export const createSyncEngine = ({
 
         for (const result of all) {
             if (result.status === 'fulfilled') {
-                await writeProjection(result.value);
+                await writeAll(result.value);
                 await result.value.dispose();
             }
         }
@@ -311,7 +364,8 @@ export const createSyncEngine = ({
         engineId,
         open,
         flush,
-        bodyReplaced,
+        applyRecords,
+        scriptReplaced,
         scriptDeleted,
         stop,
     };

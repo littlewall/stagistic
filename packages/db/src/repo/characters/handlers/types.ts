@@ -1,7 +1,6 @@
 import type {ScriptRepository} from '../../../types/scriptRepository';
 import type {
     GetDb,
-    RecordOutbox,
 } from '../../types';
 
 export type CharacterHandlers = Pick<
@@ -33,6 +32,5 @@ export type CharacterGroupHandlers = Pick<
 
 export interface CreateCharacterHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: () => Promise<void>,
 }

@@ -14,21 +14,14 @@ import {
     createTestDb,
     seedScript,
 } from '../../testing/createTestDb';
-import type {OutboxPayload} from '../types';
 import {createCharacterGroupHandlers} from './characterGroupHandlers';
 import {createCharacterHandlers} from './handlers/handlers';
 
 const createHandlers = async () => {
     const {db} = await createTestDb();
     const syncDb = vi.fn(() => Promise.resolve());
-    const outboxPayloads: OutboxPayload[] = [];
     const mutationDeps = {
         getDb: () => Promise.resolve(db),
-        recordOutbox: (payload: OutboxPayload) => {
-            outboxPayloads.push(payload);
-
-            return Promise.resolve();
-        },
         syncDb,
     };
 
@@ -36,17 +29,15 @@ const createHandlers = async () => {
         db,
         characterHandlers: createCharacterHandlers(mutationDeps),
         groupHandlers: createCharacterGroupHandlers(mutationDeps),
-        outboxPayloads,
         syncDb,
     };
 };
 
 describe('character group handlers', () => {
-    it('persists group mutations with timestamped outbox events and one sync each', async () => {
+    it('persists group mutations with timestamps and one sync each', async () => {
         const {
             db,
             groupHandlers,
-            outboxPayloads,
             syncDb,
         } = await createHandlers();
         const scriptId = 'script-1';
@@ -84,58 +75,6 @@ describe('character group handlers', () => {
         expect((await db.select().from(scriptCharacters)).find(row => row.id === 'group-all')).toBeUndefined();
         expect((await db.select().from(dbSchema.scripts))[0]?.updatedAt).toBe(500);
         expect(syncDb).toHaveBeenCalledTimes(5);
-        expect(outboxPayloads.map(payload => ({
-            opType: payload.opType,
-            payload: JSON.parse(payload.payloadJson) as Record<string, unknown>,
-        }))).toEqual([
-            {
-                opType: 'character-group.create',
-                payload: {
-                    scriptId,
-                    groupId: 'group-all',
-                    key: 'ALL',
-                    colorHex: '#112233',
-                    createdAt: 100,
-                },
-            },
-            {
-                opType: 'character-group.rename',
-                payload: {
-                    scriptId,
-                    groupId: 'group-all',
-                    previousKey: 'ALL',
-                    nextKey: 'ENSEMBLE',
-                    renamedAt: 200,
-                },
-            },
-            {
-                opType: 'character-group.color',
-                payload: {
-                    scriptId,
-                    groupId: 'group-all',
-                    colorHex: '#abcdef',
-                    updatedAt: 300,
-                },
-            },
-            {
-                opType: 'character-group.members',
-                payload: {
-                    scriptId,
-                    groupId: 'group-all',
-                    memberIds: ['character-alice'],
-                    updatedAt: 400,
-                },
-            },
-            {
-                opType: 'character-group.delete',
-                payload: {
-                    scriptId,
-                    groupId: 'group-all',
-                    key: 'ENSEMBLE',
-                    deletedAt: 500,
-                },
-            },
-        ]);
     });
 
     it('creates normalized groups and rejects character key collisions', async () => {

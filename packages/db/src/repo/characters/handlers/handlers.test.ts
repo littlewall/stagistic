@@ -16,7 +16,6 @@ describe('character handlers', () => {
         const scriptId = 'script-1';
         const handlers = createCharacterHandlers({
             getDb: () => Promise.resolve(db),
-            recordOutbox: () => Promise.resolve(),
             syncDb: () => Promise.resolve(),
         });
 
@@ -56,7 +55,6 @@ describe('character handlers', () => {
         const syncDb = vi.fn(() => Promise.resolve());
         const handlers = createCharacterHandlers({
             getDb: () => Promise.resolve(db),
-            recordOutbox: () => Promise.resolve(),
             syncDb,
         });
 

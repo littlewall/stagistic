@@ -13,18 +13,15 @@ const setup = async () => {
 
     await seedScript(db, 's1');
 
-    const recordOutbox = vi.fn(() => Promise.resolve());
     const syncDb = vi.fn(() => Promise.resolve());
     const handlers = createCommentHandlers({
         getDb: () => Promise.resolve(db),
-        recordOutbox,
         syncDb,
     });
 
     return {
         db,
         handlers,
-        recordOutbox,
         syncDb,
     };
 };
@@ -44,7 +41,6 @@ describe('comment handlers', () => {
         const {
             handlers,
             syncDb,
-            recordOutbox,
         } = await setup();
 
         const thread = await handlers.create('s1', createInput);
@@ -64,7 +60,6 @@ describe('comment handlers', () => {
             },
         ]);
         expect(syncDb).toHaveBeenCalledTimes(1);
-        expect(recordOutbox).toHaveBeenCalledWith(expect.objectContaining({opType: 'comment.create', entityKey: 'comment:t1'}), expect.anything());
     });
 
     it('rejects an empty body without writing', async () => {

@@ -5,26 +5,16 @@ import * as dbQueries from '../../queries';
 import type {ScriptCharacterGroupRef} from '../../types';
 import type {
     GetDb,
-    RecordOutbox,
 } from '../types';
-import {
-    buildCharacterGroupColorPayload,
-    buildCharacterGroupCreatePayload,
-    buildCharacterGroupDeletePayload,
-    buildCharacterGroupMembersPayload,
-    buildCharacterGroupRenamePayload,
-} from './handlers/outboxPayloads';
 import type {CharacterGroupHandlers} from './handlers/types';
 
 interface CreateCharacterGroupHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: () => Promise<void>,
 }
 
 export const createCharacterGroupHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateCharacterGroupHandlersArgs): CharacterGroupHandlers => {
     const listScriptCharacterGroups: CharacterGroupHandlers['listScriptCharacterGroups'] = async scriptId => {
@@ -64,13 +54,6 @@ export const createCharacterGroupHandlers = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character-group:${input.id}`,
-                opType: 'character-group.create',
-                occurredAt: now,
-                payloadJson: buildCharacterGroupCreatePayload(scriptId, input.id, key, input.colorHex ?? null, now),
-            }, tx);
             created = true;
         });
 
@@ -131,13 +114,6 @@ export const createCharacterGroupHandlers = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character-group:${groupId}`,
-                opType: 'character-group.rename',
-                occurredAt: now,
-                payloadJson: buildCharacterGroupRenamePayload(scriptId, groupId, current.key, key, now),
-            }, tx);
             renamed = true;
         });
 
@@ -171,13 +147,6 @@ export const createCharacterGroupHandlers = ({
 
             await dbQueries.deleteScriptCharacterGroup(tx, {scriptId, groupId});
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character-group:${groupId}`,
-                opType: 'character-group.delete',
-                occurredAt: now,
-                payloadJson: buildCharacterGroupDeletePayload(scriptId, groupId, current.key, now),
-            }, tx);
             deleted = true;
         });
 
@@ -213,13 +182,6 @@ export const createCharacterGroupHandlers = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character-group:${groupId}`,
-                opType: 'character-group.color',
-                occurredAt: now,
-                payloadJson: buildCharacterGroupColorPayload(scriptId, groupId, colorHex, now),
-            }, tx);
             updated = true;
         });
 
@@ -266,13 +228,6 @@ export const createCharacterGroupHandlers = ({
                 memberIds: targetMemberIds,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character-group:${groupId}`,
-                opType: 'character-group.members',
-                occurredAt: now,
-                payloadJson: buildCharacterGroupMembersPayload(scriptId, groupId, targetMemberIds, now),
-            }, tx);
             updated = true;
         });
 

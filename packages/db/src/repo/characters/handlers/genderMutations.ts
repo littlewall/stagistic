@@ -7,15 +7,10 @@ import {
     normalizeGenderKey,
     normalizeGenderLabel,
 } from './normalization';
-import {
-    buildCharacterGenderPayload,
-    buildCharacterGenderUpsertPayload,
-} from './outboxPayloads';
 import type {CharacterHandlers} from './types';
 
 export const createGenderMutations = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CharacterMutationDeps): Pick<
     CharacterHandlers,
@@ -91,13 +86,6 @@ export const createGenderMutations = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character:${characterId}`,
-                opType: 'character.gender',
-                occurredAt: now,
-                payloadJson: buildCharacterGenderPayload(scriptId, characterId, normalizedGenderKey, now),
-            }, tx);
         });
         await syncDb();
 
@@ -131,13 +119,6 @@ export const createGenderMutations = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character-gender:${input.id}`,
-                opType: 'character.gender.upsert',
-                occurredAt: now,
-                payloadJson: buildCharacterGenderUpsertPayload(scriptId, genderKey, normalizedLabel, now),
-            }, tx);
         });
         await syncDb();
 

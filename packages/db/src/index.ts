@@ -81,7 +81,6 @@ export * from './blocks';
 
 // ─── Local repository ──────────────────────────────────────────────────────────
 export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
-export {createScriptBodyProjectionStore, type ScriptBodyProjectionStore} from './repo/document/bodyProjectionStore';
 export {
     createProjectedTableDocumentSource,
     createSqlScriptDocumentProjectionWriter,
@@ -94,6 +93,10 @@ export {
     type ScriptDocumentProjectionWriter,
     type ScriptDocumentSource,
 } from './repo/document/documentProjection';
+export {createScriptProjectionStore} from './repo/document/projectionStore';
+export {readScriptRecords} from './repo/records/readScriptRecords';
+export {type ScriptDocumentsSync, withDocumentSync} from './repo/records/withDocumentSync';
+export {writeScriptRecords} from './repo/records/writeScriptRecords';
 
 // ─── Reactive sources ──────────────────────────────────────────────────────────
 export * from './reactive';

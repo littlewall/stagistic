@@ -14,7 +14,6 @@ import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSourc
 import {createContentHandlers} from './document/content';
 import {createLocationHandlers} from './locations';
 import {createMusicHandlers} from './music';
-import {createOutboxRecorder} from './outbox';
 import {createImportPackageHandler} from './package/importPackage';
 import {createReadScriptPackageSource} from './package/readScriptPackageSource';
 import {createScriptsHandlers} from './scripts';
@@ -33,10 +32,8 @@ export const createLocalPgliteRepository = ({
 }: LocalPgliteRepositoryDeps): ScriptRepository => {
     const dbPromise = getLocalDb();
     const getDb: GetDb = async () => dbPromise;
-    const recordOutbox = createOutboxRecorder(getDb);
     const mutationDeps = {
         getDb,
-        recordOutbox,
         syncDb: syncToFs,
     };
     const scripts = createScriptsHandlers(mutationDeps);

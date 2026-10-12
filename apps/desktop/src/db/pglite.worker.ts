@@ -3,7 +3,7 @@ import {live} from '@electric-sql/pglite/live';
 import {worker} from '@electric-sql/pglite/worker';
 import pgliteDataUrl from '@pglite-data?url';
 import pgliteWasmUrl from '@pglite-wasm?url';
-import {runPgliteMigrations} from '@stagistic/db/pglite';
+import {runPgliteMigrations, startPgliteSyncEngine} from '@stagistic/db/pglite';
 
 void worker({
     async init(options) {
@@ -36,6 +36,7 @@ void worker({
         });
 
         await runPgliteMigrations(db);
+        startPgliteSyncEngine(db);
 
         return db;
     },

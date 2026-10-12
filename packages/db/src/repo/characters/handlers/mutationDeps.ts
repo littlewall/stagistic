@@ -1,7 +1,6 @@
-import type {GetDb, RecordOutbox} from '../../types';
+import type {GetDb} from '../../types';
 
 export interface CharacterMutationDeps {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: () => Promise<void>,
 }

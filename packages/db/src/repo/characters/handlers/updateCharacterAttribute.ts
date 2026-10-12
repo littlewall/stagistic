@@ -3,14 +3,12 @@ import * as dbQueries from '../../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
 
 interface CharacterAttributeUpdate {
-    opType: string,
     update: (tx: DbClient, updatedAt: number) => Promise<unknown>,
-    buildPayload: (occurredAt: number) => string,
 }
 
 /**
  * Shared shape of single-attribute character edits (color, outline, voice type,
- * vocal range): update the row, touch the script, record the outbox op, flush.
+ * vocal range): update the row, touch the script, flush.
  *
  * These are edited in the sidebar, which never mutates editor content, so no
  * content autosave follows to flush PGlite. Flush explicitly here or the value
@@ -19,12 +17,9 @@ interface CharacterAttributeUpdate {
 export const createCharacterAttributeUpdater =
     ({
         getDb,
-        recordOutbox,
         syncDb,
     }: CharacterMutationDeps) => async (scriptId: string, characterId: string, {
-        opType,
         update,
-        buildPayload,
     }: CharacterAttributeUpdate) => {
         if (!characterId) {
             return null;
@@ -44,16 +39,6 @@ export const createCharacterAttributeUpdater =
         await db.transaction(async tx => {
             await update(tx, now);
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox(
-                {
-                    scriptId,
-                    entityKey: `character:${characterId}`,
-                    opType,
-                    occurredAt: now,
-                    payloadJson: buildPayload(now),
-                },
-                tx,
-            );
         });
         await syncDb();
 

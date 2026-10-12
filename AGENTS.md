@@ -27,7 +27,14 @@ The web app keeps each script body in a Y.Doc (`packages/sync-engine`); the
   transactions (`localTransactions` / `isRemoteTransaction`) and be idempotent.
 - Document changes made outside the editor go through `applyBodyChange`
   (three-way, per block); replacing a projection outside the engine must call
-  `notifyBodyReplaced`. Never reset Y history to replace content.
+  `notifyScriptReplaced`. Never reset Y history to replace content.
+- Records (characters, groups, genders, locations, scene metadata, music,
+  attachments, settings, title page, script title; comment threads/messages)
+  live in the meta/comments Y.Docs. Repository mutations keep their SQL, and
+  `withDocumentSync` mirrors the projection diff into Y (three-way per field).
+  A new mutation method must be listed in `META_MUTATIONS`/`COMMENT_MUTATIONS`;
+  a new user-authored column must be mapped in `packages/db/src/repo/records`
+  (read + write). Body-derived columns stay out of records.
 
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.

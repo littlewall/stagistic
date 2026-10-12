@@ -11,7 +11,6 @@ import {
 } from 'vite-plus/test';
 
 import {getScriptSummary, listScripts} from '../../queries';
-import {dbSchema} from '../../schema';
 import {createTestDb, seedScript} from '../../testing/createTestDb';
 import {createContentHandlers} from './content';
 
@@ -32,7 +31,6 @@ const setup = async () => {
 
     const deps = {
         getDb: () => Promise.resolve(db),
-        recordOutbox: () => Promise.resolve(),
         syncDb: vi.fn(() => Promise.resolve()),
     };
 
@@ -101,7 +99,7 @@ describe('saved script summary metadata', () => {
         expect((await getScriptSummary(db, 'script-1'))?.summaryMetadata).toEqual(metadata);
     });
 
-    it('refreshes measured pages without changing the edit time or outbox', async () => {
+    it('refreshes measured pages without changing the edit time', async () => {
         const {
             db,
             deps,
@@ -122,7 +120,6 @@ describe('saved script summary metadata', () => {
             ...before,
             summaryMetadata: buildScriptSummaryMetadata(value, 3),
         });
-        expect(await db.select().from(dbSchema.syncOutbox)).toEqual([]);
         expect(deps.syncDb).toHaveBeenCalledTimes(2);
     });
 
@@ -217,29 +214,5 @@ describe('saved script summary metadata', () => {
         const loaded = await content.loadLatest('script-1');
 
         expect(loaded?.content.map(node => node.type)).toEqual(last.content.map(node => node.type));
-    });
-
-    it('rolls back summary metadata and content together when outbox recording fails', async () => {
-        const {
-            db,
-            deps,
-            content,
-        } = await setup();
-        const value = document('scene');
-        const savedMetadata = buildScriptSummaryMetadata(value, 2);
-
-        await content.saveLatest('script-1', value, savedMetadata);
-
-        const failing = createContentHandlers({
-            ...deps,
-            recordOutbox: () => Promise.reject(new Error('outbox failed')),
-        });
-        const next = document('act', 'scene', 'scene');
-
-        await expect(failing.saveLatest('script-1', next, buildScriptSummaryMetadata(next, 6)))
-            .rejects.toThrow('outbox failed');
-        expect((await getScriptSummary(db, 'script-1'))?.summaryMetadata).toEqual(savedMetadata);
-        expect((await content.loadLatest('script-1'))?.content.map(node => node.type)).toEqual(['scene']);
-        expect(deps.syncDb).toHaveBeenCalledOnce();
     });
 });

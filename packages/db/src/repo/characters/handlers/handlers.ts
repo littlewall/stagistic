@@ -9,27 +9,22 @@ import {createVocalRangeMutations} from './vocalRangeMutations';
 
 export const createCharacterHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateCharacterHandlersArgs): CharacterHandlers => {
     const coreMutations = createCoreCharacterMutations({
         getDb,
-        recordOutbox,
         syncDb,
     });
     const genderMutations = createGenderMutations({
         getDb,
-        recordOutbox,
         syncDb,
     });
     const outlineMutations = createOutlineMutations({
         getDb,
-        recordOutbox,
         syncDb,
     });
     const vocalRangeMutations = createVocalRangeMutations({
         getDb,
-        recordOutbox,
         syncDb,
     });
 

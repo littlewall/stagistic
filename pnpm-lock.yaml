@@ -59,6 +59,9 @@ importers:
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@stagistic/sync-engine':
+        specifier: workspace:*
+        version: link:../../packages/sync-engine
       '@stagistic/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -77,6 +80,9 @@ importers:
       react-router-dom:
         specifier: ^7.13.0
         version: 7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      yjs:
+        specifier: ^13.6.33
+        version: 13.6.33
     devDependencies:
       '@tauri-apps/cli':
         specifier: ^3.0.0-alpha.1
@@ -381,6 +387,9 @@ importers:
       '@stagistic/shared':
         specifier: workspace:^
         version: link:../shared
+      '@stagistic/sync-engine':
+        specifier: workspace:*
+        version: link:../sync-engine
       drizzle-orm:
         specifier: ^0.44.0
         version: 0.44.7(@electric-sql/pglite@0.3.15)(bun-types@1.4.2)(postgres@3.4.9)
@@ -394,6 +403,9 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
+      yjs:
+        specifier: ^13.6.33
+        version: 13.6.33
 
   packages/editor:
     dependencies:

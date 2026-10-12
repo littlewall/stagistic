@@ -1,52 +1,20 @@
-import type {DbClient} from '../queries';
 import * as dbQueries from '../queries';
 import {LOCAL_COMMENT_AUTHOR_ID} from '../types';
 import type {ScriptCommentsRepository} from '../types/scriptRepository';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from './types';
 
 interface CreateCommentHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
-}
-
-interface CommentOutboxEntry {
-    scriptId: string,
-    entityKey: string,
-    opType: string,
-    now: number,
-    payload: Record<string, unknown>,
 }
 
 export const createCommentHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateCommentHandlersArgs): ScriptCommentsRepository => {
-    const touchScript = async (tx: DbClient, {
-        scriptId,
-        entityKey,
-        opType,
-        now,
-        payload,
-    }: CommentOutboxEntry) => {
-        await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-        await recordOutbox(
-            {
-                scriptId,
-                entityKey,
-                opType,
-                occurredAt: now,
-                payloadJson: JSON.stringify({scriptId, ...payload}),
-            },
-            tx,
-        );
-    };
-
     const listThreads: ScriptCommentsRepository['listThreads'] = async scriptId => {
         return dbQueries.listScriptCommentThreads(await getDb(), scriptId);
     };
@@ -89,13 +57,7 @@ export const createCommentHandlers = ({
                 updatedAt: now,
                 editedAt: null,
             });
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment:${input.id}`,
-                opType: 'comment.create',
-                now,
-                payload: {threadId: input.id, messageId: input.messageId},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
 
@@ -123,13 +85,7 @@ export const createCommentHandlers = ({
                 updatedAt: now,
                 editedAt: null,
             });
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment:${input.threadId}`,
-                opType: 'comment.message.add',
-                now,
-                payload: {threadId: input.threadId, messageId: input.id},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
 
@@ -153,13 +109,7 @@ export const createCommentHandlers = ({
                 body,
                 editedAt: now,
             });
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment-message:${messageId}`,
-                opType: 'comment.message.update',
-                now,
-                payload: {messageId},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
 
@@ -172,13 +122,7 @@ export const createCommentHandlers = ({
 
         await db.transaction(async tx => {
             await dbQueries.deleteScriptCommentMessage(tx, {scriptId, messageId});
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment-message:${messageId}`,
-                opType: 'comment.message.delete',
-                now,
-                payload: {messageId},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
     };
@@ -197,13 +141,7 @@ export const createCommentHandlers = ({
                 resolvedBy: isResolved ? LOCAL_COMMENT_AUTHOR_ID : null,
                 updatedAt: now,
             });
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment:${threadId}`,
-                opType: isResolved ? 'comment.resolve' : 'comment.reopen',
-                now,
-                payload: {threadId},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
 
@@ -226,17 +164,7 @@ export const createCommentHandlers = ({
             movedCount = moved.length;
 
             if (moved.length > 0) {
-                await touchScript(tx, {
-                    scriptId,
-                    entityKey: `comment-block:${fromBlockId}`,
-                    opType: 'comment.anchor.move',
-                    now,
-                    payload: {
-                        fromBlockId,
-                        toBlockId,
-                        threadIds: moved,
-                    },
-                });
+                await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
             }
         });
 
@@ -251,13 +179,7 @@ export const createCommentHandlers = ({
 
         await db.transaction(async tx => {
             await dbQueries.deleteScriptCommentThread(tx, {scriptId, threadId});
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment:${threadId}`,
-                opType: 'comment.delete',
-                now,
-                payload: {threadId},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
     };
@@ -272,13 +194,7 @@ export const createCommentHandlers = ({
                 tx,
                 snapshot.messages.map(message => ({...message, scriptId})),
             );
-            await touchScript(tx, {
-                scriptId,
-                entityKey: `comment:${snapshot.thread.id}`,
-                opType: 'comment.restore',
-                now,
-                payload: {threadId: snapshot.thread.id},
-            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         });
         await syncDb();
     };

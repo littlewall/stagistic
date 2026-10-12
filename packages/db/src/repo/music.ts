@@ -4,19 +4,16 @@ import * as dbQueries from '../queries';
 import type {ScriptMusicRepository} from '../types/scriptRepository';
 import type {
     GetDb,
-    RecordOutbox,
     SyncDb,
 } from './types';
 
 interface CreateMusicHandlersArgs {
     getDb: GetDb,
-    recordOutbox: RecordOutbox,
     syncDb: SyncDb,
 }
 
 export const createMusicHandlers = ({
     getDb,
-    recordOutbox,
     syncDb,
 }: CreateMusicHandlersArgs): ScriptMusicRepository => {
     const list: ScriptMusicRepository['list'] = async scriptId => {
@@ -51,19 +48,6 @@ export const createMusicHandlers = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `music:${musicId}`,
-                opType: 'music.create',
-                occurredAt: now,
-                payloadJson: JSON.stringify({
-                    scriptId,
-                    musicId,
-                    title,
-                    kind: input.kind,
-                    createdAt: now,
-                }),
-            }, tx);
         });
         await syncDb();
 
@@ -96,19 +80,6 @@ export const createMusicHandlers = ({
                 updatedAt: now,
             });
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `music:${musicId}`,
-                opType: 'music.update',
-                occurredAt: now,
-                payloadJson: JSON.stringify({
-                    scriptId,
-                    musicId,
-                    title,
-                    kind: input.kind,
-                    updatedAt: now,
-                }),
-            }, tx);
         });
         await syncDb();
 
@@ -129,17 +100,6 @@ export const createMusicHandlers = ({
         await db.transaction(async tx => {
             await dbQueries.deleteScriptMusic(tx, {scriptId, musicId});
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `music:${musicId}`,
-                opType: 'music.delete',
-                occurredAt: now,
-                payloadJson: JSON.stringify({
-                    scriptId,
-                    musicId,
-                    deletedAt: now,
-                }),
-            }, tx);
         });
         await syncDb();
     };
