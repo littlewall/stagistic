@@ -1,83 +1,99 @@
-version: '3.9'
+# Local services for cloud sync (phases 3–6). Everything stays on this machine:
+# Postgres, RustFS (S3), Mailpit (catches mail), the Deno server and Caddy
+# (HTTPS for *.stagistic.local with mkcert certs). Setup: infra/README.md.
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#   moon run web:dev   # the editor, proxied as https://editor.stagistic.local
+name: stagistic-dev
+
+x-local-origins: &local-origins
+  APP_ORIGINS: https://editor.stagistic.local${LOCAL_HTTPS_PORT_SUFFIX:-}
+  AUTH_BASE_URL: https://auth.api.stagistic.local${LOCAL_HTTPS_PORT_SUFFIX:-}
+  COOKIE_DOMAIN: stagistic.local
 
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: stagistic-postgres-dev
-    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-stagistic}
-      POSTGRES_USER: ${POSTGRES_USER:-stagistic}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stagistic}
+      POSTGRES_DB: stagistic
+      POSTGRES_USER: stagistic
+      POSTGRES_PASSWORD: stagistic
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U stagistic"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ['CMD-SHELL', 'pg_isready -U stagistic -d stagistic']
+      interval: 2s
+      timeout: 3s
+      retries: 30
 
-  valkey:
-    image: valkey/valkey:8-alpine
-    container_name: stagistic-valkey-dev
-    restart: unless-stopped
+  mailpit:
+    image: axllent/mailpit:v1.27
     ports:
-      - "${VALKEY_PORT:-6379}:6379"
-    volumes:
-      - valkey_data_dev:/data
-    healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - '${MAILPIT_PORT:-8025}:8025'
 
-  api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile.dev
-    container_name: stagistic-api-dev
-    restart: unless-stopped
+  # MinIO no longer publishes images; RustFS is S3-compatible (attachments, phase 6).
+  s3:
+    image: rustfs/rustfs:latest
     environment:
-      NODE_ENV: development
-      HOST: 0.0.0.0
-      PORT: 4000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-stagistic}:${POSTGRES_PASSWORD:-stagistic}@postgres:5432/${POSTGRES_DB:-stagistic}
-      REDIS_URL: redis://valkey:6379
-      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      RUSTFS_ACCESS_KEY: stagistic
+      RUSTFS_SECRET_KEY: stagistic-secret
+    command: ['/data']
     ports:
-      - "${API_PORT:-4000}:4000"
+      - '${S3_PORT:-9000}:9000'
+    volumes:
+      - s3_data:/data
+
+  server:
+    image: denoland/deno:2.9.7
+    working_dir: /repo
+    command: ['run', '-A', '--sloppy-imports', '--watch', 'apps/server/src/main.ts']
+    environment:
+      <<: *local-origins
+      SERVER_ROLES: ${SERVER_ROLES:-auth,collab}
+      AUTH_PORT: '8787'
+      COLLAB_PORT: '8788'
+      DATABASE_URL: postgres://stagistic:stagistic@postgres:5432/stagistic
+      # Local only; production secrets come from the deployment (phase 7).
+      AUTH_SECRET: local-dev-secret-change-me-0123456789abcdef
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-1x0000000000000000000000000000000AA}
+      JWT_AUDIENCE: https://sync.api.stagistic.local${LOCAL_HTTPS_PORT_SUFFIX:-}
+      MAILPIT_URL: http://mailpit:8025
+      AUTH_JWKS_URL: http://127.0.0.1:8787/api/auth/jwks
+      MIGRATE_ON_START: '1'
+    ports:
+      - '${AUTH_PORT:-8787}:8787'
+      - '${COLLAB_PORT:-8788}:8788'
+    volumes:
+      - ./:/repo
+      - deno_cache:/deno-dir
     depends_on:
       postgres:
         condition: service_healthy
-      valkey:
-        condition: service_healthy
-    volumes:
-      - ./apps/api/src:/app/apps/api/src
-      - ./packages:/app/packages
+      mailpit:
+        condition: service_started
 
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile.dev
-    container_name: stagistic-web-dev
-    restart: unless-stopped
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
-      VITE_HMR_HOST: ${VITE_HMR_HOST:-localhost}
-      VITE_HMR_PROTOCOL: ${VITE_HMR_PROTOCOL:-ws}
-      VITE_HMR_PORT: ${VITE_HMR_PORT:-3000}
-      VITE_HMR_CLIENT_PORT: ${VITE_HMR_CLIENT_PORT:-3000}
+  caddy:
+    image: caddy:2.10-alpine
     ports:
-      - "${WEB_PORT:-3000}:3000"
-    depends_on:
-      - api
+      # 80/443 may be taken by another local proxy: set CADDY_HTTPS_PORT=8443
+      # and LOCAL_HTTPS_PORT_SUFFIX=:8443 (see infra/README.md).
+      - '${CADDY_HTTP_PORT:-80}:80'
+      - '${CADDY_HTTPS_PORT:-443}:443'
     volumes:
-      - ./apps/web/src:/app/apps/web/src
-      - ./apps/web/index.html:/app/apps/web/index.html
-      - ./packages:/app/packages
+      - ./infra/proxy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./infra/certs:/etc/caddy/certs:ro
+      - caddy_data:/data
+    extra_hosts:
+      # The editor's Vite dev server runs on the host.
+      - 'host.docker.internal:host-gateway'
+    depends_on:
+      - server
 
 volumes:
-  postgres_data_dev:
-  valkey_data_dev:
+  postgres_data:
+  s3_data:
+  deno_cache:
+  caddy_data:

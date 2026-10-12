@@ -31,7 +31,11 @@
   - [x] Drop outbox (`sync_outbox` migration 0025) and dead pre-refactor copies in `packages/db/src/repo`
   - [x] `characterKey` (and gender key, location name) dedupe in the engine
   - [x] Desktop runs the engine too (same worker wiring as web)
-- [ ] 3. Identity (Better Auth, Mailpit, Turnstile test keys)
+- [x] 3. Identity (Better Auth, Mailpit, Turnstile test keys)
+  - [x] `docker-compose.dev.yml`: Postgres 17, RustFS, Mailpit, Deno server, Caddy + mkcert (`infra/README.md`)
+  - [x] `packages/identity`: Better Auth (magic link → app callback, passkey, Turnstile, JWT/JWKS, DB rate limit, 60-day sliding session, cookie on parent domain), Mailpit mailer over fetch, SQL migrations in schema `identity`
+  - [x] `apps/server`: one Deno process, `SERVER_ROLES=auth,collab`, collab verifies JWT via JWKS (`/me`)
+  - [x] Tests: identity integration (Postgres), server; HTTPS smoke test through Caddy
 - [ ] 4. Collab server (Hocuspocus + REST, server-side projection of meta/comments into Postgres tables)
 - [ ] 5. Account + cloud sync in client
 - [ ] 6. Attachments to S3 (RustFS)

@@ -33,6 +33,8 @@ export default defineConfig({
         host: true,
         port: 3000,
         strictPort: true,
+        // Served as https://editor.stagistic.local via Caddy (infra/README.md).
+        allowedHosts: ['.stagistic.local'],
         hmr: {
             protocol: process.env.VITE_HMR_PROTOCOL || 'ws',
             host: process.env.VITE_HMR_HOST || 'localhost',

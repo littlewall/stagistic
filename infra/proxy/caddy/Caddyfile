@@ -1,16 +1,24 @@
+# Local HTTPS for the apps (3rd level) and services (4th level, *.api.*).
+# One mkcert certificate covers all names (infra/README.md).
 {
-    admin off
+	admin off
 }
 
-stagistic.local {
-    # Proxy web app (Vite dev server)
-    reverse_proxy web:3000
+(local_tls) {
+	tls /etc/caddy/certs/stagistic.local.pem /etc/caddy/certs/stagistic.local-key.pem
+}
 
-    # Proxy API
-    handle /api/* {
-        reverse_proxy api:4000
-    }
+editor.stagistic.local {
+	import local_tls
+	reverse_proxy host.docker.internal:3000
+}
 
-    # TLS configuration
-    tls /etc/caddy/certs/stagistic.local.pem /etc/caddy/certs/stagistic.local-key.pem
+auth.api.stagistic.local {
+	import local_tls
+	reverse_proxy server:8787
+}
+
+sync.api.stagistic.local {
+	import local_tls
+	reverse_proxy server:8788
 }

@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Runs under Deno (docker-compose.dev.yml `server`); typecheck/lint via tsc + oxlint.
+tasks:
+  test:
+    command: 'vp test run --dir .'
+    options:
+      cache: false
+      mergeArgs: 'replace'
