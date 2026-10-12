@@ -166,6 +166,27 @@ describe.skipIf(!available)('identity service', () => {
         expect(session?.user.email).toBe('hamlet@example.com');
     });
 
+    it('keeps nothing in the DB that signs in on its own', async () => {
+        expect((await requestMagicLink('polonius@example.com')).status).toBe(200);
+
+        const linkToken = new URL((/https:\/\/\S+/).exec(mailer.messages.at(-1)!.text)![0]).searchParams.get('token')!;
+        const verifications = await pool.query<{identifier: string, value: string}>('select identifier, value from verification');
+
+        // The magic link token is stored hashed only.
+        expect(JSON.stringify(verifications.rows)).not.toContain(linkToken);
+
+        await request(`/api/auth/magic-link/verify?token=${linkToken}`);
+
+        // A session token read from the DB is not a valid cookie: it must be signed with the server secret.
+        const {rows} = await pool.query<{token: string}>(
+            'select s.token from session s join "user" u on u.id = s."userId" where u.email = $1',
+            ['polonius@example.com'],
+        );
+        const forged = await request('/api/auth/get-session', {cookie: `__Secure-better-auth.session_token=${rows[0].token}`});
+
+        expect(await forged.json()).toBeNull();
+    });
+
     it('issues an access token that services verify via JWKS', async () => {
         const {cookie} = await signIn('ophelia@example.com');
         const {token} = await (await request('/api/auth/token', {cookie})).json() as {token: string};

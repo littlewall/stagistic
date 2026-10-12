@@ -34,6 +34,7 @@
 - [x] 3. Identity (Better Auth, Mailpit, Turnstile test keys)
   - [x] `docker-compose.dev.yml`: Postgres 17, RustFS, Mailpit, Deno server, Caddy + mkcert (`infra/README.md`)
   - [x] `packages/identity`: Better Auth (magic link → app callback, passkey, Turnstile, JWT/JWKS, DB rate limit, 60-day sliding session, cookie on parent domain), Mailpit mailer over fetch, SQL migrations in schema `identity`
+  - [x] Nothing in the DB signs in alone: signed session cookie, magic-link token stored hashed (test)
   - [x] `apps/server`: one Deno process, `SERVER_ROLES=auth,collab`, collab verifies JWT via JWKS (`/me`)
   - [x] Tests: identity integration (Postgres), server; HTTPS smoke test through Caddy
 - [x] 4. Collab server (Hocuspocus + REST, server-side projection of meta/comments into Postgres tables)

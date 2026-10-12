@@ -59,6 +59,8 @@ export const createIdentityAuthOptions = ({
     plugins: [
         magicLink({
             expiresIn: MAGIC_LINK_TTL_SECONDS,
+            // Only a hash in the DB: a leaked row cannot be used as a sign-in link.
+            storeToken: 'hashed',
             sendMagicLink: async ({
                 email,
                 url,
