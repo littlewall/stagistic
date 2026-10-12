@@ -36,7 +36,12 @@
   - [x] `packages/identity`: Better Auth (magic link → app callback, passkey, Turnstile, JWT/JWKS, DB rate limit, 60-day sliding session, cookie on parent domain), Mailpit mailer over fetch, SQL migrations in schema `identity`
   - [x] `apps/server`: one Deno process, `SERVER_ROLES=auth,collab`, collab verifies JWT via JWKS (`/me`)
   - [x] Tests: identity integration (Postgres), server; HTTPS smoke test through Caddy
-- [ ] 4. Collab server (Hocuspocus + REST, server-side projection of meta/comments into Postgres tables)
+- [x] 4. Collab server (Hocuspocus + REST, server-side projection of meta/comments into Postgres tables)
+  - [x] `packages/collab`: schemas `collab` (scripts, members, ydoc_states) + `projection` (packages/db migrations), Hocuspocus (JWT + role per doc, read-only viewers/commenters, throttle, full-state store, `updated_at`), projection of meta/comments via `@stagistic/db/server`
+  - [x] REST `GET/POST /scripts` (register/restore), `DELETE` (soft), `Date` header; purge after 30 days
+  - [x] `apps/server`: collab role with `/ws` (hono/deno), graceful shutdown flushes pending stores
+  - [x] Projection writes scoped by script (ids are global; a script cannot take over another's rows)
+  - [x] Tests: collab integration (Postgres + real WebSockets), live smoke through Caddy
 - [ ] 5. Account + cloud sync in client
 - [ ] 6. Attachments to S3 (RustFS)
 

@@ -79,7 +79,12 @@ export const writeCharacters = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptCharacters.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptCharacters.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptCharacters.scriptId, scriptId),
+            });
     }
 
     // Group members after all characters exist.
@@ -139,6 +144,11 @@ export const writeGenders = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptCharacterGenders.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptCharacterGenders.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptCharacterGenders.scriptId, scriptId),
+            });
     }
 };

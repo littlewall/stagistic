@@ -54,7 +54,12 @@ export const writeLocations = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptLocations.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptLocations.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptLocations.scriptId, scriptId),
+            });
     }
 };
 

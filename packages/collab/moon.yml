@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits `lint` + `typecheck`. Integration tests need the local Postgres
+# (docker compose -f docker-compose.dev.yml up -d postgres); they skip without it.
+tasks:
+  test:
+    command: 'vp test run --dir .'
+    options:
+      cache: false
+      mergeArgs: 'replace'

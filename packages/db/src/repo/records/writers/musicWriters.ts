@@ -39,7 +39,12 @@ export const writeMusic = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptMusic.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptMusic.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptMusic.scriptId, scriptId),
+            });
     }
 };
 
@@ -70,7 +75,12 @@ export const writeAttachments = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptAttachments.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptAttachments.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptAttachments.scriptId, scriptId),
+            });
     }
 };
 
@@ -87,11 +97,16 @@ export const writeMusicAttachments = async ({
         const musicId = id.slice(0, separator);
         const role = id.slice(separator + 1);
 
+        // Bindings hang off music rows: only this script's music.
+        if (!music.has(musicId)) {
+            continue;
+        }
+
         await tx.delete(scriptMusicAttachments).where(and(eq(scriptMusicAttachments.musicId, musicId), eq(scriptMusicAttachments.role, role)));
 
         const attachmentId = str(record?.attachmentId);
 
-        if (record && attachmentId !== null && music.has(musicId) && attachments.has(attachmentId)) {
+        if (record && attachmentId !== null && attachments.has(attachmentId)) {
             await tx
                 .delete(scriptMusicAttachments)
                 .where(and(eq(scriptMusicAttachments.musicId, musicId), eq(scriptMusicAttachments.attachmentId, attachmentId)));

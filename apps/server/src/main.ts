@@ -4,6 +4,13 @@
  * (`SERVER_ROLES=collab`) behind the same image.
  */
 import {
+    createCollabApp,
+    createCollabDatabase,
+    createCollabHocuspocus,
+    purgeDeletedScripts,
+    runCollabMigrations,
+} from '@stagistic/collab';
+import {
     createAccessTokenVerifier,
     createIdentityApp,
     createIdentityAuth,
@@ -14,7 +21,7 @@ import {
     runIdentityMigrations,
 } from '@stagistic/identity';
 
-import {createCollabApp} from './collabApp';
+import {collabSocketHandler} from './collabSocket';
 import {parseServerRoles} from './roles';
 
 const env = Deno.env.toObject();
@@ -70,8 +77,49 @@ if (roles.has('collab')) {
         // Internal URL when both roles share a host; the public one otherwise.
         jwksUrl: env.AUTH_JWKS_URL || `${authBaseURL}/api/auth/jwks`,
     });
-    const app = createCollabApp({appOrigins: required('APP_ORIGINS').split(',').map(item => item.trim()), verifyAccessToken});
+    const database = createCollabDatabase({connectionString: required('DATABASE_URL')});
 
+    cleanups.push(() => database.end());
+
+    if (env.MIGRATE_ON_START === '1') {
+        const applied = await runCollabMigrations(database);
+
+        console.log(`[server] collab migrations: ${applied.length > 0 ? `${applied.length} applied` : 'up to date'}`);
+    }
+
+    const hocuspocus = createCollabHocuspocus({database, verifyAccessToken});
+    const app = createCollabApp({
+        database,
+        verifyAccessToken,
+        appOrigins: required('APP_ORIGINS').split(',').map(item => item.trim()),
+        hocuspocus,
+    });
+
+    app.get('/ws', collabSocketHandler(hocuspocus));
+    // Runs before the pool closes (cleanups run in reverse): store pending edits.
+    cleanups.push(async () => {
+        hocuspocus.flushPendingStores();
+        hocuspocus.closeConnections();
+
+        const deadline = Date.now() + 5_000;
+
+        while (hocuspocus.getDocumentsCount() > 0 && Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+    });
+
+    // Purge is idempotent, so concurrent instances need no lock.
+    const purge = setInterval(() => {
+        purgeDeletedScripts(database)
+            .then(ids => ids.length > 0 && console.log(`[server] purged ${ids.length} deleted scripts`))
+            .catch(error => console.error('[server] purge failed', error));
+    }, 60 * 60 * 1000);
+
+    cleanups.push(() => {
+        clearInterval(purge);
+
+        return Promise.resolve();
+    });
     servers.push(Deno.serve({
         port: Number(env.COLLAB_PORT ?? 8788),
         hostname: '0.0.0.0',
@@ -81,7 +129,10 @@ if (roles.has('collab')) {
 
 const shutdown = async () => {
     await Promise.all(servers.map(server => server.shutdown()));
-    await Promise.all(cleanups.map(cleanup => cleanup()));
+    for (const cleanup of cleanups.reverse()) {
+        await cleanup();
+    }
+
     Deno.exit(0);
 };
 

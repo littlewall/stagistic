@@ -4,11 +4,12 @@
     "private": true,
     "type": "module",
     "dependencies": {
+        "@hocuspocus/server": "4.7.0",
+        "@stagistic/collab": "workspace:*",
         "@stagistic/identity": "workspace:*",
         "hono": "^4.13.13"
     },
     "devDependencies": {
-        "jose": "^6.2.12",
         "typescript": "^5.9.3"
     }
 }

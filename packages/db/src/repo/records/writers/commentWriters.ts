@@ -39,7 +39,12 @@ export const writeThreads = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptCommentThreads.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptCommentThreads.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptCommentThreads.scriptId, scriptId),
+            });
     }
 };
 
@@ -78,7 +83,12 @@ export const writeMessages = async ({
                 ...fields,
                 createdAt: num(record.createdAt, now),
             })
-            .onConflictDoUpdate({target: scriptCommentMessages.id, set: fields});
+            .onConflictDoUpdate({
+                target: scriptCommentMessages.id,
+                set: fields,
+                // Ids are global: never take over another script's row.
+                setWhere: eq(scriptCommentMessages.scriptId, scriptId),
+            });
     }
 };
 

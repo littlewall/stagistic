@@ -170,6 +170,12 @@ importers:
 
   apps/server:
     dependencies:
+      '@hocuspocus/server':
+        specifier: 4.7.0
+        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
+      '@stagistic/collab':
+        specifier: workspace:*
+        version: link:../../packages/collab
       '@stagistic/identity':
         specifier: workspace:*
         version: link:../../packages/identity
@@ -177,9 +183,6 @@ importers:
         specifier: ^4.13.13
         version: 4.13.13
     devDependencies:
-      jose:
-        specifier: ^6.2.12
-        version: 6.2.12
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -391,6 +394,58 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
+
+  packages/collab:
+    dependencies:
+      '@hocuspocus/extension-database':
+        specifier: 4.7.0
+        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
+      '@hocuspocus/extension-throttle':
+        specifier: 4.7.0
+        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
+      '@hocuspocus/server':
+        specifier: 4.7.0
+        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
+      '@stagistic/db':
+        specifier: workspace:*
+        version: link:../db
+      '@stagistic/identity':
+        specifier: workspace:*
+        version: link:../identity
+      '@stagistic/sync-engine':
+        specifier: workspace:*
+        version: link:../sync-engine
+      drizzle-orm:
+        specifier: ^0.44.7
+        version: 0.44.7(@electric-sql/pglite@0.3.15)(@types/pg@8.23.1)(bun-types@1.4.2)(kysely@0.29.6)(pg@8.23.1)(postgres@3.4.9)
+      hono:
+        specifier: ^4.13.13
+        version: 4.13.13
+      pg:
+        specifier: ^8.23.1
+        version: 8.23.1
+      yjs:
+        specifier: ^13.6.33
+        version: 13.6.33
+    devDependencies:
+      '@hocuspocus/provider':
+        specifier: 4.7.0
+        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
+      '@types/ws':
+        specifier: ^8.18.2
+        version: 8.18.2
+      jose:
+        specifier: ^6.2.12
+        version: 6.2.12
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      ws:
+        specifier: ^8.22.0
+        version: 8.22.0
 
   packages/db:
     dependencies:

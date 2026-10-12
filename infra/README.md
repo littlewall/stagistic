@@ -8,7 +8,7 @@ production-like domains.
 |---|---|
 | `https://editor.stagistic.local` | editor (Vite dev server on the host, port 3000) |
 | `https://auth.api.stagistic.local` | auth (Better Auth), container port 8787 |
-| `https://sync.api.stagistic.local` | collab, container port 8788 |
+| `https://sync.api.stagistic.local` | collab, container port 8788: Hocuspocus at `wss://…/ws`, REST `GET/POST /scripts`, `DELETE /scripts/:id` |
 | `http://localhost:8025` | Mailpit (sign-in emails land here) |
 | `localhost:5432` | Postgres (`stagistic` / `stagistic`; tests use `stagistic_test`) |
 
@@ -50,7 +50,11 @@ The server runs `deno run --watch`, applies identity migrations on start
 (`TURNSTILE_SECRET_KEY=2x0000000000000000000000000000000AA` makes it always fail).
 Turnstile verification calls Cloudflare, so sign-in needs internet.
 
+Postgres schemas: `identity` (Better Auth), `collab` (scripts, members,
+`ydoc_states`: the source of truth) and `projection` (packages/db tables, a
+read-only cache of script records; rebuildable from `ydoc_states`).
+
 ## Tests
 
-`moon run identity:test` runs against the local Postgres (`stagistic_test`,
-one schema per run) and skips when it is not running.
+`moon run identity:test` and `moon run collab:test` run against the local
+Postgres (`stagistic_test`, own schemas per run) and skip when it is not running.
