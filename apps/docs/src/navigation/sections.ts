@@ -24,7 +24,6 @@ export const documentationSections: DocumentationSection[] = [
             {
                 label: 'User guide',
                 items: [
-                    'editor/music',
                     'editor/review',
                     'editor/export',
                 ],
@@ -77,6 +76,19 @@ export const documentationSections: DocumentationSection[] = [
                     'editor/characters/groups',
                     'editor/characters/references',
                     'editor/characters/manage',
+                ],
+            },
+            {
+                label: 'Music and lyrics',
+                items: [
+                    {label: 'Overview', slug: 'editor/music'},
+                    'editor/music/add',
+                    'editor/music/range',
+                    'editor/music/lyrics',
+                    'editor/music/navigate',
+                    'editor/music/manage',
+                    'editor/music/score',
+                    'editor/music/remove',
                 ],
             },
         ],
