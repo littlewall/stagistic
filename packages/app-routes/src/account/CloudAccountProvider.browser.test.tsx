@@ -64,6 +64,7 @@ const createFakes = (report: CloudCheckReport) => {
         signedIn: () => Promise.resolve(status('needs-check')),
         signedOut,
         check: () => Promise.resolve(report),
+        wake: () => Promise.resolve(status('synced')),
         apply,
         onStatus: next => {
             listener = next;

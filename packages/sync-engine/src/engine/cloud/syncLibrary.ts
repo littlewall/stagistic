@@ -103,3 +103,37 @@ export const syncLibrary = async ({
         lastSyncedAt: Date.now(),
     });
 };
+
+/** A script deleted on this device: delete it in the cloud now, or later (tombstone). */
+export const deleteInCloud = async ({
+    scriptId,
+    store,
+    api,
+    accountId,
+    live,
+}: {
+    scriptId: string,
+    store: CloudSyncStore,
+    api: CloudApi,
+    accountId: string | null,
+    live: boolean,
+}) => {
+    const state = (await store.listSyncStates()).find(item => item.scriptId === scriptId);
+
+    await store.clearSyncState(scriptId);
+
+    if (!state || state.accountId !== accountId) {
+        return;
+    }
+
+    try {
+        if (!live) {
+            throw new Error('not connected');
+        }
+
+        await api.remove(scriptId);
+    } catch {
+        // Deleted offline or signed out: the next live pass (or check) deletes it in the cloud.
+        await store.addTombstone(scriptId, state.accountId);
+    }
+};

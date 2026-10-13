@@ -52,6 +52,7 @@
   - [x] UI: account menu, sign-in modal, `/auth/callback`, account settings, conflict dialog, one-time prompt, empty-library sign-in, sync label in the indicator
   - [x] Tests: two-device cloud sync e2e (collab), engine, auth client, UI and provider browser tests
   - [ ] Passkey UI; desktop sign-in (Tauri origin needs a non-cookie flow); browser e2e through Caddy
+- [x] 5b. Change hints instead of polling (`user/{id}/events`, EventBus in memory → Redis later; catch-up on start/sign-in/reconnect/online/tab visible)
 - [ ] 6. Attachments to S3 (RustFS)
 
 ## Phase 7 — UpCloud (separate, later)

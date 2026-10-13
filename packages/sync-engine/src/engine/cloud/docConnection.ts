@@ -17,7 +17,8 @@ export interface DocConnection {
 }
 
 export interface CloudSocket {
-    attach(documentName: string, document: Y.Doc): DocConnection,
+    /** `onStateless`: server hints on the channel doc (`user/{id}/events`). */
+    attach(documentName: string, document: Y.Doc, options?: {onStateless?: (payload: string) => void}): DocConnection,
     close(): void,
 }
 
@@ -48,7 +49,7 @@ export const createCloudSocket = ({
     };
 
     return {
-        attach: (documentName, document) => {
+        attach: (documentName, document, {onStateless} = {}) => {
             let denied: Error | null = null;
             let destroyed = false;
             const waiters = new Set<() => void>();
@@ -65,6 +66,7 @@ export const createCloudSocket = ({
                 },
                 onSynced: notify,
                 onUnsyncedChanges: notify,
+                ...onStateless ? {onStateless: ({payload}: {payload: string}) => onStateless(payload)} : {},
             });
 
             provider.attach();

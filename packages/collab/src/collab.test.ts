@@ -21,6 +21,7 @@ import WebSocket, {WebSocketServer} from 'ws';
 import * as Y from 'yjs';
 
 import {type CollabDatabase, createCollabDatabase} from './database';
+import {createLocalEventBus} from './events';
 import {createCollabHocuspocus} from './hocuspocus';
 import {runCollabMigrations} from './migrations';
 import {purgeDeletedScripts} from './purge';
@@ -137,16 +138,21 @@ describe.skipIf(!available)('collab service', () => {
             projectionSchema: `projection_test_${RUN}`,
         });
         await runCollabMigrations(database);
+
+        const events = createLocalEventBus();
+
         hocuspocus = createCollabHocuspocus({
             database,
             verifyAccessToken,
             debounceMs: 50,
+            events,
         });
         app = createCollabApp({
             database,
             verifyAccessToken,
             appOrigins: [EDITOR],
             hocuspocus,
+            events,
         });
 
         server = createServer();
@@ -231,6 +237,11 @@ describe.skipIf(!available)('collab service', () => {
         const second = await connect('alice', 'script/doc-1/meta');
 
         expect(second.document.getMap<Y.Map<unknown>>('characters').get('c1')?.get('colorHex')).toBe('#ff0000');
+    });
+
+    it('lets only the owner of an events channel join it', async () => {
+        await expect(connect('mallory', 'user/alice/events')).rejects.toThrow();
+        await expect(connect('alice', 'user/alice/events')).resolves.toBeTruthy();
     });
 
     it('rejects non-members and keeps viewers and commenters read-only where they may not write', async () => {

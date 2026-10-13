@@ -42,6 +42,10 @@ The web app keeps each script body in a Y.Doc (`packages/sync-engine`); the
 - Replacing a script's local Y state (conflict resolution) gives its docs a new
   `channelId`; tabs must drop the old replica (`onScriptsReset`) and re-open.
   Never let an old replica sync into new docs.
+- From the cloud, the engine learns about changes through hints on
+  `user/{id}/events` (what changed, never the change) plus one catch-up pass on
+  start, sign-in, reconnect, going online and tab visible. Do not add polling;
+  new server-side writes to a script must publish a hint (`EventBus`).
 
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.

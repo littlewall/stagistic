@@ -32,6 +32,7 @@ import WebSocket, {WebSocketServer} from 'ws';
 import * as Y from 'yjs';
 
 import {type CollabDatabase, createCollabDatabase} from './database';
+import {createLocalEventBus} from './events';
 import {createCollabHocuspocus} from './hocuspocus';
 import {runCollabMigrations} from './migrations';
 import {createCollabApp} from './rest';
@@ -115,16 +116,21 @@ describe.skipIf(!available)('client cloud sync', () => {
             projectionSchema: `projection_${RUN}`,
         });
         await runCollabMigrations(database);
+
+        const events = createLocalEventBus();
+
         hocuspocus = createCollabHocuspocus({
             database,
             verifyAccessToken,
             debounceMs: 50,
+            events,
         });
         app = createCollabApp({
             database,
             verifyAccessToken,
             appOrigins: [],
             hocuspocus,
+            events,
         });
         server = createServer();
 
@@ -185,7 +191,7 @@ describe.skipIf(!available)('client cloud sync', () => {
                 store: cloudStore.store,
                 WebSocketPolyfill: WebSocket,
                 fetch: fetchImpl,
-                intervalMs: 300,
+                pullIntervalMs: 200,
             },
         });
         const client: SyncEngineClient = createSyncEngineClient({...channels, retryMs: 50});
@@ -325,6 +331,29 @@ describe.skipIf(!available)('client cloud sync', () => {
         aTab2.release();
         bTab.release();
         bTab2.release();
+    });
+
+    it('learns about new and deleted scripts from hints, without polling', async () => {
+        const a = createDevice('u4');
+        const b = createDevice('u4');
+
+        for (const device of [a, b]) {
+            await device.waitFor('needs-check');
+            await device.client.cloud.check();
+            await device.client.cloud.apply({});
+            await device.waitFor('synced');
+        }
+
+        // A creates a script while both are live: B gets an `added` hint and downloads it.
+        a.addScript('h1', 'Othello', 'Hint');
+        await a.client.cloud.wake();
+        await eventually(() => texts(b.projection.documents.get('h1')).includes('Hint'));
+
+        // A deletes it: B gets a `deleted` hint and deletes it too (unchanged there).
+        a.projection.documents.delete('h1');
+        a.cloudStore.titles.delete('h1');
+        await a.client.notifyScriptDeleted('h1');
+        await eventually(() => !b.projection.documents.has('h1'));
     });
 
     it('deletes in the cloud when a synced script is deleted locally', async () => {

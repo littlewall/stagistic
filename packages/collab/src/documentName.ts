@@ -12,3 +12,10 @@ export const parseDocumentName = (name: string): {scriptId: string, kind: Docume
 
     return match ? {scriptId: match[1], kind: match[2] as DocumentKind} : null;
 };
+
+/** Per-user channel for change hints (stateless messages only, never stored). */
+const EVENTS_DOCUMENT_NAME = /^user\/([A-Za-z0-9_-]{1,128})\/events$/;
+
+export const eventsDocumentName = (userId: string) => `user/${userId}/events`;
+
+export const parseEventsDocumentName = (name: string): string | null => EVENTS_DOCUMENT_NAME.exec(name)?.[1] ?? null;

@@ -1,7 +1,8 @@
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 import {createAccessTokenSource} from './accessToken';
 import {CloudUnauthorizedError, createCloudApi} from './cloudApi';
+import {createCloudEvents, eventsDocumentName} from './cloudEvents';
 import {createCloudReconcile} from './cloudReconcile';
 import type {
     CloudContext,
@@ -10,8 +11,9 @@ import type {
     CloudSyncConfig,
 } from './contracts';
 import {createCloudSocket, type DocConnection} from './docConnection';
+import {createSingleFlight} from './singleFlight';
 import {documentNameOf, encodeStateVectors} from './stateVectors';
-import {syncLibrary} from './syncLibrary';
+import {deleteInCloud, syncLibrary} from './syncLibrary';
 import {
     type CloudAccount,
     type CloudStatus,
@@ -55,7 +57,20 @@ export const createCloudSync = ({
         wsUrl: config.wsUrl,
         tokens,
         WebSocketPolyfill: config.WebSocketPolyfill,
-        onStatus: state => setStatus({state: state === 'connected' ? currentStatus.state : 'offline'}),
+        onStatus: state => {
+            if (state === 'disconnected') {
+                wasDisconnected = true;
+                setStatus({state: 'offline'});
+
+                return;
+            }
+
+            // Hints sent while the socket was down are lost: catch up once.
+            if (wasDisconnected && live) {
+                wasDisconnected = false;
+                void runSyncAll();
+            }
+        },
     });
     const connections = new Map<string, DocConnection[]>();
     const running = new Map<string, Promise<void>>();
@@ -63,7 +78,8 @@ export const createCloudSync = ({
     let account: CloudAccount | null = null;
     let live = false;
     let initialScanDone = false;
-    let timer: ReturnType<typeof setInterval> | null = null;
+    let wasDisconnected = false;
+    let eventsConnection: DocConnection | null = null;
     let dirtyTimer: ReturnType<typeof setTimeout> | null = null;
     let currentStatus: CloudStatus = {
         state: 'signed-out',
@@ -173,7 +189,17 @@ export const createCloudSync = ({
         initialScanDone = true;
     };
 
-    const runSyncAll = () => syncAll().catch(handleError);
+    const libraryPasses = createSingleFlight(() => syncAll().catch(handleError));
+    const runSyncAll = libraryPasses.run;
+
+    const events = createCloudEvents({
+        store,
+        isAttached: scriptId => connections.has(scriptId),
+        syncScript,
+        libraryPass: libraryPasses.soon,
+        onError: handleError,
+        pullIntervalMs: config.pullIntervalMs,
+    });
 
     const goLive: CloudContext['goLive'] = async () => {
         live = true;
@@ -183,17 +209,20 @@ export const createCloudSync = ({
             attach(scriptId, await host.getDocs(scriptId, {seed: true}));
         }
 
+        if (account && !eventsConnection) {
+            // Change hints replace polling; the pass below covers everything before them.
+            eventsConnection = socket.attach(eventsDocumentName(account.accountId), new Y.Doc(), {onStateless: events.handle});
+        }
+
         await runSyncAll();
-        timer ??= setInterval(() => void runSyncAll(), config.intervalMs ?? 60_000);
     };
 
     const disconnect = () => {
         live = false;
-
-        if (timer) {
-            clearInterval(timer);
-            timer = null;
-        }
+        eventsConnection?.destroy();
+        eventsConnection = null;
+        events.stop();
+        libraryPasses.cancel();
 
         [...connections.keys()].forEach(detach);
         socket.close();
@@ -280,6 +309,11 @@ export const createCloudSync = ({
         status: () => currentStatus,
         check: () => reconcile.check(),
         apply: resolutions => reconcile.apply(resolutions),
+        wake: () => {
+            if (live) {
+                void runSyncAll();
+            }
+        },
         tabOpened: scriptId => {
             if (live) {
                 void host.getDocs(scriptId, {seed: true}).then(docs => attach(scriptId, docs)).catch(handleError);
@@ -309,25 +343,13 @@ export const createCloudSync = ({
         },
         scriptDeleted: async scriptId => {
             detach(scriptId);
-
-            const state = (await store.listSyncStates()).find(item => item.scriptId === scriptId);
-
-            await store.clearSyncState(scriptId);
-
-            if (!state || !account || state.accountId !== account.accountId) {
-                return;
-            }
-
-            try {
-                if (!live) {
-                    throw new Error('not connected');
-                }
-
-                await api.remove(scriptId);
-            } catch {
-                // Deleted offline or signed out: the next live pass (or check) deletes it in the cloud.
-                await store.addTombstone(scriptId, state.accountId);
-            }
+            await deleteInCloud({
+                scriptId,
+                store,
+                api,
+                accountId: account?.accountId ?? null,
+                live,
+            });
         },
         stop: async () => {
             disconnect();

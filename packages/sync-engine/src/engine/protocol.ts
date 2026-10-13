@@ -69,8 +69,9 @@ export type EngineRequest =
  * - `status`: current `CloudStatus`
  * - `signed-in` / `signed-out`: the tab changed the session (auth client)
  * - `check`: post-sign-in classification, returns `CloudCheckReport`
+ * - `wake`: catch-up pass (a tab became visible again)
  */
-export type CloudAction = 'status' | 'signed-in' | 'signed-out' | 'check';
+export type CloudAction = 'status' | 'signed-in' | 'signed-out' | 'check' | 'wake';
 
 export interface OpenResult {
     schemaVersion: number | null,

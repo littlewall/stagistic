@@ -95,7 +95,20 @@ export const CloudAccountProvider = ({
 
         void cloud.status().then(setStatus).catch(() => {});
 
-        return cloud.onStatus(setStatus);
+        // Change hints may have been missed while the tab slept: one catch-up pass.
+        const onVisible = () => {
+            if (document.visibilityState === 'visible') {
+                void cloud.wake().catch(() => {});
+            }
+        };
+        const unsubscribe = cloud.onStatus(setStatus);
+
+        document.addEventListener('visibilitychange', onVisible);
+
+        return () => {
+            unsubscribe();
+            document.removeEventListener('visibilitychange', onVisible);
+        };
     }, [cloud]);
 
     const signOut = useCallback(async () => {

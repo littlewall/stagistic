@@ -7,6 +7,7 @@ import {
     createCollabApp,
     createCollabDatabase,
     createCollabHocuspocus,
+    createLocalEventBus,
     purgeDeletedScripts,
     runCollabMigrations,
 } from '@stagistic/collab';
@@ -87,12 +88,19 @@ if (roles.has('collab')) {
         console.log(`[server] collab migrations: ${applied.length > 0 ? `${applied.length} applied` : 'up to date'}`);
     }
 
-    const hocuspocus = createCollabHocuspocus({database, verifyAccessToken});
+    // Change hints in process (one collab instance); Redis pub/sub once collab scales out.
+    const events = createLocalEventBus();
+    const hocuspocus = createCollabHocuspocus({
+        database,
+        verifyAccessToken,
+        events,
+    });
     const app = createCollabApp({
         database,
         verifyAccessToken,
         appOrigins: required('APP_ORIGINS').split(',').map(item => item.trim()),
         hocuspocus,
+        events,
     });
 
     app.get('/ws', collabSocketLimit(), collabSocketHandler(hocuspocus));

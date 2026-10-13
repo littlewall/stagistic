@@ -32,28 +32,35 @@ export const createEngineCloud = ({
     dropLocalState: (scriptId: string) => Promise<void>,
     tabRefs: Map<string, number>,
     post: (message: EngineMessage) => void,
-}): CloudSync => createCloudSync({
-    config,
-    log,
-    host: {
-        getDocs: (scriptId, {seed}) => getDocs(scriptId, seed),
-        flush,
-        unload,
-        resetScript: dropLocalState,
-        deleteLocal: async scriptId => {
-            await dropLocalState(scriptId);
-            await config.store.deleteScript(scriptId);
-        },
-        isOpenInTab: scriptId => (tabRefs.get(scriptId) ?? 0) > 0,
-        openScripts: () => [...tabRefs.keys()],
-        publishStatus: status => post({type: 'cloud-status', status}),
-        notifyReset: scriptIds => {
+}): CloudSync => {
+    const cloud = createCloudSync({
+        config,
+        log,
+        host: {
+            getDocs: (scriptId, {seed}) => getDocs(scriptId, seed),
+            flush,
+            unload,
+            resetScript: dropLocalState,
+            deleteLocal: async scriptId => {
+                await dropLocalState(scriptId);
+                await config.store.deleteScript(scriptId);
+            },
+            isOpenInTab: scriptId => (tabRefs.get(scriptId) ?? 0) > 0,
+            openScripts: () => [...tabRefs.keys()],
+            publishStatus: status => post({type: 'cloud-status', status}),
+            notifyReset: scriptIds => {
             // Tabs drop these replicas unreleased and re-open them.
-            scriptIds.forEach(scriptId => tabRefs.delete(scriptId));
-            post({type: 'scripts-reset', scriptIds});
+                scriptIds.forEach(scriptId => tabRefs.delete(scriptId));
+                post({type: 'scripts-reset', scriptIds});
+            },
         },
-    },
-});
+    });
+
+    // Back online (worker or window): hints sent meanwhile are lost, catch up once.
+    globalThis.addEventListener?.('online', () => cloud.wake());
+
+    return cloud;
+};
 
 const SIGNED_OUT: CloudStatus = {
     state: 'signed-out',
@@ -82,6 +89,11 @@ export const runCloudAction = async (cloud: CloudSync | null, action: CloudActio
             return cloud.status();
         },
         check: () => cloud.check(),
+        wake: () => {
+            cloud.wake();
+
+            return Promise.resolve(cloud.status());
+        },
     };
 
     return actions[action]();

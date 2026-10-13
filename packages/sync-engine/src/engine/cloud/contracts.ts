@@ -38,8 +38,8 @@ export interface CloudSyncConfig {
     store: CloudSyncStore,
     WebSocketPolyfill?: unknown,
     fetch?: typeof fetch,
-    /** Background library sync interval. */
-    intervalMs?: number,
+    /** Minimum gap between pulls of one script on change hints. */
+    pullIntervalMs?: number,
 }
 
 export interface CloudSync {
@@ -49,6 +49,8 @@ export interface CloudSync {
     status(): CloudStatus,
     check(): Promise<CloudCheckReport>,
     apply(resolutions: Record<string, ConflictResolution>): Promise<void>,
+    /** One catch-up pass (going online, tab visible again); hints may have been missed. */
+    wake(): void,
     /** Engine hooks. */
     tabOpened(scriptId: string): void,
     tabReleased(scriptId: string): void,

@@ -7,6 +7,7 @@ import {createMiddleware} from 'hono/factory';
 import {getScriptRole, type ScriptRole} from './access';
 import type {CollabDatabase} from './database';
 import {SCRIPT_ID} from './documentName';
+import {type EventBus, scriptMemberIds} from './events';
 
 export interface ScriptListItem {
     id: string,
@@ -60,12 +61,20 @@ export const createCollabApp = ({
     verifyAccessToken,
     appOrigins,
     hocuspocus,
+    events,
 }: {
     database: CollabDatabase,
     verifyAccessToken: (token: string) => Promise<AccessTokenClaims>,
     appOrigins: string[],
     hocuspocus?: Hocuspocus,
+    /** Change hints (`added`/`deleted`) to the script's members. */
+    events?: EventBus,
 }) => {
+    const notifyMembers = (scriptId: string, type: 'added' | 'deleted') => {
+        void scriptMemberIds(database.collab, scriptId)
+            .then(userIds => events?.publish(userIds, {type, scriptId}))
+            .catch(() => {});
+    };
     const app = new Hono<{Variables: {user: AccessTokenClaims}}>();
 
     app.use('*', async (context, next) => {
@@ -170,6 +179,8 @@ export const createCollabApp = ({
 
         const {rows} = await database.collab.query<ScriptRow>(`${SELECT_FOR_USER} and s.id = $2`, [userId, id]);
 
+        notifyMembers(id, 'added');
+
         return context.json(toItem(rows[0]), status);
     });
 
@@ -183,6 +194,7 @@ export const createCollabApp = ({
         }
 
         await database.collab.query('update scripts set deleted_at = now() where id = $1', [id]);
+        notifyMembers(id, 'deleted');
         DOC_KINDS.forEach(kind => hocuspocus?.closeConnections(`script/${id}/${kind}`));
 
         return context.body(null, 204);

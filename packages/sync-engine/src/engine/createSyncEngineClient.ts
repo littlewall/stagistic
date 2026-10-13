@@ -49,6 +49,8 @@ export interface SyncEngineCloudClient {
     /** Post-sign-in classification; show a dialog only if it has conflicts. */
     check(): Promise<CloudCheckReport>,
     apply(resolutions: Record<string, ConflictResolution>): Promise<void>,
+    /** Catch-up pass; call when the tab becomes visible again. */
+    wake(): Promise<CloudStatus>,
     onStatus(listener: (status: CloudStatus) => void): () => void,
 }
 
@@ -279,7 +281,7 @@ export const createSyncEngineClient = ({
         };
     };
 
-    const cloudAction = <T>(action: 'status' | 'signed-in' | 'signed-out' | 'check') => send<T>({type: 'cloud', action}, {timeoutMs: CLOUD_TIMEOUT_MS});
+    const cloudAction = <T>(action: 'status' | 'signed-in' | 'signed-out' | 'check' | 'wake') => send<T>({type: 'cloud', action}, {timeoutMs: CLOUD_TIMEOUT_MS});
 
     return {
         openScript,
@@ -319,6 +321,7 @@ export const createSyncEngineClient = ({
             signedIn: () => cloudAction<CloudStatus>('signed-in'),
             signedOut: () => cloudAction<CloudStatus>('signed-out'),
             check: () => cloudAction<CloudCheckReport>('check'),
+            wake: () => cloudAction<CloudStatus>('wake'),
             apply: resolutions => send({type: 'cloud-apply', resolutions}, {timeoutMs: CLOUD_TIMEOUT_MS}),
             onStatus: listener => {
                 statusListeners.add(listener);
