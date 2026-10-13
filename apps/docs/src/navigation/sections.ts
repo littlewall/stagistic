@@ -23,10 +23,7 @@ export const documentationSections: DocumentationSection[] = [
             },
             {
                 label: 'User guide',
-                items: [
-                    'editor/review',
-                    'editor/export',
-                ],
+                items: ['editor/export'],
             },
             {
                 label: 'Scripts and files',
@@ -89,6 +86,18 @@ export const documentationSections: DocumentationSection[] = [
                     'editor/music/manage',
                     'editor/music/score',
                     'editor/music/remove',
+                ],
+            },
+            {
+                label: 'Finding and reviewing',
+                items: [
+                    {label: 'Overview', slug: 'editor/review'},
+                    'editor/review/find',
+                    'editor/review/replace',
+                    'editor/review/comment',
+                    'editor/review/threads',
+                    'editor/review/comments-view',
+                    'editor/review/history',
                 ],
             },
         ],

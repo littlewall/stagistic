@@ -19,7 +19,7 @@ When your library has at least five scripts, **Search scripts** appears above th
 
 Matching is not case-sensitive. The search filters script titles and subtitles; it does not search the dialogue inside them. Clear the search to show the whole library again.
 
-For words within an open script, see [Finding and reviewing](/editor/review/).
+For words within an open script, see [Find text in your script](/editor/review/find/).
 
 ## Change the order
 
