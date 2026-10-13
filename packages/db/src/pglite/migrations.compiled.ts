@@ -130,5 +130,10 @@ export const compiledMigrations = [
         "id": "0025_drop_sync_outbox",
         "checksum": "bd94cfae3d1839155d9dc86250a1068d36c4423be1c7a53abd33e6dc8145244d",
         "sql": "-- The outbox replication path is replaced by Y.Doc sync (packages/sync-engine).\nDROP TABLE IF EXISTS \"sync_outbox\";\n"
+    },
+    {
+        "id": "0026_cloud_sync_state",
+        "checksum": "2c760ddc7799d37ab2a5ed31dc0acddc7b072315f277b7d4700e68cd4e259778",
+        "sql": "-- Local cloud-sync state, written only by the sync engine.\n-- The account this device syncs with; `checked` = the post-sign-in check ran.\nCREATE TABLE IF NOT EXISTS \"sync_account\" (\n\t\"id\" integer PRIMARY KEY NOT NULL,\n\t\"account_id\" text NOT NULL,\n\t\"email\" text NOT NULL,\n\t\"checked\" boolean NOT NULL DEFAULT false,\n\t\"updated_at\" bigint NOT NULL\n);\n--> statement-breakpoint\n-- Per script: account it was last synced with and the state vectors of its\n-- three Y.Docs at that moment (base64). No FK: survives the script's deletion\n-- long enough to become a tombstone.\nCREATE TABLE IF NOT EXISTS \"sync_state\" (\n\t\"script_id\" text PRIMARY KEY NOT NULL,\n\t\"account_id\" text NOT NULL,\n\t\"body_state_vector\" text,\n\t\"meta_state_vector\" text,\n\t\"comments_state_vector\" text,\n\t\"synced_at\" bigint NOT NULL\n);\n--> statement-breakpoint\n-- Scripts deleted on this device that still exist in the account's cloud.\nCREATE TABLE IF NOT EXISTS \"sync_tombstones\" (\n\t\"script_id\" text PRIMARY KEY NOT NULL,\n\t\"account_id\" text NOT NULL,\n\t\"deleted_at\" bigint NOT NULL\n);\n"
     }
 ] as const;

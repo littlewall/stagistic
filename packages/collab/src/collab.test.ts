@@ -221,6 +221,12 @@ describe.skipIf(!available)('collab service', () => {
         expect(script.title).toBe('The Tragedy of Hamlet');
         expect(script.updated_at.getTime()).toBeGreaterThan(before.getTime());
 
+        // The list carries the stored doc's state vector (clients compare it with their last sync).
+        const listed = ((await (await api('alice', '/scripts')).json()) as {scripts: Array<{id: string, stateVectors: Record<string, string>}>}).scripts;
+        const metaVector = Buffer.from(listed.find(item => item.id === 'doc-1')!.stateVectors.meta, 'base64');
+
+        expect([...metaVector]).toEqual([...Y.encodeStateVector(document)]);
+
         // A fresh client gets the stored state.
         const second = await connect('alice', 'script/doc-1/meta');
 

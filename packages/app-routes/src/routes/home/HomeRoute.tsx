@@ -11,6 +11,7 @@ import {
     SearchInput,
     Select,
     Skeleton,
+    SyncPromptModal,
     Text,
     UploadIcon,
 } from '@stagistic/ui';
@@ -22,6 +23,8 @@ import {
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
+import {useCloudAccount} from '../../account/CloudAccountProvider';
+import {useSyncPrompt} from '../../account/useSyncPrompt';
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {buildHomeDashboardModel, type ScriptSort} from './homeDashboardModel';
@@ -51,6 +54,8 @@ export const HomeRoute = () => {
         openRenameScript,
         openDuplicateScript,
     } = useGlobalModals();
+    const cloudAccount = useCloudAccount();
+    const syncPrompt = useSyncPrompt(scriptSummaries.length);
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
     const [isCreatingExample, setIsCreatingExample] = useState(false);
@@ -212,6 +217,14 @@ export const HomeRoute = () => {
                             className={styles.emptyLibrary}
                         >
                             No scripts yet.
+                            {cloudAccount.isEnabled && cloudAccount.status?.state === 'signed-out' ? (
+                                <Button
+                                    variant="ghost"
+                                    onPress={cloudAccount.openSignIn}
+                                >
+                                    Sign in to sync between devices
+                                </Button>
+                            ) : null}
                         </Notice>
                     ) : (
                         <div className={styles.library}>
@@ -251,6 +264,11 @@ export const HomeRoute = () => {
                     )}
                 </div>
             </PageContainer>
+            <SyncPromptModal
+                isOpen={syncPrompt.isOpen}
+                onSignIn={syncPrompt.onSignIn}
+                onDismiss={syncPrompt.onDismiss}
+            />
         </AppLayout>
     );
 };

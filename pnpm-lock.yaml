@@ -247,6 +247,9 @@ importers:
       '@stagistic/app-routes':
         specifier: workspace:*
         version: link:../../packages/app-routes
+      '@stagistic/auth-client':
+        specifier: workspace:*
+        version: link:../../packages/auth-client
       '@stagistic/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -348,6 +351,9 @@ importers:
       '@stagistic/app-core':
         specifier: workspace:*
         version: link:../app-core
+      '@stagistic/auth-client':
+        specifier: workspace:*
+        version: link:../auth-client
       '@stagistic/editor':
         specifier: workspace:*
         version: link:../editor
@@ -395,12 +401,15 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
+  packages/auth-client:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/collab:
     dependencies:
       '@hocuspocus/extension-database':
-        specifier: 4.7.0
-        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
-      '@hocuspocus/extension-throttle':
         specifier: 4.7.0
         version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
       '@hocuspocus/server':
@@ -684,6 +693,9 @@ importers:
 
   packages/sync-engine:
     dependencies:
+      '@hocuspocus/provider':
+        specifier: 4.7.0
+        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
       '@stagistic/script':
         specifier: workspace:*
         version: link:../script
@@ -706,9 +718,6 @@ importers:
         specifier: ^13.6.33
         version: 13.6.33
     devDependencies:
-      '@hocuspocus/provider':
-        specifier: 4.7.0
-        version: 4.7.0(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33)
       '@stagistic/editor':
         specifier: workspace:*
         version: link:../editor

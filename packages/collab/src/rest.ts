@@ -15,6 +15,8 @@ export interface ScriptListItem {
     createdAt: string,
     updatedAt: string,
     deletedAt: string | null,
+    /** Base64 state vectors of the stored docs (`body`, `meta`, `comments`). */
+    stateVectors: Record<string, string>,
 }
 
 interface ScriptRow {
@@ -24,6 +26,7 @@ interface ScriptRow {
     created_at: Date,
     updated_at: Date,
     deleted_at: Date | null,
+    state_vectors: Record<string, string> | null,
 }
 
 const toItem = (row: ScriptRow): ScriptListItem => ({
@@ -33,9 +36,12 @@ const toItem = (row: ScriptRow): ScriptListItem => ({
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
     deletedAt: row.deleted_at?.toISOString() ?? null,
+    stateVectors: row.state_vectors ?? {},
 });
 
-const SELECT_FOR_USER = `select s.id, s.title, m.role, s.created_at, s.updated_at, s.deleted_at
+const SELECT_FOR_USER = `select s.id, s.title, m.role, s.created_at, s.updated_at, s.deleted_at,
+        (select json_object_agg(split_part(y.name, '/', 3), encode(y.state_vector, 'base64'))
+            from ydoc_states y where y.script_id = s.id and y.state_vector is not null) as state_vectors
     from scripts s join script_members m on m.script_id = s.id where m.user_id = $1`;
 
 const DOC_KINDS = [

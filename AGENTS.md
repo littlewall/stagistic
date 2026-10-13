@@ -35,6 +35,13 @@ The web app keeps each script body in a Y.Doc (`packages/sync-engine`); the
   A new mutation method must be listed in `META_MUTATIONS`/`COMMENT_MUTATIONS`;
   a new user-authored column must be mapped in `packages/db/src/repo/records`
   (read + write). Body-derived columns stay out of records.
+- Cloud sync runs in the engine only (`engine/cloud`). "Changed" on either side
+  means state vectors moved since the last sync (`sync_state`), never clocks;
+  clocks only pick "newer" in the conflict dialog. Scripts coming from the
+  cloud are opened with `seed: false` (an empty doc must never be seeded).
+- Replacing a script's local Y state (conflict resolution) gives its docs a new
+  `channelId`; tabs must drop the old replica (`onScriptsReset`) and re-open.
+  Never let an old replica sync into new docs.
 
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.

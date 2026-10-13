@@ -9,6 +9,7 @@
         "@dnd-kit/dom": "^0.3.0",
         "@dnd-kit/react": "^0.3.0",
         "@stagistic/app-core": "workspace:*",
+        "@stagistic/auth-client": "workspace:*",
         "@stagistic/editor": "workspace:*",
         "@stagistic/export": "workspace:*",
         "@stagistic/script": "workspace:*",

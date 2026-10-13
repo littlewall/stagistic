@@ -26,6 +26,11 @@ import {
     scriptSceneLocations,
     scriptScenes,
 } from './structure';
+import {
+    syncAccount,
+    syncState,
+    syncTombstones,
+} from './sync';
 
 export {scriptBlockCharacterRefs, scriptBlocks} from './blocks';
 export {
@@ -55,6 +60,11 @@ export {
     scriptSceneLocations,
     scriptScenes,
 } from './structure';
+export {
+    syncAccount,
+    syncState,
+    syncTombstones,
+} from './sync';
 
 export const dbSchema = {
     scripts,
@@ -79,4 +89,7 @@ export const dbSchema = {
     scriptMusicAttachments,
     scriptCommentThreads,
     scriptCommentMessages,
+    syncAccount,
+    syncState,
+    syncTombstones,
 };

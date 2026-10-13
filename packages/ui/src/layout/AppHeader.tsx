@@ -8,6 +8,7 @@ import {Button as RACButton, MenuTrigger} from 'react-aria-components';
 
 import {Button} from '../atoms/Button/Button';
 import {Tooltip} from '../atoms/Tooltip/Tooltip';
+import type {AccountMenuAccount} from '../dialogs/account/types';
 import {
     AttributeManagerIcon,
     DownloadIcon,
@@ -49,6 +50,7 @@ export type AppHeaderProps = {
     onImportScript?: () => void,
     isFullWidth?: boolean,
     contentInset?: 'default' | 'page',
+    account?: AccountMenuAccount,
 };
 
 export const AppHeader = ({
@@ -60,6 +62,7 @@ export const AppHeader = ({
     onImportScript,
     isFullWidth = false,
     contentInset = 'default',
+    account,
 }: AppHeaderProps) => {
     const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
 
@@ -167,6 +170,7 @@ export const AppHeader = ({
                         <AccountMenu
                             themeMode={themeMode}
                             onThemeChange={setThemeMode}
+                            account={account}
                         />
                     </div>
                 </div>
@@ -180,12 +184,15 @@ export type ScriptEditorAppHeaderProps = {
     onMenuAction?: (actionId: string) => void,
     onRenameScript?: (name: string) => void,
     scriptSyncState?: ScriptSyncState,
+    /** Signed in: account sync state for the indicator's label. */
+    cloudSyncLabel?: string,
     onHome: () => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
     isFullWidth?: boolean,
     activeView: ScriptView,
     onSelectView: (view: ScriptView) => void,
+    account?: AccountMenuAccount,
 };
 
 export const ScriptEditorAppHeader = ({
@@ -193,16 +200,19 @@ export const ScriptEditorAppHeader = ({
     onMenuAction,
     onRenameScript,
     scriptSyncState,
+    cloudSyncLabel,
     onHome,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
     isFullWidth = true,
     activeView,
     onSelectView,
+    account,
 }: ScriptEditorAppHeaderProps) => {
     return (
         <AppHeader
             onHome={onHome}
+            account={account}
             isFullWidth={isFullWidth}
             scriptControls={(
                 <ViewSwitcher
@@ -288,7 +298,10 @@ export const ScriptEditorAppHeader = ({
                             name={currentScript.name}
                             onRename={onRenameScript}
                         />
-                        <SyncIndicator state={scriptSyncState} />
+                        <SyncIndicator
+                            state={scriptSyncState}
+                            cloudLabel={cloudSyncLabel}
+                        />
                     </div>
                 </>
             )}

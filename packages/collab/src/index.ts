@@ -5,3 +5,4 @@ export * from './hocuspocus';
 export * from './migrations';
 export * from './purge';
 export * from './rest';
+export * from './upgradeLimiter';

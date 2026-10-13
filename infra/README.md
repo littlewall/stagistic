@@ -45,6 +45,12 @@ CADDY_HTTPS_PORT=8443
 LOCAL_HTTPS_PORT_SUFFIX=:8443
 ```
 
+The editor reads the cloud endpoints from `apps/web/.env.development`
+(`VITE_AUTH_URL`, `VITE_SYNC_URL`, `VITE_TURNSTILE_SITE_KEY`); behind port 8443
+override them in `apps/web/.env.development.local`. Without them the app stays
+local only (no account UI). Sign in through `https://editor.stagistic.local`,
+not `localhost`: cookies and CORS are bound to the `.stagistic.local` origins.
+
 The server runs `deno run --watch`, applies identity migrations on start
 (`MIGRATE_ON_START=1`) and uses Cloudflare's always-pass Turnstile test secret
 (`TURNSTILE_SECRET_KEY=2x0000000000000000000000000000000AA` makes it always fail).

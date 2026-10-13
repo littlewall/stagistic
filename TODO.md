@@ -43,7 +43,15 @@
   - [x] `apps/server`: collab role with `/ws` (hono/deno), graceful shutdown flushes pending stores
   - [x] Projection writes scoped by script (ids are global; a script cannot take over another's rows)
   - [x] Tests: collab integration (Postgres + real WebSockets), live smoke through Caddy
-- [ ] 5. Account + cloud sync in client
+- [x] 5. Account + cloud sync in client
+  - [x] Server: `ydoc_states.state_vector`, `GET /scripts` returns state vectors; per-socket connection limit instead of per-doc Throttle
+  - [x] Client DB: `sync_account`, `sync_state`, `sync_tombstones` (migration 0026), `createCloudSyncStore`
+  - [x] Engine cloud sync: access token from the session cookie, one WebSocket, tab-open scripts live, library in the background (state vectors), upload/download/delete/tombstones, unload of idle scripts
+  - [x] Post-sign-in check: classification by state vectors, scene diff on an unmerged cloud copy, keep both / use newer (replace as ops), `scripts-reset` + per-entry `channelId`
+  - [x] `packages/auth-client` (magic link, session, sign-out, Turnstile)
+  - [x] UI: account menu, sign-in modal, `/auth/callback`, account settings, conflict dialog, one-time prompt, empty-library sign-in, sync label in the indicator
+  - [x] Tests: two-device cloud sync e2e (collab), engine, auth client, UI and provider browser tests
+  - [ ] Passkey UI; desktop sign-in (Tauri origin needs a non-cookie flow); browser e2e through Caddy
 - [ ] 6. Attachments to S3 (RustFS)
 
 ## Phase 7 — UpCloud (separate, later)

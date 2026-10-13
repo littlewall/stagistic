@@ -1,9 +1,11 @@
 /*
- * Classification run before the engine reconnects after a sign-out (or on the
+ * Classification run before the engine connects after a sign-out (or on the
  * first sign-in on a device). Pure: callers gather local and cloud facts.
  *
- * - changed locally  = current state vectors != last synced state vectors
- * - changed in cloud = cloud `updatedAt` > `lastSyncedAt` (server clock)
+ * Both sides are compared with the state vectors recorded at the last sync:
+ * - changed locally  = local docs have updates the last sync did not have
+ * - changed in cloud = stored cloud docs have updates the last sync did not have
+ * State vectors make this exact; clocks are only used to pick "newer".
  */
 
 export interface LocalScriptSyncInfo {
@@ -11,8 +13,6 @@ export interface LocalScriptSyncInfo {
     /** Account the script was last synced with; null = never synced. */
     boundAccountId: string | null,
     changedSinceSync: boolean,
-    /** Per-script override of the global `lastSyncedAt` (server clock, ms). */
-    lastSyncedAt?: number | null,
 }
 
 export interface LocalTombstone {
@@ -22,13 +22,13 @@ export interface LocalTombstone {
 
 export interface CloudScriptInfo {
     scriptId: string,
-    updatedAt: number,
+    /** Cloud docs have updates beyond this device's last sync (true if never synced). */
+    changedSinceSync: boolean,
     deletedAt: number | null,
 }
 
 export interface ClassifyScriptsInput {
     accountId: string,
-    lastSyncedAt: number | null,
     local: readonly LocalScriptSyncInfo[],
     tombstones: readonly LocalTombstone[],
     cloud: readonly CloudScriptInfo[],
@@ -68,7 +68,6 @@ const createEmptyPlan = (): ScriptSyncPlan => ({
 
 export const classifyScripts = ({
     accountId,
-    lastSyncedAt,
     local,
     tombstones,
     cloud,
@@ -76,12 +75,6 @@ export const classifyScripts = ({
     const plan = createEmptyPlan();
     const cloudById = new Map(cloud.map(entry => [entry.scriptId, entry]));
     const handled = new Set<string>();
-
-    const isCloudChanged = (entry: CloudScriptInfo, syncedAt: number | null | undefined) => {
-        const since = syncedAt === undefined ? lastSyncedAt : syncedAt;
-
-        return since === null || entry.updatedAt > since;
-    };
 
     for (const script of local) {
         handled.add(script.scriptId);
@@ -104,13 +97,11 @@ export const classifyScripts = ({
             continue;
         }
 
-        const cloudChanged = isCloudChanged(remote, script.lastSyncedAt);
-
-        if (!everSynced || (script.changedSinceSync && cloudChanged)) {
+        if (!everSynced || (script.changedSinceSync && remote.changedSinceSync)) {
             plan.conflicts.push(script.scriptId);
         } else if (script.changedSinceSync) {
             plan.upload.push(script.scriptId);
-        } else if (cloudChanged) {
+        } else if (remote.changedSinceSync) {
             plan.download.push(script.scriptId);
         } else {
             plan.unchanged.push(script.scriptId);
@@ -130,7 +121,7 @@ export const classifyScripts = ({
             continue;
         }
 
-        (isCloudChanged(remote, undefined) ? plan.restoreLocal : plan.deleteCloud).push(tombstone.scriptId);
+        (remote.changedSinceSync ? plan.restoreLocal : plan.deleteCloud).push(tombstone.scriptId);
     }
 
     for (const remote of cloud) {

@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+tasks:
+  test:
+    command: 'vp test run --dir .'
+    options:
+      cache: false
+      mergeArgs: 'replace'

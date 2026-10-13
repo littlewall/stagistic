@@ -151,6 +151,16 @@ export {ModalHeader, type ModalHeaderProps} from './dialogs/modal/ModalHeader';
 export {TypeToConfirmAction, type TypeToConfirmActionProps} from './dialogs/modal/TypeToConfirmAction';
 
 // ─── Dialogs: script ────────────────────────────────────────────────────────
+export {AccountSettingsModal} from './dialogs/account/AccountSettingsModal';
+export {CloudSyncModal} from './dialogs/account/CloudSyncModal';
+export {SignInModal} from './dialogs/account/SignInModal';
+export {SyncPromptModal} from './dialogs/account/SyncPromptModal';
+export type {
+    AccountMenuAccount,
+    CloudConflictItem,
+    CloudConflictResolution,
+    CloudSyncSummary,
+} from './dialogs/account/types';
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
 export {DeleteScriptModal} from './dialogs/script/DeleteScriptModal';
 export {

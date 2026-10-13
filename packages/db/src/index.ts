@@ -97,6 +97,7 @@ export {createScriptProjectionStore} from './repo/document/projectionStore';
 export {readScriptRecords} from './repo/records/readScriptRecords';
 export {type ScriptDocumentsSync, withDocumentSync} from './repo/records/withDocumentSync';
 export {writeScriptRecords} from './repo/records/writeScriptRecords';
+export {createCloudSyncStore} from './repo/sync/cloudSyncStore';
 
 // ─── Reactive sources ──────────────────────────────────────────────────────────
 export * from './reactive';

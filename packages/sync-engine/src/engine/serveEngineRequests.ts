@@ -1,5 +1,7 @@
 import type {RecordChanges} from '../ydoc/recordsCodec';
+import type {ConflictResolution} from './cloud/types';
 import {
+    type CloudAction,
     type ControlChannel,
     type EngineMessage,
     type EngineRequest,
@@ -9,11 +11,14 @@ import {
 import type {RecordsKind} from './scriptRecords';
 
 export interface EngineRequestHandlers {
-    open(scriptId: string): Promise<OpenResult>,
+    open(scriptId: string, retain: boolean): Promise<OpenResult>,
     flush(scriptId: string, stateVector?: Uint8Array): Promise<void>,
     applyRecords(scriptId: string, kind: RecordsKind, changes: RecordChanges): Promise<void>,
     scriptReplaced(scriptId: string): Promise<void>,
     scriptDeleted(scriptId: string): Promise<void>,
+    release(scriptId: string): Promise<void>,
+    cloud(action: CloudAction): Promise<unknown>,
+    cloudApply(resolutions: Record<string, ConflictResolution>): Promise<void>,
 }
 
 const HANDLED_TTL_MS = 60_000;
@@ -38,7 +43,7 @@ export const serveEngineRequests = (
                         type: 'reply',
                         requestId: request.requestId,
                         ok: true,
-                        result: await handlers.open(request.scriptId),
+                        result: await handlers.open(request.scriptId, request.retain !== false),
                     };
                 case 'flush':
                     await handlers.flush(request.scriptId, request.stateVector);
@@ -52,6 +57,19 @@ export const serveEngineRequests = (
                 case 'script-deleted':
                     await handlers.scriptDeleted(request.scriptId);
                     break;
+                case 'release':
+                    await handlers.release(request.scriptId);
+                    break;
+                case 'cloud':
+                    return {
+                        type: 'reply',
+                        requestId: request.requestId,
+                        ok: true,
+                        result: await handlers.cloud(request.action),
+                    };
+                case 'cloud-apply':
+                    await handlers.cloudApply(request.resolutions);
+                    break;
             }
 
             return {
@@ -60,7 +78,7 @@ export const serveEngineRequests = (
                 ok: true,
             };
         } catch (error) {
-            log(`${request.type} failed for ${request.scriptId}`, error);
+            log(`${request.type} failed${'scriptId' in request ? ` for ${request.scriptId}` : ''}`, error);
 
             return {
                 type: 'reply',
@@ -74,7 +92,7 @@ export const serveEngineRequests = (
     const handleMessage = (event: {data: unknown}) => {
         const message = event.data;
 
-        if (!isEngineMessage(message) || message.type === 'reply' || message.type === 'engine-started') {
+        if (!isEngineMessage(message) || message.type === 'reply' || message.type === 'engine-started' || message.type === 'cloud-status' || message.type === 'scripts-reset') {
             return;
         }
 

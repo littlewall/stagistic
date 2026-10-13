@@ -1,0 +1,67 @@
+.form {
+    composes: form from '../modal/dialogForm.module.css';
+}
+
+.label {
+    composes: label from '../modal/dialogForm.module.css';
+}
+
+.input {
+    composes: input from '../modal/dialogForm.module.css';
+}
+
+/* Turnstile renders a fixed 65px widget. */
+.captcha {
+    min-height: 4.0625rem;
+}
+
+.summary {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.conflicts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.conflict {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.conflictTitle {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+}
+
+.conflictMeta {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin: var(--space-md) 0 0;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: var(--space-md);
+    font-size: var(--font-size-sm);
+}
+
+.rowLabel {
+    color: var(--color-text-muted);
+}

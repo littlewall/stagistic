@@ -7,10 +7,16 @@ import {
 } from '../tabs/broadcastSync';
 import {isBodyDocEmpty} from '../ydoc/bodyCodec';
 import {isEmptyChanges, type RecordChanges} from '../ydoc/recordsCodec';
+import type {
+    CloudCheckReport,
+    CloudStatus,
+    ConflictResolution,
+} from './cloud/types';
 import {
     bodyDocName,
     type ControlChannelFactory,
     createControlChannel,
+    docChannelName,
     type EngineRequest,
     isEngineMessage,
     metaDocName,
@@ -34,6 +40,18 @@ export interface OpenedScript {
     release(): void,
 }
 
+/** Cloud sync controls; all work happens in the leader's engine. */
+export interface SyncEngineCloudClient {
+    status(): Promise<CloudStatus>,
+    /** The auth client signed in (or out) in this tab. */
+    signedIn(): Promise<CloudStatus>,
+    signedOut(): Promise<CloudStatus>,
+    /** Post-sign-in classification; show a dialog only if it has conflicts. */
+    check(): Promise<CloudCheckReport>,
+    apply(resolutions: Record<string, ConflictResolution>): Promise<void>,
+    onStatus(listener: (status: CloudStatus) => void): () => void,
+}
+
 export interface SyncEngineClient {
     openScript(scriptId: string): Promise<OpenedScript>,
     /** Mirrors a repository mutation (projection before/after) into the script's Y.Doc. */
@@ -43,6 +61,9 @@ export interface SyncEngineClient {
     /** The projection was rewritten outside the engine (package restore). */
     notifyScriptReplaced(scriptId: string): Promise<void>,
     notifyScriptDeleted(scriptId: string): Promise<void>,
+    /** Scripts whose local state the engine replaced: views must re-open them. */
+    onScriptsReset(listener: (scriptIds: string[]) => void): () => void,
+    cloud: SyncEngineCloudClient,
     destroy(): void,
 }
 
@@ -58,7 +79,7 @@ type RequestBody = EngineRequest extends infer R ? R extends EngineRequest ? Omi
 
 interface Pending {
     request: EngineRequest,
-    resolve: (result: OpenResult | undefined) => void,
+    resolve: (result: unknown) => void,
     reject: (error: Error) => void,
     retry: ReturnType<typeof setInterval>,
     timeout: ReturnType<typeof setTimeout>,
@@ -68,8 +89,12 @@ interface Replica {
     body: Y.Doc,
     meta: Y.Doc,
     syncs: BroadcastSync[],
+    channelId: string | null,
     refs: number,
 }
+
+/** Cloud check/apply walk the whole library. */
+const CLOUD_TIMEOUT_MS = 10 * 60_000;
 
 export const createSyncEngineClient = ({
     controlChannelFactory = createControlChannel,
@@ -80,8 +105,10 @@ export const createSyncEngineClient = ({
     const channel = controlChannelFactory();
     const pending = new Map<string, Pending>();
     const replicas = new Map<string, Replica>();
+    const statusListeners = new Set<(status: CloudStatus) => void>();
+    const resetListeners = new Set<(scriptIds: string[]) => void>();
 
-    const send = (body: RequestBody) => new Promise<OpenResult | undefined>((resolve, reject) => {
+    const send = <T = undefined>(body: RequestBody, options: {timeoutMs?: number} = {}) => new Promise<T>((resolve, reject) => {
         const request = {...body, requestId: crypto.randomUUID()} as EngineRequest;
         const settle = () => {
             clearInterval(entry.retry);
@@ -92,14 +119,14 @@ export const createSyncEngineClient = ({
             request,
             resolve: result => {
                 settle();
-                resolve(result);
+                resolve(result as T);
             },
             reject: error => {
                 settle();
                 reject(error);
             },
             retry: setInterval(() => channel.postMessage(request), retryMs),
-            timeout: setTimeout(() => entry.reject(new Error(`sync engine did not answer ${request.type}`)), timeoutMs),
+            timeout: setTimeout(() => entry.reject(new Error(`sync engine did not answer ${request.type}`)), options.timeoutMs ?? timeoutMs),
         };
 
         pending.set(request.requestId, entry);
@@ -123,6 +150,27 @@ export const createSyncEngineClient = ({
         doc.on('update', check);
     });
 
+    /** (Re)binds a replica to the engine docs' channels and pulls their state. */
+    const bind = (scriptId: string, replica: Replica, channelId: string) => {
+        if (replica.channelId !== channelId) {
+            replica.syncs.forEach(sync => sync.destroy());
+            replica.syncs = [
+                createBroadcastSync(replica.body, docChannelName(bodyDocName(scriptId), channelId), {channelFactory: docChannelFactory}),
+                createBroadcastSync(replica.meta, docChannelName(metaDocName(scriptId), channelId), {channelFactory: docChannelFactory}),
+            ];
+            replica.channelId = channelId;
+        }
+
+        replica.syncs.forEach(sync => sync.resync());
+    };
+
+    const destroyReplica = (scriptId: string, replica: Replica) => {
+        replica.syncs.forEach(sync => sync.destroy());
+        replica.body.destroy();
+        replica.meta.destroy();
+        replicas.delete(scriptId);
+    };
+
     const handleMessage = (event: {data: unknown}) => {
         const message = event.data;
 
@@ -130,27 +178,45 @@ export const createSyncEngineClient = ({
             return;
         }
 
-        if (message.type === 'reply') {
-            const entry = pending.get(message.requestId);
+        switch (message.type) {
+            case 'reply': {
+                const entry = pending.get(message.requestId);
 
-            if (message.ok) {
-                entry?.resolve(message.result);
-            } else {
-                entry?.reject(new Error(message.error));
+                if (message.ok) {
+                    entry?.resolve(message.result);
+                } else {
+                    entry?.reject(new Error(message.error));
+                }
+
+                break;
             }
+            case 'engine-started':
+                // New leader: re-open replicas (it loads them from IndexedDB) and re-sync on its channels.
+                for (const [scriptId, replica] of replicas) {
+                    void send<OpenResult>({type: 'open', scriptId})
+                        .then(result => bind(scriptId, replica, result.channelId))
+                        .catch(() => {});
+                }
 
-            return;
-        }
+                pending.forEach(entry => channel.postMessage(entry.request));
+                break;
+            case 'scripts-reset':
+                // These replicas hold a discarded history: drop them unsynced.
+                for (const scriptId of message.scriptIds) {
+                    const replica = replicas.get(scriptId);
 
-        if (message.type === 'engine-started') {
-            // New leader: re-open replicas (it loads them from IndexedDB) and re-sync.
-            for (const [scriptId, replica] of replicas) {
-                void send({type: 'open', scriptId})
-                    .then(() => replica.syncs.forEach(sync => sync.resync()))
-                    .catch(() => {});
-            }
+                    if (replica) {
+                        destroyReplica(scriptId, replica);
+                    }
+                }
 
-            pending.forEach(entry => channel.postMessage(entry.request));
+                resetListeners.forEach(listener => listener(message.scriptIds));
+                break;
+            case 'cloud-status':
+                statusListeners.forEach(listener => listener(message.status));
+                break;
+            default:
+                break;
         }
     };
 
@@ -158,19 +224,15 @@ export const createSyncEngineClient = ({
 
     const openScript: SyncEngineClient['openScript'] = async scriptId => {
         let replica = replicas.get(scriptId);
+        const retain = !replica;
 
         if (!replica) {
-            const body = new Y.Doc({gc: true});
-            const meta = new Y.Doc({gc: true});
-
             replica = {
-                body,
-                meta,
+                body: new Y.Doc({gc: true}),
+                meta: new Y.Doc({gc: true}),
+                syncs: [],
+                channelId: null,
                 refs: 0,
-                syncs: [
-                    createBroadcastSync(body, bodyDocName(scriptId), {channelFactory: docChannelFactory}),
-                    createBroadcastSync(meta, metaDocName(scriptId), {channelFactory: docChannelFactory}),
-                ],
             };
             replicas.set(scriptId, replica);
         }
@@ -178,10 +240,13 @@ export const createSyncEngineClient = ({
         replica.refs++;
 
         const opened = replica;
-        const result = await send({type: 'open', scriptId});
+        const result = await send<OpenResult>({
+            type: 'open',
+            scriptId,
+            retain,
+        });
 
-        // The engine joined the doc channels only now: pull its state.
-        opened.syncs.forEach(sync => sync.resync());
+        bind(scriptId, opened, result.channelId);
         await waitForContent(opened.body);
 
         let released = false;
@@ -190,7 +255,7 @@ export const createSyncEngineClient = ({
             scriptId,
             body: opened.body,
             meta: opened.meta,
-            schemaVersion: result?.schemaVersion ?? null,
+            schemaVersion: result.schemaVersion,
             flush: async () => {
                 await send({
                     type: 'flush',
@@ -206,15 +271,15 @@ export const createSyncEngineClient = ({
                 released = true;
                 opened.refs--;
 
-                if (opened.refs === 0) {
-                    opened.syncs.forEach(sync => sync.destroy());
-                    opened.body.destroy();
-                    opened.meta.destroy();
-                    replicas.delete(scriptId);
+                if (opened.refs === 0 && replicas.get(scriptId) === opened) {
+                    destroyReplica(scriptId, opened);
+                    void send({type: 'release', scriptId}).catch(() => {});
                 }
             },
         };
     };
+
+    const cloudAction = <T>(action: 'status' | 'signed-in' | 'signed-out' | 'check') => send<T>({type: 'cloud', action}, {timeoutMs: CLOUD_TIMEOUT_MS});
 
     return {
         openScript,
@@ -244,16 +309,28 @@ export const createSyncEngineClient = ({
         notifyScriptDeleted: async scriptId => {
             await send({type: 'script-deleted', scriptId});
         },
+        onScriptsReset: listener => {
+            resetListeners.add(listener);
+
+            return () => resetListeners.delete(listener);
+        },
+        cloud: {
+            status: () => cloudAction<CloudStatus>('status'),
+            signedIn: () => cloudAction<CloudStatus>('signed-in'),
+            signedOut: () => cloudAction<CloudStatus>('signed-out'),
+            check: () => cloudAction<CloudCheckReport>('check'),
+            apply: resolutions => send({type: 'cloud-apply', resolutions}, {timeoutMs: CLOUD_TIMEOUT_MS}),
+            onStatus: listener => {
+                statusListeners.add(listener);
+
+                return () => statusListeners.delete(listener);
+            },
+        },
         destroy: () => {
             channel.removeEventListener('message', handleMessage);
             channel.close();
             pending.forEach(entry => entry.reject(new Error('sync engine client destroyed')));
-            replicas.forEach(replica => {
-                replica.syncs.forEach(sync => sync.destroy());
-                replica.body.destroy();
-                replica.meta.destroy();
-            });
-            replicas.clear();
+            [...replicas].forEach(([scriptId, replica]) => destroyReplica(scriptId, replica));
         },
     };
 };

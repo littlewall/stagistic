@@ -7,6 +7,7 @@
         "@electric-sql/pglite": "^0.3.7",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
+        "@stagistic/auth-client": "workspace:*",
         "@stagistic/db": "workspace:*",
         "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",

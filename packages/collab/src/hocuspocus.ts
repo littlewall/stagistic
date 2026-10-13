@@ -1,5 +1,4 @@
 import {Database} from '@hocuspocus/extension-database';
-import {Throttle} from '@hocuspocus/extension-throttle';
 import {Hocuspocus} from '@hocuspocus/server';
 import {syncScriptRecords} from '@stagistic/db/server';
 import type {AccessTokenClaims} from '@stagistic/identity';
@@ -8,7 +7,7 @@ import {
     RECORD_COLLECTIONS,
     SCRIPT_RECORD_ID,
 } from '@stagistic/sync-engine';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 import {
     canWrite,
@@ -34,7 +33,8 @@ interface CreateCollabHocuspocusArgs {
 /*
  * Hocuspocus for script Y.Docs. Each connection is authenticated with the auth
  * service's JWT and the user's role in the script (viewers and commenters get
- * read-only docs). A stored doc bumps `scripts.updated_at`; meta and comments
+ * read-only docs). Abuse limits apply per WebSocket (`createUpgradeLimiter`), not
+ * per doc: one socket carries all docs of a client. A stored doc bumps `scripts.updated_at`; meta and comments
  * are also projected into the `projection` schema.
  */
 export const createCollabHocuspocus = ({
@@ -62,7 +62,6 @@ export const createCollabHocuspocus = ({
         unloadImmediately: true,
         quiet: true,
         extensions: [
-            new Throttle({throttle: 30, banTime: 1}),
             new Database({
                 fetch: async ({documentName}) => {
                     const {rows} = await database.collab.query<{state: Buffer}>('select state from ydoc_states where name = $1', [documentName]);
@@ -73,12 +72,13 @@ export const createCollabHocuspocus = ({
                     const parsed = parseDocumentName(documentName)!;
 
                     await database.collab.query(
-                        `insert into ydoc_states (name, script_id, state, updated_at) values ($1, $2, $3, now())
-                         on conflict (name) do update set state = excluded.state, updated_at = now()`,
+                        `insert into ydoc_states (name, script_id, state, state_vector, updated_at) values ($1, $2, $3, $4, now())
+                         on conflict (name) do update set state = excluded.state, state_vector = excluded.state_vector, updated_at = now()`,
                         [
                             documentName,
                             parsed.scriptId,
                             state,
+                            Y.encodeStateVectorFromUpdate(state),
                         ],
                     );
                     await database.collab.query('update scripts set updated_at = now() where id = $1', [parsed.scriptId]);

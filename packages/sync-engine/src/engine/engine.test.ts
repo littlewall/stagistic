@@ -73,7 +73,7 @@ describe('sync engine', () => {
             persistence,
         });
 
-        expect(await second.open(SCRIPT)).toEqual({schemaVersion: SCHEMA});
+        expect(await second.open(SCRIPT)).toMatchObject({schemaVersion: SCHEMA});
         expect(persistence.store.get(bodyDocName(SCRIPT))?.length).toBeGreaterThan(0);
     });
 

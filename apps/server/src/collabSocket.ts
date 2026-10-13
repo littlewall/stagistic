@@ -1,6 +1,20 @@
 import type {Hocuspocus} from '@hocuspocus/server';
-import type {Context} from 'hono';
+import {clientIpOf, createUpgradeLimiter} from '@stagistic/collab';
+import type {Context, MiddlewareHandler} from 'hono';
 import {upgradeWebSocket} from 'hono/deno';
+
+/** Rejects clients opening too many sockets (per IP, see `createUpgradeLimiter`). */
+export const collabSocketLimit = (): MiddlewareHandler => {
+    const limiter = createUpgradeLimiter();
+
+    return async (context, next) => {
+        if (!limiter.allow(clientIpOf(context.req.raw.headers))) {
+            return context.text('too many connections', 429);
+        }
+
+        await next();
+    };
+};
 
 /** `GET /ws`: Deno WebSocket (via Hono) handed to Hocuspocus. */
 export const collabSocketHandler = (hocuspocus: Hocuspocus) => upgradeWebSocket((context: Context) => {

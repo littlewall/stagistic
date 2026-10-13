@@ -11,54 +11,31 @@ import {
 } from './classify';
 
 const ACCOUNT = 'acc-1';
-const SYNCED_AT = 1_000;
 
 describe('classifyScripts', () => {
+    const local = (scriptId: string, boundAccountId: string | null, changedSinceSync: boolean) => ({
+        scriptId,
+        boundAccountId,
+        changedSinceSync,
+    });
+    const cloud = (scriptId: string, changedSinceSync: boolean, deletedAt: number | null = null) => ({
+        scriptId,
+        changedSinceSync,
+        deletedAt,
+    });
+
     it('sorts every category', () => {
         const plan = classifyScripts({
             accountId: ACCOUNT,
-            lastSyncedAt: SYNCED_AT,
             local: [
-                {
-                    scriptId: 'new-local',
-                    boundAccountId: null,
-                    changedSinceSync: true,
-                },
-                {
-                    scriptId: 'changed-here',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: true,
-                },
-                {
-                    scriptId: 'changed-there',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: false,
-                },
-                {
-                    scriptId: 'changed-both',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: true,
-                },
-                {
-                    scriptId: 'same',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: false,
-                },
-                {
-                    scriptId: 'cloud-deleted',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: false,
-                },
-                {
-                    scriptId: 'cloud-deleted-edited-here',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: true,
-                },
-                {
-                    scriptId: 'foreign',
-                    boundAccountId: 'acc-2',
-                    changedSinceSync: true,
-                },
+                local('new-local', null, true),
+                local('changed-here', ACCOUNT, true),
+                local('changed-there', ACCOUNT, false),
+                local('changed-both', ACCOUNT, true),
+                local('same', ACCOUNT, false),
+                local('cloud-deleted', ACCOUNT, false),
+                local('cloud-deleted-edited-here', ACCOUNT, true),
+                local('foreign', 'acc-2', true),
             ],
             tombstones: [
                 {scriptId: 'deleted-here', boundAccountId: ACCOUNT},
@@ -66,61 +43,16 @@ describe('classifyScripts', () => {
                 {scriptId: 'deleted-foreign', boundAccountId: 'acc-2'},
             ],
             cloud: [
-                {
-                    scriptId: 'changed-here',
-                    updatedAt: 900,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'changed-there',
-                    updatedAt: 1_200,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'changed-both',
-                    updatedAt: 1_200,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'same',
-                    updatedAt: 1_000,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'cloud-deleted',
-                    updatedAt: 1_100,
-                    deletedAt: 1_100,
-                },
-                {
-                    scriptId: 'cloud-deleted-edited-here',
-                    updatedAt: 1_100,
-                    deletedAt: 1_100,
-                },
-                {
-                    scriptId: 'deleted-here',
-                    updatedAt: 900,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'deleted-here-edited-there',
-                    updatedAt: 1_300,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'deleted-foreign',
-                    updatedAt: 900,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'new-cloud',
-                    updatedAt: 1_500,
-                    deletedAt: null,
-                },
-                {
-                    scriptId: 'gone-cloud',
-                    updatedAt: 1_500,
-                    deletedAt: 1_500,
-                },
+                cloud('changed-here', false),
+                cloud('changed-there', true),
+                cloud('changed-both', true),
+                cloud('same', false),
+                cloud('cloud-deleted', false, 1),
+                cloud('cloud-deleted-edited-here', false, 1),
+                cloud('deleted-here', false),
+                cloud('deleted-here-edited-there', true),
+                cloud('deleted-foreign', false),
+                cloud('new-cloud', true),
             ],
         });
 
@@ -140,54 +72,16 @@ describe('classifyScripts', () => {
     it('treats an unbound script that already exists in the cloud as a conflict', () => {
         const plan = classifyScripts({
             accountId: ACCOUNT,
-            lastSyncedAt: null,
-            local: [
-                {
-                    scriptId: 'x',
-                    boundAccountId: null,
-                    changedSinceSync: true,
-                },
-            ],
+            local: [local('s1', null, false)],
             tombstones: [],
-            cloud: [
-                {
-                    scriptId: 'x',
-                    updatedAt: 1,
-                    deletedAt: null,
-                },
-            ],
+            cloud: [cloud('s1', true)],
         });
 
-        expect(plan.conflicts).toEqual(['x']);
-    });
-
-    it('uses the per-script lastSyncedAt when present', () => {
-        const plan = classifyScripts({
-            accountId: ACCOUNT,
-            lastSyncedAt: 0,
-            local: [
-                {
-                    scriptId: 'x',
-                    boundAccountId: ACCOUNT,
-                    changedSinceSync: false,
-                    lastSyncedAt: 2_000,
-                },
-            ],
-            tombstones: [],
-            cloud: [
-                {
-                    scriptId: 'x',
-                    updatedAt: 1_500,
-                    deletedAt: null,
-                },
-            ],
-        });
-
-        expect(plan.unchanged).toEqual(['x']);
+        expect(plan.conflicts).toEqual(['s1']);
     });
 });
 
-describe('clock skew', () => {
+describe('clock helpers', () => {
     it('corrects local time by the Date header offset', () => {
         const offset = computeClockOffset('Wed, 07 Oct 2026 10:00:10 GMT', Date.parse('Wed, 07 Oct 2026 10:00:00 GMT'));
 

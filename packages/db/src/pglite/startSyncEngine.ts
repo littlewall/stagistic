@@ -3,6 +3,7 @@ import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '@stagistic/script';
 import {createIndexeddbDocPersistence, createSyncEngine} from '@stagistic/sync-engine';
 
 import {createScriptProjectionStore} from '../repo/document/projectionStore';
+import {createCloudSyncStore} from '../repo/sync/cloudSyncStore';
 import {createLocalDb} from './bootstrap';
 
 /**
@@ -11,14 +12,30 @@ import {createLocalDb} from './bootstrap';
  * one engine per browser profile; a new leader starts its own and tabs re-open
  * their scripts on `engine-started`.
  */
-export const startPgliteSyncEngine = (client: PGlite) => {
+export interface CloudEndpoints {
+    /** `https://auth.api.stagistic.app` */
+    authUrl: string,
+    /** `https://sync.api.stagistic.app` (REST); WebSocket at `wss://…/ws`. */
+    syncUrl: string,
+}
+
+export const startPgliteSyncEngine = (client: PGlite, {cloud}: {cloud?: CloudEndpoints} = {}) => {
     const localDb = createLocalDb(client);
+    const getDb = () => Promise.resolve(localDb);
+    const syncDb = () => client.syncToFs();
 
     return createSyncEngine({
-        store: createScriptProjectionStore({
-            getDb: () => Promise.resolve(localDb),
-            syncDb: () => client.syncToFs(),
-        }),
+        store: createScriptProjectionStore({getDb, syncDb}),
+        ...cloud
+            ? {
+                cloud: {
+                    authUrl: cloud.authUrl,
+                    syncUrl: cloud.syncUrl,
+                    wsUrl: `${cloud.syncUrl.replace(/^http/, 'ws')}/ws`,
+                    store: createCloudSyncStore({getDb, syncDb}),
+                },
+            }
+            : {},
         persistence: createIndexeddbDocPersistence(),
         clientSchemaVersion: SCRIPT_DOCUMENT_SCHEMA_VERSION,
     });

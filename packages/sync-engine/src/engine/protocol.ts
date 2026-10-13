@@ -1,4 +1,5 @@
 import type {RecordChanges} from '../ydoc/recordsCodec';
+import type {CloudStatus, ConflictResolution} from './cloud/types';
 import type {RecordsKind} from './scriptRecords';
 
 /*
@@ -18,6 +19,8 @@ export type EngineRequest =
         type: 'open',
         requestId: string,
         scriptId: string,
+        /** false: the tab already holds this replica (no new tab reference). */
+        retain?: boolean,
     }
     /** Waits until the engine has the body `stateVector` (if given), then writes the projection. */
     | {
@@ -44,11 +47,42 @@ export type EngineRequest =
         type: 'script-deleted',
         requestId: string,
         scriptId: string,
+    }
+    /** The tab no longer shows the script (engine may detach and unload it). */
+    | {
+        type: 'release',
+        requestId: string,
+        scriptId: string,
+    }
+    | {
+        type: 'cloud',
+        requestId: string,
+        action: CloudAction,
+    }
+    | {
+        type: 'cloud-apply',
+        requestId: string,
+        resolutions: Record<string, ConflictResolution>,
     };
+
+/**
+ * - `status`: current `CloudStatus`
+ * - `signed-in` / `signed-out`: the tab changed the session (auth client)
+ * - `check`: post-sign-in classification, returns `CloudCheckReport`
+ */
+export type CloudAction = 'status' | 'signed-in' | 'signed-out' | 'check';
 
 export interface OpenResult {
     schemaVersion: number | null,
+    /**
+     * Identifies the engine's in-memory docs of the script; tab replicas sync on
+     * `docChannelName(name, channelId)`. A new id after a reset isolates stale
+     * replicas (they must never merge an old history into the new docs).
+     */
+    channelId: string,
 }
+
+export const docChannelName = (documentName: string, channelId: string) => `${documentName}#${channelId}`;
 
 export type EngineMessage =
     | EngineRequest
@@ -56,7 +90,7 @@ export type EngineMessage =
         type: 'reply',
         requestId: string,
         ok: true,
-        result?: OpenResult,
+        result?: unknown,
     }
     | {
         type: 'reply',
@@ -65,7 +99,10 @@ export type EngineMessage =
         error: string,
     }
     /** A (new) leader started: clients re-open their scripts. */
-    | {type: 'engine-started', engineId: string};
+    | {type: 'engine-started', engineId: string}
+    | {type: 'cloud-status', status: CloudStatus}
+    /** Local Y state of these scripts was replaced (conflict resolution): tabs reload them. */
+    | {type: 'scripts-reset', scriptIds: string[]};
 
 export interface ControlChannel {
     postMessage(message: EngineMessage): void,

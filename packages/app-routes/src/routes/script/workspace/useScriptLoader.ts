@@ -55,6 +55,20 @@ export const useScriptLoader = (
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
     const [replica, setReplica] = useState<OpenedScript | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(false);
+    // Bumped when the engine replaced the script's local state (cloud conflict resolution).
+    const [generation, setGeneration] = useState(0);
+
+    useEffect(() => {
+        if (!documentSync || !currentScriptId) {
+            return undefined;
+        }
+
+        return documentSync.onScriptsReset(scriptIds => {
+            if (scriptIds.includes(currentScriptId)) {
+                setGeneration(current => current + 1);
+            }
+        });
+    }, [currentScriptId, documentSync]);
 
     useEffect(() => {
         if (!currentScriptId) {
@@ -167,6 +181,7 @@ export const useScriptLoader = (
     }, [
         currentScriptId,
         documentSync,
+        generation,
         scriptRepository,
     ]);
 

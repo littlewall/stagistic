@@ -9,7 +9,6 @@
     },
     "dependencies": {
         "@hocuspocus/extension-database": "4.7.0",
-        "@hocuspocus/extension-throttle": "4.7.0",
         "@hocuspocus/server": "4.7.0",
         "@stagistic/db": "workspace:*",
         "@stagistic/identity": "workspace:*",

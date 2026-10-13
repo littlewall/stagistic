@@ -1,5 +1,7 @@
 import {ScriptDocumentSyncProvider, ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
+    AuthCallbackRoute,
+    CloudAccountProvider,
     GlobalModalsProvider,
     HomeRoute,
     ScriptEditorRoute,
@@ -7,6 +9,7 @@ import {
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
+import {createAuthClient} from '@stagistic/auth-client';
 import type {SyncEngineClient} from '@stagistic/sync-engine';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {
@@ -19,10 +22,13 @@ import {
     Routes,
 } from 'react-router-dom';
 
+import {cloudConfig} from './cloud/cloudConfig';
 import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
 import type {ScriptRepository} from './repo';
 import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
+
+const authClient = cloudConfig ? createAuthClient({authUrl: cloudConfig.authUrl}) : null;
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
@@ -81,16 +87,23 @@ const BootedApp = () => {
             <ScriptDocumentSyncProvider client={documentSync}>
                 <ToastProvider>
                     <GlobalModalsProvider>
-                        <Routes>
-                            <Route path="/" element={<HomeRoute />} />
-                            <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
-                                <Route index element={<Navigate to="editor" replace />} />
-                                <Route path="editor" element={<ScriptEditorRoute />} />
-                                <Route path="export" element={<ScriptExportRoute />} />
-                            </Route>
-                            <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
+                        <CloudAccountProvider
+                            auth={authClient}
+                            cloud={cloudConfig ? documentSync?.cloud ?? null : null}
+                            turnstileSiteKey={cloudConfig?.turnstileSiteKey ?? ''}
+                        >
+                            <Routes>
+                                <Route path="/" element={<HomeRoute />} />
+                                <Route path="/auth/callback" element={<AuthCallbackRoute />} />
+                                <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                                    <Route index element={<Navigate to="editor" replace />} />
+                                    <Route path="editor" element={<ScriptEditorRoute />} />
+                                    <Route path="export" element={<ScriptExportRoute />} />
+                                </Route>
+                                <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                        </CloudAccountProvider>
                     </GlobalModalsProvider>
                 </ToastProvider>
             </ScriptDocumentSyncProvider>

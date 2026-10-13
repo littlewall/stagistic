@@ -5,6 +5,8 @@ import pgliteDataUrl from '@pglite-data?url';
 import pgliteWasmUrl from '@pglite-wasm?url';
 import {runPgliteMigrations, startPgliteSyncEngine} from '@stagistic/db/pglite';
 
+import {cloudConfig} from '../cloud/cloudConfig';
+
 void worker({
     async init(options) {
         const dataDir = options.dataDir ?? 'idb://stagistic-main';
@@ -32,7 +34,7 @@ void worker({
         });
 
         await runPgliteMigrations(db);
-        startPgliteSyncEngine(db);
+        startPgliteSyncEngine(db, {cloud: cloudConfig ?? undefined});
 
         return db;
     },

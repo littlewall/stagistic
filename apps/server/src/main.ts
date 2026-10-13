@@ -21,7 +21,7 @@ import {
     runIdentityMigrations,
 } from '@stagistic/identity';
 
-import {collabSocketHandler} from './collabSocket';
+import {collabSocketHandler, collabSocketLimit} from './collabSocket';
 import {parseServerRoles} from './roles';
 
 const env = Deno.env.toObject();
@@ -95,7 +95,7 @@ if (roles.has('collab')) {
         hocuspocus,
     });
 
-    app.get('/ws', collabSocketHandler(hocuspocus));
+    app.get('/ws', collabSocketLimit(), collabSocketHandler(hocuspocus));
     // Runs before the pool closes (cleanups run in reverse): store pending edits.
     cleanups.push(async () => {
         hocuspocus.flushPendingStores();

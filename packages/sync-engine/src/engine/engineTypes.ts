@@ -7,6 +7,7 @@ import type {
     RecordsSnapshot,
     RecordUpserts,
 } from '../ydoc/recordsCodec';
+import type {CloudSyncConfig} from './cloud/cloudSync';
 import type {DocPersistence} from './persistence';
 import type {ProjectionLane, ProjectionQueue} from './projectionLane';
 import type {ControlChannelFactory, OpenResult} from './protocol';
@@ -29,6 +30,8 @@ export interface CreateSyncEngineArgs {
     projectionMaxDelayMs?: number,
     flushTimeoutMs?: number,
     log?: (message: string, error?: unknown) => void,
+    /** Cloud sync (signed-in users); without it the engine is local only. */
+    cloud?: CloudSyncConfig,
 }
 
 export const SEED_ORIGIN = 'sync-engine:seed';
@@ -53,6 +56,8 @@ export interface ScriptEntry {
     dispose: () => Promise<void>,
     /** Seeded from the projection when this entry was created. */
     seededOnOpen: boolean,
+    /** Tab replicas sync on channels suffixed with it (see `OpenResult.channelId`). */
+    channelId: string,
 }
 
 export interface SyncEngine {

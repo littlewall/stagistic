@@ -2,7 +2,8 @@ import {MenuTrigger, Popover} from 'react-aria-components';
 
 import {Button} from '../../atoms/Button/Button';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
-import {AppearanceIcon} from '../../icons/ui';
+import type {AccountMenuAccount} from '../../dialogs/account/types';
+import {AppearanceIcon, UserCircleIcon} from '../../icons/ui';
 import {type AppThemeMode} from '../../theme/theme';
 import styles from '../AppHeader.module.css';
 import {ThemeModeToggle} from './ThemeModeToggle';
@@ -10,11 +11,49 @@ import {ThemeModeToggle} from './ThemeModeToggle';
 type AccountMenuProps = {
     themeMode: AppThemeMode,
     onThemeChange: (mode: AppThemeMode) => void,
+    /** Hosts with cloud sync; without it the menu is appearance only. */
+    account?: AccountMenuAccount,
 };
 
-export const AccountMenuContent = ({themeMode, onThemeChange}: AccountMenuProps) => {
+const AccountSection = ({account}: {account: AccountMenuAccount}) => (
+    <>
+        <div className={styles.settingsMenuHeader}>{account.email ?? 'Not signed in'}</div>
+        <div className={styles.accountActions}>
+            {account.email ? (
+                <>
+                    <Button
+                        variant="ghost"
+                        onPress={account.onOpenAccountSettings}
+                    >
+                        Account settings…
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        onPress={account.onSignOut}
+                    >
+                        Sign out
+                    </Button>
+                </>
+            ) : (
+                <Button
+                    variant="ghost"
+                    onPress={account.onSignIn}
+                >
+                    Sign in
+                </Button>
+            )}
+        </div>
+    </>
+);
+
+export const AccountMenuContent = ({
+    themeMode,
+    onThemeChange,
+    account,
+}: AccountMenuProps) => {
     return (
         <div className={styles.settingsMenu}>
+            {account ? <AccountSection account={account} /> : null}
             <div className={styles.settingsMenuHeader}>Appearance</div>
             <ThemeModeToggle
                 themeMode={themeMode}
@@ -24,7 +63,14 @@ export const AccountMenuContent = ({themeMode, onThemeChange}: AccountMenuProps)
     );
 };
 
-export const AccountMenu = ({themeMode, onThemeChange}: AccountMenuProps) => {
+export const AccountMenu = ({
+    themeMode,
+    onThemeChange,
+    account,
+}: AccountMenuProps) => {
+    const label = account ? 'Account and appearance' : 'Appearance';
+    const Icon = account ? UserCircleIcon : AppearanceIcon;
+
     return (
         <MenuTrigger>
             {/*
@@ -36,15 +82,15 @@ export const AccountMenu = ({themeMode, onThemeChange}: AccountMenuProps) => {
              * `.size-sm/md/lg` classes went with the density coefficient they set).
              */}
             <Tooltip
-                label="Appearance"
+                label={label}
                 placement="bottom"
             >
                 <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Appearance"
+                    aria-label={label}
                 >
-                    <AppearanceIcon
+                    <Icon
                         className={styles.icon}
                         aria-hidden="true"
                     />
@@ -57,6 +103,7 @@ export const AccountMenu = ({themeMode, onThemeChange}: AccountMenuProps) => {
                 <AccountMenuContent
                     themeMode={themeMode}
                     onThemeChange={onThemeChange}
+                    account={account}
                 />
             </Popover>
         </MenuTrigger>

@@ -37,7 +37,12 @@ create index ydoc_states_script_id_idx on ydoc_states (script_id);
 create index scripts_deleted_at_idx on scripts (deleted_at) where deleted_at is not null;
 `;
 
-const COLLAB_MIGRATIONS: readonly SqlMigration[] = [{id: '0001_collab', sql: COLLAB_0001}];
+// Lets clients tell "changed in the cloud" exactly, without comparing clocks.
+const COLLAB_0002 = `
+alter table ydoc_states add column state_vector bytea;
+`;
+
+const COLLAB_MIGRATIONS: readonly SqlMigration[] = [{id: '0001_collab', sql: COLLAB_0001}, {id: '0002_state_vector', sql: COLLAB_0002}];
 
 /** Creates both schemas and applies collab + projection (packages/db) migrations. */
 export const runCollabMigrations = async (database: CollabDatabase) => {

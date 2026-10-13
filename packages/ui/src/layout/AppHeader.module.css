@@ -244,6 +244,13 @@
     padding: var(--space-md) 0;
 }
 
+.accountActions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 var(--space-sm) var(--space-md);
+}
+
 .settingsMenuHeader {
     padding: var(--space-sm) var(--space-lg);
     font-size: var(--font-size-xxs);

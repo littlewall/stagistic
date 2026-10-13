@@ -6,6 +6,8 @@ import type {ScriptSyncState} from './types';
 
 type SyncIndicatorProps = {
     state?: ScriptSyncState,
+    /** Signed in: the account sync state ("Synced to your account" …); appended to the label. */
+    cloudLabel?: string,
 };
 
 const syncMetaByState: Record<
@@ -33,13 +35,14 @@ const syncMetaByState: Record<
     },
 };
 
-export const SyncIndicator = ({state = 'idle'}: SyncIndicatorProps) => {
+export const SyncIndicator = ({state = 'idle', cloudLabel}: SyncIndicatorProps) => {
     const syncMeta = syncMetaByState[state];
-    const isIdle = state === 'idle';
+    const label = [syncMeta.label, cloudLabel].filter(Boolean).join(' · ');
+    const isIdle = label.length === 0;
 
     return (
         <Tooltip
-            label={syncMeta.label}
+            label={label}
             isDisabled={isIdle}
         >
             <span
@@ -47,7 +50,7 @@ export const SyncIndicator = ({state = 'idle'}: SyncIndicatorProps) => {
                 data-sync-status
                 data-state={state}
                 role={isIdle ? undefined : 'img'}
-                aria-label={isIdle ? undefined : syncMeta.label}
+                aria-label={isIdle ? undefined : label}
                 aria-live="polite"
                 aria-hidden={isIdle || undefined}
                 tabIndex={isIdle ? undefined : 0}
