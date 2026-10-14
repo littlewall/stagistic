@@ -284,16 +284,16 @@ export const ScriptEditorAppHeader = ({
                         </RACButton>
                     ) : null}
                     <div
-                        className={styles.scriptIdentity}
+                        className={clsx(styles.scriptIdentity, scriptState && styles.scriptIdentityWithState)}
                         data-script-identity
                     >
                         <ScriptTitle
                             name={currentScript.name}
                             onRename={onRenameScript}
                         />
+                        {scriptState}
                         <SyncIndicator state={scriptSyncState} />
                     </div>
-                    {scriptState}
                 </>
             )}
         />

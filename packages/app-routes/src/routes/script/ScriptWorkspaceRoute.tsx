@@ -40,6 +40,7 @@ import {
     ScriptAccessProvider,
 } from './workspace/ScriptAccessContext';
 import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './workspace/ScriptWorkspaceContext';
+import {useScriptWorkspaceReloadKey} from './workspace/scriptWorkspaceReload';
 import {useScriptEditorController} from './workspace/useScriptEditorController';
 
 const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
@@ -265,6 +266,7 @@ const SnapshotScriptWorkspace = ({scriptId, snapshotId}: {scriptId: string, snap
 
 export const ScriptWorkspaceRoute = () => {
     const {scriptId, snapshotId} = useParams();
+    const reloadKey = useScriptWorkspaceReloadKey();
 
     if (scriptId && snapshotId) {
         return (
@@ -276,5 +278,5 @@ export const ScriptWorkspaceRoute = () => {
         );
     }
 
-    return <LiveScriptWorkspace scriptId={scriptId} />;
+    return <LiveScriptWorkspace key={reloadKey} scriptId={scriptId} />;
 };

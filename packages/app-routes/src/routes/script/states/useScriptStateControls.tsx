@@ -1,21 +1,18 @@
 import {
-    createScriptSnapshotFromCurrent,
     getScriptSnapshotLabel,
-    restoreScriptSnapshot,
-    restoreScriptSnapshotAsNew,
     type ScriptSnapshot,
     useScriptSnapshots,
 } from '@stagistic/app-core';
 import {
-    ManageScriptStatesModal,
     RestoreScriptStateModal,
     type RestoreScriptStateMode,
     SaveScriptStateModal,
     type ScriptStateDetails,
     type ScriptStateKind,
     ScriptStateMenu,
+    ScriptStatesModal,
+    type ScriptStateUpdate,
     type ScriptView,
-    useToastController,
 } from '@stagistic/ui';
 import {
     type ReactNode,
@@ -27,18 +24,25 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {getScriptBasePath, useScriptAccess} from '../workspace/ScriptAccessContext';
-import {
-    errorMessage,
-    toManagedState,
-    toMenuItem,
-    waitForScriptInList,
-} from './scriptStateItems';
+import {toMenuItem, toStateRecord} from './scriptStateItems';
+import {useScriptStateActions} from './useScriptStateActions';
 
 interface UseScriptStateControlsArgs {
     scriptId: string | null,
     view: ScriptView,
     /** Persists pending editor changes of the current script. */
     flush?: () => Promise<void>,
+}
+
+interface SaveRequest {
+    kind: ScriptStateKind,
+    submitLabel?: string,
+    afterSave?: (snapshot: ScriptSnapshot) => void,
+}
+
+interface ManagerState {
+    kind: ScriptStateKind,
+    selectedId: string | null,
 }
 
 /**
@@ -51,7 +55,6 @@ export const useScriptStateControls = ({
     flush,
 }: UseScriptStateControlsArgs) => {
     const navigate = useNavigate();
-    const {addToast} = useToastController();
     const {
         isReadOnly,
         snapshot: shownSnapshot,
@@ -59,16 +62,17 @@ export const useScriptStateControls = ({
         liveScriptTitle,
     } = useScriptAccess();
     const {snapshots} = useScriptSnapshots(scriptId, liveRepository);
-    const [saveKind, setSaveKind] = useState<ScriptStateKind | null>(null);
-    const [saveSubmitLabel, setSaveSubmitLabel] = useState<string | undefined>(undefined);
-    const afterSaveRef = useRef<((snapshot: ScriptSnapshot) => void) | null>(null);
-    const [isManageOpen, setIsManageOpen] = useState(false);
-    const [restoreMode, setRestoreMode] = useState<RestoreScriptStateMode | null>(null);
-    const [isPending, setIsPending] = useState(false);
+    const actions = useScriptStateActions(scriptId, flush);
+    const [saveRequest, setSaveRequest] = useState<SaveRequest | null>(null);
+    const [manager, setManager] = useState<ManagerState | null>(null);
+    const [restoreTarget, setRestoreTarget] = useState<{snapshot: ScriptSnapshot, mode: RestoreScriptStateMode} | null>(null);
+    // A kept request survives the closing animation of the save dialog.
+    const lastSaveKindRef = useRef<ScriptStateKind>('draft');
 
     const versions = useMemo(() => snapshots.filter(snapshot => snapshot.kind === 'version').map(toMenuItem), [snapshots]);
     const drafts = useMemo(() => snapshots.filter(snapshot => snapshot.kind === 'draft').map(toMenuItem), [snapshots]);
-    const managedStates = useMemo(() => snapshots.map(toManagedState), [snapshots]);
+    const records = useMemo(() => snapshots.map(toStateRecord), [snapshots]);
+    const findSnapshot = (snapshotId: string) => snapshots.find(snapshot => snapshot.id === snapshotId) ?? null;
 
     const selectState = useCallback(async (snapshotId: string | null) => {
         if (!scriptId || snapshotId === (shownSnapshot?.id ?? null)) {
@@ -90,186 +94,61 @@ export const useScriptStateControls = ({
     ]);
 
     /** Opens the save dialog; `afterSave` runs once the state is stored (e.g. to download a PDF). */
-    const openSave = useCallback((kind: ScriptStateKind, options?: {submitLabel?: string, afterSave?: (snapshot: ScriptSnapshot) => void}) => {
-        afterSaveRef.current = options?.afterSave ?? null;
-        setSaveSubmitLabel(options?.submitLabel);
-        setSaveKind(kind);
-    }, []);
-
-    const closeSave = useCallback(() => {
-        afterSaveRef.current = null;
-        setSaveKind(null);
+    const openSave = useCallback((kind: ScriptStateKind, options?: Omit<SaveRequest, 'kind'>) => {
+        lastSaveKindRef.current = kind;
+        setSaveRequest({kind, ...options});
     }, []);
 
     const handleSave = async (details: ScriptStateDetails) => {
-        if (!scriptId || !saveKind) {
+        if (!saveRequest) {
             return;
         }
 
-        setIsPending(true);
+        const created = await actions.save(saveRequest.kind, details);
 
-        try {
-            const created = await createScriptSnapshotFromCurrent({
-                repository: liveRepository,
-                scriptId,
-                kind: saveKind,
-                name: details.name,
-                note: details.note,
-                flush,
-            });
+        if (created) {
+            saveRequest.afterSave?.(created);
+            setSaveRequest(null);
 
-            if (created) {
-                addToast({
-                    title: `${getScriptSnapshotLabel(created)} saved`,
-                    description: 'You keep writing in the current script.',
-                    variant: 'success',
-                });
-                afterSaveRef.current?.(created);
+            if (manager) {
+                setManager({kind: created.kind, selectedId: created.id});
             }
-
-            closeSave();
-        } catch (error) {
-            addToast({
-                title: 'Could not save',
-                description: errorMessage(error),
-                variant: 'error',
-            });
-        } finally {
-            setIsPending(false);
         }
     };
 
-    const handleUpdate = async (snapshotId: string, update: {
-        kind: ScriptStateKind,
-        name: string,
-        note: string,
-    }) => {
-        if (!scriptId) {
-            return;
-        }
+    const handleUpdate = async (snapshotId: string, update: ScriptStateUpdate) => {
+        const updated = await actions.update(snapshotId, update);
 
-        setIsPending(true);
-
-        try {
-            await liveRepository.updateScriptSnapshot(scriptId, snapshotId, {
-                name: update.name,
-                note: update.note,
-                ...update.kind === 'version' ? {kind: 'version' as const} : {},
-            });
-        } catch (error) {
-            addToast({
-                title: 'Could not save changes',
-                description: errorMessage(error),
-                variant: 'error',
-            });
-        } finally {
-            setIsPending(false);
+        // A draft marked as a version moves to the Versions tab and stays selected.
+        if (updated && manager && updated.kind !== manager.kind) {
+            setManager({kind: updated.kind, selectedId: updated.id});
         }
     };
 
-    const handleDelete = async (snapshotId: string) => {
-        if (!scriptId) {
-            return;
-        }
+    const requestRestore = (snapshotId: string, mode: RestoreScriptStateMode) => {
+        const snapshot = findSnapshot(snapshotId);
 
-        setIsPending(true);
-
-        try {
-            await liveRepository.deleteScriptSnapshot(scriptId, snapshotId);
-        } catch (error) {
-            addToast({
-                title: 'Could not delete',
-                description: errorMessage(error),
-                variant: 'error',
-            });
-        } finally {
-            setIsPending(false);
+        if (snapshot) {
+            setRestoreTarget({snapshot, mode});
         }
     };
 
     const handleRestore = async () => {
-        if (!scriptId || !shownSnapshot) {
-            return;
-        }
-
-        setIsPending(true);
-
-        try {
-            const result = await restoreScriptSnapshot({
-                repository: liveRepository,
-                scriptId,
-                snapshot: shownSnapshot,
-            });
-
-            if (!result.ok) {
-                addToast({
-                    title: 'Could not restore',
-                    description: 'The saved state could not be read.',
-                    variant: 'error',
-                });
-
-                return;
-            }
-
-            setRestoreMode(null);
-            addToast({
-                title: `Restored ${getScriptSnapshotLabel(shownSnapshot)}`,
-                description: result.backup ? `The previous state is saved as ${getScriptSnapshotLabel(result.backup)}.` : undefined,
-                variant: 'success',
-            });
-            void navigate(`${getScriptBasePath(scriptId)}/editor`, {replace: true});
-        } catch (error) {
-            addToast({
-                title: 'Could not restore',
-                description: errorMessage(error),
-                variant: 'error',
-            });
-        } finally {
-            setIsPending(false);
+        if (restoreTarget && await actions.restore(restoreTarget.snapshot)) {
+            setRestoreTarget(null);
+            setManager(null);
         }
     };
 
     const handleRestoreAsNew = async (title: string) => {
-        if (!scriptId || !shownSnapshot) {
-            return;
-        }
-
-        setIsPending(true);
-
-        try {
-            const result = await restoreScriptSnapshotAsNew({
-                repository: liveRepository,
-                scriptId,
-                snapshotId: shownSnapshot.id,
-                title,
-            });
-
-            if (!result.ok) {
-                addToast({
-                    title: 'Could not create the script',
-                    description: 'The saved state could not be read.',
-                    variant: 'error',
-                });
-
-                return;
-            }
-
-            await waitForScriptInList(liveRepository, result.scriptId);
-            setRestoreMode(null);
-            addToast({title: `Created “${result.title}”`, variant: 'success'});
-            void navigate(`${getScriptBasePath(result.scriptId)}/editor`);
-        } catch (error) {
-            addToast({
-                title: 'Could not create the script',
-                description: errorMessage(error),
-                variant: 'error',
-            });
-        } finally {
-            setIsPending(false);
+        if (restoreTarget && await actions.restoreAsNew(restoreTarget.snapshot, title)) {
+            setRestoreTarget(null);
+            setManager(null);
         }
     };
 
     const shownLabel = shownSnapshot ? getScriptSnapshotLabel(shownSnapshot) : 'Current';
+    const restoreLabel = restoreTarget ? getScriptSnapshotLabel(restoreTarget.snapshot) : shownLabel;
 
     const stateMenu: ReactNode = scriptId ? (
         <ScriptStateMenu
@@ -280,39 +159,52 @@ export const useScriptStateControls = ({
             onSelect={snapshotId => void selectState(snapshotId)}
             onSaveDraft={isReadOnly ? undefined : () => openSave('draft')}
             onSaveVersion={isReadOnly ? undefined : () => openSave('version')}
-            onManage={snapshots.length > 0 ? () => setIsManageOpen(true) : undefined}
+            onManage={() => setManager({kind: shownSnapshot?.kind ?? 'draft', selectedId: shownSnapshot?.id ?? null})}
             restore={shownSnapshot ? {
-                onRestore: () => setRestoreMode('restore'),
-                onRestoreAsNew: () => setRestoreMode('restore-as-new'),
+                onRestore: () => requestRestore(shownSnapshot.id, 'restore'),
+                onRestoreAsNew: () => requestRestore(shownSnapshot.id, 'restore-as-new'),
             } : undefined}
         />
     ) : null;
 
     const modals: ReactNode = (
         <>
+            <ScriptStatesModal
+                isOpen={manager !== null}
+                activeKind={manager?.kind ?? 'draft'}
+                states={records}
+                shownStateId={shownSnapshot?.id ?? null}
+                initialSelectedId={manager?.selectedId ?? null}
+                isPending={actions.isPending}
+                onClose={() => setManager(null)}
+                onSelectKind={kind => setManager({kind, selectedId: null})}
+                onCreate={isReadOnly ? undefined : kind => openSave(kind)}
+                onUpdate={handleUpdate}
+                onDelete={async snapshotId => {
+                    await actions.remove(snapshotId);
+                }}
+                onOpen={snapshotId => {
+                    setManager(null);
+                    void selectState(snapshotId);
+                }}
+                onRestore={snapshotId => requestRestore(snapshotId, 'restore')}
+                onRestoreAsNew={snapshotId => requestRestore(snapshotId, 'restore-as-new')}
+            />
             <SaveScriptStateModal
-                isOpen={saveKind !== null}
-                kind={saveKind ?? 'draft'}
-                submitLabel={saveSubmitLabel}
-                isPending={isPending}
-                onClose={closeSave}
+                isOpen={saveRequest !== null}
+                kind={saveRequest?.kind ?? lastSaveKindRef.current}
+                submitLabel={saveRequest?.submitLabel}
+                isPending={actions.isPending}
+                onClose={() => setSaveRequest(null)}
                 onSubmit={handleSave}
             />
-            <ManageScriptStatesModal
-                isOpen={isManageOpen}
-                states={managedStates}
-                isPending={isPending}
-                onClose={() => setIsManageOpen(false)}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
-            />
             <RestoreScriptStateModal
-                isOpen={restoreMode !== null}
-                mode={restoreMode ?? 'restore'}
-                stateLabel={shownLabel}
-                initialTitle={`${liveScriptTitle ?? 'Untitled script'} — ${shownLabel}`}
-                isPending={isPending}
-                onClose={() => setRestoreMode(null)}
+                isOpen={restoreTarget !== null}
+                mode={restoreTarget?.mode ?? 'restore'}
+                stateLabel={restoreLabel}
+                initialTitle={`${liveScriptTitle ?? 'Untitled script'} — ${restoreLabel}`}
+                isPending={actions.isPending}
+                onClose={() => setRestoreTarget(null)}
                 onRestore={handleRestore}
                 onRestoreAsNew={handleRestoreAsNew}
             />

@@ -4,7 +4,7 @@ import {
     type ScriptRepository,
     type ScriptSnapshot,
 } from '@stagistic/app-core';
-import type {ManagedScriptState, ScriptStateMenuItem} from '@stagistic/ui';
+import type {ScriptStateMenuItem, ScriptStateRecord} from '@stagistic/ui';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {dateStyle: 'medium', timeStyle: 'short'});
 
@@ -53,11 +53,20 @@ export const waitForScriptInList = async (repository: ScriptRepository, scriptId
     }
 };
 
-export const toManagedState = (snapshot: ScriptSnapshot): ManagedScriptState => ({
-    id: snapshot.id,
-    kind: snapshot.kind,
-    label: getScriptSnapshotLabel(snapshot),
-    detail: describeSnapshot(snapshot),
-    name: snapshot.name,
-    note: snapshot.note,
-});
+export const toStateRecord = (snapshot: ScriptSnapshot): ScriptStateRecord => {
+    const {pageCount, sceneCount} = snapshot.summaryMetadata ?? {pageCount: null, sceneCount: null};
+
+    return {
+        id: snapshot.id,
+        kind: snapshot.kind,
+        label: getScriptSnapshotLabel(snapshot),
+        name: snapshot.name,
+        note: snapshot.note,
+        savedAt: formatSnapshotDate(snapshot.createdAt),
+        origin: getScriptSnapshotOrigin(snapshot),
+        facts: [
+            ...sceneCount === null ? [] : [sceneCount === 1 ? '1 scene' : `${sceneCount} scenes`],
+            ...pageCount === null ? [] : [pageCount === 1 ? '1 page' : `${pageCount} pages`],
+        ],
+    };
+};

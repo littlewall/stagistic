@@ -1,5 +1,6 @@
 import {useId} from 'react';
 
+import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import styles from './ScriptStateModals.module.css';
 
 export type ScriptStateKind = 'draft' | 'version';
@@ -14,6 +15,8 @@ interface ScriptStateDetailsFieldsProps {
     value: ScriptStateDetails,
     isDisabled?: boolean,
     autoFocus?: boolean,
+    /** Dialog fields, or the form controls of a manager panel. */
+    appearance?: 'dialog' | 'panel',
     onChange: (value: ScriptStateDetails) => void,
 }
 
@@ -27,19 +30,21 @@ export const ScriptStateDetailsFields = ({
     value,
     isDisabled = false,
     autoFocus = false,
+    appearance = 'dialog',
     onChange,
 }: ScriptStateDetailsFieldsProps) => {
     const nameId = useId();
     const noteId = useId();
+    const controls = appearance === 'panel' ? formControlStyles : styles;
 
     return (
         <>
             {kind === 'version' ? (
                 <div className={styles.field}>
-                    <label className={styles.label} htmlFor={nameId}>Name</label>
+                    <label className={controls.label} htmlFor={nameId}>Name</label>
                     <input
                         id={nameId}
-                        className={styles.input}
+                        className={controls.input}
                         value={value.name}
                         autoComplete="off"
                         placeholder="e.g. Edinburgh Fringe 2026"
@@ -50,10 +55,10 @@ export const ScriptStateDetailsFields = ({
                 </div>
             ) : null}
             <div className={styles.field}>
-                <label className={styles.label} htmlFor={noteId}>{kind === 'version' ? 'Note' : 'Reason'}</label>
+                <label className={controls.label} htmlFor={noteId}>{kind === 'version' ? 'Note' : 'Reason'}</label>
                 <input
                     id={noteId}
-                    className={styles.input}
+                    className={controls.input}
                     value={value.note}
                     autoComplete="off"
                     placeholder={kind === 'version' ? 'Optional' : 'Optional, e.g. new final monologue'}

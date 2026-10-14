@@ -70,7 +70,7 @@ export const AttributeManagerModal = ({
                 className={styles.modal}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Attribute manager"
+                aria-label={title}
                 onClick={handleModalClick}
             >
                 <header className={styles.header}>
@@ -79,14 +79,14 @@ export const AttributeManagerModal = ({
                         type="button"
                         className={styles.closeButton}
                         onClick={onClose}
-                        aria-label="Close attribute manager"
+                        aria-label={`Close ${title.toLocaleLowerCase()}`}
                     >
                         Close
                     </button>
                 </header>
                 <nav
                     className={styles.tabs}
-                    aria-label="Attribute manager sections"
+                    aria-label={`${title} sections`}
                 >
                     <div
                         className={styles.tabList}

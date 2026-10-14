@@ -165,11 +165,6 @@ export {
 } from './dialogs/script/DuplicateScriptModal';
 export type {StepkgPeekResult} from './dialogs/script/import/types';
 export {ImportScriptModal} from './dialogs/script/ImportScriptModal';
-export {
-    type ManagedScriptState,
-    ManageScriptStatesModal,
-    type ManageScriptStatesModalProps,
-} from './dialogs/script/ManageScriptStatesModal';
 export {NewScriptModal} from './dialogs/script/NewScriptModal';
 export {PublicPreviewNotice} from './dialogs/script/PublicPreviewNotice';
 export {
@@ -190,6 +185,12 @@ export {
     type SettingsNavSubItem,
 } from './dialogs/script/ScriptSettingsModal';
 export type {ScriptStateDetails, ScriptStateKind} from './dialogs/script/ScriptStateDetailsFields';
+export {
+    type ScriptStateRecord,
+    ScriptStatesModal,
+    type ScriptStatesModalProps,
+    type ScriptStateUpdate,
+} from './dialogs/script/ScriptStatesModal';
 export type {NewScriptShape} from './dialogs/script/types';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────
