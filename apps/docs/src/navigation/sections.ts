@@ -115,13 +115,26 @@ export const documentationSections: DocumentationSection[] = [
     {
         label: 'Syntax',
         href: '/syntax/',
-        description: 'Explore the Stagistic text format and its technical reference for files and integrations.',
+        description: 'Read the Stagistic text format reference for implementations and plain-text writing.',
         sidebar: [
             {
-                label: 'Reference',
+                label: 'Format reference',
                 items: [
                     {label: 'Syntax overview', slug: 'syntax'},
                     'syntax/reference',
+                    'syntax/reference/frontmatter',
+                    'syntax/reference/structure',
+                    'syntax/reference/speech',
+                    'syntax/reference/directions',
+                    'syntax/reference/music',
+                    'syntax/reference/text',
+                ],
+            },
+            {
+                label: 'Examples and lookup',
+                items: [
+                    'syntax/examples',
+                    'syntax/markers',
                 ],
             },
         ],
