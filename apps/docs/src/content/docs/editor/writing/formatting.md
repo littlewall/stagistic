@@ -26,7 +26,7 @@ If you applied formatting by mistake, use the editor's undo shortcut: <kbd><span
 
 The type of a block can supply its own appearance. For example, Aside text is italic with the default settings. Changing a word's formatting and changing a block's default appearance are separate operations.
 
-Use [Change block type](/editor/writing/blocks/) when the text has a different role in the script. For the overall printed layout, see [Pages and export](/editor/export/).
+Use [Change block type](/editor/writing/blocks/) when the text has a different role in the script. For page layout and a block type's default appearance, see [Set up script pages](/editor/export/layout/).
 
 ## Related tasks
 

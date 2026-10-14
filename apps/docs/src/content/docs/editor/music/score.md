@@ -36,7 +36,7 @@ The dialog removes the file from this browser and states that the removal cannot
 
 ## Include it in printed output
 
-Uploading the score associates it with the number. For preparing output with integrated scores, see [Pages and export](/editor/export/).
+Uploading the score associates it with the number. To prepare the combined PDF, see [Include integrated scores](/editor/export/integrated-score/).
 
 ## Related tasks
 

@@ -1,6 +1,6 @@
 # Další kategorie: Finding and reviewing
 
-Stav: návrh členění a příkladu k odsouhlasení. Funkce byly předběžně ověřeny v aktivním toolbaru a komentářovém panelu i v jejich obsluze. Rozcestník, uživatelské články ani navigace zatím nejsou změněné.
+Stav: schváleno 12. října 2026; rozcestník, šest uživatelských článků, plochá skupina sidebaru a kontextové odkazy jsou připravené. Postupy byly ověřeny podle aktivních komponent a jejich obsluhy. Záznam kontrol je v `docs/superpowers/plans/2026-10-12-finding-and-reviewing-documentation.md`.
 
 ## Co má čtenář zvládnout
 
@@ -87,6 +87,16 @@ Zdrojové body:
 - `packages/app-routes/src/routes/script/editor/comments/`
 - `packages/db/src/repo/comments.ts`
 
-## Další krok po odsouhlasení
+## Ověřené upřesnění při psaní
 
-Ověřit konkrétní postupy, napsat rozcestník a šest článků, doplnit sidebar a kontextové odkazy. Potom provést nezávislou obsahovou kontrolu a kontroly projektu docs.
+- Clear search vymaže hledanou frázi a vypne Match case i Match whole word, ale zachová omezení na typy bloků. Návrat k plnému hledání proto obsahuje také Reset v nabídce Search in.
+- Zkratky mají uvedenou platformu i pole: Enter přechází výsledky v hledání, nahrazuje v Replace with a zalamuje řádek v komentáři. Command/Ctrl + Enter v komentáři odesílá zprávu.
+- Add comment přes Block actions založí připomínku k celému bloku; výběr textu a zkratka umožní komentovat konkrétní pasáž.
+- Značka komentáře na okraji otevře Comments. Kliknutí na podtrženou pasáž pracuje s již otevřeným panelem; nenabízíme je jako způsob otevření zavřeného panelu.
+- Detached vlákna zůstávají dostupná v režimu List, i když už nemají místo, ke kterému by bylo možné posunout scénář.
+- Otevření ukotvené karty v List posune editor k pasáži, ale nerozbalí sbalenou scénu. Článek výslovně uvádí její rozbalení.
+- Undo po odstranění celého vlákna patří oznámení o odstranění. Historie textového editoru je samostatná a nepředstavuje trvalé verze scénáře.
+
+## Další krok
+
+Redakčně projít připravené články a jejich příklady. Živý průchod zůstává možný po novém předání sdíleného prohlížeče; tato vlna jej neobsahuje.

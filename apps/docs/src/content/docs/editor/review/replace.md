@@ -44,7 +44,7 @@ While **Replace with** is focused:
 - <kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> on macOS, or <kbd>Ctrl</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> on Windows/Linux, replaces all results.
 - <kbd>Esc</kbd> hides the replacement row and returns focus to the search field.
 
-In the search field, Enter navigates results instead of replacing them.
+In the search field, <kbd><span aria-hidden="true">⏎</span> Enter</kbd> navigates results instead of replacing them.
 
 ## Return to the previous wording
 

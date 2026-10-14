@@ -21,7 +21,7 @@ With the panel already open, clicking marked comment text highlights its related
 | Anchored | Cards beside the passages they refer to, following the script as you scroll. |
 | List | A systematic review grouped by scene, with quoted text and detached threads at the end. |
 
-Click a card's summary to open it. In List, opening an anchored card also reveals its passage in the editor. Click the expanded card's header to collapse it again.
+Click a card's summary to open it. In List, opening an anchored card also scrolls the editor to its passage. If its scene is collapsed, expand it first to see the passage. Click the expanded card's header to collapse it again.
 
 ## Filter by status
 

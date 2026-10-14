@@ -22,10 +22,6 @@ export const documentationSections: DocumentationSection[] = [
                 ],
             },
             {
-                label: 'User guide',
-                items: ['editor/export'],
-            },
-            {
                 label: 'Scripts and files',
                 items: [
                     {label: 'Overview', slug: 'editor/scripts'},
@@ -98,6 +94,20 @@ export const documentationSections: DocumentationSection[] = [
                     'editor/review/threads',
                     'editor/review/comments-view',
                     'editor/review/history',
+                ],
+            },
+            {
+                label: 'Pages and export',
+                items: [
+                    {label: 'Overview', slug: 'editor/export'},
+                    'editor/export/pdf',
+                    'editor/export/layout',
+                    'editor/export/title-page',
+                    'editor/export/headers-footers',
+                    'editor/export/initial-pages',
+                    'editor/export/characters',
+                    'editor/export/page-breaks',
+                    'editor/export/integrated-score',
                 ],
             },
         ],

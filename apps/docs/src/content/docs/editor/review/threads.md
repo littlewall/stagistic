@@ -11,13 +11,13 @@ After changing Alex's line, return to `Could Alex sound less urgent?` and record
 2. Write `Changed the line.` in **Reply**.
 3. Choose **Reply**.
 
-The reply is added to the same thread. Enter adds a line in this field. <kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> on macOS, or <kbd>Ctrl</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> on Windows/Linux, submits the reply.
+The reply is added to the same thread. <kbd><span aria-hidden="true">⏎</span> Enter</kbd> adds a line in this field. <kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> on macOS, or <kbd>Ctrl</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> on Windows/Linux, submits the reply.
 
 ## Edit a message
 
 For the first message, open the card's <img class="kb-editor-icon" src="/icons/editor/script-actions.svg" alt="" aria-hidden="true" /> **More actions** menu and choose **Edit**. For a reply, use its own three-dot **Reply actions** menu and choose Edit.
 
-Change the text, then choose **Save**. Choose **Cancel** or press <kbd>Esc</kbd> in the editing field to leave the message unchanged. The same Command/Ctrl + Enter combination submits an edited message.
+Change the text, then choose **Save**. Choose **Cancel** or press <kbd>Esc</kbd> in the editing field to leave the message unchanged. The same submission shortcut saves an edited message.
 
 ## Mark a thread as resolved
 
