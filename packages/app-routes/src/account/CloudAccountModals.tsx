@@ -29,6 +29,7 @@ export const CloudAccountModals = ({
                 onClose={close}
                 onRequestLink={email => state.requestLink(email, captchaToken ?? '')}
                 isCaptchaComplete={captchaToken !== null}
+                onPasskeySignIn={state.signInWithPasskey}
                 captcha={state.modal === 'sign-in' ? (
                     <TurnstileField
                         siteKey={turnstileSiteKey}
@@ -44,6 +45,7 @@ export const CloudAccountModals = ({
                 lastSyncedAt={status?.lastSyncedAt ?? null}
                 pending={status?.pending ?? 0}
                 onSignOut={() => void state.signOut()}
+                passkeys={state.passkeys}
             />
             {state.report ? (
                 <CloudSyncModal

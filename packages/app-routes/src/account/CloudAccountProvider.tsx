@@ -22,6 +22,7 @@ import {
 
 import {CloudAccountModals} from './CloudAccountModals';
 import {cloudSyncLabel} from './cloudSyncLabels';
+import {usePasskeys, usePasskeySignIn} from './usePasskeys';
 
 /*
  * Account and cloud sync for the app. The auth client signs in (magic link);
@@ -52,6 +53,8 @@ interface CloudAccountState {
     signOut: () => Promise<void>,
     resolve: (resolutions: Record<string, CloudConflictResolution>) => Promise<void>,
     cancelCheck: () => Promise<void>,
+    signInWithPasskey: (() => Promise<void>) | undefined,
+    passkeys: ReturnType<typeof usePasskeys>,
 }
 
 const disabled: CloudAccountValue = {
@@ -117,6 +120,12 @@ export const CloudAccountProvider = ({
         setStatus(await cloud!.signedOut());
     }, [auth, cloud]);
 
+    const signInWithPasskey = usePasskeySignIn(auth, async () => {
+        setModal(null);
+        setStatus(await cloud!.signedIn());
+    });
+    const passkeys = usePasskeys(auth, modal === 'settings');
+
     // Post-sign-in check: automatic unless scripts changed on both sides.
     useEffect(() => {
         if (!cloud || status?.state !== 'needs-check' || checking.current) {
@@ -171,6 +180,8 @@ export const CloudAccountProvider = ({
             setReport(null);
             await signOut();
         },
+        signInWithPasskey,
+        passkeys,
     };
 
     const isEnabled = Boolean(auth && cloud);

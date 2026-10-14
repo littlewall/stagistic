@@ -11,6 +11,7 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {AccountMenu} from '../../layout/header/AccountMenu';
+import {AccountSettingsModal} from './AccountSettingsModal';
 import {CloudSyncModal} from './CloudSyncModal';
 import {SignInModal} from './SignInModal';
 import type {CloudConflictItem} from './types';
@@ -178,5 +179,38 @@ describe('AccountMenu with an account', () => {
         await waitFor(() => document.body.textContent?.includes('jan@example.com'));
         await userEvent.click(buttonNamed('Sign out')!);
         expect(account.onSignOut).toHaveBeenCalled();
+    });
+});
+
+describe('Passkeys in account settings', () => {
+    it('shows why adding failed and keeps the list', async () => {
+        mount(
+            <AccountSettingsModal
+                isOpen
+                onClose={() => {}}
+                email="jan@example.com"
+                syncLabel="Synced"
+                lastSyncedAt={null}
+                pending={0}
+                onSignOut={() => {}}
+                passkeys={{
+                    passkeys: [
+                        {
+                            id: 'p1',
+                            name: null,
+                            createdAt: Date.parse('2026-10-14T10:00:00'),
+                            backedUp: false,
+                        },
+                    ],
+                    onAdd: () => Promise.reject(new Error('For your security, sign in again with an email link, then add the passkey.')),
+                    onRemove: () => Promise.resolve(),
+                }}
+            />,
+        );
+
+        await userEvent.click(await waitFor(() => buttonNamed('Add a passkey')));
+        await waitFor(() => document.body.textContent?.includes('sign in again with an email link'));
+        expect(document.body.textContent).toContain('Passkey · added');
+        expect(document.body.textContent).not.toContain('· synced');
     });
 });

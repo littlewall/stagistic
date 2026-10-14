@@ -20,6 +20,8 @@ interface SignInModalProps {
     /** Human check widget (Turnstile), rendered by the host. */
     captcha?: ReactNode,
     isCaptchaComplete: boolean,
+    /** Signs in with a passkey; resolves when signed in or cancelled, rejects with a user-facing message. Omitted without WebAuthn. */
+    onPasskeySignIn?: () => Promise<void>,
 }
 
 export const SignInModal = ({
@@ -28,6 +30,7 @@ export const SignInModal = ({
     onRequestLink,
     captcha,
     isCaptchaComplete,
+    onPasskeySignIn,
 }: SignInModalProps) => {
     const [email, setEmail] = useState('');
     const [sentTo, setSentTo] = useState<string | null>(null);
@@ -40,6 +43,19 @@ export const SignInModal = ({
             setError(null);
         }
     }, [isOpen]);
+
+    const handlePasskey = async () => {
+        setError(null);
+        setIsPending(true);
+
+        try {
+            await onPasskeySignIn?.();
+        } catch (passkeyError) {
+            setError(passkeyError instanceof Error ? passkeyError.message : 'The passkey could not be used.');
+        } finally {
+            setIsPending(false);
+        }
+    };
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -94,6 +110,23 @@ export const SignInModal = ({
                 className={styles.form}
                 onSubmit={event => void handleSubmit(event)}
             >
+                {onPasskeySignIn ? (
+                    <>
+                        <Button
+                            variant="secondary"
+                            isDisabled={isPending}
+                            onPress={() => void handlePasskey()}
+                        >
+                            Sign in with a passkey
+                        </Button>
+                        <p
+                            className={styles.divider}
+                            aria-hidden="true"
+                        >
+                            or
+                        </p>
+                    </>
+                ) : null}
                 <label
                     className={styles.label}
                     htmlFor="sign-in-email"

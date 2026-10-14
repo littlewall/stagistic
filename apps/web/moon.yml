@@ -36,3 +36,10 @@ tasks:
     deps: ['~:build']
     options:
       cache: false
+
+  # Cloud account flows (sign-in, passkeys, sync) through Caddy against the
+  # local stack (docker-compose.dev.yml); skipped when it is not running.
+  test-e2e-cloud:
+    command: 'vp test run -c vitest.e2e-cloud.config.ts'
+    options:
+      cache: false

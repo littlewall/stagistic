@@ -51,7 +51,7 @@
   - [x] `packages/auth-client` (magic link, session, sign-out, Turnstile)
   - [x] UI: account menu, sign-in modal, `/auth/callback`, account settings, conflict dialog, one-time prompt, empty-library sign-in, sync label in the indicator
   - [x] Tests: two-device cloud sync e2e (collab), engine, auth client, UI and provider browser tests
-  - [ ] Passkey UI; desktop sign-in (Tauri origin needs a non-cookie flow); browser e2e through Caddy
+  - [ ] Desktop sign-in (Tauri origin needs a non-cookie flow); passkey UI and browser e2e moved to 6b
 - [x] 5b. Change hints instead of polling (`user/{id}/events`, EventBus in memory → Redis later; catch-up on start/sign-in/reconnect/online/tab visible)
 - [x] 6. Attachments to S3 (RustFS)
   - [x] Server: presigned PUT (type + length signed, role/MIME/size checked) and GET, bucket + CORS on start, blobs deleted on purge
@@ -62,7 +62,7 @@
 ## Phase 6b — functional readiness (local; no deploy, DNS, Turnstile prod, speed)
 - [x] SMTP mailer (`SMTP_URL`, `SMTP_HEADERS`): Mailpit SMTP locally, Postmark = only a different URL; test against Mailpit
 - [ ] Browser e2e through Caddy: sign-in via Mailpit link, two devices sync edits + attachments, conflict dialog after offline edits
-- [ ] Passkey UI (Playwright virtual authenticator)
+- [x] Passkeys: sign-in button, Account settings list/add/remove, discoverable credentials (`residentKey: required`); e2e through Caddy with a virtual authenticator (`moon run web:test-e2e-cloud`)
 - [ ] Delete blobs of removed/replaced attachments; pending count includes attachments
 - [ ] Remove/update the spike `network.browser.test.ts`
 

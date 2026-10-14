@@ -3,6 +3,7 @@ import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './account.module.css';
+import {PasskeysSection, type PasskeysSectionProps} from './PasskeysSection';
 import {formatSyncTime} from './types';
 
 interface AccountSettingsModalProps {
@@ -14,6 +15,8 @@ interface AccountSettingsModalProps {
     lastSyncedAt: number | null,
     pending: number,
     onSignOut: () => void,
+    /** Omitted where passkeys are unavailable (no WebAuthn). */
+    passkeys?: PasskeysSectionProps,
 }
 
 export const AccountSettingsModal = ({
@@ -24,6 +27,7 @@ export const AccountSettingsModal = ({
     lastSyncedAt,
     pending,
     onSignOut,
+    passkeys,
 }: AccountSettingsModalProps) => (
     <ModalDialog
         isOpen={isOpen}
@@ -49,6 +53,7 @@ export const AccountSettingsModal = ({
                 <dd>{pending > 0 ? `${pending} script${pending === 1 ? '' : 's'}` : 'Nothing'}</dd>
             </div>
         </dl>
+        {passkeys ? <PasskeysSection {...passkeys} /> : null}
         <p className={styles.summary}>Signing out keeps your scripts on this device; syncing pauses until you sign in again.</p>
         <ModalActions>
             <Button onPress={onClose}>Done</Button>

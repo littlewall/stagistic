@@ -1,6 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {AuthClient} from '@stagistic/auth-client';
+import {type AuthClient, PasskeyCancelledError} from '@stagistic/auth-client';
 import type {
     CloudCheckReport,
     CloudStatus,
@@ -42,6 +42,8 @@ const waitFor = async <T,>(find: () => T | null | undefined | false, timeoutMs =
     throw new Error('Timed out waiting for condition');
 };
 
+const buttonNamed = (name: string) => [...document.querySelectorAll('button')].find(button => button.textContent?.trim() === name);
+
 const status = (state: CloudStatus['state']): CloudStatus => ({
     state,
     email: state === 'signed-out' ? null : 'jan@example.com',
@@ -59,6 +61,19 @@ const createFakes = (report: CloudCheckReport) => {
     });
     const signedOut = vi.fn(() => Promise.resolve(status('signed-out')));
     const authSignOut = vi.fn(() => Promise.resolve());
+    const passkeys = {
+        signInWithPasskey: vi.fn(() => Promise.resolve({userId: 'u1', email: 'jan@example.com'})),
+        addPasskey: vi.fn(() => Promise.resolve()),
+        listPasskeys: vi.fn(() => Promise.resolve([
+            {
+                id: 'p1',
+                name: null,
+                createdAt: Date.parse('2026-10-14T10:00:00'),
+                backedUp: true,
+            },
+        ])),
+        deletePasskey: vi.fn(() => Promise.resolve()),
+    };
     const cloud: SyncEngineCloudClient = {
         status: () => Promise.resolve(status('needs-check')),
         signedIn: () => Promise.resolve(status('needs-check')),
@@ -66,6 +81,7 @@ const createFakes = (report: CloudCheckReport) => {
         check: () => Promise.resolve(report),
         wake: () => Promise.resolve(status('synced')),
         apply,
+        downloadAttachment: () => Promise.resolve(false),
         onStatus: next => {
             listener = next;
 
@@ -79,6 +95,7 @@ const createFakes = (report: CloudCheckReport) => {
         verifyMagicLink: () => Promise.resolve({userId: 'u1', email: 'jan@example.com'}),
         getSession: () => Promise.resolve(null),
         signOut: authSignOut,
+        ...passkeys,
     };
 
     return {
@@ -87,13 +104,30 @@ const createFakes = (report: CloudCheckReport) => {
         apply,
         signedOut,
         authSignOut,
+        passkeys,
     };
 };
 
 const MenuProbe = () => {
     const {menuAccount, syncLabel} = useCloudAccount();
 
-    return <output data-probe>{`${menuAccount?.email ?? 'signed out'} | ${syncLabel ?? 'local'}`}</output>;
+    return (
+        <>
+            <output data-probe>{`${menuAccount?.email ?? 'signed out'} | ${syncLabel ?? 'local'}`}</output>
+            <button
+                type="button"
+                onClick={menuAccount?.onSignIn}
+            >
+                Probe sign in
+            </button>
+            <button
+                type="button"
+                onClick={menuAccount?.onOpenAccountSettings}
+            >
+                Probe settings
+            </button>
+        </>
+    );
 };
 
 const mount = (fakes: ReturnType<typeof createFakes>) => {
@@ -182,5 +216,57 @@ describe('CloudAccountProvider', () => {
         await waitFor(() => fakes.signedOut.mock.calls.length > 0);
         expect(fakes.authSignOut).toHaveBeenCalled();
         expect(fakes.apply).not.toHaveBeenCalled();
+    });
+
+    it('signs in with a passkey and starts sync; a closed prompt keeps the dialog without an error', async () => {
+        const fakes = createFakes({
+            email: 'jan@example.com',
+            upload: 0,
+            download: 0,
+            delete: 0,
+            restore: 0,
+            conflicts: [],
+        });
+        const signedIn = vi.fn(() => Promise.resolve(status('needs-check')));
+
+        fakes.cloud.signedIn = signedIn;
+        fakes.cloud.status = () => Promise.resolve(status('signed-out'));
+        fakes.passkeys.signInWithPasskey.mockRejectedValueOnce(new PasskeyCancelledError());
+        mount(fakes);
+
+        await userEvent.click(await waitFor(() => buttonNamed('Probe sign in')));
+        await userEvent.click(await waitFor(() => buttonNamed('Sign in with a passkey')));
+        await waitFor(() => fakes.passkeys.signInWithPasskey.mock.calls.length === 1);
+        expect(document.body.textContent).not.toContain('cancelled');
+        expect(signedIn).not.toHaveBeenCalled();
+
+        await userEvent.click(buttonNamed('Sign in with a passkey')!);
+        await waitFor(() => signedIn.mock.calls.length === 1);
+        await waitFor(() => !buttonNamed('Sign in with a passkey'));
+        await waitFor(() => document.body.textContent?.includes('Synced with jan@example.com'));
+    });
+
+    it('lists, adds and removes passkeys in account settings', async () => {
+        const fakes = createFakes({
+            email: 'jan@example.com',
+            upload: 0,
+            download: 0,
+            delete: 0,
+            restore: 0,
+            conflicts: [],
+        });
+
+        mount(fakes);
+        await waitFor(() => fakes.apply.mock.calls.length > 0);
+        await userEvent.click(await waitFor(() => buttonNamed('Probe settings')));
+        await waitFor(() => document.body.textContent?.includes('· synced'));
+
+        await userEvent.click(buttonNamed('Add a passkey')!);
+        await waitFor(() => fakes.passkeys.listPasskeys.mock.calls.length === 2);
+        expect(fakes.passkeys.addPasskey).toHaveBeenCalled();
+
+        await userEvent.click(buttonNamed('Remove')!);
+        await waitFor(() => fakes.passkeys.deletePasskey.mock.calls.length === 1);
+        expect(fakes.passkeys.deletePasskey).toHaveBeenCalledWith('p1');
     });
 });

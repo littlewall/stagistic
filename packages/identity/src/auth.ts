@@ -79,6 +79,8 @@ export const createIdentityAuthOptions = ({
             rpID: config.cookieDomain,
             rpName: 'Stagistic',
             origin: config.appOrigins,
+            // Discoverable: the passkey itself names the account, so sign-in needs no email.
+            authenticatorSelection: {residentKey: 'required', userVerification: 'preferred'},
         }),
         captcha({
             provider: 'cloudflare-turnstile',

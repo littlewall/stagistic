@@ -160,6 +160,7 @@ export type {
     CloudConflictItem,
     CloudConflictResolution,
     CloudSyncSummary,
+    PasskeyItem,
 } from './dialogs/account/types';
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
 export {DeleteScriptModal} from './dialogs/script/DeleteScriptModal';

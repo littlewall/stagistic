@@ -25,4 +25,12 @@ export interface AccountMenuAccount {
     onOpenAccountSettings: () => void,
 }
 
+/** A passkey of the signed-in account. */
+export interface PasskeyItem {
+    id: string,
+    name: string | null,
+    createdAt: number,
+    backedUp: boolean,
+}
+
 export const formatSyncTime = (ms: number) => new Intl.DateTimeFormat(undefined, {dateStyle: 'medium', timeStyle: 'short'}).format(ms);
