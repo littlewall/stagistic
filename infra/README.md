@@ -10,7 +10,7 @@ production-like domains.
 | `https://auth.api.stagistic.local` | auth (Better Auth), container port 8787 |
 | `https://sync.api.stagistic.local` | collab, container port 8788: Hocuspocus at `wss://…/ws`, REST `GET/POST /scripts`, `DELETE /scripts/:id` |
 | `https://files.api.stagistic.local` | attachment bucket (RustFS, presigned URLs only) |
-| `http://localhost:8025` | Mailpit (sign-in emails land here) |
+| `http://localhost:8025` | Mailpit UI (sign-in emails land here); SMTP on `localhost:1025` |
 | `localhost:5432` | Postgres (`stagistic` / `stagistic`; tests use `stagistic_test`) |
 
 ## One-time setup
@@ -61,7 +61,13 @@ Postgres schemas: `identity` (Better Auth), `collab` (scripts, members,
 `ydoc_states`: the source of truth) and `projection` (packages/db tables, a
 read-only cache of script records; rebuildable from `ydoc_states`).
 
+Mail goes out over SMTP (`SMTP_URL`, here `smtp://mailpit:1025`). Production
+only swaps the URL, e.g. Postmark
+`smtp://<server-token>:<server-token>@smtp.postmarkapp.com:587` with
+`SMTP_HEADERS=X-PM-Message-Stream=outbound`.
+
 ## Tests
 
 `moon run identity:test` and `moon run collab:test` run against the local
-Postgres (`stagistic_test`, own schemas per run) and skip when it is not running.
+Postgres (`stagistic_test`, own schemas per run) and skip when it is not running;
+the SMTP mailer test sends through Mailpit and skips without it.

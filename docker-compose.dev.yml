@@ -33,6 +33,7 @@ services:
     image: axllent/mailpit:v1.27
     ports:
       - '${MAILPIT_PORT:-8025}:8025'
+      - '${MAILPIT_SMTP_PORT:-1025}:1025'
 
   # MinIO no longer publishes images; RustFS is S3-compatible (attachments, phase 6).
   s3:
@@ -60,7 +61,8 @@ services:
       AUTH_SECRET: local-dev-secret-change-me-0123456789abcdef
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-1x0000000000000000000000000000000AA}
       JWT_AUDIENCE: https://sync.api.stagistic.local${LOCAL_HTTPS_PORT_SUFFIX:-}
-      MAILPIT_URL: http://mailpit:8025
+      # Production: the provider's SMTP URL (e.g. Postmark), plus SMTP_HEADERS for its stream.
+      SMTP_URL: smtp://mailpit:1025
       AUTH_JWKS_URL: http://127.0.0.1:8787/api/auth/jwks
       S3_ENDPOINT: http://s3:9000
       # Browsers reach the bucket through Caddy; presigned URLs are signed for this host.

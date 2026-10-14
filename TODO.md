@@ -33,7 +33,7 @@
   - [x] Desktop runs the engine too (same worker wiring as web)
 - [x] 3. Identity (Better Auth, Mailpit, Turnstile test keys)
   - [x] `docker-compose.dev.yml`: Postgres 17, RustFS, Mailpit, Deno server, Caddy + mkcert (`infra/README.md`)
-  - [x] `packages/identity`: Better Auth (magic link → app callback, passkey, Turnstile, JWT/JWKS, DB rate limit, 60-day sliding session, cookie on parent domain), Mailpit mailer over fetch, SQL migrations in schema `identity`
+  - [x] `packages/identity`: Better Auth (magic link → app callback, passkey, Turnstile, JWT/JWKS, DB rate limit, 60-day sliding session, cookie on parent domain), SMTP mailer (nodemailer), SQL migrations in schema `identity`
   - [x] Nothing in the DB signs in alone: signed session cookie, magic-link token stored hashed (test)
   - [x] `apps/server`: one Deno process, `SERVER_ROLES=auth,collab`, collab verifies JWT via JWKS (`/me`)
   - [x] Tests: identity integration (Postgres), server; HTTPS smoke test through Caddy
@@ -59,6 +59,13 @@
   - [x] Local env: `files.api.stagistic.local` (Caddy → RustFS); tests: REST/RustFS, two-device attachment sync, live smoke
   - [ ] Delete blobs of removed/replaced attachments (now only on purge)
 
+## Phase 6b — functional readiness (local; no deploy, DNS, Turnstile prod, speed)
+- [x] SMTP mailer (`SMTP_URL`, `SMTP_HEADERS`): Mailpit SMTP locally, Postmark = only a different URL; test against Mailpit
+- [ ] Browser e2e through Caddy: sign-in via Mailpit link, two devices sync edits + attachments, conflict dialog after offline edits
+- [ ] Passkey UI (Playwright virtual authenticator)
+- [ ] Delete blobs of removed/replaced attachments; pending count includes attachments
+- [ ] Remove/update the spike `network.browser.test.ts`
+
 ## Phase 7 — UpCloud (separate, later)
-- [ ] Provisioning, deploy (Caddy, systemd, binary), Postmark, prod Turnstile, DNS
+- [ ] Provisioning, deploy (Caddy, systemd, binary), Postmark SMTP credentials, prod Turnstile, DNS
 - [ ] Tests against UpCloud: RSS/CPU, DB latency, connections, CORS, `pg_dump` restore

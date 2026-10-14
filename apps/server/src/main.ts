@@ -17,8 +17,9 @@ import {
     createIdentityApp,
     createIdentityAuth,
     createIdentityPool,
-    createMailpitMailer,
+    createSmtpMailer,
     type Mailer,
+    parseMailHeaders,
     readIdentityConfig,
     runIdentityMigrations,
 } from '@stagistic/identity';
@@ -34,14 +35,10 @@ const required = (name: string) => env[name] || (() => {
 const servers: Array<{shutdown(): Promise<void>}> = [];
 const cleanups: Array<() => Promise<void>> = [];
 
-const createMailer = (): Mailer => {
-    if (env.MAILPIT_URL) {
-        return createMailpitMailer({baseUrl: env.MAILPIT_URL});
-    }
-
-    // Postmark adapter: phase 7.
-    throw new Error('[server] no mailer configured (set MAILPIT_URL)');
-};
+const createMailer = (): Mailer => createSmtpMailer({
+    url: required('SMTP_URL'),
+    headers: parseMailHeaders(env.SMTP_HEADERS),
+});
 
 if (roles.has('auth')) {
     const config = readIdentityConfig(env);

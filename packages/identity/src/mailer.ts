@@ -1,7 +1,6 @@
-/*
- * Outgoing mail behind one interface, over plain `fetch` (no SDK): Mailpit's
- * HTTP send API locally, Postmark in production (phase 7).
- */
+import nodemailer from 'nodemailer';
+
+/* Outgoing mail behind one interface: SMTP everywhere, a memory mailer in tests. */
 
 export interface MailMessage {
     to: string,
@@ -21,26 +20,51 @@ export interface MailSender {
 
 export const DEFAULT_SENDER: MailSender = {email: 'no-reply@stagistic.app', name: 'Stagistic'};
 
-/** Mailpit (`axllent/mailpit`) catches mail locally; `baseUrl` is its web/API port. */
-export const createMailpitMailer = ({baseUrl, from = DEFAULT_SENDER}: {baseUrl: string, from?: MailSender}): Mailer => ({
-    send: async message => {
-        const response = await fetch(new URL('/api/v1/send', baseUrl), {
-            method: 'POST',
-            headers: {'content-type': 'application/json'},
-            body: JSON.stringify({
-                From: {Email: from.email, Name: from.name},
-                To: [{Email: message.to}],
-                Subject: message.subject,
-                Text: message.text,
-                HTML: message.html,
-            }),
-        });
+/**
+ * SMTP (nodemailer): Mailpit locally (`smtp://mailpit:1025`), Postmark or any
+ * provider in production — only the URL changes, e.g.
+ * `smtp://<server-token>:<server-token>@smtp.postmarkapp.com:587`.
+ * `headers` are added to every message (Postmark: `X-PM-Message-Stream`).
+ */
+export const createSmtpMailer = ({
+    url,
+    from = DEFAULT_SENDER,
+    headers = {},
+}: {
+    url: string,
+    from?: MailSender,
+    headers?: Record<string, string>,
+}): Mailer => {
+    const transport = nodemailer.createTransport(url);
 
-        if (!response.ok) {
-            throw new Error(`[identity] Mailpit send failed (${response.status}): ${await response.text()}`);
+    return {
+        send: async message => {
+            await transport.sendMail({
+                from: {name: from.name, address: from.email},
+                to: message.to,
+                subject: message.subject,
+                text: message.text,
+                html: message.html,
+                headers,
+            });
+        },
+    };
+};
+
+/** `SMTP_HEADERS="X-PM-Message-Stream=outbound;Other=value"` -> headers. */
+export const parseMailHeaders = (value: string | undefined): Record<string, string> => {
+    const headers: Record<string, string> = {};
+
+    for (const item of (value ?? '').split(';')) {
+        const [name = '', header = ''] = item.split('=').map(part => part.trim());
+
+        if (name && header) {
+            headers[name] = header;
         }
-    },
-});
+    }
+
+    return headers;
+};
 
 /** Keeps messages in memory (tests). */
 export const createMemoryMailer = (): Mailer & {messages: MailMessage[]} => {
