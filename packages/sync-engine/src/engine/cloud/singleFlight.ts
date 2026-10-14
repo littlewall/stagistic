@@ -43,3 +43,28 @@ export const createSingleFlight = (task: () => Promise<void>, delayMs = 500) => 
         },
     };
 };
+
+/**
+ * Scripts changed on this device outside a live connection (repository
+ * mutations): flushed together once edits pause for `delayMs`.
+ */
+export const createDirtyQueue = (flush: (scriptIds: string[]) => void, delayMs = 1_000) => {
+    const dirty = new Set<string>();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    return {
+        dirty,
+        add: (scriptId: string) => {
+            dirty.add(scriptId);
+
+            if (timer) {
+                clearTimeout(timer);
+            }
+
+            timer = setTimeout(() => {
+                timer = null;
+                flush([...dirty]);
+            }, delayMs);
+        },
+    };
+};

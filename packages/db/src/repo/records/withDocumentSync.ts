@@ -22,6 +22,8 @@ export interface ScriptDocumentsSync {
     flushScript(scriptId: string): Promise<void>,
     notifyScriptReplaced(scriptId: string): Promise<void>,
     notifyScriptDeleted(scriptId: string): Promise<void>,
+    /** Signed in: fetch an attachment blob this device lacks (`cloud.downloadAttachment`). */
+    downloadAttachment?(storageKey: string): Promise<boolean>,
 }
 
 interface WithDocumentSyncArgs {
@@ -122,6 +124,16 @@ export const withDocumentSync = (repository: ScriptRepository, {
         restoreScriptFromPackage: async input => {
             await repository.restoreScriptFromPackage(input);
             await documents.notifyScriptReplaced(input.script.id);
+        },
+        // Attachments synced from another device: fetch the blob on first use.
+        getAttachmentBlob: async storageKey => {
+            const local = await repository.getAttachmentBlob(storageKey);
+
+            if (local || !documents.downloadAttachment || !await documents.downloadAttachment(storageKey).catch(() => false)) {
+                return local;
+            }
+
+            return repository.getAttachmentBlob(storageKey);
         },
         deleteScript: async scriptId => {
             await repository.deleteScript(scriptId);

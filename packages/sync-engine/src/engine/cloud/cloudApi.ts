@@ -9,6 +9,12 @@ export interface CloudApi {
     /** Registers a local script, or restores one deleted in the cloud. */
     register(scriptId: string, title: string): Promise<CloudScript>,
     remove(scriptId: string): Promise<void>,
+    attachmentUploadUrl(
+        scriptId: string,
+        attachmentId: string,
+        file: {mimeType: string, size: number},
+    ): Promise<{url: string, headers: Record<string, string>}>,
+    attachmentDownloadUrl(scriptId: string, attachmentId: string): Promise<string>,
 }
 
 export class CloudUnauthorizedError extends Error {}
@@ -66,5 +72,12 @@ export const createCloudApi = ({
         remove: async scriptId => {
             await request(`/scripts/${encodeURIComponent(scriptId)}`, {method: 'DELETE'});
         },
+        attachmentUploadUrl: async (scriptId, attachmentId, file) => await (await request(
+            `/scripts/${encodeURIComponent(scriptId)}/attachments/${encodeURIComponent(attachmentId)}/upload`,
+            {method: 'POST', body: JSON.stringify(file)},
+        )).json() as {url: string, headers: Record<string, string>},
+        attachmentDownloadUrl: async (scriptId, attachmentId) => (await (await request(
+            `/scripts/${encodeURIComponent(scriptId)}/attachments/${encodeURIComponent(attachmentId)}/download`,
+        )).json() as {url: string}).url,
     };
 };

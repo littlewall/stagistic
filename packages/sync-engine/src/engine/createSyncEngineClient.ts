@@ -51,6 +51,8 @@ export interface SyncEngineCloudClient {
     apply(resolutions: Record<string, ConflictResolution>): Promise<void>,
     /** Catch-up pass; call when the tab becomes visible again. */
     wake(): Promise<CloudStatus>,
+    /** Fetches a missing attachment blob into local storage; false if not possible. */
+    downloadAttachment(storageKey: string): Promise<boolean>,
     onStatus(listener: (status: CloudStatus) => void): () => void,
 }
 
@@ -322,6 +324,7 @@ export const createSyncEngineClient = ({
             signedOut: () => cloudAction<CloudStatus>('signed-out'),
             check: () => cloudAction<CloudCheckReport>('check'),
             wake: () => cloudAction<CloudStatus>('wake'),
+            downloadAttachment: storageKey => send<boolean>({type: 'attachment-download', storageKey}, {timeoutMs: CLOUD_TIMEOUT_MS}),
             apply: resolutions => send({type: 'cloud-apply', resolutions}, {timeoutMs: CLOUD_TIMEOUT_MS}),
             onStatus: listener => {
                 statusListeners.add(listener);

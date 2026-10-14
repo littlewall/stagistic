@@ -4,6 +4,7 @@
  * (`SERVER_ROLES=collab`) behind the same image.
  */
 import {
+    createAttachmentStorage,
     createCollabApp,
     createCollabDatabase,
     createCollabHocuspocus,
@@ -90,6 +91,23 @@ if (roles.has('collab')) {
 
     // Change hints in process (one collab instance); Redis pub/sub once collab scales out.
     const events = createLocalEventBus();
+    const appOrigins = required('APP_ORIGINS').split(',').map(item => item.trim());
+    // Attachment blobs (presigned URLs); without S3 config attachments stay on devices.
+    const attachments = env.S3_ENDPOINT
+        ? createAttachmentStorage({
+            endpoint: env.S3_ENDPOINT,
+            publicEndpoint: required('S3_PUBLIC_ENDPOINT'),
+            bucket: required('S3_BUCKET'),
+            accessKeyId: required('S3_ACCESS_KEY'),
+            secretAccessKey: required('S3_SECRET_KEY'),
+            region: env.S3_REGION,
+        })
+        : undefined;
+
+    if (attachments && env.MIGRATE_ON_START === '1') {
+        await attachments.ensureBucket(appOrigins);
+    }
+
     const hocuspocus = createCollabHocuspocus({
         database,
         verifyAccessToken,
@@ -98,9 +116,10 @@ if (roles.has('collab')) {
     const app = createCollabApp({
         database,
         verifyAccessToken,
-        appOrigins: required('APP_ORIGINS').split(',').map(item => item.trim()),
+        appOrigins,
         hocuspocus,
         events,
+        attachments,
     });
 
     app.get('/ws', collabSocketLimit(), collabSocketHandler(hocuspocus));
@@ -118,7 +137,7 @@ if (roles.has('collab')) {
 
     // Purge is idempotent, so concurrent instances need no lock.
     const purge = setInterval(() => {
-        purgeDeletedScripts(database)
+        purgeDeletedScripts(database, undefined, attachments)
             .then(ids => ids.length > 0 && console.log(`[server] purged ${ids.length} deleted scripts`))
             .catch(error => console.error('[server] purge failed', error));
     }, 60 * 60 * 1000);

@@ -9,6 +9,7 @@ production-like domains.
 | `https://editor.stagistic.local` | editor (Vite dev server on the host, port 3000) |
 | `https://auth.api.stagistic.local` | auth (Better Auth), container port 8787 |
 | `https://sync.api.stagistic.local` | collab, container port 8788: Hocuspocus at `wss://…/ws`, REST `GET/POST /scripts`, `DELETE /scripts/:id` |
+| `https://files.api.stagistic.local` | attachment bucket (RustFS, presigned URLs only) |
 | `http://localhost:8025` | Mailpit (sign-in emails land here) |
 | `localhost:5432` | Postgres (`stagistic` / `stagistic`; tests use `stagistic_test`) |
 
@@ -25,7 +26,7 @@ production-like domains.
 2. Host names (needs sudo):
 
     ```sh
-    echo '127.0.0.1 editor.stagistic.local auth.api.stagistic.local sync.api.stagistic.local' | sudo tee -a /etc/hosts
+    echo '127.0.0.1 editor.stagistic.local auth.api.stagistic.local sync.api.stagistic.local files.api.stagistic.local' | sudo tee -a /etc/hosts
     ```
 
 ## Run

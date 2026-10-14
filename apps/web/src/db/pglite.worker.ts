@@ -6,6 +6,7 @@ import pgliteWasmUrl from '@pglite-wasm?url';
 import {runPgliteMigrations, startPgliteSyncEngine} from '@stagistic/db/pglite';
 
 import {cloudConfig} from '../cloud/cloudConfig';
+import {IndexedDbFileStorage} from './fileStorage';
 
 void worker({
     async init(options) {
@@ -34,7 +35,7 @@ void worker({
         });
 
         await runPgliteMigrations(db);
-        startPgliteSyncEngine(db, {cloud: cloudConfig ?? undefined});
+        startPgliteSyncEngine(db, {cloud: cloudConfig ?? undefined, files: new IndexedDbFileStorage()});
 
         return db;
     },

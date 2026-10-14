@@ -46,6 +46,10 @@ The web app keeps each script body in a Y.Doc (`packages/sync-engine`); the
   `user/{id}/events` (what changed, never the change) plus one catch-up pass on
   start, sign-in, reconnect, going online and tab visible. Do not add polling;
   new server-side writes to a script must publish a hint (`EventBus`).
+- Attachment blobs: metadata syncs in the meta doc (`storageKey` + `sha256`),
+  blobs go to object storage only through presigned URLs from the collab API
+  (never bucket credentials in clients). A missing local blob is fetched on
+  demand (`downloadAttachment`) and kept under the same `storageKey`.
 
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.

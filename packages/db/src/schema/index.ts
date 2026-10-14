@@ -28,6 +28,7 @@ import {
 } from './structure';
 import {
     syncAccount,
+    syncAttachments,
     syncState,
     syncTombstones,
 } from './sync';
@@ -62,6 +63,7 @@ export {
 } from './structure';
 export {
     syncAccount,
+    syncAttachments,
     syncState,
     syncTombstones,
 } from './sync';
@@ -90,6 +92,7 @@ export const dbSchema = {
     scriptCommentThreads,
     scriptCommentMessages,
     syncAccount,
+    syncAttachments,
     syncState,
     syncTombstones,
 };

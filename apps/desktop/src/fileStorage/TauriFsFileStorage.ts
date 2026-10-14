@@ -28,14 +28,16 @@ export class TauriFsFileStorage implements FileStorage {
     }
 
     async save(blob: Blob): Promise<string> {
-        await this.ensureDir();
-
         const key = uuidv7();
-        const bytes = new Uint8Array(await blob.arrayBuffer());
 
-        await writeFile(pathFor(key), bytes, {baseDir: BaseDirectory.AppData});
+        await this.put(key, blob);
 
         return key;
+    }
+
+    async put(key: string, blob: Blob): Promise<void> {
+        await this.ensureDir();
+        await writeFile(pathFor(key), new Uint8Array(await blob.arrayBuffer()), {baseDir: BaseDirectory.AppData});
     }
 
     async get(key: string): Promise<Blob | null> {

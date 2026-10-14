@@ -1,7 +1,7 @@
 import {uuidv7} from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
-import type {FileStorage} from '../storage/fileStorage';
+import {type FileStorage, sha256Hex} from '../storage/fileStorage';
 import type {ScriptAttachmentsRepository} from '../types/scriptRepository';
 import type {
     GetDb,
@@ -32,6 +32,7 @@ export const createAttachmentHandlers = ({
         }
 
         const storageKey = await fileStorage.save(file.blob);
+        const sha256 = await sha256Hex(file.blob);
         const db = await getDb();
         const now = Date.now();
         const attachmentId = uuidv7();
@@ -50,6 +51,7 @@ export const createAttachmentHandlers = ({
                     mimeType: file.type || 'application/pdf',
                     sizeBytes: file.size,
                     storageKey,
+                    sha256,
                     createdAt: now,
                     updatedAt: now,
                 });

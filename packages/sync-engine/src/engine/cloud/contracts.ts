@@ -4,6 +4,7 @@ import type {AccessTokenSource} from './accessToken';
 import type {CloudApi} from './cloudApi';
 import type {CloudSocket} from './docConnection';
 import type {
+    AttachmentFiles,
     CloudAccount,
     CloudCheckReport,
     CloudScript,
@@ -40,6 +41,8 @@ export interface CloudSyncConfig {
     fetch?: typeof fetch,
     /** Minimum gap between pulls of one script on change hints. */
     pullIntervalMs?: number,
+    /** Local attachment blobs; without it attachments stay on the device. */
+    files?: AttachmentFiles,
 }
 
 export interface CloudSync {
@@ -51,6 +54,8 @@ export interface CloudSync {
     apply(resolutions: Record<string, ConflictResolution>): Promise<void>,
     /** One catch-up pass (going online, tab visible again); hints may have been missed. */
     wake(): void,
+    /** Fetches an attachment blob missing on this device; false if it cannot. */
+    downloadAttachment(storageKey: string): Promise<boolean>,
     /** Engine hooks. */
     tabOpened(scriptId: string): void,
     tabReleased(scriptId: string): void,

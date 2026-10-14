@@ -59,6 +59,27 @@ export interface CloudSyncStore {
     duplicateScript(sourceScriptId: string, targetScriptId: string, title: string): Promise<void>,
     /** Removes the script's projection rows (its Y state is cleared by the engine). */
     deleteScript(scriptId: string): Promise<void>,
+    /** Attachments of the script whose blob is not in the cloud yet. */
+    listPendingUploads(scriptId: string): Promise<PendingAttachment[]>,
+    markAttachmentUploaded(attachmentId: string, scriptId: string): Promise<void>,
+    findAttachment(storageKey: string): Promise<{
+        attachmentId: string,
+        scriptId: string,
+        sha256: string | null,
+    } | null>,
+}
+
+export interface PendingAttachment {
+    attachmentId: string,
+    storageKey: string,
+    mimeType: string,
+    sizeBytes: number,
+}
+
+/** Local blob storage (the app's `FileStorage`). */
+export interface AttachmentFiles {
+    get(storageKey: string): Promise<Blob | null>,
+    put(storageKey: string, blob: Blob): Promise<void>,
 }
 
 /** Script as listed by `GET /scripts` of the collab service. */
@@ -82,6 +103,14 @@ export interface CloudStatus {
     lastSyncedAt: number | null,
     error: string | null,
 }
+
+export const SIGNED_OUT_STATUS: CloudStatus = {
+    state: 'signed-out',
+    email: null,
+    pending: 0,
+    lastSyncedAt: null,
+    error: null,
+};
 
 export interface CloudConflict {
     scriptId: string,

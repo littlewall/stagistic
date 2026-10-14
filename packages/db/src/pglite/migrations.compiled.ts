@@ -135,5 +135,10 @@ export const compiledMigrations = [
         "id": "0026_cloud_sync_state",
         "checksum": "2c760ddc7799d37ab2a5ed31dc0acddc7b072315f277b7d4700e68cd4e259778",
         "sql": "-- Local cloud-sync state, written only by the sync engine.\n-- The account this device syncs with; `checked` = the post-sign-in check ran.\nCREATE TABLE IF NOT EXISTS \"sync_account\" (\n\t\"id\" integer PRIMARY KEY NOT NULL,\n\t\"account_id\" text NOT NULL,\n\t\"email\" text NOT NULL,\n\t\"checked\" boolean NOT NULL DEFAULT false,\n\t\"updated_at\" bigint NOT NULL\n);\n--> statement-breakpoint\n-- Per script: account it was last synced with and the state vectors of its\n-- three Y.Docs at that moment (base64). No FK: survives the script's deletion\n-- long enough to become a tombstone.\nCREATE TABLE IF NOT EXISTS \"sync_state\" (\n\t\"script_id\" text PRIMARY KEY NOT NULL,\n\t\"account_id\" text NOT NULL,\n\t\"body_state_vector\" text,\n\t\"meta_state_vector\" text,\n\t\"comments_state_vector\" text,\n\t\"synced_at\" bigint NOT NULL\n);\n--> statement-breakpoint\n-- Scripts deleted on this device that still exist in the account's cloud.\nCREATE TABLE IF NOT EXISTS \"sync_tombstones\" (\n\t\"script_id\" text PRIMARY KEY NOT NULL,\n\t\"account_id\" text NOT NULL,\n\t\"deleted_at\" bigint NOT NULL\n);\n"
+    },
+    {
+        "id": "0027_attachment_sync",
+        "checksum": "1b9ee6b10530d2b74ec40ecf8706880792f763fa4d44b94ec764225118d24063",
+        "sql": "-- Content hash of an attachment (hex SHA-256): verified after a cloud download.\nALTER TABLE \"script_attachments\" ADD COLUMN IF NOT EXISTS \"sha256\" text;\n--> statement-breakpoint\n-- Attachments whose blob is in the account's cloud storage (local bookkeeping\n-- of the sync engine; missing row = upload pending).\nCREATE TABLE IF NOT EXISTS \"sync_attachments\" (\n\t\"attachment_id\" text PRIMARY KEY NOT NULL,\n\t\"script_id\" text NOT NULL,\n\t\"uploaded_at\" bigint NOT NULL\n);\n"
     }
 ] as const;

@@ -13,6 +13,7 @@
         "@stagistic/db": "workspace:*",
         "@stagistic/identity": "workspace:*",
         "@stagistic/sync-engine": "workspace:*",
+        "aws4fetch": "^1.0.20",
         "drizzle-orm": "^0.44.7",
         "hono": "^4.13.13",
         "pg": "^8.23.1",

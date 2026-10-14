@@ -13,6 +13,8 @@ export const createMemoryCloudSyncStore = (projection: ReturnType<typeof createM
     const updatedAt = new Map<string, number>();
     const states = new Map<string, SyncedScriptState>();
     const tombstones = new Map<string, LocalTombstoneRecord>();
+    const uploaded = new Set<string>();
+    const attachmentsOf = (scriptId: string) => Object.entries(projection.readRecordsOf(scriptId, 'meta').attachments ?? {});
 
     const store: CloudSyncStore = {
         getAccount: () => Promise.resolve(account),
@@ -75,6 +77,34 @@ export const createMemoryCloudSyncStore = (projection: ReturnType<typeof createM
 
             return Promise.resolve();
         },
+        listPendingUploads: scriptId => Promise.resolve(attachmentsOf(scriptId)
+            .filter(([id]) => !uploaded.has(id))
+            .map(([attachmentId, fields]) => ({
+                attachmentId,
+                storageKey: String(fields.storageKey),
+                mimeType: String(fields.mimeType),
+                sizeBytes: Number(fields.sizeBytes),
+            }))),
+        markAttachmentUploaded: attachmentId => {
+            uploaded.add(attachmentId);
+
+            return Promise.resolve();
+        },
+        findAttachment: storageKey => {
+            for (const scriptId of projection.documents.keys()) {
+                const found = attachmentsOf(scriptId).find(([, fields]) => fields.storageKey === storageKey);
+
+                if (found) {
+                    return Promise.resolve({
+                        attachmentId: found[0],
+                        scriptId,
+                        sha256: typeof found[1].sha256 === 'string' ? found[1].sha256 : null,
+                    });
+                }
+            }
+
+            return Promise.resolve(null);
+        },
         deleteScript: scriptId => {
             projection.documents.delete(scriptId);
             titles.delete(scriptId);
@@ -88,6 +118,7 @@ export const createMemoryCloudSyncStore = (projection: ReturnType<typeof createM
         titles,
         states,
         tombstones,
+        uploaded,
         /** Local edit time of a script (drives "newer" in conflicts). */
         touch: (scriptId: string, at = Date.now()) => updatedAt.set(scriptId, at),
         account: () => account,

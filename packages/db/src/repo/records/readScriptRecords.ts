@@ -155,6 +155,7 @@ const READERS: Record<string, CollectionReader> = {
             mimeType: row.mimeType,
             sizeBytes: row.sizeBytes,
             storageKey: row.storageKey,
+            sha256: row.sha256,
             createdAt: row.createdAt,
         }),
     ),

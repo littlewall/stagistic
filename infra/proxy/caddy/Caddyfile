@@ -22,3 +22,9 @@ sync.api.stagistic.local {
 	import local_tls
 	reverse_proxy server:8788
 }
+
+# Attachment bucket (RustFS). The Host header is kept: presigned URLs are signed for it.
+files.api.stagistic.local {
+	import local_tls
+	reverse_proxy s3:9000
+}

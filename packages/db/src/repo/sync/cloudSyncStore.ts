@@ -1,9 +1,15 @@
 import type {CloudSyncStore} from '@stagistic/sync-engine';
-import {eq} from 'drizzle-orm';
+import {
+    and,
+    eq,
+    isNull,
+} from 'drizzle-orm';
 
 import {
+    scriptAttachments,
     scripts,
     syncAccount,
+    syncAttachments,
     syncState,
     syncTombstones,
 } from '../../schema';
@@ -110,6 +116,44 @@ export const createCloudSyncStore = ({getDb, syncDb}: {getDb: GetDb, syncDb: Syn
             copySettings: true,
             copyAttributes: true,
         }),
-        deleteScript: scriptId => scriptHandlers.delete(scriptId),
+        deleteScript: async scriptId => {
+            await scriptHandlers.delete(scriptId);
+            await write(db => db.delete(syncAttachments).where(eq(syncAttachments.scriptId, scriptId)));
+        },
+        listPendingUploads: async scriptId => {
+            const rows = await (await getDb())
+                .select({
+                    attachmentId: scriptAttachments.id,
+                    storageKey: scriptAttachments.storageKey,
+                    mimeType: scriptAttachments.mimeType,
+                    sizeBytes: scriptAttachments.sizeBytes,
+                })
+                .from(scriptAttachments)
+                .leftJoin(syncAttachments, eq(syncAttachments.attachmentId, scriptAttachments.id))
+                .where(and(eq(scriptAttachments.scriptId, scriptId), isNull(syncAttachments.attachmentId)));
+
+            return rows;
+        },
+        markAttachmentUploaded: (attachmentId, scriptId) => write(db => db
+            .insert(syncAttachments)
+            .values({
+                attachmentId,
+                scriptId,
+                uploadedAt: Date.now(),
+            })
+            .onConflictDoNothing()),
+        findAttachment: async storageKey => {
+            const [row] = await (await getDb())
+                .select({
+                    attachmentId: scriptAttachments.id,
+                    scriptId: scriptAttachments.scriptId,
+                    sha256: scriptAttachments.sha256,
+                })
+                .from(scriptAttachments)
+                .where(eq(scriptAttachments.storageKey, storageKey))
+                .limit(1);
+
+            return row ?? null;
+        },
     };
 };

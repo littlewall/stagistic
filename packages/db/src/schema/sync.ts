@@ -33,3 +33,10 @@ export const syncTombstones = pgTable('sync_tombstones', {
     accountId: text('account_id').notNull(),
     deletedAt: bigint('deleted_at', {mode: 'number'}).notNull(),
 });
+
+/** Attachments whose blob is in cloud storage; no row = upload pending. */
+export const syncAttachments = pgTable('sync_attachments', {
+    attachmentId: text('attachment_id').primaryKey(),
+    scriptId: text('script_id').notNull(),
+    uploadedAt: bigint('uploaded_at', {mode: 'number'}).notNull(),
+});

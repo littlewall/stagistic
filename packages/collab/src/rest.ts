@@ -5,6 +5,8 @@ import {cors} from 'hono/cors';
 import {createMiddleware} from 'hono/factory';
 
 import {getScriptRole, type ScriptRole} from './access';
+import {registerAttachmentRoutes} from './attachmentRoutes';
+import type {AttachmentStorage} from './attachmentStorage';
 import type {CollabDatabase} from './database';
 import {SCRIPT_ID} from './documentName';
 import {type EventBus, scriptMemberIds} from './events';
@@ -62,6 +64,7 @@ export const createCollabApp = ({
     appOrigins,
     hocuspocus,
     events,
+    attachments,
 }: {
     database: CollabDatabase,
     verifyAccessToken: (token: string) => Promise<AccessTokenClaims>,
@@ -69,6 +72,8 @@ export const createCollabApp = ({
     hocuspocus?: Hocuspocus,
     /** Change hints (`added`/`deleted`) to the script's members. */
     events?: EventBus,
+    /** Attachment blobs (presigned URLs); routes absent without it. */
+    attachments?: AttachmentStorage,
 }) => {
     const notifyMembers = (scriptId: string, type: 'added' | 'deleted') => {
         void scriptMemberIds(database.collab, scriptId)
@@ -109,6 +114,10 @@ export const createCollabApp = ({
 
     app.use('/scripts', requireUser);
     app.use('/scripts/*', requireUser);
+
+    if (attachments) {
+        registerAttachmentRoutes(app, {database, storage: attachments});
+    }
 
     // All scripts of the user, deleted ones included (login classification).
     app.get('/scripts', async context => {

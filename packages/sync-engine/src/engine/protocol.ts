@@ -59,6 +59,12 @@ export type EngineRequest =
         requestId: string,
         action: CloudAction,
     }
+    /** Fetch an attachment blob this device lacks; replies with a boolean. */
+    | {
+        type: 'attachment-download',
+        requestId: string,
+        storageKey: string,
+    }
     | {
         type: 'cloud-apply',
         requestId: string,

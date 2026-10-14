@@ -1,6 +1,10 @@
 import type {PGlite} from '@electric-sql/pglite';
 import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '@stagistic/script';
-import {createIndexeddbDocPersistence, createSyncEngine} from '@stagistic/sync-engine';
+import {
+    type AttachmentFiles,
+    createIndexeddbDocPersistence,
+    createSyncEngine,
+} from '@stagistic/sync-engine';
 
 import {createScriptProjectionStore} from '../repo/document/projectionStore';
 import {createCloudSyncStore} from '../repo/sync/cloudSyncStore';
@@ -19,7 +23,7 @@ export interface CloudEndpoints {
     syncUrl: string,
 }
 
-export const startPgliteSyncEngine = (client: PGlite, {cloud}: {cloud?: CloudEndpoints} = {}) => {
+export const startPgliteSyncEngine = (client: PGlite, {cloud, files}: {cloud?: CloudEndpoints, files?: AttachmentFiles} = {}) => {
     const localDb = createLocalDb(client);
     const getDb = () => Promise.resolve(localDb);
     const syncDb = () => client.syncToFs();
@@ -33,6 +37,7 @@ export const startPgliteSyncEngine = (client: PGlite, {cloud}: {cloud?: CloudEnd
                     syncUrl: cloud.syncUrl,
                     wsUrl: `${cloud.syncUrl.replace(/^http/, 'ws')}/ws`,
                     store: createCloudSyncStore({getDb, syncDb}),
+                    files,
                 },
             }
             : {},

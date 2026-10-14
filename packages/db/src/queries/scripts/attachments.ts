@@ -19,11 +19,12 @@ export interface InsertAttachmentRow {
     mimeType: string,
     sizeBytes: number,
     storageKey: string,
+    sha256?: string | null,
     createdAt: number,
     updatedAt: number,
 }
 
-export type AttachmentRow = InsertAttachmentRow;
+export type AttachmentRow = InsertAttachmentRow & {sha256: string | null};
 
 export const listScriptAttachments = async (db: DbClient, scriptId: string) => db
     .select()
@@ -74,6 +75,7 @@ export const getAttachmentByMusicRole = async (db: DbClient, musicId: string, ro
             mimeType: scriptAttachments.mimeType,
             sizeBytes: scriptAttachments.sizeBytes,
             storageKey: scriptAttachments.storageKey,
+            sha256: scriptAttachments.sha256,
             createdAt: scriptAttachments.createdAt,
             updatedAt: scriptAttachments.updatedAt,
         })

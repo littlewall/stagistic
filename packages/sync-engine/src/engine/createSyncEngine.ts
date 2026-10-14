@@ -265,6 +265,7 @@ export const createSyncEngine = ({
         cloudApply: async resolutions => {
             await cloud?.apply(resolutions);
         },
+        downloadAttachment: storageKey => cloud?.downloadAttachment(storageKey) ?? Promise.resolve(false),
     }, log);
 
     channel.postMessage({type: 'engine-started', engineId});

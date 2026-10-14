@@ -1,4 +1,5 @@
 export * from './access';
+export * from './attachmentStorage';
 export * from './database';
 export * from './documentName';
 export * from './events';

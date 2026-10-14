@@ -6,7 +6,7 @@ import {
     type CloudSyncConfig,
     createCloudSync,
 } from './cloudSync';
-import type {CloudStatus, DocKind} from './types';
+import {type DocKind, SIGNED_OUT_STATUS} from './types';
 
 /*
  * The engine's side of cloud sync: exposes its docs, projection and tab
@@ -62,18 +62,10 @@ export const createEngineCloud = ({
     return cloud;
 };
 
-const SIGNED_OUT: CloudStatus = {
-    state: 'signed-out',
-    email: null,
-    pending: 0,
-    lastSyncedAt: null,
-    error: null,
-};
-
 /** Control-channel `cloud` request; a local-only engine is always signed out. */
 export const runCloudAction = async (cloud: CloudSync | null, action: CloudAction): Promise<unknown> => {
     if (!cloud) {
-        return SIGNED_OUT;
+        return SIGNED_OUT_STATUS;
     }
 
     const actions: Record<CloudAction, () => Promise<unknown>> = {

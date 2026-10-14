@@ -36,6 +36,12 @@ class TrackingFileStorage implements FileStorage {
         return Promise.resolve(key);
     }
 
+    put(key: string, blob: Blob) {
+        this.blobs.set(key, blob);
+
+        return Promise.resolve();
+    }
+
     get(key: string) {
         return Promise.resolve(this.blobs.get(key) ?? null);
     }

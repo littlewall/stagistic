@@ -31,6 +31,7 @@ import {
 import WebSocket, {WebSocketServer} from 'ws';
 import * as Y from 'yjs';
 
+import {createAttachmentStorage} from './attachmentStorage';
 import {type CollabDatabase, createCollabDatabase} from './database';
 import {createLocalEventBus} from './events';
 import {createCollabHocuspocus} from './hocuspocus';
@@ -47,6 +48,16 @@ const RUN = `c${Date.now().toString(36)}`;
 const AUTH = 'https://auth.api.stagistic.local';
 const SYNC = 'https://sync.api.stagistic.local';
 const SCHEMA = 4;
+
+const S3_URL = process.env.COLLAB_TEST_S3_URL ?? 'http://localhost:9000';
+const hasS3 = await fetch(S3_URL).then(() => true, () => false);
+const storage = createAttachmentStorage({
+    endpoint: S3_URL,
+    publicEndpoint: S3_URL,
+    bucket: `sync-${RUN}`,
+    accessKeyId: 'stagistic',
+    secretAccessKey: 'stagistic-secret',
+});
 
 const probe = createCollabDatabase({connectionString: DATABASE_URL, max: 1});
 const available = await probe.collab.query('select 1').then(() => true, () => false);
@@ -117,6 +128,10 @@ describe.skipIf(!available)('client cloud sync', () => {
         });
         await runCollabMigrations(database);
 
+        if (hasS3) {
+            await storage.ensureBucket([]);
+        }
+
         const events = createLocalEventBus();
 
         hocuspocus = createCollabHocuspocus({
@@ -129,6 +144,7 @@ describe.skipIf(!available)('client cloud sync', () => {
             database,
             verifyAccessToken,
             appOrigins: [],
+            attachments: hasS3 ? storage : undefined,
             hocuspocus,
             events,
         });
@@ -167,6 +183,7 @@ describe.skipIf(!available)('client cloud sync', () => {
             docChannelFactory: (name: string) => new BroadcastChannel(`${ns}:${name}`) as never,
         };
         const projection = createMemoryProjectionStore();
+        const files = new Map<string, Blob>();
         const cloudStore = createMemoryCloudSyncStore(projection);
         const session = {signedIn: true};
         const fetchImpl: typeof fetch = async (input, init) => {
@@ -176,7 +193,8 @@ describe.skipIf(!available)('client cloud sync', () => {
                 return session.signedIn ? Response.json({token: await tokenFor(userId)}) : new Response('', {status: 401});
             }
 
-            return app.request(url, init);
+            // Presigned object URLs go to the real bucket.
+            return url.startsWith(SYNC) ? app.request(url, init) : fetch(input, init);
         };
         const engine: SyncEngine = createSyncEngine({
             ...channels,
@@ -189,6 +207,14 @@ describe.skipIf(!available)('client cloud sync', () => {
                 syncUrl: SYNC,
                 wsUrl,
                 store: cloudStore.store,
+                files: {
+                    get: key => Promise.resolve(files.get(key) ?? null),
+                    put: (key, blob) => {
+                        files.set(key, blob);
+
+                        return Promise.resolve();
+                    },
+                },
                 WebSocketPolyfill: WebSocket,
                 fetch: fetchImpl,
                 pullIntervalMs: 200,
@@ -219,6 +245,7 @@ describe.skipIf(!available)('client cloud sync', () => {
             client,
             projection,
             cloudStore,
+            files,
             addScript,
             signIn,
             signOut,
@@ -354,6 +381,42 @@ describe.skipIf(!available)('client cloud sync', () => {
         a.cloudStore.titles.delete('h1');
         await a.client.notifyScriptDeleted('h1');
         await eventually(() => !b.projection.documents.has('h1'));
+    });
+
+    it.skipIf(!hasS3)('uploads attachment blobs after sync and downloads them on demand elsewhere', async () => {
+        const a = createDevice('u5');
+        const blob = new Blob([new Uint8Array(3000).fill(9)], {type: 'application/pdf'});
+        const sha256 = Buffer.from(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer())).toString('hex');
+
+        a.addScript('p1', 'Carmen', 'Overture');
+        a.files.set('local-key-1', blob);
+        a.projection.setRecords('p1', 'meta', {
+            attachments: {
+                att1: {
+                    filename: 'score.pdf',
+                    mimeType: 'application/pdf',
+                    sizeBytes: blob.size,
+                    storageKey: 'local-key-1',
+                    sha256,
+                    createdAt: 1,
+                },
+            },
+        });
+        await a.waitFor('needs-check');
+        await a.client.cloud.check();
+        await a.client.cloud.apply({});
+        await eventually(() => a.cloudStore.uploaded.has('att1'));
+
+        const b = createDevice('u5');
+
+        await b.waitFor('needs-check');
+        await b.client.cloud.check();
+        await b.client.cloud.apply({});
+        await eventually(() => b.projection.readRecordsOf('p1', 'meta').attachments?.att1 !== undefined);
+        expect(b.files.has('local-key-1')).toBe(false);
+
+        expect(await b.client.cloud.downloadAttachment('local-key-1')).toBe(true);
+        expect(new Uint8Array(await b.files.get('local-key-1')!.arrayBuffer())).toEqual(new Uint8Array(3000).fill(9));
     });
 
     it('deletes in the cloud when a synced script is deleted locally', async () => {

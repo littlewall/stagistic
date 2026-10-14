@@ -16,5 +16,14 @@ export const scriptRepository: ScriptRepository = withDocumentSync(createLocalPg
     getLocalDb,
     syncToFs,
     fileStorage: new IndexedDbFileStorage(),
-}), {getDb: getLocalDb, documents: documentSync});
+}), {
+    getDb: getLocalDb,
+    documents: {
+        applyRecordChanges: (...args) => documentSync.applyRecordChanges(...args),
+        flushScript: scriptId => documentSync.flushScript(scriptId),
+        notifyScriptReplaced: scriptId => documentSync.notifyScriptReplaced(scriptId),
+        notifyScriptDeleted: scriptId => documentSync.notifyScriptDeleted(scriptId),
+        downloadAttachment: storageKey => documentSync.cloud.downloadAttachment(storageKey),
+    },
+});
 export type {ScriptRepository} from '@stagistic/db';

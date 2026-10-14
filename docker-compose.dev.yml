@@ -62,6 +62,12 @@ services:
       JWT_AUDIENCE: https://sync.api.stagistic.local${LOCAL_HTTPS_PORT_SUFFIX:-}
       MAILPIT_URL: http://mailpit:8025
       AUTH_JWKS_URL: http://127.0.0.1:8787/api/auth/jwks
+      S3_ENDPOINT: http://s3:9000
+      # Browsers reach the bucket through Caddy; presigned URLs are signed for this host.
+      S3_PUBLIC_ENDPOINT: https://files.api.stagistic.local${LOCAL_HTTPS_PORT_SUFFIX:-}
+      S3_BUCKET: stagistic-attachments
+      S3_ACCESS_KEY: stagistic
+      S3_SECRET_KEY: stagistic-secret
       MIGRATE_ON_START: '1'
     ports:
       - '${AUTH_PORT:-8787}:8787'
@@ -73,6 +79,8 @@ services:
       postgres:
         condition: service_healthy
       mailpit:
+        condition: service_started
+      s3:
         condition: service_started
 
   caddy:

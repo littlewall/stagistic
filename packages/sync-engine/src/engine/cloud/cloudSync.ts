@@ -2,6 +2,7 @@ import * as Y from 'yjs';
 
 import {createAccessTokenSource} from './accessToken';
 import {CloudUnauthorizedError, createCloudApi} from './cloudApi';
+import {createCloudAttachments} from './cloudAttachments';
 import {createCloudEvents, eventsDocumentName} from './cloudEvents';
 import {createCloudReconcile} from './cloudReconcile';
 import type {
@@ -11,7 +12,7 @@ import type {
     CloudSyncConfig,
 } from './contracts';
 import {createCloudSocket, type DocConnection} from './docConnection';
-import {createSingleFlight} from './singleFlight';
+import {createDirtyQueue, createSingleFlight} from './singleFlight';
 import {documentNameOf, encodeStateVectors} from './stateVectors';
 import {deleteInCloud, syncLibrary} from './syncLibrary';
 import {
@@ -19,6 +20,7 @@ import {
     type CloudStatus,
     DOC_KINDS,
     type DocKind,
+    SIGNED_OUT_STATUS,
 } from './types';
 
 export type {
@@ -72,22 +74,23 @@ export const createCloudSync = ({
             }
         },
     });
+    const attachments = createCloudAttachments({
+        api,
+        store,
+        files: config.files,
+        fetch: config.fetch,
+        log,
+    });
     const connections = new Map<string, DocConnection[]>();
     const running = new Map<string, Promise<void>>();
-    const dirty = new Set<string>();
+    const dirtyQueue = createDirtyQueue(scriptIds => scriptIds.forEach(id => void syncScript(id, {seed: true}).catch(handleError)));
+    const {dirty} = dirtyQueue;
     let account: CloudAccount | null = null;
     let live = false;
     let initialScanDone = false;
     let wasDisconnected = false;
     let eventsConnection: DocConnection | null = null;
-    let dirtyTimer: ReturnType<typeof setTimeout> | null = null;
-    let currentStatus: CloudStatus = {
-        state: 'signed-out',
-        email: null,
-        pending: 0,
-        lastSyncedAt: null,
-        error: null,
-    };
+    let currentStatus: CloudStatus = SIGNED_OUT_STATUS;
 
     const setStatus = (patch: Partial<CloudStatus>) => {
         currentStatus = {...currentStatus, ...patch};
@@ -126,6 +129,7 @@ export const createCloudSync = ({
                 stateVectors: encodeStateVectors(docs),
                 syncedAt: Date.now(),
             });
+            await attachments.uploadPending(scriptId);
 
             if (!host.isOpenInTab(scriptId)) {
                 detach(scriptId);
@@ -309,6 +313,7 @@ export const createCloudSync = ({
         status: () => currentStatus,
         check: () => reconcile.check(),
         apply: resolutions => reconcile.apply(resolutions),
+        downloadAttachment: storageKey => (account ? attachments.download(storageKey).catch(() => false) : Promise.resolve(false)),
         wake: () => {
             if (live) {
                 void runSyncAll();
@@ -330,16 +335,7 @@ export const createCloudSync = ({
                 return;
             }
 
-            dirty.add(scriptId);
-
-            if (dirtyTimer) {
-                clearTimeout(dirtyTimer);
-            }
-
-            dirtyTimer = setTimeout(() => {
-                dirtyTimer = null;
-                [...dirty].forEach(id => void syncScript(id, {seed: true}).catch(handleError));
-            }, 1_000);
+            dirtyQueue.add(scriptId);
         },
         scriptDeleted: async scriptId => {
             detach(scriptId);

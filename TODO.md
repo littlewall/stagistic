@@ -53,7 +53,11 @@
   - [x] Tests: two-device cloud sync e2e (collab), engine, auth client, UI and provider browser tests
   - [ ] Passkey UI; desktop sign-in (Tauri origin needs a non-cookie flow); browser e2e through Caddy
 - [x] 5b. Change hints instead of polling (`user/{id}/events`, EventBus in memory → Redis later; catch-up on start/sign-in/reconnect/online/tab visible)
-- [ ] 6. Attachments to S3 (RustFS)
+- [x] 6. Attachments to S3 (RustFS)
+  - [x] Server: presigned PUT (type + length signed, role/MIME/size checked) and GET, bucket + CORS on start, blobs deleted on purge
+  - [x] Client: `sha256` on attachments, `sync_attachments` (0027), upload after each script sync (durable queue), download on demand with checksum, `FileStorage.put`
+  - [x] Local env: `files.api.stagistic.local` (Caddy → RustFS); tests: REST/RustFS, two-device attachment sync, live smoke
+  - [ ] Delete blobs of removed/replaced attachments (now only on purge)
 
 ## Phase 7 — UpCloud (separate, later)
 - [ ] Provisioning, deploy (Caddy, systemd, binary), Postmark, prod Turnstile, DNS

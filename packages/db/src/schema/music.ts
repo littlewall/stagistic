@@ -47,6 +47,8 @@ export const scriptAttachments = pgTable(
         mimeType: text('mime_type').notNull(),
         sizeBytes: bigint('size_bytes', {mode: 'number'}).notNull(),
         storageKey: text('storage_key').notNull(),
+        /** Hex SHA-256 of the blob; checked after a cloud download. */
+        sha256: text('sha256'),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },

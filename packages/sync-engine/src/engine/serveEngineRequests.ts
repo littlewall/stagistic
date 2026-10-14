@@ -19,6 +19,7 @@ export interface EngineRequestHandlers {
     release(scriptId: string): Promise<void>,
     cloud(action: CloudAction): Promise<unknown>,
     cloudApply(resolutions: Record<string, ConflictResolution>): Promise<void>,
+    downloadAttachment(storageKey: string): Promise<boolean>,
 }
 
 const HANDLED_TTL_MS = 60_000;
@@ -66,6 +67,13 @@ export const serveEngineRequests = (
                         requestId: request.requestId,
                         ok: true,
                         result: await handlers.cloud(request.action),
+                    };
+                case 'attachment-download':
+                    return {
+                        type: 'reply',
+                        requestId: request.requestId,
+                        ok: true,
+                        result: await handlers.downloadAttachment(request.storageKey),
                     };
                 case 'cloud-apply':
                     await handlers.cloudApply(request.resolutions);

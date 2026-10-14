@@ -64,6 +64,7 @@ export const writeAttachments = async ({
             mimeType: str(record.mimeType) ?? 'application/octet-stream',
             sizeBytes: num(record.sizeBytes, 0),
             storageKey: str(record.storageKey) ?? '',
+            sha256: str(record.sha256),
             updatedAt: now,
         };
 
