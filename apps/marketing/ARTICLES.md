@@ -17,6 +17,9 @@ The filename supplies the URL: `stage-play-formatting.md` becomes
 `/articles/stage-play-formatting`. Nested folders become nested URL segments.
 Link to other articles using their full path, without `.md`.
 
+The shared article layout adds a footer linking to Stagistic Editor after every
+article. Keep this footer out of individual Markdown files.
+
 ## Frontmatter
 
 | Field | Required | Meaning |
