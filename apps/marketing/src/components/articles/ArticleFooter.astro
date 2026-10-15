@@ -1,42 +1,10 @@
-<footer class="articleFooter">
-    <p>Stagistic Editor is free and open source. Start writing without an account.</p>
-    <a href="https://editor.stagistic.app" class="editorLink">
+---
+import styles from './ArticleFooter.module.css';
+---
+
+<footer class={styles.articleFooter}>
+    <p class={styles.description}>Stagistic Editor is free and open source. Start writing without an account.</p>
+    <a href="https://editor.stagistic.app" class={styles.editorLink}>
         Open Stagistic Editor <span aria-hidden="true">→</span>
     </a>
 </footer>
-
-<style>
-.articleFooter {
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border);
-}
-
-p {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: var(--color-text-muted);
-}
-
-.editorLink {
-    display: inline-flex;
-    gap: 0.5rem;
-    align-items: center;
-    min-height: 2.75rem;
-    margin-top: 0.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--color-text);
-    text-underline-offset: 0.25em;
-
-    &:hover {
-        text-decoration-thickness: 2px;
-    }
-
-    &:focus-visible {
-        border-radius: 0.125rem;
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 4px;
-    }
-}
-</style>

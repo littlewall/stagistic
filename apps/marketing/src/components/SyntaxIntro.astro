@@ -1,4 +1,8 @@
-<main class="syntaxIntro">
+---
+import styles from './SyntaxIntro.module.css';
+---
+
+<main class={styles.syntaxIntro}>
     <h1>Stagistic syntax</h1>
     <p>
         Stagistic Syntax is an open, plain-text format for theatrical plays and musicals. It keeps acts, scenes, character cues, dialogue, stage directions,
@@ -7,43 +11,3 @@
         for format rules, examples, and a complete marker reference.
     </p>
 </main>
-
-<style>
-.syntaxIntro {
-    width: min(48rem, calc(100% - 3rem));
-    min-height: 26rem;
-    margin: 0 auto;
-    padding: 5rem 0;
-}
-
-.syntaxIntro h1 {
-    margin-bottom: 1.5rem;
-    font-size: clamp(2.25rem, 5vw, 3.25rem);
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -0.035em;
-}
-
-.syntaxIntro p {
-    font-size: 1.0625rem;
-    line-height: 1.7;
-    color: var(--color-text-muted);
-}
-
-.syntaxIntro a {
-    color: var(--color-text);
-    text-decoration-color: var(--color-text-muted);
-    text-underline-offset: 0.2em;
-    transition: text-decoration-color 0.15s ease;
-
-    &:hover {
-        text-decoration-color: currentcolor;
-    }
-
-    &:focus-visible {
-        border-radius: 0.125rem;
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 4px;
-    }
-}
-</style>

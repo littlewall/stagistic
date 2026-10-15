@@ -1,0 +1,37 @@
+.syntaxIntro {
+    width: min(48rem, calc(100% - 3rem));
+    min-height: 26rem;
+    margin: 0 auto;
+    padding: 5rem 0;
+}
+
+.syntaxIntro h1 {
+    margin-bottom: 1.5rem;
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -.035em;
+}
+
+.syntaxIntro p {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+}
+
+.syntaxIntro a {
+    color: var(--color-text);
+    text-decoration-color: var(--color-text-muted);
+    text-underline-offset: .2em;
+    transition: text-decoration-color .15s ease;
+
+    &:hover {
+        text-decoration-color: currentcolor;
+    }
+
+    &:focus-visible {
+        border-radius: .125rem;
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 4px;
+    }
+}

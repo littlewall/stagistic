@@ -1,36 +1,22 @@
 ---
 import type {CollectionEntry} from 'astro:content';
 import {formatArticleDate} from '../../data/articles';
+import styles from './ArticleMeta.module.css';
 
 interface Props {
     data: CollectionEntry<'articles'>['data'];
+    showTags?: boolean;
 }
 
-const {publishDate, author, tags} = Astro.props.data;
+const {data, showTags = true} = Astro.props;
+const {publishDate, author, tags} = data;
 ---
 
-<div class="articleMeta">
+<div class={styles.articleMeta}>
     <p>
         <time datetime={publishDate.toISOString()}>{formatArticleDate(publishDate)}</time>
         <span aria-hidden="true"> · </span>
         <span>{author}</span>
     </p>
-    {tags.length > 0 && <ul aria-label="Topics">{tags.map(tag => <li>{tag}</li>)}</ul>}
+    {showTags && tags.length > 0 && <ul class={styles.tags} aria-label="Topics">{tags.map(tag => <li>{tag}</li>)}</ul>}
 </div>
-
-<style>
-.articleMeta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
-}
-
-ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    list-style: none;
-}
-</style>

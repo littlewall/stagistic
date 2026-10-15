@@ -37,6 +37,11 @@ temporarily use `draft: false` and a past or current date locally; restore its
 draft status before sharing changes. Publication is checked at build time:
 future dates need a new build to go live. Published articles are listed newest first.
 
+The build also generates `/sitemap.xml` with `/articles` and every published
+article, using the same draft and publication-date filter as the article pages.
+Article pages include `Article` JSON-LD with their title, description, author,
+publication date, canonical URL, publisher, language, and optional topic keywords.
+
 The template stays a draft. Until the first article is published, `/articles`
 shows an empty state with a link to the Stagistic Syntax introduction.
 

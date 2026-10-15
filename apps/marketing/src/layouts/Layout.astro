@@ -1,4 +1,5 @@
 ---
+import type {CollectionEntry} from 'astro:content';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import SiteIcons from '../components/SiteIcons.astro';
@@ -12,6 +13,7 @@ interface Props {
     ogType?: 'website' | 'article';
     header?: 'full' | 'subpage';
     softwareApplication?: boolean;
+    article?: CollectionEntry<'articles'>['data'];
     breadcrumbs?: Array<{
         name: string;
         url: string;
@@ -26,6 +28,7 @@ const {
     header = 'full',
     softwareApplication,
     breadcrumbs,
+    article,
 } = Astro.props;
 const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
 ---
@@ -38,7 +41,7 @@ const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
         <title>{title}</title>
         <meta name="description" content={description}>
         {canonical && <link rel="canonical" href={canonical} />}
-        <StructuredData canonical={pageUrl} description={description} softwareApplication={softwareApplication} breadcrumbs={breadcrumbs} />
+        <StructuredData canonical={pageUrl} description={description} softwareApplication={softwareApplication} breadcrumbs={breadcrumbs} article={article} />
 
         <meta property="og:title" content={title}>
         <meta property="og:description" content={description}>
