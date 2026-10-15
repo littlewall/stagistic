@@ -68,3 +68,18 @@ export const createDirtyQueue = (flush: (scriptIds: string[]) => void, delayMs =
         },
     };
 };
+
+/** Runs tasks one after another, each after the previous one settled. */
+export const createSerialQueue = () => {
+    let tail: Promise<unknown> = Promise.resolve();
+
+    return {
+        run: <T>(task: () => Promise<T>): Promise<T> => {
+            const next = tail.catch(() => {}).then(task);
+
+            tail = next;
+
+            return next;
+        },
+    };
+};

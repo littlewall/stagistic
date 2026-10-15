@@ -3,6 +3,8 @@ import * as buf from 'lib0/buffer';
 import * as sha256 from 'lib0/hash/sha256';
 import * as Y from 'yjs';
 
+import {toBase64} from './base64';
+
 /*
  * Schema-less ScriptDocument JSON <-> Y.XmlFragment codec.
  *
@@ -36,7 +38,7 @@ const convolute = (digest: Uint8Array) => {
     return digest.slice(0, size);
 };
 
-const hashOfJSON = (json: unknown) => buf.toBase64(convolute(sha256.digest(buf.encodeAny(json))));
+const hashOfJSON = (json: unknown) => toBase64(convolute(sha256.digest(buf.encodeAny(json))));
 
 const markToJSON = (mark: ScriptMark) => {
     const json: {type: string, attrs?: Record<string, unknown>} = {type: mark.type};

@@ -143,14 +143,15 @@ export const createCollabApp = ({
         try {
             await client.query('begin');
 
+            // Insert first: `for update` cannot lock a row that does not exist yet (two concurrent registrations).
+            const inserted = await client.query('insert into scripts (id, title, created_by) values ($1, $2, $3) on conflict (id) do nothing', [
+                id,
+                title,
+                userId,
+            ]);
             const existing = await client.query<{deleted_at: Date | null}>('select deleted_at from scripts where id = $1 for update', [id]);
 
-            if (existing.rows.length === 0) {
-                await client.query('insert into scripts (id, title, created_by) values ($1, $2, $3)', [
-                    id,
-                    title,
-                    userId,
-                ]);
+            if (inserted.rowCount === 1) {
                 await client.query('insert into script_members (script_id, user_id, role) values ($1, $2, \'owner\')', [id, userId]);
                 status = 201;
             } else {

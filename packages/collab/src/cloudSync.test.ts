@@ -383,6 +383,27 @@ describe.skipIf(!available)('client cloud sync', () => {
         await eventually(() => !b.projection.documents.has('h1'));
     });
 
+    it('uploads a script created and opened while signed in, without waiting for a library pass', async () => {
+        const a = createDevice('u6');
+        const b = createDevice('u6');
+
+        for (const device of [a, b]) {
+            await device.waitFor('needs-check');
+            await device.client.cloud.check();
+            await device.client.cloud.apply({});
+            await device.waitFor('synced');
+        }
+
+        // New on A and opened in a tab right away: registered before it attaches (else Hocuspocus refuses it).
+        a.addScript('o1', 'Macbeth', 'Thunder');
+
+        const tab = await a.client.openScript('o1');
+
+        setDialogue(tab.body, 1, 'Thunder and lightning');
+        await eventually(() => texts(b.projection.documents.get('o1')).includes('Thunder and lightning'));
+        tab.release();
+    });
+
     it.skipIf(!hasS3)('uploads attachment blobs after sync and downloads them on demand elsewhere', async () => {
         const a = createDevice('u5');
         const blob = new Blob([new Uint8Array(3000).fill(9)], {type: 'application/pdf'});

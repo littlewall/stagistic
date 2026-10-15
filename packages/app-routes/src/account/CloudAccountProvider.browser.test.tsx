@@ -18,6 +18,7 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {CloudAccountProvider, useCloudAccount} from './CloudAccountProvider';
+import {useSyncPrompt} from './useSyncPrompt';
 
 const roots: Root[] = [];
 
@@ -61,6 +62,7 @@ const createFakes = (report: CloudCheckReport) => {
     });
     const signedOut = vi.fn(() => Promise.resolve(status('signed-out')));
     const authSignOut = vi.fn(() => Promise.resolve());
+    const check = vi.fn(() => Promise.resolve(report));
     const passkeys = {
         signInWithPasskey: vi.fn(() => Promise.resolve({userId: 'u1', email: 'jan@example.com'})),
         addPasskey: vi.fn(() => Promise.resolve()),
@@ -78,7 +80,7 @@ const createFakes = (report: CloudCheckReport) => {
         status: () => Promise.resolve(status('needs-check')),
         signedIn: () => Promise.resolve(status('needs-check')),
         signedOut,
-        check: () => Promise.resolve(report),
+        check,
         wake: () => Promise.resolve(status('synced')),
         apply,
         downloadAttachment: () => Promise.resolve(false),
@@ -105,15 +107,19 @@ const createFakes = (report: CloudCheckReport) => {
         signedOut,
         authSignOut,
         passkeys,
+        emit: (next: CloudStatus) => listener?.(next),
+        check,
     };
 };
 
 const MenuProbe = () => {
     const {menuAccount, syncLabel} = useCloudAccount();
+    const prompt = useSyncPrompt(1);
 
     return (
         <>
             <output data-probe>{`${menuAccount?.email ?? 'signed out'} | ${syncLabel ?? 'local'}`}</output>
+            <output data-prompt>{prompt.isOpen ? 'prompt open' : 'prompt closed'}</output>
             <button
                 type="button"
                 onClick={menuAccount?.onSignIn}
@@ -192,6 +198,13 @@ describe('CloudAccountProvider', () => {
         mount(fakes);
 
         await waitFor(() => document.body.textContent?.includes('Revizor'));
+
+        // The check moves the state itself (checking → needs-check): no second check while the dialog waits.
+        fakes.emit(status('checking'));
+        fakes.emit(status('needs-check'));
+        await new Promise(resolve => window.setTimeout(resolve, 100));
+        expect(fakes.check).toHaveBeenCalledTimes(1);
+
         await userEvent.click([...document.querySelectorAll('button')].find(button => button.textContent === 'Sync')!);
 
         await waitFor(() => fakes.apply.mock.calls.length > 0);
@@ -268,5 +281,34 @@ describe('CloudAccountProvider', () => {
         await userEvent.click(buttonNamed('Remove')!);
         await waitFor(() => fakes.passkeys.deletePasskey.mock.calls.length === 1);
         expect(fakes.passkeys.deletePasskey).toHaveBeenCalledWith('p1');
+    });
+
+    it('offers sync once: not over another account dialog, never again after a sign-in', async () => {
+        window.localStorage.removeItem('stagistic.account.sync-prompt-dismissed');
+
+        const fakes = createFakes({
+            email: 'jan@example.com',
+            upload: 0,
+            download: 0,
+            delete: 0,
+            restore: 0,
+            conflicts: [],
+        });
+        const promptText = () => document.querySelector('[data-prompt]')?.textContent;
+
+        fakes.cloud.status = () => Promise.resolve(status('signed-out'));
+        mount(fakes);
+
+        await waitFor(() => promptText() === 'prompt open');
+        await userEvent.click(buttonNamed('Probe sign in')!);
+        await waitFor(() => promptText() === 'prompt closed');
+
+        fakes.emit(status('synced'));
+        await waitFor(() => document.querySelector('[data-probe]')?.textContent?.startsWith('jan@example.com'));
+        fakes.emit(status('signed-out'));
+        await waitFor(() => document.querySelector('[data-probe]')?.textContent?.startsWith('signed out'));
+        await userEvent.keyboard('{Escape}');
+        await new Promise(resolve => window.setTimeout(resolve, 100));
+        expect(promptText()).toBe('prompt closed');
     });
 });

@@ -204,6 +204,13 @@ describe.skipIf(!available)('collab service', () => {
         expect((await list('alice')).find(item => item.id === 'rest-1')?.deletedAt).toBeNull();
     });
 
+    it('registers the same new script twice at once without a server error', async () => {
+        const statuses = (await Promise.all([register('alice', 'race-1'), register('alice', 'race-1')])).map(response => response.status).sort((left, right) => left - right);
+
+        expect(statuses).toEqual([200, 201]);
+        expect((await register('mallory', 'race-1')).status).toBe(403);
+    });
+
     it('persists docs, bumps updated_at and projects meta records into Postgres tables', async () => {
         await register('alice', 'doc-1');
 

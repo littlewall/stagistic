@@ -24,6 +24,8 @@ export interface IdentityConfig {
     /** Accepted `aud` of access tokens (the collab service). */
     jwtAudience: string,
     sessionDays?: number,
+    /** Sign-in emails per IP and minute (default 5); the local stack raises it for e2e tests from one IP. */
+    magicLinkPerMinute?: number,
 }
 
 const required = (env: Record<string, string | undefined>, name: string) => {
@@ -47,4 +49,5 @@ export const readIdentityConfig = (env: Record<string, string | undefined>): Ide
     turnstileSecretKey: required(env, 'TURNSTILE_SECRET_KEY'),
     turnstileVerifyURL: env.TURNSTILE_VERIFY_URL || undefined,
     jwtAudience: required(env, 'JWT_AUDIENCE'),
+    magicLinkPerMinute: env.MAGIC_LINK_PER_MINUTE ? Number(env.MAGIC_LINK_PER_MINUTE) : undefined,
 });

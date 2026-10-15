@@ -1,6 +1,6 @@
-import * as buf from 'lib0/buffer';
 import * as Y from 'yjs';
 
+import {fromBase64, toBase64} from '../../ydoc/base64';
 import {stateVectorCovers} from '../stateVectorCovers';
 import {
     type CloudScript,
@@ -13,9 +13,9 @@ import {
 export const documentNameOf = (scriptId: string, kind: DocKind) => `script/${scriptId}/${kind}`;
 
 export const encodeStateVectors = (docs: Record<DocKind, Y.Doc>): StateVectors => ({
-    body: buf.toBase64(Y.encodeStateVector(docs.body)),
-    meta: buf.toBase64(Y.encodeStateVector(docs.meta)),
-    comments: buf.toBase64(Y.encodeStateVector(docs.comments)),
+    body: toBase64(Y.encodeStateVector(docs.body)),
+    meta: toBase64(Y.encodeStateVector(docs.meta)),
+    comments: toBase64(Y.encodeStateVector(docs.comments)),
 });
 
 /** `synced` already contained everything in `current` (base64 state vectors). */
@@ -24,7 +24,7 @@ const covers = (synced: string | null | undefined, current: string | null | unde
         return true;
     }
 
-    return Boolean(synced) && stateVectorCovers(buf.fromBase64(synced!), buf.fromBase64(current));
+    return Boolean(synced) && stateVectorCovers(fromBase64(synced!), fromBase64(current));
 };
 
 export const localChangedSince = (docs: Record<DocKind, Y.Doc>, synced: SyncedScriptState | undefined) => {

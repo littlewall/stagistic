@@ -162,6 +162,48 @@ describe('sync engine', () => {
         expect(texts(documents.get(SCRIPT))).toEqual(['[gap] INT. HALL', 'Hello (before)']);
     });
 
+    it('repairs a projection that lagged behind the stored Y state (page closed before the write)', async () => {
+        const persistence = createMemoryDocPersistence();
+        const projection = createMemoryProjectionStore({[SCRIPT]: stored()});
+        const first = createChannels();
+
+        // The first leader never gets to its debounced writes: the page closed.
+        startEngine({
+            ...first,
+            store: projection.store,
+            persistence,
+            projectionDelayMs: 60_000,
+            projectionMaxDelayMs: 60_000,
+        });
+
+        const firstClient = startClient(first);
+        const tab = await firstClient.openScript(SCRIPT);
+
+        blockText(tab.body, 1).insert(5, ' (unprojected)');
+        await firstClient.applyRecordChanges(SCRIPT, 'meta', {characters: {c1: {
+            before: null,
+            after: {
+                key: 'HAMLET',
+                kind: 'character',
+                createdAt: 1,
+            },
+        }}});
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(texts(projection.documents.get(SCRIPT))).toEqual(['INT. HALL', 'Hello']);
+
+        const second = createChannels();
+
+        startEngine({
+            ...second,
+            store: projection.store,
+            persistence,
+        });
+        await startClient(second).openScript(SCRIPT);
+
+        await eventually(() => texts(projection.documents.get(SCRIPT))?.[1] === 'Hello (unprojected)');
+        await eventually(() => projection.readRecordsOf(SCRIPT, 'meta').characters?.c1 !== undefined);
+    });
+
     it('applies an outside projection rewrite as Y ops (no duplicates in replicas)', async () => {
         const channels = createChannels();
         const {store, documents} = createStore({[SCRIPT]: stored()});

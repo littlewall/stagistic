@@ -1,7 +1,8 @@
-import * as buf from 'lib0/buffer';
 import * as Y from 'yjs';
 
-export const encodeStateVectorBase64 = (doc: Y.Doc) => buf.toBase64(Y.encodeStateVector(doc));
+import {fromBase64, toBase64} from './base64';
+
+export const encodeStateVectorBase64 = (doc: Y.Doc) => toBase64(Y.encodeStateVector(doc));
 
 /** Order-independent comparison of two encoded state vectors. */
 export const stateVectorsEqual = (left: Uint8Array, right: Uint8Array) => {
@@ -27,5 +28,5 @@ export const hasChangedSince = (doc: Y.Doc, lastSyncedBase64: string | null) => 
         return true;
     }
 
-    return !stateVectorsEqual(Y.encodeStateVector(doc), buf.fromBase64(lastSyncedBase64));
+    return !stateVectorsEqual(Y.encodeStateVector(doc), fromBase64(lastSyncedBase64));
 };

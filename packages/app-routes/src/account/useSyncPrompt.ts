@@ -1,3 +1,5 @@
+import {useEffect} from 'react';
+
 import {useLocalPreference} from '../shared/useLocalPreference';
 import {useCloudAccount} from './CloudAccountProvider';
 
@@ -9,6 +11,7 @@ export const useSyncPrompt = (scriptCount: number) => {
         isEnabled,
         status,
         openSignIn,
+        isAccountModalOpen,
     } = useCloudAccount();
     const [dismissed, setDismissed] = useLocalPreference({
         key: SYNC_PROMPT_DISMISSED_KEY,
@@ -16,8 +19,21 @@ export const useSyncPrompt = (scriptCount: number) => {
         parse: value => (typeof value === 'boolean' ? value : undefined),
     });
 
+    const hasAccount = Boolean(status && status.state !== 'signed-out');
+
+    // Only for writers without an account: once signed in, signing out never brings it back.
+    useEffect(() => {
+        if (hasAccount && !dismissed) {
+            setDismissed(true);
+        }
+    }, [
+        dismissed,
+        hasAccount,
+        setDismissed,
+    ]);
+
     return {
-        isOpen: isEnabled && status?.state === 'signed-out' && scriptCount > 0 && !dismissed,
+        isOpen: isEnabled && status?.state === 'signed-out' && scriptCount > 0 && !dismissed && !isAccountModalOpen,
         onSignIn: () => {
             setDismissed(true);
             openSignIn();

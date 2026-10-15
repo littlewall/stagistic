@@ -8,7 +8,7 @@ import type {
     RecordUpserts,
 } from '../ydoc/recordsCodec';
 import type {CloudSyncConfig} from './cloud/cloudSync';
-import type {DocPersistence} from './persistence';
+import type {DocPersistence, ProjectedMark} from './persistence';
 import type {ProjectionLane, ProjectionQueue} from './projectionLane';
 import type {ControlChannelFactory, OpenResult} from './protocol';
 import type {RecordsKind} from './scriptRecords';
@@ -52,6 +52,8 @@ export interface ScriptEntry {
     /** Record ids that must be re-written even if unchanged (Y rejected a local value). */
     forced: Record<RecordsKind, RecordUpserts>,
     lanes: Record<'body' | RecordsKind, ProjectionLane>,
+    /** Per doc: state vector the projection was last written from. */
+    marks: Record<'body' | RecordsKind, ProjectedMark>,
     queue: ProjectionQueue,
     dispose: () => Promise<void>,
     /** Seeded from the projection when this entry was created. */

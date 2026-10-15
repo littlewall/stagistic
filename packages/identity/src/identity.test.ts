@@ -244,6 +244,18 @@ describe.skipIf(!available)('identity service', () => {
         expect(statuses[5]).toBe(429);
     });
 
+    it('does not turn steady access token refreshes from one IP into a lockout', async () => {
+        const {cookie} = await signIn('rosencrantz@example.com');
+        const statuses = new Set<number>();
+
+        // More than the general limit (100 per window) from one office IP.
+        for (let attempt = 0; attempt < 110; attempt++) {
+            statuses.add((await request('/api/auth/token', {cookie, clientIp: '10.7.7.7'})).status);
+        }
+
+        expect([...statuses]).toEqual([200]);
+    });
+
     it('tracks applied migrations (running them again is a no-op)', async () => {
         expect(await runIdentityMigrations(pool, SCHEMA)).toEqual([]);
     });

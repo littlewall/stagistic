@@ -1,6 +1,7 @@
 import * as Y from 'yjs';
 
 import {createAccessTokenSource} from './accessToken';
+import {isSyncedToAccount, resolveAccountOnStart} from './cloudAccount';
 import {CloudUnauthorizedError, createCloudApi} from './cloudApi';
 import {createCloudAttachments} from './cloudAttachments';
 import {createCloudEvents, eventsDocumentName} from './cloudEvents';
@@ -12,7 +13,11 @@ import type {
     CloudSyncConfig,
 } from './contracts';
 import {createCloudSocket, type DocConnection} from './docConnection';
-import {createDirtyQueue, createSingleFlight} from './singleFlight';
+import {
+    createDirtyQueue,
+    createSerialQueue,
+    createSingleFlight,
+} from './singleFlight';
 import {documentNameOf, encodeStateVectors} from './stateVectors';
 import {deleteInCloud, syncLibrary} from './syncLibrary';
 import {
@@ -83,7 +88,7 @@ export const createCloudSync = ({
     });
     const connections = new Map<string, DocConnection[]>();
     const running = new Map<string, Promise<void>>();
-    const dirtyQueue = createDirtyQueue(scriptIds => scriptIds.forEach(id => void syncScript(id, {seed: true}).catch(handleError)));
+    const dirtyQueue = createDirtyQueue(scriptIds => void syncOrUpload(scriptIds).catch(handleError));
     const {dirty} = dirtyQueue;
     let account: CloudAccount | null = null;
     let live = false;
@@ -145,6 +150,20 @@ export const createCloudSync = ({
                 running.delete(scriptId);
             }
         });
+    };
+
+    // A new local script must be registered (upload) before it attaches: Hocuspocus refuses unknown ones.
+    const isInCloud = (scriptId: string) => isSyncedToAccount(store, scriptId, account?.accountId);
+
+    /** Known scripts sync directly; new ones go through the library pass (register, then sync). */
+    const syncOrUpload = async (scriptIds: string[]) => {
+        for (const scriptId of scriptIds) {
+            if (await isInCloud(scriptId)) {
+                void syncScript(scriptId, {seed: true}).catch(handleError);
+            } else {
+                libraryPasses.soon();
+            }
+        }
     };
 
     const upload: CloudContext['upload'] = async (scriptId, title) => {
@@ -209,8 +228,11 @@ export const createCloudSync = ({
         live = true;
         setStatus({state: 'syncing', email: account?.email ?? null});
 
+        // New local scripts attach after the pass below registers them.
         for (const scriptId of host.openScripts()) {
-            attach(scriptId, await host.getDocs(scriptId, {seed: true}));
+            if (await isInCloud(scriptId)) {
+                attach(scriptId, await host.getDocs(scriptId, {seed: true}));
+            }
         }
 
         if (account && !eventsConnection) {
@@ -233,42 +255,25 @@ export const createCloudSync = ({
     };
 
     const start: CloudSync['start'] = async () => {
-        let token: string | null;
+        const resolved = await resolveAccountOnStart({
+            tokens,
+            store,
+            log,
+        });
 
-        try {
-            token = await tokens.get({force: true});
-        } catch (error) {
-            log('could not reach the auth service', error);
-            setStatus({state: 'offline'});
-
-            return;
-        }
-
-        const claims = tokens.claims();
-
-        if (!token || !claims) {
-            setStatus({state: 'signed-out', email: null});
+        if (resolved.kind === 'offline' || resolved.kind === 'signed-out') {
+            setStatus(resolved.kind === 'offline' ? {state: 'offline'} : {state: 'signed-out', email: null});
 
             return;
         }
 
-        const stored = await store.getAccount();
+        account = resolved.account;
 
-        if (stored && stored.accountId === claims.accountId && stored.checked) {
-            account = stored;
+        if (resolved.kind === 'checked') {
             await goLive();
-
-            return;
+        } else {
+            setStatus({state: 'needs-check', email: account.email});
         }
-
-        // A sign-in this device has not checked yet: connect nothing until the check ran.
-        account = {
-            accountId: claims.accountId,
-            email: claims.email,
-            checked: false,
-        };
-        await store.setAccount(account);
-        setStatus({state: 'needs-check', email: claims.email});
     };
 
     const signedOut: CloudSync['signedOut'] = async () => {
@@ -277,12 +282,7 @@ export const createCloudSync = ({
         account = null;
         initialScanDone = false;
         await store.clearAccount();
-        setStatus({
-            state: 'signed-out',
-            email: null,
-            pending: 0,
-            error: null,
-        });
+        setStatus(SIGNED_OUT_STATUS);
     };
 
     const reconcile = createCloudReconcile({
@@ -303,6 +303,8 @@ export const createCloudSync = ({
         setStatus,
     });
 
+    const reconcileQueue = createSerialQueue();
+
     return {
         start,
         signedIn: async () => {
@@ -311,8 +313,9 @@ export const createCloudSync = ({
         },
         signedOut,
         status: () => currentStatus,
-        check: () => reconcile.check(),
-        apply: resolutions => reconcile.apply(resolutions),
+        // One at a time: a check loading docs during an apply could re-seed a script being reset.
+        check: () => reconcileQueue.run(() => reconcile.check()),
+        apply: resolutions => reconcileQueue.run(() => reconcile.apply(resolutions)),
         downloadAttachment: storageKey => (account ? attachments.download(storageKey).catch(() => false) : Promise.resolve(false)),
         wake: () => {
             if (live) {
@@ -321,7 +324,9 @@ export const createCloudSync = ({
         },
         tabOpened: scriptId => {
             if (live) {
-                void host.getDocs(scriptId, {seed: true}).then(docs => attach(scriptId, docs)).catch(handleError);
+                void isInCloud(scriptId)
+                    .then(async known => (known ? attach(scriptId, await host.getDocs(scriptId, {seed: true})) : libraryPasses.soon()))
+                    .catch(handleError);
             }
         },
         tabReleased: scriptId => {

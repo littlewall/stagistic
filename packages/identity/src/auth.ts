@@ -44,6 +44,11 @@ export const createIdentityAuthOptions = ({
         // One session across editor.*, casting.* … and the *.api.* services.
         crossSubDomainCookies: {enabled: true, domain: config.cookieDomain},
         defaultCookieAttributes: {sameSite: 'lax'},
+        /*
+         * Behind Caddy: it replaces X-Forwarded-For from clients with the real address,
+         * so rate limits count per client instead of one shared bucket.
+         */
+        ipAddress: {ipAddressHeaders: ['x-forwarded-for']},
     },
     rateLimit: {
         enabled: true,
@@ -52,8 +57,15 @@ export const createIdentityAuthOptions = ({
         window: 60,
         max: 100,
         customRules: {
-            '/sign-in/magic-link': {window: 60, max: 5},
+            '/sign-in/magic-link': {window: 60, max: config.magicLinkPerMinute ?? 5},
             '/magic-link/verify': {window: 60, max: 20},
+            /*
+             * Better Auth resets a bucket only after `window` without requests: under steady
+             * traffic from one IP (an office behind NAT) a limit becomes a total quota. These
+             * need a valid session cookie anyway, so they are not limited per IP.
+             */
+            '/token': false,
+            '/get-session': false,
         },
     },
     plugins: [

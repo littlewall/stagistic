@@ -18,6 +18,7 @@ import {
     readRecords,
     replaceRecords,
 } from '../ydoc/recordsCodec';
+import {stateVectorsEqual} from '../ydoc/stateVector';
 import {
     type CreateSyncEngineArgs,
     DEDUPE_ORIGIN,
@@ -75,6 +76,7 @@ export const createScriptEntryFactory = ({
     const isWritable = (entry: ScriptEntry) => resolveSchemaGate(readSchemaVersion(entry.records.meta), clientSchemaVersion) === 'writable';
 
     const projectRecords = async (entry: ScriptEntry, kind: RecordsKind) => {
+        const stateVector = Y.encodeStateVector(entry.records[kind]);
         const current = readRecords(entry.records[kind], RECORD_COLLECTIONS[kind]);
         const upserts = projectionUpserts(entry.projected[kind], current);
 
@@ -91,15 +93,60 @@ export const createScriptEntryFactory = ({
         if (Object.values(upserts).some(records => Object.keys(records).length > 0)) {
             await store.writeRecords(entry.scriptId, kind, upserts);
         }
+
+        await entry.marks[kind].set(stateVector);
     };
 
     const projectBody = async (entry: ScriptEntry) => {
+        const stateVector = Y.encodeStateVector(entry.body);
+
         await store.writeDocument(entry.scriptId, bodyDocToScriptDocument(entry.body));
 
         // Rows like scene metadata attach to body-derived rows: re-apply them.
         const current = readRecords(entry.records.meta, BODY_DEPENDENT_COLLECTIONS);
 
         await store.writeRecords(entry.scriptId, 'meta', current);
+        await entry.marks.body.set(stateVector);
+    };
+
+    /**
+     * Stored Y state can be ahead of the projection: the page closed before a
+     * debounced write. Readers of the projection (library, duplicate, keep both)
+     * would see old content until the next edit. Docs whose state vector moved
+     * past the last projected one are projected again; outside projection
+     * writes (repository SQL, replace) leave the vectors alone and are kept.
+     */
+    const repairProjection = async (entry: ScriptEntry) => {
+        if (!isWritable(entry)) {
+            return;
+        }
+
+        const lagging = async (kind: 'body' | RecordsKind, doc: Y.Doc) => {
+            const projected = await entry.marks[kind].get();
+
+            if (!projected) {
+                // Projected before marks existed: assume it is current.
+                await entry.marks[kind].set(Y.encodeStateVector(doc));
+
+                return false;
+            }
+
+            return !stateVectorsEqual(projected, Y.encodeStateVector(doc));
+        };
+
+        if (await lagging('body', entry.body)) {
+            await projectBody(entry);
+        }
+
+        for (const kind of RECORD_KINDS) {
+            if (await lagging(kind, entry.records[kind])) {
+                const stateVector = Y.encodeStateVector(entry.records[kind]);
+                const records = readRecords(entry.records[kind], RECORD_COLLECTIONS[kind]);
+
+                await store.writeRecords(entry.scriptId, kind, projectionUpserts(await store.loadRecords(entry.scriptId, kind), records));
+                await entry.marks[kind].set(stateVector);
+            }
+        }
     };
 
     const createLanes = (entry: ScriptEntry): ScriptEntry['lanes'] => {
@@ -156,6 +203,11 @@ export const createScriptEntryFactory = ({
             queue: createProjectionQueue(log, scriptId),
             seededOnOpen: false,
             channelId: crypto.randomUUID(),
+            marks: {
+                body: stores[0].projected,
+                meta: stores[1].projected,
+                comments: stores[2].projected,
+            },
             dispose: async () => {},
         } as Omit<ScriptEntry, 'lanes'> as ScriptEntry;
 
@@ -187,6 +239,9 @@ export const createScriptEntryFactory = ({
         if (entry.seededOnOpen) {
             // Normalization may have changed the stored document.
             await entry.lanes.body.write({force: true});
+        } else if (seed && !isBodyDocEmpty(body)) {
+            // Queued: later lane writes of this script run after the repair.
+            void entry.queue.run(() => repairProjection(entry));
         }
 
         const syncs = [
@@ -223,6 +278,8 @@ export const createScriptEntryFactory = ({
         body.on('update', onBodyUpdate);
 
         entry.dispose = async () => {
+            // Queued projection work (writes, repair) still uses the docs and their stores.
+            await entry.queue.idle();
             body.off('update', onBodyUpdate);
             recordListeners.forEach(off => off());
             syncs.forEach(sync => sync.destroy());

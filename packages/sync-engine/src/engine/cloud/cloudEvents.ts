@@ -1,5 +1,5 @@
-import * as buf from 'lib0/buffer';
 
+import {fromBase64} from '../../ydoc/base64';
 import {stateVectorCovers} from '../stateVectorCovers';
 import type {CloudContext} from './contracts';
 import type {CloudSyncStore, DocKind} from './types';
@@ -86,7 +86,7 @@ export const createCloudEvents = ({
 
         const synced = state.stateVectors[event.kind];
 
-        if (!synced || !stateVectorCovers(buf.fromBase64(synced), buf.fromBase64(event.stateVector))) {
+        if (!synced || !stateVectorCovers(fromBase64(synced), fromBase64(event.stateVector))) {
             pull(event.scriptId);
         }
     };

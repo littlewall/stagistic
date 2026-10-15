@@ -43,6 +43,8 @@ export interface CloudAccountValue {
     openSignIn: () => void,
     /** `/auth/callback`: exchanges the link token for a session. */
     completeSignIn: (token: string) => Promise<void>,
+    /** Sign-in, settings or conflict dialog is open (other prompts wait). */
+    isAccountModalOpen: boolean,
 }
 
 interface CloudAccountState {
@@ -64,6 +66,7 @@ const disabled: CloudAccountValue = {
     syncLabel: undefined,
     openSignIn: () => {},
     completeSignIn: () => Promise.resolve(),
+    isAccountModalOpen: false,
 };
 
 const CloudAccountContext = createContext<CloudAccountValue>(disabled);
@@ -128,7 +131,8 @@ export const CloudAccountProvider = ({
 
     // Post-sign-in check: automatic unless scripts changed on both sides.
     useEffect(() => {
-        if (!cloud || status?.state !== 'needs-check' || checking.current) {
+        // `check` itself moves the state (checking → needs-check): one check per sign-in until the dialog is answered.
+        if (!cloud || status?.state !== 'needs-check' || checking.current || report) {
             return;
         }
 
@@ -158,6 +162,7 @@ export const CloudAccountProvider = ({
     }, [
         addToast,
         cloud,
+        report,
         status?.state,
     ]);
 
@@ -202,12 +207,14 @@ export const CloudAccountProvider = ({
                 await auth!.verifyMagicLink(token);
                 setStatus(await cloud!.signedIn());
             },
+            isAccountModalOpen: modal !== null,
         }
         : disabled), [
         auth,
         cloud,
         email,
         isEnabled,
+        modal,
         signOut,
         status,
     ]);

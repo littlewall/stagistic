@@ -74,5 +74,6 @@ the SMTP mailer test sends through Mailpit and skips without it.
 
 `moon run web:test-e2e-cloud` drives the editor through Caddy in Chromium
 (starts `vp dev` on :3000 unless it runs): email sign-in with the link from
-Mailpit, passkeys with a virtual authenticator. Behind another HTTPS port set
+Mailpit, passkeys with a virtual authenticator, two devices syncing edits and
+an attachment, and the conflict dialog after edits made while signed out. Behind another HTTPS port set
 `LOCAL_HTTPS_PORT_SUFFIX=:8443`. Skipped when the stack is not running.

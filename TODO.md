@@ -61,7 +61,8 @@
 
 ## Phase 6b — functional readiness (local; no deploy, DNS, Turnstile prod, speed)
 - [x] SMTP mailer (`SMTP_URL`, `SMTP_HEADERS`): Mailpit SMTP locally, Postmark = only a different URL; test against Mailpit
-- [ ] Browser e2e through Caddy: sign-in via Mailpit link, two devices sync edits + attachments, conflict dialog after offline edits
+- [x] Browser e2e through Caddy (`web:test-e2e-cloud`): two devices sync edits live, example script's PDF downloads on demand on the second device, conflict after signed-out edits → keep both
+  - [x] Fixed on the way: base64 in the worker (lib0 picked `Buffer`), new scripts attached before registration (Hocuspocus refused them), check loop while the conflict dialog is open + check/apply run serially (re-seed duplicated content), lagging projection after reload (projected state vector per doc), unload/reset race, concurrent `POST /scripts` (500), sync prompt over the sign-in dialog, Better Auth rate limits behind Caddy (client IP from X-Forwarded-For; `/token`, `/get-session` not IP-limited)
 - [x] Passkeys: sign-in button, Account settings list/add/remove, discoverable credentials (`residentKey: required`); e2e through Caddy with a virtual authenticator (`moon run web:test-e2e-cloud`)
 - [ ] Delete blobs of removed/replaced attachments; pending count includes attachments
 - [ ] Remove/update the spike `network.browser.test.ts`

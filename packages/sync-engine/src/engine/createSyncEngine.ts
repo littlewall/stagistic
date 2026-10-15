@@ -74,11 +74,16 @@ export const createSyncEngine = ({
         onLocalChange: scriptId => cloud?.localChange(scriptId),
     });
 
+    /** Unloads still writing and disposing: a new entry (or a reset) for the script waits for them. */
+    const unloading = new Map<string, Promise<void>>();
+
     const getEntry = (scriptId: string, {seed = true}: {seed?: boolean} = {}) => {
         let entry = entries.get(scriptId);
 
         if (!entry) {
-            entry = createEntry(scriptId, seed);
+            const pending = unloading.get(scriptId);
+
+            entry = pending ? pending.then(() => createEntry(scriptId, seed)) : createEntry(scriptId, seed);
             entries.set(scriptId, entry);
             entry.catch(() => entries.delete(scriptId));
         }
@@ -188,6 +193,7 @@ export const createSyncEngine = ({
         const entry = entries.get(scriptId);
 
         entries.delete(scriptId);
+        await unloading.get(scriptId);
 
         if (entry) {
             const resolved = await entry;
@@ -219,10 +225,19 @@ export const createSyncEngine = ({
 
         entries.delete(scriptId);
 
-        const resolved = await entry;
+        const done = (async () => {
+            const resolved = await entry;
 
-        await writeAll(resolved);
-        await resolved.dispose();
+            await writeAll(resolved);
+            await resolved.dispose();
+        })().finally(() => {
+            if (unloading.get(scriptId) === done) {
+                unloading.delete(scriptId);
+            }
+        });
+
+        unloading.set(scriptId, done);
+        await done;
     };
 
     cloud = cloudConfig

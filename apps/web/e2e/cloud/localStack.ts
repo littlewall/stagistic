@@ -129,8 +129,41 @@ export const signInWithEmail = async (page: Page, email: string) => {
     const send = page.getByRole('button', {name: 'Send sign-in link'});
 
     // The always-pass Turnstile test key still takes a moment to issue a token.
-    await send.and(page.locator(':not([disabled])')).waitFor({timeout: 30_000});
-    await send.click();
+    await send.click({timeout: 30_000});
     await page.getByText(`We sent a sign-in link to ${email}`).waitFor();
     await page.goto(await readMagicLink(email));
 };
+
+export const EDITOR = '[data-editor="true"]';
+
+export const editorText = async (page: Page) => await page.locator(EDITOR).textContent() ?? '';
+
+export const typeAtEnd = async (page: Page, text: string) => {
+    await page.locator(EDITOR).click();
+    // Caret after the last character of the document (ProseMirror follows the DOM selection).
+    await page.locator(EDITOR).evaluate(element => {
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        let last: Text | null = null;
+
+        while (walker.nextNode()) {
+            if (walker.currentNode.textContent?.trim()) {
+                last = walker.currentNode as Text;
+            }
+        }
+
+        if (last) {
+            window.getSelection()?.setBaseAndExtent(last, last.length, last, last.length);
+        }
+    });
+    await page.waitForTimeout(100);
+    await page.keyboard.type(text);
+};
+
+export const signOut = async (page: Page) => {
+    await openAccountMenu(page);
+    await page.getByRole('button', {name: 'Sign out'}).click();
+    await page.keyboard.press('Escape');
+};
+
+/** Header sync indicator says everything reached the account. */
+export const waitUntilSynced = (page: Page) => page.locator('[data-sync-status][aria-label*="Synced to your account"]').first().waitFor({timeout: 30_000});
