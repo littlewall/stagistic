@@ -1,0 +1,41 @@
+# Stagistic Marketing Brand Assets
+
+## Identity
+
+- `Stagistic` is the umbrella brand.
+- `Stagistic Editor` is the script editor product.
+- `Stagistic Syntax` is an independent script format used by the editor.
+
+## Editor mark
+
+- On light: `public/assets/stagistic-brand/editor-mark-on-light.svg`
+- On dark: `public/assets/stagistic-brand/editor-mark-on-dark.svg`
+- Steel Wool: `#5b6267` — neutral foundation
+- Creamed Corn: `#f7e09f` — selection and quiet emphasis
+- Primrose Yellow: `#f4ca52` — action, music, and attention
+- Paper: `#f4f1ec` — script and light surfaces
+
+Use the on-dark mark against the marketing header's graphite surface. A visible
+`Stagistic Editor` wordmark accompanies it; the image itself is decorative in
+that lockup.
+
+## Product imagery
+
+- Main editor screenshot: `public/editor-preview.png`
+- Theatre-writing detail: `public/features/theatre-writing.png`
+- Social preview: `public/opengraph.jpg`
+
+## Typography
+
+- Interface and marketing voice: IBM Plex Sans Variable
+- Script and structural voice: Courier Prime
+
+## Marketing color roles
+
+The canonical OKLCH tokens live in `src/styles/global.css`.
+
+- Paper: primary page background
+- Umber: primary text and dark-stage surfaces
+- Aubergine: muted text and border derivation
+- Copper: primary action and music accent
+- Lavender: focus and utility accent

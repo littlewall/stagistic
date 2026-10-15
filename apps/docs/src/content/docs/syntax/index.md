@@ -1,26 +1,39 @@
 ---
 title: Syntax
-description: Technical documentation for the Stagistic text format.
+description: Stagistic Syntax for implementers and people working in plain-text editors.
 template: splash
 hero:
   layout: banner
   title: Stagistic Syntax
-  tagline: The structured text format for theatre and musical scripts. Technical documentation for working with files and integrations.
+  tagline: A structured text format for theatre and musical scripts. Rules and examples for implementers and plain-text writing.
   actions:
     - text: Format reference
       link: /syntax/reference/
       icon: right-arrow
-    - text: About the format
-      link: https://stagistic.com/editor/syntax
+    - text: Complete example
+      link: /syntax/examples/
       variant: secondary
 ---
 
-:::note[Reference in progress]
-The full specification is being prepared for this knowledge base. The existing specification remains available on the Stagistic website.
-:::
+Stagistic Syntax represents a theatrical script in a `.stagistic` text file: structure, speakers, dialogue, lyrics, stage directions, music markers and selected title-page metadata.
 
-## Technical reference
+This reference is for people implementing the format in other tools and for writers using plain-text editors. It describes the current Stagistic reader and writer, including context-sensitive interpretation and known round-trip limits.
 
-The [format reference](/syntax/reference/) will describe how scripts are represented in Stagistic Syntax. This section is intended for people working with the text format and integrations.
+## Choose an entry point
 
-For writing a script through the application, use the separate [Editor documentation](/editor/). You do not need to learn the syntax to use the editor.
+| I need… | Start here |
+| --- | --- |
+| The file model and recognition rules | [Format reference](/syntax/reference/) |
+| A complete file to read or try | [Complete example](/syntax/examples/) |
+| The meaning of a particular marker | [Marker reference](/syntax/markers/) |
+
+## Read by area
+
+- [Frontmatter](/syntax/reference/frontmatter/): supported metadata fields and validation.
+- [Acts and scenes](/syntax/reference/structure/): heading forms with and without acts.
+- [Cues, dialogue and asides](/syntax/reference/speech/): speaker recognition and speech context.
+- [Stage directions and notes](/syntax/reference/directions/): action, character references and forced interpretation.
+- [Music and lyrics](/syntax/reference/music/): music markers, Hits, lyric lines and soft breaks.
+- [Inline text and literals](/syntax/reference/text/): emphasis, quoting and escapes.
+
+For writing through the Stagistic application, use the [Editor documentation](/editor/). For the motivation behind the format, see [Stagistic Syntax on the website](https://stagistic.com/editor/syntax).

@@ -1,0 +1,51 @@
+---
+import styles from './HeaderEditorMenu.module.css';
+
+interface Props {
+    currentPath: string;
+}
+
+const {currentPath} = Astro.props;
+const links = [
+    {href: '/editor/playwriting', label: 'Playwriting'},
+    {href: '/editor/musicals', label: 'Musicals'},
+];
+const isCurrent = links.some(({href}) => href === currentPath);
+---
+
+<details class={styles.editorMenu} data-editor-menu>
+    <summary class={styles.menuTrigger} data-current={isCurrent || undefined}>
+        Editor
+        <svg class={styles.chevron} viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false">
+            <path d="m3 4.5 3 3 3-3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </summary>
+    <div class={styles.menuPanel}>
+        {links.map(({href, label}) => (
+            <a href={href} class={styles.menuLink} aria-current={currentPath === href ? 'page' : undefined}>{label}</a>
+        ))}
+    </div>
+</details>
+
+<script>
+document.querySelectorAll<HTMLDetailsElement>('[data-editor-menu]').forEach(menu => {
+    menu.addEventListener('keydown', event => {
+        if (event.key !== 'Escape' || !menu.open) return;
+
+        menu.open = false;
+        menu.querySelector('summary')?.focus();
+    });
+
+    menu.addEventListener('focusout', event => {
+        if (event.relatedTarget instanceof Node && !menu.contains(event.relatedTarget)) {
+            menu.open = false;
+        }
+    });
+
+    document.addEventListener('click', event => {
+        if (event.target instanceof Node && !menu.contains(event.target)) {
+            menu.open = false;
+        }
+    });
+});
+</script>

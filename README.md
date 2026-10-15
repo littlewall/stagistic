@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://stagistic.app">
-    <img src="apps/landing/public/favicon.svg" alt="Stagistic logo" width="96" height="96">
+    <img src="apps/marketing/public/favicon.svg" alt="Stagistic logo" width="96" height="96">
   </a>
 </p>
 
@@ -22,7 +22,7 @@ Your play is not a screenplay with the camera removed. Most script software is b
 It runs in your browser, needs no account, and stores your scripts locally by default.
 
 <p align="center">
-  <img src="apps/landing/public/opengraph.jpg" alt="Stagistic Editor with the structure panel and a musical number with lyrics" width="100%">
+  <img src="apps/marketing/public/opengraph.jpg" alt="Stagistic Editor with the structure panel and a musical number with lyrics" width="100%">
 </p>
 
 # Features
@@ -82,7 +82,7 @@ Requirements: **Node.js ≥ 24.12**, **pnpm ≥ 11**. Tasks run through [moon](h
 ```bash
 pnpm install
 moon run web:dev        # editor app
-moon run landing:dev    # stagistic.app website
+moon run marketing:dev  # stagistic.app website
 ```
 
 Checks:
@@ -99,7 +99,7 @@ moon run <project>:test-browser   # app-core, app-routes, editor, ui
 | Path                                       | Contents                                      |
 | ------------------------------------------ | --------------------------------------------- |
 | `apps/web`                                 | The editor app (editor.stagistic.app)         |
-| `apps/landing`                             | The website (stagistic.app), built with Astro |
+| `apps/marketing`                           | The website (stagistic.app), built with Astro |
 | `apps/desktop`                             | Desktop shell (Tauri), work in progress       |
 | `packages/editor`                          | The script editor (Tiptap / ProseMirror)      |
 | `packages/script`                          | Script document model and Stagistic Syntax    |

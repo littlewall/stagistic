@@ -2,7 +2,7 @@
 $schema: 'https://moonrepo.dev/schemas/workspace.json'
 
 # Projects are auto-discovered from these globs. Project id = folder name,
-# so tasks are addressed as `web:lint`, `landing:typecheck`, `db:test`, ...
+# so tasks are addressed as `web:lint`, `marketing:typecheck`, `db:test`, ...
 projects:
   globs:
     - 'apps/*'

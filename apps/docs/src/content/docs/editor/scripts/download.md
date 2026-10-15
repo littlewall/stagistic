@@ -35,7 +35,7 @@ For technical information about the format, see [Stagistic Syntax](/syntax/).
 
 ## Need printable pages?
 
-For PDF output, page layout and title-page design, see [Pages and export](/editor/export/). A script file is for continued editing and storage; printable output is prepared through the export view.
+Start with [Preview and download a PDF](/editor/export/pdf/). For page layout and title-page design, see [Pages and export](/editor/export/). A script file is for continued editing and storage; printable output is prepared through the export view.
 
 ## Related tasks
 

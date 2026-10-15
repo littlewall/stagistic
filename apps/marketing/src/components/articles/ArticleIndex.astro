@@ -1,0 +1,40 @@
+---
+import type {CollectionEntry} from 'astro:content';
+import styles from './ArticleIndex.module.css';
+import ArticleMeta from './ArticleMeta.astro';
+
+interface Props {
+    articles: CollectionEntry<'articles'>[];
+}
+
+const {articles} = Astro.props;
+---
+
+<main class={styles.articlesPage}>
+    <div class={styles.articlesInner}>
+        <header class={styles.intro}>
+            <h1 class={styles.title}>Articles</h1>
+            <p>Practical notes on writing for the stage. From the first line of dialogue to the rehearsal room.</p>
+        </header>
+
+        {articles.length > 0 ? (
+            <ul class={styles.articleList}>
+                {articles.map(article => (
+                    <li>
+                        <article class={styles.articleSummary}>
+                            <h2 class={styles.articleTitle}><a href={`/articles/${article.id}`} class={styles.articleLink}>{article.data.title}</a></h2>
+                            <p class={styles.description}>{article.data.description}</p>
+                            <ArticleMeta data={article.data} showTags={false} />
+                        </article>
+                    </li>
+                ))}
+            </ul>
+        ) : (
+            <section class={styles.emptyState} aria-labelledby="articles-coming-soon">
+                <h2 class={styles.articleTitle} id="articles-coming-soon">The first articles are on their way.</h2>
+                <p>We're working on pieces about playwriting, musical theatre, and preparing a script for the stage. Meanwhile, get to know the format behind Stagistic.</p>
+                <a href="/editor/syntax" class={styles.articleLink}>Explore the syntax <span aria-hidden="true">→</span></a>
+            </section>
+        )}
+    </div>
+</main>

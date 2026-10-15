@@ -7,7 +7,7 @@
         "scripts/*.mjs",
         "packages/db/scripts/*.mjs"
     ],
-    "dynamicallyLoaded": ["apps/landing/src/pages/editor/syntax.module.css", "packages/ui/src/dialogs/dialogForm.module.css"],
+    "dynamicallyLoaded": ["packages/ui/src/dialogs/dialogForm.module.css"],
     "ignoreExports": [
         {
             "file": "**/*.module.css",

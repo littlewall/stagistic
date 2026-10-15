@@ -1,0 +1,141 @@
+.articlePage {
+    min-height: 65vh;
+    padding: clamp(2.5rem, 7vw, 5rem) 1.5rem;
+    background: var(--color-bg);
+}
+
+.article {
+    max-width: 44rem;
+    margin: 0 auto;
+    overflow-wrap: break-word;
+}
+
+.backLink {
+    display: inline-block;
+    margin-bottom: 2.5rem;
+    font-size: .875rem;
+    color: var(--color-text-muted);
+    text-underline-offset: .25em;
+}
+
+.articleHeader {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+    margin-bottom: 1.25rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+}
+
+.description {
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+}
+
+.articleBody {
+    padding-top: 2rem;
+    font-size: 1.0625rem;
+    line-height: 1.8;
+}
+
+.articleBody :global(> * + *) {
+    margin-top: 1.25rem;
+}
+
+.articleBody :global(h2),
+.articleBody :global(h3),
+.articleBody :global(h4) {
+    scroll-margin-top: 8rem;
+    margin-top: 2.5rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+}
+
+.articleBody :global(h2) {
+    font-size: 1.75rem;
+}
+
+.articleBody :global(h3) {
+    font-size: 1.375rem;
+}
+
+.articleBody :global(ul),
+.articleBody :global(ol) {
+    padding-left: 1.5rem;
+}
+
+/* stylelint-disable-next-line selector-max-type -- Markdown sibling spacing requires both list items. */
+.articleBody :global(li + li) {
+    margin-top: .5rem;
+}
+
+.articleBody :global(blockquote) {
+    padding-left: 1.25rem;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-border-strong);
+}
+
+.articleBody :global(code),
+.articleBody :global(pre) {
+    font-family: var(--font-mono);
+    font-size: .9375rem;
+}
+
+.articleBody :global(pre) {
+    overflow-x: auto;
+    padding: 1.25rem;
+    line-height: 1.6;
+    border: 1px solid var(--color-border);
+    border-radius: .25rem;
+}
+
+.articleBody :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.articleBody :global(table) {
+    overflow-x: auto;
+    display: block;
+    border-collapse: collapse;
+    max-width: 100%;
+}
+
+.articleBody :global(th),
+.articleBody :global(td) {
+    padding: .5rem .75rem;
+    text-align: left;
+    border: 1px solid var(--color-border);
+}
+
+.articleBody :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.articleBody :global(a) {
+    color: inherit;
+    text-underline-offset: .2em;
+}
+
+.backLink:focus-visible,
+.articleBody :global(a:focus-visible) {
+    border-radius: .125rem;
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 4px;
+}
+
+@media (max-width: 40em) {
+    .articlePage {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+}

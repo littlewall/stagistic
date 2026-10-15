@@ -69,7 +69,7 @@ Canonical commands run through moon. Root workflows are defined in `moon.yml`; r
 ## Design context
 See [PRODUCT.md](PRODUCT.md) before any UI work.
 
-**Register:** product (app-first). The editor app (`apps/web`) is the primary surface; the landing page (`apps/landing`) is brand register.
+**Register:** product (app-first). The editor app (`apps/web`) is the primary surface; the marketing website (`apps/marketing`) is brand register.
 
 **North Star:** "The Dark Stage" — the interface exists in the wings; the script is the spotlight.
 
