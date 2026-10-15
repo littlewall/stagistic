@@ -1,5 +1,9 @@
 import {execFileSync} from 'node:child_process';
-import {existsSync, readFileSync} from 'node:fs';
+import {
+    existsSync,
+    readdirSync,
+    readFileSync,
+} from 'node:fs';
 
 import {
     beforeAll,
@@ -101,12 +105,18 @@ describe('marketing website', () => {
     it('keeps the header navigation focused and exposes the editor action', () => {
         const homeHeader = homeHtml.match(/<header\b[\s\S]*?<\/header>/)?.[0] ?? '';
         const primaryNav = homeHeader.match(/<nav\b[\s\S]*?<\/nav>/)?.[0] ?? '';
+        const articleDirectory = new URL('../dist/articles/', import.meta.url);
+        const hasPublishedArticles = existsSync(articleDirectory) && readdirSync(articleDirectory, {encoding: 'utf8', recursive: true}).some(file => file.endsWith('.html'));
 
-        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(4);
+        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(hasPublishedArticles ? 4 : 3);
         expect(primaryNav).toContain('aria-label="Primary"');
-        expect(primaryNav).toContain('href="/editor/playwriting"');
-        expect(primaryNav).toContain('href="/editor/musicals"');
-        expect(primaryNav).toContain('href="/articles"');
+
+        const editorMenu = primaryNav.match(/<details\b[^>]*data-editor-menu[\s\S]*?<\/details>/)?.[0] ?? '';
+
+        expect(editorMenu).toMatch(/<summary\b[^>]*>Editor(?:\s|<)/);
+        expect(editorMenu).toContain('href="/editor/playwriting"');
+        expect(editorMenu).toContain('href="/editor/musicals"');
+        expect(primaryNav.includes('href="/articles"')).toBe(hasPublishedArticles);
         expect(primaryNav).toContain('href="https://docs.stagistic.com"');
         expect(primaryNav).toMatch(/<span\b[^>]*aria-hidden="true"[^>]*>↗<\/span>/);
         expect(primaryNav).not.toContain('href="/open-source"');
