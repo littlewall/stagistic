@@ -1,0 +1,16 @@
+---
+import SyntaxIntro from '../../components/SyntaxIntro.astro';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+    title="Stagistic Syntax - Stagistic Editor"
+    description="An open, plain-text format for theatrical plays and musicals. Discover Stagistic Syntax and find the full documentation."
+    canonical={new URL('/editor/syntax', Astro.site).href}
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Syntax', url: new URL('/editor/syntax', Astro.site).href},
+    ]}
+>
+    <SyntaxIntro />
+</Layout>

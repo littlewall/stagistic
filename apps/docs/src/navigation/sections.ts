@@ -22,14 +22,6 @@ export const documentationSections: DocumentationSection[] = [
                 ],
             },
             {
-                label: 'User guide',
-                items: [
-                    'editor/music',
-                    'editor/review',
-                    'editor/export',
-                ],
-            },
-            {
                 label: 'Scripts and files',
                 items: [
                     {label: 'Overview', slug: 'editor/scripts'},
@@ -79,18 +71,70 @@ export const documentationSections: DocumentationSection[] = [
                     'editor/characters/manage',
                 ],
             },
+            {
+                label: 'Music and lyrics',
+                items: [
+                    {label: 'Overview', slug: 'editor/music'},
+                    'editor/music/add',
+                    'editor/music/range',
+                    'editor/music/lyrics',
+                    'editor/music/navigate',
+                    'editor/music/manage',
+                    'editor/music/score',
+                    'editor/music/remove',
+                ],
+            },
+            {
+                label: 'Finding and reviewing',
+                items: [
+                    {label: 'Overview', slug: 'editor/review'},
+                    'editor/review/find',
+                    'editor/review/replace',
+                    'editor/review/comment',
+                    'editor/review/threads',
+                    'editor/review/comments-view',
+                    'editor/review/history',
+                ],
+            },
+            {
+                label: 'Pages and export',
+                items: [
+                    {label: 'Overview', slug: 'editor/export'},
+                    'editor/export/pdf',
+                    'editor/export/layout',
+                    'editor/export/title-page',
+                    'editor/export/headers-footers',
+                    'editor/export/initial-pages',
+                    'editor/export/characters',
+                    'editor/export/page-breaks',
+                    'editor/export/integrated-score',
+                ],
+            },
         ],
     },
     {
         label: 'Syntax',
         href: '/syntax/',
-        description: 'Explore the Stagistic text format and its technical reference for files and integrations.',
+        description: 'Read the Stagistic text format reference for implementations and plain-text writing.',
         sidebar: [
             {
-                label: 'Reference',
+                label: 'Format reference',
                 items: [
                     {label: 'Syntax overview', slug: 'syntax'},
                     'syntax/reference',
+                    'syntax/reference/frontmatter',
+                    'syntax/reference/structure',
+                    'syntax/reference/speech',
+                    'syntax/reference/directions',
+                    'syntax/reference/music',
+                    'syntax/reference/text',
+                ],
+            },
+            {
+                label: 'Examples and lookup',
+                items: [
+                    'syntax/examples',
+                    'syntax/markers',
                 ],
             },
         ],

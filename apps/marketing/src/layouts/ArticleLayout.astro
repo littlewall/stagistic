@@ -1,0 +1,189 @@
+---
+import type {CollectionEntry} from 'astro:content';
+import ArticleMeta from '../components/articles/ArticleMeta.astro';
+import Layout from './Layout.astro';
+
+interface Props {
+    article: CollectionEntry<'articles'>;
+}
+
+const {article} = Astro.props;
+const {
+    title,
+    description,
+    author,
+    publishDate,
+} = article.data;
+const canonical = new URL(`/articles/${article.id}`, Astro.site).href;
+---
+
+<Layout
+    title={`${title} - Stagistic`}
+    description={description}
+    canonical={canonical}
+    ogType="article"
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Articles', url: new URL('/articles', Astro.site).href},
+        {name: title, url: canonical},
+    ]}
+>
+    <Fragment slot="head">
+        <meta name="author" content={author}>
+        <meta property="article:published_time" content={publishDate.toISOString()}>
+    </Fragment>
+    <main class="articlePage">
+        <article class="article">
+            <a href="/articles" class="backLink"><span aria-hidden="true">←</span> All articles</a>
+            <header>
+                <h1>{title}</h1>
+                <p class="description">{description}</p>
+                <ArticleMeta data={article.data} />
+            </header>
+            <div class="articleBody"><slot /></div>
+        </article>
+    </main>
+</Layout>
+
+<style>
+.articlePage {
+    min-height: 65vh;
+    padding: clamp(2.5rem, 7vw, 5rem) 1.5rem;
+    background: var(--color-bg);
+}
+
+.article {
+    max-width: 44rem;
+    margin: 0 auto;
+    overflow-wrap: break-word;
+}
+
+.backLink {
+    display: inline-block;
+    margin-bottom: 2.5rem;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-underline-offset: 0.25em;
+}
+
+header {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+h1 {
+    margin-bottom: 1.25rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+}
+
+.description {
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+}
+
+.articleBody {
+    padding-top: 2rem;
+    font-size: 1.0625rem;
+    line-height: 1.8;
+}
+
+.articleBody :global(> * + *) {
+    margin-top: 1.25rem;
+}
+
+.articleBody :global(h2),
+.articleBody :global(h3),
+.articleBody :global(h4) {
+    margin-top: 2.5rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    scroll-margin-top: 8rem;
+}
+
+.articleBody :global(h2) {
+    font-size: 1.75rem;
+}
+
+.articleBody :global(h3) {
+    font-size: 1.375rem;
+}
+
+.articleBody :global(ul),
+.articleBody :global(ol) {
+    padding-left: 1.5rem;
+}
+
+.articleBody :global(li + li) {
+    margin-top: 0.5rem;
+}
+
+.articleBody :global(blockquote) {
+    padding-left: 1.25rem;
+    color: var(--color-text-muted);
+    border-left: 3px solid var(--color-border-strong);
+}
+
+.articleBody :global(code),
+.articleBody :global(pre) {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+}
+
+.articleBody :global(pre) {
+    overflow-x: auto;
+    padding: 1.25rem;
+    line-height: 1.6;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+}
+
+.articleBody :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.articleBody :global(table) {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+}
+
+.articleBody :global(th),
+.articleBody :global(td) {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border: 1px solid var(--color-border);
+}
+
+.articleBody :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.articleBody :global(a) {
+    color: inherit;
+    text-underline-offset: 0.2em;
+}
+
+.backLink:focus-visible,
+.articleBody :global(a:focus-visible) {
+    border-radius: 0.125rem;
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 4px;
+}
+
+@media (max-width: 40em) {
+    .articlePage {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+}
+</style>
