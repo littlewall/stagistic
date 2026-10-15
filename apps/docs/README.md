@@ -1,6 +1,6 @@
 # Stagistic documentation
 
-Static Astro/Starlight application for `https://docs.stagistic.com`, using [Lucode Starlight](https://lucas-labs.github.io/lucode-starlight-theme/) for its layout and component styles. Getting started includes a first-scene walkthrough. Characters has six task guides, Writing your script has seven, Acts and scenes has six, Scripts and files has seven, Music and lyrics has seven, Finding and reviewing has six and Pages and export has eight ready for editorial review. Syntax includes seven reference chapters, a complete example and a marker lookup for implementers and plain-text-editor users. The shorter landing-page introduction remains a follow-up.
+Static Astro/Starlight application for `https://docs.stagistic.com`, using [Lucode Starlight](https://lucas-labs.github.io/lucode-starlight-theme/) for its layout and component styles. Getting started includes a first-scene walkthrough. Characters has six task guides, Writing your script has seven, Acts and scenes has six, Scripts and files has seven, Music and lyrics has seven, Finding and reviewing has six and Pages and export has eight ready for editorial review. Syntax includes seven reference chapters, a complete example and a marker lookup for implementers and plain-text-editor users. The marketing website introduces the format at `/editor/syntax` and links to the full documentation here.
 
 ## Local development
 
@@ -133,9 +133,9 @@ The foundation currently sets a global `noindex, nofollow` robots meta tag while
 
 ## Phase boundaries
 
-The technical reference is now available under `/syntax/reference/`, with a complete example and marker lookup beside it. The landing `/editor/syntax` page will next become a concise introduction with the format's motivation and verified comparisons with Fountain. Keep that introduction at its existing URL.
+The technical reference is available under `/syntax/reference/`, with a complete example and marker lookup beside it. The marketing website keeps `/editor/syntax` as a one-paragraph introduction and links to the `/syntax/` overview for full documentation.
 
-Links from the landing header and editor should be added when useful content is ready. For now, the application can be reviewed locally without sending existing users to an unfinished guide.
+The marketing header links to `https://docs.stagistic.com`. The application editor can link to relevant guides as they become useful in its writing flows.
 
 ## Review references
 

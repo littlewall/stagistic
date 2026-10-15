@@ -10,8 +10,7 @@ const navLinks = [
     {href: '/editor/playwriting', label: 'Playwriting'},
     {href: '/editor/musicals', label: 'Musicals'},
     {href: '/articles', label: 'Articles'},
-    {href: '/open-source', label: 'Open Source'},
-    {href: '/editor/syntax', label: 'Syntax'},
+    {href: 'https://docs.stagistic.com', label: 'Docs', external: true},
 ];
 ---
 
@@ -27,6 +26,7 @@ const navLinks = [
                     {navLinks.map((link) => (
                         <a href={link.href} class="navLink" aria-current={currentPath === link.href ? 'page' : undefined}>
                             {link.label}
+                            {link.external && <span aria-hidden="true">↗</span>}
                         </a>
                     ))}
                 </nav>
@@ -89,6 +89,9 @@ const navLinks = [
 }
 
 .navLink {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: baseline;
     font-size: 0.8125rem;
     color: var(--color-text);
     text-decoration-color: transparent;

@@ -3,7 +3,7 @@ $schema: 'https://moonrepo.dev/schemas/project.json'
 
 # Astro app: no `vp lint`, no unit tests. `typecheck` is overridden below to
 # use `astro check` instead of the inherited `tsc -b` -> the command name stays
-# `landing:typecheck`, only its body changes. This is exactly the "same command,
+# `marketing:typecheck`, only its body changes. This is exactly the "same command,
 # different implementation" case.
 workspace:
   inheritedTasks:

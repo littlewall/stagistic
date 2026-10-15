@@ -1,4 +1,4 @@
-# Stagistic Landing Brand Assets
+# Stagistic Marketing Brand Assets
 
 ## Identity
 
@@ -15,7 +15,7 @@
 - Primrose Yellow: `#f4ca52` — action, music, and attention
 - Paper: `#f4f1ec` — script and light surfaces
 
-Use the on-dark mark against the landing header's graphite surface. A visible
+Use the on-dark mark against the marketing header's graphite surface. A visible
 `Stagistic Editor` wordmark accompanies it; the image itself is decorative in
 that lockup.
 
@@ -30,7 +30,7 @@ that lockup.
 - Interface and marketing voice: IBM Plex Sans Variable
 - Script and structural voice: Courier Prime
 
-## Landing color roles
+## Marketing color roles
 
 The canonical OKLCH tokens live in `src/styles/global.css`.
 

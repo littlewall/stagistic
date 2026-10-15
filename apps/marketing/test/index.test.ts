@@ -36,7 +36,7 @@ const readIcoDimensions = (relativePath: string) => {
     });
 };
 
-describe('landing page', () => {
+describe('marketing website', () => {
     let homeHtml = '';
     let homeCss = '';
     let musicalsHtml = '';
@@ -45,7 +45,7 @@ describe('landing page', () => {
     let syntaxHtml = '';
 
     beforeAll(() => {
-        execFileSync('moon', ['run', 'landing:build'], {
+        execFileSync('moon', ['run', 'marketing:build'], {
             cwd: new URL('../../..', import.meta.url),
             stdio: 'pipe',
         });
@@ -106,8 +106,16 @@ describe('landing page', () => {
         expect(primaryNav).toContain('aria-label="Primary"');
         expect(primaryNav).toContain('href="/editor/playwriting"');
         expect(primaryNav).toContain('href="/editor/musicals"');
-        expect(primaryNav).toContain('href="/open-source"');
-        expect(primaryNav).toContain('href="/editor/syntax"');
+        expect(primaryNav).toContain('href="/articles"');
+        expect(primaryNav).toContain('href="https://docs.stagistic.com"');
+        expect(primaryNav).toMatch(/<span\b[^>]*aria-hidden="true"[^>]*>↗<\/span>/);
+        expect(primaryNav).not.toContain('href="/open-source"');
+        expect(primaryNav).not.toContain('href="/editor/syntax"');
+
+        const footer = homeHtml.match(/<footer\b[\s\S]*?<\/footer>/)?.[0] ?? '';
+
+        expect(footer).toContain('href="/open-source"');
+        expect(footer).toContain('href="/editor/syntax"');
         expect(primaryNav).not.toContain('href="#alpha"');
         expect(homeHeader).not.toContain('Early alpha');
         expect(homeHeader).toContain('<a href="https://editor.stagistic.app" class="navCta"');
@@ -188,12 +196,15 @@ describe('landing page', () => {
         expect(syntaxHtml).toContain('>Stagistic syntax</h1>');
     });
 
-    it('states the syntax and open-source facts directly', () => {
+    it('introduces syntax in one paragraph and links to the full documentation', () => {
+        const main = syntaxHtml.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? '';
         const normalizedSyntax = syntaxHtml.replace(/\s+/g, ' ');
         const normalizedOpenSource = openSourceHtml.replace(/\s+/g, ' ');
 
+        expect(main.match(/<p\b/g) ?? []).toHaveLength(1);
+        expect(main).toContain('href="https://docs.stagistic.com/syntax/"');
+        expect(main).not.toMatch(/<h2\b|<pre\b|<aside\b/);
         expect(normalizedSyntax).toContain('Stagistic Syntax is an open, plain-text format for theatrical plays and musicals.');
-        expect(normalizedSyntax).toContain('Formats such as <a href="https://fountain.io"');
         expect(normalizedOpenSource).toContain('runs in your browser even without an account and stores scripts locally by default.');
     });
 

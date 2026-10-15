@@ -122,7 +122,7 @@ importers:
         specifier: ^0.9.10
         version: 0.9.10(prettier@3.9.6)(typescript@5.9.3)
 
-  apps/landing:
+  apps/marketing:
     dependencies:
       '@astrojs/react':
         specifier: ^7.0.0
