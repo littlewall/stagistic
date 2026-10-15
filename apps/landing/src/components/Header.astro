@@ -4,9 +4,12 @@ interface Props {
 }
 
 const {variant = 'full'} = Astro.props;
+// File-format builds include .html in Astro.url; public links omit it.
+const currentPath = Astro.url.pathname.replace(/(?:\.html|\/)$/, '') || '/';
 const navLinks = [
     {href: '/editor/playwriting', label: 'Playwriting'},
     {href: '/editor/musicals', label: 'Musicals'},
+    {href: '/articles', label: 'Articles'},
     {href: '/open-source', label: 'Open Source'},
     {href: '/editor/syntax', label: 'Syntax'},
 ];
@@ -22,7 +25,7 @@ const navLinks = [
         {variant === 'full' && (
                 <nav class="navLinks" aria-label="Primary">
                     {navLinks.map((link) => (
-                        <a href={link.href} class="navLink">
+                        <a href={link.href} class="navLink" aria-current={currentPath === link.href ? 'page' : undefined}>
                             {link.label}
                         </a>
                     ))}
@@ -94,7 +97,8 @@ const navLinks = [
     text-underline-offset: 0.3rem;
     transition: text-decoration-color 0.15s ease;
 
-    &:hover {
+    &:hover,
+    &[aria-current] {
         text-decoration-color: currentcolor;
     }
 
@@ -146,11 +150,17 @@ const navLinks = [
 
 @media (max-width: 40em) {
     .navInner {
+        flex-wrap: wrap;
+        gap: 0.75rem;
         width: calc(100% - 2rem);
+        height: auto;
+        padding: 0.75rem 0;
     }
 
     .navLinks {
-        display: none;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        width: 100%;
     }
 }
 </style>

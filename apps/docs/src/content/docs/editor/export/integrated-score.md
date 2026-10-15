@@ -37,7 +37,7 @@ Character filtering can exclude a musical number's scene. That number is then ou
 
 ## If an attached score is missing from the preview
 
-Check that the block at the end of the musical passage is included in the output too. If that block is a **Note**, leave **Show notes** on in Content. If character filtering excludes the scene containing the ending, include that scene by adjusting the character selection or turn off the filter.
+Check that the block at the end of the musical passage is included in the output too. If that block uses **Notes**, leave **Show notes** on in Content. If character filtering excludes the scene containing the ending, include that scene by adjusting the character selection or turn off the filter.
 
 Then wait for the updated preview and check the score pages again. The missing-attachment notice checks whether a file is attached; its absence does not guarantee that a passage's ending is included in your output.
 

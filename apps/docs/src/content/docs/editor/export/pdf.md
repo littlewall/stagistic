@@ -35,7 +35,7 @@ If the view says **Add script content to generate a PDF preview**, return to **E
 
 ## Include or omit notes
 
-Expand **Content** and use **Show notes** to include or omit **Note** blocks written in the script. This does not control the comment threads in the Comments panel.
+Expand **Content** and use **Show notes** to include or omit **Notes** blocks written in the script. This does not control the comment threads in the Comments panel.
 
 ## Related tasks
 

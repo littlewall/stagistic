@@ -1,0 +1,19 @@
+---
+import ArticleIndex from '../../components/articles/ArticleIndex.astro';
+import {getPublishedArticles} from '../../data/articles';
+import Layout from '../../layouts/Layout.astro';
+
+const articles = await getPublishedArticles();
+---
+
+<Layout
+    title="Articles - Stagistic"
+    description="Practical articles on playwriting, musical theatre, and preparing scripts for the stage."
+    canonical={new URL('/articles', Astro.site).href}
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Articles', url: new URL('/articles', Astro.site).href},
+    ]}
+>
+    <ArticleIndex articles={articles} />
+</Layout>

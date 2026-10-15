@@ -9,6 +9,7 @@ interface Props {
     title: string;
     description: string;
     canonical?: string;
+    ogType?: 'website' | 'article';
     header?: 'full' | 'subpage';
     softwareApplication?: boolean;
     breadcrumbs?: Array<{
@@ -17,7 +18,15 @@ interface Props {
     }>;
 }
 
-const {title, description, canonical, header = 'full', softwareApplication, breadcrumbs} = Astro.props;
+const {
+    title,
+    description,
+    canonical,
+    ogType = 'website',
+    header = 'full',
+    softwareApplication,
+    breadcrumbs,
+} = Astro.props;
 const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
 ---
 
@@ -33,7 +42,7 @@ const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
 
         <meta property="og:title" content={title}>
         <meta property="og:description" content={description}>
-        <meta property="og:type" content="website">
+        <meta property="og:type" content={ogType}>
         <meta property="og:url" content={pageUrl}>
         <meta property="og:image" content={new URL('/opengraph.jpg', Astro.site).href}>
         <meta property="og:image:alt" content="Stagistic Editor preview">
@@ -42,10 +51,12 @@ const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
         <meta property="og:image:type" content="image/jpeg">
         <meta property="og:site_name" content="Stagistic">
         <meta name="twitter:card" content="summary_large_image">
+        <slot name="head" />
         <script is:inline>
             document.documentElement.classList.add('js');
         </script>
         <script
+            is:inline
             async
             src="https://betterlytics.io/analytics.js"
             data-site-id="stagistic-muplea51">

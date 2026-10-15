@@ -12,13 +12,9 @@ hero:
       icon: right-arrow
 ---
 
-:::note[Documentation in progress]
-The guide is being prepared. These pages introduce the topics it will cover.
-:::
-
 ## Writing with Stagistic
 
-The [user guide](/editor/getting-started/) follows the work of writing a theatre or musical script. You do not need to learn the text format to use the editor.
+Start with [Getting started](/editor/getting-started/) to write a first scene with Robin and Alex, or choose the topic that matches your next task. The guides follow the work of writing, organizing and preparing a theatre or musical script.
 
 - [Scripts and files](/editor/scripts/) — creating, organizing and keeping your work.
 - [Writing your script](/editor/writing/) — dialogue, stage directions and the flow between them.
@@ -30,6 +26,6 @@ The [user guide](/editor/getting-started/) follows the work of writing a theatre
 
 ## About the text format
 
-The separate [Syntax documentation](/syntax/) describes the text format for people working with files and integrations.
+The separate [Syntax documentation](/syntax/) describes the text format for implementers and people working in plain-text editors.
 
 [Visit the Stagistic website](https://stagistic.com).
