@@ -1,5 +1,6 @@
 ---
 import type {CollectionEntry} from 'astro:content';
+import ArticleFooter from '../components/articles/ArticleFooter.astro';
 import ArticleMeta from '../components/articles/ArticleMeta.astro';
 import Layout from './Layout.astro';
 
@@ -41,6 +42,7 @@ const canonical = new URL(`/articles/${article.id}`, Astro.site).href;
                 <ArticleMeta data={article.data} />
             </header>
             <div class="articleBody"><slot /></div>
+            <ArticleFooter />
         </article>
     </main>
 </Layout>
