@@ -1,4 +1,6 @@
 ---
+import styles from './HeaderEditorMenu.module.css';
+
 interface Props {
     currentPath: string;
 }
@@ -11,16 +13,16 @@ const links = [
 const isCurrent = links.some(({href}) => href === currentPath);
 ---
 
-<details class="editorMenu" data-editor-menu>
-    <summary class="menuTrigger" data-current={isCurrent || undefined}>
+<details class={styles.editorMenu} data-editor-menu>
+    <summary class={styles.menuTrigger} data-current={isCurrent || undefined}>
         Editor
-        <svg class="chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false">
+        <svg class={styles.chevron} viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false">
             <path d="m3 4.5 3 3 3-3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
     </summary>
-    <div class="menuPanel">
+    <div class={styles.menuPanel}>
         {links.map(({href, label}) => (
-            <a href={href} class="menuLink" aria-current={currentPath === href ? 'page' : undefined}>{label}</a>
+            <a href={href} class={styles.menuLink} aria-current={currentPath === href ? 'page' : undefined}>{label}</a>
         ))}
     </div>
 </details>
@@ -47,88 +49,3 @@ document.querySelectorAll<HTMLDetailsElement>('[data-editor-menu]').forEach(menu
     });
 });
 </script>
-
-<style>
-.editorMenu {
-    position: relative;
-}
-
-.menuTrigger {
-    display: flex;
-    gap: 0.375rem;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.8125rem;
-    color: var(--color-stage-nav-text);
-    list-style: none;
-    text-decoration-line: underline;
-    text-decoration-color: transparent;
-    text-underline-offset: 0.3rem;
-
-    &::-webkit-details-marker {
-        display: none;
-    }
-
-    &:hover,
-    &[data-current] {
-        text-decoration-color: currentcolor;
-    }
-
-    &:focus-visible {
-        border-radius: 0.125rem;
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 4px;
-    }
-}
-
-.chevron {
-    width: 0.75rem;
-    height: 0.75rem;
-}
-
-.editorMenu[open] .chevron {
-    transform: rotate(180deg);
-}
-
-.menuPanel {
-    position: absolute;
-    z-index: 1;
-    top: calc(100% + 0.75rem);
-    right: 0;
-    min-width: 11rem;
-    padding: 0.375rem;
-    background: var(--color-stage-bg);
-    border: 1px solid var(--color-stage-border);
-    border-radius: 0.375rem;
-}
-
-.menuLink {
-    display: block;
-    padding: 0.625rem 0.75rem;
-    font-size: 0.8125rem;
-    color: var(--color-stage-nav-text);
-    text-decoration: none;
-    border-radius: 0.25rem;
-
-    &:hover {
-        background: color-mix(in oklch, var(--color-stage-nav-text) 8%, transparent);
-    }
-
-    &[aria-current] {
-        text-decoration: underline;
-        text-underline-offset: 0.25rem;
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: -2px;
-    }
-}
-
-@media (max-width: 40em) {
-    .menuPanel {
-        right: auto;
-        left: 0;
-    }
-}
-</style>
