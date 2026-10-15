@@ -107,6 +107,48 @@
     font-family: var(--sl-font-system);
 }
 
+:root .sidebar .container-sidebar {
+    max-height: none;
+}
+
+#drawer > .content {
+    display: flex;
+    flex-direction: column;
+}
+
+#drawer .body {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+}
+
+:root .sidebar .container-sidebar,
+#drawer .body {
+    scrollbar-color: var(--sl-color-gray-3) transparent;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+}
+
+/* Explicit WebKit widths keep the scroll affordance visible with overlay scrollbars. */
+@supports selector(::-webkit-scrollbar) {
+    :root .sidebar .container-sidebar,
+    #drawer .body {
+        scrollbar-color: auto;
+        scrollbar-width: auto;
+    }
+
+    :root .sidebar .container-sidebar::-webkit-scrollbar,
+    #drawer .body::-webkit-scrollbar {
+        width: .5rem;
+    }
+
+    :root .sidebar .container-sidebar::-webkit-scrollbar-thumb,
+    #drawer .body::-webkit-scrollbar-thumb {
+        background-color: var(--sl-color-gray-3);
+        border-radius: .25rem;
+    }
+}
+
 .sidebar .entry-link {
     height: auto;
     min-height: 1.875rem;

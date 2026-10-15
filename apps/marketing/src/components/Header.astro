@@ -1,4 +1,7 @@
 ---
+import {getPublishedArticles} from '../data/articles';
+import HeaderEditorMenu from './HeaderEditorMenu.astro';
+
 interface Props {
     variant?: 'full' | 'subpage';
 }
@@ -6,12 +9,7 @@ interface Props {
 const {variant = 'full'} = Astro.props;
 // File-format builds include .html in Astro.url; public links omit it.
 const currentPath = Astro.url.pathname.replace(/(?:\.html|\/)$/, '') || '/';
-const navLinks = [
-    {href: '/editor/playwriting', label: 'Playwriting'},
-    {href: '/editor/musicals', label: 'Musicals'},
-    {href: '/articles', label: 'Articles'},
-    {href: 'https://docs.stagistic.com', label: 'Docs', external: true},
-];
+const hasPublishedArticles = variant === 'full' && (await getPublishedArticles()).length > 0;
 ---
 
 <header class="nav">
@@ -23,12 +21,15 @@ const navLinks = [
 
         {variant === 'full' && (
                 <nav class="navLinks" aria-label="Primary">
-                    {navLinks.map((link) => (
-                        <a href={link.href} class="navLink" aria-current={currentPath === link.href ? 'page' : undefined}>
-                            {link.label}
-                            {link.external && <span aria-hidden="true">↗</span>}
+                    <HeaderEditorMenu currentPath={currentPath} />
+                    {hasPublishedArticles && (
+                        <a href="/articles" class="navLink" aria-current={currentPath === '/articles' ? 'page' : undefined}>
+                            Articles
                         </a>
-                    ))}
+                    )}
+                    <a href="https://docs.stagistic.com" class="navLink">
+                        Docs <span aria-hidden="true">↗</span>
+                    </a>
                 </nav>
             )}
 
