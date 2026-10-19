@@ -1,50 +1,16 @@
-import {fileURLToPath} from 'node:url';
-
-import react from '@vitejs/plugin-react';
-import {defineConfig} from 'vite-plus';
+import {createEditorViteConfig} from '@stagistic/vite-config';
 
 const host = process.env.TAURI_DEV_HOST;
-const pgliteDataPath = fileURLToPath(
-    new URL('./node_modules/@electric-sql/pglite/dist/pglite.data', import.meta.url),
-);
-const pgliteWasmPath = fileURLToPath(
-    new URL('./node_modules/@electric-sql/pglite/dist/pglite.wasm', import.meta.url),
-);
 
-export default defineConfig({
-    plugins: [react()],
-    css: {
-        transformer: 'lightningcss',
-    },
-    optimizeDeps: {
-        exclude: ['@electric-sql/pglite'],
-    },
-    resolve: {
-        // One Yjs instance across editor, engine and replicas (duplicates break Y type identity).
-        dedupe: [
-            'yjs',
-            'y-protocols',
-            'lib0',
-        ],
-        tsconfigPaths: true,
-        alias: [{find: /^@pglite-data/, replacement: pgliteDataPath}, {find: /^@pglite-wasm/, replacement: pgliteWasmPath}],
-    },
-    clearScreen: false,
-    server: {
-        host: host || true,
-        port: 5173,
-        strictPort: true,
-        hmr: host
-            ? {
-                protocol: 'ws',
-                host,
-                port: 5173,
-            }
-            : undefined,
-    },
-    build: {
-        target: 'es2022',
-        outDir: 'dist',
-        sourcemap: true,
-    },
+export default createEditorViteConfig(import.meta.url, {
+    host: host || true,
+    port: 5173,
+    strictPort: true,
+    hmr: host
+        ? {
+            protocol: 'ws',
+            host,
+            port: 5173,
+        }
+        : undefined,
 });

@@ -8,31 +8,16 @@ import {createServer} from 'node:http';
 import {WebSocketServer} from 'ws';
 
 import {
-    collectGarbage,
     hocuspocus,
     metrics,
     PER_MESSAGE_DEFLATE,
     PORT,
-    resetMetrics,
-    snapshot,
     STRATEGY,
 } from './core';
+import {handleMetricsRequest} from './metricsRequest';
 
 const server = createServer(async (request, response) => {
-    const respond = (body: unknown) => {
-        response.writeHead(200, {'content-type': 'application/json'});
-        response.end(JSON.stringify(body));
-    };
-
-    if (request.url === '/metrics') {
-        respond(await snapshot());
-    } else if (request.url === '/metrics/reset') {
-        resetMetrics();
-        respond({ok: true});
-    } else if (request.url === '/gc') {
-        collectGarbage();
-        respond({ok: true});
-    } else {
+    if (!await handleMetricsRequest(request, response)) {
         response.end('sync-spike');
     }
 });

@@ -123,18 +123,25 @@ export const useCharacterColorPickerState = ({
     };
 
     return {
-        resolvedColorSaturation,
+        control: {
+            state: {
+                isActionDisabled: isColorActionDisabled,
+                isPickerOpen: isColorPickerOpen,
+                currentColorHex: currentCharacterColorHex,
+                colorDraftHex,
+                pickerColorValue,
+                presetColorHexes,
+                resolvedColorSaturation,
+            },
+            refs: {triggerRef: colorTriggerRef},
+            actions: {
+                togglePicker: toggleColorPicker,
+                setPickerOpen: setIsColorPickerOpen,
+                applyColor,
+                resetColor,
+                setDraftHue: setColorDraftHue,
+            },
+        },
         currentCharacterColorHex,
-        colorTriggerRef,
-        isColorPickerOpen,
-        setIsColorPickerOpen,
-        colorDraftHex,
-        pickerColorValue,
-        presetColorHexes,
-        setColorDraftHue,
-        toggleColorPicker,
-        closeColorPicker,
-        applyColor,
-        resetColor,
     };
 };

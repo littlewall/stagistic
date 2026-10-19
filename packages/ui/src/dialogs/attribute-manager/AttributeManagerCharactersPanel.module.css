@@ -52,25 +52,13 @@
     }
 }
 .workspace {
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-    flex: 1 1 auto;
-    min-height: 0;
+    composes: workspace from './attributeManagerWorkspace.module.css';
 }
 .browser {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
-    border-right: 1px solid var(--color-border);
+    composes: browser from './attributeManagerWorkspace.module.css';
 }
 .searchRow {
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-    padding: var(--space-xl);
+    composes: search-row from './attributeManagerWorkspace.module.css';
 }
 .detailIdentity {
     display: flex;
@@ -78,24 +66,12 @@
     align-items: center;
     min-width: 0;
 }
-.addButton,
-.deleteButton {
-    flex: 0 0 auto;
-    box-sizing: border-box;
-    width: var(--control-trigger-height);
-    height: var(--control-trigger-height);
-    padding: 0;
-    color: var(--color-text-muted);
+.addButton {
+    composes: icon-action from './attributeManagerWorkspace.module.css';
 }
 
 .actionIcon {
-    display: block;
-    flex: 0 0 auto;
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
-    fill: none;
-    stroke: currentcolor;
-    stroke-width: 2;
+    composes: action-icon from './attributeManagerWorkspace.module.css';
 }
 
 .addButton:hover:not(:disabled) {
@@ -107,25 +83,11 @@
     opacity: .5;
 }
 .searchField {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-
-    & input {
-        padding-left: calc(var(--space-xl) + var(--icon-size-md));
-        background: var(--color-surface);
-    }
+    composes: search-field from './attributeManagerWorkspace.module.css';
 }
 
 .searchIcon {
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-    top: calc((var(--control-trigger-height) - var(--icon-size-md)) / 2);
-    left: var(--space-md);
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
-    color: var(--color-text-muted);
+    composes: search-icon from './attributeManagerWorkspace.module.css';
 }
 
 .browserList {
@@ -136,29 +98,11 @@
 }
 
 .listItem {
-    cursor: pointer;
+    composes: list-item from './attributeManagerWorkspace.module.css';
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--space-md);
     align-items: center;
-    width: 100%;
-    padding: var(--space-md) var(--space-lg);
-    color: var(--color-text-muted);
-    text-align: left;
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-sm);
-    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
-
-    &:hover {
-        color: var(--color-text);
-        background: var(--menu-item-hover-bg);
-    }
-
-    &.selected {
-        color: var(--color-text);
-        background: var(--menu-item-active-bg);
-    }
 }
 
 .characterColor {
@@ -179,27 +123,15 @@
 }
 
 .emptyList {
-    padding: var(--space-xl) var(--space-lg);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
+    composes: empty-list from './attributeManagerWorkspace.module.css';
 }
 
 .detail {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    background: var(--color-surface);
+    composes: detail from './attributeManagerWorkspace.module.css';
 }
 
 .detailHeader {
-    display: flex;
-    gap: var(--space-lg);
-    align-items: center;
-    justify-content: space-between;
-    min-height: 76px;
-    padding: var(--space-xl) var(--space-2xl);
+    composes: detail-header from './attributeManagerWorkspace.module.css';
 }
 
 .detailColorControl,
@@ -209,22 +141,11 @@
 }
 
 .deleteButton {
-    color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
-
-    &:hover:not(:disabled) {
-        color: var(--color-status-danger);
-        background: color-mix(in oklch, var(--color-status-danger) 16%, transparent);
-    }
+    composes: icon-action delete-button from './attributeManagerWorkspace.module.css';
 }
 
 .detailTitle {
-    overflow: hidden;
-    margin: 0;
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    composes: detail-title from './attributeManagerWorkspace.module.css';
 }
 
 .detailNavigation {
@@ -234,27 +155,18 @@
 }
 
 .detailBody {
-    overflow-y: auto;
+    composes: detail-body from './attributeManagerWorkspace.module.css';
     display: flex;
-    flex: 1 1 auto;
     flex-direction: column;
     gap: var(--space-2xl);
-    min-height: 0;
-    padding: var(--space-2xl);
-    border-top: 1px solid var(--color-border);
 }
 
 .nameForm {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    max-width: 65ch;
+    composes: name-form from './attributeManagerWorkspace.module.css';
 }
 
 .error {
-    margin: 0;
-    font-size: var(--font-size-sm);
-    color: var(--color-status-danger);
+    composes: error from './attributeManagerWorkspace.module.css';
 }
 
 .outlineSection,
@@ -263,12 +175,7 @@
 }
 
 .emptyDetail {
-    display: grid;
-    flex: 1 1 auto;
-    place-items: center;
-    min-height: 0;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
+    composes: empty-detail from './attributeManagerWorkspace.module.css';
 }
 
 @media (max-width: 45em) {
@@ -279,21 +186,14 @@
     .workspaceTabs {
         white-space: nowrap;
     }
-
-    .workspace {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
-    }
-
-    .browser {
-        border-right: 0;
-        border-bottom: 1px solid var(--color-border);
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .workspaceTab,
-    .listItem {
+    .workspaceTab {
         transition-duration: 0ms;
     }
+}
+
+.selected {
+    composes: selected from './attributeManagerWorkspace.module.css';
 }

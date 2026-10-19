@@ -22,6 +22,7 @@ import type {PersistentMusicRef} from '../contracts';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {getMusicSuggestions} from './musicSuggestions/musicSuggestionModel';
 import styles from './MusicSuggestionsOverlay.module.css';
+import {handleSuggestionKeyDown} from './suggestionKeyboardNavigation';
 
 interface MusicDraftSuggestionsOverlayProps {
     editor: TiptapEditor | null,
@@ -205,39 +206,13 @@ const MusicDraftSuggestionsOverlay = ({
         }
 
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? 0 : (previous + 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? suggestions.length - 1 : (previous + suggestions.length - 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key !== 'Enter' || activeSuggestionIndex === null) {
-                return;
-            }
-
-            const activeSuggestion = suggestions[activeSuggestionIndex];
-
-            if (!activeSuggestion) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            selectMusic(activeSuggestion);
+            handleSuggestionKeyDown({
+                event,
+                suggestions,
+                activeSuggestionIndex,
+                setActiveSuggestionIndex,
+                onSelect: selectMusic,
+            });
         };
 
         document.addEventListener('keydown', handleKeyDown, true);

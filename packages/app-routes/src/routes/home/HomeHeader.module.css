@@ -1,3 +1,7 @@
+/*
+ * Route layout: the home header brand lockup (mark + product name), used only here.
+ */
+
 .brand {
     display: inline-flex;
     gap: var(--space-md);

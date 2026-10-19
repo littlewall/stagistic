@@ -1,3 +1,8 @@
+/*
+ * Route layout: the title page logo field (preview + file details), specific to
+ * the document info panel.
+ */
+
 .field {
     display: flex;
     flex-direction: column;

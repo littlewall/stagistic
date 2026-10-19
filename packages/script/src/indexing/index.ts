@@ -1,3 +1,4 @@
+export {indexCharacterTags} from './indexCharacterTags';
 export type {
     BuildScriptBlockIndexResult,
     IndexedScriptBlock,

@@ -1,6 +1,7 @@
 ---
 import {clsx} from 'clsx';
 import CreatorNote from '../components/CreatorNote.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
 import {landingFaqs} from '../data/landingFaqs';
 import {landingFeatures} from '../data/landingFeatures';
@@ -214,21 +215,5 @@ import s from './index.module.css';
         </section>
     </div>
 
-    <script>
-    const observer = new IntersectionObserver(
-        entries => {
-            for (const entry of entries) {
-                if (entry.isIntersecting) {
-                    entry.target.setAttribute('data-visible', '');
-                    observer.unobserve(entry.target);
-                }
-            }
-        },
-        {threshold: 0.06, rootMargin: '-20px'},
-    );
-
-    document.querySelectorAll('[data-reveal]').forEach(el => {
-        observer.observe(el);
-    });
-    </script>
+    <ScrollReveal />
 </Layout>

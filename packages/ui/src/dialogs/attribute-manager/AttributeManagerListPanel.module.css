@@ -1,48 +1,22 @@
 .panel {
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-    flex: 1 1 auto;
+    composes: workspace from './attributeManagerWorkspace.module.css';
     height: 100%;
-    min-height: 0;
 }
 
 .browser {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
-    border-right: 1px solid var(--color-border);
+    composes: browser from './attributeManagerWorkspace.module.css';
 }
 
 .searchRow {
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-    padding: var(--space-xl);
+    composes: search-row from './attributeManagerWorkspace.module.css';
 }
 
 .searchField {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-
-    & input {
-        padding-left: calc(var(--space-xl) + var(--icon-size-md));
-        background: var(--color-surface);
-    }
+    composes: search-field from './attributeManagerWorkspace.module.css';
 }
 
 .searchIcon {
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-    top: calc((var(--control-trigger-height) - var(--icon-size-md)) / 2);
-    left: var(--space-md);
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
-    color: var(--color-text-muted);
+    composes: search-icon from './attributeManagerWorkspace.module.css';
 }
 
 .addButton {
@@ -63,14 +37,8 @@
 }
 
 .actionIcon {
-    display: block;
-    flex: 0 0 auto;
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
+    composes: action-icon from './attributeManagerWorkspace.module.css';
     color: currentcolor;
-    fill: none;
-    stroke: currentcolor;
-    stroke-width: 2;
 }
 
 .browserList {
@@ -103,29 +71,11 @@
 }
 
 .listItem {
-    cursor: pointer;
+    composes: list-item from './attributeManagerWorkspace.module.css';
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--space-md);
     align-items: center;
-    width: 100%;
-    padding: var(--space-md) var(--space-lg);
-    color: var(--color-text-muted);
-    text-align: left;
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-sm);
-    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
-
-    &:hover {
-        color: var(--color-text);
-        background: var(--menu-item-hover-bg);
-    }
-
-    &.selected {
-        color: var(--color-text);
-        background: var(--menu-item-active-bg);
-    }
 }
 
 .listItemWithoutNumber {
@@ -173,27 +123,16 @@
 }
 
 .emptyList {
-    padding: var(--space-xl) var(--space-lg);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
+    composes: empty-list from './attributeManagerWorkspace.module.css';
 }
 
 .detail {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    background: var(--color-surface);
+    composes: detail from './attributeManagerWorkspace.module.css';
 }
 
 .detailHeader {
-    display: flex;
+    composes: detail-header from './attributeManagerWorkspace.module.css';
     gap: var(--space-xl);
-    align-items: center;
-    justify-content: space-between;
-    min-height: 76px;
-    padding: var(--space-xl) var(--space-2xl);
 }
 
 .detailIdentity {
@@ -210,13 +149,7 @@
 }
 
 .detailTitle {
-    overflow: hidden;
-    margin: 0;
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    composes: detail-title from './attributeManagerWorkspace.module.css';
 }
 
 .detailTitleWrapped {
@@ -273,36 +206,13 @@
 }
 
 .detailBody {
-    overflow-y: auto;
-    flex: 1 1 auto;
-    min-height: 0;
-    padding: var(--space-2xl);
-    border-top: 1px solid var(--color-border);
+    composes: detail-body from './attributeManagerWorkspace.module.css';
 }
 
 .emptyDetail {
-    display: grid;
-    flex: 1 1 auto;
-    place-items: center;
-    min-height: 0;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
+    composes: empty-detail from './attributeManagerWorkspace.module.css';
 }
 
-@media (max-width: 45em) {
-    .panel {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
-    }
-
-    .browser {
-        border-right: 0;
-        border-bottom: 1px solid var(--color-border);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .listItem {
-        transition-duration: 0ms;
-    }
+.selected {
+    composes: selected from './attributeManagerWorkspace.module.css';
 }

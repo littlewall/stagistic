@@ -5,15 +5,13 @@
 import {Server} from '@hocuspocus/server';
 
 import {
-    collectGarbage,
     hocuspocus,
     metrics,
     PER_MESSAGE_DEFLATE,
     PORT,
-    resetMetrics,
-    snapshot,
     STRATEGY,
 } from './core';
+import {handleMetricsRequest} from './metricsRequest';
 
 hocuspocus.configuration.extensions.push({
     onConnect: () => {
@@ -27,20 +25,7 @@ hocuspocus.configuration.extensions.push({
         return Promise.resolve();
     },
     async onRequest({request, response}) {
-        const respond = (body: unknown) => {
-            response.writeHead(200, {'content-type': 'application/json'});
-            response.end(JSON.stringify(body));
-        };
-
-        if (request.url === '/metrics') {
-            respond(await snapshot());
-        } else if (request.url === '/metrics/reset') {
-            resetMetrics();
-            respond({ok: true});
-        } else if (request.url === '/gc') {
-            collectGarbage();
-            respond({ok: true});
-        } else {
+        if (!await handleMetricsRequest(request, response)) {
             return;
         }
 

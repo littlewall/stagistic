@@ -182,7 +182,7 @@ describe('MiniScriptEditor', () => {
             throw new Error('Expected scene heading text.');
         }
 
-        expect(scene.dataset.sceneNumber).toBe('1');
+        expect(scene.dataset.sceneNumber).toBe('1.');
         expect(getComputedStyle(scene, '::before').content).toBe('"1."');
         expect(scene.textContent).toBe('Inside the lighthouse');
 
@@ -190,7 +190,7 @@ describe('MiniScriptEditor', () => {
         setCollapsedSelection(sceneText, 0);
         await userEvent.keyboard('{Backspace}');
 
-        expect(scene.dataset.sceneNumber).toBe('1');
+        expect(scene.dataset.sceneNumber).toBe('1.');
         expect(scene.textContent).toBe('Inside the lighthouse');
     });
 

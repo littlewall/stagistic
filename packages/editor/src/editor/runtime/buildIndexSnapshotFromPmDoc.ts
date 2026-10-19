@@ -1,9 +1,9 @@
 import {
     canBlockTypeHaveCharacterTags,
-    collectCharacterTags,
     collectMusicAtoms,
     deriveMusicTimeline,
     extractCharacterKeys,
+    indexCharacterTags,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
     type MusicBlockInput,
@@ -16,27 +16,6 @@ import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {isCharacterBlockType, readNormalizedRefsFromAttrs} from '../characters/characterRefUtils';
 import {isScriptBlockNodeName, normalizeBlockNodeType} from '../tiptap/scriptCore';
 
-const toTagCharacterRefs = (node: ProseMirrorNode): IndexedScriptCharacterRef[] | null => {
-    const idByKey = new Map<string, string | null>();
-    const tags = collectCharacterTags(node.toJSON() as ScriptNode);
-
-    tags.forEach(tag => {
-        const existing = idByKey.get(tag.key);
-
-        if (existing === undefined || (existing === null && tag.characterId)) {
-            idByKey.set(tag.key, tag.characterId);
-        }
-    });
-
-    if (idByKey.size === 0) {
-        return null;
-    }
-
-    return Array.from(idByKey.entries())
-        .toSorted((a, b) => a[0].localeCompare(b[0]))
-        .map(([key, characterId]) => ({key, characterId}));
-};
-
 const toCharacterRefs = (
     node: ProseMirrorNode,
     blockType: string,
@@ -44,7 +23,7 @@ const toCharacterRefs = (
     attrs: Record<string, unknown> | null | undefined,
 ): IndexedScriptCharacterRef[] | null => {
     if (!isCharacterBlockType(blockType)) {
-        return canBlockTypeHaveCharacterTags(blockType) ? toTagCharacterRefs(node) : null;
+        return canBlockTypeHaveCharacterTags(blockType) ? indexCharacterTags(node.toJSON() as ScriptNode) : null;
     }
 
     const refsByKey = readNormalizedRefsFromAttrs(attrs);

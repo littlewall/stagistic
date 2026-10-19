@@ -173,6 +173,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     hasMeasuredLayout = !usedFallbackMeasurements;
 
                     storage.state = pagination;
+                    storage.measuredOptionsVersion = hasMeasuredLayout ? optionsVersion : undefined;
 
                     const tr = view.state.tr.setMeta(paginationKey, {
                         decorations,

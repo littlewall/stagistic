@@ -3,3 +3,4 @@ export {createReactiveCollection, toDomainCollectionValue} from './createReactiv
 export {createRepositoryStoreRegistry} from './createRepositoryStoreRegistry';
 export {createReactiveCollectionStatusStore} from './reactiveCollectionStatus';
 export {useReactiveCollectionStatus, useReactiveSourceSnapshot} from './useReactiveCollectionState';
+export {useReactiveRecord} from './useReactiveRecord';

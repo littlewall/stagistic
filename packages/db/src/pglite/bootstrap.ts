@@ -5,6 +5,7 @@ import {requireValue} from '@stagistic/shared';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 
 import {dbSchema} from '../schema';
+import {loadPgliteFsBundle, loadPgliteWasmModule} from './assets';
 import {runPgliteMigrations} from './migrations';
 
 export type LocalDb = PgliteDatabase<typeof dbSchema>;
@@ -126,15 +127,7 @@ export const createPgliteBootstrap = ({
 
     const loadFsBundle = async () => {
         if (!fsBundlePromise) {
-            fsBundlePromise = (async () => {
-                const response = await fetch(fsBundleUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load PGlite fs bundle (${response.status})`);
-                }
-
-                return response.blob();
-            })();
+            fsBundlePromise = loadPgliteFsBundle(fsBundleUrl);
         }
 
         return fsBundlePromise;
@@ -142,17 +135,7 @@ export const createPgliteBootstrap = ({
 
     const loadWasmModule = async () => {
         if (!wasmModulePromise) {
-            wasmModulePromise = (async () => {
-                const response = await fetch(wasmUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load PGlite wasm (${response.status})`);
-                }
-
-                const bytes = await response.arrayBuffer();
-
-                return WebAssembly.compile(bytes);
-            })();
+            wasmModulePromise = loadPgliteWasmModule(wasmUrl);
         }
 
         return wasmModulePromise;

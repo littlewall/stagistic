@@ -62,7 +62,7 @@ const EditorProbe = () => {
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (initialValue: ScriptDocument = searchFixture()) => {
+const renderEditor = async (initialValue: ScriptDocument = searchFixture()) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -80,6 +80,9 @@ const renderEditor = (initialValue: ScriptDocument = searchFixture()) => {
     );
 
     mountedRoots.push(root);
+
+    // `autoFocus` focuses the editor one frame after mount; let it land before a test moves focus.
+    await poll(() => document.activeElement?.closest('[data-editor="true"]'), 'initial editor focus');
 };
 
 const poll = async <T,>(get: () => T | null | undefined, label: string): Promise<T> => {
@@ -163,7 +166,7 @@ afterEach(() => {
 
 describe('editor search', () => {
     it('searches instantly and navigates while retaining input focus and editor selection', async () => {
-        renderEditor();
+        await renderEditor();
 
         const editor = await getEditor();
         const input = await findSearchInput();
@@ -187,7 +190,7 @@ describe('editor search', () => {
     });
 
     it('does not navigate on composing Enter', async () => {
-        renderEditor();
+        await renderEditor();
 
         const input = await findSearchInput();
 
@@ -198,7 +201,7 @@ describe('editor search', () => {
     });
 
     it('shows zero results, disables navigation, and restores the search icon once cleared search loses focus', async () => {
-        renderEditor();
+        await renderEditor();
 
         const input = await findSearchInput();
 
@@ -223,7 +226,7 @@ describe('editor search', () => {
     });
 
     it('replaces the active result and then every remaining one from the replace row', async () => {
-        renderEditor();
+        await renderEditor();
 
         const editor = await getEditor();
         const input = await findSearchInput();
@@ -250,7 +253,7 @@ describe('editor search', () => {
     });
 
     it('opens and focuses the replace row through the replace shortcut', async () => {
-        renderEditor();
+        await renderEditor();
 
         await getEditor();
         await findSearchInput();
@@ -276,7 +279,7 @@ describe('editor search', () => {
     });
 
     it('narrows results with match case', async () => {
-        renderEditor();
+        await renderEditor();
 
         const input = await findSearchInput();
 
@@ -290,7 +293,7 @@ describe('editor search', () => {
     });
 
     it('wraps button navigation between the last and first results', async () => {
-        renderEditor();
+        await renderEditor();
 
         const input = await findSearchInput();
 
@@ -304,7 +307,7 @@ describe('editor search', () => {
     });
 
     it('focuses and selects search through the find shortcut without stealing it from other inputs', async () => {
-        renderEditor();
+        await renderEditor();
 
         const editor = await getEditor();
         const input = await findSearchInput();
@@ -346,7 +349,7 @@ describe('editor search', () => {
     });
 
     it('expands a collapsed scene and scrolls the active match into view', async () => {
-        renderEditor(collapsedSearchFixture());
+        await renderEditor(collapsedSearchFixture());
 
         const editor = await getEditor();
         const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => undefined);
@@ -363,7 +366,7 @@ describe('editor search', () => {
     });
 
     it('keeps the search input focused after pointer navigation', async () => {
-        renderEditor();
+        await renderEditor();
 
         const input = await findSearchInput();
 
@@ -381,7 +384,7 @@ describe('editor search', () => {
     });
 
     it('uses only background intensity to distinguish the active result', async () => {
-        renderEditor();
+        await renderEditor();
 
         const input = await findSearchInput();
 

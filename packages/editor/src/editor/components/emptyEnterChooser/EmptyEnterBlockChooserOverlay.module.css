@@ -42,21 +42,7 @@
 }
 
 .icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--bubble-menu-icon-size);
-    height: var(--bubble-menu-icon-size);
-
-    & :global(svg) {
-        width: var(--bubble-menu-icon-size);
-        height: var(--bubble-menu-icon-size);
-        fill: none;
-        stroke: currentcolor;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-width: 1.6;
-    }
+    composes: icon from '../BubbleMenuIcon.module.css';
 }
 
 .shortcut {

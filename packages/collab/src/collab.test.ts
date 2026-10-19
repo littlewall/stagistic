@@ -227,9 +227,13 @@ describe.skipIf(!available)('collab service', () => {
             setRecord(document, 'script', 'script', {title: 'The Tragedy of Hamlet', subtitle: null});
         });
 
-        await eventually(async () => (await database.projection.query('select 1 from script_characters where id = $1', ['c1'])).rowCount === 1);
+        const readScript = async () => (await database.collab.query<{title: string, updated_at: Date}>('select title, updated_at from scripts where id = $1', ['doc-1'])).rows[0];
 
-        const script = (await database.collab.query<{title: string, updated_at: Date}>('select title, updated_at from scripts where id = $1', ['doc-1'])).rows[0];
+        // The title is written after the records projection commits, so wait for both.
+        await eventually(async () => (await database.projection.query('select 1 from script_characters where id = $1', ['c1'])).rowCount === 1);
+        await eventually(async () => (await readScript()).title === 'The Tragedy of Hamlet');
+
+        const script = await readScript();
 
         expect(script.title).toBe('The Tragedy of Hamlet');
         expect(script.updated_at.getTime()).toBeGreaterThan(before.getTime());

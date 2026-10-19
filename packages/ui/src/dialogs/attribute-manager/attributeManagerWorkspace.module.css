@@ -1,0 +1,179 @@
+.workspace {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.browser {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
+    border-right: 1px solid var(--color-border);
+}
+
+.search-row {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-xl);
+}
+
+.search-field {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+
+    & input {
+        padding-left: calc(var(--space-xl) + var(--icon-size-md));
+        background: var(--color-surface);
+    }
+}
+
+.search-icon {
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+    top: calc((var(--control-trigger-height) - var(--icon-size-md)) / 2);
+    left: var(--space-md);
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    color: var(--color-text-muted);
+}
+
+.list-item {
+    cursor: pointer;
+    gap: var(--space-md);
+    align-items: center;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-text-muted);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--menu-item-hover-bg);
+    }
+
+    &.selected {
+        color: var(--color-text);
+        background: var(--menu-item-active-bg);
+    }
+}
+
+.empty-list {
+    padding: var(--space-xl) var(--space-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.detail {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: var(--color-surface);
+}
+
+.detail-title {
+    overflow: hidden;
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.detail-body {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+}
+
+.empty-detail {
+    display: grid;
+    flex: 1 1 auto;
+    place-items: center;
+    min-height: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.name-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 65ch;
+}
+
+.error {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-status-danger);
+}
+
+.detail-header {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 76px;
+    padding: var(--space-xl) var(--space-2xl);
+}
+
+.icon-action {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: var(--control-trigger-height);
+    height: var(--control-trigger-height);
+    padding: 0;
+    color: var(--color-text-muted);
+}
+
+.action-icon {
+    display: block;
+    flex: 0 0 auto;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+}
+
+@media (max-width: 45em) {
+    .workspace {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
+    }
+
+    .browser {
+        border-right: 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .list-item {
+        transition-duration: 0ms;
+    }
+}
+
+.delete-button {
+    color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
+
+    &:hover:not(:disabled) {
+        color: var(--color-status-danger);
+        background: color-mix(in oklch, var(--color-status-danger) 16%, transparent);
+    }
+}

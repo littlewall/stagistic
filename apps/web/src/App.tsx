@@ -8,14 +8,10 @@ import {
     ScriptExportRoute,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
+    useAppBootstrap,
 } from '@stagistic/app-routes';
 import {createAuthClient} from '@stagistic/auth-client';
-import type {SyncEngineClient} from '@stagistic/sync-engine';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
-import {
-    useEffect,
-    useState,
-} from 'react';
 import {
     Navigate,
     Route,
@@ -25,58 +21,21 @@ import {
 import {cloudConfig} from './cloud/cloudConfig';
 import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
-import type {ScriptRepository} from './repo';
 import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
 const authClient = cloudConfig ? createAuthClient({authUrl: cloudConfig.authUrl}) : null;
+const bootstrapOptions = {
+    prepareDatabase: prepareLocalDbWithProgress,
+    loadRepository: () => import('./repo'),
+};
 
 const BootedApp = () => {
-    const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
-    const [documentSync, setDocumentSync] = useState<SyncEngineClient | null>(null);
-    const [bootProgress, setBootProgress] = useState(0);
-    const [bootStatus, setBootStatus] = useState('Preparing');
-
-    useEffect(() => {
-        let isActive = true;
-
-        const boot = async () => {
-            if (document?.fonts) {
-                await document.fonts.ready;
-            }
-
-            if (!isActive) {
-                return;
-            }
-
-            await prepareLocalDbWithProgress(update => {
-                if (!isActive) {
-                    return;
-                }
-
-                setBootProgress(update.progress);
-                setBootStatus(update.label);
-            });
-
-            if (!isActive) {
-                return;
-            }
-
-            const repositoryModule = await import('./repo');
-
-            if (!isActive) {
-                return;
-            }
-
-            setDocumentSync(repositoryModule.documentSync);
-            setScriptRepository(repositoryModule.scriptRepository);
-        };
-
-        void boot();
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
+    const {
+        scriptRepository,
+        documentSync,
+        bootProgress,
+        bootStatus,
+    } = useAppBootstrap(bootstrapOptions);
 
     if (!scriptRepository) {
         return <LoaderOverlay label="Starting Stagistic" messages={[bootStatus]} progress={bootProgress} />;
