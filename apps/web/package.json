@@ -19,6 +19,7 @@
         "yjs": "^13.6.33"
     },
     "devDependencies": {
+        "@stagistic/vite-config": "workspace:*",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^6.0.3",

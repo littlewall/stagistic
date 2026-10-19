@@ -1,7 +1,8 @@
 # yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-# Config-only package (ESLint, oxlint, stylelint configs) -> opt out of all inherited tasks.
+# Config package (ESLint, oxlint, stylelint configs): no lint/typecheck of its own;
+# `test` covers the agent hook script (scripts/agent-fix.mjs).
 workspace:
   inheritedTasks:
-    exclude: ['lint', 'typecheck', 'test']
+    exclude: ['lint', 'typecheck']

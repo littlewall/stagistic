@@ -20,6 +20,7 @@
         "yjs": "^13.6.33"
     },
     "devDependencies": {
+        "@stagistic/vite-config": "workspace:*",
         "@stagistic/editor": "workspace:*",
         "@tiptap/core": "3.19.0",
         "@tiptap/extension-bold": "3.19.0",

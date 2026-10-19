@@ -6,14 +6,31 @@ import {dbSchema} from '../schema';
 
 export type TestDb = PgliteDatabase<typeof dbSchema>;
 
+let migratedDataDir: Promise<Blob> | null = null;
+
+/** Migrate once per worker; each test db starts from a copy of that data dir. */
+export const loadMigratedDataDir = () => {
+    migratedDataDir ??= (async () => {
+        const template = await PGlite.create();
+
+        await runPgliteMigrations(template);
+
+        const dataDir = await template.dumpDataDir('none');
+
+        await template.close();
+
+        return dataDir;
+    })();
+
+    return migratedDataDir;
+};
+
 /**
  * Ephemeral in-memory PGlite with the full migration set applied.
  * Used by node tests for SQL-level correctness (NOT IndexedDB flush).
  */
 export const createTestDb = async (): Promise<{db: TestDb, client: PGlite}> => {
-    const client = await PGlite.create();
-
-    await runPgliteMigrations(client);
+    const client = await PGlite.create({loadDataDir: await loadMigratedDataDir()});
 
     const db = drizzle({client, schema: dbSchema});
 
