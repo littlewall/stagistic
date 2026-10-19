@@ -29,6 +29,7 @@ export {MusicCommandsExtension} from './music/MusicCommandsExtension';
 export {getMusicComposeFromState, MusicInputExtension} from './MusicInputExtension';
 export {MusicNumberingExtension} from './MusicNumberingExtension';
 export {MusicRailExtension} from './musicRail/MusicRailExtension';
+export {ReadOnlyGuardExtension} from './ReadOnlyGuardExtension';
 export {SceneCommandsExtension} from './SceneCommandsExtension';
 export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 

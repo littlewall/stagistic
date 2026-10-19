@@ -50,6 +50,7 @@ export const AttributeManagerCharactersPanel = ({
     onDeleteGroup,
     onSetGroupColor,
     onChangeGroupMemberIds,
+    isReadOnly = false,
 }: AttributeManagerCharactersPanelProps) => {
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>(initialWorkspaceId);
     const [selectedCharacterId, setSelectedCharacterId] = useItemSelection(characters, initialSelectedCharacterId);
@@ -126,7 +127,7 @@ export const AttributeManagerCharactersPanel = ({
             loadingLabel={isCharactersWorkspace ? 'Loading characters…' : 'Loading groups…'}
             noMatchesLabel={isCharactersWorkspace ? 'No characters match your search.' : 'No groups match your search.'}
             isLoading={isLoading}
-            isCreateDisabled={isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup}
+            isCreateDisabled={isReadOnly || (isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup)}
             onSelectItem={isCharactersWorkspace ? setSelectedCharacterId : setSelectedGroupId}
             onCreate={isCharactersWorkspace ? () => setIsCreateCharacterOpen(true) : () => setIsCreateGroupOpen(true)}
         />
@@ -136,6 +137,7 @@ export const AttributeManagerCharactersPanel = ({
         <section
             className={styles.detail}
             aria-label={`${activeWorkspace.label} detail`}
+            inert={isReadOnly}
             data-selected-group-id={!isCharactersWorkspace ? selectedGroupId ?? undefined : undefined}
         >
             {isCharactersWorkspace && selectedCharacter && selectedConfirmedCharacter ? (

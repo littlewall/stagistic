@@ -624,9 +624,17 @@ describe('ScriptCommentsSidebar', () => {
                 message('m3', 'g3', 'Three'),
             ],
         });
-        const group = () => findButton('3 comments', panel() ?? document);
+        const group = () => {
+            const root = panel();
 
-        await page.elementLocator(await poll(() => group(), 'folded group')).click();
+            return root ? findButton('3 comments', root) : null;
+        };
+
+        await poll(() => group(), 'folded group');
+        // Scoped: the editor's block marker carries the same accessible name.
+        await page.elementLocator(await poll(panel, 'comments panel'))
+            .getByRole('button', {name: '3 comments', exact: true})
+            .click();
         await page.elementLocator(await poll(() => card('g1'), 'g1 card')).click();
         await poll(() => getCommentsState(editor.state).activeThreadId === 'g1', 'g1 active');
 

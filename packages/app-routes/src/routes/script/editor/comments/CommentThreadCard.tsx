@@ -34,6 +34,8 @@ export interface CommentThreadCardProps {
     onDeleteMessage: (messageId: string) => void,
     onToggleResolved: () => void,
     onDeleteThread: () => void,
+    /** A saved draft or version: comments can be read but not changed. */
+    isReadOnly?: boolean,
     measureRef?: Ref<HTMLElement>,
 }
 
@@ -78,6 +80,50 @@ const cardClassName = (active: boolean, highlighted: boolean, resolved: boolean)
     resolved && styles.resolved,
 );
 
+const ThreadQuote = ({quote, showQuote}: {quote: string, showQuote: boolean}) => (
+    showQuote && quote ? <blockquote className={styles.quote}>{quote}</blockquote> : null
+);
+
+const ThreadActionsMenu = ({
+    isResolved,
+    onEdit,
+    onToggleResolved,
+    onDeleteThread,
+}: {
+    isResolved: boolean,
+    onEdit: () => void,
+    onToggleResolved: () => void,
+    onDeleteThread: () => void,
+}) => (
+    <MoreActionsMenu
+        aria-label="More actions"
+        items={[
+            {id: 'edit', label: 'Edit'},
+            {id: 'status', label: isResolved ? 'Reopen' : 'Resolve'},
+            {
+                id: 'delete',
+                label: 'Delete',
+                tone: 'danger',
+            },
+        ]}
+        onAction={id => {
+            if (id === 'edit') {
+                onEdit();
+
+                return;
+            }
+
+            if (id === 'status') {
+                onToggleResolved();
+
+                return;
+            }
+
+            onDeleteThread();
+        }}
+    />
+);
+
 export const CommentThreadCard = ({
     thread,
     messages,
@@ -95,6 +141,7 @@ export const CommentThreadCard = ({
     onDeleteMessage,
     onToggleResolved,
     onDeleteThread,
+    isReadOnly = false,
     measureRef,
 }: CommentThreadCardProps) => {
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -107,7 +154,7 @@ export const CommentThreadCard = ({
         return (
             <article ref={measureRef} className={classNames(styles.card, styles.active)} aria-label="New comment" data-comment-draft="true">
                 <div className={styles.content}>
-                    {showQuote && quote ? <blockquote className={styles.quote}>{quote}</blockquote> : null}
+                    <ThreadQuote quote={quote} showQuote={showQuote} />
                     <Composer label="Comment" submitLabel="Comment" autoFocus onSubmit={onSubmitDraft} onCancel={onCancelDraft} />
                 </div>
             </article>
@@ -145,39 +192,22 @@ export const CommentThreadCard = ({
                         <span className={styles.label}>{isResolved ? 'Resolved' : 'Comment'}</span>
                         <span className={styles.headerMeta}>
                             <time className={styles.time}>{time}</time>
-                            <MoreActionsMenu
-                                aria-label="More actions"
-                                items={[
-                                    {id: 'edit', label: 'Edit'},
-                                    {id: 'status', label: isResolved ? 'Reopen' : 'Resolve'},
-                                    {
-                                        id: 'delete',
-                                        label: 'Delete',
-                                        tone: 'danger',
-                                    },
-                                ]}
-                                onAction={id => {
-                                    if (id === 'edit') {
+                            {isReadOnly ? null : (
+                                <ThreadActionsMenu
+                                    isResolved={isResolved}
+                                    onEdit={() => {
                                         if (root) {
                                             setEditingMessageId(root.id);
                                         }
-
-                                        return;
-                                    }
-
-                                    if (id === 'status') {
-                                        onToggleResolved();
-
-                                        return;
-                                    }
-
-                                    onDeleteThread();
-                                }}
-                            />
+                                    }}
+                                    onToggleResolved={onToggleResolved}
+                                    onDeleteThread={onDeleteThread}
+                                />
+                            )}
                         </span>
                     </header>
                     <div className={styles.content}>
-                        {showQuote && quote ? <blockquote className={styles.quote}>{quote}</blockquote> : null}
+                        <ThreadQuote quote={quote} showQuote={showQuote} />
                         {root ? (
                             <MessageBody
                                 message={root}
@@ -193,6 +223,7 @@ export const CommentThreadCard = ({
                                         key={message.id}
                                         message={message}
                                         isEditing={editingMessageId === message.id}
+                                        isReadOnly={isReadOnly}
                                         onStartEdit={() => setEditingMessageId(message.id)}
                                         onStopEdit={() => setEditingMessageId(null)}
                                         onEdit={body => onEditMessage(message.id, body)}
@@ -201,7 +232,7 @@ export const CommentThreadCard = ({
                                 ))}
                             </div>
                         ) : null}
-                        {isResolved ? null : (
+                        {isResolved || isReadOnly ? null : (
                             <div className={styles.replyComposer}>
                                 <Composer label="Reply" submitLabel="Reply" placeholder="Write a reply…" onSubmit={onReply} />
                             </div>

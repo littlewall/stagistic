@@ -140,6 +140,11 @@ export {
     type ScriptView,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
+export {
+    ScriptStateMenu,
+    type ScriptStateMenuItem,
+    type ScriptStateMenuProps,
+} from './layout/header/ScriptStateMenu';
 export {SidebarActionsGroup} from './layout/SidebarActionsGroup';
 export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMiniHeader';
 
@@ -168,11 +173,24 @@ export {
     type RenameScriptSubmit,
 } from './dialogs/script/RenameScriptModal';
 export {
+    RestoreScriptStateModal,
+    type RestoreScriptStateModalProps,
+    type RestoreScriptStateMode,
+} from './dialogs/script/RestoreScriptStateModal';
+export {SaveScriptStateModal, type SaveScriptStateModalProps} from './dialogs/script/SaveScriptStateModal';
+export {
     ScriptSettingsModal,
     type SettingsNavGroup,
     type SettingsNavItem,
     type SettingsNavSubItem,
 } from './dialogs/script/ScriptSettingsModal';
+export type {ScriptStateDetails, ScriptStateKind} from './dialogs/script/ScriptStateDetailsFields';
+export {
+    type ScriptStateRecord,
+    ScriptStatesModal,
+    type ScriptStatesModalProps,
+    type ScriptStateUpdate,
+} from './dialogs/script/ScriptStatesModal';
 export type {NewScriptShape} from './dialogs/script/types';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────

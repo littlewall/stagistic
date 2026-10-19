@@ -60,8 +60,6 @@ const createRepository = () => {
             saveCalls.push(settings);
 
             if (shouldFail) {
-                shouldFail = false;
-
                 return Promise.reject(new Error('disk full'));
             }
 
@@ -73,7 +71,13 @@ const createRepository = () => {
         deleteScriptSettings: () => Promise.resolve(),
     } as unknown as ScriptRepository;
 
-    return {repository, saveCalls};
+    return {
+        repository,
+        saveCalls,
+        allowSaves: () => {
+            shouldFail = false;
+        },
+    };
 };
 
 const Harness = ({repository}: {repository: ScriptRepository}) => {
@@ -125,7 +129,11 @@ afterEach(() => {
 
 describe('useScriptEditorSettingsDraft', () => {
     it('retains toggle and formatting changes after failure and retries them together', async () => {
-        const {repository, saveCalls} = createRepository();
+        const {
+            repository,
+            saveCalls,
+            allowSaves,
+        } = createRepository();
         const host = document.createElement('div');
         const root = createRoot(host);
 
@@ -136,15 +144,20 @@ describe('useScriptEditorSettingsDraft', () => {
 
         await userEvent.click(host.querySelector('[data-testid="toggle"]') as HTMLButtonElement);
         await userEvent.click(host.querySelector('[data-testid="format"]') as HTMLButtonElement);
+        /*
+         * Saves fail until allowed: under load the debounced save may fire
+         * between the clicks, so the toggle alone can fail first.
+         */
         await waitFor(() => host.textContent?.includes('false:true:error') ?? false);
 
-        expect(saveCalls).toHaveLength(1);
+        const failedSaveCount = saveCalls.length;
 
+        allowSaves();
         await userEvent.click(host.querySelector('[data-testid="retry"]') as HTMLButtonElement);
         await waitFor(() => host.textContent?.includes('false:true:saved') ?? false);
 
-        expect(saveCalls).toHaveLength(2);
-        expect(saveCalls[1]).toMatchObject({
+        expect(saveCalls).toHaveLength(failedSaveCount + 1);
+        expect(saveCalls.at(-1)).toMatchObject({
             initialPages: {castAndPlace: {showOutline: false}},
             blocks: {dialogue: {isBold: true}},
         });

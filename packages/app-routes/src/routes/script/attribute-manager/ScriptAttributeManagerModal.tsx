@@ -17,6 +17,7 @@ import {AddMusicModal} from '../editor/music/AddMusicModal';
 import {DeleteMusicModal} from '../editor/music/DeleteMusicModal';
 import type {useScriptMusicState} from '../editor/music/useScriptMusicState';
 import {DeleteSceneHeadingModal} from '../editor/scene/DeleteSceneHeadingModal';
+import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import type {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
@@ -82,6 +83,7 @@ export const ScriptAttributeManagerModal = ({
     persistMusicTitleDraft,
     onDeleteMusic,
 }: ScriptAttributeManagerModalProps) => {
+    const {isReadOnly} = useScriptReadOnlyState();
     const {music: musicCatalog} = musicState;
     const [isAddMusicOpen, setIsAddMusicOpen] = useState(false);
     const [createdMusicId, setCreatedMusicId] = useState<string | null>(null);
@@ -99,8 +101,9 @@ export const ScriptAttributeManagerModal = ({
                         detailTypeLabel="Scene"
                         emptyListLabel="No scenes yet"
                         emptyDetailLabel="Select a scene"
+                        isReadOnly={isReadOnly}
                         renderDetailAction={item => {
-                            if (item.id === firstSceneHeadingBlockId) {
+                            if (isReadOnly || item.id === firstSceneHeadingBlockId) {
                                 return null;
                             }
 
@@ -157,6 +160,7 @@ export const ScriptAttributeManagerModal = ({
                         onDeleteGroup={characters.handleDeleteGroup}
                         onSetGroupColor={characters.handleSetGroupColor}
                         onChangeGroupMemberIds={characters.handleReplaceGroupMembers}
+                        isReadOnly={isReadOnly}
                     />
                 ) : null}
                 {activePanelId === ATTRIBUTE_MANAGER_PANEL_MUSIC ? (
@@ -169,12 +173,13 @@ export const ScriptAttributeManagerModal = ({
                         emptyListLabel="No music yet"
                         emptyDetailLabel="Select music"
                         search={{ariaLabel: 'Search music', placeholder: 'Search music'}}
-                        createAction={{
+                        createAction={isReadOnly ? undefined : {
                             ariaLabel: 'Create music',
                             tooltipLabel: 'Create music',
                             onPress: () => setIsAddMusicOpen(true),
                         }}
-                        renderDetailAction={item => (
+                        isReadOnly={isReadOnly}
+                        renderDetailAction={item => (isReadOnly ? null : (
                             <Tooltip label={`Delete ${item.title}`} placement="left">
                                 <Button
                                     className={styles.deleteButton}
@@ -187,7 +192,7 @@ export const ScriptAttributeManagerModal = ({
                                     <TrashIcon className={styles.actionIcon} aria-hidden="true" />
                                 </Button>
                             </Tooltip>
-                        )}
+                        ))}
                         renderDetail={item => {
                             const music = musicCatalog.find(candidate => candidate.id === item.id);
 
@@ -215,6 +220,7 @@ export const ScriptAttributeManagerModal = ({
                         onCreatePlace={placeState.createPlace}
                         onRenamePlace={placeState.renamePlace}
                         onDeletePlace={placeState.deletePlace}
+                        isReadOnly={isReadOnly}
                     />
                 ) : null}
             </AttributeManagerModal>

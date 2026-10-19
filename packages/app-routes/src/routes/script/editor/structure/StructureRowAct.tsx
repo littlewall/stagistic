@@ -18,6 +18,7 @@ const ActRowContent = memo(({
     onNamePreview,
     onNamePreviewClear,
     onDelete,
+    isReadOnly = false,
 }: StructureRowActContentProps) => {
     // Set by Escape so the following blur discards the draft instead of committing.
     const revertOnBlurRef = useRef(false);
@@ -79,7 +80,8 @@ const ActRowContent = memo(({
                     type="text"
                     className={clsx(styles.actTitleInput, styles.actTitleDisplay)}
                     value={namePreview ?? name}
-                    aria-label={`Rename act ${name}`}
+                    readOnly={isReadOnly}
+                    aria-label={isReadOnly ? `Act ${name}` : `Rename act ${name}`}
                     onChange={event => {
                         handleNameChange(event.target.value);
                     }}
@@ -100,21 +102,23 @@ const ActRowContent = memo(({
                         }
                     }}
                 />
-                <button
-                    type="button"
-                    className={styles.actDeleteButton}
-                    aria-label={`Delete act ${name}`}
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }}
-                    onClick={event => {
-                        event.stopPropagation();
-                        onDelete(blockId);
-                    }}
-                >
-                    ×
-                </button>
+                {isReadOnly ? null : (
+                    <button
+                        type="button"
+                        className={styles.actDeleteButton}
+                        aria-label={`Delete act ${name}`}
+                        onMouseDown={event => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }}
+                        onClick={event => {
+                            event.stopPropagation();
+                            onDelete(blockId);
+                        }}
+                    >
+                        ×
+                    </button>
+                )}
             </div>
         </>
     );
@@ -142,6 +146,7 @@ export const StructureRowAct = memo(({index, ...content}: StructureRowActProps) 
         type: ACT_DND_TYPE,
         accept: [SCENE_DND_TYPE],
         sensors: [],
+        disabled: content.isReadOnly,
     });
 
     return (

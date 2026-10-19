@@ -3,6 +3,7 @@ export {
     ScriptRepositoryProvider,
     useScriptRepository,
     useScriptsContext,
+    useSnapshotViews,
 } from './ScriptRepositoryProvider';
 export type {
     RecentScriptsState,

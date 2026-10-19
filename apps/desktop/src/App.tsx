@@ -39,6 +39,11 @@ const AppRoutes = () => {
                 <Route path="editor" element={<ScriptEditorRoute />} />
                 <Route path="export" element={<ScriptExportRoute />} />
             </Route>
+            <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
+                <Route index element={<Navigate to="editor" replace />} />
+                <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="export" element={<ScriptExportRoute />} />
+            </Route>
             <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -52,6 +57,7 @@ const App = () => {
         bootStatus,
     } = useAppBootstrap(bootstrapOptions);
     const scriptRepository = services?.scriptRepository ?? null;
+    const snapshotViews = services?.snapshotViews ?? null;
 
     /*
      * Portable backup snapshots into the app data folder: periodic while running,
@@ -80,7 +86,10 @@ const App = () => {
     }
 
     return (
-        <ScriptRepositoryProvider repository={scriptRepository}>
+        <ScriptRepositoryProvider
+            repository={scriptRepository}
+            snapshotViews={snapshotViews}
+        >
             <ToastProvider>
                 <GlobalModalsProvider>
                     <AppRoutes />

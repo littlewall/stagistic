@@ -54,6 +54,7 @@ const Editor = ({
     editorZoom = 1,
     surfaceCache,
     liveStore: providedLiveStore,
+    isReadOnly = false,
     children,
 }: EditorProps & {children?: ReactNode}) => {
     const {
@@ -187,6 +188,7 @@ const Editor = ({
         onRequestConvertScene,
         commentCallbacksRef,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
+        isReadOnly,
     });
     const initialDoc = useInitialEditorContent(initialContentSignature, resolvedInitialValue);
     const {editor} = useScriptEditorInstance({
@@ -195,6 +197,7 @@ const Editor = ({
         extensions,
         content: initialDoc,
         characterColorRefs: surfaceRefs,
+        isReadOnly,
     });
 
     useEffect(() => {
@@ -282,6 +285,7 @@ const Editor = ({
                         <EditorActCommandsProvider value={actCommands}>
                             <EditorShell
                                 isCanvasReady={isInitialCanvasReady}
+                                isReadOnly={isReadOnly}
                                 canvas={{
                                     autoFocus,
                                     editor,

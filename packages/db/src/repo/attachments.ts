@@ -105,8 +105,12 @@ export const createAttachmentHandlers = ({
 
         await syncDb();
 
-        if (previousStorageKey) {
-            await fileStorage.delete(previousStorageKey).catch(() => {
+        const [replacedStorageKey] = previousStorageKey
+            ? await dbQueries.filterUnreferencedStorageKeys(db, [previousStorageKey])
+            : [];
+
+        if (replacedStorageKey) {
+            await fileStorage.delete(replacedStorageKey).catch(() => {
                 console.error('[attachments] Failed to clean up a replaced blob.');
             });
         }
@@ -164,8 +168,12 @@ export const createAttachmentHandlers = ({
 
         await syncDb();
 
-        if (removal.storageKey) {
-            await fileStorage.delete(removal.storageKey).catch(() => {
+        const [removedStorageKey] = removal.storageKey
+            ? await dbQueries.filterUnreferencedStorageKeys(db, [removal.storageKey])
+            : [];
+
+        if (removedStorageKey) {
+            await fileStorage.delete(removedStorageKey).catch(() => {
                 console.error('[attachments] Failed to clean up a removed blob.');
             });
         }

@@ -179,3 +179,9 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
 }
+
+.downloadGroup {
+    display: inline-flex;
+    gap: var(--space-xs);
+    align-items: center;
+}

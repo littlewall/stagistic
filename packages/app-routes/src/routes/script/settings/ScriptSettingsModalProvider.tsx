@@ -1,6 +1,14 @@
-import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
+import {
+    getScriptSnapshotLabel,
+    useScriptActions,
+    useScriptRepository,
+} from '@stagistic/app-core';
 import {isApplePlatform} from '@stagistic/shared';
-import {ScriptSettingsModal, useKeyedFieldDrafts} from '@stagistic/ui';
+import {
+    Notice,
+    ScriptSettingsModal,
+    useKeyedFieldDrafts,
+} from '@stagistic/ui';
 import {type ReactNode, useMemo} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
@@ -16,11 +24,13 @@ import {useScriptEditorSettingsDraft} from '../drafts/useScriptEditorSettingsDra
 import {useScriptTitleDraft} from '../drafts/useScriptTitleDraft';
 import {useTitlePageDraft} from '../drafts/useTitlePageDraft';
 import {useScriptMusicState} from '../editor/music/useScriptMusicState';
+import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {ScriptCharactersProvider} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {ScriptEditorSettingsPanel} from './panels';
 import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
+import styles from './ScriptSettingsModalProvider.module.css';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 
@@ -29,6 +39,7 @@ const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
+    const {isReadOnly, snapshot} = useScriptReadOnlyState();
     const {deleteScript, renameScriptTitle} = useScriptActions();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
@@ -219,32 +230,39 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     onToggleExpand={toggleExpanded}
                 >
                     <DraftSaveError error={draftSaveError} onRetry={retryFailedDrafts} />
-                    <ScriptEditorSettingsPanel
-                        panelId={activePanelId}
-                        resolvedScriptSettings={resolvedScriptSettings}
-                        settingsOverride={effectiveScriptSettingsDraft}
-                        blockLabelByType={BLOCK_LABEL_BY_TYPE}
-                        shortcutPrefix={shortcutPrefix}
-                        elementsHandlers={{
-                            onResetBlockSettings: resetBlockSettings,
-                            onUpdateBlockSettings: updateBlockSettings,
-                        }}
-                        visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
-                        structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
-                        pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
-                        headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
-                        initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
-                        titlePageHandlers={{
-                            titlePageSettings: titlePageDraft,
-                            scriptTitle: scriptTitleDraft,
-                            onUpdateScriptTitle: updateScriptTitle,
-                            onUpdateTitlePage: updateTitlePage,
-                        }}
-                        dangerZoneHandlers={{
-                            scriptTitle: scriptTitleDraft,
-                            onDeleteScript: handleDeleteScript,
-                        }}
-                    />
+                    {isReadOnly ? (
+                        <Notice variant="empty" className={styles.readOnlyNotice}>
+                            {snapshot ? `${getScriptSnapshotLabel(snapshot)} is read-only.` : 'These settings are read-only.'}
+                        </Notice>
+                    ) : null}
+                    <div className={styles.panelContent} inert={isReadOnly}>
+                        <ScriptEditorSettingsPanel
+                            panelId={activePanelId}
+                            resolvedScriptSettings={resolvedScriptSettings}
+                            settingsOverride={effectiveScriptSettingsDraft}
+                            blockLabelByType={BLOCK_LABEL_BY_TYPE}
+                            shortcutPrefix={shortcutPrefix}
+                            elementsHandlers={{
+                                onResetBlockSettings: resetBlockSettings,
+                                onUpdateBlockSettings: updateBlockSettings,
+                            }}
+                            visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
+                            structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
+                            pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                            headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
+                            initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
+                            titlePageHandlers={{
+                                titlePageSettings: titlePageDraft,
+                                scriptTitle: scriptTitleDraft,
+                                onUpdateScriptTitle: updateScriptTitle,
+                                onUpdateTitlePage: updateTitlePage,
+                            }}
+                            dangerZoneHandlers={{
+                                scriptTitle: scriptTitleDraft,
+                                onDeleteScript: handleDeleteScript,
+                            }}
+                        />
+                    </div>
                 </ScriptSettingsModal>
                 <ScriptAttributeManagerModal
                     currentScriptId={currentScriptId}

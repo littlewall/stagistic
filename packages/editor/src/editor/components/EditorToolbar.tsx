@@ -37,6 +37,8 @@ interface EditorToolbarProps {
     editor: TiptapEditor | null,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
     search?: EditorSearchProps,
+    /** Only search remains: no formatting, block types, undo or replace. */
+    isReadOnly?: boolean,
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
@@ -57,6 +59,7 @@ const EditorToolbar = ({
     editor,
     blockShortcuts,
     search: searchProps,
+    isReadOnly = false,
 }: EditorToolbarProps) => {
     const searchShortcuts = getToolbarShortcutLabels();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -239,15 +242,19 @@ const EditorToolbar = ({
 
     return (
         <div className={styles.toolbar} ref={toolbarRef} data-editor-toolbar="true">
-            <InlineMarksGroup state={inlineMarksState} actions={inlineMarksActions} />
-            <span className={styles.divider} aria-hidden="true" />
-            <BlockTypeSelect
-                options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
-                blockShortcuts={blockShortcuts}
-                dropdownRef={dropdownRef}
-                state={blockTypeState}
-                actions={blockTypeActions}
-            />
+            {isReadOnly ? null : (
+                <>
+                    <InlineMarksGroup state={inlineMarksState} actions={inlineMarksActions} />
+                    <span className={styles.divider} aria-hidden="true" />
+                    <BlockTypeSelect
+                        options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
+                        blockShortcuts={blockShortcuts}
+                        dropdownRef={dropdownRef}
+                        state={blockTypeState}
+                        actions={blockTypeActions}
+                    />
+                </>
+            )}
             <span className={styles.spacer} />
             <SearchControl
                 ref={inputRef}
@@ -266,7 +273,7 @@ const EditorToolbar = ({
                 isWholeWord={isWholeWord}
                 onWholeWordChange={onWholeWordChange}
                 filter={searchFilter}
-                replace={{
+                replace={isReadOnly ? undefined : {
                     isOpen: isReplaceOpen,
                     onOpenChange: onReplaceOpenChange,
                     value: replacement,

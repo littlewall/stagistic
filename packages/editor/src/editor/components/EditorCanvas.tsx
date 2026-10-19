@@ -38,6 +38,7 @@ type EditorCanvasProps = {
     scriptTitle?: string,
     draftDate?: string,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
+    isReadOnly?: boolean,
 };
 
 export const EditorCanvas = ({
@@ -53,6 +54,7 @@ export const EditorCanvas = ({
     scriptTitle = '',
     draftDate = '',
     blockShortcuts,
+    isReadOnly = false,
 }: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
 
@@ -64,19 +66,28 @@ export const EditorCanvas = ({
                 Use the toolbar or keyboard shortcuts to change block types and formatting.
             </p>
             <EditorContent className={styles.content} editor={editor} spellCheck={false} autoFocus={autoFocus} />
-            <CharacterSuggestionsOverlay
-                editor={editor}
-                canvasRef={canvasRef}
-                persistentCharacters={persistentCharacters}
-            />
-            <MusicSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />
-            <MusicDraftSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />
-            <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} blockShortcuts={blockShortcuts} />
-            <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} blockShortcuts={blockShortcuts} />
-            <SelectionToolbarOverlay editor={editor} canvasRef={canvasRef} />
+            {isReadOnly ? null : (
+                <>
+                    <CharacterSuggestionsOverlay
+                        editor={editor}
+                        canvasRef={canvasRef}
+                        persistentCharacters={persistentCharacters}
+                    />
+                    <MusicSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />
+                    <MusicDraftSuggestionsOverlay editor={editor} canvasRef={canvasRef} persistentMusic={persistentMusic} onMusicAssigned={onMusicAssigned} />
+                    <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} blockShortcuts={blockShortcuts} />
+                    <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} blockShortcuts={blockShortcuts} />
+                    <SelectionToolbarOverlay editor={editor} canvasRef={canvasRef} />
+                </>
+            )}
             <CommentMarkersOverlay editor={editor} canvasRef={canvasRef} />
             <SceneCollapseOverlay editor={editor} canvasRef={canvasRef} />
-            <MusicRangeOverlay editor={editor} canvasRef={canvasRef} onOpenMusicManager={onOpenMusicManager} onRequestRemoveMusic={onRequestRemoveMusic} />
+            <MusicRangeOverlay
+                editor={editor}
+                canvasRef={canvasRef}
+                onOpenMusicManager={onOpenMusicManager}
+                onRequestRemoveMusic={isReadOnly ? undefined : onRequestRemoveMusic}
+            />
             <HeaderFooterOverlay editor={editor} canvasRef={canvasRef} headerFooter={headerFooter} scriptTitle={scriptTitle} draftDate={draftDate} />
         </section>
     );
