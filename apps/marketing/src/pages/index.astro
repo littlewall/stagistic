@@ -71,7 +71,12 @@ import s from './index.module.css';
                             />
                         </svg>
                     </div>
-                    <div class={s.scriptExcerpt} aria-describedby="interactive-preview-description">
+                    <div
+                        class={s.scriptExcerpt}
+                        role="region"
+                        aria-label="Interactive preview of Stagistic Editor"
+                        aria-describedby="interactive-preview-description"
+                    >
                         <LandingMiniEditor client:media="(min-width: 1000px)" />
                     </div>
                 </div>

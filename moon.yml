@@ -65,6 +65,28 @@ tasks:
     options:
       cache: false
 
+  # Node tests importing the given files; the Claude Stop hook runs this command.
+  test-related:
+    command: 'vp test related --run --passWithNoTests'
+    options:
+      cache: false
+
+  # Everything before merging a feature branch: node, browser and marketing suites.
+  # One suite at a time; parallel browser suites compete for CPU and focus.
+  test-all:
+    command: 'echo "All test suites passed."'
+    deps:
+      - 'root:test'
+      - 'app-core:test-browser'
+      - 'app-routes:test-browser'
+      - 'editor:test-browser'
+      - 'ui:test-browser'
+      - 'web:test-browser'
+      - 'marketing:test'
+    options:
+      cache: false
+      runDepsInParallel: false
+
   test-watch:
     command: 'vp test watch'
     preset: 'server'

@@ -112,10 +112,9 @@ describe('AppLayout', () => {
         expect(dialogText).toContain('Stagistic Editor is in public preview.');
         expect(dialogText).toContain('Use it at your own risk.');
         expect(dialogText).toContain('stored only in this browser');
-        expect(dialogText).toContain('Sync is not available yet.');
-        expect(dialogText).toContain('Nothing you create is sent from your device.');
-        expect(dialogText).toContain('does not send analytics, telemetry, or other usage data');
-        expect(dialogText).toContain('including theme and layout');
+        expect(dialogText).not.toContain('Sync');
+        expect(dialogText).toContain('Nothing you create is sent from your device to external servers.');
+        expect(dialogText).toContain('including theme, layout or filters');
         expect(dialogText).toContain('Back up your work regularly.');
         expect(dialogText).toContain('may permanently remove it');
 
