@@ -109,7 +109,7 @@ describe('records codec', () => {
         replaceRecords(left, {characters: {a: {...hamlet, colorHex: '#f00'}, c: {key: 'HORATIO'}}}, COLLECTIONS);
         sync(left, right);
 
-        expect(Object.keys(readRecords(right, COLLECTIONS).characters).sort()).toEqual(['a', 'c']);
+        expect(Object.keys(readRecords(right, COLLECTIONS).characters).toSorted()).toEqual(['a', 'c']);
         expect(readRecords(right, COLLECTIONS).characters.a.colorHex).toBe('#f00');
     });
 
@@ -162,7 +162,7 @@ describe('records codec', () => {
         const characters = readRecords(left, COLLECTIONS).characters;
 
         expect(readRecords(right, COLLECTIONS)).toEqual(readRecords(left, COLLECTIONS));
-        expect(Object.keys(characters).sort()).toEqual(['g', 'r']);
+        expect(Object.keys(characters).toSorted()).toEqual(['g', 'r']);
         expect(characters.r.colorHex).toBe('#f00');
         expect(characters.g.memberIds).toEqual(['r']);
     });

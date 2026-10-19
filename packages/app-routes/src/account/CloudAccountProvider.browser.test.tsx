@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import {type AuthClient, PasskeyCancelledError} from '@stagistic/auth-client';
+import {requireValue} from '@stagistic/shared';
 import type {
     CloudCheckReport,
     CloudStatus,
@@ -205,7 +206,7 @@ describe('CloudAccountProvider', () => {
         await new Promise(resolve => window.setTimeout(resolve, 100));
         expect(fakes.check).toHaveBeenCalledTimes(1);
 
-        await userEvent.click([...document.querySelectorAll('button')].find(button => button.textContent === 'Sync')!);
+        await userEvent.click(requireValue([...document.querySelectorAll('button')].find(button => button.textContent === 'Sync')));
 
         await waitFor(() => fakes.apply.mock.calls.length > 0);
         expect(fakes.apply).toHaveBeenCalledWith({s1: 'keep-both'});
@@ -224,7 +225,7 @@ describe('CloudAccountProvider', () => {
         mount(fakes);
 
         await waitFor(() => document.body.textContent?.includes('Revizor'));
-        await userEvent.click([...document.querySelectorAll('button')].find(button => button.textContent === 'Cancel')!);
+        await userEvent.click(requireValue([...document.querySelectorAll('button')].find(button => button.textContent === 'Cancel')));
 
         await waitFor(() => fakes.signedOut.mock.calls.length > 0);
         expect(fakes.authSignOut).toHaveBeenCalled();
@@ -253,7 +254,7 @@ describe('CloudAccountProvider', () => {
         expect(document.body.textContent).not.toContain('cancelled');
         expect(signedIn).not.toHaveBeenCalled();
 
-        await userEvent.click(buttonNamed('Sign in with a passkey')!);
+        await userEvent.click(requireValue(buttonNamed('Sign in with a passkey')));
         await waitFor(() => signedIn.mock.calls.length === 1);
         await waitFor(() => !buttonNamed('Sign in with a passkey'));
         await waitFor(() => document.body.textContent?.includes('Synced with jan@example.com'));
@@ -274,11 +275,11 @@ describe('CloudAccountProvider', () => {
         await userEvent.click(await waitFor(() => buttonNamed('Probe settings')));
         await waitFor(() => document.body.textContent?.includes('· synced'));
 
-        await userEvent.click(buttonNamed('Add a passkey')!);
+        await userEvent.click(requireValue(buttonNamed('Add a passkey')));
         await waitFor(() => fakes.passkeys.listPasskeys.mock.calls.length === 2);
         expect(fakes.passkeys.addPasskey).toHaveBeenCalled();
 
-        await userEvent.click(buttonNamed('Remove')!);
+        await userEvent.click(requireValue(buttonNamed('Remove')));
         await waitFor(() => fakes.passkeys.deletePasskey.mock.calls.length === 1);
         expect(fakes.passkeys.deletePasskey).toHaveBeenCalledWith('p1');
     });
@@ -300,7 +301,7 @@ describe('CloudAccountProvider', () => {
         mount(fakes);
 
         await waitFor(() => promptText() === 'prompt open');
-        await userEvent.click(buttonNamed('Probe sign in')!);
+        await userEvent.click(requireValue(buttonNamed('Probe sign in')));
         await waitFor(() => promptText() === 'prompt closed');
 
         fakes.emit(status('synced'));

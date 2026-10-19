@@ -132,10 +132,20 @@ describe.skipIf(!available)('identity service', () => {
         clientIp,
     });
 
+    const latestMagicLink = () => {
+        const match = mailer.messages.at(-1)?.text.match(/https:\/\/\S+/);
+
+        if (!match) {
+            throw new Error('Expected a magic link email');
+        }
+
+        return new URL(match[0]);
+    };
+
     const signIn = async (email: string) => {
         expect((await requestMagicLink(email)).status).toBe(200);
 
-        const link = new URL((/https:\/\/\S+/).exec(mailer.messages.at(-1)!.text)![0]);
+        const link = latestMagicLink();
         const verified = await request(`/api/auth/magic-link/verify?token=${link.searchParams.get('token')}`);
         const cookie = verified.headers.getSetCookie().map(item => item.split(';')[0]).join('; ');
 
@@ -169,7 +179,12 @@ describe.skipIf(!available)('identity service', () => {
     it('keeps nothing in the DB that signs in on its own', async () => {
         expect((await requestMagicLink('polonius@example.com')).status).toBe(200);
 
-        const linkToken = new URL((/https:\/\/\S+/).exec(mailer.messages.at(-1)!.text)![0]).searchParams.get('token')!;
+        const linkToken = latestMagicLink().searchParams.get('token');
+
+        if (!linkToken) {
+            throw new Error('Expected a magic link token');
+        }
+
         const verifications = await pool.query<{identifier: string, value: string}>('select identifier, value from verification');
 
         // The magic link token is stored hashed only.

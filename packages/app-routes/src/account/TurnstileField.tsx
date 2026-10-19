@@ -1,12 +1,18 @@
 import {renderTurnstile} from '@stagistic/auth-client';
-import {useEffect, useRef} from 'react';
+import {
+    useEffect,
+    useLayoutEffect,
+    useRef,
+} from 'react';
 
 /** Turnstile widget slot for the sign-in modal; reports the token (null when expired). */
 export const TurnstileField = ({siteKey, onToken}: {siteKey: string, onToken: (token: string | null) => void}) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const onTokenRef = useRef(onToken);
 
-    onTokenRef.current = onToken;
+    useLayoutEffect(() => {
+        onTokenRef.current = onToken;
+    }, [onToken]);
 
     useEffect(() => {
         const container = containerRef.current;

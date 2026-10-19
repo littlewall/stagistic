@@ -24,7 +24,7 @@ export const ScriptWorkspaceRoute = () => {
         storageError,
     } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
-    const editorSnapshotStore = useMemo(() => createEditorSnapshotStore(), [scriptId]);
+    const {store: editorSnapshotStore} = useMemo(() => ({scriptId, store: createEditorSnapshotStore()}), [scriptId]);
     const pendingCacheDestroyRef = useRef<number | null>(null);
 
     useEffect(() => {

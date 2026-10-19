@@ -3,6 +3,27 @@ import type {CloudContext, CloudEngineHost} from './cloudSync';
 import {cloudChangedSince, localChangedSince} from './stateVectors';
 import type {CloudSyncStore} from './types';
 
+const settleTombstones = async (
+    store: CloudSyncStore,
+    api: CloudApi,
+    accountId: string,
+    cloudById: ReadonlyMap<string, Awaited<ReturnType<CloudApi['list']>>['scripts'][number]>,
+) => {
+    for (const tombstone of await store.listTombstones()) {
+        if (tombstone.accountId !== accountId) {
+            continue;
+        }
+
+        const remote = cloudById.get(tombstone.scriptId);
+
+        if (remote && remote.deletedAt === null) {
+            await api.remove(tombstone.scriptId);
+        }
+
+        await store.removeTombstone(tombstone.scriptId);
+    }
+};
+
 /*
  * One live pass over the library: settle tombstones, then sync every script
  * whose local or cloud docs moved since its last sync (state vectors), upload
@@ -42,17 +63,7 @@ export const syncLibrary = async ({
     const localIds = new Set(local.map(script => script.scriptId));
     const states = new Map((await store.listSyncStates()).map(state => [state.scriptId, state]));
 
-    for (const tombstone of await store.listTombstones()) {
-        if (tombstone.accountId === accountId) {
-            const remote = cloudById.get(tombstone.scriptId);
-
-            if (remote && remote.deletedAt === null) {
-                await api.remove(tombstone.scriptId);
-            }
-
-            await store.removeTombstone(tombstone.scriptId);
-        }
-    }
+    await settleTombstones(store, api, accountId, cloudById);
 
     for (const script of local) {
         const state = states.get(script.scriptId);

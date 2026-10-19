@@ -82,7 +82,7 @@ const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.listScrip
     });
 
     if (credits.size > 0) {
-        settings.credits = [...credits.entries()].sort(([left], [right]) => left - right).map(([, credit]) => credit);
+        settings.credits = [...credits.entries()].toSorted(([left], [right]) => left - right).map(([, credit]) => credit);
     }
 
     return settings;

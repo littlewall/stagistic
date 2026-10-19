@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     afterEach,
     describe,
@@ -95,7 +96,7 @@ describe('useEditorAutosave pagination snapshots', () => {
 
         await waitFor(() => refreshed.length === 1);
 
-        const initialPages = refreshed[0].metadata!.pageCount!;
+        const initialPages = requireValue(requireValue(refreshed[0].metadata).pageCount);
         const commands = editor.commands as {updatePaginationSettings?: (settings: {pageHeight: number}) => boolean};
 
         commands.updatePaginationSettings?.({pageHeight: 50});
@@ -156,7 +157,7 @@ describe('useEditorAutosave pagination snapshots', () => {
         await waitFor(() => refreshed.length === 2);
         paginationStorage(editor).flushRecalc?.();
 
-        expect(refreshed[1].metadata?.pageCount).toBeGreaterThan(refreshed[0].metadata!.pageCount!);
+        expect(refreshed[1].metadata?.pageCount).toBeGreaterThan(requireValue(requireValue(refreshed[0].metadata).pageCount));
         expect(refreshed[1].value).toEqual(refreshed[0].value);
         expect(refreshed).toHaveLength(2);
         expect(saved).toHaveLength(0);
@@ -210,9 +211,9 @@ describe('useEditorAutosave pagination snapshots', () => {
             return new Promise(resolve => {
                 finishSave = () => resolve(true);
             });
-        }, editor => {
-            editor.commands.setContent(shortDocument());
-            paginationStorage(editor).flushRecalc?.();
+        }, fixtureEditor => {
+            fixtureEditor.commands.setContent(shortDocument());
+            paginationStorage(fixtureEditor).flushRecalc?.();
         });
 
         editor.commands.setContent(longDocument());

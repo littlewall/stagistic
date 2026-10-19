@@ -58,11 +58,7 @@ export const CharacterOutlineInput = ({
         if (isVisible) {
             autoResize();
         }
-    }, [
-        autoResize,
-        isVisible,
-        outlineDraft,
-    ]);
+    });
 
     const commitOutline = useCallback((value: string) => {
         if (!characterId || !onSetCharacterOutline || value === lastSavedRef.current) {

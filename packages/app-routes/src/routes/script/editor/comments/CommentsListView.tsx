@@ -36,7 +36,7 @@ const groupByScene = (
 ) => {
     const anchored = threads
         .filter(thread => anchors.has(thread.id))
-        .sort((left, right) => {
+        .toSorted((left, right) => {
             const leftAnchor = anchors.get(left.id);
             const rightAnchor = anchors.get(right.id);
 

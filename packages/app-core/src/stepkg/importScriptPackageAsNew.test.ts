@@ -1,5 +1,6 @@
 import type {ScriptPackageWrite, ScriptRepository} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
 import {
     describe,
@@ -63,10 +64,10 @@ const exportBytes = async (snapshot: StepkgSnapshot): Promise<Uint8Array> => {
 describe('importScriptPackageAsNew', () => {
     it('imports an exported package as an independent new script', async () => {
         const bytes = await exportBytes(baseSnapshot());
-        let captured: ScriptPackageWrite | null = null;
+        const captured: ScriptPackageWrite[] = [];
         const repository = {
             createScriptFromPackage: (input: ScriptPackageWrite) => {
-                captured = input;
+                captured.push(input);
 
                 return Promise.resolve();
             },
@@ -80,10 +81,10 @@ describe('importScriptPackageAsNew', () => {
             expect(result.title).toBe('Original');
         }
 
-        expect(captured).not.toBeNull();
-        expect(captured!.script.id).not.toBe('original-id');
-        expect(captured!.characters[0]?.id).not.toBe('char-1');
-        expect(captured!.document.content?.length).toBe(baseSnapshot().document.content?.length);
+        expect(captured).toHaveLength(1);
+        expect(requireValue(captured[0]).script.id).not.toBe('original-id');
+        expect(requireValue(captured[0]).characters[0]?.id).not.toBe('char-1');
+        expect(requireValue(captured[0]).document.content?.length).toBe(baseSnapshot().document.content?.length);
     });
 
     it('applies a title override, falling back to the package title when blank', async () => {

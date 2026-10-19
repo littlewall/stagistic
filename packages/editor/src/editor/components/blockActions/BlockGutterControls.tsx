@@ -64,8 +64,16 @@ interface BlockGutterControlsProps {
 
 export const BlockGutterControls = ({
     block,
-    actionMenu,
-    typeMenu,
+    actionMenu: {
+        triggerRef: actionTriggerRef,
+        menuRef: actionMenuRef,
+        ...actionMenu
+    },
+    typeMenu: {
+        triggerRef: typeTriggerRef,
+        menuRef: typeMenuRef,
+        ...typeMenu
+    },
 }: BlockGutterControlsProps) => {
     return (
         <div className={styles.controls}>
@@ -84,7 +92,7 @@ export const BlockGutterControls = ({
                         data-block-action-trigger="true"
                         data-block-id={block.id}
                         data-block-type={block.type}
-                        ref={actionMenu.triggerRef}
+                        ref={actionTriggerRef}
                         onPointerDown={actionMenu.onPointerDown}
                         onKeyDown={actionMenu.onKeyboardKeyDown}
                     >
@@ -117,7 +125,7 @@ export const BlockGutterControls = ({
                     data-block-id={block.id}
                     data-block-type={block.type}
                     data-drag-pending={typeMenu.isDragPending ? 'true' : undefined}
-                    ref={typeMenu.triggerRef}
+                    ref={typeTriggerRef}
                     onPointerDown={typeMenu.onPointerDown}
                     onKeyDown={typeMenu.onKeyboardKeyDown}
                 >
@@ -133,7 +141,7 @@ export const BlockGutterControls = ({
                 <BlockActionMenu
                     items={actionMenu.items}
                     isMenuAbove={actionMenu.isAbove}
-                    menuRef={actionMenu.menuRef}
+                    menuRef={actionMenuRef}
                     menuStyle={actionMenu.style}
                     onClose={actionMenu.onClose}
                     onExecute={actionMenu.onExecute}
@@ -144,7 +152,7 @@ export const BlockGutterControls = ({
                     blockType={block.type}
                     blockShortcuts={typeMenu.blockShortcuts}
                     isMenuAbove={typeMenu.isAbove}
-                    menuRef={typeMenu.menuRef}
+                    menuRef={typeMenuRef}
                     menuStyle={typeMenu.style}
                     onClose={typeMenu.onClose}
                     onMenuItemMouseDown={typeMenu.onMenuItemMouseDown}

@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {RadioChoiceGroup, type RadioChoiceOption} from '../../atoms/RadioChoiceGroup/RadioChoiceGroup';
@@ -63,13 +63,16 @@ export const CloudSyncModal = ({
     onCancel,
     onSync,
 }: CloudSyncModalProps) => {
-    const [resolutions, setResolutions] = useState<Record<string, CloudConflictResolution>>({});
+    const [resolutions, setResolutions] = useState<Record<string, CloudConflictResolution>>(() => Object.fromEntries(conflicts.map(conflict => [conflict.scriptId, 'keep-both' as const])));
     const [isPending, setIsPending] = useState(false);
 
-    useEffect(() => {
+    const [previousConflicts, setPreviousConflicts] = useState(conflicts);
+
+    if (previousConflicts !== conflicts) {
+        setPreviousConflicts(conflicts);
         // Default without loss: keep both.
         setResolutions(Object.fromEntries(conflicts.map(conflict => [conflict.scriptId, 'keep-both' as const])));
-    }, [conflicts]);
+    }
 
     const handleSync = async () => {
         setIsPending(true);

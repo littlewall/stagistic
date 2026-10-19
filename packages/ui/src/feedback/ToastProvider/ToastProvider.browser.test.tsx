@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -94,7 +95,7 @@ describe('ToastProvider', () => {
         expect(closeButtons).toHaveLength(3);
         closeButtons.forEach(button => {
             const buttonStyle = getComputedStyle(button);
-            const iconStyle = getComputedStyle(button.querySelector('svg')!);
+            const iconStyle = getComputedStyle(requireValue(button.querySelector('svg')));
 
             expect(buttonStyle.width).toBe('24px');
             expect(buttonStyle.height).toBe('24px');

@@ -5,10 +5,9 @@ import {
     UndoIcon,
 } from '@stagistic/ui';
 import {
-    useLayoutEffect,
-    useState,
 } from 'react';
 
+import {usePropState} from '../../../../../usePropState';
 import styles from '../ScriptEditorSettingsPanel.module.css';
 import type {
     ElementNumericModel,
@@ -43,19 +42,9 @@ export const ElementSettingsPanel = ({
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx
         ?? DEFAULT_EDITOR_SETTINGS.typography.fontSizePx;
 
-    const [localSpacingBefore, setLocalSpacingBefore] = useState(numeric.spacingBefore);
-    const [localSpacingAfter, setLocalSpacingAfter] = useState(numeric.spacingAfter);
-    const [localLineHeight, setLocalLineHeight] = useState(numeric.lineHeight);
-
-    useLayoutEffect(() => {
-        setLocalSpacingBefore(numeric.spacingBefore);
-    }, [numeric.spacingBefore]);
-    useLayoutEffect(() => {
-        setLocalSpacingAfter(numeric.spacingAfter);
-    }, [numeric.spacingAfter]);
-    useLayoutEffect(() => {
-        setLocalLineHeight(numeric.lineHeight);
-    }, [numeric.lineHeight]);
+    const [localSpacingBefore, setLocalSpacingBefore] = usePropState(numeric.spacingBefore);
+    const [localSpacingAfter, setLocalSpacingAfter] = usePropState(numeric.spacingAfter);
+    const [localLineHeight, setLocalLineHeight] = usePropState(numeric.lineHeight);
 
     const previewStyleOverride = {
         '--preview-spacing-before': `${Math.max(0, localSpacingBefore) * fontSizePx}px`,

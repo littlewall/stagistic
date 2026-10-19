@@ -3,11 +3,11 @@ import {eq} from 'drizzle-orm';
 
 import type {DbClient} from '../../../queries';
 import {
-    scriptAttachments,
-    scriptCharacters,
-    scriptCommentThreads,
-    scriptLocations,
-    scriptMusic,
+    type scriptAttachments,
+    type scriptCharacters,
+    type scriptCommentThreads,
+    type scriptLocations,
+    type scriptMusic,
 } from '../../../schema';
 
 export type Upserts = Record<string, RecordFields | null>;

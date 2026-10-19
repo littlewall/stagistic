@@ -66,6 +66,30 @@ const createEmptyPlan = (): ScriptSyncPlan => ({
     unchanged: [],
 });
 
+const classifyTombstones = (
+    accountId: string,
+    tombstones: readonly LocalTombstone[],
+    cloudById: ReadonlyMap<string, CloudScriptInfo>,
+    plan: ScriptSyncPlan,
+    handled: Set<string>,
+) => {
+    for (const tombstone of tombstones) {
+        handled.add(tombstone.scriptId);
+
+        if (tombstone.boundAccountId !== accountId) {
+            continue;
+        }
+
+        const remote = cloudById.get(tombstone.scriptId);
+
+        if (!remote || remote.deletedAt !== null) {
+            continue;
+        }
+
+        (remote.changedSinceSync ? plan.restoreLocal : plan.deleteCloud).push(tombstone.scriptId);
+    }
+};
+
 export const classifyScripts = ({
     accountId,
     local,
@@ -108,21 +132,7 @@ export const classifyScripts = ({
         }
     }
 
-    for (const tombstone of tombstones) {
-        handled.add(tombstone.scriptId);
-
-        if (tombstone.boundAccountId !== accountId) {
-            continue;
-        }
-
-        const remote = cloudById.get(tombstone.scriptId);
-
-        if (!remote || remote.deletedAt !== null) {
-            continue;
-        }
-
-        (remote.changedSinceSync ? plan.restoreLocal : plan.deleteCloud).push(tombstone.scriptId);
-    }
+    classifyTombstones(accountId, tombstones, cloudById, plan, handled);
 
     for (const remote of cloud) {
         if (!handled.has(remote.scriptId) && remote.deletedAt === null) {

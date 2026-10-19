@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import * as Y from 'yjs';
 
 import {createAccessTokenSource} from './accessToken';
@@ -127,7 +128,7 @@ export const createCloudSync = ({
 
             dirty.delete(scriptId);
             attach(scriptId, docs);
-            await Promise.all(connections.get(scriptId)!.map(connection => connection.idle()));
+            await Promise.all(requireValue(connections.get(scriptId)).map(connection => connection.idle()));
             await store.setSyncState({
                 scriptId,
                 accountId: current.accountId,
@@ -296,7 +297,7 @@ export const createCloudSync = ({
         download,
         upload,
         goLive: async () => {
-            account = {...account!, checked: true};
+            account = {...requireValue(account), checked: true};
             await store.setAccount(account);
             await goLive();
         },

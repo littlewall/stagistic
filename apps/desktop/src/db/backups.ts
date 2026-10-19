@@ -26,7 +26,7 @@ const pruneOldBackups = async (): Promise<void> => {
     const backups = entries
         .filter(entry => entry.isFile && entry.name.startsWith(BACKUP_PREFIX) && entry.name.endsWith(BACKUP_SUFFIX))
         .map(entry => entry.name)
-        .sort();
+        .toSorted();
 
     if (backups.length <= MAX_BACKUPS) {
         return;

@@ -14,7 +14,7 @@ const isBoundary = (blockType: string): boolean => {
 
 const serializeRefs = (refByKey: Record<string, string>): string => {
     return Object.entries(refByKey)
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .toSorted((a, b) => a[0].localeCompare(b[0]))
         .map(([key, id]) => `${key}:${id}`)
         .join('|');
 };

@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -76,7 +77,7 @@ describe('LoaderOverlay', () => {
         renderLoader();
 
         const progressBar = await waitForElement<HTMLElement>('[role="progressbar"]');
-        const panel = progressBar.parentElement!;
+        const panel = requireValue(progressBar.parentElement);
         const panelStyle = getComputedStyle(panel);
 
         expect(panel.firstElementChild).toBe(progressBar);

@@ -28,6 +28,7 @@ const attachment: ScriptAttachment = {
     mimeType: 'application/pdf',
     sizeBytes: 3,
     storageKey: 'blob-1',
+    sha256: null,
     createdAt: 1,
     updatedAt: 1,
 };

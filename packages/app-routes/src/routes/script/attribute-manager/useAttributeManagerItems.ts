@@ -55,8 +55,8 @@ export const useAttributeManagerItems = ({
             groupNames: characters.confirmedGroupRecords
                 .filter(group => group.memberIds.includes(character.id))
                 .map(group => liveCharacters.keyByCharacterId.get(group.id) ?? group.key)
-                .sort((left, right) => left.localeCompare(right)),
-        })).sort((left, right) => left.name.localeCompare(right.name));
+                .toSorted((left, right) => left.localeCompare(right)),
+        })).toSorted((left, right) => left.name.localeCompare(right.name));
     }, [
         characters.confirmedCharacterRecords,
         characters.confirmedGroupRecords,
@@ -69,7 +69,7 @@ export const useAttributeManagerItems = ({
             color: group.colorHex,
             memberIds: group.memberIds,
             usageCount: liveCharacters.countsByCharacterId.get(group.id) ?? 0,
-        })).sort((left, right) => left.name.localeCompare(right.name));
+        })).toSorted((left, right) => left.name.localeCompare(right.name));
     }, [
         characters.confirmedGroupRecords,
         liveCharacters.countsByCharacterId,

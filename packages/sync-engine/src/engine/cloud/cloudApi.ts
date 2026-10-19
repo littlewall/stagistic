@@ -17,7 +17,9 @@ export interface CloudApi {
     attachmentDownloadUrl(scriptId: string, attachmentId: string): Promise<string>,
 }
 
-export class CloudUnauthorizedError extends Error {}
+export class CloudUnauthorizedError extends Error {
+    override name = 'CloudUnauthorizedError';
+}
 
 export const createCloudApi = ({
     syncUrl,

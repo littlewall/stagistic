@@ -52,7 +52,7 @@ export const createContentHandlers = ({
             afterPersist: async (tx, documentChanged) => {
                 const layoutMatches = expectedSettings === undefined
                     || getScriptLayoutFingerprint(await readScriptSettings(tx, scriptId)) === getScriptLayoutFingerprint(expectedSettings);
-                const previousMetadata = metadata?.pageCount == null && !documentChanged && layoutMatches
+                const previousMetadata = (metadata?.pageCount === null || metadata?.pageCount === undefined) && !documentChanged && layoutMatches
                     ? (await dbQueries.getScriptSummary(tx, scriptId))?.summaryMetadata
                     : null;
 

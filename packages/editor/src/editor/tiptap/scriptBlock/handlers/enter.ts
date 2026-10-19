@@ -1,5 +1,8 @@
-import {createNodeId, resolveScriptBlockNodeType} from '@stagistic/script';
-import {getEnterFallback} from '@stagistic/script';
+import {
+    createNodeId,
+    getEnterFallback,
+    resolveScriptBlockNodeType,
+} from '@stagistic/script';
 import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
@@ -170,7 +173,7 @@ export const handleEnter = (editor: Editor, event: KeyboardEvent, blockNextEleme
     }
 
     const isEmptyBlock = isScriptBlockContentEmpty(block.node);
-    const hasOnlyNonTextContent = !isEmptyBlock && (block.node.textContent ?? '').trim().length === 0;
+    const hasOnlyNonTextContent = !isEmptyBlock && block.node.textContent.trim().length === 0;
     const wasSelectionEmpty = editor.state.selection.empty;
 
     if (!event.shiftKey && editor.state.selection.empty && isEmptyBlock && isEmptyEnterChooserWriterType(block.blockType)) {

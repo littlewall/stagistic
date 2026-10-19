@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import * as Y from 'yjs';
 
 /*
@@ -39,7 +40,7 @@ const stableStringify = (value: unknown): string => {
 
     const entries = Object.entries(value as Record<string, unknown>)
         .filter(([, item]) => item !== undefined)
-        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0));
+        .toSorted(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0));
 
     return `{${entries.map(([key, item]) => `${JSON.stringify(key)}:${stableStringify(item)}`).join(',')}}`;
 };
@@ -256,7 +257,7 @@ const remapReference = (value: unknown, mapping: Map<string, string>) => {
     if (Array.isArray(value)) {
         const ids = (value as unknown[]).filter((item): item is string => typeof item === 'string');
 
-        return [...new Set(ids.map(id => mapping.get(id) ?? id))].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
+        return [...new Set(ids.map(id => mapping.get(id) ?? id))].toSorted((left, right) => (left < right ? -1 : left > right ? 1 : 0));
     }
 
     return value;
@@ -296,8 +297,8 @@ export const dedupeRecords = (doc: Y.Doc, rules: readonly DedupeRule[], origin: 
                     continue;
                 }
 
-                const [[winnerId, winnerFields], ...losers] = [...group].sort(winnerOrder);
-                const winner = map.get(winnerId)!;
+                const [[winnerId, winnerFields], ...losers] = [...group].toSorted(winnerOrder);
+                const winner = requireValue(map.get(winnerId));
 
                 for (const [loserId, loserFields] of losers) {
                     for (const [key, value] of Object.entries(loserFields)) {

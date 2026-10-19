@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -231,17 +232,17 @@ describe('editor search', () => {
 
         expect(await resultText()).toBe('1 / 3');
 
-        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Toggle replace"]')!);
+        await userEvent.click(requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Toggle replace"]')));
 
         const replaceInput = await poll(() => document.querySelector<HTMLInputElement>('input[aria-label="Replace with"]'), 'replace input');
 
         await userEvent.type(replaceInput, 'lamp');
-        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Replace"]')!);
+        await userEvent.click(requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Replace"]')));
 
         expect(await waitForResult('1 / 2')).toBe('1 / 2');
         expect(editor.getText()).toContain('lamp the lantern.');
 
-        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Replace all"]')!);
+        await userEvent.click(requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Replace all"]')));
 
         expect(await waitForResult('0 / 0')).toBe('0 / 0');
         expect(editor.getText()).toContain('A lamp remains. lamp fades.');
@@ -283,7 +284,7 @@ describe('editor search', () => {
 
         expect(await resultText()).toBe('1 / 3');
 
-        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Match case"]')!);
+        await userEvent.click(requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Match case"]')));
 
         expect(await waitForResult('1 / 1')).toBe('1 / 1');
     });
@@ -295,7 +296,7 @@ describe('editor search', () => {
 
         setSearchQuery(input, 'light');
 
-        const previous = document.querySelector<HTMLButtonElement>('button[aria-label="Previous search result"]')!;
+        const previous = requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Previous search result"]'));
 
         previous.click();
 
@@ -369,7 +370,7 @@ describe('editor search', () => {
         setSearchQuery(input, 'light');
         input.focus();
 
-        await userEvent.click(document.querySelector<HTMLButtonElement>('button[aria-label="Next search result"]')!);
+        await userEvent.click(requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Next search result"]')));
 
         expect(await waitForResult('2 / 3')).toBe('2 / 3');
         expect(document.activeElement).toBe(input);
@@ -396,9 +397,9 @@ describe('editor search', () => {
 
         expect(active).not.toBeNull();
         expect(passive).not.toBeUndefined();
-        expect(getComputedStyle(active!).backgroundColor).not.toBe(getComputedStyle(passive!).backgroundColor);
-        expect(getComputedStyle(active!).borderStyle).toBe('none');
-        expect(getComputedStyle(active!).outlineStyle).toBe('none');
-        expect(getComputedStyle(active!).boxShadow).toBe('none');
+        expect(getComputedStyle(requireValue(active)).backgroundColor).not.toBe(getComputedStyle(requireValue(passive)).backgroundColor);
+        expect(getComputedStyle(requireValue(active)).borderStyle).toBe('none');
+        expect(getComputedStyle(requireValue(active)).outlineStyle).toBe('none');
+        expect(getComputedStyle(requireValue(active)).boxShadow).toBe('none');
     });
 });

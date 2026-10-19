@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -82,7 +83,7 @@ describe('useSaveIndicator', () => {
         mountHarness();
 
         await waitForState('idle');
-        await userEvent.click(document.querySelector('button')!);
+        await userEvent.click(requireValue(document.querySelector('button')));
         await waitForState('saving');
         await userEvent.click(document.querySelectorAll('button')[1]);
         await waitForState('saved');
@@ -93,7 +94,7 @@ describe('useSaveIndicator', () => {
         mountHarness();
 
         await waitForState('idle');
-        await userEvent.click(document.querySelector('button')!);
+        await userEvent.click(requireValue(document.querySelector('button')));
         await userEvent.click(document.querySelectorAll('button')[2]);
         await waitForState('error');
         await new Promise(resolve => window.setTimeout(resolve, 1500));

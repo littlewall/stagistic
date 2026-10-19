@@ -24,6 +24,7 @@
         "@tiptap/react": "^3.19.0",
         "@tiptap/y-tiptap": "^3.0.9",
         "clsx": "^2.1.1",
+        "use-sync-external-store": "1.6.0",
         "yjs": "^13.6.33"
     },
     "peerDependencies": {
@@ -33,6 +34,7 @@
     "devDependencies": {
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
+        "@types/use-sync-external-store": "0.0.6",
         "playwright": "^1.61.0",
         "typescript": "^5.9.2"
     }

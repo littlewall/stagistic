@@ -8,6 +8,7 @@
         "@fontsource-variable/ibm-plex-sans": "^5.2.8",
         "@fontsource/courier-prime": "^5.2.8",
         "@stagistic/script": "workspace:*",
+        "@stagistic/shared": "workspace:*",
         "clsx": "^2.1.1",
         "iconoir-react": "^7.11.0",
         "react-aria": "^3.50.0",

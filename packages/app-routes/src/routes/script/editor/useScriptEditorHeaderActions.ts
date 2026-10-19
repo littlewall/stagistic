@@ -7,7 +7,6 @@ import {
 import {useCallback, useState} from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-import {useGlobalModals} from '../../../global-modals/GlobalModalsProvider';
 import {downloadBlob, downloadStagistic} from '../../../shared/downloadStagistic';
 import type {CurrentScriptItem} from '../workspace/types';
 
@@ -23,7 +22,6 @@ interface HeaderActionsParams {
 }
 
 export const useScriptEditorHeaderActions = ({
-    navigate,
     currentScript,
     openSettingsModal,
     openAttributeManagerModal,
@@ -32,7 +30,6 @@ export const useScriptEditorHeaderActions = ({
     scriptRepository,
     flushScript,
 }: HeaderActionsParams) => {
-    const {openNewScript} = useGlobalModals();
     const [isPreparingPackage, setIsPreparingPackage] = useState(false);
 
     const handleMenuAction = useCallback(
@@ -87,8 +84,6 @@ export const useScriptEditorHeaderActions = ({
         [
             currentScript,
             getEditorValue,
-            navigate,
-            openNewScript,
             openAttributeManagerModal,
             openSettingsModal,
             scriptRepository,

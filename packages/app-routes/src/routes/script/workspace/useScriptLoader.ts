@@ -47,7 +47,7 @@ const NEWER_SCHEMA_ERROR = 'This script was saved by a newer version of Stagisti
 export const useScriptLoader = (
     currentScriptId: string | null,
     scriptRepository: ScriptLoaderRepository,
-    documentSync: SyncEngineClient | null = null,
+    documentSync: Pick<SyncEngineClient, 'openScript' | 'onScriptsReset'> | null = null,
 ): ScriptLoaderResult => {
     const [initialValue, setInitialValue] = useState<ScriptDocument | null | undefined>(undefined);
     const [initialIndexSnapshot, setInitialIndexSnapshot] = useState<ScriptBlockIndexSnapshot | null | undefined>(undefined);
@@ -70,25 +70,47 @@ export const useScriptLoader = (
         });
     }, [currentScriptId, documentSync]);
 
-    useEffect(() => {
-        if (!currentScriptId) {
-            return;
-        }
+    const loadRequest = useMemo(() => ({
+        scriptId: currentScriptId,
+        sync: documentSync,
+        repository: scriptRepository,
+        generation,
+    }), [
+        currentScriptId,
+        documentSync,
+        scriptRepository,
+        generation,
+    ]);
+    const [previousRequest, setPreviousRequest] = useState(loadRequest);
 
-        let isActive = true;
-
+    if (previousRequest !== loadRequest) {
+        setPreviousRequest(loadRequest);
         setInitialValue(undefined);
         setInitialIndexSnapshot(undefined);
         setShouldAutoFocus(false);
         setReplica(null);
         setIsReadOnly(false);
+    }
 
-        if (documentSync) {
+    useEffect(() => {
+        const {
+            scriptId,
+            sync,
+            repository,
+        } = loadRequest;
+
+        if (!scriptId) {
+            return;
+        }
+
+        let isActive = true;
+
+        if (sync) {
             let opened: OpenedScript | null = null;
 
             const openReplica = async () => {
                 try {
-                    opened = await documentSync.openScript(currentScriptId);
+                    opened = await sync.openScript(scriptId);
 
                     if (!isActive) {
                         opened.release();
@@ -126,7 +148,7 @@ export const useScriptLoader = (
 
         const loadLatest = async () => {
             try {
-                const stored = await scriptRepository.loadLatest(currentScriptId);
+                const stored = await repository.loadLatest(scriptId);
 
                 if (!isActive) {
                     return;
@@ -149,7 +171,11 @@ export const useScriptLoader = (
                 const coerced = coerceUnknownBlocksToStageDirections(stored);
 
                 if (coerced.changed) {
-                    await scriptRepository.saveLatest(currentScriptId, coerced.value);
+                    await repository.saveLatest(scriptId, coerced.value);
+                }
+
+                if (!isActive) {
+                    return;
                 }
 
                 const withIds = ensureScriptBlockIds(coerced.value);
@@ -161,6 +187,10 @@ export const useScriptLoader = (
                 setInitialIndexSnapshot(fallbackIndex);
                 setShouldAutoFocus(needsFocus);
             } catch {
+                if (!isActive) {
+                    return;
+                }
+
                 console.error('Failed to load latest script');
                 setStorageErrorState('Failed to load script data.');
 
@@ -178,12 +208,7 @@ export const useScriptLoader = (
         return () => {
             isActive = false;
         };
-    }, [
-        currentScriptId,
-        documentSync,
-        generation,
-        scriptRepository,
-    ]);
+    }, [loadRequest]);
 
     const collaboration = useMemo<EditorCollaboration | undefined>(
         () => replica && !isReadOnly ? {document: replica.body, field: BODY_FIELD} : undefined,

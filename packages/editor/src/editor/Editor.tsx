@@ -1,7 +1,6 @@
 import {
     coerceUnknownBlocksToStageDirections,
     DEFAULT_SCENE_NUMBER_FORMAT,
-    type ScriptDocument,
 } from '@stagistic/script';
 import {
     type ReactNode,
@@ -28,7 +27,11 @@ import {useCommentCallbacksRef} from './hooks/useCommentCallbacksRef';
 import {useEditorAutosave} from './hooks/useEditorAutosave';
 import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
-import {useEditorReadOnly, useInitialContentSignature} from './hooks/useEditorCollaborationMode';
+import {
+    useEditorReadOnly,
+    useInitialContentSignature,
+    useInitialEditorContent,
+} from './hooks/useEditorCollaborationMode';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
 import {useInitialCanvasReady} from './hooks/usePaginationReady';
@@ -37,8 +40,8 @@ import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
 import {EditorSceneNumberFormatContext} from './sceneNumberFormatContext';
-import {type CharacterColorRefsBundle, createCharacterColorRefsBundle} from './surface/editorSurfaceCache';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
+import {useSurfaceCharacterRefs} from './surface/useSurfaceCharacterRefs';
 import {useEditorExtensions} from './useEditorExtensions';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -124,11 +127,7 @@ const Editor = ({
      * restored cached surface must keep using the bundle its extensions hold.
      * Resolved once per mount, before extensions are built.
      */
-    const surfaceRefsRef = useRef<CharacterColorRefsBundle | null>(null);
-
-    if (!surfaceRefsRef.current) {
-        surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs ?? createCharacterColorRefsBundle();
-    }
+    const surfaceRefs = useSurfaceCharacterRefs(surfaceCache, surfaceSignature);
 
     const commentCallbacksRef = useCommentCallbacksRef({
         onRequestReveal: onRequestRevealComments,
@@ -152,7 +151,7 @@ const Editor = ({
     } = useEditorCharacterColors({
         persistentCharacters,
         resolvedInitialValue,
-        refs: surfaceRefsRef.current,
+        refs: surfaceRefs,
         liveStore: providedLiveStore,
     });
 
@@ -195,14 +194,14 @@ const Editor = ({
         enableBlockUiEvents: Boolean(onBlockUiEvent),
         collaboration,
     });
-    const initialDoc = useMemo<ScriptDocument>(() => resolvedInitialValue, [initialContentSignature]);
+    const initialDoc = useInitialEditorContent(initialContentSignature, resolvedInitialValue);
     const {editor} = useScriptEditorInstance({
         surfaceCache,
         signature: surfaceSignature,
         extensions,
         // Bound editors render the Y.Doc; initial content would be written into it.
         content: collaboration ? undefined : initialDoc,
-        characterColorRefs: surfaceRefsRef.current,
+        characterColorRefs: surfaceRefs,
     });
 
     useEffect(() => {

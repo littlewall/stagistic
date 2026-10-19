@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -73,7 +74,7 @@ describe('SignInModal', () => {
 
         root.render(render(true));
         await waitFor(() => buttonNamed('Send sign-in link')?.disabled === false);
-        await userEvent.click(buttonNamed('Send sign-in link')!);
+        await userEvent.click(requireValue(buttonNamed('Send sign-in link')));
 
         await waitFor(() => document.body.textContent?.includes('We sent a sign-in link to hamlet@example.com'));
         expect(onRequestLink).toHaveBeenCalledWith('hamlet@example.com');
@@ -90,7 +91,7 @@ describe('SignInModal', () => {
         );
 
         await userEvent.type(await waitFor(() => document.querySelector<HTMLInputElement>('#sign-in-email')), 'a@example.com');
-        await userEvent.click(buttonNamed('Send sign-in link')!);
+        await userEvent.click(requireValue(buttonNamed('Send sign-in link')));
 
         await waitFor(() => document.body.textContent?.includes('Too many attempts'));
     });
@@ -142,7 +143,7 @@ describe('CloudSyncModal', () => {
         const useNewer = [...document.querySelectorAll('label')].filter(label => label.textContent?.startsWith('Use newer'))[1];
 
         await userEvent.click(useNewer);
-        await userEvent.click(buttonNamed('Sync')!);
+        await userEvent.click(requireValue(buttonNamed('Sync')));
 
         expect(onSync).toHaveBeenCalledWith({s1: 'keep-both', s2: 'use-newer'});
     });
@@ -166,7 +167,7 @@ describe('AccountMenu with an account', () => {
 
         await userEvent.click(await waitFor(() => document.querySelector<HTMLButtonElement>('button[aria-label="Account and appearance"]')));
         await waitFor(() => document.body.textContent?.includes('Not signed in'));
-        await userEvent.click(buttonNamed('Sign in')!);
+        await userEvent.click(requireValue(buttonNamed('Sign in')));
         expect(account.onSignIn).toHaveBeenCalled();
 
         root.render(
@@ -177,7 +178,7 @@ describe('AccountMenu with an account', () => {
             />,
         );
         await waitFor(() => document.body.textContent?.includes('jan@example.com'));
-        await userEvent.click(buttonNamed('Sign out')!);
+        await userEvent.click(requireValue(buttonNamed('Sign out')));
         expect(account.onSignOut).toHaveBeenCalled();
     });
 });

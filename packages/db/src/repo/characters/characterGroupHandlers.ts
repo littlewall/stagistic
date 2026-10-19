@@ -205,7 +205,7 @@ export const createCharacterGroupHandlers = ({
 
         const db = await getDb();
         const now = Date.now();
-        const targetMemberIds = [...new Set(memberIds)].sort();
+        const targetMemberIds = [...new Set(memberIds)].toSorted();
         let updated = false;
 
         await db.transaction(async tx => {

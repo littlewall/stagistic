@@ -1,4 +1,5 @@
 import {buildScriptSummaryMetadata} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {eq} from 'drizzle-orm';
 
 import type {DbClient} from '../../queries';
@@ -166,7 +167,7 @@ const writePackageDomainRowsTx = async (
             filename: attachment.filename,
             mimeType: attachment.mimeType,
             sizeBytes: attachment.sizeBytes,
-            storageKey: storageKeyByAttachment.get(attachment.id)!,
+            storageKey: requireValue(storageKeyByAttachment.get(attachment.id)),
             createdAt: attachment.createdAt,
             updatedAt: attachment.updatedAt,
         });

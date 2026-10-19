@@ -33,11 +33,17 @@ export const AddCharacterModal = ({
 }: AddCharacterModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
+        if (!isOpen) {
+            setName('');
+        }
+    }
 
     useEffect(() => {
         if (!isOpen) {
-            setName('');
-
             return;
         }
 

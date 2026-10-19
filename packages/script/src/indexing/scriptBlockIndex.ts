@@ -60,7 +60,7 @@ const toTagCharacterRefs = (node: ScriptNode): IndexedScriptCharacterRef[] | nul
     }
 
     return Array.from(idByKey.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .toSorted((a, b) => a[0].localeCompare(b[0]))
         .map(([key, characterId]) => ({key, characterId}));
 };
 
@@ -91,7 +91,7 @@ const toCharacterRefs = (
     });
 
     Object.entries(characterRefByKey)
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .toSorted((a, b) => a[0].localeCompare(b[0]))
         .forEach(([key, characterId]) => {
             if (seenKeys.has(key)) {
                 return;

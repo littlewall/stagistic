@@ -75,7 +75,7 @@ const persistExtractedBlocks = async (
 
     extracted.blocks.forEach(block => {
         const refs = Object.entries(block.characterRefByKey)
-            .sort((a, b) => a[0].localeCompare(b[0]))
+            .toSorted((a, b) => a[0].localeCompare(b[0]))
             .reduce<RewriteStoredBlockCharacterRefRow[]>((accumulator, [characterKey, characterId]) => {
                 if (!characterIdSet.has(characterId)) {
                     warnings.push(

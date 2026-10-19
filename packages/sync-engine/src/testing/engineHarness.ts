@@ -30,7 +30,7 @@ export const eventually = async (check: () => boolean, timeoutMs = 3_000) => {
 export const cleanups: Array<() => Promise<void> | void> = [];
 
 afterEach(async () => {
-    for (const cleanup of cleanups.splice(0).reverse()) {
+    for (const cleanup of cleanups.splice(0).toReversed()) {
         await cleanup();
     }
 });

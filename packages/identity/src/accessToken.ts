@@ -34,7 +34,7 @@ export const createAccessTokenVerifier = ({
         throw new Error('[identity] access token verifier needs jwksUrl or jwks');
     }
 
-    const keys = jwks ? createLocalJWKSet(jwks) : createRemoteJWKSet(new URL(jwksUrl!));
+    const keys = jwks ? createLocalJWKSet(jwks) : createRemoteJWKSet(new URL(jwksUrl ?? ''));
 
     return async (token: string): Promise<AccessTokenClaims> => {
         const {payload} = await jwtVerify(token, keys, {issuer, audience});

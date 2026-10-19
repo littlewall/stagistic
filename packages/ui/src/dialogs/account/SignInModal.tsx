@@ -1,7 +1,6 @@
 import {
     type FormEvent,
     type ReactNode,
-    useEffect,
     useState,
 } from 'react';
 
@@ -37,12 +36,15 @@ export const SignInModal = ({
     const [error, setError] = useState<string | null>(null);
     const [isPending, setIsPending] = useState(false);
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
         if (!isOpen) {
             setSentTo(null);
             setError(null);
         }
-    }, [isOpen]);
+    }
 
     const handlePasskey = async () => {
         setError(null);

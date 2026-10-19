@@ -17,7 +17,9 @@ export const AuthCallbackRoute = () => {
     const [params] = useSearchParams();
     const navigate = useNavigate();
     const {completeSignIn} = useCloudAccount();
+    const token = params.get('token');
     const [error, setError] = useState<string | null>(null);
+    const displayError = token ? error : 'This sign-in link is incomplete. Request a new one from the account menu.';
     const started = useRef(false);
 
     useEffect(() => {
@@ -27,11 +29,7 @@ export const AuthCallbackRoute = () => {
 
         started.current = true;
 
-        const token = params.get('token');
-
         if (!token) {
-            setError('This sign-in link is incomplete. Request a new one from the account menu.');
-
             return;
         }
 
@@ -41,13 +39,13 @@ export const AuthCallbackRoute = () => {
     }, [
         completeSignIn,
         navigate,
-        params,
+        token,
     ]);
 
     return (
         <>
             <AppHeader showScriptActions={false} />
-            {error ? <Notice variant="error">{error}</Notice> : null}
+            {displayError ? <Notice variant="error">{displayError}</Notice> : null}
         </>
     );
 };

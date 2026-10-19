@@ -40,7 +40,7 @@ const groupOpenThreadsByBlock = (anchors: ReadonlyMap<string, CommentAnchorLocat
 
     [...anchors.values()]
         .filter(anchor => isThreadMarked(threads.get(anchor.threadId)))
-        .sort((left, right) => left.from - right.from || (left.kind === 'block' ? -1 : 1))
+        .toSorted((left, right) => left.from - right.from || (left.kind === 'block' ? -1 : 1))
         .forEach(anchor => grouped.set(anchor.blockId, [...grouped.get(anchor.blockId) ?? [], anchor.threadId]));
 
     return grouped;

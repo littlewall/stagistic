@@ -2,6 +2,7 @@ import {
     type MouseEvent as ReactMouseEvent,
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -29,7 +30,7 @@ export const useMusicSuggestionsOverlay = ({
     const rafIdRef = useRef<number | null>(null);
     const [overlayState, setOverlayState] = useState<MusicSuggestionOverlayState | null>(null);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
-    const suggestions = overlayState?.suggestions ?? [];
+    const suggestions = useMemo(() => overlayState?.suggestions ?? [], [overlayState]);
     const closeOverlay = useCallback(() => {
         setOverlayState(null);
         setActiveSuggestionIndex(null);
@@ -194,21 +195,13 @@ export const useMusicSuggestionsOverlay = ({
         };
     }, [cancelScheduledOverlayUpdate]);
 
-    useEffect(() => {
-        if (suggestions.length === 0) {
-            setActiveSuggestionIndex(null);
+    const boundedActiveIndex = activeSuggestionIndex === null || suggestions.length === 0
+        ? null
+        : Math.min(activeSuggestionIndex, suggestions.length - 1);
 
-            return;
-        }
-
-        setActiveSuggestionIndex(previous => {
-            if (previous === null) {
-                return null;
-            }
-
-            return Math.min(previous, suggestions.length - 1);
-        });
-    }, [suggestions.length]);
+    if (activeSuggestionIndex !== boundedActiveIndex) {
+        setActiveSuggestionIndex(boundedActiveIndex);
+    }
 
     useEffect(() => {
         if (!overlayState || suggestions.length === 0) {

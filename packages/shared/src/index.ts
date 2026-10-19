@@ -10,5 +10,6 @@ export * from './ids/uuidv7';
 export * from './utils/number';
 export * from './utils/object';
 export * from './utils/platform';
+export * from './utils/requireValue';
 export * from './utils/string';
 export * from './utils/structuralEquals';

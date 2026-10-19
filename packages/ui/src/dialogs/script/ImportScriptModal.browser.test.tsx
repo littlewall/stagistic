@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -121,8 +122,8 @@ describe('ImportScriptModal', () => {
         const nameInput = host.querySelector<HTMLInputElement>('#import-script-name');
 
         expect(selectedFileHint).toBeTruthy();
-        expect(window.getComputedStyle(selectedFileHint!).fontSize).toBe('11px');
-        expect(window.getComputedStyle(nameInput!).fontSize).toBe('12px');
+        expect(window.getComputedStyle(requireValue(selectedFileHint)).fontSize).toBe('11px');
+        expect(window.getComputedStyle(requireValue(nameInput)).fontSize).toBe('12px');
 
         const replaceOption = [...host.querySelectorAll('button')].find(button => button.textContent?.includes('Replace existing'));
 
@@ -137,8 +138,8 @@ describe('ImportScriptModal', () => {
         const warning = backupButton?.closest<HTMLElement>('[role="status"]');
 
         expect(warning).toBeTruthy();
-        expect(window.getComputedStyle(warning!).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-        expect(window.getComputedStyle(warning!).borderLeftStyle).toBe('solid');
+        expect(window.getComputedStyle(requireValue(warning)).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+        expect(window.getComputedStyle(requireValue(warning)).borderLeftStyle).toBe('solid');
         backupButton?.click();
         await waitFor(() => onDownloadStepkgBackup.mock.calls.length > 0);
         expect(onDownloadStepkgBackup).toHaveBeenCalledWith('script-1');
@@ -150,12 +151,12 @@ describe('ImportScriptModal', () => {
         expect(replaceButton?.parentElement).toBe(cancelButton?.parentElement);
         expect(replaceButton?.disabled).toBe(true);
         expect(confirmationInput).toBeTruthy();
-        expect(window.getComputedStyle(confirmationInput!).fontSize).toBe('12px');
+        expect(window.getComputedStyle(requireValue(confirmationInput)).fontSize).toBe('12px');
 
-        await userEvent.fill(confirmationInput!, 'replace me');
+        await userEvent.fill(requireValue(confirmationInput), 'replace me');
         expect(replaceButton?.disabled).toBe(false);
 
-        await userEvent.click(replaceButton!);
+        await userEvent.click(requireValue(replaceButton));
         expect(onReplaceWithStepkg).toHaveBeenCalledOnce();
     });
 });

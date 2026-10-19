@@ -75,10 +75,10 @@ describe('leader handoff', () => {
 
         await eventually(() => JSON.stringify(bodyDocToScriptDocument(tabB)) === JSON.stringify(bodyDocToScriptDocument(tabA)));
 
-        const workers = [startWorker('w1', docName, lock), startWorker('w2', docName, lock)];
+        const workers: [Worker, Worker] = [startWorker('w1', docName, lock), startWorker('w2', docName, lock)];
         // Whichever worker gets the lock first leads.
         const {workerId} = await Promise.race(workers.map(worker => waitFor<{workerId: string}>(worker, 'leader')));
-        const [first, second] = (workerId === 'w1' ? workers : [...workers].reverse()) as [Worker, Worker];
+        const [first, second] = workerId === 'w1' ? workers : [workers[1], workers[0]];
 
         await eventually(async () => (await snapshot(first))?.content.length === 2);
 

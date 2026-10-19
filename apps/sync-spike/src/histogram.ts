@@ -18,7 +18,7 @@ export const createHistogram = () => {
         },
         values: () => samples,
         summary: () => {
-            const sorted = [...samples].sort((a, b) => a - b);
+            const sorted = [...samples].toSorted((a, b) => a - b);
 
             return {
                 count: sorted.length,

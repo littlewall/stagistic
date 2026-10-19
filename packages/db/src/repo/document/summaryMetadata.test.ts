@@ -2,6 +2,7 @@ import {
     buildScriptSummaryMetadata,
     type ScriptDocument,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     afterEach,
     describe,
@@ -171,14 +172,14 @@ describe('saved script summary metadata', () => {
 
         const editorValue = structuredClone(value);
 
-        editorValue.content[0].content![0].attrs!.draft = false;
+        requireValue(requireValue(editorValue.content[0].content)[0].attrs).draft = false;
         expect(await content.saveSummaryMetadata('script-1', editorValue, buildScriptSummaryMetadata(editorValue, 2))).toBe(true);
         expect((await getScriptSummary(db, 'script-1'))?.summaryMetadata?.pageCount).toBe(2);
-        editorValue.content[0].content![0].attrs!.draft = true;
+        requireValue(requireValue(editorValue.content[0].content)[0].attrs).draft = true;
         expect(await content.saveSummaryMetadata('script-1', editorValue, buildScriptSummaryMetadata(editorValue, 5))).toBe(false);
         expect((await getScriptSummary(db, 'script-1'))?.summaryMetadata?.pageCount).toBe(2);
-        editorValue.content[0].content![0].attrs!.draft = false;
-        editorValue.content[0].content![0].attrs!.title = 'Changed music';
+        requireValue(requireValue(editorValue.content[0].content)[0].attrs).draft = false;
+        requireValue(requireValue(editorValue.content[0].content)[0].attrs).title = 'Changed music';
         await content.saveSummaryMetadata('script-1', editorValue, buildScriptSummaryMetadata(editorValue, 6));
         expect((await getScriptSummary(db, 'script-1'))?.summaryMetadata?.pageCount).toBe(2);
     });

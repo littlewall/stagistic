@@ -263,13 +263,13 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
             scheduleImmediateRecalc();
 
             return {
-                update: (view, prevState) => {
+                update: (updatedView, prevState) => {
                     const optionsVersion = storage.optionsVersion;
-                    const docChanged = !prevState.doc.eq(view.state.doc);
-                    const {heightKey, contentWidth} = computeLayoutMetrics(storage, view);
+                    const docChanged = !prevState.doc.eq(updatedView.state.doc);
+                    const {heightKey, contentWidth} = computeLayoutMetrics(storage, updatedView);
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
                     const previousPluginState = paginationKey.getState(prevState);
-                    const currentPluginState = paginationKey.getState(view.state);
+                    const currentPluginState = paginationKey.getState(updatedView.state);
                     const forceRecalcTokenChanged = (previousPluginState?.forceRecalcToken ?? 0) !== (currentPluginState?.forceRecalcToken ?? 0);
 
                     if (!docChanged && optionsVersion === lastOptionsVersion && !layoutChanged && !forceRecalcTokenChanged) {

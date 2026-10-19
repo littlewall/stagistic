@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import {
     useCallback,
     useState,
@@ -126,8 +127,8 @@ describe('StructureRowAct rename input', () => {
         mount();
         await waitFor(() => getInput() !== null);
 
-        const row = document.querySelector<HTMLElement>('[data-structure-act-id] > div')!;
-        const deleteButton = row.querySelector<HTMLButtonElement>('button[aria-label^="Delete act"]')!;
+        const row = requireValue(document.querySelector<HTMLElement>('[data-structure-act-id] > div'));
+        const deleteButton = requireValue(row.querySelector<HTMLButtonElement>('button[aria-label^="Delete act"]'));
         const deleteStyle = getComputedStyle(deleteButton);
         const titleOffset = getInput().getBoundingClientRect().left
             - row.getBoundingClientRect().left;
@@ -145,7 +146,7 @@ describe('StructureRowAct rename input', () => {
 
         const deleteButton = await waitFor(() => {
             return document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]') !== null;
-        }).then(() => document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')!);
+        }).then(() => requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')));
 
         await userEvent.click(deleteButton);
 
@@ -159,7 +160,7 @@ describe('StructureRowAct rename input', () => {
 
         const deleteButton = await waitFor(() => {
             return document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]') !== null;
-        }).then(() => document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')!);
+        }).then(() => requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')));
 
         getInput().focus();
         await userEvent.tab();

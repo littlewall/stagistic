@@ -153,7 +153,7 @@ if (roles.has('collab')) {
 
 const shutdown = async () => {
     await Promise.all(servers.map(server => server.shutdown()));
-    for (const cleanup of cleanups.reverse()) {
+    for (const cleanup of cleanups.toReversed()) {
         await cleanup();
     }
 

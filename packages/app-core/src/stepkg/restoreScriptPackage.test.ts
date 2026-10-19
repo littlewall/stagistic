@@ -1,5 +1,6 @@
 import type {ScriptPackageWrite, ScriptRepository} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
 import {
     describe,
@@ -47,10 +48,10 @@ const exportBytes = async (): Promise<Uint8Array> => {
 
 describe('restoreScriptPackage', () => {
     it('restores using the package\'s own script id, without remapping', async () => {
-        let captured: ScriptPackageWrite | null = null;
+        const captured: ScriptPackageWrite[] = [];
         const repository = {
             restoreScriptFromPackage: (input: ScriptPackageWrite) => {
-                captured = input;
+                captured.push(input);
 
                 return Promise.resolve();
             },
@@ -64,8 +65,8 @@ describe('restoreScriptPackage', () => {
             expect(result.title).toBe('Original');
         }
 
-        expect(captured).not.toBeNull();
-        expect(captured!.script.id).toBe('script-1');
+        expect(captured).toHaveLength(1);
+        expect(requireValue(captured[0]).script.id).toBe('script-1');
     });
 
     it('returns issues for a corrupt package and never calls the repository', async () => {

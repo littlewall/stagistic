@@ -14,7 +14,13 @@ declare const Deno: {env: {get(name: string): string | undefined}};
 
 // An empty scratch schema yields the full migration; point at an existing one for a delta.
 const schema = Deno.env.get('IDENTITY_SCHEMA') ?? 'identity_compile';
-const pool = createIdentityPool({connectionString: Deno.env.get('DATABASE_URL')!, schema});
+const connectionString = Deno.env.get('DATABASE_URL');
+
+if (!connectionString) {
+    throw new Error('DATABASE_URL is required to compile the identity migration');
+}
+
+const pool = createIdentityPool({connectionString, schema});
 
 await pool.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`);
 

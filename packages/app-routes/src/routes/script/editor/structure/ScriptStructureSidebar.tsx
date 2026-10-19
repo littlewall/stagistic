@@ -63,6 +63,12 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
 
     // ── Local state ──────────────────────────────────────────────────────────
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
+    const [previewScriptId, setPreviewScriptId] = useState(currentScriptId);
+
+    if (previewScriptId !== currentScriptId) {
+        setPreviewScriptId(currentScriptId);
+        setActNamePreviewById({});
+    }
 
     // ── Active block persistence (debounced) ─────────────────────────────────
     const lastPersistedActiveBlockIdsRef = useRef(new Map<string, string | null>());
@@ -107,10 +113,11 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         [flushPendingActiveBlockPersist],
     );
 
-    // Reset + flush on script change
-    useEffect(() => {
-        flushPendingActiveBlockPersist();
-        setActNamePreviewById({});
+    // Retire the previous script's pending write when the script changes.
+    useEffect(() => () => {
+        if (pendingPersistScriptIdRef.current === currentScriptId) {
+            flushPendingActiveBlockPersist();
+        }
     }, [currentScriptId, flushPendingActiveBlockPersist]);
 
     // Debounced persist on active block change

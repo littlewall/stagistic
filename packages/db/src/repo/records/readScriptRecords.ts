@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     RECORD_COLLECTIONS,
     type RecordFields,
@@ -38,7 +39,7 @@ import {readTitlePageSettings} from '../config/titlePage';
 
 const byId = <T extends {id: string}>(rows: T[], toFields: (row: T) => RecordFields) => Object.fromEntries(rows.map(row => [row.id, toFields(row)]));
 
-const sortedIds = (ids: string[]) => [...ids].sort();
+const sortedIds = (ids: string[]) => [...ids].toSorted();
 
 export const musicAttachmentRecordId = (musicId: string, role: string) => `${musicId}:${role}`;
 
@@ -86,7 +87,7 @@ const readScenes: CollectionReader = async (db, scriptId) => {
 
         // Scenes are body-derived; only their user metadata is a record.
         if (scene.colorHex !== null || scene.synopsis !== null || scene.locationId !== null || locationIds.length > 0) {
-            records[scene.headingBlockId!] = {
+            records[requireValue(scene.headingBlockId)] = {
                 colorHex: scene.colorHex,
                 synopsis: scene.synopsis,
                 locationId: scene.locationId,

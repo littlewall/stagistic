@@ -69,7 +69,7 @@ describe('persistDocumentDelta at scale', () => {
         const blocksPerScene = 50;
         const scenes: Scene[] = Array.from({length: sceneCount}, (_, s) => ({
             headingId: `h${s}`,
-            blockIds: Array.from({length: blocksPerScene}, (_, b) => `s${s}b${b}`),
+            blockIds: Array.from({length: blocksPerScene}, (_block, b) => `s${s}b${b}`),
         }));
 
         const persister = createDocumentPersister('s1');

@@ -8,12 +8,7 @@ import type {ScriptDocument} from '../document';
 
 describe('removeMusicFromScriptDocument', () => {
     it('removes the selected start and paired out while preserving other music', async () => {
-        const scriptApi = await import('../index') as typeof import('../index') & {
-            removeMusicFromScriptDocument?: (
-                document: ScriptDocument,
-                musicId: string,
-            ) => {value: ScriptDocument, changed: boolean},
-        };
+        const scriptApi = await import('../index');
         const removeMusic = scriptApi.removeMusicFromScriptDocument;
         const document: ScriptDocument = {
             type: 'doc',

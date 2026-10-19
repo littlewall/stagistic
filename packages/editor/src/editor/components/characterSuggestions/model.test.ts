@@ -17,8 +17,7 @@ import {
 import {PLACEHOLDER_CHARACTER} from '../../tiptap/extensions/characterTagInput/constants';
 import {createCharacterTagComposePlugin} from '../../tiptap/extensions/characterTagInput/plugin';
 import {buildOpenComposeTransaction} from '../../tiptap/extensions/characterTagInput/transactions';
-import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
-import {characterTagComposeKey} from '../../tiptap/extensions/CharacterTagInputExtension';
+import {characterTagComposeKey, getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {computeCharacterSuggestions, normalizePersistentCharacters} from './model';
 
 const schema = new Schema({

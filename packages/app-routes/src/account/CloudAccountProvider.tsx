@@ -1,4 +1,5 @@
 import type {AuthClient} from '@stagistic/auth-client';
+import {requireValue} from '@stagistic/shared';
 import type {
     CloudCheckReport,
     CloudStatus,
@@ -120,12 +121,12 @@ export const CloudAccountProvider = ({
     const signOut = useCallback(async () => {
         setModal(null);
         await auth?.signOut().catch(() => {});
-        setStatus(await cloud!.signedOut());
+        setStatus(await requireValue(cloud).signedOut());
     }, [auth, cloud]);
 
     const signInWithPasskey = usePasskeySignIn(auth, async () => {
         setModal(null);
-        setStatus(await cloud!.signedIn());
+        setStatus(await requireValue(cloud).signedIn());
     });
     const passkeys = usePasskeys(auth, modal === 'settings');
 
@@ -171,11 +172,11 @@ export const CloudAccountProvider = ({
         setModal,
         report,
         requestLink: async (email, captchaToken) => {
-            await auth!.requestMagicLink(email, {captchaToken, callbackURL: new URL(callbackPath, window.location.origin).toString()});
+            await requireValue(auth).requestMagicLink(email, {captchaToken, callbackURL: new URL(callbackPath, window.location.origin).toString()});
         },
         signOut,
         resolve: async resolutions => {
-            await cloud!.apply(resolutions);
+            await requireValue(cloud).apply(resolutions);
             setModal(null);
             setReport(null);
             addToast({title: 'Synced with your account'}, {timeout: 5_000});
@@ -204,8 +205,8 @@ export const CloudAccountProvider = ({
             syncLabel: cloudSyncLabel(status),
             openSignIn: () => setModal('sign-in'),
             completeSignIn: async token => {
-                await auth!.verifyMagicLink(token);
-                setStatus(await cloud!.signedIn());
+                await requireValue(auth).verifyMagicLink(token);
+                setStatus(await requireValue(cloud).signedIn());
             },
             isAccountModalOpen: modal !== null,
         }

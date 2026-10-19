@@ -4,7 +4,6 @@ import {
 import type {UpdateMusicRequest} from '@stagistic/editor';
 import {
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -43,37 +42,36 @@ export const useScriptMusicState = (
         });
     }, []);
 
-    useEffect(() => {
+    if (assignmentIntentState.scriptId !== scriptId) {
+        setAssignmentIntentState({scriptId, values: {}});
         setUpdateMusicRequest(null);
-    }, [scriptId]);
+    }
 
-    useEffect(() => {
-        setAssignmentIntentState(previous => {
-            if (previous.scriptId !== scriptId) {
-                return {scriptId, values: {}};
-            }
+    const assignmentIntents = useMemo(() => {
+        if (assignmentIntentState.scriptId !== scriptId) {
+            return {};
+        }
 
-            const pendingEntries = Object.entries(previous.values).filter(([musicId, assigned]) => {
-                const music = catalog.music.find(candidate => candidate.id === musicId);
+        return Object.fromEntries(Object.entries(assignmentIntentState.values).filter(([musicId, assigned]) => {
+            const record = catalog.music.find(candidate => candidate.id === musicId);
 
-                return music ? Boolean(music.startBlockId) !== assigned : false;
-            });
+            return record ? Boolean(record.startBlockId) !== assigned : false;
+        }));
+    }, [
+        assignmentIntentState,
+        catalog.music,
+        scriptId,
+    ]);
 
-            return pendingEntries.length === Object.keys(previous.values).length
-                ? previous
-                : {scriptId, values: Object.fromEntries(pendingEntries)};
-        });
-    }, [catalog.music, scriptId]);
+    if (assignmentIntentState.scriptId === scriptId && Object.keys(assignmentIntents).length !== Object.keys(assignmentIntentState.values).length) {
+        setAssignmentIntentState({scriptId, values: assignmentIntents});
+    }
 
-    const assignmentIntents = assignmentIntentState.scriptId === scriptId
-        ? assignmentIntentState.values
-        : {};
-
-    const music = useMemo<ScriptMusicListItem[]>(() => catalog.music.map(music => ({
-        id: music.id,
-        title: music.title,
-        kind: music.kind === 'instrumental' ? 'instrumental' : 'song',
-        assignmentLabel: assignmentIntents[music.id] ?? Boolean(music.startBlockId)
+    const music = useMemo<ScriptMusicListItem[]>(() => catalog.music.map(item => ({
+        id: item.id,
+        title: item.title,
+        kind: item.kind === 'instrumental' ? 'instrumental' : 'song',
+        assignmentLabel: assignmentIntents[item.id] ?? Boolean(item.startBlockId)
             ? 'Assigned'
             : null,
     })), [assignmentIntents, catalog.music]);
@@ -85,7 +83,7 @@ export const useScriptMusicState = (
             return null;
         }
 
-        return music.find(music => music.id === created.id) ?? {
+        return music.find(item => item.id === created.id) ?? {
             id: created.id,
             title: created.title,
             kind: created.kind === 'instrumental' ? 'instrumental' : 'song',
@@ -95,7 +93,7 @@ export const useScriptMusicState = (
 
     const updateMusic = useCallback(async (musicId: string, input: UpdateScriptMusicInput) => {
         const title = input.title.trim();
-        const original = catalog.music.find(music => music.id === musicId);
+        const original = catalog.music.find(item => item.id === musicId);
 
         if (!scriptId || !musicId || !title || !original) {
             return null;

@@ -320,7 +320,11 @@ describe('marketing website', () => {
 
             expect(json).toBeDefined();
 
-            return JSON.parse(json!) as StructuredData;
+            if (!json) {
+                throw new Error('Expected structured data');
+            }
+
+            return JSON.parse(json) as StructuredData;
         };
         const routes = [
             '../dist/index.html',

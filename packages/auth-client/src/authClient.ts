@@ -15,6 +15,7 @@ import {
 export class AuthRequestError extends Error {
     constructor(message: string, readonly status: number) {
         super(message);
+        this.name = 'AuthRequestError';
     }
 }
 
@@ -30,6 +31,7 @@ export const browserSupportsPasskeys = () => browserSupportsWebAuthn();
 export class PasskeyCancelledError extends Error {
     constructor() {
         super('Passkey prompt was cancelled.');
+        this.name = 'PasskeyCancelledError';
     }
 }
 

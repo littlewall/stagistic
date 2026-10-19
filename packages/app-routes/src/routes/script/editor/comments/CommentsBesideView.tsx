@@ -97,9 +97,9 @@ export const CommentsBesideView = ({
     const anchoredThreads = useMemo(
         () => threads
             .filter(thread => anchors.has(thread.id))
-            .sort((left, right) => {
-                const leftAnchor = anchors.get(left.id)!;
-                const rightAnchor = anchors.get(right.id)!;
+            .toSorted((left, right) => {
+                const leftAnchor = requireValue(anchors.get(left.id));
+                const rightAnchor = requireValue(anchors.get(right.id));
 
                 return leftAnchor.from - rightAnchor.from || (leftAnchor.kind === 'block' ? -1 : 0) - (rightAnchor.kind === 'block' ? -1 : 0);
             }),
@@ -199,3 +199,4 @@ export const CommentsBesideView = ({
         </div>
     );
 };
+import {requireValue} from '@stagistic/shared';

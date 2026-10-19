@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     and,
     eq,
@@ -81,7 +82,7 @@ export const writeScenes = async ({
     const locations = await existingIds(tx, scriptLocations, scriptId);
 
     for (const scene of scenes) {
-        const record = upserts[scene.headingBlockId!] ?? null;
+        const record = upserts[requireValue(scene.headingBlockId)] ?? null;
         const locationId = str(record?.locationId);
 
         await tx.update(scriptScenes).set({

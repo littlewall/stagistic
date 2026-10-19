@@ -1,6 +1,7 @@
 import {PGlite} from '@electric-sql/pglite';
 import {live} from '@electric-sql/pglite/live';
 import {PGliteWorker} from '@electric-sql/pglite/worker';
+import {requireValue} from '@stagistic/shared';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 
 import {dbSchema} from '../schema';
@@ -85,7 +86,7 @@ export const createPgliteBootstrap = ({
                 await getLocalDb();
             }
 
-            return workerInstanceRef!.dumpDataDir(compression);
+            return requireValue(workerInstanceRef).dumpDataDir(compression);
         };
 
         return {

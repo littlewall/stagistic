@@ -81,7 +81,7 @@ export const useScriptSaveHandlers = ({
         // The value is already in the replica; wait until the engine projected it.
         await replica.flush();
 
-        if (metadata?.pageCount != null) {
+        if (metadata?.pageCount !== null && metadata?.pageCount !== undefined) {
             await scriptRepository.saveSummaryMetadata(scriptId, value, metadata, expectedSettings);
         }
     }, [replica, scriptRepository]);

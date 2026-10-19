@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -137,7 +138,7 @@ describe('editor bound to a Y.Doc', () => {
         // Mounting (setContent skipped, sanitize no-op) wrote nothing to the shared doc.
         expect(Y.encodeStateVector(left)).toEqual(before);
 
-        const leftEditor = editorIn(leftHost)!;
+        const leftEditor = requireValue(editorIn(leftHost));
         const lastParagraph = leftEditor.querySelectorAll('p')[1];
 
         await userEvent.click(lastParagraph);
@@ -199,7 +200,7 @@ describe('editor bound to a Y.Doc', () => {
 
         await waitFor(() => Boolean(editorIn(rightHost)?.textContent?.includes('To be.')));
 
-        const characterParagraph = editorIn(leftHost)!.querySelectorAll('p')[1];
+        const characterParagraph = requireValue(editorIn(leftHost)).querySelectorAll('p')[1];
 
         await userEvent.click(characterParagraph);
         await userEvent.keyboard('{End}LET');

@@ -1,5 +1,4 @@
 import {
-    ACCIDENTAL_GLYPHS,
     type Clef,
     CLEF_GLYPHS,
     formatPitch,
@@ -9,8 +8,9 @@ import {
     type Pitch,
     staffPosition,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import clsx from 'clsx';
-import type {KeyboardEvent} from 'react';
+import type {KeyboardEvent, SVGProps} from 'react';
 
 import {
     INTERACTIVE_MAX_POSITION,
@@ -24,6 +24,7 @@ import {
     CLEF_ANCHOR_Y,
     CLEF_INSET,
     CONNECTOR_GAP,
+    getAccidentalGlyph,
     HIGH_NOTE_FRACTION,
     LOW_NOTE_FRACTION,
     MANAGER_RESIZE_COMPENSATION,
@@ -71,8 +72,7 @@ export const VocalRangeStaff = ({
     const clef = pickRangeClef(low, high);
     const committedPositions = [
         ...STAFF_LINE_POSITIONS,
-        ...low ? [staffPosition(low, clef)] : [],
-        ...high ? [staffPosition(high, clef)] : [],
+        ...[low, high].flatMap(pitch => (pitch ? [staffPosition(pitch, clef)] : [])),
     ];
     const committedExtent = committedPositions.flatMap(position => [position, ...ledgerPositions(position)]);
     const minPosition = interactive
@@ -102,7 +102,7 @@ export const VocalRangeStaff = ({
     const highLedgers = highPosition !== null ? ledgerPositions(highPosition) : [];
 
     const clefGlyph = CLEF_GLYPHS[clef];
-    const clefHeightPx = (STAFF_LINE_POSITIONS.at(-1)! - STAFF_LINE_POSITIONS[0]) * UNIT_PX * 1.55;
+    const clefHeightPx = (requireValue(STAFF_LINE_POSITIONS.at(-1)) - STAFF_LINE_POSITIONS[0]) * UNIT_PX * 1.55;
     const clefScale = clefHeightPx / CLEF_GLYPHS.treble.viewBox.height;
     const clefY = y(2) - CLEF_ANCHOR_Y * clefScale;
 
@@ -116,11 +116,7 @@ export const VocalRangeStaff = ({
     const noteHitRx = UNIT_PX * 2.64 * MANAGER_RESIZE_COMPENSATION;
     const noteHitRy = UNIT_PX * 2.1 * MANAGER_RESIZE_COMPENSATION;
     const ledgerHalfWidth = noteRx + 5;
-    const highAccidentalGlyph = displayHigh?.alter === 1
-        ? ACCIDENTAL_GLYPHS.sharp
-        : displayHigh?.alter === -1
-            ? ACCIDENTAL_GLYPHS.flat
-            : null;
+    const highAccidentalGlyph = getAccidentalGlyph(displayHigh);
     const highAccidentalHeight = accidentalHeight(displayHigh);
     const highAccidentalScale = highAccidentalGlyph
         ? highAccidentalHeight / highAccidentalGlyph.viewBox.height
@@ -153,11 +149,7 @@ export const VocalRangeStaff = ({
         }
 
         const noteY = y(position);
-        const accidentalGlyph = pitch.alter === 1
-            ? ACCIDENTAL_GLYPHS.sharp
-            : pitch.alter === -1
-                ? ACCIDENTAL_GLYPHS.flat
-                : null;
+        const accidentalGlyph = getAccidentalGlyph(pitch);
         const accidentalVisualHeight = accidentalHeight(pitch);
         const accidentalScale = accidentalGlyph
             ? accidentalVisualHeight / accidentalGlyph.viewBox.height
@@ -166,26 +158,30 @@ export const VocalRangeStaff = ({
         const accidentalX = x - noteRx - ACCIDENTAL_NOTE_GAP - accidentalWidthPx;
         const accidentalY = noteY - accidentalAnchorY(pitch) * accidentalScale;
 
+        const interactiveProps: SVGProps<SVGGElement> = interactive ? {
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': `Select ${which} note ${formatPitch(pitch)}`,
+            'aria-pressed': interaction.selectedNote === which,
+            onClick: event => {
+                event.stopPropagation();
+                interaction.setSelectedNote(which);
+            },
+            onKeyDown: handleNoteKeyDown(which),
+            onPointerDown: event => interaction.startDrag(event, which),
+            onPointerMove: interaction.moveDrag,
+            onPointerUp: interaction.finishDrag,
+            onPointerCancel: interaction.cancelDrag,
+            onLostPointerCapture: interaction.cancelDrag,
+        } : {};
+
         return (
             <g
                 className={styles.note}
-                role={interactive ? 'button' : undefined}
-                tabIndex={interactive ? 0 : undefined}
-                aria-label={interactive ? `Select ${which} note ${formatPitch(pitch)}` : undefined}
-                aria-pressed={interactive ? interaction.selectedNote === which : undefined}
+                {...interactiveProps}
                 data-staff-position={position}
                 data-selected={interaction.selectedNote === which || undefined}
                 data-dragging={interaction.draggingNote === which || undefined}
-                onClick={interactive ? event => {
-                    event.stopPropagation();
-                    interaction.setSelectedNote(which);
-                } : undefined}
-                onKeyDown={interactive ? handleNoteKeyDown(which) : undefined}
-                onPointerDown={interactive ? event => interaction.startDrag(event, which) : undefined}
-                onPointerMove={interactive ? interaction.moveDrag : undefined}
-                onPointerUp={interactive ? interaction.finishDrag : undefined}
-                onPointerCancel={interactive ? interaction.cancelDrag : undefined}
-                onLostPointerCapture={interactive ? interaction.cancelDrag : undefined}
             >
                 {interactive ? (
                     <ellipse

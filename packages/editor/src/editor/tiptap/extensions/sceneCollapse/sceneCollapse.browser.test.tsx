@@ -4,6 +4,7 @@ import type {
     ScriptDocument,
     ScriptNode,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {
@@ -135,7 +136,7 @@ describe('scene collapse extension', () => {
         expect(blockElement(editor, 'b2')?.getAttribute('data-scene-content-collapsed')).toBe('true');
         expect(blockElement(editor, 's2')?.getAttribute('data-scene-content-collapsed')).toBeNull();
         expect(blockElement(editor, 'b3')?.getAttribute('data-scene-content-collapsed')).toBeNull();
-        expect(getComputedStyle(blockElement(editor, 'b1')!).display).toBe('none');
+        expect(getComputedStyle(requireValue(blockElement(editor, 'b1'))).display).toBe('none');
     });
 
     it('toggles multiple scenes independently without changing document JSON', async () => {

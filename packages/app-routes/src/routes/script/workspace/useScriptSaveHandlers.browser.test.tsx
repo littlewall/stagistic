@@ -35,23 +35,23 @@ const Harness = ({handlersRef, stored}: {
     handlersRef: {current: Handlers | null},
     stored: StoredSnapshot[],
 }) => {
-    handlersRef.current = useScriptSaveHandlers({
+    const handlers = useScriptSaveHandlers({
         context: {currentScriptId: 'script-id', currentScript: {id: 'script-id', name: 'Script'}},
         repository: {
-            saveLatest: (scriptId, value, metadata) => {
+            saveLatest: (scriptId, snapshotValue, snapshotMetadata) => {
                 stored.push({
                     scriptId,
-                    value,
-                    metadata,
+                    value: snapshotValue,
+                    metadata: snapshotMetadata,
                 });
 
                 return Promise.resolve();
             },
-            saveSummaryMetadata: (scriptId, value, metadata, expectedSettings) => {
+            saveSummaryMetadata: (scriptId, snapshotValue, snapshotMetadata, expectedSettings) => {
                 stored.push({
                     scriptId,
-                    value,
-                    metadata,
+                    value: snapshotValue,
+                    metadata: snapshotMetadata,
                     expectedSettings,
                 });
 
@@ -61,6 +61,10 @@ const Harness = ({handlersRef, stored}: {
         notifications: {setStorageError: () => {}, addToast: () => {}},
         state: {saveIndicatorControls: {startSaveIndicator: () => {}, finishSaveIndicator: () => {}}},
     });
+
+    useLayoutEffect(() => {
+        handlersRef.current = handlers;
+    }, [handlers, handlersRef]);
 
     return null;
 };
@@ -135,3 +139,4 @@ describe('workspace editor save snapshots', () => {
         ]);
     });
 });
+import {useLayoutEffect} from 'react';

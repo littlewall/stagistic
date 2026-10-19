@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import * as Y from 'yjs';
 
 import {fromBase64, toBase64} from '../../ydoc/base64';
@@ -24,7 +25,7 @@ const covers = (synced: string | null | undefined, current: string | null | unde
         return true;
     }
 
-    return Boolean(synced) && stateVectorCovers(fromBase64(synced!), fromBase64(current));
+    return Boolean(synced) && stateVectorCovers(fromBase64(requireValue(synced)), fromBase64(current));
 };
 
 export const localChangedSince = (docs: Record<DocKind, Y.Doc>, synced: SyncedScriptState | undefined) => {

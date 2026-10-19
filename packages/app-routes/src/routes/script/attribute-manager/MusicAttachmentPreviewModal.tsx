@@ -27,6 +27,22 @@ export const MusicAttachmentPreviewModal = ({
 }: MusicAttachmentPreviewModalProps) => {
     const pagesRef = useRef<HTMLDivElement | null>(null);
     const [status, setStatus] = useState<PreviewStatus>('loading');
+    const [previous, setPrevious] = useState({
+        isOpen,
+        storageKey,
+        loadBlob,
+    });
+
+    if (previous.isOpen !== isOpen || previous.storageKey !== storageKey || previous.loadBlob !== loadBlob) {
+        setPrevious({
+            isOpen,
+            storageKey,
+            loadBlob,
+        });
+        if (isOpen) {
+            setStatus('loading');
+        }
+    }
 
     useEffect(() => {
         if (!isOpen) {
@@ -36,7 +52,6 @@ export const MusicAttachmentPreviewModal = ({
         let cancelled = false;
 
         pagesRef.current?.replaceChildren();
-        setStatus('loading');
 
         const render = async () => {
             if (!storageKey) {

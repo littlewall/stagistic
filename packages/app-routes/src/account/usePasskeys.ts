@@ -28,23 +28,44 @@ const ignoreCancel = async (action: () => Promise<void>) => {
 export const usePasskeys = (auth: AuthClient | null, isOpen: boolean) => {
     const [supported] = useState(() => browserSupportsPasskeys());
     const [passkeys, setPasskeys] = useState<PasskeyItem[] | null>(null);
+    const [previous, setPrevious] = useState({auth, isOpen});
+
+    if (previous.auth !== auth || previous.isOpen !== isOpen) {
+        setPrevious({auth, isOpen});
+        setPasskeys(null);
+    }
 
     const reload = useCallback(async () => {
-        setPasskeys(await auth!.listPasskeys());
+        if (auth) {
+            const items = await auth.listPasskeys();
+
+            setPasskeys(items);
+        }
     }, [auth]);
 
     useEffect(() => {
         if (!auth || !supported || !isOpen) {
-            setPasskeys(null);
-
             return;
         }
 
-        void reload().catch(() => setPasskeys([]));
+        let active = true;
+
+        void auth.listPasskeys().then(items => {
+            if (active) {
+                setPasskeys(items);
+            }
+        }).catch(() => {
+            if (active) {
+                setPasskeys([]);
+            }
+        });
+
+        return () => {
+            active = false;
+        };
     }, [
         auth,
         isOpen,
-        reload,
         supported,
     ]);
 

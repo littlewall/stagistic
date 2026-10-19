@@ -29,7 +29,7 @@ import {
     it,
 } from 'vite-plus/test';
 import WebSocket, {WebSocketServer} from 'ws';
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 
 import {createAttachmentStorage} from './attachmentStorage';
 import {type CollabDatabase, createCollabDatabase} from './database';
@@ -163,7 +163,7 @@ describe.skipIf(!available)('client cloud sync', () => {
     });
 
     afterEach(async () => {
-        for (const cleanup of cleanups.splice(0).reverse()) {
+        for (const cleanup of cleanups.splice(0).toReversed()) {
             await cleanup();
         }
     });
@@ -333,7 +333,7 @@ describe.skipIf(!available)('client cloud sync', () => {
 
         const report = await a.client.cloud.check();
 
-        expect(report.conflicts.map(conflict => conflict.scriptId).sort()).toEqual(['k1', 'n1']);
+        expect(report.conflicts.map(conflict => conflict.scriptId).toSorted()).toEqual(['k1', 'n1']);
         expect(report.conflicts.find(conflict => conflict.scriptId === 'k1')).toMatchObject({differingScenes: 1, newer: 'cloud'});
         expect(report.conflicts.find(conflict => conflict.scriptId === 'n1')).toMatchObject({newer: 'local'});
 
@@ -345,8 +345,13 @@ describe.skipIf(!available)('client cloud sync', () => {
         const copyId = [...a.cloudStore.titles].find(([, title]) => title === `Lear${COPY_SUFFIX}`)?.[0];
 
         expect(copyId).toBeTruthy();
-        expect(texts(a.projection.documents.get(copyId!))).toContain('A version');
-        expect(resets.flat().sort()).toEqual(['k1', 'n1']);
+
+        if (!copyId) {
+            throw new Error('Expected a conflict copy');
+        }
+
+        expect(texts(a.projection.documents.get(copyId))).toContain('A version');
+        expect(resets.flat().toSorted()).toEqual(['k1', 'n1']);
 
         // Use newer (local): B receives A's version as an ordinary change, without duplicates.
         await eventually(() => texts(b.projection.documents.get('n1')).includes('A newer version'));
@@ -437,7 +442,14 @@ describe.skipIf(!available)('client cloud sync', () => {
         expect(b.files.has('local-key-1')).toBe(false);
 
         expect(await b.client.cloud.downloadAttachment('local-key-1')).toBe(true);
-        expect(new Uint8Array(await b.files.get('local-key-1')!.arrayBuffer())).toEqual(new Uint8Array(3000).fill(9));
+
+        const downloaded = b.files.get('local-key-1');
+
+        if (!downloaded) {
+            throw new Error('Expected a downloaded attachment');
+        }
+
+        expect(new Uint8Array(await downloaded.arrayBuffer())).toEqual(new Uint8Array(3000).fill(9));
     });
 
     it('deletes in the cloud when a synced script is deleted locally', async () => {

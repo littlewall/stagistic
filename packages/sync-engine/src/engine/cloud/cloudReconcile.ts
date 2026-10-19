@@ -1,4 +1,4 @@
-import {uuidv7} from '@stagistic/shared';
+import {requireValue, uuidv7} from '@stagistic/shared';
 import * as Y from 'yjs';
 
 import {
@@ -117,8 +117,8 @@ export const createCloudReconcile = (context: CloudContext) => {
         const conflicts: CloudConflict[] = [];
 
         for (const scriptId of plan.conflicts) {
-            const remote = cloudById.get(scriptId)!;
-            const localScript = local.find(script => script.scriptId === scriptId)!;
+            const remote = requireValue(cloudById.get(scriptId));
+            const localScript = requireValue(local.find(script => script.scriptId === scriptId));
             const cloudDocs = await fetchCloudState(scriptId);
             const localDocs = await host.getDocs(scriptId, {seed: true});
             const cloudUpdatedAt = Date.parse(remote.updatedAt);
@@ -219,7 +219,7 @@ export const createCloudReconcile = (context: CloudContext) => {
         }
 
         for (const scriptId of [...plan.download, ...plan.restoreLocal]) {
-            await context.download(cloudById.get(scriptId)!);
+            await context.download(requireValue(cloudById.get(scriptId)));
             await store.removeTombstone(scriptId);
         }
 
@@ -234,8 +234,8 @@ export const createCloudReconcile = (context: CloudContext) => {
         }
 
         for (const conflict of conflicts) {
-            await resolveConflict(conflict, resolutions[conflict.scriptId] ?? 'keep-both', cloudById.get(conflict.scriptId)!, scratch.get(conflict.scriptId)!);
-            scratch.get(conflict.scriptId)!.body.destroy();
+            await resolveConflict(conflict, resolutions[conflict.scriptId] ?? 'keep-both', requireValue(cloudById.get(conflict.scriptId)), requireValue(scratch.get(conflict.scriptId)));
+            requireValue(scratch.get(conflict.scriptId)).body.destroy();
         }
 
         if (conflicts.length > 0) {

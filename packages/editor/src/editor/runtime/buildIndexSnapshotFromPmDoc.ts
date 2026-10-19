@@ -33,7 +33,7 @@ const toTagCharacterRefs = (node: ProseMirrorNode): IndexedScriptCharacterRef[] 
     }
 
     return Array.from(idByKey.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .toSorted((a, b) => a[0].localeCompare(b[0]))
         .map(([key, characterId]) => ({key, characterId}));
 };
 
@@ -69,7 +69,7 @@ const toCharacterRefs = (
     }
 
     Object.entries(refsByKey)
-        .sort((left, right) => left[0].localeCompare(right[0]))
+        .toSorted((left, right) => left[0].localeCompare(right[0]))
         .forEach(([key, characterId]) => {
             if (seenKeys.has(key)) {
                 return;

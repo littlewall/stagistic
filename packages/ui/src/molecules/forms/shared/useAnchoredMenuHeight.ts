@@ -31,12 +31,18 @@ export const useAnchoredMenuPlacement = ({
 } => {
     const [placement, setPlacement] = useState<AnchoredMenuPlacement>('below');
     const [style, setStyle] = useState<AnchoredMenuHeightStyle>({});
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
+        if (!isOpen) {
+            setPlacement('below');
+            setStyle({});
+        }
+    }
 
     useLayoutEffect(() => {
         if (!isOpen || typeof window === 'undefined') {
-            setPlacement('below');
-            setStyle({});
-
             return;
         }
 
@@ -109,7 +115,7 @@ export const useAnchoredMenuPlacement = ({
     ]);
 
     return {
-        placement,
-        style,
+        placement: isOpen ? placement : 'below',
+        style: isOpen ? style : {},
     };
 };

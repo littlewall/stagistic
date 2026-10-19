@@ -205,7 +205,7 @@ describe.skipIf(!available)('collab service', () => {
     });
 
     it('registers the same new script twice at once without a server error', async () => {
-        const statuses = (await Promise.all([register('alice', 'race-1'), register('alice', 'race-1')])).map(response => response.status).sort((left, right) => left - right);
+        const statuses = (await Promise.all([register('alice', 'race-1'), register('alice', 'race-1')])).map(response => response.status).toSorted((left, right) => left - right);
 
         expect(statuses).toEqual([200, 201]);
         expect((await register('mallory', 'race-1')).status).toBe(403);
@@ -236,7 +236,13 @@ describe.skipIf(!available)('collab service', () => {
 
         // The list carries the stored doc's state vector (clients compare it with their last sync).
         const listed = ((await (await api('alice', '/scripts')).json()) as {scripts: Array<{id: string, stateVectors: Record<string, string>}>}).scripts;
-        const metaVector = Buffer.from(listed.find(item => item.id === 'doc-1')!.stateVectors.meta, 'base64');
+        const listedScript = listed.find(item => item.id === 'doc-1');
+
+        if (!listedScript) {
+            throw new Error('Expected doc-1 in the cloud library');
+        }
+
+        const metaVector = Buffer.from(listedScript.stateVectors.meta, 'base64');
 
         expect([...metaVector]).toEqual([...Y.encodeStateVector(document)]);
 

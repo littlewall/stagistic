@@ -23,15 +23,15 @@ export const getMusicSuggestions = (music: readonly PersistentMusicRef[], query:
     const normalizedQuery = normalizeMusicTitle(query);
 
     return music
-        .filter(music => !music.assignmentLabel)
-        .map(music => ({
-            music,
-            normalizedTitle: normalizeMusicTitle(music.title),
+        .filter(item => !item.assignmentLabel)
+        .map(item => ({
+            music: item,
+            normalizedTitle: normalizeMusicTitle(item.title),
         }))
         .filter(entry => {
             return !normalizedQuery || entry.normalizedTitle.includes(normalizedQuery);
         })
-        .sort((a, b) => {
+        .toSorted((a, b) => {
             if (!normalizedQuery) {
                 return a.music.title.localeCompare(b.music.title);
             }

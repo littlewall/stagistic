@@ -107,7 +107,9 @@ export const useScriptEditorInstance = ({
 
     const stateRef = useRef(currentState);
 
-    stateRef.current = currentState;
+    useEffect(() => {
+        stateRef.current = currentState;
+    }, [currentState]);
 
     const pendingDestroyRef = useRef<number | null>(null);
 

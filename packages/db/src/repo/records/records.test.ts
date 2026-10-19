@@ -1,4 +1,5 @@
 import {SCRIPT_DOCUMENT_SCHEMA_VERSION, type ScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     createMemoryDocPersistence,
     createSyncEngine,
@@ -45,7 +46,7 @@ const body: ScriptDocument = {
 const stops: Array<() => Promise<void> | void> = [];
 
 afterEach(async () => {
-    for (const stop of stops.splice(0).reverse()) {
+    for (const stop of stops.splice(0).toReversed()) {
         await stop();
     }
 });
@@ -191,7 +192,7 @@ describe('script records', () => {
                 return record;
             };
 
-            characters.get('c1')!.set('colorHex', '#00ff00');
+            requireValue(characters.get('c1')).set('colorHex', '#00ff00');
             characters.set('c2', createCharacter({
                 key: 'OPHELIA',
                 kind: 'character',

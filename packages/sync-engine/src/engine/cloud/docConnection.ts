@@ -22,7 +22,9 @@ export interface CloudSocket {
     close(): void,
 }
 
-export class CloudAccessDeniedError extends Error {}
+export class CloudAccessDeniedError extends Error {
+    override name = 'CloudAccessDeniedError';
+}
 
 export const createCloudSocket = ({
     wsUrl,
