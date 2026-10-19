@@ -1,0 +1,30 @@
+.tooltip {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-surface);
+    letter-spacing: var(--letter-spacing-sm);
+    background: var(--color-text);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-popover);
+}
+
+.content {
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    white-space: nowrap;
+}
+
+/* A quiet keycap beside the label: the chip separates it, the text stays nearly full strength. */
+.shortcut {
+    padding: var(--space-px) var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-none);
+    color: color-mix(in oklch, var(--color-surface) 88%, transparent);
+    letter-spacing: var(--letter-spacing-normal);
+    background: color-mix(in oklch, var(--color-surface) 16%, transparent);
+    border-radius: var(--radius-sm);
+}

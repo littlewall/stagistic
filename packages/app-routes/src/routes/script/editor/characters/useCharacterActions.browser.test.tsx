@@ -48,7 +48,8 @@ const Harness = ({catalog}: {catalog: Catalog}) => {
         confirmedCharacterSet: new Set(['ALICE']),
         confirmedCharactersById: new Map([
             [
-                'character-1', {
+                'character-1',
+                {
                     id: 'character-1',
                     key: 'ALICE',
                     colorHex: null,

@@ -8,7 +8,6 @@ import {
 } from '@tiptap/pm/state';
 
 import type {EditorBlockUiEvent} from '../../contracts';
-import {incrementFullIndexBuildCount} from '../../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {transactionMayAffectBlockStructure} from '../../runtime/transactionGuards';
 import {getActiveScriptBlockFromState} from '../scriptCore';
@@ -21,17 +20,13 @@ type IndexedSnapshotBlock = ScriptBlockIndexSnapshot['blocks'][number];
 
 const EMPTY_EVENTS: EditorBlockUiEvent[] = [];
 
-export const blockUiEventsKey = new PluginKey<BlockUiEventsPluginState>('script-block-ui-events');
+const blockUiEventsKey = new PluginKey<BlockUiEventsPluginState>('script-block-ui-events');
 
 const getActiveBlockIdFromState = (state: EditorState) => {
     return getActiveScriptBlockFromState(state)?.id ?? null;
 };
 
-const shouldDiffBlocks = (
-    transaction: Transaction,
-    previousSnapshot: ScriptBlockIndexSnapshot,
-    nextSnapshot: ScriptBlockIndexSnapshot,
-) => {
+const shouldDiffBlocks = (transaction: Transaction, previousSnapshot: ScriptBlockIndexSnapshot, nextSnapshot: ScriptBlockIndexSnapshot) => {
     if (!transaction.docChanged) {
         return false;
     }
@@ -44,15 +39,10 @@ const shouldDiffBlocks = (
 };
 
 const buildIndexSnapshotFromState = (state: EditorState): ScriptBlockIndexSnapshot => {
-    incrementFullIndexBuildCount();
-
     return buildIndexSnapshotFromPmDoc(state.doc);
 };
 
-const buildBlockDiffEvents = (
-    previousBlocks: readonly IndexedSnapshotBlock[],
-    nextBlocks: readonly IndexedSnapshotBlock[],
-): EditorBlockUiEvent[] => {
+const buildBlockDiffEvents = (previousBlocks: readonly IndexedSnapshotBlock[], nextBlocks: readonly IndexedSnapshotBlock[]): EditorBlockUiEvent[] => {
     const events: EditorBlockUiEvent[] = [];
     const previousById = new Map(previousBlocks.map(block => [block.blockId, block] as const));
     const nextById = new Map(nextBlocks.map(block => [block.blockId, block] as const));

@@ -18,13 +18,9 @@ import {
     Plugin,
     PluginKey,
 } from '@tiptap/pm/state';
-import {
-    Decoration, DecorationSet,
-} from '@tiptap/pm/view';
+import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
-import {
-    isScriptBlockNodeName, normalizeBlockNodeType,
-} from '../../scriptCore';
+import {isScriptBlockNodeName, normalizeBlockNodeType} from '../../scriptCore';
 import {buildMusicLabelMap} from './musicLabels';
 
 interface MusicNumberingState {
@@ -33,11 +29,9 @@ interface MusicNumberingState {
     decorationCount: number,
 }
 
-export const musicNumberingPluginKey = new PluginKey<MusicNumberingState>('musicNumbering');
+const musicNumberingPluginKey = new PluginKey<MusicNumberingState>('musicNumbering');
 
-export const getMusicNumberLabelsById = (
-    state: EditorState,
-): ReadonlyMap<string, string> => {
+export const getMusicNumberLabelsById = (state: EditorState): ReadonlyMap<string, string> => {
     const labels = new Map<string, string>();
     const decorations = musicNumberingPluginKey.getState(state)?.decorations.find() ?? [];
 
@@ -77,7 +71,9 @@ const computeSignature = (doc: ProseMirrorNode): string => {
         if (isScriptBlockNodeName(name) && resolveBlockType(node) === 'scene') {
             parts.push('S');
         } else if (name === MUSIC_START_NODE_NAME) {
-            parts.push(`s:${String(node.attrs[MUSIC_ID_ATTR] ?? '')}:${String(node.attrs[MUSIC_TITLE_ATTR] ?? '')}:${String(node.attrs[MUSIC_MODE_ATTR] ?? '')}`);
+            parts.push(
+                `s:${String(node.attrs[MUSIC_ID_ATTR] ?? '')}:${String(node.attrs[MUSIC_TITLE_ATTR] ?? '')}:${String(node.attrs[MUSIC_MODE_ATTR] ?? '')}`,
+            );
         }
 
         return true;
@@ -89,7 +85,11 @@ const computeSignature = (doc: ProseMirrorNode): string => {
 const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
     const musicBlockInputs: MusicBlockInput[] = [];
     const atomSites: {
-        pos: number, size: number, name: string, musicId: string, blockId: string,
+        pos: number,
+        size: number,
+        name: string,
+        musicId: string,
+        blockId: string,
     }[] = [];
     let currentBlockId = '';
 
@@ -142,18 +142,20 @@ const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
 
         const music = derivedMusic.find(entry => entry.endBlockId === site.blockId);
 
-        return Decoration.node(site.pos, site.pos + site.size, {}, {
-            musicId: music?.musicId ?? '',
-        });
+        return Decoration.node(
+            site.pos,
+            site.pos + site.size,
+            {},
+            {
+                musicId: music?.musicId ?? '',
+            },
+        );
     });
 
     return DecorationSet.create(doc, decorations);
 };
 
-const createMusicNumberingState = (
-    doc: ProseMirrorNode,
-    signature = computeSignature(doc),
-): MusicNumberingState => {
+const createMusicNumberingState = (doc: ProseMirrorNode, signature = computeSignature(doc)): MusicNumberingState => {
     const decorations = buildDecorations(doc);
 
     return {

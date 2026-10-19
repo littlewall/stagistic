@@ -33,7 +33,6 @@ interface UseCharacterComputedArgs {
         confirmedGroupRecords: ScriptCharacterGroupRecord[],
         characterSnapshot: EditorLiveCharacterSnapshot | null,
         resolvedScriptSettings: EditorSettings,
-        characterColorSaturation: number,
     },
     pending: {
         confirmingCharacterKeys: string[],
@@ -72,7 +71,6 @@ export const useCharacterComputed = ({
         confirmedGroupRecords,
         characterSnapshot,
         resolvedScriptSettings,
-        characterColorSaturation,
     } = data;
     const {
         confirmingCharacterKeys,
@@ -135,7 +133,7 @@ export const useCharacterComputed = ({
         [characterSnapshot, confirmedGroupRecords],
     );
     const normalizedSpeakingEntityRecords = useMemo(
-        () => [...normalizedConfirmedCharacterRecords, ...normalizedConfirmedGroupRecords].sort((left, right) => left.key.localeCompare(right.key)),
+        () => [...normalizedConfirmedCharacterRecords, ...normalizedConfirmedGroupRecords].toSorted((left, right) => left.key.localeCompare(right.key)),
         [normalizedConfirmedCharacterRecords, normalizedConfirmedGroupRecords],
     );
 
@@ -179,7 +177,6 @@ export const useCharacterComputed = ({
                     color: getConfirmedCharacterColor(
                         character.id,
                         normalizedColorHex,
-                        characterColorSaturation,
                     ),
                     colorHex: normalizedColorHex ?? null,
                     genderKey: character.genderKey ?? null,
@@ -197,7 +194,6 @@ export const useCharacterComputed = ({
             });
         },
         [
-            characterColorSaturation,
             colorUpdatingCharacterIdSet,
             deletingCharacterIdSet,
             genderUpdatingCharacterIdSet,
@@ -216,11 +212,11 @@ export const useCharacterComputed = ({
             return Array.from(unconfirmedCharacterKeys.values())
                 .filter(key => !confirmedCharacterSet.has(key))
                 .filter(key => !renamingCharacterKeySet.has(key))
-                .sort((a, b) => a.localeCompare(b))
+                .toSorted((a, b) => a.localeCompare(b))
                 .map(key => ({
                     key,
                     color: characterSnapshot?.displayColorByKey.get(key)
-                        ?? getCharacterColor(key, characterColorSaturation),
+                        ?? getCharacterColor(key),
                     isConfirmed: false,
                     isConfirmPending: confirmingCharacterSet.has(key),
                     isPending: confirmingCharacterSet.has(key),
@@ -228,7 +224,6 @@ export const useCharacterComputed = ({
         },
         [
             characterSnapshot?.displayColorByKey,
-            characterColorSaturation,
             confirmedCharacterSet,
             confirmingCharacterSet,
             includeSidebarLists,

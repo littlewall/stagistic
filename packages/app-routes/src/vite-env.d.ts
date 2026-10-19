@@ -1,4 +1,4 @@
-/// <reference types="vite/client" />
+/// <reference types="vite-plus/client" />
 
 declare module 'pdfjs-dist/build/pdf.worker.mjs?url' {
     const url: string;
@@ -16,6 +16,11 @@ declare module '*.pdf?url' {
 }
 
 declare module '*.pdf?url&no-inline' {
+    const url: string;
+    export default url;
+}
+
+declare module '*.png?url&no-inline' {
     const url: string;
     export default url;
 }

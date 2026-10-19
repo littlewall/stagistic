@@ -9,37 +9,31 @@ import type {NormalizedPersistentCharacterRef} from './persistentRefNormalizatio
 export const getConfirmedCharacterColor = (
     characterId: string,
     colorHex: string | null | undefined,
-    characterColorSaturation?: number,
 ) => {
     const normalizedColor = normalizeCharacterColorHex(colorHex);
 
     if (normalizedColor) {
-        return characterColorSaturation === undefined
-            ? normalizedColor
-            : applyCharacterColorSaturation(normalizedColor, characterColorSaturation);
+        return applyCharacterColorSaturation(normalizedColor);
     }
 
-    return getCharacterColor(`character:${characterId}`, characterColorSaturation);
+    return getCharacterColor(`character:${characterId}`);
 };
 
 export const getUnconfirmedCharacterColor = (
     characterKey: string,
-    characterColorSaturation?: number,
 ) => {
-    return getCharacterColor(characterKey, characterColorSaturation);
+    return getCharacterColor(characterKey);
 };
 
 const getDraftTokenColor = (
     blockId: string,
     tokenIndex: number,
-    characterColorSaturation?: number,
 ) => {
-    return getCharacterColor(`draft:${blockId}:${tokenIndex}`, characterColorSaturation);
+    return getCharacterColor(`draft:${blockId}:${tokenIndex}`);
 };
 
 interface CreateCharacterColorResolversArgs {
     normalizedPersistentCharacters: readonly NormalizedPersistentCharacterRef[],
-    characterColorSaturation?: number,
     colorByCharacterId?: ReadonlyMap<string, string>,
     rememberedColorByKey?: ReadonlyMap<string, string>,
 }
@@ -53,7 +47,6 @@ export interface CharacterColorResolvers {
 
 export const createCharacterColorResolvers = ({
     normalizedPersistentCharacters,
-    characterColorSaturation,
     colorByCharacterId,
     rememberedColorByKey,
 }: CreateCharacterColorResolversArgs): CharacterColorResolvers => {
@@ -67,7 +60,6 @@ export const createCharacterColorResolvers = ({
             getConfirmedCharacterColor(
                 character.id,
                 colorByCharacterId?.get(character.id) ?? character.colorHex,
-                characterColorSaturation,
             ),
         );
     });
@@ -85,7 +77,7 @@ export const createCharacterColorResolvers = ({
             return persistentColor;
         }
 
-        return getCharacterColor(`character:${characterId}`, characterColorSaturation);
+        return getCharacterColor(`character:${characterId}`);
     };
 
     const resolveRememberedColorByKey = (characterKey: string) => {
@@ -93,7 +85,7 @@ export const createCharacterColorResolvers = ({
     };
 
     const resolveDraftTokenColor = (blockId: string, tokenIndex: number) => {
-        return getDraftTokenColor(blockId, tokenIndex, characterColorSaturation);
+        return getDraftTokenColor(blockId, tokenIndex);
     };
 
     return {

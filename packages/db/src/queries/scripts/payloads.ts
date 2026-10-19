@@ -1,3 +1,5 @@
+import type {ScriptSummaryMetadata} from '@stagistic/script';
+
 export interface ListScriptsOptions {
     limit?: number,
 }
@@ -7,6 +9,7 @@ export interface InsertScriptPayload {
     title: string,
     createdAt: number,
     updatedAt: number,
+    summaryMetadata?: ScriptSummaryMetadata,
 }
 
 export interface UpdateScriptPayload {
@@ -36,6 +39,10 @@ export interface UpdateActiveBlockPayload {
 export interface UpdateScriptTimestampPayload {
     scriptId: string,
     updatedAt: number,
+}
+
+export interface UpdateScriptSummaryMetadataPayload extends UpdateScriptTimestampPayload {
+    summaryMetadata: ScriptSummaryMetadata,
 }
 
 export interface ScriptConfigLookupPayload {

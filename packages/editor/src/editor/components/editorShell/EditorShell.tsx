@@ -1,5 +1,6 @@
 import type {
     BlockShortcut,
+    CharacterDecoration,
     HeaderFooterSettings,
     ScriptBlockNodeType,
 } from '@stagistic/script';
@@ -11,19 +12,17 @@ import {
     type MouseEvent as ReactMouseEvent,
     type RefObject,
     useEffect,
+    useEffectEvent,
     useId,
     useMemo,
-    useRef,
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
-import {
-    CHARACTER_HIGHLIGHT_ATTR,
-    DEFAULT_CHARACTER_HIGHLIGHT,
-} from '../../characters/characterHighlight';
+import {CHARACTER_HIGHLIGHT_ATTR} from '../../characters/characterHighlight';
 import type {
     EditorLayoutProps,
     EditorMusicRemoveRequest,
+    EditorSearchProps,
     PersistentCharacterRef,
     PersistentMusicRef,
 } from '../../contracts';
@@ -42,12 +41,13 @@ interface EditorShellCanvasProps {
     onMusicAssigned?: (musicId: string) => void,
     onOpenMusicManager?: (musicId: string) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
-    characterColorSaturation?: number,
     headerFooter: HeaderFooterSettings,
+    characterDecoration: CharacterDecoration,
     scriptTitle?: string,
     draftDate?: string,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
     blockNextElements?: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
+    search?: EditorSearchProps,
 }
 
 interface EditorShellProps {
@@ -86,12 +86,13 @@ export const EditorShell = ({
         onMusicAssigned,
         onOpenMusicManager,
         onRequestRemoveMusic,
-        characterColorSaturation,
         headerFooter,
+        characterDecoration,
         scriptTitle,
         draftDate,
         blockShortcuts,
         blockNextElements,
+        search,
     } = canvas;
     const {
         leftSidebarToggle,
@@ -120,9 +121,19 @@ export const EditorShell = ({
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
     const isAnySidebarOpen = isLeftSidebarOpen || isRightSidebarOpen;
-    const sidebarTogglesRef = useRef({leftSidebarToggle, rightSidebarToggle});
+    const handleBeforeInput = useEffectEvent(() => {
+        if (!window.matchMedia('(max-width: 1199px)').matches) {
+            return;
+        }
 
-    sidebarTogglesRef.current = {leftSidebarToggle, rightSidebarToggle};
+        if (leftSidebarToggle?.isOpen) {
+            leftSidebarToggle.onToggle();
+        }
+
+        if (rightSidebarToggle?.isOpen) {
+            rightSidebarToggle.onToggle();
+        }
+    });
 
     useEffect(() => {
         const editorElement = editor?.view.dom;
@@ -130,22 +141,6 @@ export const EditorShell = ({
         if (!editorElement) {
             return;
         }
-
-        const handleBeforeInput = () => {
-            if (!window.matchMedia('(max-width: 1199px)').matches) {
-                return;
-            }
-
-            const {leftSidebarToggle: leftToggle, rightSidebarToggle: rightToggle} = sidebarTogglesRef.current;
-
-            if (leftToggle?.isOpen) {
-                leftToggle.onToggle();
-            }
-
-            if (rightToggle?.isOpen) {
-                rightToggle.onToggle();
-            }
-        };
 
         editorElement.addEventListener('beforeinput', handleBeforeInput);
 
@@ -167,7 +162,7 @@ export const EditorShell = ({
             className={styles.root}
             data-character-tag-scope={characterTagScopeId}
             data-editor-ready={isCanvasReady ? 'true' : 'false'}
-            {...{[CHARACTER_HIGHLIGHT_ATTR]: DEFAULT_CHARACTER_HIGHLIGHT}}
+            {...{[CHARACTER_HIGHLIGHT_ATTR]: characterDecoration}}
             aria-busy={!isCanvasReady}
             ref={rootRef}
             style={rootStyle}
@@ -216,6 +211,7 @@ export const EditorShell = ({
                             <EditorToolbar
                                 editor={editor}
                                 blockShortcuts={blockShortcuts}
+                                search={search}
                             />
                         </div>
                         {rightSidebarToggle ? (
@@ -240,7 +236,6 @@ export const EditorShell = ({
                             onMusicAssigned={onMusicAssigned}
                             onOpenMusicManager={onOpenMusicManager}
                             onRequestRemoveMusic={onRequestRemoveMusic}
-                            characterColorSaturation={characterColorSaturation}
                             autoFocus={autoFocus}
                             headerFooter={headerFooter}
                             scriptTitle={scriptTitle}

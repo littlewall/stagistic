@@ -38,7 +38,9 @@ export const isFirstSceneBlock = (doc: ProseMirrorNode, blockId: string): boolea
 
 export const resolveSceneActions = (
     {
-        editor, blockId, blockType,
+        editor,
+        blockId,
+        blockType,
     }: BlockActionContext,
 ): readonly BlockActionItem[] => {
     if (blockType !== 'scene') {

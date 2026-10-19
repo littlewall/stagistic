@@ -1,20 +1,11 @@
 import {
-    MUSIC_DRAFT_ATTR,
-    MUSIC_ID_ATTR,
-    MUSIC_KIND_ATTR,
-    MUSIC_MODE_ATTR,
     MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
-import {
-    ArrowRightIcon,
-    EditPencilIcon,
-} from '@stagistic/ui';
-import {
-    type NodeViewProps,
-    NodeViewWrapper,
-} from '@tiptap/react';
+import {ArrowRightIcon, EditPencilIcon} from '@stagistic/ui';
+import {type NodeViewProps, NodeViewWrapper} from '@tiptap/react';
 import clsx from 'clsx';
 import {
+    type FocusEvent,
     useEffect,
     useId,
     useRef,
@@ -29,16 +20,14 @@ import type {
 import styles from './MusicPill.module.css';
 import {
     MusicMenuButton,
-    type MusicMode,
     MusicUnassignIcon,
 } from './MusicPillControls';
+import {requestMusicPillCreation} from './musicPillCreation';
 import {
-    cancelMusicDraft,
     findMusicPillElement,
+    getMusicStartPillData,
     handleBlurWithin,
     handleFocusWithin,
-    normalizeMusicTitle,
-    readDecorationLabel,
     scrollToMusicPill,
     usePillActivation,
 } from './musicPillHelpers';
@@ -70,22 +59,30 @@ export const MusicStartPill = ({
     persistentMusicRef,
 }: MusicStartPillProps) => {
     const {
-        active, setActive, rootRef,
+        active,
+        setActive,
+        rootRef,
     } = usePillActivation();
     const anchorName = `--music-pill-${useId().replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
     const titleRef = useRef<HTMLSpanElement>(null);
-    const mode: MusicMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
-    const isDraft = node.attrs[MUSIC_DRAFT_ATTR] === true;
-    const musicId = String(node.attrs[MUSIC_ID_ATTR] ?? '');
-    const title = normalizeMusicTitle(node.attrs[MUSIC_TITLE_ATTR]);
-    const musicNumber = numberLabel
-        ?? readDecorationLabel(decorations, 'musicNumber');
+    const {
+        mode,
+        isDraft,
+        musicId,
+        title,
+        musicNumber,
+    } = getMusicStartPillData(node, decorations, numberLabel);
     const [draftTitle, setDraftTitle] = useState(title);
+    const [previousTitle, setPreviousTitle] = useState(title);
+
+    if (previousTitle !== title) {
+        setPreviousTitle(title);
+        setDraftTitle(title);
+    }
+
     const hasEndMusic = Boolean(musicId && findMusicPillElement(editor, 'out', musicId));
 
     useEffect(() => {
-        setDraftTitle(title);
-
         if (titleRef.current && titleRef.current.textContent !== title) {
             titleRef.current.textContent = title;
         }
@@ -136,75 +133,35 @@ export const MusicStartPill = ({
         setActive(false);
         scrollToMusicPill(editor, 'out', musicId);
     };
-    const requestMusicCreation = (value = titleRef.current?.textContent ?? draftTitle) => {
-        const nextTitle = value.trim();
-        const pos = getPos();
-
-        const existingMusic = persistentMusicRef?.current.find(candidate => {
-            return !candidate.assignmentLabel
-                && candidate.title.trim().toLocaleLowerCase() === nextTitle.toLocaleLowerCase();
-        });
-
-        if (nextTitle && isDraft && existingMusic) {
-            updateAttributes({
-                [MUSIC_ID_ATTR]: existingMusic.id,
-                [MUSIC_TITLE_ATTR]: existingMusic.title,
-                [MUSIC_KIND_ATTR]: existingMusic.kind,
-                [MUSIC_DRAFT_ATTR]: false,
-            });
-            onMusicAssigned?.(existingMusic.id);
-
-            return;
-        }
-
-        if (!nextTitle || !isDraft || !onRequestCreateMusic || typeof pos !== 'number') {
-            return;
-        }
-
-        const candidateBlockId: unknown = editor.state.doc.resolve(pos).parent.attrs.id;
-
-        if (typeof candidateBlockId !== 'string' || !candidateBlockId) {
-            return;
-        }
-
-        onRequestCreateMusic({
-            title: nextTitle,
-            blockId: candidateBlockId,
-            cancel: () => cancelMusicDraft(editor, getPos, musicId),
-            complete: music => {
-                updateAttributes({
-                    [MUSIC_ID_ATTR]: music.id,
-                    [MUSIC_TITLE_ATTR]: music.title,
-                    [MUSIC_KIND_ATTR]: music.kind,
-                    [MUSIC_DRAFT_ATTR]: false,
-                });
-                onMusicAssigned?.(music.id);
-
-                return true;
-            },
-        });
-    };
+    const requestMusicCreation = (value = titleRef.current?.textContent ?? draftTitle) => requestMusicPillCreation({
+        title: value,
+        isDraft,
+        musicId,
+        editor,
+        getPos,
+        updateAttributes,
+        persistentMusicRef,
+        onMusicAssigned,
+        onRequestCreateMusic,
+    });
 
     return (
         <NodeViewWrapper
             ref={rootRef}
             as="span"
-            className={clsx(
-                styles.pill,
-                styles[mode],
-                active && !locked && styles.active,
-            )}
+            className={clsx(styles.pill, styles[mode], active && !locked && styles.active)}
             data-music-pill="start"
             data-music-id={musicId || undefined}
             data-music-active={active ? 'true' : undefined}
             style={{'--music-pill-anchor': anchorName}}
             contentEditable={false}
             onFocus={locked ? undefined : handleFocusWithin(setActive)}
-            onBlur={locked ? undefined : handleBlurWithin(rootRef, setActive)}
+            onBlur={locked ? undefined : (event: FocusEvent<HTMLSpanElement>) => handleBlurWithin(rootRef, setActive)(event)}
         >
             {' '}
             <span
                 className={styles.tagBody}
+                role="presentation"
                 onMouseDown={event => {
                     if (event.target !== titleRef.current) {
                         event.preventDefault();
@@ -216,7 +173,8 @@ export const MusicStartPill = ({
                     className={styles.number}
                     data-music-number
                     aria-hidden
-                >{musicNumber}
+                >
+                    {musicNumber}
                 </span>
                 {draftTitle.length > 0 || active ? '\u00A0' : null}
                 <span
@@ -224,7 +182,7 @@ export const MusicStartPill = ({
                     className={styles.titleInput}
                     data-music-title-input="start"
                     data-music-draft={isDraft ? 'true' : undefined}
-                    data-music-id={String(node.attrs[MUSIC_ID_ATTR] ?? '')}
+                    data-music-id={musicId}
                     data-placeholder={active ? 'music' : undefined}
                     role="textbox"
                     aria-label="Music title"
@@ -282,14 +240,23 @@ export const MusicStartPill = ({
                 />
             </span>
             {active && !locked ? (
-                <MusicPillMenuPopover isOpen onOpenChange={setActive}>
+                <MusicPillMenuPopover
+                    isOpen
+                    onOpenChange={setActive}
+                >
                     {hasEndMusic ? (
-                        <MusicMenuButton label="Go to music end" onClick={goToEndMusic}>
+                        <MusicMenuButton
+                            label="Go to music end"
+                            onClick={goToEndMusic}
+                        >
                             <ArrowRightIcon aria-hidden="true" />
                         </MusicMenuButton>
                     ) : null}
                     {musicId && onOpenMusicManager ? (
-                        <MusicMenuButton label="Manage music" onClick={openMusicManager}>
+                        <MusicMenuButton
+                            label="Manage music"
+                            onClick={openMusicManager}
+                        >
                             <EditPencilIcon aria-hidden="true" />
                         </MusicMenuButton>
                     ) : null}
@@ -300,8 +267,7 @@ export const MusicStartPill = ({
                         <MusicUnassignIcon />
                     </MusicMenuButton>
                 </MusicPillMenuPopover>
-            ) : null}
-            {' '}
+            ) : null}{' '}
         </NodeViewWrapper>
     );
 };

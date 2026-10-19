@@ -6,10 +6,7 @@ import {
 
 import {buildEditorRootStyle} from './buildRootStyle';
 
-const build = (
-    isLeftSidebarOpen: boolean,
-    isRightSidebarOpen: boolean,
-) => buildEditorRootStyle({
+const build = (isLeftSidebarOpen: boolean, isRightSidebarOpen: boolean) => buildEditorRootStyle({
     persistentCharacters: [],
     editorStyle: {},
     sidebarWidth: '280px',
@@ -42,5 +39,17 @@ describe('buildEditorRootStyle', () => {
 
         expect(style['--left-sidebar-size']).toBe('0px');
         expect(style['--right-sidebar-size']).toBe('0px');
+    });
+
+    it('grows sidebars only into width the page does not need', () => {
+        const style = buildEditorRootStyle({
+            persistentCharacters: [],
+            editorStyle: {},
+            pageSpanPx: 793.7,
+            isLeftSidebarOpen: true,
+            isRightSidebarOpen: true,
+        }) as Record<string, string>;
+
+        expect(style['--editor-sidebar-width']).toBe('clamp(var(--sidebar-width), calc((100vw - 794px - 2 * var(--space-3xl)) / 2), var(--sidebar-max-width))');
     });
 });

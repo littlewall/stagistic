@@ -1,0 +1,83 @@
+.backdrop {
+    position: fixed;
+    z-index: 15;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-3xl);
+    background: var(--color-overlay-scrim);
+}
+
+.modal {
+    composes: modal from '../shared/workspaceModal.module.css';
+    width: min(1080px, 100%);
+
+    & .tabs {
+        flex: 0 0 auto;
+        padding: var(--space-lg) var(--space-2xl) 0;
+        background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    & .content {
+        overflow: hidden;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+}
+
+.tabList {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: flex-end;
+    margin: 0;
+}
+
+.tab {
+    cursor: pointer;
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--menu-item-hover-bg);
+    }
+
+    &.active {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text);
+        background: var(--menu-item-active-bg);
+    }
+}
+
+@media (max-width: 56.25em) {
+    .backdrop {
+        padding: var(--space-xl);
+    }
+
+    .tabList {
+        overflow-x: auto;
+    }
+
+    .tab {
+        flex: 0 0 auto;
+    }
+}
+
+.header {
+    composes: header from '../shared/workspaceModal.module.css';
+}
+
+.title {
+    composes: title from '../shared/workspaceModal.module.css';
+}
+
+.closeButton {
+    composes: close-button from '../shared/workspaceModal.module.css';
+}

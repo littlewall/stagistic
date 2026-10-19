@@ -87,6 +87,7 @@ export const EmptyEnterBlockChooserOverlay = ({
     }, [editor]);
 
     useLayoutEffect(() => {
+        // oxlint-disable-next-line react/set-state-in-effect -- Read the mounted ProseMirror plugin before paint so the chooser matches its initial state.
         syncChooserStateFromEditor();
     }, [syncChooserStateFromEditor]);
 
@@ -122,7 +123,9 @@ export const EmptyEnterBlockChooserOverlay = ({
     }, [editor, syncChooserStateFromEditor]);
 
     const anchorStyle = useChooserAnchor({
-        canvasRef, editor, chooserState,
+        canvasRef,
+        editor,
+        chooserState,
     });
 
     const labelByType = useMemo(() => {

@@ -24,8 +24,8 @@ import {
     useState,
 } from 'react';
 
-import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
-import {useScriptSession} from '../../ScriptSessionContext';
+import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attribute-manager/attributeManagerMenu';
+import {useScriptSession} from '../../workspace/ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import styles from './ScriptStructureSidebar.module.css';
 import {
@@ -53,9 +53,7 @@ interface ScriptStructureSidebarProps {
 }
 
 export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) => {
-    const {
-        currentScriptId, indexSnapshot,
-    } = useScriptSession();
+    const {currentScriptId, indexSnapshot} = useScriptSession();
     const {setActiveBlock} = useScriptActions();
     const actCommands = useEditorActCommands();
     const liveStructure = useEditorLiveStructure();
@@ -65,6 +63,12 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
 
     // ── Local state ──────────────────────────────────────────────────────────
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
+    const [previewScriptId, setPreviewScriptId] = useState(currentScriptId);
+
+    if (previewScriptId !== currentScriptId) {
+        setPreviewScriptId(currentScriptId);
+        setActNamePreviewById({});
+    }
 
     // ── Active block persistence (debounced) ─────────────────────────────────
     const lastPersistedActiveBlockIdsRef = useRef(new Map<string, string | null>());
@@ -94,28 +98,31 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
             return;
         }
 
-        void setActiveBlock(scriptId, blockId).then(() => {
-            lastPersistedActiveBlockIdsRef.current.set(scriptId, blockId);
-        }).catch(() => undefined);
+        void setActiveBlock(scriptId, blockId)
+            .then(() => {
+                lastPersistedActiveBlockIdsRef.current.set(scriptId, blockId);
+            })
+            .catch(() => undefined);
     }, [clearPendingPersistTimer, setActiveBlock]);
 
     // Flush on unmount
-    useEffect(() => () => {
-        flushPendingActiveBlockPersist();
-    }, [flushPendingActiveBlockPersist]);
+    useEffect(
+        () => () => {
+            flushPendingActiveBlockPersist();
+        },
+        [flushPendingActiveBlockPersist],
+    );
 
-    // Reset + flush on script change
-    useEffect(() => {
-        flushPendingActiveBlockPersist();
-        setActNamePreviewById({});
+    // Retire the previous script's pending write when the script changes.
+    useEffect(() => () => {
+        if (pendingPersistScriptIdRef.current === currentScriptId) {
+            flushPendingActiveBlockPersist();
+        }
     }, [currentScriptId, flushPendingActiveBlockPersist]);
 
     // Debounced persist on active block change
     useEffect(() => {
-        if (
-            !currentScriptId
-            || lastPersistedActiveBlockIdsRef.current.get(currentScriptId) === liveActiveBlockId
-        ) {
+        if (!currentScriptId || lastPersistedActiveBlockIdsRef.current.get(currentScriptId) === liveActiveBlockId) {
             return;
         }
 
@@ -145,10 +152,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
 
     const {groups} = state;
 
-    const activeSceneBlockId = useMemo(
-        () => resolveActiveSceneBlockId(state, liveActiveBlockId),
-        [liveActiveBlockId, state],
-    );
+    const activeSceneBlockId = useMemo(() => resolveActiveSceneBlockId(state, liveActiveBlockId), [liveActiveBlockId, state]);
 
     const firstActBlockId = useMemo(() => {
         for (const group of groups) {
@@ -161,9 +165,12 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
     }, [groups]);
 
     // ── Actions ───────────────────────────────────────────────────────────────
-    const handleRenameAct = useCallback((blockId: string, nextName: string) => {
-        actCommands.renameAct(blockId, nextName.trim());
-    }, [actCommands]);
+    const handleRenameAct = useCallback(
+        (blockId: string, nextName: string) => {
+            actCommands.renameAct(blockId, nextName.trim());
+        },
+        [actCommands],
+    );
 
     const handleActNamePreview = useCallback((blockId: string, nextName: string) => {
         // Store the draft verbatim — trimming here would eat spaces mid-typing.
@@ -184,20 +191,26 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         });
     }, []);
 
-    const handleDeleteAct = useCallback((blockId: string) => {
-        setActNamePreviewById(prev => {
-            const next = {...prev};
+    const handleDeleteAct = useCallback(
+        (blockId: string) => {
+            setActNamePreviewById(prev => {
+                const next = {...prev};
 
-            delete next[blockId];
+                delete next[blockId];
 
-            return next;
-        });
-        actCommands.deleteAct(blockId);
-    }, [actCommands]);
+                return next;
+            });
+            actCommands.deleteAct(blockId);
+        },
+        [actCommands],
+    );
 
-    const handleReorderScene = useCallback((sourceSceneBlockId: string, beforeBlockId: string | null) => {
-        actCommands.moveScene(sourceSceneBlockId, beforeBlockId);
-    }, [actCommands]);
+    const handleReorderScene = useCallback(
+        (sourceSceneBlockId: string, beforeBlockId: string | null) => {
+            actCommands.moveScene(sourceSceneBlockId, beforeBlockId);
+        },
+        [actCommands],
+    );
 
     // ── DnD ───────────────────────────────────────────────────────────────────
     const handleDragEnd = useStructureSidebarDnd({
@@ -219,10 +232,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         return map;
     }, [groups]);
 
-    const accessibilityPlugin = useMemo(
-        () => buildAccessibilityPlugin(sceneByBlockId),
-        [sceneByBlockId],
-    );
+    const accessibilityPlugin = useMemo(() => buildAccessibilityPlugin(sceneByBlockId), [sceneByBlockId]);
 
     const plugins = useCallback(
         (defaults: readonly unknown[]) => [
@@ -248,22 +258,16 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         <div className={styles.content}>
             <SidebarMiniHeader
                 navigation={header}
-                actions={<StructureSidebarContextActions />}
                 controls={(
                     <SidebarActionsGroup>
+                        <StructureSidebarContextActions />
                         <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_STRUCTURE} />
                     </SidebarActionsGroup>
                 )}
             />
-            <DragDropProvider
-                onDragEnd={handleDragEnd}
-                plugins={plugins as never}
-                sensors={sensors as never}
-            >
+            <DragDropProvider onDragEnd={handleDragEnd} plugins={plugins as never} sensors={sensors as never}>
                 {!hasContent ? (
-                    <p className={styles.empty}>
-                        Structure outline will appear after adding Scene headings or ACT blocks.
-                    </p>
+                    <p className={styles.empty}>Structure outline will appear after adding Scene headings or ACT blocks.</p>
                 ) : (
                     <ul className={styles.itemList}>
                         {groups.map(group => {
@@ -274,8 +278,8 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
 
                             return (
                                 <Fragment key={group.groupId}>
-                                    {isActGroup && (
-                                        isFirstAct ? (
+                                    {isActGroup &&
+                                        (isFirstAct ? (
                                             <StructureRowActStatic
                                                 blockId={group.groupId}
                                                 name={group.actName ?? ''}
@@ -298,8 +302,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
                                                 onNamePreviewClear={handleActNamePreviewClear}
                                                 onDelete={handleDeleteAct}
                                             />
-                                        )
-                                    )}
+                                        ))}
                                     {group.scenes.map((scene, idx) => {
                                         const placement = scenePlacement.byBlockId.get(scene.blockId);
 

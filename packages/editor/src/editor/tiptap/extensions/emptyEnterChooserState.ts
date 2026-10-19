@@ -1,6 +1,4 @@
-import {
-    getEnterFallback,
-} from '@stagistic/script';
+import {getEnterFallback} from '@stagistic/script';
 import {
     type EditorState,
     Plugin,
@@ -90,7 +88,7 @@ const isBlockContentEmpty = (state: EditorState, blockPos: number | null) => {
     return isScriptBlockContentEmpty(nodeAtPos);
 };
 
-export const createOpenStateFromPayload = (payload: OpenMetaPayload): EmptyEnterChooserState => {
+const createOpenStateFromPayload = (payload: OpenMetaPayload): EmptyEnterChooserState => {
     const normalizedBlockType = normalizeBlockNodeType(payload.blockType);
     const selectedType = normalizeWriterType(payload.selectedType ?? normalizedBlockType);
 
@@ -110,16 +108,13 @@ export const isEmptyEnterChooserWriterType = (value: unknown): value is BlockNod
     return EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET.has(normalized);
 };
 
-export const emptyEnterChooserKey = new PluginKey<EmptyEnterChooserState>('empty-enter-chooser');
+const emptyEnterChooserKey = new PluginKey<EmptyEnterChooserState>('empty-enter-chooser');
 
 export const getEmptyEnterChooserFromState = (state: EditorState): EmptyEnterChooserState => {
     return emptyEnterChooserKey.getState(state) ?? CLOSED_EMPTY_ENTER_CHOOSER_STATE;
 };
 
-export const resolveNextEmptyType = (
-    selectedType: BlockNodeType,
-    blockNextElements?: BlockNextElementMap,
-): BlockNodeType => {
+export const resolveNextEmptyType = (selectedType: BlockNodeType, blockNextElements?: BlockNextElementMap): BlockNodeType => {
     const configured = blockNextElements?.[selectedType];
 
     return configured ?? normalizeBlockNodeType(getEnterFallback(selectedType));
@@ -174,11 +169,7 @@ export const createEmptyEnterChooserPlugin = (): Plugin<EmptyEnterChooserState> 
                 const normalizedBlockType = normalizeBlockNodeType(activeBlock.blockType);
                 const selectedType = normalizeWriterType(nextState.selectedType ?? normalizedBlockType);
 
-                if (
-                    nextState.blockPos === activeBlock.pos
-                    && nextState.blockType === normalizedBlockType
-                    && nextState.selectedType === selectedType
-                ) {
+                if (nextState.blockPos === activeBlock.pos && nextState.blockType === normalizedBlockType && nextState.selectedType === selectedType) {
                     return nextState;
                 }
 

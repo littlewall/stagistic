@@ -79,7 +79,8 @@ const createEmptyNoteDocument = (): ScriptDocument => {
     return {
         ...baseDocument,
         content: [
-            ...baseDocument.content ?? [], {
+            ...baseDocument.content ?? [],
+            {
                 type: 'note',
                 attrs: {id: 'mini-empty-note'},
             },
@@ -181,7 +182,7 @@ describe('MiniScriptEditor', () => {
             throw new Error('Expected scene heading text.');
         }
 
-        expect(scene.dataset.sceneNumber).toBe('1');
+        expect(scene.dataset.sceneNumber).toBe('1.');
         expect(getComputedStyle(scene, '::before').content).toBe('"1."');
         expect(scene.textContent).toBe('Inside the lighthouse');
 
@@ -189,7 +190,7 @@ describe('MiniScriptEditor', () => {
         setCollapsedSelection(sceneText, 0);
         await userEvent.keyboard('{Backspace}');
 
-        expect(scene.dataset.sceneNumber).toBe('1');
+        expect(scene.dataset.sceneNumber).toBe('1.');
         expect(scene.textContent).toBe('Inside the lighthouse');
     });
 
@@ -317,7 +318,8 @@ describe('MiniScriptEditor', () => {
             {
                 ...baseDocument,
                 content: [
-                    ...baseDocument.content ?? [], {
+                    ...baseDocument.content ?? [],
+                    {
                         type: 'character',
                         attrs: {
                             id: 'mini-character-second',
@@ -394,7 +396,7 @@ describe('MiniScriptEditor', () => {
         ).toBe('6ch');
         expect(
             getComputedStyle(mara).getPropertyValue('--character-tag-color').trim(),
-        ).toBe(getConfirmedCharacterColor('mini-character:MARA', null, 60));
+        ).toBe(getConfirmedCharacterColor('mini-character:MARA', null));
     });
 
     it('keeps the music title editable without activating a menu', async () => {

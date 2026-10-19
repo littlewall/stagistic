@@ -12,9 +12,14 @@ import {getScriptCharactersStore} from './scriptCharactersStoreRegistry';
 
 const defaultGenderOptions = [
     {
-        id: 'default:male', key: 'male', label: 'Male',
-    }, {
-        id: 'default:female', key: 'female', label: 'Female',
+        id: 'default:male',
+        key: 'male',
+        label: 'Male',
+    },
+    {
+        id: 'default:female',
+        key: 'female',
+        label: 'Female',
     },
 ];
 
@@ -69,7 +74,7 @@ export const useScriptCharacterCatalog = (
             }
         });
 
-        return Array.from(byKey.values()).sort((left, right) => {
+        return Array.from(byKey.values()).toSorted((left, right) => {
             return left.label.localeCompare(right.label);
         });
     }, [gendersQuery.data]);
@@ -166,6 +171,17 @@ export const useScriptCharacterCatalog = (
         [groupsStore],
     );
 
+    const sourceError = charactersStatus.sourceError ?? gendersStatus.sourceError ?? groupsStatus.sourceError;
+    const mutationError = [
+        actionStatus,
+        groupActionStatus,
+        charactersStatus,
+        gendersStatus,
+        groupsStatus,
+    ]
+        .flatMap(status => status.mutations)
+        .find(mutation => mutation.status === 'failed')?.error;
+
     return {
         characters: charactersQuery.data ?? [],
         groups: groupsQuery.data ?? [],
@@ -178,15 +194,7 @@ export const useScriptCharacterCatalog = (
             || gendersQuery.isLoading
             || groupsQuery.isLoading
         ),
-        error: charactersStatus.sourceError
-            ?? gendersStatus.sourceError
-            ?? groupsStatus.sourceError
-            ?? actionStatus.mutations.find(mutation => mutation.status === 'failed')?.error
-            ?? groupActionStatus.mutations.find(mutation => mutation.status === 'failed')?.error
-            ?? charactersStatus.mutations.find(mutation => mutation.status === 'failed')?.error
-            ?? gendersStatus.mutations.find(mutation => mutation.status === 'failed')?.error
-            ?? groupsStatus.mutations.find(mutation => mutation.status === 'failed')?.error
-            ?? null,
+        error: sourceError ?? mutationError ?? null,
         pendingCharacterKeys: pendingIds('confirm'),
         deletingCharacterIds: pendingIds('delete'),
         renamingCharacterIds: pendingIds('rename'),

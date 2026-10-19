@@ -29,11 +29,15 @@ import {
 type SceneTestWindow = Window & {__sceneDeletionTestEditor?: Editor | null};
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'scene',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const stageDirection = (id: string, text: string): ScriptNode => ({
-    type: 'stageDirection', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'stageDirection',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const EditorProbe = () => {

@@ -1,9 +1,7 @@
-import type {
-    CharacterGenderOption,
-    ScriptCharacterRecord,
-} from '@stagistic/script';
+import type {ScriptCharacterRecord} from '@stagistic/script';
 
-export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key'>, Partial<Pick<ScriptCharacterRecord, 'id' | 'colorHex' | 'genderKey' | 'outline'>> {
+export interface EditorSidebarCharacter
+    extends Pick<ScriptCharacterRecord, 'key'>, Partial<Pick<ScriptCharacterRecord, 'id' | 'colorHex' | 'genderKey' | 'outline'>> {
     color: string,
     isConfirmed: boolean,
     isPending?: boolean,
@@ -17,5 +15,3 @@ export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key
 export interface EditorSidebarGroup extends EditorSidebarCharacter {
     isEmpty: boolean,
 }
-
-export type {CharacterGenderOption};

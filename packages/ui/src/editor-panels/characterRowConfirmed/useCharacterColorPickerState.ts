@@ -1,7 +1,6 @@
-import {clampCharacterColorSaturation} from '@stagistic/script';
+import {CHARACTER_COLOR_SATURATION} from '@stagistic/script';
 import {
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -23,47 +22,25 @@ interface UseCharacterColorPickerStateArgs {
     character: EditorSidebarCharacter,
     isColorActionDisabled: boolean,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
-    characterColorSaturation?: number,
 }
 
 export const useCharacterColorPickerState = ({
     character,
     isColorActionDisabled,
     onSetCharacterColor,
-    characterColorSaturation,
 }: UseCharacterColorPickerStateArgs) => {
-    const resolvedColorSaturation = clampCharacterColorSaturation(characterColorSaturation);
+    const resolvedColorSaturation = CHARACTER_COLOR_SATURATION;
     const currentCharacterColorHex = normalizeHexColor(character.colorHex ?? character.color)
         ?? DEFAULT_COLOR_HEX;
     const colorTriggerRef = useRef<HTMLSpanElement | null>(null);
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
-    const [colorDraftHue, setColorDraftHue] = useState(
+    const [draftHue, setColorDraftHue] = useState(
         getPastelHueFromHex(currentCharacterColorHex, resolvedColorSaturation),
     );
-    const colorDraftHex = useMemo(
-        () => getPastelHexFromHue(colorDraftHue, resolvedColorSaturation),
-        [colorDraftHue, resolvedColorSaturation],
-    );
-    const pickerColorValue = useMemo(
-        () => getPickerColorValue(colorDraftHex, resolvedColorSaturation),
-        [colorDraftHex, resolvedColorSaturation],
-    );
-    const presetColorHexes = useMemo(
-        () => PRESET_COLOR_HUES.map(hue => getPastelHexFromHue(hue, resolvedColorSaturation)),
-        [resolvedColorSaturation],
-    );
-
-    useEffect(() => {
-        if (isColorPickerOpen) {
-            return;
-        }
-
-        setColorDraftHue(getPastelHueFromHex(currentCharacterColorHex, resolvedColorSaturation));
-    }, [
-        currentCharacterColorHex,
-        isColorPickerOpen,
-        resolvedColorSaturation,
-    ]);
+    const colorDraftHue = isColorPickerOpen ? draftHue : getPastelHueFromHex(currentCharacterColorHex, resolvedColorSaturation);
+    const colorDraftHex = getPastelHexFromHue(colorDraftHue, resolvedColorSaturation);
+    const pickerColorValue = getPickerColorValue(colorDraftHex, resolvedColorSaturation);
+    const presetColorHexes = PRESET_COLOR_HUES.map(hue => getPastelHexFromHue(hue, resolvedColorSaturation));
 
     useEffect(() => {
         if (!isColorPickerOpen) {
@@ -146,18 +123,25 @@ export const useCharacterColorPickerState = ({
     };
 
     return {
-        resolvedColorSaturation,
+        control: {
+            state: {
+                isActionDisabled: isColorActionDisabled,
+                isPickerOpen: isColorPickerOpen,
+                currentColorHex: currentCharacterColorHex,
+                colorDraftHex,
+                pickerColorValue,
+                presetColorHexes,
+                resolvedColorSaturation,
+            },
+            refs: {triggerRef: colorTriggerRef},
+            actions: {
+                togglePicker: toggleColorPicker,
+                setPickerOpen: setIsColorPickerOpen,
+                applyColor,
+                resetColor,
+                setDraftHue: setColorDraftHue,
+            },
+        },
         currentCharacterColorHex,
-        colorTriggerRef,
-        isColorPickerOpen,
-        setIsColorPickerOpen,
-        colorDraftHex,
-        pickerColorValue,
-        presetColorHexes,
-        setColorDraftHue,
-        toggleColorPicker,
-        closeColorPicker,
-        applyColor,
-        resetColor,
     };
 };

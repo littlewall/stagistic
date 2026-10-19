@@ -11,18 +11,20 @@ import {
 } from 'react';
 import {Outlet, useParams} from 'react-router-dom';
 
-import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './ScriptWorkspaceContext';
 import {ScriptSettingsModalProvider} from './settings/ScriptSettingsModalProvider';
-import {useScriptEditorController} from './useScriptEditorController';
+import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './workspace/ScriptWorkspaceContext';
+import {useScriptEditorController} from './workspace/useScriptEditorController';
 
 export const ScriptWorkspaceRoute = () => {
     const {scriptId} = useParams();
     const controller = useScriptEditorController(scriptId);
     const {
-        editorLoadState, initialValue, storageError,
+        editorLoadState,
+        initialValue,
+        storageError,
     } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
-    const editorSnapshotStore = useMemo(() => createEditorSnapshotStore(), [scriptId]);
+    const {store: editorSnapshotStore} = useMemo(() => ({scriptId, store: createEditorSnapshotStore()}), [scriptId]);
     const pendingCacheDestroyRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -47,7 +49,9 @@ export const ScriptWorkspaceRoute = () => {
 
     const workspaceValue = useMemo<ScriptWorkspaceValue>(
         () => ({
-            ...controller, editorSnapshotStore, editorSurfaceCache,
+            ...controller,
+            editorSnapshotStore,
+            editorSurfaceCache,
         }),
         [
             controller,

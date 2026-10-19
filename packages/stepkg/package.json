@@ -6,6 +6,7 @@
     "main": "./src/index.ts",
     "dependencies": {
         "@stagistic/script": "workspace:*",
+        "@stagistic/shared": "workspace:*",
         "fflate": "^0.8.2"
     },
     "devDependencies": {

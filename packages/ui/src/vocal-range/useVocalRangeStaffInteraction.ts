@@ -15,7 +15,9 @@ import {
 import type {VocalRangeNote} from './VocalRangeStaff.types';
 
 const DEFAULT_PITCH: Pitch = {
-    step: 'C', alter: 0, octave: 4,
+    step: 'C',
+    alter: 0,
+    octave: 4,
 };
 
 export const INTERACTIVE_MIN_POSITION = -4;
@@ -166,7 +168,9 @@ export const useVocalRangeStaffInteraction = ({
 
         if (pitch && (!current.hasMoved || !pitchesEqual(pitch, current.pitch))) {
             setDrag({
-                ...current, hasMoved: true, pitch,
+                ...current,
+                hasMoved: true,
+                pitch,
             });
         }
     };

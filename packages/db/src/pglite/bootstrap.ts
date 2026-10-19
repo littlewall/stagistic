@@ -1,9 +1,11 @@
 import {PGlite} from '@electric-sql/pglite';
 import {live} from '@electric-sql/pglite/live';
 import {PGliteWorker} from '@electric-sql/pglite/worker';
+import {requireValue} from '@stagistic/shared';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 
 import {dbSchema} from '../schema';
+import {loadPgliteFsBundle, loadPgliteWasmModule} from './assets';
 import {runPgliteMigrations} from './migrations';
 
 export type LocalDb = PgliteDatabase<typeof dbSchema>;
@@ -11,34 +13,39 @@ export type LocalDb = PgliteDatabase<typeof dbSchema>;
 export type DbBootstrapStep = 'fs-bundle' | 'wasm' | 'client' | 'migrations' | 'ready';
 
 export type DbBootstrapUpdate = {
-    step: DbBootstrapStep;
-    label: string;
-    progress: number;
+    step: DbBootstrapStep,
+    label: string,
+    progress: number,
 };
 
 // Mirrors PGlite's DumpTarCompressionOptions (not re-exported from the public entry).
 export type DbDumpCompression = 'none' | 'gzip' | 'auto';
 
 interface CreatePgliteBootstrapOptions {
-    fsBundleUrl: string;
-    wasmUrl: string;
-    dataDir?: string;
-    workerFactory?: () => Worker;
+    fsBundleUrl: string,
+    wasmUrl: string,
+    dataDir?: string,
+    workerFactory?: () => Worker,
 }
 
 interface PgliteBootstrap {
-    getLocalDb: () => Promise<LocalDb>;
-    syncToFs: () => Promise<void>;
-    runMigrations: () => Promise<void>;
-    prepareLocalDb: () => Promise<void>;
-    prepareLocalDbWithProgress: (onProgress: (update: DbBootstrapUpdate) => void) => Promise<void>;
+    getLocalDb: () => Promise<LocalDb>,
+    syncToFs: () => Promise<void>,
+    runMigrations: () => Promise<void>,
+    prepareLocalDb: () => Promise<void>,
+    prepareLocalDbWithProgress: (onProgress: (update: DbBootstrapUpdate) => void) => Promise<void>,
     // Snapshot the whole data dir as a single tarball (for backup/export/portability).
-    dumpDataDir: (compression?: DbDumpCompression) => Promise<Blob>;
+    dumpDataDir: (compression?: DbDumpCompression) => Promise<Blob>,
 }
 
 const DEFAULT_DATA_DIR = 'idb://stagistic-main';
 
-export const createPgliteBootstrap = ({fsBundleUrl, wasmUrl, dataDir = DEFAULT_DATA_DIR, workerFactory}: CreatePgliteBootstrapOptions): PgliteBootstrap => {
+export const createPgliteBootstrap = ({
+    fsBundleUrl,
+    wasmUrl,
+    dataDir = DEFAULT_DATA_DIR,
+    workerFactory,
+}: CreatePgliteBootstrapOptions): PgliteBootstrap => {
     if (workerFactory) {
         let dbPromise: Promise<LocalDb> | null = null;
         let workerInstanceRef: PGliteWorker | null = null;
@@ -77,7 +84,7 @@ export const createPgliteBootstrap = ({fsBundleUrl, wasmUrl, dataDir = DEFAULT_D
                 await getLocalDb();
             }
 
-            return workerInstanceRef!.dumpDataDir(compression);
+            return requireValue(workerInstanceRef).dumpDataDir(compression);
         };
 
         return {
@@ -117,15 +124,7 @@ export const createPgliteBootstrap = ({fsBundleUrl, wasmUrl, dataDir = DEFAULT_D
 
     const loadFsBundle = async () => {
         if (!fsBundlePromise) {
-            fsBundlePromise = (async () => {
-                const response = await fetch(fsBundleUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load PGlite fs bundle (${response.status})`);
-                }
-
-                return response.blob();
-            })();
+            fsBundlePromise = loadPgliteFsBundle(fsBundleUrl);
         }
 
         return fsBundlePromise;
@@ -133,17 +132,7 @@ export const createPgliteBootstrap = ({fsBundleUrl, wasmUrl, dataDir = DEFAULT_D
 
     const loadWasmModule = async () => {
         if (!wasmModulePromise) {
-            wasmModulePromise = (async () => {
-                const response = await fetch(wasmUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load PGlite wasm (${response.status})`);
-                }
-
-                const bytes = await response.arrayBuffer();
-
-                return WebAssembly.compile(bytes);
-            })();
+            wasmModulePromise = loadPgliteWasmModule(wasmUrl);
         }
 
         return wasmModulePromise;

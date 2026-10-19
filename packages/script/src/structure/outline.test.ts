@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ScriptNode} from '../document';
@@ -75,7 +77,9 @@ describe('buildScriptStructureOutline', () => {
         const outline = buildScriptStructureOutline([
             block('act', 'a1', 'ACT ONE'),
             {
-                type: 'scene', attrs: {}, content: [{type: 'text', text: 'No id'}],
+                type: 'scene',
+                attrs: {},
+                content: [{type: 'text', text: 'No id'}],
             },
             block('scene', 's1', 'Has id'),
         ]);

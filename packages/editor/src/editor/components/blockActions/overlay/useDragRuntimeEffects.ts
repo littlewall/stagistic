@@ -1,5 +1,7 @@
 import {
-    type MutableRefObject, type RefObject, useEffect,
+    type MutableRefObject,
+    type RefObject,
+    useEffect,
 } from 'react';
 
 import type {BlockNodeType} from '../../../tiptap/scriptCore';

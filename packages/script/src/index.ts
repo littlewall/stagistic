@@ -1,5 +1,6 @@
 export * from './blocks';
 export * from './characters';
+export * from './comments';
 export * from './document';
 export * from './indexing';
 export * from './music';

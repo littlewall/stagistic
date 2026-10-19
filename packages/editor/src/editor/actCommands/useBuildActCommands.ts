@@ -1,7 +1,9 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MutableRefObject, useCallback, useMemo,
+    type MutableRefObject,
+    useCallback,
+    useMemo,
 } from 'react';
 
 import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
@@ -44,7 +46,12 @@ export const useBuildActCommands = ({
         }
 
         return {
-            editor: instance, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+            editor: instance,
+            setLatestValue,
+            onValueChangeRef,
+            onIndexChangeRef,
+            scheduleAutosave,
+            revisionRef,
         };
     }, [
         instance,

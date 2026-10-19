@@ -1,0 +1,48 @@
+---
+import styles from './Footer.module.css';
+
+const footerColumns = [
+    {
+        title: 'Editor',
+        links: [
+            {href: '/', label: 'Overview'},
+            {href: '/editor/playwriting', label: 'For Playwriting'},
+            {href: '/editor/musicals', label: 'For Musicals'},
+            {href: '/editor/syntax', label: 'Stagistic Syntax'},
+            {href: '/articles', label: 'Articles'},
+        ],
+    },
+    {
+        title: 'Project',
+        links: [
+            {href: '/open-source', label: 'Open Source & Manifesto'},
+            {href: 'https://github.com/littlewall/stagistic', label: 'GitHub repo', target: '_blank', rel: 'noopener noreferrer'},
+            {href: 'https://feedback.stagistic.com', label: 'Feedback & bug reports', target: '_blank', rel: 'noopener noreferrer'},
+        ],
+    },
+];
+---
+
+<footer class={styles.footer}>
+    <div class={styles.footerInner}>
+        <div class={styles.footerLeft}>
+            <span class={styles.footerLogo}>© Stagistic • Made with 💛 in Prague</span>
+        </div>
+        <div class={styles.footerRight}>
+            {footerColumns.map((col) => (
+                    <div class={styles.footerCol}>
+                        <h3 class={styles.footerColTitle}>{col.title}</h3>
+                        <ul class={styles.footerColLinks}>
+                            {col.links.map((link) => (
+                                <li>
+                                    <a href={link.href} class={styles.footerLink} target={link.target} rel={link.rel}>
+                                        {link.label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+        </div>
+    </div>
+</footer>

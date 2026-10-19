@@ -2,7 +2,9 @@ import type {BlockLine} from './types';
 
 export type SplitDecision =
     | {
-        kind: 'split', breakPos: number, fragmentHeight: number,
+        kind: 'split',
+        breakPos: number,
+        fragmentHeight: number,
     }
     | {kind: 'pushDown'}
     | {kind: 'forcePlace'};

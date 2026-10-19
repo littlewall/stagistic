@@ -1,0 +1,30 @@
+.anchor {
+    text-decoration: underline dotted var(--state-selected-strong) 2px;
+    text-underline-offset: 3px;
+}
+
+/* Hover (card or margin marker) is lighter, so it never reads as the active thread. */
+.anchorHovered,
+.blockHovered {
+    background-color: color-mix(in oklch, var(--state-selected) 50%, transparent);
+}
+
+.anchorActive {
+    background: var(--state-selected);
+}
+
+.draft {
+    background: var(--state-selected);
+}
+
+.blockHovered {
+    background-clip: content-box;
+    border-radius: var(--radius-sm);
+}
+
+/* Same tint as an active range anchor, over the whole block (block comments). */
+.blockActive {
+    background-color: var(--state-selected);
+    background-clip: content-box;
+    border-radius: var(--radius-sm);
+}

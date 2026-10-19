@@ -1,9 +1,0 @@
-.form {
-    composes: form from './dialogForm.module.css';
-}
-
-.error {
-    margin: 0;
-    font-size: var(--font-size-sm);
-    color: var(--color-status-danger);
-}

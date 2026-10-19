@@ -2,7 +2,7 @@ import {
     BASIC_DEFAULTS,
     type BasicExportConfig,
 } from '@stagistic/export';
-import {ExportPanel} from '@stagistic/ui';
+import {ExportPanel, formControlStyles} from '@stagistic/ui';
 import {
     useMemo,
     useState,
@@ -26,11 +26,23 @@ export const ExportControlPanel = () => {
                 <h1 className={styles.title}>Export</h1>
             </div>
             <aside aria-label="Export controls">
+                <div className={styles.template}>
+                    <div className={formControlStyles.field}>
+                        <label
+                            className={formControlStyles.label}
+                            htmlFor="export-template"
+                        >
+                            Template
+                        </label>
+                        <TemplatePicker
+                            id="export-template"
+                            value={templateId}
+                            onChange={setTemplateId}
+                        />
+                    </div>
+                    {templateId === 'integratedScore' ? <IntegratedScoreWarning config={config} /> : null}
+                </div>
                 <ExportPanel>
-                    <ExportPanel.Section title="Template">
-                        <TemplatePicker value={templateId} onChange={setTemplateId} />
-                        {templateId === 'integratedScore' ? <IntegratedScoreWarning config={config} /> : null}
-                    </ExportPanel.Section>
                     <TemplateComponent
                         key={templateKey}
                         config={config}

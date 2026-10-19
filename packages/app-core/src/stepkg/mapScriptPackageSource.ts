@@ -5,17 +5,23 @@ const toIso = (timestamp: number): string => new Date(timestamp).toISOString();
 
 export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): StepkgSnapshot => {
     const memberIdsByGroup = new Map<string, string[]>();
+
     source.characterGroupMembers.forEach(member => {
         const memberIds = memberIdsByGroup.get(member.groupId) ?? [];
+
         memberIds.push(member.characterId);
         memberIdsByGroup.set(member.groupId, memberIds);
     });
+
     const locationIdsByScene = new Map<string, string[]>();
+
     source.sceneLocations.forEach(assignment => {
         const locationIds = locationIdsByScene.get(assignment.sceneId) ?? [];
+
         locationIds.push(assignment.locationId);
         locationIdsByScene.set(assignment.sceneId, locationIds);
     });
+
     const musicById = new Map(source.music.map(music => [music.id, music]));
 
     return {
@@ -113,5 +119,28 @@ export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): Ste
             order,
             createdAt: toIso(musicById.get(binding.musicId)?.createdAt ?? source.script.updatedAt),
         })),
+        comments: {
+            threads: source.comments.threads.map(thread => ({
+                id: thread.id,
+                anchorKind: thread.anchorKind === 'block' ? ('block' as const) : ('range' as const),
+                anchorBlockId: thread.anchorBlockId,
+                quotedText: thread.quotedText,
+                status: thread.status === 'resolved' ? ('resolved' as const) : ('open' as const),
+                resolvedAt: thread.resolvedAt === null ? null : toIso(thread.resolvedAt),
+                resolvedBy: thread.resolvedBy,
+                createdBy: thread.createdBy,
+                createdAt: toIso(thread.createdAt),
+                updatedAt: toIso(thread.updatedAt),
+            })),
+            messages: source.comments.messages.map(message => ({
+                id: message.id,
+                threadId: message.threadId,
+                authorId: message.authorId,
+                body: message.body,
+                createdAt: toIso(message.createdAt),
+                updatedAt: toIso(message.updatedAt),
+                editedAt: message.editedAt === null ? null : toIso(message.editedAt),
+            })),
+        },
     };
 };

@@ -1,0 +1,96 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--space-md);
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.nameField {
+    gap: var(--space-sm);
+}
+
+.dropZone {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    text-align: center;
+    background: var(--color-surface-raised);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
+
+    &[data-hovered],
+    &[data-drop-target] {
+        background: var(--color-surface);
+        border-color: color-mix(in oklch, var(--color-text) 35%, var(--color-border));
+    }
+}
+
+.error {
+    font-size: var(--font-size-sm);
+    color: var(--color-status-danger);
+}
+
+.dropZoneTrigger {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-2xl);
+    text-align: center;
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+}
+
+.dropZoneLabel {
+    font-weight: var(--font-weight-semibold);
+}
+
+.dropZoneHint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+
+    &[data-selected] {
+        font-size: var(--font-size-xs);
+    }
+}
+
+.hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.replacePanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.replaceNoticeContent {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-lg);
+    align-items: center;
+
+    & > :last-child {
+        white-space: nowrap;
+    }
+}
+
+@media (width <= 34em) {
+    .replaceNoticeContent {
+        grid-template-columns: 1fr;
+    }
+}

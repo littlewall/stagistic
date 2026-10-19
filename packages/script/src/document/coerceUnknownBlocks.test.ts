@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {coerceUnknownBlocksToStageDirections} from './coerceUnknownBlocks';
@@ -21,7 +23,9 @@ describe('coerceUnknownBlocksToStageDirections', () => {
     it('rewrites an unknown top-level block type to the default stage direction', () => {
         const value = doc([
             {
-                type: 'paragraph', attrs: {id: 'p1'}, content: [{type: 'text', text: 'x'}],
+                type: 'paragraph',
+                attrs: {id: 'p1'},
+                content: [{type: 'text', text: 'x'}],
             },
         ]);
 
@@ -45,7 +49,9 @@ describe('coerceUnknownBlocksToStageDirections', () => {
     it('does not descend into child nodes', () => {
         const value = doc([
             {
-                type: 'scene', attrs: {id: 's1'}, content: [{type: 'weird', content: []}],
+                type: 'scene',
+                attrs: {id: 's1'},
+                content: [{type: 'weird', content: []}],
             },
         ]);
 

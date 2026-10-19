@@ -1,6 +1,8 @@
 import {
     MUSIC_DRAFT_ATTR,
     MUSIC_ID_ATTR,
+    MUSIC_MODE_ATTR,
+    MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import type {NodeViewProps} from '@tiptap/react';
 import {
@@ -79,6 +81,18 @@ export const readDecorationLabel = (
 
     return '';
 };
+
+export const getMusicStartPillData = (
+    node: NodeViewProps['node'],
+    decorations: NodeViewProps['decorations'],
+    numberLabel: string | undefined,
+) => ({
+    mode: node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' as const : 'open' as const,
+    isDraft: node.attrs[MUSIC_DRAFT_ATTR] === true,
+    musicId: String(node.attrs[MUSIC_ID_ATTR] ?? ''),
+    title: normalizeMusicTitle(node.attrs[MUSIC_TITLE_ATTR]),
+    musicNumber: numberLabel ?? readDecorationLabel(decorations, 'musicNumber'),
+});
 
 export const findMusicPillElement = (
     editor: NodeViewProps['editor'],

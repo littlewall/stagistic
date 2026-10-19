@@ -1,7 +1,6 @@
 import {
     type CSSProperties,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -43,29 +42,13 @@ export const useSuggestionInteractionState = () => {
             : 'open_keyboard_selected';
     }
 
-    useEffect(() => {
-        if (suggestionEntries.length === 0) {
-            setActiveSuggestionIndex(null);
+    const boundedActiveIndex = activeSuggestionIndex === null || suggestionEntries.length === 0
+        ? null
+        : Math.max(0, Math.min(activeSuggestionIndex, suggestionEntries.length - 1));
 
-            return;
-        }
-
-        setActiveSuggestionIndex(previous => {
-            if (previous === null) {
-                return null;
-            }
-
-            if (previous < 0) {
-                return 0;
-            }
-
-            if (previous >= suggestionEntries.length) {
-                return suggestionEntries.length - 1;
-            }
-
-            return previous;
-        });
-    }, [suggestionEntries]);
+    if (activeSuggestionIndex !== boundedActiveIndex) {
+        setActiveSuggestionIndex(boundedActiveIndex);
+    }
 
     return {
         overlayState,

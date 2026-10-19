@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+workspace:
+  inheritedTasks:
+    exclude: ['test']
+
+tasks:
+  dev:
+    command: 'astro dev --port 4322'
+    preset: 'server'
+
+  build:
+    command: 'astro build'
+    options:
+      cache: false
+
+  preview:
+    command: 'astro preview --port 4322'
+    preset: 'server'
+
+  typecheck:
+    command: 'astro check'
+    options:
+      cache: false
+      mergeArgs: 'replace'
+
+  lint:
+    script: 'vp lint && stylelint "src/**/*.css"'
+    options:
+      cache: false

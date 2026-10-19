@@ -2,9 +2,11 @@ import clsx from 'clsx';
 import {Button} from 'react-aria-components';
 
 import {
-    DarkThemeIcon, LightThemeIcon, SystemThemeIcon,
+    DarkThemeIcon,
+    LightThemeIcon,
+    SystemThemeIcon,
 } from '../../icons/ui';
-import {type AppThemeMode} from '../../theme';
+import {type AppThemeMode} from '../../theme/theme';
 import styles from '../AppHeader.module.css';
 
 type ThemeModeToggleProps = {
@@ -12,10 +14,7 @@ type ThemeModeToggleProps = {
     onChange: (mode: AppThemeMode) => void,
 };
 
-export const ThemeModeToggle = ({
-    themeMode,
-    onChange,
-}: ThemeModeToggleProps) => {
+export const ThemeModeToggle = ({themeMode, onChange}: ThemeModeToggleProps) => {
     return (
         <div className={styles.themeControlsContainer}>
             <div
@@ -31,7 +30,10 @@ export const ThemeModeToggle = ({
                     aria-label="Light theme"
                     aria-pressed={themeMode === 'light'}
                 >
-                    <LightThemeIcon className={styles.icon} aria-hidden="true" />
+                    <LightThemeIcon
+                        className={styles.icon}
+                        aria-hidden="true"
+                    />
                 </Button>
                 <Button
                     className={clsx(styles.themeButton, themeMode === 'dark' && styles.active)}
@@ -41,7 +43,10 @@ export const ThemeModeToggle = ({
                     aria-label="Dark theme"
                     aria-pressed={themeMode === 'dark'}
                 >
-                    <DarkThemeIcon className={styles.icon} aria-hidden="true" />
+                    <DarkThemeIcon
+                        className={styles.icon}
+                        aria-hidden="true"
+                    />
                 </Button>
                 <Button
                     className={clsx(styles.themeButton, themeMode === 'auto' && styles.active)}
@@ -51,7 +56,10 @@ export const ThemeModeToggle = ({
                     aria-label="System theme"
                     aria-pressed={themeMode === 'auto'}
                 >
-                    <SystemThemeIcon className={styles.icon} aria-hidden="true" />
+                    <SystemThemeIcon
+                        className={styles.icon}
+                        aria-hidden="true"
+                    />
                 </Button>
             </div>
         </div>

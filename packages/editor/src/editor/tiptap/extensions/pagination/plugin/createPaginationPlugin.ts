@@ -6,7 +6,6 @@ import {
 } from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
-import {incrementPaginationRecalcCount} from '../../../../perf/editorPerfMetrics';
 import {buildPaginationState} from '../layout/buildPaginationState';
 import {createInitialPaginationState} from '../state/createInitialPaginationState';
 import {
@@ -26,12 +25,8 @@ const TYPING_RECALC_DELAY_MS = 250;
 
 const computeLayoutMetrics = (storage: PaginationStorage, view: {dom: {clientWidth: number}}) => {
     const options = storage.options;
-    const heightKey = `${options.pageWidth}|${options.marginLeft}|`
-        + `${options.marginRight}|${options.lineHeightPx}`;
-    const contentWidth = Math.max(
-        0,
-        view.dom.clientWidth - options.marginLeft - options.marginRight,
-    );
+    const heightKey = `${options.pageWidth}|${options.marginLeft}|` + `${options.marginRight}|${options.lineHeightPx}`;
+    const contentWidth = Math.max(0, view.dom.clientWidth - options.marginLeft - options.marginRight);
 
     return {heightKey, contentWidth};
 };
@@ -51,13 +46,16 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     pagination: createInitialPaginationState(storage.options),
                     forceRecalcToken: storage.forceRecalcToken,
                     hasComputed: false,
+                    hasMeasuredLayout: false,
                 };
             },
             apply: (tr, pluginState: PaginationPluginState) => {
                 const meta = tr.getMeta(paginationKey) as PaginationPluginState | undefined;
-                const controlMeta = tr.getMeta(PAGINATION_CONTROL_META_KEY) as {
-                    forceRecalcToken?: number,
-                } | undefined;
+                const controlMeta = tr.getMeta(PAGINATION_CONTROL_META_KEY) as
+                    | {
+                        forceRecalcToken?: number,
+                    }
+                    | undefined;
 
                 if (meta) {
                     storage.state = meta.pagination;
@@ -66,16 +64,13 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     return meta;
                 }
 
-                if (
-                    controlMeta
-                    && typeof controlMeta.forceRecalcToken === 'number'
-                    && controlMeta.forceRecalcToken !== pluginState.forceRecalcToken
-                ) {
+                if (controlMeta && typeof controlMeta.forceRecalcToken === 'number') {
                     storage.forceRecalcToken = controlMeta.forceRecalcToken;
 
                     return {
                         ...pluginState,
                         forceRecalcToken: controlMeta.forceRecalcToken,
+                        hasMeasuredLayout: false,
                     };
                 }
 
@@ -85,6 +80,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                         pagination: pluginState.pagination,
                         forceRecalcToken: pluginState.forceRecalcToken,
                         hasComputed: pluginState.hasComputed,
+                        hasMeasuredLayout: false,
                     };
                 }
 
@@ -108,9 +104,21 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
             let recalcFrameId = 0;
             let deferredTypingTimeout: number | null = null;
 
+            const clearPendingRecalc = () => {
+                if (recalcFrameId) {
+                    window.cancelAnimationFrame(recalcFrameId);
+                    recalcFrameId = 0;
+                }
+
+                if (deferredTypingTimeout !== null) {
+                    window.clearTimeout(deferredTypingTimeout);
+                    deferredTypingTimeout = null;
+                }
+            };
+
             const runRecalc = () => {
                 if (destroyed) {
-                    return;
+                    return false;
                 }
 
                 /*
@@ -121,16 +129,18 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                  * dimensions and reschedules.
                  */
                 if (!view.dom.isConnected || view.dom.clientWidth === 0) {
-                    return;
+                    return false;
                 }
 
                 if (isRecalcRunning) {
                     needsRecalc = true;
 
-                    return;
+                    return false;
                 }
 
                 isRecalcRunning = true;
+
+                let hasMeasuredLayout: boolean;
 
                 do {
                     needsRecalc = false;
@@ -160,18 +170,20 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     );
 
                     blockCache = nextCache;
+                    hasMeasuredLayout = !usedFallbackMeasurements;
 
                     storage.state = pagination;
+                    storage.measuredOptionsVersion = hasMeasuredLayout ? optionsVersion : undefined;
 
                     const tr = view.state.tr.setMeta(paginationKey, {
                         decorations,
                         pagination,
                         forceRecalcToken: storage.forceRecalcToken,
                         hasComputed: true,
+                        hasMeasuredLayout,
                     });
 
                     view.dispatch(tr);
-                    incrementPaginationRecalcCount();
 
                     if (hasInlineBreaks && lastInlineBreakDoc !== view.state.doc) {
                         lastInlineBreakDoc = view.state.doc;
@@ -185,21 +197,31 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                 } while (needsRecalc && !destroyed);
 
                 isRecalcRunning = false;
+
+                return hasMeasuredLayout;
             };
+
+            const flushRecalc = () => {
+                clearPendingRecalc();
+
+                const {options} = storage;
+
+                if (view.dom.clientWidth <= options.marginLeft + options.marginRight
+                    || options.pageHeight <= options.marginTop + options.marginBottom) {
+                    return false;
+                }
+
+                return runRecalc();
+            };
+
+            storage.flushRecalc = flushRecalc;
 
             const scheduleImmediateRecalc = () => {
                 if (destroyed) {
                     return;
                 }
 
-                if (deferredTypingTimeout !== null) {
-                    window.clearTimeout(deferredTypingTimeout);
-                    deferredTypingTimeout = null;
-                }
-
-                if (recalcFrameId) {
-                    window.cancelAnimationFrame(recalcFrameId);
-                }
+                clearPendingRecalc();
 
                 recalcFrameId = window.requestAnimationFrame(() => {
                     recalcFrameId = 0;
@@ -232,33 +254,26 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
             }
 
             if (typeof document !== 'undefined' && 'fonts' in document) {
-                document.fonts.ready.then(() => {
-                    scheduleImmediateRecalc();
-                }).catch(() => {});
+                document.fonts.ready
+                    .then(() => {
+                        scheduleImmediateRecalc();
+                    })
+                    .catch(() => {});
             }
 
             scheduleImmediateRecalc();
 
             return {
-                update: (view, prevState) => {
+                update: (updatedView, prevState) => {
                     const optionsVersion = storage.optionsVersion;
-                    const docChanged = !prevState.doc.eq(view.state.doc);
-                    const {heightKey, contentWidth} = computeLayoutMetrics(storage, view);
+                    const docChanged = !prevState.doc.eq(updatedView.state.doc);
+                    const {heightKey, contentWidth} = computeLayoutMetrics(storage, updatedView);
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
                     const previousPluginState = paginationKey.getState(prevState);
-                    const currentPluginState = paginationKey.getState(view.state);
-                    const forceRecalcTokenChanged = (
-                        previousPluginState?.forceRecalcToken ?? 0
-                    ) !== (
-                        currentPluginState?.forceRecalcToken ?? 0
-                    );
+                    const currentPluginState = paginationKey.getState(updatedView.state);
+                    const forceRecalcTokenChanged = (previousPluginState?.forceRecalcToken ?? 0) !== (currentPluginState?.forceRecalcToken ?? 0);
 
-                    if (
-                        !docChanged
-                        && optionsVersion === lastOptionsVersion
-                        && !layoutChanged
-                        && !forceRecalcTokenChanged
-                    ) {
+                    if (!docChanged && optionsVersion === lastOptionsVersion && !layoutChanged && !forceRecalcTokenChanged) {
                         return;
                     }
 
@@ -272,14 +287,9 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                 },
                 destroy: () => {
                     destroyed = true;
-                    if (recalcFrameId) {
-                        window.cancelAnimationFrame(recalcFrameId);
-                        recalcFrameId = 0;
-                    }
-
-                    if (deferredTypingTimeout !== null) {
-                        window.clearTimeout(deferredTypingTimeout);
-                        deferredTypingTimeout = null;
+                    clearPendingRecalc();
+                    if (storage.flushRecalc === flushRecalc) {
+                        delete storage.flushRecalc;
                     }
 
                     resizeObserver?.disconnect();

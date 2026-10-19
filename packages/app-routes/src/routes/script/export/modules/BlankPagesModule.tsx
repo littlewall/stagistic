@@ -13,7 +13,8 @@ const BLANK_PAGE_OPTIONS: FormSelectOption[] = [
     {
         label: NO_BLANK_PAGES,
         value: NO_BLANK_PAGES,
-    }, ...Array.from({length: 10}, (_, index) => ({
+    },
+    ...Array.from({length: 10}, (_, index) => ({
         label: String(index + 1),
         value: index + 1,
     })),

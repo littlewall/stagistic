@@ -17,14 +17,12 @@ type CharacterSuggestionsOverlayProps = {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     persistentCharacters?: readonly PersistentCharacterRef[],
-    characterColorSaturation?: number,
 };
 
 const CharacterSuggestionsOverlay = ({
     editor,
     canvasRef,
     persistentCharacters = [],
-    characterColorSaturation,
 }: CharacterSuggestionsOverlayProps) => {
     const overlayRef = useRef<HTMLDivElement | null>(null);
     const listboxId = useId();
@@ -38,7 +36,6 @@ const CharacterSuggestionsOverlay = ({
         canvasRef,
         overlayRef,
         persistentCharacters,
-        characterColorSaturation,
     });
 
     const isOpen = overlayState !== null && suggestionEntries.length > 0;

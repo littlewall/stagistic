@@ -1,6 +1,7 @@
 import {parsePitch} from '@stagistic/script';
 import {
-    type ReactElement, useState,
+    type ReactElement,
+    useState,
 } from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -86,16 +87,25 @@ const dragNoteToPosition = async (
     const release = vi.spyOn(note, 'releasePointerCapture').mockImplementation(() => undefined);
 
     note.dispatchEvent(new PointerEvent('pointerdown', {
-        bubbles: true, pointerId, button: 0, clientY: sourceClientY,
+        bubbles: true,
+        pointerId,
+        button: 0,
+        clientY: sourceClientY,
     }));
     note.dispatchEvent(new PointerEvent('pointermove', {
-        bubbles: true, pointerId, buttons: 1, clientY,
+        bubbles: true,
+        pointerId,
+        buttons: 1,
+        clientY,
     }));
 
     await waitForElement(host, '[data-dragging]');
 
     return {
-        capture, clientY, pointerId, release,
+        capture,
+        clientY,
+        pointerId,
+        release,
     };
 };
 
@@ -402,7 +412,10 @@ describe('VocalRangeStaff interactive editing', () => {
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
         const {
-            capture, clientY, pointerId, release,
+            capture,
+            clientY,
+            pointerId,
+            release,
         } = await dragNoteToPosition(host, note, 0);
 
         expect(host.querySelector('[aria-label="Select low note E3"]')).not.toBeNull();
@@ -410,7 +423,10 @@ describe('VocalRangeStaff interactive editing', () => {
         expect(capture).toHaveBeenCalledWith(pointerId);
 
         note.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId, button: 0, clientY,
+            bubbles: true,
+            pointerId,
+            button: 0,
+            clientY,
         }));
 
         expect(onChange).toHaveBeenCalledTimes(1);
@@ -434,7 +450,10 @@ describe('VocalRangeStaff interactive editing', () => {
         expect(host.querySelector('[aria-label="Select low note E#3"]')).not.toBeNull();
 
         note.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId, button: 0, clientY,
+            bubbles: true,
+            pointerId,
+            button: 0,
+            clientY,
         }));
 
         expect(onChange).toHaveBeenCalledWith('low', parsePitch('E#3'));
@@ -442,12 +461,22 @@ describe('VocalRangeStaff interactive editing', () => {
 
     it.each([
         {
-            which: 'low' as const, source: 'C3', position: -4, target: 'A2',
-        }, {
-            which: 'high' as const, source: 'A4', position: 12, target: 'C5',
+            which: 'low' as const,
+            source: 'C3',
+            position: -4,
+            target: 'A2',
+        },
+        {
+            which: 'high' as const,
+            source: 'A4',
+            position: 12,
+            target: 'C5',
         },
     ])('supports two dynamic ledger lines at the $which boundary', async ({
-        which, source, position, target,
+        which,
+        source,
+        position,
+        target,
     }) => {
         const onChange = vi.fn();
         const host = await render(
@@ -465,7 +494,10 @@ describe('VocalRangeStaff interactive editing', () => {
         expect(preview.querySelectorAll('[data-ledger-line]')).toHaveLength(2);
 
         note.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId, button: 0, clientY,
+            bubbles: true,
+            pointerId,
+            button: 0,
+            clientY,
         }));
 
         expect(onChange).toHaveBeenCalledTimes(1);
@@ -488,7 +520,10 @@ describe('VocalRangeStaff interactive editing', () => {
         expect(host.querySelector('[aria-label="Select low note A2"]')).not.toBeNull();
 
         note.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId, button: 0, clientY: 1000,
+            bubbles: true,
+            pointerId,
+            button: 0,
+            clientY: 1000,
         }));
 
         expect(onChange).toHaveBeenCalledWith('low', parsePitch('A2'));

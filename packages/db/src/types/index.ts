@@ -7,16 +7,17 @@ export type {
     ScriptCharacterRef,
     ScriptSpeakingEntityRef,
 } from './characters';
-export {
-    MUSIC_ATTACHMENT_ROLES,
-    type MusicAttachmentRole,
-} from './musicAttachments';
+export {MUSIC_ATTACHMENT_ROLES, type MusicAttachmentRole} from './musicAttachments';
 export type {
+    CommentAnchorKind,
+    CommentThreadStatus,
     Script,
     ScriptAct,
     ScriptAttachment,
     ScriptBlock,
     ScriptBlockCharacterRef,
+    ScriptCommentMessage,
+    ScriptCommentThread,
     ScriptLocation,
     ScriptMusic,
     ScriptMusicAttachment,
@@ -26,3 +27,4 @@ export type {
     ScriptSummary,
     ScriptTitlePageField,
 } from './script';
+export {LOCAL_COMMENT_AUTHOR_ID} from './script';

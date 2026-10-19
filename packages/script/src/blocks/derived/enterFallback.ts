@@ -5,7 +5,7 @@ const buildEnterFallbackByNodeType = (): Partial<Record<ScriptBlockNodeType, Scr
     const map: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>> = {};
 
     for (const spec of ALL_BLOCK_SPECS) {
-        map[spec.nodeType] = spec.enterFallback as ScriptBlockNodeType;
+        map[spec.nodeType] = spec.enterFallback;
     }
 
     return map;

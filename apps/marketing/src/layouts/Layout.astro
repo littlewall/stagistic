@@ -1,0 +1,73 @@
+---
+import type {CollectionEntry} from 'astro:content';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import SiteIcons from '../components/SiteIcons.astro';
+import StructuredData from '../components/StructuredData.astro';
+import '../styles/global.css';
+
+interface Props {
+    title: string;
+    description: string;
+    canonical?: string;
+    ogType?: 'website' | 'article';
+    header?: 'full' | 'subpage';
+    softwareApplication?: boolean;
+    article?: CollectionEntry<'articles'>['data'];
+    breadcrumbs?: Array<{
+        name: string;
+        url: string;
+    }>;
+}
+
+const {
+    title,
+    description,
+    canonical,
+    ogType = 'website',
+    header = 'full',
+    softwareApplication,
+    breadcrumbs,
+    article,
+} = Astro.props;
+const pageUrl = canonical || new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <SiteIcons />
+        <title>{title}</title>
+        <meta name="description" content={description}>
+        {canonical && <link rel="canonical" href={canonical} />}
+        <StructuredData canonical={pageUrl} description={description} softwareApplication={softwareApplication} breadcrumbs={breadcrumbs} article={article} />
+
+        <meta property="og:title" content={title}>
+        <meta property="og:description" content={description}>
+        <meta property="og:type" content={ogType}>
+        <meta property="og:url" content={pageUrl}>
+        <meta property="og:image" content={new URL('/opengraph.jpg', Astro.site).href}>
+        <meta property="og:image:alt" content="Stagistic Editor preview">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:type" content="image/jpeg">
+        <meta property="og:site_name" content="Stagistic">
+        <meta name="twitter:card" content="summary_large_image">
+        <slot name="head" />
+        <script is:inline>
+            document.documentElement.classList.add('js');
+        </script>
+        <script
+            is:inline
+            async
+            src="https://betterlytics.io/analytics.js"
+            data-site-id="stagistic-muplea51">
+        </script>
+    </head>
+    <body>
+        <Header variant={header} />
+        <slot />
+        <Footer />
+    </body>
+</html>

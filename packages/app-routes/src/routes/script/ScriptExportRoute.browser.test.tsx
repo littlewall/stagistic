@@ -1,3 +1,4 @@
+import type * as MockedModule from '@stagistic/app-core';
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -20,7 +21,7 @@ import {CharacterFilterModule} from './export/modules/CharacterFilterModule';
 import {useExportScriptData} from './export/useExportScriptData';
 
 vi.mock('@stagistic/app-core', async importOriginal => {
-    const original = await importOriginal<typeof import('@stagistic/app-core')>();
+    const original = await importOriginal<typeof MockedModule>();
 
     return {
         ...original,
@@ -29,19 +30,25 @@ vi.mock('@stagistic/app-core', async importOriginal => {
     };
 });
 
-vi.mock('./ScriptWorkspaceContext', () => ({
+vi.mock('./workspace/ScriptWorkspaceContext', () => ({
     useScriptWorkspace: () => ({
         currentScript: {id: 's1', name: 'My Script'},
         currentScriptId: 's1',
         characterCatalog: {
             characters: [
                 {
-                    id: 'anna', kind: 'character', key: 'ANNA', outline: null,
+                    id: 'anna',
+                    kind: 'character',
+                    key: 'ANNA',
+                    outline: null,
                 },
             ],
             groups: [
                 {
-                    id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna'],
+                    id: 'all',
+                    kind: 'group',
+                    key: 'ALL',
+                    memberIds: ['anna'],
                 },
             ],
         },
@@ -56,7 +63,8 @@ vi.mock('./ScriptWorkspaceContext', () => ({
                     actBlockId: null,
                     sceneBlockId: null,
                     characterRefs: [{key: 'ANNA', characterId: 'anna'}],
-                }, {
+                },
+                {
                     blockId: 'all-cue',
                     orderNo: 1,
                     blockType: 'character',
@@ -72,22 +80,28 @@ vi.mock('./ScriptWorkspaceContext', () => ({
     }),
 }));
 
-vi.mock('./ScriptCharactersContext', () => ({
+vi.mock('./workspace/ScriptCharactersContext', () => ({
     useScriptCharacters: () => ({
         confirmedCharacterRecords: [
             {
-                id: 'anna', kind: 'character', key: 'ANNA', outline: null,
+                id: 'anna',
+                kind: 'character',
+                key: 'ANNA',
+                outline: null,
             },
         ],
         confirmedGroupRecords: [
             {
-                id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna'],
+                id: 'all',
+                kind: 'group',
+                key: 'ALL',
+                memberIds: ['anna'],
             },
         ],
     }),
 }));
 
-vi.mock('./settings/ScriptSettingsModalProvider', () => ({
+vi.mock('./settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS,
         titlePageDraft: null,
@@ -111,10 +125,7 @@ const renderAt = (view: 'editor' | 'export') => {
 
     root.render(
         <MemoryRouter initialEntries={[`/script/s1/${view}`]}>
-            <ScriptEditorAppHeader
-                currentScript={{id: 's1', name: 'My Script'}}
-                activeView={view}
-            />
+            <ScriptEditorAppHeader currentScript={{id: 's1', name: 'My Script'}} activeView={view} />
             <Routes>
                 <Route path="/script/:scriptId/editor" element={<LocationProbe />} />
                 <Route path="/script/:scriptId/export" element={<LocationProbe />} />
@@ -143,24 +154,17 @@ const pathname = () => document.querySelector('[data-testid="pathname"]')?.textC
 const ExportCharacterFilterProbe = () => {
     const {script} = useExportScriptData();
 
-    return (
-        <CharacterFilterModule
-            value={{mode: 'only', characterIds: []}}
-            characters={script?.characters ?? []}
-            onChange={() => undefined}
-        />
-    );
+    return <CharacterFilterModule value={{mode: 'only', characterIds: []}} characters={script?.characters ?? []} onChange={() => undefined} />;
 };
 
 const findSegment = (label: string): HTMLElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(el => el.textContent?.trim() === label);
+    const button = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.trim() === label);
 
     if (!button) {
         throw new Error(`Segment "${label}" not found`);
     }
 
-    return button as HTMLElement;
+    return button;
 };
 
 afterEach(() => {
@@ -210,8 +214,7 @@ describe('export character filter', () => {
 
         await waitFor(() => document.querySelectorAll(chipSelector).length > 0);
 
-        const labels = Array.from(document.querySelectorAll(chipSelector))
-            .map(chip => chip.textContent?.trim());
+        const labels = Array.from(document.querySelectorAll(chipSelector)).map(chip => chip.textContent?.trim());
 
         expect(labels).toContain('Anna');
         expect(labels).not.toContain('All');

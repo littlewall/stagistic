@@ -20,7 +20,8 @@ const CHARACTER_ORDER_OPTIONS: FormSelectOption[] = [
     {
         label: 'name',
         value: 'name',
-    }, {
+    },
+    {
         label: 'first appearance',
         value: 'first-appearance',
     },

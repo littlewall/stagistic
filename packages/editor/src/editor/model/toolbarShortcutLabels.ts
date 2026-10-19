@@ -6,6 +6,11 @@ export type ToolbarShortcutLabels = Readonly<{
     bold: string,
     italic: string,
     underline: string,
+    previousResult: string,
+    nextResult: string,
+    toggleReplace: string,
+    replace: string,
+    replaceAll: string,
 }>;
 
 const APPLE_LABELS: ToolbarShortcutLabels = {
@@ -14,6 +19,11 @@ const APPLE_LABELS: ToolbarShortcutLabels = {
     bold: '⌘B',
     italic: '⌘I',
     underline: '⌘U',
+    previousResult: '⇧↩',
+    nextResult: '↩',
+    toggleReplace: '⌥⌘F',
+    replace: '↩',
+    replaceAll: '⌘↩',
 };
 
 const OTHER_LABELS: ToolbarShortcutLabels = {
@@ -22,6 +32,11 @@ const OTHER_LABELS: ToolbarShortcutLabels = {
     bold: 'Ctrl+B',
     italic: 'Ctrl+I',
     underline: 'Ctrl+U',
+    previousResult: 'Shift+Enter',
+    nextResult: 'Enter',
+    toggleReplace: 'Ctrl+H',
+    replace: 'Enter',
+    replaceAll: 'Ctrl+Enter',
 };
 
 export const getToolbarShortcutLabels = (): ToolbarShortcutLabels => {

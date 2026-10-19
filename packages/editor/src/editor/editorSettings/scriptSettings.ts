@@ -1,4 +1,4 @@
-import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 
 export const stripScriptSettings = (value: ScriptDocument): ScriptDocument => {
     if (!value.attrs || !('settings' in value.attrs)) {
@@ -24,22 +24,5 @@ export const stripScriptSettings = (value: ScriptDocument): ScriptDocument => {
         type: value.type,
         content: value.content,
         attrs: restAttrs,
-    };
-};
-
-export const applyScriptSettings = (
-    value: ScriptDocument,
-    settings?: EditorSettingsOverride,
-): ScriptDocument => {
-    if (!settings) {
-        return value;
-    }
-
-    return {
-        ...value,
-        attrs: {
-            ...value.attrs,
-            settings,
-        },
     };
 };

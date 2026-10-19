@@ -1,4 +1,4 @@
-import type {ScriptDocument} from '@stagistic/script';
+import {buildScriptSummaryMetadata, type ScriptDocument} from '@stagistic/script';
 import {
     trimOrFallback,
     uuidv7,
@@ -8,7 +8,7 @@ import * as dbQueries from '../queries';
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,
     migrateScriptDocumentToBlocks,
-} from './migration/legacyToBlocks';
+} from './document/migration/legacyToBlocks';
 import type {
     GetDb,
     RecordOutbox,
@@ -47,6 +47,7 @@ export const createScriptsHandlers = ({
                 title: trimOrFallback(title, 'Untitled script'),
                 createdAt: timestamp,
                 updatedAt: timestamp,
+                summaryMetadata: buildScriptSummaryMetadata(initialContent ?? {type: 'doc', content: []}),
             });
 
             if (initialContent) {
@@ -129,7 +130,9 @@ export const createScriptsHandlers = ({
             const id = uuidv7();
 
             await createWithId({
-                id, title, initialContent,
+                id,
+                title,
+                initialContent,
             });
 
             return id;
@@ -154,7 +157,9 @@ export const createScriptsHandlers = ({
                     opType: 'script.rename',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
-                        scriptId, title: nextTitle, updatedAt: now,
+                        scriptId,
+                        title: nextTitle,
+                        updatedAt: now,
                     }),
                 }, tx);
             });
@@ -178,7 +183,9 @@ export const createScriptsHandlers = ({
                     opType: 'script.title.rename',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
-                        scriptId, title: nextTitle, updatedAt: now,
+                        scriptId,
+                        title: nextTitle,
+                        updatedAt: now,
                     }),
                 }, tx);
             });
@@ -187,7 +194,9 @@ export const createScriptsHandlers = ({
         duplicate: async (
             sourceScriptId: string,
             input: {
-                title: string, copySettings: boolean, copyAttributes: boolean,
+                title: string,
+                copySettings: boolean,
+                copyAttributes: boolean,
             },
         ) => {
             const targetScriptId = uuidv7();
@@ -231,7 +240,9 @@ export const createScriptsHandlers = ({
                     opType: 'script.active-block.set',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
-                        scriptId, blockId, updatedAt: now,
+                        scriptId,
+                        blockId,
+                        updatedAt: now,
                     }),
                 }, tx);
             });

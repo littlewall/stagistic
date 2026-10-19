@@ -1,7 +1,4 @@
-import {
-    CHARACTER_COLOR_SATURATION_MAX,
-    type ScriptDocument,
-} from '@stagistic/script';
+import {type ScriptDocument} from '@stagistic/script';
 import type {Extensions} from '@tiptap/core';
 import HardBreak from '@tiptap/extension-hard-break';
 import Text from '@tiptap/extension-text';
@@ -16,6 +13,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
@@ -23,9 +21,7 @@ import {buildCharacterTagPaletteCss} from '../characters/buildCharacterTagPalett
 import CharacterSuggestionsOverlay from '../components/CharacterSuggestionsOverlay';
 import {EditorSnapshotStoreProvider} from '../live/context';
 import {createEditorSnapshotStore} from '../live/store';
-import {
-    createCharacterColorRefsBundle,
-} from '../surface/editorSurfaceCache';
+import {createCharacterColorRefsBundle} from '../surface/editorSurfaceCache';
 import {useScriptEditorInstance} from '../surface/useScriptEditorInstance';
 import {
     CharacterTagInputExtension,
@@ -34,11 +30,8 @@ import {
     SceneNumberingExtension,
 } from '../tiptap/extensions';
 import {DocumentWithSettings} from '../tiptap/extensions/DocumentExtension';
-import {CharacterTagMark} from '../tiptap/marks';
-import {
-    MusicStartNode,
-    ScriptBlockNodes,
-} from '../tiptap/nodes';
+import {CharacterTagMark, CommentAnchorMark} from '../tiptap/marks';
+import {MusicStartNode, ScriptBlockNodes} from '../tiptap/nodes';
 import characterTagStyles from '../tiptap/scriptBlock/CharacterTagDecorations.module.css';
 import {getActiveScriptBlockFromState} from '../tiptap/scriptCore';
 import {MiniBlockTypeIndicator} from './MiniBlockTypeIndicator';
@@ -46,13 +39,9 @@ import {
     buildMiniEditorCharacterPresentation,
     buildMiniEditorCharacters,
     mergeMiniEditorCharacters,
-    MINI_EDITOR_CHARACTER_SATURATION,
     syncMiniEditorCharacterRefs,
 } from './miniEditorCharacters';
-import {
-    buildMiniEditorDocumentStructureSignature,
-    MiniEditorGuardExtension,
-} from './MiniEditorGuardExtension';
+import {buildMiniEditorDocumentStructureSignature, MiniEditorGuardExtension} from './MiniEditorGuardExtension';
 import {MiniMusicCaretExtension} from './MiniMusicCaretExtension';
 import styles from './MiniScriptEditor.module.css';
 
@@ -75,10 +64,7 @@ const MiniScriptEditorSurface = ({
     musicNumberLabel,
 }: MiniScriptEditorSurfaceProps) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
-    const characterColorRefs = useMemo(
-        () => createCharacterColorRefsBundle(),
-        [],
-    );
+    const characterColorRefs = useMemo(() => createCharacterColorRefsBundle(), []);
     const signature = useMemo(() => {
         const nextSignature = buildMiniEditorDocumentStructureSignature(document);
 
@@ -88,25 +74,13 @@ const MiniScriptEditorSurface = ({
 
         return nextSignature;
     }, [document]);
-    const initialCharacters = useMemo(
-        () => buildMiniEditorCharacters(document),
-        [document],
-    );
+    const initialCharacters = useMemo(() => buildMiniEditorCharacters(document), [document]);
     const [persistentCharacters, setPersistentCharacters] = useState(initialCharacters);
     const [liveStore] = useState(() => createEditorSnapshotStore());
     const committedCharactersRef = useRef(initialCharacters);
     const rawCharacterTagScopeId = useId();
-    const characterTagScopeId = useMemo(
-        () => rawCharacterTagScopeId.replace(/[^a-zA-Z0-9_-]/g, ''),
-        [rawCharacterTagScopeId],
-    );
-    const characterPresentation = useMemo(
-        () => buildMiniEditorCharacterPresentation(
-            document,
-            persistentCharacters,
-        ),
-        [document, persistentCharacters],
-    );
+    const characterTagScopeId = useMemo(() => rawCharacterTagScopeId.replace(/[^a-zA-Z0-9_-]/g, ''), [rawCharacterTagScopeId]);
+    const characterPresentation = useMemo(() => buildMiniEditorCharacterPresentation(document, persistentCharacters), [document, persistentCharacters]);
     const characterTagPaletteCss = useMemo(
         () => buildCharacterTagPaletteCss({
             colorByCharacterId: characterPresentation.colorByCharacterId,
@@ -117,51 +91,48 @@ const MiniScriptEditorSurface = ({
     );
 
     if (characterColorRefs.persistentCharactersRef.current.length === 0) {
-        syncMiniEditorCharacterRefs(
-            characterColorRefs,
-            initialCharacters,
-            document,
-        );
+        syncMiniEditorCharacterRefs(characterColorRefs, initialCharacters, document);
     }
 
-    const extensions = useMemo<Extensions>(() => [
-        DocumentWithSettings,
-        Text,
-        HardBreak,
-        CharacterTagMark.configure({
-            tagClassName: characterTagStyles.characterTag,
-        }),
-        CharacterTagInputExtension.configure({
-            persistentCharactersRef: characterColorRefs.persistentCharactersRef,
-        }),
-        ...ScriptBlockNodes,
-        SceneNumberingExtension,
-        MusicStartNode.configure({
-            locked: true,
-            numberLabel: musicNumberLabel,
-        }),
-        MusicNumberingExtension,
-        EditorRuntimeExtension.configure({
-            characterColorSaturation: MINI_EDITOR_CHARACTER_SATURATION,
-            colorByCharacterIdRef: characterColorRefs.colorByCharacterIdRef,
-            rememberedColorByKeyRef: characterColorRefs.rememberedColorByKeyRef,
-            persistentCharactersRef: characterColorRefs.persistentCharactersRef,
-            characterTagClassNames: {
-                tag: characterTagStyles.characterTag,
-                separator: characterTagStyles.characterSeparator,
-            },
-        }),
-        MiniMusicCaretExtension,
-        MiniEditorGuardExtension.configure({signature}),
-    ], [
-        characterColorRefs,
-        musicNumberLabel,
-        signature,
-    ]);
-    const editorSignature = useMemo(
-        () => JSON.stringify({document, signature}),
-        [document, signature],
+    const extensions = useMemo<Extensions>(
+        () => [
+            DocumentWithSettings,
+            Text,
+            HardBreak,
+            CharacterTagMark.configure({
+                tagClassName: characterTagStyles.characterTag,
+            }),
+            CommentAnchorMark,
+            CharacterTagInputExtension.configure({
+                persistentCharactersRef: characterColorRefs.persistentCharactersRef,
+            }),
+            ...ScriptBlockNodes,
+            SceneNumberingExtension,
+            MusicStartNode.configure({
+                locked: true,
+                numberLabel: musicNumberLabel,
+            }),
+            MusicNumberingExtension,
+            EditorRuntimeExtension.configure({
+                colorByCharacterIdRef: characterColorRefs.colorByCharacterIdRef,
+                rememberedColorByKeyRef: characterColorRefs.rememberedColorByKeyRef,
+                persistentCharactersRef: characterColorRefs.persistentCharactersRef,
+                characterTagClassNames: {
+                    tag: characterTagStyles.characterTag,
+                    separator: characterTagStyles.characterSeparator,
+                    line: characterTagStyles.characterLine,
+                },
+            }),
+            MiniMusicCaretExtension,
+            MiniEditorGuardExtension.configure({signature}),
+        ],
+        [
+            characterColorRefs,
+            musicNumberLabel,
+            signature,
+        ],
     );
+    const editorSignature = useMemo(() => JSON.stringify({document, signature}), [document, signature]);
     const {editor} = useScriptEditorInstance({
         signature: editorSignature,
         extensions,
@@ -174,27 +145,18 @@ const MiniScriptEditorSurface = ({
         const activeBlock = getActiveScriptBlockFromState(editor.state);
 
         if (activeBlock?.blockType !== 'character') {
-            committedCharactersRef.current = mergeMiniEditorCharacters(
-                committedCharactersRef.current,
-                documentCharacters,
-            );
+            committedCharactersRef.current = mergeMiniEditorCharacters(committedCharactersRef.current, documentCharacters);
         }
 
         const nextCharacters = committedCharactersRef.current;
-        const didCharactersChange = nextCharacters.length
-            !== characterColorRefs.persistentCharactersRef.current.length
-            || nextCharacters.some((character, index) => {
-                const previous = characterColorRefs
-                    .persistentCharactersRef.current[index];
+        const didCharactersChange =
+            nextCharacters.length !== characterColorRefs.persistentCharactersRef.current.length ||
+            nextCharacters.some((character, index) => {
+                const previous = characterColorRefs.persistentCharactersRef.current[index];
 
-                return character.id !== previous?.id
-                    || character.key !== previous.key;
+                return character.id !== previous?.id || character.key !== previous.key;
             });
-        const presentation = syncMiniEditorCharacterRefs(
-            characterColorRefs,
-            nextCharacters,
-            currentDocument,
-        );
+        const presentation = syncMiniEditorCharacterRefs(characterColorRefs, nextCharacters, currentDocument);
 
         liveStore.patchSnapshot({
             revision: liveStore.getSnapshot().revision + 1,
@@ -225,37 +187,25 @@ const MiniScriptEditorSurface = ({
             <div
                 className={clsx(styles.root, className)}
                 data-character-highlight="underline"
-                data-character-saturation={CHARACTER_COLOR_SATURATION_MAX}
                 data-character-tag-scope={characterTagScopeId}
                 data-mini-editor
                 ref={rootRef}
             >
-                {characterTagPaletteCss ? (
-                    <style data-character-tag-palette>
-                        {characterTagPaletteCss}
-                    </style>
-                ) : null}
-                <p
-                    className={styles.screenReaderInstructions}
-                    id={SCRIPT_EDITOR_DESCRIPTION_ID}
-                >
+                {characterTagPaletteCss ? <style data-character-tag-palette>{characterTagPaletteCss}</style> : null}
+                <p className={styles.screenReaderInstructions} id={SCRIPT_EDITOR_DESCRIPTION_ID}>
                     Interactive script excerpt. Enter moves to the next block.
                 </p>
-                <EditorContent
-                    className={styles.content}
-                    editor={editor}
-                    spellCheck={false}
-                />
+                <EditorContent className={styles.content} editor={editor} spellCheck={false} />
                 <MiniBlockTypeIndicator editor={editor} rootRef={rootRef} />
-                <CharacterSuggestionsOverlay
-                    editor={editor}
-                    canvasRef={rootRef}
-                    persistentCharacters={persistentCharacters}
-                />
+                <CharacterSuggestionsOverlay editor={editor} canvasRef={rootRef} persistentCharacters={persistentCharacters} />
             </div>
         </EditorSnapshotStoreProvider>
     );
 };
+
+const subscribeToMount = () => () => {};
+const getMountedSnapshot = () => true;
+const getServerMountedSnapshot = () => false;
 
 export const MiniScriptEditor = ({
     className,
@@ -263,21 +213,11 @@ export const MiniScriptEditor = ({
     musicNumberLabel,
     staticFallback = null,
 }: MiniScriptEditorProps): ReactElement | null => {
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    const isMounted = useSyncExternalStore(subscribeToMount, getMountedSnapshot, getServerMountedSnapshot);
 
     if (!isMounted) {
         return staticFallback ? <>{staticFallback}</> : null;
     }
 
-    return (
-        <MiniScriptEditorSurface
-            className={className}
-            document={document}
-            musicNumberLabel={musicNumberLabel}
-        />
-    );
+    return <MiniScriptEditorSurface className={className} document={document} musicNumberLabel={musicNumberLabel} />;
 };

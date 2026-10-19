@@ -3,7 +3,9 @@ import Document from '@tiptap/extension-document';
 import Text from '@tiptap/extension-text';
 import {Node} from '@tiptap/pm/model';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -33,19 +35,35 @@ describe('buildIndexSnapshotFromPmDoc music', () => {
                         {
                             type: 'musicStart',
                             attrs: {
-                                musicId: 'c1', mode: 'open', title: 'Night', kind: null,
+                                musicId: 'c1',
+                                mode: 'open',
+                                title: 'Night',
+                                kind: null,
                             },
                         },
                     ],
-                }, {
-                    type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'musicOut'}],
+                },
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'b2'},
+                    content: [{type: 'musicOut'}],
                 },
             ],
         });
 
         expect(buildIndexSnapshotFromPmDoc(doc).music).toEqual([
             {
-                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
+                musicId: 'c1',
+                sceneNumber: 0,
+                indexInScene: 0,
+                sceneMusicCount: 1,
+                mode: 'open',
+                title: 'Night',
+                kind: null,
+                startBlockId: 'b1',
+                endBlockId: 'b2',
+                effectiveEndBlockId: 'b2',
+                endKind: 'explicit',
             },
         ]);
     });

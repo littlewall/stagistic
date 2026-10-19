@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ScriptDocument} from '../document';
@@ -23,11 +25,15 @@ const doc: ScriptDocument = {
             attrs: {id: 'b1'},
             content: [
                 {
-                    type: 'text', text: 'Anna', marks: [tagMark('ANNA', 'char-anna')],
+                    type: 'text',
+                    text: 'Anna',
+                    marks: [tagMark('ANNA', 'char-anna')],
                 },
                 {type: 'text', text: ' meets '},
                 {
-                    type: 'text', text: 'Bob', marks: [tagMark('BOB', null)],
+                    type: 'text',
+                    text: 'Bob',
+                    marks: [tagMark('BOB', null)],
                 },
                 {type: 'text', text: '.'},
             ],

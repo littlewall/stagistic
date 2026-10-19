@@ -84,13 +84,19 @@ describe('scene collapse model', () => {
             nextId: range.nextBoundary?.blockId ?? null,
         }))).toEqual([
             {
-                id: 's1', bodyIds: ['b1', 'b2'], nextId: 's2',
+                id: 's1',
+                bodyIds: ['b1', 'b2'],
+                nextId: 's2',
             },
             {
-                id: 's2', bodyIds: [], nextId: 'a2',
+                id: 's2',
+                bodyIds: [],
+                nextId: 'a2',
             },
             {
-                id: 's3', bodyIds: [], nextId: null,
+                id: 's3',
+                bodyIds: [],
+                nextId: null,
             },
         ]);
     });

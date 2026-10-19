@@ -1,21 +1,17 @@
 export type {EditorActCommands} from './editor/actCommands/context';
 export {useEditorActCommands} from './editor/actCommands/context';
 export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
-export {
-    getCharacterColor,
-    getCharacterColorVarName,
-} from './editor/characters/characterColors';
+export {getCharacterColor, getCharacterColorVarName} from './editor/characters/characterColors';
 export {
     getConfirmedCharacterColor,
     getUnconfirmedCharacterColor,
     normalizePersistentCharacterRefs,
 } from './editor/characters/colorResolver';
+export {COMMENT_DRAFT_ANCHOR_KEY, useCommentAnchorTops} from './editor/comments/useCommentAnchorTops';
+export {type EditorCommentsApi, useEditorComments} from './editor/comments/useEditorComments';
 export {EditorCanvas} from './editor/components/EditorCanvas';
 export {default as EditorToolbar} from './editor/components/EditorToolbar';
-export {
-    EditorInstanceProvider,
-    useEditorInstance,
-} from './editor/context';
+export {EditorInstanceProvider, useEditorInstance} from './editor/context';
 export type {
     ConvertSceneRequest,
     DeleteActRequest,
@@ -38,6 +34,7 @@ export type {
     EditorProps,
     EditorSaveCallbacks,
     EditorSaveProps,
+    EditorSearchProps,
     EditorSettingsProps,
     EditorSidebarToggle,
     EditorStructureRequests,
@@ -53,14 +50,8 @@ export type {
     UpdateMusicRequest,
 } from './editor/contracts';
 export {default as ScriptEditor} from './editor/Editor';
-export {
-    type EditorElementSelection,
-    useEditorElementSelection,
-} from './editor/elementSelection/context';
-export {
-    buildConvertSceneHeadingContent,
-    buildDeleteSceneHeadingContent,
-} from './editor/hooks/blockMutations';
+export {type EditorElementSelection, useEditorElementSelection} from './editor/elementSelection/context';
+export {buildConvertSceneHeadingContent, buildDeleteSceneHeadingContent} from './editor/hooks/blockMutations';
 export {useExclusiveOverlay} from './editor/hooks/useExclusiveOverlay';
 export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
 export {useFocusEditorMusic} from './editor/hooks/useFocusEditorMusic';
@@ -75,19 +66,9 @@ export {
     useEditorLiveSnapshot,
     useEditorLiveStructure,
 } from './editor/live/hooks';
-export {
-    createEditorSnapshotStore,
-    type EditorSnapshotStore,
-} from './editor/live/store';
-export {
-    MiniScriptEditor,
-    type MiniScriptEditorProps,
-} from './editor/mini/MiniScriptEditor';
-export {
-    getEditorPerfMetricsSnapshot,
-    incrementRouteRenderCount,
-    resetEditorPerfMetrics,
-} from './editor/perf/editorPerfMetrics';
+export {createEditorSnapshotStore, type EditorSnapshotStore} from './editor/live/store';
+export {MiniScriptEditor, type MiniScriptEditorProps} from './editor/mini/MiniScriptEditor';
+export {useEditorSceneNumberFormat} from './editor/sceneNumberFormatContext';
 export {
     type CharacterColorRefsBundle,
     createCharacterColorRefsBundle,
@@ -95,6 +76,14 @@ export {
     type EditorSurfaceCache,
     type EditorSurfaceEntry,
 } from './editor/surface/editorSurfaceCache';
+export {
+    type CommentAnchorLocation,
+    type CommentBlockMerge,
+    type CommentDraft,
+    type CommentsPluginState,
+    type EditorCommentThreadRef,
+    getCommentsState,
+} from './editor/tiptap/extensions/comments';
 export {
     focusFirstCharacterBlock,
     linkCharacterRef,

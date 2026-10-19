@@ -1,10 +1,7 @@
 import clsx from 'clsx';
-import {
-    type CSSProperties,
-    type KeyboardEvent,
-} from 'react';
+import {type CSSProperties, type KeyboardEvent} from 'react';
 
-import {Tooltip} from '../../atoms/Tooltip';
+import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import styles from '../EditorSidebar.module.css';
 import {CharacterColorPopover} from './CharacterColorPopover';
 import type {CharacterRowColorControls} from './contracts';
@@ -22,21 +19,27 @@ export const CharacterColorControl = ({
     className,
     swatchClassName,
 }: CharacterColorControlProps) => {
+    const {
+        state,
+        actions,
+        refs,
+    } = color;
+    const {triggerRef} = refs;
     const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
         event.stopPropagation();
 
-        if (color.state.isActionDisabled) {
+        if (state.isActionDisabled) {
             return;
         }
 
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            color.actions.togglePicker();
+            actions.togglePicker();
         }
 
         if (event.key === 'Escape') {
             event.preventDefault();
-            color.actions.setPickerOpen(false);
+            actions.setPickerOpen(false);
         }
     };
 
@@ -45,19 +48,19 @@ export const CharacterColorControl = ({
             <Tooltip
                 label="Choose color"
                 placement="right"
-                isDisabled={color.state.isActionDisabled}
+                isDisabled={state.isActionDisabled}
             >
                 <span
-                    ref={color.refs.triggerRef}
+                    ref={triggerRef}
                     role="button"
-                    tabIndex={color.state.isActionDisabled ? -1 : 0}
+                    tabIndex={state.isActionDisabled ? -1 : 0}
                     aria-label={`Choose color for ${characterKey}`}
-                    aria-disabled={color.state.isActionDisabled || undefined}
+                    aria-disabled={state.isActionDisabled || undefined}
                     className={clsx(styles.characterColorInteractive, className)}
-                    style={{'--character-color': color.state.currentColorHex} as CSSProperties}
+                    style={{'--character-color': state.currentColorHex} as CSSProperties}
                     onClick={event => {
                         event.stopPropagation();
-                        color.actions.togglePicker();
+                        actions.togglePicker();
                     }}
                     onKeyDown={handleKeyDown}
                 >
@@ -68,24 +71,22 @@ export const CharacterColorControl = ({
                 </span>
             </Tooltip>
             <CharacterColorPopover
-                refs={{
-                    triggerRef: color.refs.triggerRef,
-                }}
+                triggerRef={triggerRef}
                 model={{
                     characterKey,
-                    colorDraftHex: color.state.colorDraftHex,
-                    pickerColorValue: color.state.pickerColorValue,
-                    presetColorHexes: color.state.presetColorHexes,
-                    resolvedColorSaturation: color.state.resolvedColorSaturation,
+                    colorDraftHex: state.colorDraftHex,
+                    pickerColorValue: state.pickerColorValue,
+                    presetColorHexes: state.presetColorHexes,
+                    resolvedColorSaturation: state.resolvedColorSaturation,
                 }}
                 state={{
-                    isOpen: color.state.isPickerOpen,
+                    isOpen: state.isPickerOpen,
                 }}
                 actions={{
-                    onOpenChange: color.actions.setPickerOpen,
-                    onHueChange: color.actions.setDraftHue,
-                    onApply: color.actions.applyColor,
-                    onReset: color.actions.resetColor,
+                    onOpenChange: actions.setPickerOpen,
+                    onHueChange: actions.setDraftHue,
+                    onApply: actions.applyColor,
+                    onReset: actions.resetColor,
                 }}
             />
         </>

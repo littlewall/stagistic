@@ -1,13 +1,14 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll.oxc": "explicit"
+    "source.fixAll.oxc": "explicit",
+    "source.fixAll.eslint": "explicit"
   },
-  "editor.defaultFormatter": "oxc.oxc-vscode",
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
   "biome.requireConfiguration": true,
   "oxc.disableNestedConfig": true,
-  "oxc.fmt.disableNestedConfig": true,
+  "eslint.useFlatConfig": true,
+  "[javascript][javascriptreact][typescript][typescriptreact]": {
+    "editor.formatOnSave": false
+  },
   "[astro]": {
     "editor.codeActionsOnSave": {
       "source.fixAll.biome": "explicit"

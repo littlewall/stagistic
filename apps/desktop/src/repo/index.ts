@@ -1,4 +1,5 @@
 import {createLocalPgliteRepository, type ScriptRepository} from '@stagistic/db';
+
 import {getLocalDb, syncToFs} from '~db';
 
 import {TauriFsFileStorage} from '../fileStorage/TauriFsFileStorage';

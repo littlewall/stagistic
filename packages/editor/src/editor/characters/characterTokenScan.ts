@@ -7,10 +7,7 @@ import {
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 
 import {isScriptBlockNodeName} from '../tiptap/scriptCore';
-import {
-    readNormalizedRefsFromAttrs,
-    visitCharacterBlocks,
-} from './characterRefUtils';
+import {readNormalizedRefsFromAttrs, visitCharacterBlocks} from './characterRefUtils';
 
 export interface CharacterTokenEntry {
     blockId: string,
@@ -73,7 +70,7 @@ export const getActiveTokenIndex = (line: string, offset: number) => {
     return tokens.length - 1;
 };
 
-export const resolveCharacterBlockId = (rawBlockId: unknown, blockPos: number) => {
+const resolveCharacterBlockId = (rawBlockId: unknown, blockPos: number) => {
     if (typeof rawBlockId !== 'string' || rawBlockId.trim().length === 0) {
         return `block-pos:${blockPos}`;
     }
@@ -85,10 +82,7 @@ export const getCharacterTokenColorKey = (blockId: string, tokenIndex: number) =
     return `${blockId}\u0001${tokenIndex}`;
 };
 
-export const scanCharacterTokensFromDoc = ({
-    doc,
-    selectionFrom,
-}: ScanCharacterTokensArgs): CharacterTokenScanResult => {
+export const scanCharacterTokensFromDoc = ({doc, selectionFrom}: ScanCharacterTokensArgs): CharacterTokenScanResult => {
     const tokenEntries: CharacterTokenEntry[] = [];
     const tokenCountByKey = new Map<string, number>();
     let activeToken: ActiveCharacterToken | null = null;
@@ -99,15 +93,13 @@ export const scanCharacterTokensFromDoc = ({
             onCharacterBlock: (node, pos) => {
                 const text = node.textContent ?? '';
                 const tokens = splitCharacterTokens(text);
-                const refsByKey = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
+                const refsByKey = readNormalizedRefsFromAttrs(node.attrs);
                 const blockStart = pos + 1;
                 const blockId = resolveCharacterBlockId(node.attrs.id, pos);
 
                 tokens.forEach((token, tokenIndex) => {
                     const key = normalizeCharacterKey(token.value);
-                    const characterId = key
-                        ? refsByKey[key] ?? null
-                        : null;
+                    const characterId = key ? refsByKey[key] ?? null : null;
 
                     tokenEntries.push({
                         blockId,
@@ -146,9 +138,7 @@ export const scanCharacterTokensFromDoc = ({
 
                 const token = tokens[activeTokenIndex];
                 const key = normalizeCharacterKey(token.value);
-                const characterId = key
-                    ? refsByKey[key] ?? null
-                    : null;
+                const characterId = key ? refsByKey[key] ?? null : null;
 
                 activeToken = {
                     id: getCharacterTokenColorKey(blockId, activeTokenIndex),

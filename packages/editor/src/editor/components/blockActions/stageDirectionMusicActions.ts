@@ -14,10 +14,7 @@ import {
     resolveNewMusicNumber,
     resolveScriptTargetBlock,
 } from '../../tiptap/extensions/music/musicCommands';
-import {
-    findMusicAtomRange,
-    resolveMusicOutCandidate,
-} from '../../tiptap/extensions/music/musicOutCommands';
+import {findMusicAtomRange, resolveMusicOutCandidate} from '../../tiptap/extensions/music/musicOutCommands';
 import type {
     BlockActionCommand,
     BlockActionContext,
@@ -29,9 +26,7 @@ const MUSIC_TITLE_PREVIEW_LENGTH = 10;
 const truncateMusicTitle = (title: string) => {
     const characters = Array.from(title.trim());
 
-    return characters.length <= MUSIC_TITLE_PREVIEW_LENGTH
-        ? characters.join('')
-        : `${characters.slice(0, MUSIC_TITLE_PREVIEW_LENGTH).join('')}…`;
+    return characters.length <= MUSIC_TITLE_PREVIEW_LENGTH ? characters.join('') : `${characters.slice(0, MUSIC_TITLE_PREVIEW_LENGTH).join('')}…`;
 };
 
 /*
@@ -45,7 +40,7 @@ export const formatMusicTitlePreview = (music: DerivedMusic) => {
 };
 
 /** The whole title, for surfaces that can wrap it onto as many lines as it takes. */
-export const formatMusicTitleFull = (music: DerivedMusic) => {
+const formatMusicTitleFull = (music: DerivedMusic) => {
     return music.title.trim() || undefined;
 };
 
@@ -80,7 +75,7 @@ export const formatSetMusicOutLabel = (music: DerivedMusic) => {
  * script (see deriveMusicTimeline). It is also the only way back to a derived
  * end, because dragging the endpoint always pins it to a block.
  */
-export const formatResetMusicEndLabel = (music: DerivedMusic) => {
+const formatResetMusicEndLabel = (music: DerivedMusic) => {
     return withMusicNumber('Reset music end', formatMusicNumber(music));
 };
 
@@ -121,17 +116,15 @@ export const canResetMusicEnd = (snapshot: ScriptBlockIndexSnapshot, blockId: st
 };
 
 /** Starting a music is what dropping the pill does, so the label says so. */
-export const formatAddMusicLabel = (newMusicNumber: string) => {
+const formatAddMusicLabel = (newMusicNumber: string) => {
     return withMusicNumber('Start new music', newMusicNumber);
 };
 
 export {resolveNewMusicNumber} from '../../tiptap/extensions/music/musicCommands';
 
-export const resolveOpenMusicAtBlock = (
-    snapshot: ScriptBlockIndexSnapshot,
-    blockId: string,
-): DerivedMusic | null => resolveMusicOutCandidate(snapshot, blockId);
-
+export const resolveOpenMusicAtBlock = (snapshot: ScriptBlockIndexSnapshot, blockId: string): DerivedMusic | null => {
+    return resolveMusicOutCandidate(snapshot, blockId);
+};
 export type MusicOutBoundaryAction = 'add' | 'set' | 'remove';
 
 export interface MusicBoundaryAvailability {
@@ -161,11 +154,8 @@ export const resolveMusicBoundaryAvailabilityFromSnapshot = (
     }
 
     const explicitOutMusic = snapshot.music.find(music => music.endBlockId === blockId) ?? null;
-    const outMusic = atoms.hasMusicOut
-        ? explicitOutMusic
-        : resolveMusicOutCandidate(snapshot, blockId);
-    const isOrphanOut = atoms.hasMusicOut
-        && snapshot.orphanMusicOutBlockIds.includes(blockId);
+    const outMusic = atoms.hasMusicOut ? explicitOutMusic : resolveMusicOutCandidate(snapshot, blockId);
+    const isOrphanOut = atoms.hasMusicOut && snapshot.orphanMusicOutBlockIds.includes(blockId);
     const canAddMusic = block.blockType === 'stageDirection' && !atoms.hasMusicStart;
 
     return {
@@ -178,10 +168,7 @@ export const resolveMusicBoundaryAvailabilityFromSnapshot = (
     };
 };
 
-export const resolveMusicBoundaryAvailability = (
-    editor: TiptapEditor,
-    blockId: string,
-): MusicBoundaryAvailability | null => {
+const resolveMusicBoundaryAvailability = (editor: TiptapEditor, blockId: string): MusicBoundaryAvailability | null => {
     const block = resolveScriptTargetBlock(editor.state, blockId);
 
     if (!block) {
@@ -190,8 +177,7 @@ export const resolveMusicBoundaryAvailability = (
 
     const snapshot = buildIndexSnapshotFromPmDoc(editor.state.doc);
     const hasOut = findMusicAtomRange(block, MUSIC_OUT_NODE_NAME) !== null;
-    const hasMusicStart = resolveMusicTargetBlock(editor.state, blockId) !== null
-        && blockHasMusicStart(block);
+    const hasMusicStart = resolveMusicTargetBlock(editor.state, blockId) !== null && blockHasMusicStart(block);
 
     return resolveMusicBoundaryAvailabilityFromSnapshot(snapshot, blockId, {
         hasMusicStart,
@@ -199,11 +185,7 @@ export const resolveMusicBoundaryAvailability = (
     });
 };
 
-const resolveOutCommand = (
-    editor: TiptapEditor,
-    blockId: string,
-    availability: MusicBoundaryAvailability,
-): BlockActionCommand | null => {
+const resolveOutCommand = (editor: TiptapEditor, blockId: string, availability: MusicBoundaryAvailability): BlockActionCommand | null => {
     const {outAction, outMusic} = availability;
 
     if (!outAction) {
@@ -261,10 +243,7 @@ const resolveOutCommand = (
     };
 };
 
-export const resolveMusicBoundaryActions = ({
-    editor,
-    blockId,
-}: BlockActionContext): readonly BlockActionItem[] => {
+export const resolveMusicBoundaryActions = ({editor, blockId}: BlockActionContext): readonly BlockActionItem[] => {
     const availability = resolveMusicBoundaryAvailability(editor, blockId);
 
     if (!availability) {
@@ -289,15 +268,15 @@ export const resolveMusicBoundaryActions = ({
         items.push(outCommand);
     }
 
-    return items.length > 0 ? [
-        {
-            kind: 'submenu',
-            id: 'music',
-            label: 'Music',
-            icon: 'music',
-            items,
-        },
-    ] : [];
+    return items.length > 0
+        ? [
+            {
+                kind: 'submenu',
+                id: 'music',
+                label: 'Music',
+                icon: 'music',
+                items,
+            },
+        ]
+        : [];
 };
-
-export const resolveStageDirectionMusicActions = resolveMusicBoundaryActions;

@@ -1,20 +1,19 @@
 import {useEditorActCommands} from '@stagistic/editor';
-import {PlusIcon} from '@stagistic/ui';
+import {IconDropdownMenu, PlusIcon} from '@stagistic/ui';
 import {useCallback} from 'react';
 
-import {SidebarContextButton} from '../sidebar';
+const ADD_ITEMS = [{id: 'add-act', label: 'Add act'}];
 
 export const StructureSidebarContextActions = () => {
     const {insertAct} = useEditorActCommands();
-    const handleClick = useCallback(() => insertAct(null), [insertAct]);
-
-    return (
-        <SidebarContextButton
-            ariaLabel="Add act"
-            tooltipLabel="Add act"
-            onClick={handleClick}
-        >
-            <PlusIcon aria-hidden="true" />
-        </SidebarContextButton>
+    const handleAction = useCallback(
+        (id: string) => {
+            if (id === 'add-act') {
+                insertAct(null);
+            }
+        },
+        [insertAct],
     );
+
+    return <IconDropdownMenu aria-label="Add to structure" icon={<PlusIcon aria-hidden="true" />} size="xs" items={ADD_ITEMS} onAction={handleAction} />;
 };

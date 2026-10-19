@@ -1,10 +1,14 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {paginate} from './paginate';
 import type {
-    BlockLine, PaginatorBlock, PaginatorMetrics,
+    BlockLine,
+    PaginatorBlock,
+    PaginatorMetrics,
 } from './types';
 
 const LINE = 20;

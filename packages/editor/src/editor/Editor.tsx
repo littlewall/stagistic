@@ -1,15 +1,12 @@
 import {
     coerceUnknownBlocksToStageDirections,
-    type ScriptDocument,
+    DEFAULT_SCENE_NUMBER_FORMAT,
 } from '@stagistic/script';
 import {
     type ReactNode,
-    useCallback,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
-    useState,
 } from 'react';
 
 import {EditorActCommandsProvider} from './actCommands/context';
@@ -26,27 +23,22 @@ import {
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
 import {EditorElementSelectionProvider} from './elementSelection/context';
-import {
-    serializeDocumentForSave,
-    useAutosaveController,
-} from './hooks/useAutosaveController';
+import {serializeDocumentForSave} from './hooks/useAutosaveController';
+import {useCommentCallbacksRef} from './hooks/useCommentCallbacksRef';
+import {useEditorAutosave} from './hooks/useEditorAutosave';
 import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
-import {usePaginationReady} from './hooks/usePaginationReady';
+import {useInitialEditorContent} from './hooks/useInitialEditorContent';
+import {useInitialCanvasReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
-import {
-    getBlockNextElements,
-    getBlockShortcuts,
-} from './model/blockSettingMaps';
-import {
-    type CharacterColorRefsBundle,
-    createCharacterColorRefsBundle,
-} from './surface/editorSurfaceCache';
+import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
+import {EditorSceneNumberFormatContext} from './sceneNumberFormatContext';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
+import {useSurfaceCharacterRefs} from './surface/useSurfaceCharacterRefs';
 import {useEditorExtensions} from './useEditorExtensions';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -58,6 +50,7 @@ const Editor = ({
     layout,
     requests,
     callbacks,
+    search,
     editorZoom = 1,
     surfaceCache,
     liveStore: providedLiveStore,
@@ -67,19 +60,12 @@ const Editor = ({
         initialValue,
         persistentCharacters = [],
         persistentMusic = [],
+        commentThreads,
         scriptTitle,
         draftDate,
     } = document;
-    const {
-        settings: globalSettings,
-        scriptSettings,
-    } = settingsProps ?? {};
-    const {
-        onAutoSave,
-        onManualSave,
-        onDirtyChange,
-        autoSaveDelayMs,
-    } = save ?? {};
+    const {settings: globalSettings, scriptSettings} = settingsProps ?? {};
+    const {onManualSave} = save ?? {};
     const {
         autoFocus,
         leftSidebarToggle,
@@ -98,62 +84,52 @@ const Editor = ({
         onMusicUnassigned,
         onRequestDeleteScene,
         onRequestConvertScene,
+        onRequestRevealComments,
+        isCommentsPanelOpen,
+        onCommentAnchorClick,
+        onCommentBlocksMerged,
     } = callbacks ?? {};
 
-    const resolvedInitialValue = useMemo(
-        () => coerceUnknownBlocksToStageDirections(initialValue).value,
-        [initialValue],
-    );
-    const initialSerialized = useMemo(
-        () => serializeDocumentForSave(resolvedInitialValue),
-        [resolvedInitialValue],
-    );
+    const resolvedInitialValue = useMemo(() => coerceUnknownBlocksToStageDirections(initialValue).value, [initialValue]);
+    const initialSerialized = useMemo(() => serializeDocumentForSave(resolvedInitialValue), [resolvedInitialValue]);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
 
     const runtimeGlobalSettings = useEditorRuntimeSettings(globalSettings);
-    const runtimeScriptSettings = useEditorRuntimeSettings(
-        scriptSettings ?? resolvedInitialValue.attrs?.settings,
-    );
-    const resolvedSettings = useMemo(
-        () => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings),
-        [runtimeGlobalSettings, runtimeScriptSettings],
-    );
-    const blockShortcuts = useMemo(
-        () => getBlockShortcuts(resolvedSettings.blocks),
-        [resolvedSettings.blocks],
-    );
-    const blockNextElements = useMemo(
-        () => getBlockNextElements(resolvedSettings.blocks),
-        [resolvedSettings.blocks],
-    );
+    const runtimeScriptSettings = useEditorRuntimeSettings(scriptSettings ?? resolvedInitialValue.attrs?.settings);
+    const resolvedSettings = useMemo(() => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings), [runtimeGlobalSettings, runtimeScriptSettings]);
+    const blockShortcuts = useMemo(() => getBlockShortcuts(resolvedSettings.blocks), [resolvedSettings.blocks]);
+    const sceneNumberFormat = resolvedSettings.blocks.scene?.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
+    const blockNextElements = useMemo(() => getBlockNextElements(resolvedSettings.blocks), [resolvedSettings.blocks]);
 
-    const initialContentSignature = useMemo(
-        () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),
-        [resolvedInitialValue],
+    const initialContentSignature = useMemo(() => JSON.stringify(stripScriptSettings(resolvedInitialValue)), [resolvedInitialValue]);
+    const surfaceSignature = useMemo(
+        () => JSON.stringify({
+            content: initialContentSignature,
+            settings: selectEditorRebuildSettings(resolvedSettings),
+            editorZoom,
+            blockUi: Boolean(onBlockUiEvent),
+        }),
+        [
+            editorZoom,
+            initialContentSignature,
+            onBlockUiEvent,
+            resolvedSettings,
+        ],
     );
-    const surfaceSignature = useMemo(() => JSON.stringify({
-        content: initialContentSignature,
-        settings: selectEditorRebuildSettings(resolvedSettings),
-        editorZoom,
-        blockUi: Boolean(onBlockUiEvent),
-    }), [
-        editorZoom,
-        initialContentSignature,
-        onBlockUiEvent,
-        resolvedSettings,
-    ]);
     /*
      * The color refs are captured by editor extensions via closure, so a
      * restored cached surface must keep using the bundle its extensions hold.
      * Resolved once per mount, before extensions are built.
      */
-    const surfaceRefsRef = useRef<CharacterColorRefsBundle | null>(null);
+    const surfaceRefs = useSurfaceCharacterRefs(surfaceCache, surfaceSignature);
 
-    if (!surfaceRefsRef.current) {
-        surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs
-            ?? createCharacterColorRefsBundle();
-    }
+    const commentCallbacksRef = useCommentCallbacksRef({
+        onRequestReveal: onRequestRevealComments,
+        isPanelOpen: isCommentsPanelOpen,
+        onAnchorClick: onCommentAnchorClick,
+        onBlocksMerged: onCommentBlocksMerged,
+    });
 
     const persistentMusicRef = useRef(persistentMusic);
 
@@ -169,9 +145,8 @@ const Editor = ({
         liveStore,
     } = useEditorCharacterColors({
         persistentCharacters,
-        characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         resolvedInitialValue,
-        refs: surfaceRefsRef.current,
+        refs: surfaceRefs,
         liveStore: providedLiveStore,
     });
 
@@ -183,23 +158,18 @@ const Editor = ({
         pageWidthPx: resolvedSettings.page.widthPx,
         editorZoom,
     });
-    const renderScale = useMemo(
-        () => editorZoom * responsiveScale,
-        [editorZoom, responsiveScale],
-    );
-    const editorStyle = useMemo(
-        () => getEditorCssVars(resolvedSettings, renderScale, editorZoom),
-        [
-            editorZoom,
-            renderScale,
-            resolvedSettings,
-        ],
-    );
+    const renderScale = useMemo(() => editorZoom * responsiveScale, [editorZoom, responsiveScale]);
+    const editorStyle = useMemo(() => getEditorCssVars(resolvedSettings, renderScale, editorZoom), [
+        editorZoom,
+        renderScale,
+        resolvedSettings,
+    ]);
 
     const {
-        resolvedLayout, handleLeftSidebarToggleMouseDown, handleRightSidebarToggleMouseDown,
-    } =
-        useEditorSidebarLayout({children, layout});
+        resolvedLayout,
+        handleLeftSidebarToggleMouseDown,
+        handleRightSidebarToggleMouseDown,
+    } = useEditorSidebarLayout({children, layout});
 
     const extensions = useEditorExtensions({
         resolvedSettings,
@@ -215,68 +185,55 @@ const Editor = ({
         onMusicUnassigned,
         onRequestDeleteScene,
         onRequestConvertScene,
+        commentCallbacksRef,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
-    const initialDoc = useMemo<ScriptDocument>(
-        () => resolvedInitialValue,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [initialContentSignature],
-    );
+    const initialDoc = useInitialEditorContent(initialContentSignature, resolvedInitialValue);
     const {editor} = useScriptEditorInstance({
         surfaceCache,
         signature: surfaceSignature,
         extensions,
         content: initialDoc,
-        characterColorRefs: surfaceRefsRef.current,
+        characterColorRefs: surfaceRefs,
     });
 
-    useEditorCharacterSync(
-        editor,
-        persistentCharacters,
-        resolvedSettings.visual.characterColorSaturation,
-    );
-
-    const resolveLatestValue = useCallback(() => {
-        if (!editor) {
-            return null;
+    useEffect(() => {
+        if (editor && !editor.isDestroyed) {
+            editor.commands.setCommentThreads(commentThreads ?? []);
         }
+    }, [commentThreads, editor]);
 
-        const paginationCommands = editor.commands as {
-            forcePaginationRecalc?: () => boolean,
-        };
+    useEditorCharacterSync(editor, persistentCharacters);
 
-        paginationCommands.forcePaginationRecalc?.();
-
-        return stripScriptSettings(editor.getJSON() as ScriptDocument);
-    }, [editor]);
     const {
         scheduleAutosave,
         handleManualSave,
         setLatestValue,
         syncInitialValue,
-    } = useAutosaveController({
-        onAutoSave,
-        onManualSave,
-        onDirtyChange,
-        autoSaveDelayMs,
-        resolveLatestValue,
-        onValueSynced: (value, revision) => {
-            onValueChange?.(value, {source: 'typing', revision});
-        },
+    } = useEditorAutosave(editor, {
+        ...save,
+        onValueChange,
+        scriptSettings,
     });
-    const rootStyle = useMemo(() => buildEditorRootStyle({
-        persistentCharacters,
-        editorStyle,
-        sidebarWidth,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-    }), [
-        editorStyle,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-        persistentCharacters,
-        sidebarWidth,
-    ]);
+    const rootStyle = useMemo(
+        () => buildEditorRootStyle({
+            persistentCharacters,
+            editorStyle,
+            sidebarWidth,
+            pageSpanPx: resolvedSettings.page.widthPx * editorZoom,
+            isLeftSidebarOpen,
+            isRightSidebarOpen,
+        }),
+        [
+            editorStyle,
+            editorZoom,
+            isLeftSidebarOpen,
+            isRightSidebarOpen,
+            persistentCharacters,
+            resolvedSettings.page.widthPx,
+            sidebarWidth,
+        ],
+    );
 
     usePaginationSettings({
         editor,
@@ -284,16 +241,7 @@ const Editor = ({
         renderScale,
     });
 
-    const isPaginationReady = usePaginationReady(editor);
-    const [hasPresentedCanvas, setHasPresentedCanvas] = useState(isPaginationReady);
-
-    useLayoutEffect(() => {
-        if (isPaginationReady) {
-            setHasPresentedCanvas(true);
-        }
-    }, [isPaginationReady]);
-
-    const isInitialCanvasReady = hasPresentedCanvas || isPaginationReady;
+    const isInitialCanvasReady = useInitialCanvasReady(editor);
 
     const {actCommands} = useEditorLifecycle({
         editor: {
@@ -322,7 +270,6 @@ const Editor = ({
             persistentCharactersRef,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
-            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         },
         requests,
     });
@@ -331,33 +278,36 @@ const Editor = ({
         <EditorSnapshotStoreProvider store={liveStore}>
             <EditorInstanceProvider editor={editor}>
                 <EditorElementSelectionProvider editor={editor} rootRef={rootRef}>
-                    <EditorActCommandsProvider value={actCommands}>
-                        <EditorShell
-                            isCanvasReady={isInitialCanvasReady}
-                            canvas={{
-                                autoFocus,
-                                characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-                                editor,
-                                persistentCharacters,
-                                persistentMusic,
-                                onMusicAssigned,
-                                onOpenMusicManager,
-                                onRequestRemoveMusic,
-                                headerFooter: resolvedSettings.headerFooter,
-                                scriptTitle,
-                                draftDate,
-                                blockShortcuts,
-                                blockNextElements,
-                            }}
-                            layout={resolvedLayout}
-                            rootRef={rootRef}
-                            canvasHostRef={canvasHostRef}
-                            rootStyle={rootStyle}
-                            confirmedCharacterColorsById={confirmedCharacterColorsById}
-                            onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
-                            onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
-                        />
-                    </EditorActCommandsProvider>
+                    <EditorSceneNumberFormatContext.Provider value={sceneNumberFormat}>
+                        <EditorActCommandsProvider value={actCommands}>
+                            <EditorShell
+                                isCanvasReady={isInitialCanvasReady}
+                                canvas={{
+                                    autoFocus,
+                                    editor,
+                                    persistentCharacters,
+                                    persistentMusic,
+                                    onMusicAssigned,
+                                    onOpenMusicManager,
+                                    onRequestRemoveMusic,
+                                    headerFooter: resolvedSettings.headerFooter,
+                                    characterDecoration: resolvedSettings.visual.characterDecoration,
+                                    scriptTitle,
+                                    draftDate,
+                                    blockShortcuts,
+                                    blockNextElements,
+                                    search,
+                                }}
+                                layout={resolvedLayout}
+                                rootRef={rootRef}
+                                canvasHostRef={canvasHostRef}
+                                rootStyle={rootStyle}
+                                confirmedCharacterColorsById={confirmedCharacterColorsById}
+                                onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+                                onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+                            />
+                        </EditorActCommandsProvider>
+                    </EditorSceneNumberFormatContext.Provider>
                 </EditorElementSelectionProvider>
             </EditorInstanceProvider>
         </EditorSnapshotStoreProvider>

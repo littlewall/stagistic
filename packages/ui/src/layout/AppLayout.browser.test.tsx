@@ -1,5 +1,6 @@
 import '../../styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -8,12 +9,9 @@ import {
     expect,
     it,
 } from 'vite-plus/test';
-import {
-    page,
-    userEvent,
-} from 'vite-plus/test/browser';
+import {page, userEvent} from 'vite-plus/test/browser';
 
-import {formControlStyles} from '../molecules/forms/formControlStyles';
+import {formControlStyles} from '../molecules/forms/shared/formControlStyles';
 import {AppLayout} from './AppLayout';
 
 const mountedRoots: Root[] = [];
@@ -39,11 +37,7 @@ const renderLayout = (children: ReactNode = <div>Script canvas</div>) => {
 
     const root = createRoot(host);
 
-    root.render(
-        <AppLayout>
-            {children}
-        </AppLayout>,
-    );
+    root.render(<AppLayout>{children}</AppLayout>);
     mountedRoots.push(root);
 };
 
@@ -55,7 +49,12 @@ afterEach(() => {
 
 describe('AppLayout', () => {
     it('does not show a focus ring after a pointer focuses a text input', async () => {
-        renderLayout(<input className={formControlStyles.input} aria-label="Script title" />);
+        renderLayout(
+            <input
+                className={formControlStyles.input}
+                aria-label="Script title"
+            />,
+        );
 
         await waitFor(() => document.querySelector('[aria-label="Script title"]') !== null);
 
@@ -72,7 +71,12 @@ describe('AppLayout', () => {
     });
 
     it('shows a focus ring when the keyboard focuses a text input', async () => {
-        renderLayout(<input className={formControlStyles.input} aria-label="Script title" />);
+        renderLayout(
+            <input
+                className={formControlStyles.input}
+                aria-label="Script title"
+            />,
+        );
 
         await waitFor(() => document.querySelector('[aria-label="Script title"]') !== null);
         await userEvent.tab();
@@ -88,45 +92,37 @@ describe('AppLayout', () => {
 
         await waitFor(() => document.querySelector('footer') !== null);
 
-        expect(document.body.textContent).toContain('Made with 💛 in Prague');
+        expect(document.body.textContent).toContain('💛 Stagistic Editor • Public preview');
 
-        const feedback = document.querySelector<HTMLAnchorElement>(
-            'a[href="mailto:feedback@stagistic.com"]',
-        );
-        const explainPreview = document.querySelector<HTMLButtonElement>(
-            'button[aria-label="What does public preview mean?"]',
-        );
+        const feedback = document.querySelector<HTMLAnchorElement>('a[href="https://feedback.stagistic.com"]');
+        const explainPreview = document.querySelector<HTMLButtonElement>('button[aria-label="What does public preview mean?"]');
 
-        expect(feedback?.textContent).toBe('feedback@stagistic.com');
+        expect(feedback?.textContent).toBe('Feedback & bug reports');
+        expect(feedback?.target).toBe('_blank');
         expect(explainPreview?.textContent).toBe('what does it mean?');
-        expect(explainPreview?.parentElement?.textContent).toBe(
-            'Public preview (what does it mean?)',
-        );
+        expect(explainPreview?.parentElement?.textContent).toBe('💛 Stagistic Editor • Public preview (what does it mean?)');
 
-        await page.elementLocator(explainPreview!).click();
+        await page.elementLocator(requireValue(explainPreview)).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 
-        const dialog = document.querySelector<HTMLDialogElement>('dialog')!;
+        const dialog = requireValue(document.querySelector<HTMLDialogElement>('dialog'));
         const dialogText = dialog.textContent;
 
         expect(dialogText).toContain('Public preview notice');
         expect(dialogText).toContain('Stagistic Editor is in public preview.');
         expect(dialogText).toContain('Use it at your own risk.');
         expect(dialogText).toContain('stored only in this browser');
-        expect(dialogText).toContain('Sync is not available yet.');
-        expect(dialogText).toContain('Nothing you create is sent from your device.');
-        expect(dialogText).toContain('does not send analytics, telemetry, or other usage data');
-        expect(dialogText).toContain('including theme and layout');
+        expect(dialogText).not.toContain('Sync');
+        expect(dialogText).toContain('Nothing you create is sent from your device to external servers.');
+        expect(dialogText).toContain('including theme, layout or filters');
         expect(dialogText).toContain('Back up your work regularly.');
         expect(dialogText).toContain('may permanently remove it');
 
-        const closeButton = Array
-            .from(dialog.querySelectorAll('button'))
-            .find(button => button.textContent === 'Close');
+        const closeButton = Array.from(dialog.querySelectorAll('button')).find(button => button.textContent === 'Close');
 
         expect(closeButton).toBeDefined();
 
-        await page.elementLocator(closeButton!).click();
+        await page.elementLocator(requireValue(closeButton)).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog') === null);
     });
 });

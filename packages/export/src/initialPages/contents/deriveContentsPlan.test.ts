@@ -1,4 +1,5 @@
 import type {ScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -8,7 +9,7 @@ import {
 import {
     block,
     text,
-} from '../../testUtils';
+} from '../../test/testUtils';
 import {deriveContentsPlan} from './deriveContentsPlan';
 
 const MUSIC_ID_ATTR = 'musicId';
@@ -26,7 +27,10 @@ const musicStart = (
         {
             type: 'musicStart',
             attrs: {
-                [MUSIC_ID_ATTR]: musicId, mode, title, kind,
+                [MUSIC_ID_ATTR]: musicId,
+                mode,
+                title,
+                kind,
             },
         },
     ],
@@ -35,7 +39,9 @@ const musicStart = (
 const cue = (blockId: string, key: string) => ({
     type: 'character',
     attrs: {
-        id: blockId, blockType: 'character', characterRefs: {[key]: null},
+        id: blockId,
+        blockType: 'character',
+        characterRefs: {[key]: null},
     },
     content: [text(key)],
 });
@@ -99,7 +105,7 @@ describe('deriveContentsPlan', () => {
             musicStart('m2', 'music-2', 'Silent Song'),
             block('stageDirection', 'sd2', 'Music out.'),
         ]), [], []);
-        const [first, second] = plan!.acts[0].scenes[0].music;
+        const [first, second] = requireValue(plan).acts[0].scenes[0].music;
 
         expect(first.isInstrumental).toBe(true);
         expect(second.isInstrumental).toBe(true);
@@ -115,10 +121,12 @@ describe('deriveContentsPlan', () => {
             block('stageDirection', 'sd1', 'Music out.'),
         ]), [
             {
-                id: 'c-kylie', key: 'KYLIE', displayName: 'Kylie',
+                id: 'c-kylie',
+                key: 'KYLIE',
+                displayName: 'Kylie',
             },
         ], []);
-        const [entry] = plan!.acts[0].scenes[0].music;
+        const [entry] = requireValue(plan).acts[0].scenes[0].music;
 
         expect(entry.singers).toEqual(['Kylie']);
         expect(entry.isInstrumental).toBe(false);

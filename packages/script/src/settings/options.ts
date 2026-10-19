@@ -1,4 +1,15 @@
-export const BLOCK_SHORTCUT_OPTIONS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'] as const;
+export const BLOCK_SHORTCUT_OPTIONS = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '0',
+] as const;
 
 export type BlockShortcut = (typeof BLOCK_SHORTCUT_OPTIONS)[number];
 
@@ -6,15 +17,27 @@ export const isBlockShortcut = (value: unknown): value is BlockShortcut => {
     return typeof value === 'string' && BLOCK_SHORTCUT_OPTIONS.includes(value as BlockShortcut);
 };
 
-export const BLOCK_TEXT_ALIGN_OPTIONS = ['left', 'center', 'right'] as const;
+export const BLOCK_TEXT_ALIGN_OPTIONS = [
+    'left',
+    'center',
+    'right',
+] as const;
 
 export type BlockTextAlign = (typeof BLOCK_TEXT_ALIGN_OPTIONS)[number];
 
-export const BLOCK_CASING_OPTIONS = ['normal', 'uppercase', 'lowercase'] as const;
+export const BLOCK_CASING_OPTIONS = [
+    'normal',
+    'uppercase',
+    'lowercase',
+] as const;
 
 export type BlockCasing = (typeof BLOCK_CASING_OPTIONS)[number];
 
-export const SCENE_NUMBER_FORMAT_OPTIONS = ['none', 'dot', 'paren'] as const;
+export const SCENE_NUMBER_FORMAT_OPTIONS = [
+    'none',
+    'dot',
+    'paren',
+] as const;
 
 export type SceneNumberFormat = (typeof SCENE_NUMBER_FORMAT_OPTIONS)[number];
 
@@ -37,15 +60,25 @@ export const formatSceneNumber = (sceneNumber: number, format: SceneNumberFormat
     return format === 'paren' ? `${sceneNumber})` : `${sceneNumber}.`;
 };
 
-export const CHARACTER_COLOR_SATURATION_MIN = 30;
-export const CHARACTER_COLOR_SATURATION_MAX = 60;
-export const CHARACTER_COLOR_SATURATION_DEFAULT = CHARACTER_COLOR_SATURATION_MAX;
-export const CHARACTER_COLOR_SATURATION_OPTIONS = [30, 40, 50, 60] as const;
+/** Fixed HSL saturation (percent) applied to every character color. */
+export const CHARACTER_COLOR_SATURATION = 65;
 
-export const clampCharacterColorSaturation = (value: number | null | undefined): number => {
-    if (!Number.isFinite(value)) {
-        return CHARACTER_COLOR_SATURATION_DEFAULT;
-    }
+/**
+ * How character names (cue blocks + stage-direction tags) are decorated on the
+ * script canvas. Each step adds to the previous one: underline → tinted names →
+ * tinted dialogue/lyrics lines spoken by that character. `none` drops all of it.
+ */
+export const CHARACTER_DECORATION_OPTIONS = [
+    'underline',
+    'underline-tint',
+    'underline-tint-lines',
+    'none',
+] as const;
 
-    return Math.max(CHARACTER_COLOR_SATURATION_MIN, Math.min(CHARACTER_COLOR_SATURATION_MAX, Math.round(value as number)));
+export type CharacterDecoration = (typeof CHARACTER_DECORATION_OPTIONS)[number];
+
+export const DEFAULT_CHARACTER_DECORATION: CharacterDecoration = 'underline';
+
+export const isCharacterDecoration = (value: unknown): value is CharacterDecoration => {
+    return typeof value === 'string' && CHARACTER_DECORATION_OPTIONS.includes(value as CharacterDecoration);
 };

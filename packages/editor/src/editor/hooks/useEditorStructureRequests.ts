@@ -1,7 +1,10 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MutableRefObject, useEffect, useMemo, useRef,
+    type MutableRefObject,
+    useEffect,
+    useMemo,
+    useRef,
 } from 'react';
 
 import type {
@@ -62,7 +65,12 @@ export const useEditorStructureRequests = ({
         }
 
         return {
-            editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+            editor,
+            setLatestValue,
+            onValueChangeRef,
+            onIndexChangeRef,
+            scheduleAutosave,
+            revisionRef,
         };
     }, [
         editor,

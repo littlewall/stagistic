@@ -1,0 +1,17 @@
+.form {
+    composes: form from '../modal/dialogForm.module.css';
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.label {
+    composes: label from '../modal/dialogForm.module.css';
+}
+
+.input {
+    composes: input from '../modal/dialogForm.module.css';
+}

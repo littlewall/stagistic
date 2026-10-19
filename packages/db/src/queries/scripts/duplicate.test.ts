@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     and,
     eq,
@@ -107,7 +108,8 @@ const seedSource = async (db: TestDb): Promise<void> => {
             colorHex: '#ff0000',
             createdAt: 1,
             updatedAt: 1,
-        }, {
+        },
+        {
             id: 'group-1',
             scriptId: SOURCE_ID,
             characterKey: 'ALL',
@@ -124,7 +126,8 @@ const seedSource = async (db: TestDb): Promise<void> => {
             characterId: 'char-1',
             characterKey: 'ANNA',
             isConfirmed: true,
-        }, {
+        },
+        {
             blockId: 'block-3',
             characterId: 'group-1',
             characterKey: 'ALL',
@@ -166,7 +169,13 @@ const listTarget = async (db: TestDb) => {
         .where(eq(scriptSettingsInitialPages.scriptId, TARGET_ID));
 
     return {
-        blocks, acts, scenes, characters, memberships, structure, initialPages,
+        blocks,
+        acts,
+        scenes,
+        characters,
+        memberships,
+        structure,
+        initialPages,
     };
 };
 
@@ -185,7 +194,12 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            blocks, acts, scenes, structure, characters, initialPages,
+            blocks,
+            acts,
+            scenes,
+            structure,
+            characters,
+            initialPages,
         } = await listTarget(db);
 
         expect(blocks).toHaveLength(3);
@@ -255,7 +269,9 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            characters, memberships, blocks,
+            characters,
+            memberships,
+            blocks,
         } = await listTarget(db);
         const character = characters.find(row => row.kind === 'character');
         const group = characters.find(row => row.kind === 'group');
@@ -272,8 +288,8 @@ describe('duplicateScriptRows', () => {
             .select()
             .from(scriptBlockCharacterRefs)
             .where(and(
-                eq(scriptBlockCharacterRefs.blockId, dialogueBlock!.id),
-                eq(scriptBlockCharacterRefs.characterId, character!.id),
+                eq(scriptBlockCharacterRefs.blockId, requireValue(dialogueBlock).id),
+                eq(scriptBlockCharacterRefs.characterId, requireValue(character).id),
             ));
 
         expect(characterRefs).toHaveLength(1);
@@ -284,10 +300,10 @@ describe('duplicateScriptRows', () => {
             .select()
             .from(scriptBlockCharacterRefs)
             .where(and(
-                eq(scriptBlockCharacterRefs.blockId, groupBlock!.id),
-                eq(scriptBlockCharacterRefs.characterId, group!.id),
+                eq(scriptBlockCharacterRefs.blockId, requireValue(groupBlock).id),
+                eq(scriptBlockCharacterRefs.characterId, requireValue(group).id),
             ));
-        const inline = JSON.parse(groupBlock!.contentJson!) as Array<{
+        const inline = JSON.parse(requireValue(requireValue(groupBlock).contentJson)) as Array<{
             text?: string,
             marks?: Array<{attrs?: {characterId?: string | null}}>,
         }>;
@@ -311,13 +327,15 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            blocks, characters, memberships,
+            blocks,
+            characters,
+            memberships,
         } = await listTarget(db);
         const blockIds = blocks.map(block => block.id);
         const allRefs = await db.select().from(scriptBlockCharacterRefs);
         const targetRefs = allRefs.filter(ref => blockIds.includes(ref.blockId));
         const groupBlock = blocks.find(block => block.blockType === 'stageDirection');
-        const inline = JSON.parse(groupBlock!.contentJson!) as Array<{
+        const inline = JSON.parse(requireValue(requireValue(groupBlock).contentJson)) as Array<{
             text?: string,
             marks?: Array<{attrs?: {characterId?: string | null}}>,
         }>;

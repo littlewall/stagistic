@@ -1,0 +1,186 @@
+.button {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
+
+    &:disabled,
+    &[aria-disabled = 'true'] {
+        cursor: not-allowed;
+        opacity: .6;
+    }
+
+    &[data-pending] {
+        cursor: not-allowed;
+        opacity: .8;
+    }
+
+    &.md {
+        padding: var(--space-md) var(--space-2xl);
+    }
+
+    &.sm {
+        padding: var(--space-md) var(--space-xl);
+    }
+
+    /* Inline actions in dense panels (comment composer). */
+    &.xs {
+        padding: var(--space-xs) var(--space-lg);
+        font-size: var(--font-size-xs);
+        line-height: var(--line-height-normal);
+    }
+
+    &.icon {
+        flex: 0 0 var(--control-height-md);
+        box-sizing: border-box;
+        aspect-ratio: 1;
+        width: var(--control-height-md);
+        height: var(--control-height-md);
+        padding: 0;
+        border-radius: var(--radius-sm);
+    }
+
+    &.primary {
+        color: var(--color-surface);
+        background: var(--color-text);
+
+        &:hover {
+            background: color-mix(in oklch, var(--color-text) 86%, var(--color-bg));
+        }
+    }
+
+    &.secondary {
+        color: var(--color-text);
+        background: var(--color-surface);
+        border-color: var(--color-border);
+
+        &:hover {
+            background: var(--color-surface-raised);
+        }
+
+        &:disabled,
+        &[aria-disabled = 'true'] {
+            cursor: not-allowed;
+            opacity: .6;
+        }
+    }
+
+    &.toggle {
+        color: var(--color-text);
+        background: var(--color-surface);
+        border-color: var(--color-border);
+
+        &[data-hovered] {
+            background: var(--state-hover);
+        }
+
+        &[aria-pressed = 'true'] {
+            background: var(--state-selected);
+            border-color: transparent;
+        }
+
+        &[data-focus-visible] {
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
+        }
+    }
+
+    &.ghost {
+        color: var(--color-text-muted);
+        background: transparent;
+        border-color: transparent;
+
+        &[data-hovered] {
+            color: var(--color-text);
+            background: var(--state-hover);
+        }
+
+        &[data-pressed] {
+            color: var(--color-text);
+            background: var(--state-hover);
+        }
+
+        &[data-focus-visible] {
+            color: var(--color-text);
+            background: var(--state-hover);
+            border-color: transparent;
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
+        }
+    }
+
+    &.segment {
+        color: var(--color-text-muted);
+        background: transparent;
+        border-color: transparent;
+        border-radius: 0;
+        transition: color var(--duration-normal) var(--ease-standard);
+
+        &[data-hovered] {
+            color: var(--color-text);
+            background: var(--state-hover);
+        }
+
+        &[aria-pressed = 'true'] {
+            color: var(--color-text);
+            background: var(--state-selected);
+        }
+
+        &[aria-pressed = 'true'][data-hovered] {
+            background: var(--state-selected);
+        }
+
+        &[data-focus-visible] {
+            color: var(--color-text);
+            outline: var(--focus-ring);
+            outline-offset: calc(-1 * var(--focus-ring-offset));
+        }
+    }
+
+    &.outline {
+        color: var(--color-text);
+        background: transparent;
+        border-color: var(--color-border);
+
+        &:hover {
+            background: var(--color-surface-raised);
+        }
+    }
+
+    &.danger {
+        color: var(--color-status-danger);
+        background: transparent;
+        border-color: color-mix(in oklch, var(--color-status-danger) 35%, var(--color-border));
+
+        &:hover {
+            background: color-mix(in oklch, var(--color-status-danger) 10%, transparent);
+        }
+    }
+}
+
+.spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentcolor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 600ms linear infinite;
+}
+
+.loadingLabel {
+    opacity: .7;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

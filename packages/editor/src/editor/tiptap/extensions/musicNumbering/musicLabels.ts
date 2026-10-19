@@ -1,5 +1,6 @@
 import {
-    type DerivedMusic, formatMusicNumber,
+    type DerivedMusic,
+    formatMusicNumber,
 } from '@stagistic/script';
 
 export interface MusicLabelMap {
@@ -13,8 +14,8 @@ export interface MusicLabelMap {
 export const buildMusicLabelMap = (music: DerivedMusic[]): MusicLabelMap => {
     const byMusicId = new Map<string, string>();
 
-    music.forEach(music => {
-        byMusicId.set(music.musicId, formatMusicNumber(music));
+    music.forEach(item => {
+        byMusicId.set(item.musicId, formatMusicNumber(item));
     });
 
     return {

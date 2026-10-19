@@ -1,16 +1,10 @@
 import type {ReactiveQuerySource} from '@stagistic/db';
 import {structuralValueEquals} from '@stagistic/shared';
-import {
-    createCollection,
-    type PendingMutation,
-} from '@tanstack/react-db';
+import {createCollection, type PendingMutation} from '@tanstack/react-db';
 
 import {createKeyedTaskQueue} from './createKeyedTaskQueue';
 import {createReactiveSourceStore} from './createReactiveSourceStore';
-import {
-    createReactiveCollectionStatusStore,
-    type ReactiveCollectionStatusStore,
-} from './reactiveCollectionStatus';
+import {createReactiveCollectionStatusStore} from './reactiveCollectionStatus';
 
 export interface ReactiveCollectionMutationHandlers<T extends object> {
     insert?: (value: T) => Promise<void>,
@@ -45,10 +39,7 @@ export const toDomainCollectionValue = <T extends object>(value: T): T => {
     return domainValue;
 };
 
-type ReactivePendingMutation<T extends object, TKey extends string | number> = Omit<
-    PendingMutation<T>,
-    'key'
-> & {key: TKey};
+type ReactivePendingMutation<T extends object, TKey extends string | number> = Omit<PendingMutation<T>, 'key'> & {key: TKey};
 
 const createConfirmation = () => {
     let resolve!: () => void;
@@ -59,7 +50,9 @@ const createConfirmation = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -78,9 +71,7 @@ const isConfirmed = <T extends object, TKey extends string | number>(
         return false;
     }
 
-    const expectedValues = mutation.type === 'insert'
-        ? toDomainCollectionValue(mutation.modified)
-        : mutation.changes;
+    const expectedValues = mutation.type === 'insert' ? toDomainCollectionValue(mutation.modified) : mutation.changes;
 
     return Object.entries(expectedValues).every(([key, value]) => {
         return structuralValueEquals(row[key as keyof T], value);
@@ -101,22 +92,23 @@ const waitForConfirmation = async <T extends object, TKey extends string | numbe
 
     const confirmation = createConfirmation();
     const timeout = setTimeout(() => {
-        confirmation.reject(new Error(
-            `Timed out confirming ${mutation.type} for entity ${String(mutation.key)}`,
-        ));
+        confirmation.reject(new Error(`Timed out confirming ${mutation.type} for entity ${String(mutation.key)}`));
     }, timeoutMs);
     let unsubscribe: (() => void) | undefined;
 
     try {
-        unsubscribe = await source.subscribe(rows => {
-            if (!isConfirmed(rows, mutation, getKey)) {
-                return;
-            }
+        unsubscribe = await source.subscribe(
+            rows => {
+                if (!isConfirmed(rows, mutation, getKey)) {
+                    return;
+                }
 
-            confirmation.resolve();
-        }, error => {
-            confirmation.reject(error);
-        });
+                confirmation.resolve();
+            },
+            error => {
+                confirmation.reject(error);
+            },
+        );
         await confirmation.promise;
     } finally {
         clearTimeout(timeout);
@@ -124,10 +116,7 @@ const waitForConfirmation = async <T extends object, TKey extends string | numbe
     }
 };
 
-export const createReactiveCollection = <
-    T extends object,
-    TKey extends string | number,
->({
+export const createReactiveCollection = <T extends object, TKey extends string | number>({
     id,
     source,
     getKey,
@@ -138,27 +127,14 @@ export const createReactiveCollection = <
     const confirmed = createReactiveSourceStore<T>();
     const enqueueEntityMutation = createKeyedTaskQueue<TKey>();
 
-    const persist = async (
-        mutation: ReactivePendingMutation<T, TKey>,
-        action: ReactiveMutationAction,
-    ) => enqueueEntityMutation(mutation.key, async () => {
+    const persist = async (mutation: ReactivePendingMutation<T, TKey>, action: ReactiveMutationAction) => enqueueEntityMutation(mutation.key, async () => {
         status.startMutation({entityKey: mutation.key, action});
 
         try {
             const commands = {
-                insert: handlers.insert
-                    ? () => handlers.insert?.(mutation.modified)
-                    : undefined,
-                update: handlers.update
-                    ? () => handlers.update?.(
-                        mutation.original as T,
-                        mutation.modified,
-                        mutation.changes,
-                    )
-                    : undefined,
-                delete: handlers.delete
-                    ? () => handlers.delete?.(mutation.original as T)
-                    : undefined,
+                insert: handlers.insert ? () => handlers.insert?.(mutation.modified) : undefined,
+                update: handlers.update ? () => handlers.update?.(mutation.original as T, mutation.modified, mutation.changes) : undefined,
+                delete: handlers.delete ? () => handlers.delete?.(mutation.original as T) : undefined,
             };
             const command = commands[action];
 
@@ -170,9 +146,7 @@ export const createReactiveCollection = <
             await waitForConfirmation(source, mutation, getKey, confirmationTimeoutMs);
             status.finishMutation(mutation.key, action);
         } catch (error) {
-            const normalizedError = error instanceof Error
-                ? error
-                : new Error(String(error));
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
 
             status.failMutation(mutation.key, action, normalizedError);
             throw normalizedError;
@@ -215,31 +189,32 @@ export const createReactiveCollection = <
                     status.setSourceError(null);
                 };
 
-                void source.subscribe(applySnapshot, error => {
-                    status.setSourceError(error);
-                    confirmed.setError(error);
-                }).then(cleanup => {
-                    if (!active) {
-                        cleanup();
+                void source
+                    .subscribe(applySnapshot, error => {
+                        status.setSourceError(error);
+                        confirmed.setError(error);
+                    })
+                    .then(cleanup => {
+                        if (!active) {
+                            cleanup();
 
-                        return;
-                    }
+                            return;
+                        }
 
-                    unsubscribe = cleanup;
-                }).catch(error => {
-                    if (!active) {
-                        return;
-                    }
+                        unsubscribe = cleanup;
+                    })
+                    .catch(error => {
+                        if (!active) {
+                            return;
+                        }
 
-                    const normalizedError = error instanceof Error
-                        ? error
-                        : new Error(String(error));
+                        const normalizedError = error instanceof Error ? error : new Error(String(error));
 
-                    status.setSourceError(normalizedError);
-                    confirmed.setError(normalizedError);
-                    status.setReady();
-                    markReady();
-                });
+                        status.setSourceError(normalizedError);
+                        confirmed.setError(normalizedError);
+                        status.setReady();
+                        markReady();
+                    });
 
                 return () => {
                     active = false;
@@ -248,28 +223,19 @@ export const createReactiveCollection = <
             },
         },
         onInsert: async ({transaction}) => {
-            await Promise.all(transaction.mutations.map(mutation => persist(
-                mutation as ReactivePendingMutation<T, TKey>,
-                'insert',
-            )));
+            await Promise.all(transaction.mutations.map(mutation => persist(mutation as ReactivePendingMutation<T, TKey>, 'insert')));
         },
         onUpdate: async ({transaction}) => {
-            await Promise.all(transaction.mutations.map(mutation => persist(
-                mutation as ReactivePendingMutation<T, TKey>,
-                'update',
-            )));
+            await Promise.all(transaction.mutations.map(mutation => persist(mutation as ReactivePendingMutation<T, TKey>, 'update')));
         },
         onDelete: async ({transaction}) => {
-            await Promise.all(transaction.mutations.map(mutation => persist(
-                mutation as ReactivePendingMutation<T, TKey>,
-                'delete',
-            )));
+            await Promise.all(transaction.mutations.map(mutation => persist(mutation as ReactivePendingMutation<T, TKey>, 'delete')));
         },
     });
 
     return {
-        collection, status, confirmed,
+        collection,
+        status,
+        confirmed,
     };
 };
-
-export type {ReactiveCollectionStatusStore};

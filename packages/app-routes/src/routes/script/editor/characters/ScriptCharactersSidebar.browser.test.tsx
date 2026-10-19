@@ -4,7 +4,9 @@ import {
     type ScriptRepository,
     useScriptCharacterCatalog,
 } from '@stagistic/app-core';
+import type * as MockedModule from '@stagistic/editor';
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -19,11 +21,11 @@ import {userEvent} from 'vite-plus/test/browser';
 import {
     type ScriptCharactersContextValue,
     ScriptCharactersProvider,
-} from '../../ScriptCharactersContext';
+} from '../../workspace/ScriptCharactersContext';
 import {ScriptCharactersSidebar} from './ScriptCharactersSidebar';
 
 vi.mock('@stagistic/editor', async importOriginal => {
-    const original = await importOriginal<typeof import('@stagistic/editor')>();
+    const original = await importOriginal<typeof MockedModule>();
 
     return {
         ...original,
@@ -31,11 +33,11 @@ vi.mock('@stagistic/editor', async importOriginal => {
     };
 });
 
-vi.mock('../../ScriptSessionContext', () => ({
+vi.mock('../../workspace/ScriptSessionContext', () => ({
     useScriptSession: () => ({resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS}),
 }));
 
-vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+vi.mock('../../settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         openAttributeManagerCharacter: () => {},
         openAttributeManagerGroup: () => {},
@@ -178,7 +180,7 @@ describe('ScriptCharactersSidebar', () => {
             'Add character action',
         );
 
-        await userEvent.click(document.querySelector('button[aria-label="Add character"]')!);
+        await userEvent.click(requireValue(document.querySelector('button[aria-label="Add character"]')));
 
         const input = document.querySelector<HTMLInputElement>('#character-name');
 
@@ -257,11 +259,11 @@ describe('ScriptCharactersSidebar', () => {
         );
         const initialColor = getTrigger()?.style.getPropertyValue('--character-color');
 
-        await userEvent.click(getTrigger()!);
-        await userEvent.click(document.querySelector('[aria-label="Select preset color 1"]')!);
-        await userEvent.click(Array.from(document.querySelectorAll('button')).find(button => {
+        await userEvent.click(requireValue(getTrigger()));
+        await userEvent.click(requireValue(document.querySelector('[aria-label="Select preset color 1"]')));
+        await userEvent.click(requireValue(Array.from(document.querySelectorAll('button')).find(button => {
             return button.textContent?.trim() === 'Apply';
-        })!);
+        })));
         await waitFor(
             () => getTrigger()?.style.getPropertyValue('--character-color') !== initialColor,
             'optimistic group color',
@@ -281,7 +283,7 @@ describe('ScriptCharactersSidebar', () => {
         expect(unhandled).toEqual([]);
         expect(getTrigger()?.getAttribute('aria-disabled')).toBeNull();
 
-        await userEvent.click(getTrigger()!);
+        await userEvent.click(requireValue(getTrigger()));
         expect(document.querySelector('[aria-label="Color picker for ENSEMBLE"]')).not.toBeNull();
 
         window.removeEventListener('unhandledrejection', activeUnhandledHandler);

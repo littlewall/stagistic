@@ -7,5 +7,7 @@ export type {
     TitlePageCredit,
     TitlePageDateFormat,
     TitlePageDraftDateMode,
+    TitlePageLogo,
+    TitlePageLogoMimeType,
     TitlePageSettings,
 } from './types';

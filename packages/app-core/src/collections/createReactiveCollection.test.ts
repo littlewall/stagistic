@@ -22,16 +22,16 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
 const createTestCollection = (
-    createHandler: (source: ReturnType<typeof createInMemoryReactiveQuerySource<Row>>) => (
-        original: Row,
-        modified: Row,
-        changes: Partial<Row>,
-    ) => Promise<void>,
+    createHandler: (
+        source: ReturnType<typeof createInMemoryReactiveQuerySource<Row>>,
+    ) => (original: Row, modified: Row, changes: Partial<Row>) => Promise<void>,
     timeout = 2_000,
 ) => {
     const source = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
@@ -111,9 +111,7 @@ describe('reactive collection bridge', () => {
             draft.title = 'Never committed';
         });
 
-        await expect(transaction.isPersisted.promise).rejects.toThrow(
-            'Timed out confirming update for entity row-1',
-        );
+        await expect(transaction.isPersisted.promise).rejects.toThrow('Timed out confirming update for entity row-1');
         expect(result.collection.get('row-1')?.title).toBe('Original');
     });
 
@@ -145,7 +143,7 @@ describe('reactive collection bridge', () => {
                             id: modified.id,
                             settings: {
                                 typography: {},
-                                page: modified.settings.page as object,
+                                page: modified.settings.page,
                                 initialPages: {
                                     castAndPlace: {castOrderBy: 'appearance'},
                                     songs: {},
@@ -201,9 +199,7 @@ describe('reactive collection bridge', () => {
             title: 'Expected persisted value',
         });
 
-        await expect(transaction.isPersisted.promise).rejects.toThrow(
-            'Timed out confirming insert for entity row-1',
-        );
+        await expect(transaction.isPersisted.promise).rejects.toThrow('Timed out confirming insert for entity row-1');
     });
 
     it('rolls back writes when a read-only collection has no persistence handler', async () => {
@@ -220,9 +216,7 @@ describe('reactive collection bridge', () => {
             draft.title = 'Not persisted';
         });
 
-        await expect(transaction.isPersisted.promise).rejects.toThrow(
-            'Missing update handler for collection read-only-',
-        );
+        await expect(transaction.isPersisted.promise).rejects.toThrow('Missing update handler for collection read-only-');
         expect(result.collection.get('row-1')?.title).toBe('Original');
     });
 
@@ -293,9 +287,11 @@ describe('reactive collection bridge', () => {
             getKey: row => row.id,
             handlers: {
                 update: (_original, modified) => {
-                    source.emit(rows.map(row => {
-                        return row.id === modified.id ? modified : row;
-                    }));
+                    source.emit(
+                        rows.map(row => {
+                            return row.id === modified.id ? modified : row;
+                        }),
+                    );
 
                     return Promise.resolve();
                 },

@@ -7,7 +7,7 @@ import {
 import type {
     ExportCharacter,
     ExportCharacterGroup,
-} from '../../scriptData';
+} from '../../model/scriptData';
 
 export interface MusicSingerInput {
     blocks: IndexedScriptBlock[],
@@ -107,7 +107,7 @@ export const collectMusicSingers = (
             && singer.memberIds.length > 0
             && singer.memberIds.every(id => individualIds.has(id))
         ))
-        .sort((left, right) => right.count - left.count
+        .toSorted((left, right) => right.count - left.count
             || left.firstOrder - right.firstOrder
             || left.displayName.localeCompare(right.displayName))
         .map(singer => singer.displayName);

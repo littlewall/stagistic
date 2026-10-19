@@ -1,6 +1,9 @@
+import type * as MockedModule from '@stagistic/app-core';
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    MemoryRouter, Route, Routes,
+    MemoryRouter,
+    Route,
+    Routes,
 } from 'react-router-dom';
 import {
     afterEach,
@@ -13,7 +16,7 @@ import {
 import {ScriptSettingsRoute} from './ScriptSettingsRoute';
 
 vi.mock('@stagistic/app-core', async importOriginal => {
-    const original = await importOriginal<typeof import('@stagistic/app-core')>();
+    const original = await importOriginal<typeof MockedModule>();
 
     return {
         ...original,

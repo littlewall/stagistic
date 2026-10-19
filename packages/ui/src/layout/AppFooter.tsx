@@ -1,32 +1,43 @@
-import {useState} from 'react';
+import {type ReactNode, useState} from 'react';
 
-import {Button} from '../atoms/Button';
-import {ModalDialog} from '../dialogs/ModalDialog';
-import {PublicPreviewNotice} from '../dialogs/PublicPreviewNotice';
+import {Button} from '../atoms/Button/Button';
+import {ModalDialog} from '../dialogs/modal/ModalDialog';
+import {PublicPreviewNotice} from '../dialogs/script/PublicPreviewNotice';
 import styles from './AppFooter.module.css';
 
-export const AppFooter = () => {
+const FEEDBACK_URL = 'https://feedback.stagistic.com';
+
+type AppFooterProps = {
+    /** Centre slot, e.g. the editor's keyboard hints. Empty on other screens. */
+    children?: ReactNode,
+};
+
+export const AppFooter = ({children}: AppFooterProps) => {
     const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
 
     return (
         <>
             <footer className={styles.footer}>
-                <span>© Stagistic Editor • Made with 💛 in Prague</span>
-                <span className={styles.previewStatus}>
-                    Public preview (
-                    <Button
+                <span className={styles.start}>
+                    💛 Stagistic Editor • Public preview (
+                    <button
                         aria-label="What does public preview mean?"
                         className={styles.previewLink}
-                        size="icon"
-                        variant="ghost"
-                        onPress={() => setIsPreviewDialogOpen(true)}
+                        type="button"
+                        onClick={() => setIsPreviewDialogOpen(true)}
                     >
                         what does it mean?
-                    </Button>
+                    </button>
                     )
                 </span>
-                <a className={styles.feedbackLink} href="mailto:feedback@stagistic.com">
-                    feedback@stagistic.com
+                <div className={styles.center}>{children}</div>
+                <a
+                    className={styles.feedbackLink}
+                    href={FEEDBACK_URL}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                >
+                    Feedback & bug reports
                 </a>
             </footer>
             <ModalDialog

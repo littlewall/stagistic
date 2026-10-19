@@ -8,10 +8,14 @@ import {
 import type {VocalRangeNote} from './VocalRangeStaff.types';
 
 const BOUND_LOW: Pitch = {
-    step: 'C', alter: 0, octave: 2,
+    step: 'C',
+    alter: 0,
+    octave: 2,
 };
 const BOUND_HIGH: Pitch = {
-    step: 'C', alter: 0, octave: 6,
+    step: 'C',
+    alter: 0,
+    octave: 6,
 };
 
 interface RangePitches {
@@ -66,7 +70,7 @@ export const constrainStaffPitch = ({
     const candidatePositions = Array.from(
         {length: maxPosition - minPosition + 1},
         (_, index) => minPosition + index,
-    ).sort((left, right) => Math.abs(left - position) - Math.abs(right - position));
+    ).toSorted((left, right) => Math.abs(left - position) - Math.abs(right - position));
 
     for (const candidatePosition of candidatePositions) {
         const candidate = positionToPitch(candidatePosition, clef, alter);

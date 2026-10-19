@@ -8,10 +8,7 @@ import {
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
 import {setBlockTypeWithSelection} from '../commands';
-import {
-    type BlockContext,
-    createBlockContext,
-} from '../context';
+import {type BlockContext, createBlockContext} from '../context';
 import {type HandlerMap} from './types';
 
 /*
@@ -98,10 +95,7 @@ const findPrecedingFlowBlockType = (doc: ProseMirrorNode, blockPos: number): Blo
  * aside back) and Enter (continuing past it) should resume. One resolver for
  * one question, so the two keys can't disagree about the same block.
  */
-export const resolveAsideFlowTarget = (
-    doc: ProseMirrorNode,
-    blockPos: number,
-): BlockNodeType => {
+export const resolveAsideFlowTarget = (doc: ProseMirrorNode, blockPos: number): BlockNodeType => {
     const flowOrigin = findPrecedingFlowBlockType(doc, blockPos);
 
     return flowOrigin === 'lyrics' ? 'lyrics' : 'dialogue';
@@ -113,11 +107,7 @@ export const resolveAsideFlowTarget = (
  * Exported so the status bar can advertise the same destination Tab will
  * actually produce.
  */
-export const resolveAsideToggleTarget = (
-    doc: ProseMirrorNode,
-    blockType: BlockNodeType,
-    blockPos: number,
-): BlockNodeType | null => {
+export const resolveAsideToggleTarget = (doc: ProseMirrorNode, blockType: BlockNodeType, blockPos: number): BlockNodeType | null => {
     if (blockType === 'dialogue' || blockType === 'lyrics') {
         return 'aside';
     }
@@ -129,12 +119,9 @@ export const resolveAsideToggleTarget = (
     return null;
 };
 
-const toggleAsideTarget = (context: BlockContext): BlockNodeType | null => resolveAsideToggleTarget(
-    context.editor.state.doc,
-    context.block.blockType,
-    context.block.pos,
-);
-
+const toggleAsideTarget = (context: BlockContext): BlockNodeType | null => {
+    return resolveAsideToggleTarget(context.editor.state.doc, context.block.blockType, context.block.pos);
+};
 const handleQuickToggle = (context: BlockContext, event: KeyboardEvent) => {
     const nextBlockType = getBlockQuickToggleTarget(context.block.blockType);
 
@@ -189,8 +176,4 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
     event.preventDefault();
 
     return true;
-};
-
-export const tabHandlerMaps = {
-    tabHandlers,
 };

@@ -5,7 +5,9 @@ export type {
     ScriptSpeakingEntityRef,
 } from '../../../types';
 export {
+    deleteScriptCharacterGendersByScriptId,
     getScriptCharacterGenderByKey,
+    insertScriptCharacterGenders,
     listScriptCharacterGenders,
     upsertScriptCharacterGender,
 } from './genders';
@@ -13,6 +15,7 @@ export {
     createScriptCharacterGroup,
     deleteScriptCharacterGroup,
     getScriptCharacterGroupById,
+    insertScriptCharacterGroupMembers,
     listScriptCharacterGroups,
     renameScriptCharacterGroup,
     replaceScriptCharacterGroupMembers,
@@ -28,6 +31,8 @@ export {
 } from './read';
 export {
     deleteScriptCharacter,
+    deleteScriptCharactersByScriptId,
+    insertScriptCharacters,
     touchScriptCharacter,
     updateScriptCharacterBackstory,
     updateScriptCharacterColor,

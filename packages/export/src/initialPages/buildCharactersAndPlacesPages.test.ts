@@ -1,12 +1,13 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
 
-import type {CharactersAndPlacesInitialPagePlan} from '../plan';
-import type {VisualLine} from '../visualLine';
+import type {CharactersAndPlacesInitialPagePlan} from '../model/plan';
+import type {VisualLine} from '../model/visualLine';
 import {buildCharactersAndPlacesPages} from './buildCharactersAndPlacesPages';
 
 const textOf = (line: VisualLine) => line.runs.map(run => run.text).join('');
@@ -15,7 +16,7 @@ const findLine = (lines: VisualLine[], text: string) => {
 
     expect(line).toBeDefined();
 
-    return line!;
+    return requireValue(line);
 };
 
 const centeredX = (text: string, fontSizePx: number, pageWidthPx: number) => (pageWidthPx - text.length * fontSizePx * 0.6) / 2;
@@ -26,9 +27,14 @@ const basePlan = (
     kind: 'characters-and-places',
     characters: [
         {
-            id: 'anna', displayName: 'Anna', outline: 'A brave lead',
-        }, {
-            id: 'bob', displayName: 'Bob', outline: 'A careful friend',
+            id: 'anna',
+            displayName: 'Anna',
+            outline: 'A brave lead',
+        },
+        {
+            id: 'bob',
+            displayName: 'Bob',
+            outline: 'A careful friend',
         },
     ],
     places: [{id: 'attic', name: 'Attic'}, {id: 'stage', name: 'Stage'}],
@@ -74,7 +80,7 @@ describe('buildCharactersAndPlacesPages', () => {
             lineHeight * 3,
         );
         expect(placesHeading.runs[0]?.bold).toBe(true);
-        expect(textOf(page.at(-1)!)).toBe('Stage');
+        expect(textOf(requireValue(page.at(-1)))).toBe('Stage');
     });
 
     it('gives character names extra line height without outlines', () => {

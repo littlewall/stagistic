@@ -23,10 +23,10 @@ import {
     useState,
 } from 'react';
 
-import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attributes/attributeManagerMenu';
-import {useScriptCharacters} from '../../ScriptCharactersContext';
-import {useScriptSession} from '../../ScriptSessionContext';
-import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
+import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attribute-manager/attributeManagerMenu';
+import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
+import {useScriptCharacters} from '../../workspace/ScriptCharactersContext';
+import {useScriptSession} from '../../workspace/ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {AddCharacterModal} from './AddCharacterModal';
 import {CharactersSidebarContextActions} from './CharactersSidebarContextActions';
@@ -61,7 +61,6 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
             confirmedGroupRecords: characters.confirmedGroupRecords,
             characterSnapshot: liveCharacters,
             resolvedScriptSettings,
-            characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         },
         pending: {
             confirmingCharacterKeys: characters.pendingCharacterKeys,
@@ -81,7 +80,6 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
             color: getConfirmedCharacterColor(
                 group.id,
                 normalizedColorHex,
-                resolvedScriptSettings.visual.characterColorSaturation,
             ),
             colorHex: normalizedColorHex ?? null,
             isConfirmed: true,
@@ -91,7 +89,6 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
     }), [
         characters.colorUpdatingGroupIds,
         normalizedConfirmedGroupRecords,
-        resolvedScriptSettings.visual.characterColorSaturation,
     ]);
 
     const handleFocusCharacter = useCallback((characterKey: string) => {
@@ -144,7 +141,6 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                     confirmedCharacters,
                     groups,
                     unconfirmedCharacters,
-                    characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
                     isLoading: characters.isCharactersLoading,
                 }}
                 actions={{

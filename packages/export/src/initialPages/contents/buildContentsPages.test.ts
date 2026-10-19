@@ -1,12 +1,13 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
 
-import type {ContentsInitialPagePlan} from '../../plan';
-import type {VisualLine} from '../../visualLine';
+import type {ContentsInitialPagePlan} from '../../model/plan';
+import type {VisualLine} from '../../model/visualLine';
 import {buildContentsPages} from './buildContentsPages';
 
 const SETTINGS = DEFAULT_EDITOR_SETTINGS;
@@ -21,14 +22,14 @@ const findLine = (page: VisualLine[], value: string) => {
 
     expect(line).toBeDefined();
 
-    return line!;
+    return requireValue(line);
 };
 const runWithText = (page: VisualLine[], value: string) => {
     const run = page.flatMap(line => line.runs).find(item => item.text === value);
 
     expect(run).toBeDefined();
 
-    return run!;
+    return requireValue(run);
 };
 
 const scenesPlan = (
@@ -43,9 +44,16 @@ const scenesPlan = (
             preSceneMusic: [],
             scenes: [
                 {
-                    sceneNumber: 1, title: 'Kylie\'s Bedroom', startBlockId: 's1', music: [],
-                }, {
-                    sceneNumber: 2, title: 'The Diner', startBlockId: 's2', music: [],
+                    sceneNumber: 1,
+                    title: 'Kylie\'s Bedroom',
+                    startBlockId: 's1',
+                    music: [],
+                },
+                {
+                    sceneNumber: 2,
+                    title: 'The Diner',
+                    startBlockId: 's2',
+                    music: [],
                 },
             ],
         },
@@ -109,7 +117,9 @@ describe('buildContentsPages scenes variant', () => {
         const entry = findLine(page, '1. Kylie\'s Bedroom');
 
         expect(entry.runs[0]).toMatchObject({
-            text: '1. Kylie\'s Bedroom', bold: true, x: CONTENT_LEFT,
+            text: '1. Kylie\'s Bedroom',
+            bold: true,
+            x: CONTENT_LEFT,
         });
 
         const number = page
@@ -252,7 +262,9 @@ describe('buildContentsPages musical numbers variant', () => {
                     name: 'ACT TWO',
                     preSceneMusic: [
                         musicEntry({
-                            musicId: 'm0', number: '0)', title: 'Entracte',
+                            musicId: 'm0',
+                            number: '0)',
+                            title: 'Entracte',
                         }),
                     ],
                     scenes: musicPlan().acts[0].scenes,

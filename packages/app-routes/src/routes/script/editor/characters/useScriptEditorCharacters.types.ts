@@ -2,8 +2,8 @@ import {type useScriptCharacterCatalog} from '@stagistic/app-core';
 import {
     type EditorValueChangeMeta,
 } from '@stagistic/editor';
-import {type EditorSettings} from '@stagistic/script';
 import {
+    type EditorSettings,
     type ScriptDocument,
 } from '@stagistic/script';
 
@@ -18,7 +18,6 @@ export interface UseScriptEditorCharactersArgs {
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
-    characterColorSaturation: number,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
 }
 

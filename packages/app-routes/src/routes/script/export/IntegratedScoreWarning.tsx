@@ -2,7 +2,7 @@ import {type BasicExportConfig, deriveIntegratedScoreExportPlan} from '@stagisti
 import {Notice} from '@stagistic/ui';
 import {useState} from 'react';
 
-import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
 import {useExportContext} from './ExportProvider';
 import styles from './IntegratedScoreWarning.module.css';
 

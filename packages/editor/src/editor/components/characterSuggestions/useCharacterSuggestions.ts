@@ -29,7 +29,6 @@ type UseCharacterSuggestionsArgs = {
     canvasRef: RefObject<HTMLElement | null>,
     overlayRef: RefObject<HTMLDivElement | null>,
     persistentCharacters?: readonly PersistentCharacterRef[],
-    characterColorSaturation?: number,
 };
 
 export const useCharacterSuggestions = ({
@@ -37,7 +36,6 @@ export const useCharacterSuggestions = ({
     canvasRef,
     overlayRef,
     persistentCharacters = [],
-    characterColorSaturation,
 }: UseCharacterSuggestionsArgs) => {
     const liveCharacters = useEditorLiveCharacters();
     const suppressedSelectionRef = useRef<SuppressedSelection | null>(null);
@@ -63,7 +61,6 @@ export const useCharacterSuggestions = ({
         canvasRef,
         normalizedPersistentCharacters,
         liveCountsByKey: liveCharacters.countsByKey,
-        characterColorSaturation,
         suppressedSelectionRef,
         suggestionOrderByKeyRef,
         closeOverlay,

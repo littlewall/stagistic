@@ -1,6 +1,6 @@
 import {
     useCallback,
-    useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
@@ -14,11 +14,16 @@ export const useKeyedFieldDrafts = <TValue>(scopeKey: string | null) => {
     const revisionRef = useRef(0);
     const draftsRef = useRef<Record<string, FieldDraft<TValue>>>({});
     const [drafts, setDrafts] = useState<Record<string, FieldDraft<TValue>>>({});
+    const [previousScopeKey, setPreviousScopeKey] = useState(scopeKey);
 
-    useEffect(() => {
-        draftsRef.current = {};
+    if (previousScopeKey !== scopeKey) {
+        setPreviousScopeKey(scopeKey);
         setDrafts({});
-    }, [scopeKey]);
+    }
+
+    useLayoutEffect(() => {
+        draftsRef.current = drafts;
+    }, [drafts]);
 
     const setValue = useCallback((key: string, value: TValue) => {
         const revision = revisionRef.current + 1;

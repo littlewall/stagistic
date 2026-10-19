@@ -13,7 +13,7 @@ import {
 
 type GroupField = 'key' | 'colorHex' | 'memberIds';
 
-const normalizeIds = (ids: string[]) => [...new Set(ids)].sort();
+const normalizeIds = (ids: string[]) => [...new Set(ids)].toSorted();
 
 export const createScriptCharacterGroupsStore = (
     repository: ScriptRepository,

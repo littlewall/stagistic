@@ -13,7 +13,7 @@ import {
 } from '../collections';
 
 const assignmentKey = (assignment: ScriptSceneLocationAssignment) => `${assignment.sceneHeadingBlockId}:${assignment.locationId}`;
-const normalizeIds = (ids: string[]) => [...new Set(ids)].sort();
+const normalizeIds = (ids: string[]) => [...new Set(ids)].toSorted();
 
 export const createScriptPlacesStore = (
     repository: ScriptRepository,

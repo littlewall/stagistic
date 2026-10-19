@@ -1,0 +1,50 @@
+---
+import type {CollectionEntry} from 'astro:content';
+import ArticleFooter from '../components/articles/ArticleFooter.astro';
+import ArticleMeta from '../components/articles/ArticleMeta.astro';
+import styles from './ArticleLayout.module.css';
+import Layout from './Layout.astro';
+
+interface Props {
+    article: CollectionEntry<'articles'>;
+}
+
+const {article} = Astro.props;
+const {
+    title,
+    description,
+    author,
+    publishDate,
+} = article.data;
+const canonical = new URL(`/articles/${article.id}`, Astro.site).href;
+---
+
+<Layout
+    title={`${title} - Stagistic`}
+    description={description}
+    canonical={canonical}
+    ogType="article"
+    article={article.data}
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Articles', url: new URL('/articles', Astro.site).href},
+        {name: title, url: canonical},
+    ]}
+>
+    <Fragment slot="head">
+        <meta name="author" content={author}>
+        <meta property="article:published_time" content={publishDate.toISOString()}>
+    </Fragment>
+    <main class={styles.articlePage}>
+        <article class={styles.article}>
+            <a href="/articles" class={styles.backLink}><span aria-hidden="true">←</span> All articles</a>
+            <header class={styles.articleHeader}>
+                <h1 class={styles.title}>{title}</h1>
+                <p class={styles.description}>{description}</p>
+                <ArticleMeta data={article.data} />
+            </header>
+            <div class={styles.articleBody}><slot /></div>
+            <ArticleFooter />
+        </article>
+    </main>
+</Layout>

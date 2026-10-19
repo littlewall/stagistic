@@ -13,7 +13,6 @@ export const useScriptEditorCharacters = ({
     characterCatalog,
     initialValue,
     resolvedScriptSettings,
-    characterColorSaturation,
     handleAutoSave,
 }: UseScriptEditorCharactersArgs): UseScriptEditorCharactersResult => {
     const {
@@ -40,7 +39,6 @@ export const useScriptEditorCharacters = ({
             confirmedGroupRecords: catalog.groups,
             characterSnapshot: null,
             resolvedScriptSettings,
-            characterColorSaturation,
         },
         pending: {
             confirmingCharacterKeys: catalog.pendingCharacterKeys,

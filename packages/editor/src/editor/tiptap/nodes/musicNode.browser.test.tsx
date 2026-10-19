@@ -1,17 +1,24 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {
-    createRoot, type Root,
+    createRoot,
+    type Root,
 } from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {
-    page, userEvent,
+    page,
+    userEvent,
 } from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
@@ -24,13 +31,19 @@ import {findScriptBlockByIdFromState} from '../scriptCore';
 type MusicTestWindow = Window & {__musicTestEditor?: Editor | null};
 
 const createStageDirection = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'stageDirection', attrs: {id}, content,
+    type: 'stageDirection',
+    attrs: {id},
+    content,
 });
 const createAside = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'aside', attrs: {id}, content,
+    type: 'aside',
+    attrs: {id},
+    content,
 });
 const createNote = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'note', attrs: {id}, content,
+    type: 'note',
+    attrs: {id},
+    content,
 });
 const EditorProbe = () => {
     const editor = useEditorInstance();
@@ -160,6 +173,9 @@ describe('music pill node views', () => {
         renderEditor(createDocumentWithText());
 
         const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'prose-music'});
+
         const boundary = await poll(
             () => document.querySelector('[data-music-rail-boundary="true"]'),
             'music rail boundary',
@@ -172,28 +188,37 @@ describe('music pill node views', () => {
         expect(musicRailPluginKey.getState(editor.state)?.rebuildCount).toBe(before);
     });
 
-    it('adds and focuses an empty music draft from the active block rail trigger', async () => {
+    it('adds music from the left menu without a right menu on an empty stage direction', async () => {
         renderEditor();
 
         await getEditor();
 
-        const boundary = await poll(
-            () => document.querySelector('[data-music-rail-active-trigger="true"][data-block-id="sd-1"]'),
-            'active block music trigger',
+        const trigger = await poll(
+            () => document.querySelector('[data-block-action-trigger="true"][data-block-id="sd-1"]'),
+            'left block actions trigger',
         );
 
-        await page.elementLocator(boundary).click();
+        expect(document.querySelector('[data-music-rail-active-trigger="true"]')).toBeNull();
+
+        await page.elementLocator(trigger).click();
 
         const menu = await poll(
-            () => document.querySelector('[data-music-rail-menu="true"]'),
-            'music boundary menu',
+            () => document.querySelector('[data-block-action-menu="true"]'),
+            'left block actions menu',
         );
-        const addMusic = [...menu.querySelectorAll('button')]
-            .find(button => button.textContent?.includes('Start new music'));
+        const music = await poll(
+            () => [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]')]
+                .find(item => item.textContent?.trim() === 'Music'),
+            'Music submenu',
+        );
 
-        if (!addMusic) {
-            throw new Error('Start new music rail action not found');
-        }
+        await page.elementLocator(music).hover();
+
+        const addMusic = await poll(
+            () => [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]')]
+                .find(item => item.textContent?.includes('Start new music')),
+            'Start new music action',
+        );
 
         await page.elementLocator(addMusic).click();
 
@@ -217,27 +242,9 @@ describe('music pill node views', () => {
 
         renderEditor(createDocument(), {onRequestCreateMusic});
 
-        await getEditor();
+        const editor = await getEditor();
 
-        const boundary = await poll(
-            () => document.querySelector('[data-music-rail-active-trigger="true"][data-block-id="sd-1"]'),
-            'active block music trigger',
-        );
-
-        await page.elementLocator(boundary).click();
-
-        const menu = await poll(
-            () => document.querySelector('[data-music-rail-menu="true"]'),
-            'music boundary menu',
-        );
-        const addMusic = [...menu.querySelectorAll('button')]
-            .find(button => button.textContent?.includes('Start new music'));
-
-        if (!addMusic) {
-            throw new Error('Start new music rail action not found');
-        }
-
-        await page.elementLocator(addMusic).click();
+        editor.commands.insertMusicDraft('sd-1');
 
         const title = await poll(
             () => document.querySelector<HTMLElement>('[data-music-draft="true"]'),
@@ -473,7 +480,7 @@ describe('music pill node views', () => {
             .toBeCloseTo(plainAside.getBoundingClientRect().height, 1);
         expect(getComputedStyle(asideWithMusicOut, '::after').content).toBe('none');
         expect(musicOutWrapper).not.toBeNull();
-        expect(getComputedStyle(musicOutWrapper!, '::after').content).toBe('")"');
+        expect(getComputedStyle(requireValue(musicOutWrapper), '::after').content).toBe('")"');
     });
 
     it('keeps a note closing marker on its text line when the music ends there', async () => {
@@ -511,7 +518,7 @@ describe('music pill node views', () => {
             .toBeCloseTo(plainNote.getBoundingClientRect().height, 1);
         expect(getComputedStyle(noteWithMusicOut, '::after').content).toBe('none');
         expect(musicOutWrapper).not.toBeNull();
-        expect(getComputedStyle(musicOutWrapper!, '::after').content).toBe('"]]"');
+        expect(getComputedStyle(requireValue(musicOutWrapper), '::after').content).toBe('"]]"');
     });
 
     const musicStartAttrs = (editor: Editor): Record<string, unknown> | undefined => {
@@ -768,12 +775,14 @@ describe('music pill node views', () => {
             () => {
                 const candidate = document.querySelector('[data-music-rail-menu="true"]');
 
-                return candidate?.textContent?.includes('Start new music') ? candidate : null;
+                return candidate?.textContent?.includes('Place music end here') ? candidate : null;
             },
             'active block music menu',
         );
 
-        expect(menu.textContent).toContain('Start new music');
+        expect(menu.querySelectorAll('button')).toHaveLength(1);
+        expect(menu.textContent).toContain('Place music end here');
+        expect(menu.textContent).not.toContain('Start new music');
         expect(marker.dataset.musicRailMenuOpen).toBeUndefined();
         expect(findTrigger()?.dataset.musicRailMenuOpen).toBe('true');
     });
@@ -786,10 +795,7 @@ describe('music pill node views', () => {
         const editor = await getEditor();
 
         editor.commands.insertMusicStart('sd-1', longTitle, 'open', {musicId: 'long-out'});
-        /*
-         * An explicit end elsewhere is what turns the middle block's command
-         * into a "Set music end" command that names a music.
-         */
+        // A placed end later in the document can move to the middle block.
         editor.commands.insertMusicOut('sd-3');
         editor.commands.focus();
         editor.commands.setTextSelection(findScriptBlockByIdFromState(editor.state, 'sd-2')?.from ?? 1);
@@ -803,12 +809,12 @@ describe('music pill node views', () => {
 
         const setOut = await poll(
             () => [...document.querySelectorAll<HTMLElement>('[data-music-rail-menu="true"] button')]
-                .find(button => button.textContent?.includes('Set music end')),
+                .find(button => button.textContent?.includes('Place music end here')),
             'set music end action',
         );
         const detail = setOut.querySelector<HTMLElement>('span + span');
 
-        expect(setOut.firstElementChild?.textContent).toBe('Set music end (0)');
+        expect(setOut.firstElementChild?.textContent).toBe('Place music end here');
 
         // Title alone: the number is already in the label above it.
         expect(detail?.textContent).toBe(longTitle);
@@ -818,6 +824,18 @@ describe('music pill node views', () => {
 
         expect(detail?.getBoundingClientRect().top).toBeGreaterThanOrEqual(labelBottom);
         expect(detail?.scrollWidth).toBeLessThanOrEqual(detail?.clientWidth ?? 0);
+
+        expect(document.querySelectorAll('[data-music-rail-menu="true"] button')).toHaveLength(1);
+
+        await page.elementLocator(setOut).click();
+
+        await poll(
+            () => document.querySelector('[data-id="sd-2"] [data-music-pill="out"]'),
+            'music end placed at the active block',
+        );
+
+        expect(document.querySelector('[data-id="sd-3"] [data-music-pill="out"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-menu="true"]')).toBeNull();
     });
 
     it('marks the active block trigger while its own menu is open', async () => {
@@ -825,6 +843,7 @@ describe('music pill node views', () => {
 
         const editor = await getEditor();
 
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'active-range'});
         editor.commands.focus();
         editor.commands.setTextSelection(findScriptBlockByIdFromState(editor.state, 'sd-2')?.from ?? 1);
 
@@ -1055,7 +1074,7 @@ describe('music pill node views', () => {
         const content = editor.view.dom.parentElement;
 
         expect(content).not.toBeNull();
-        expect(getComputedStyle(content!, '::after').content).toBe('none');
+        expect(getComputedStyle(requireValue(content), '::after').content).toBe('none');
         expect(document.querySelector('[data-music-rail-range]')).toBeNull();
     });
 
@@ -1101,11 +1120,19 @@ describe('music pill node views', () => {
         const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([target]);
 
         source.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 10,
+            clientY: 10,
         }));
         await new Promise(resolve => window.setTimeout(resolve, 400));
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 30,
         }));
 
         const preview = document.querySelector<HTMLElement>(
@@ -1115,7 +1142,11 @@ describe('music pill node views', () => {
         expect(preview).not.toBeNull();
 
         source.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 30,
+            clientY: 30,
         }));
 
         capture.mockRestore();
@@ -1165,13 +1196,21 @@ describe('music pill node views', () => {
         const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([target]);
 
         source.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 10,
+            clientY: 10,
         }));
 
         expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
 
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 30,
         }));
 
         expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
@@ -1179,7 +1218,11 @@ describe('music pill node views', () => {
         await new Promise(resolve => window.setTimeout(resolve, 400));
 
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 30,
         }));
 
         const dropTargets = Array.from(
@@ -1292,11 +1335,19 @@ describe('music pill node views', () => {
         const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([canvas]);
 
         source.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 40,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 10,
+            clientY: 40,
         }));
         await new Promise(resolve => window.setTimeout(resolve, 400));
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 260,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 260,
         }));
 
         expect(document.querySelector(
@@ -1304,7 +1355,8 @@ describe('music pill node views', () => {
         )).not.toBeNull();
 
         source.dispatchEvent(new PointerEvent('pointercancel', {
-            bubbles: true, pointerId: 1,
+            bubbles: true,
+            pointerId: 1,
         }));
 
         rectSpies.forEach(spy => spy.mockRestore());

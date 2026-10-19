@@ -1,0 +1,19 @@
+{
+    "name": "@stagistic/vite-config",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./browser-test": "./src/browserTest.ts"
+    },
+    "dependencies": {
+        "@vitejs/plugin-react": "^6.0.3"
+    },
+    "peerDependencies": {
+        "vite-plus": "^0.3.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.2"
+    }
+}

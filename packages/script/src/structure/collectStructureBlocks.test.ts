@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ScriptNode} from '../document';
@@ -26,13 +28,25 @@ describe('collectStructureBlocks', () => {
 
         expect(entries).toEqual([
             {
-                id: 'a1', blockType: 'act', text: 'ACT ONE', index: 0, sceneIndex: -1,
+                id: 'a1',
+                blockType: 'act',
+                text: 'ACT ONE',
+                index: 0,
+                sceneIndex: -1,
             },
             {
-                id: 's1', blockType: 'scene', text: 'Scene 1', index: 1, sceneIndex: 0,
+                id: 's1',
+                blockType: 'scene',
+                text: 'Scene 1',
+                index: 1,
+                sceneIndex: 0,
             },
             {
-                id: 'd1', blockType: 'dialogue', text: 'Hello', index: 2, sceneIndex: 0,
+                id: 'd1',
+                blockType: 'dialogue',
+                text: 'Hello',
+                index: 2,
+                sceneIndex: 0,
             },
         ]);
     });

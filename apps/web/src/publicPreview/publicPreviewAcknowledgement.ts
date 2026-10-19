@@ -1,6 +1,5 @@
-export const PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY
-    = 'stagistic.web.publicPreviewAcknowledgement';
-export const CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION = '1';
+const PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY = 'stagistic.web.publicPreviewAcknowledgement';
+const CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION = '1';
 
 const getBrowserStorage = () => {
     try {
@@ -10,33 +9,25 @@ const getBrowserStorage = () => {
     }
 };
 
-export const hasCurrentPublicPreviewAcknowledgement = (
-    storage: Pick<Storage, 'getItem'> | null = getBrowserStorage(),
-) => {
+export const hasCurrentPublicPreviewAcknowledgement = (storage: Pick<Storage, 'getItem'> | null = getBrowserStorage()) => {
     if (!storage) {
         return false;
     }
 
     try {
-        return storage.getItem(PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY)
-            === CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION;
+        return storage.getItem(PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY) === CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION;
     } catch {
         return false;
     }
 };
 
-export const storeCurrentPublicPreviewAcknowledgement = (
-    storage: Pick<Storage, 'setItem'> | null = getBrowserStorage(),
-) => {
+export const storeCurrentPublicPreviewAcknowledgement = (storage: Pick<Storage, 'setItem'> | null = getBrowserStorage()) => {
     if (!storage) {
         return false;
     }
 
     try {
-        storage.setItem(
-            PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY,
-            CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION,
-        );
+        storage.setItem(PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY, CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION);
 
         return true;
     } catch {

@@ -33,7 +33,9 @@ const scripts = [
 describe('buildHomeDashboardModel', () => {
     it('returns one newest-first script list', () => {
         const model = buildHomeDashboardModel({
-            scripts, query: '', sort: 'newest',
+            scripts,
+            query: '',
+            sort: 'newest',
         });
 
         expect(model.scripts.map(item => item.id)).toEqual([
@@ -45,10 +47,14 @@ describe('buildHomeDashboardModel', () => {
 
     it('searches title and subtitle case-insensitively', () => {
         const byTitle = buildHomeDashboardModel({
-            scripts, query: 'alpha', sort: 'newest',
+            scripts,
+            query: 'alpha',
+            sort: 'newest',
         });
         const bySubtitle = buildHomeDashboardModel({
-            scripts, query: 'MOON', sort: 'newest',
+            scripts,
+            query: 'MOON',
+            sort: 'newest',
         });
 
         expect(byTitle.scripts.map(item => item.id)).toEqual(['month']);
@@ -57,7 +63,9 @@ describe('buildHomeDashboardModel', () => {
 
     it('sorts scripts alphabetically', () => {
         const model = buildHomeDashboardModel({
-            scripts, query: '', sort: 'title',
+            scripts,
+            query: '',
+            sort: 'title',
         });
 
         expect(model.scripts.map(item => item.title)).toEqual([

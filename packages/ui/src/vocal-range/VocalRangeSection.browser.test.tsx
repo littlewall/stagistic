@@ -138,7 +138,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: null, vocalRangeHigh: null,
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -160,7 +163,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: 'C3',
+                    vocalRangeHigh: 'A4',
                 }}
                 onSetCharacterVoiceType={onSetCharacterVoiceType}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
@@ -204,7 +210,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: null, vocalRangeHigh: null,
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
                 }}
                 onSetCharacterVoiceType={onSetCharacterVoiceType}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
@@ -224,7 +233,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: null, vocalRangeHigh: null,
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -251,7 +263,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: 'tenor', vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+                    id: 'char-1',
+                    voiceType: 'tenor',
+                    vocalRangeLow: 'C3',
+                    vocalRangeHigh: 'A4',
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -271,7 +286,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: 'C3',
+                    vocalRangeHigh: 'A4',
                 }}
             />,
         );
@@ -284,7 +302,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: null, vocalRangeHigh: null,
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -302,7 +323,10 @@ describe('VocalRangeSection', () => {
         const host = await render(
             <VocalRangeSection
                 character={{
-                    id: 'char-1', voiceType: null, vocalRangeLow: null, vocalRangeHigh: null,
+                    id: 'char-1',
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -328,7 +352,10 @@ describe('VocalRangeSection', () => {
         root.render(
             <VocalRangeSection
                 character={{
-                    id: 'char-a', voiceType: null, vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+                    id: 'char-a',
+                    voiceType: null,
+                    vocalRangeLow: 'C3',
+                    vocalRangeHigh: 'A4',
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -338,14 +365,20 @@ describe('VocalRangeSection', () => {
 
         vi.spyOn(oldNote, 'setPointerCapture').mockImplementation(() => undefined);
         oldNote.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientY: 0,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientY: 0,
         }));
         await waitForElement(host, '[data-dragging]');
 
         root.render(
             <VocalRangeSection
                 character={{
-                    id: 'char-b', voiceType: null, vocalRangeLow: 'D3', vocalRangeHigh: 'B4',
+                    id: 'char-b',
+                    voiceType: null,
+                    vocalRangeLow: 'D3',
+                    vocalRangeHigh: 'B4',
                 }}
                 onSetCharacterVocalRange={onSetCharacterVocalRange}
             />,
@@ -353,7 +386,10 @@ describe('VocalRangeSection', () => {
         await waitForElement(host, '[aria-label="Edit low note D3"]');
 
         oldNote.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId: 1, button: 0, clientY: 0,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientY: 0,
         }));
 
         expect(host.querySelector('[data-dragging]')).toBeNull();

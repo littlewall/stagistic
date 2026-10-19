@@ -30,11 +30,15 @@ type SceneConvertTestWindow = Window & {
 };
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'scene',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const dialogue = (id: string, text: string): ScriptNode => ({
-    type: 'dialogue', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'dialogue',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const EditorProbe = () => {

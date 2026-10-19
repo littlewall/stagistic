@@ -1,0 +1,218 @@
+.panel {
+    composes: workspace from './attributeManagerWorkspace.module.css';
+    height: 100%;
+}
+
+.browser {
+    composes: browser from './attributeManagerWorkspace.module.css';
+}
+
+.searchRow {
+    composes: search-row from './attributeManagerWorkspace.module.css';
+}
+
+.searchField {
+    composes: search-field from './attributeManagerWorkspace.module.css';
+}
+
+.searchIcon {
+    composes: search-icon from './attributeManagerWorkspace.module.css';
+}
+
+.addButton {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: var(--control-trigger-height);
+    height: var(--control-trigger-height);
+    padding: 0;
+
+    &:hover:not(:disabled) {
+        color: var(--color-text);
+        background: var(--menu-item-hover-bg);
+    }
+}
+
+.searchRow .addButton {
+    color: var(--color-text);
+}
+
+.actionIcon {
+    composes: action-icon from './attributeManagerWorkspace.module.css';
+    color: currentcolor;
+}
+
+.browserList {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--space-xl) var(--space-md);
+}
+
+.browserListWithToolbar {
+    padding-top: 0;
+}
+
+.itemGroup + .itemGroup {
+    margin-top: var(--space-xl);
+}
+
+.groupTitle {
+    overflow: hidden;
+    margin: 0 0 var(--space-sm);
+    padding: 0 var(--space-lg);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-sm);
+    white-space: nowrap;
+}
+
+.listItem {
+    composes: list-item from './attributeManagerWorkspace.module.css';
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.listItemWithoutNumber {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.itemNumber {
+    flex: 0 0 auto;
+    min-width: 2ch;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: right;
+}
+
+.itemIcon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+    color: currentcolor;
+}
+
+.itemIcon svg {
+    width: 13px;
+    height: 13px;
+}
+
+.itemTitle {
+    overflow: hidden;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.itemSubtitle {
+    flex: 0 0 auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-sm);
+}
+
+.emptyList {
+    composes: empty-list from './attributeManagerWorkspace.module.css';
+}
+
+.detail {
+    composes: detail from './attributeManagerWorkspace.module.css';
+}
+
+.detailHeader {
+    composes: detail-header from './attributeManagerWorkspace.module.css';
+    gap: var(--space-xl);
+}
+
+.detailIdentity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+.detailType {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.detailTitle {
+    composes: detail-title from './attributeManagerWorkspace.module.css';
+}
+
+.detailTitleWrapped {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.detailSubtitle {
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    white-space: normal;
+}
+
+.detailMetadata {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: var(--space-xs);
+    max-width: 45%;
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.detailHeaderAside {
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: flex-end;
+    max-width: 55%;
+}
+
+.detailMetadataRow {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-md);
+
+    & dt {
+        color: var(--color-text-subtle, var(--color-text-muted));
+    }
+
+    & dd {
+        overflow: hidden;
+        margin: 0;
+        color: var(--color-text);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.detailBody {
+    composes: detail-body from './attributeManagerWorkspace.module.css';
+}
+
+.emptyDetail {
+    composes: empty-detail from './attributeManagerWorkspace.module.css';
+}
+
+.selected {
+    composes: selected from './attributeManagerWorkspace.module.css';
+}

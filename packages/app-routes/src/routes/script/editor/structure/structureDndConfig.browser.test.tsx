@@ -1,5 +1,6 @@
 import {DragDropProvider} from '@dnd-kit/react';
 import {useSortable} from '@dnd-kit/react/sortable';
+import {requireValue} from '@stagistic/shared';
 import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -23,9 +24,14 @@ const groups: StructureGroup[] = [
         actName: null,
         scenes: [
             {
-                blockId: 'scene-1', title: 'First scene', sceneNumber: 1,
-            }, {
-                blockId: 'scene-2', title: 'Second scene', sceneNumber: 2,
+                blockId: 'scene-1',
+                title: 'First scene',
+                sceneNumber: 1,
+            },
+            {
+                blockId: 'scene-2',
+                title: 'Second scene',
+                sceneNumber: 2,
             },
         ],
     },
@@ -118,7 +124,7 @@ describe('structure keyboard drag and drop', () => {
             'scene drag handle',
         );
 
-        const handle = document.querySelector<HTMLButtonElement>('button[aria-label="Drag scene-2"]')!;
+        const handle = requireValue(document.querySelector<HTMLButtonElement>('button[aria-label="Drag scene-2"]'));
 
         handle.focus();
         await userEvent.keyboard('{Space}{ArrowUp}{Space}');

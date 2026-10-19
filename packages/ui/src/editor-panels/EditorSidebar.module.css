@@ -249,37 +249,7 @@
     }
 }
 
-.editIconButton {
-    cursor: pointer;
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: var(--icon-size-lg);
-    height: var(--icon-size-lg);
-    margin-left: auto;
-    color: var(--color-text-muted);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-xs);
-    transition: color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
-
-    &:hover {
-        color: var(--color-text);
-        background: color-mix(in oklch, var(--color-text) 8%, transparent);
-    }
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: 1px;
-    }
-
-    &[aria-disabled = 'true'] {
-        cursor: default;
-        opacity: .65;
-    }
-}
-
+.editIconButton,
 .focusIconButton {
     cursor: pointer;
     display: inline-flex;
@@ -304,6 +274,11 @@
         outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
         outline-offset: 1px;
     }
+}
+
+.editIconButton[aria-disabled = 'true'] {
+    cursor: default;
+    opacity: .65;
 }
 
 .iconGlyph {

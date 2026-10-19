@@ -1,0 +1,199 @@
+.panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+.workspaceNavigation {
+    flex: 0 0 auto;
+    padding: var(--space-lg) var(--space-2xl) 0;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+}
+.workspaceTabs,
+.detailTabs {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: flex-end;
+}
+.workspaceTab,
+.detailTab {
+    cursor: pointer;
+    position: relative;
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
+    transition: color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        right: var(--space-lg);
+        bottom: calc(var(--space-px) * -1);
+        left: var(--space-lg);
+        height: 2px;
+        background: transparent;
+    }
+
+    &.active {
+        color: var(--color-text);
+
+        &::after {
+            background: var(--color-text);
+        }
+    }
+}
+.workspace {
+    composes: workspace from './attributeManagerWorkspace.module.css';
+}
+.browser {
+    composes: browser from './attributeManagerWorkspace.module.css';
+}
+.searchRow {
+    composes: search-row from './attributeManagerWorkspace.module.css';
+}
+.detailIdentity {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    min-width: 0;
+}
+.addButton {
+    composes: icon-action from './attributeManagerWorkspace.module.css';
+}
+
+.actionIcon {
+    composes: action-icon from './attributeManagerWorkspace.module.css';
+}
+
+.addButton:hover:not(:disabled) {
+    color: var(--color-text);
+    background: var(--menu-item-hover-bg);
+}
+
+.addButton:disabled {
+    opacity: .5;
+}
+.searchField {
+    composes: search-field from './attributeManagerWorkspace.module.css';
+}
+
+.searchIcon {
+    composes: search-icon from './attributeManagerWorkspace.module.css';
+}
+
+.browserList {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0 var(--space-md) var(--space-xl);
+}
+
+.listItem {
+    composes: list-item from './attributeManagerWorkspace.module.css';
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.characterColor {
+    flex: 0 0 auto;
+    width: .625rem;
+    height: .625rem;
+    background: var(--color-border-strong);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+.characterName {
+    overflow: hidden;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.emptyList {
+    composes: empty-list from './attributeManagerWorkspace.module.css';
+}
+
+.detail {
+    composes: detail from './attributeManagerWorkspace.module.css';
+}
+
+.detailHeader {
+    composes: detail-header from './attributeManagerWorkspace.module.css';
+}
+
+.detailColorControl,
+.detailColorSwatch {
+    width: 12px;
+    height: 12px;
+}
+
+.deleteButton {
+    composes: icon-action delete-button from './attributeManagerWorkspace.module.css';
+}
+
+.detailTitle {
+    composes: detail-title from './attributeManagerWorkspace.module.css';
+}
+
+.detailNavigation {
+    flex: 0 0 auto;
+    padding: 0 var(--space-2xl);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.detailBody {
+    composes: detail-body from './attributeManagerWorkspace.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+}
+
+.nameForm {
+    composes: name-form from './attributeManagerWorkspace.module.css';
+}
+
+.error {
+    composes: error from './attributeManagerWorkspace.module.css';
+}
+
+.outlineSection,
+.membersSection {
+    max-width: 65ch;
+}
+
+.emptyDetail {
+    composes: empty-detail from './attributeManagerWorkspace.module.css';
+}
+
+@media (max-width: 45em) {
+    .workspaceNavigation {
+        overflow-x: auto;
+    }
+
+    .workspaceTabs {
+        white-space: nowrap;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspaceTab {
+        transition-duration: 0ms;
+    }
+}
+
+.selected {
+    composes: selected from './attributeManagerWorkspace.module.css';
+}

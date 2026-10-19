@@ -1,0 +1,100 @@
+.panel {
+    composes: workspace from './attributeManagerWorkspace.module.css';
+    height: 100%;
+}
+
+.browser {
+    composes: browser from './attributeManagerWorkspace.module.css';
+}
+
+.searchRow {
+    composes: search-row from './attributeManagerWorkspace.module.css';
+}
+
+.searchField {
+    composes: search-field from './attributeManagerWorkspace.module.css';
+}
+
+.searchIcon {
+    composes: search-icon from './attributeManagerWorkspace.module.css';
+}
+
+.addButton {
+    composes: icon-action from './attributeManagerWorkspace.module.css';
+    color: var(--color-text);
+}
+
+.addButton:hover:not(:disabled) {
+    color: var(--color-text);
+    background: var(--menu-item-hover-bg);
+}
+
+.actionIcon {
+    composes: action-icon from './attributeManagerWorkspace.module.css';
+    color: currentcolor;
+}
+
+.browserList {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0 var(--space-md) var(--space-xl);
+}
+
+.listItem {
+    composes: list-item from './attributeManagerWorkspace.module.css';
+    display: block;
+}
+
+.placeName {
+    overflow: hidden;
+    display: block;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.emptyList {
+    composes: empty-list from './attributeManagerWorkspace.module.css';
+}
+
+.detail {
+    composes: detail from './attributeManagerWorkspace.module.css';
+}
+
+.detailHeader {
+    composes: detail-header from './attributeManagerWorkspace.module.css';
+}
+
+.detailIdentity {
+    min-width: 0;
+}
+
+.detailTitle {
+    composes: detail-title from './attributeManagerWorkspace.module.css';
+}
+
+.deleteButton {
+    composes: icon-action delete-button from './attributeManagerWorkspace.module.css';
+}
+
+.detailBody {
+    composes: detail-body from './attributeManagerWorkspace.module.css';
+}
+
+.nameForm {
+    composes: name-form from './attributeManagerWorkspace.module.css';
+}
+
+.error {
+    composes: error from './attributeManagerWorkspace.module.css';
+}
+
+.emptyDetail {
+    composes: empty-detail from './attributeManagerWorkspace.module.css';
+}
+
+.selected {
+    composes: selected from './attributeManagerWorkspace.module.css';
+}

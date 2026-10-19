@@ -1,23 +1,20 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
-import {
-    type Selection,
-    TextSelection,
-    type Transaction,
-} from '@tiptap/pm/state';
+import {type Transaction} from '@tiptap/pm/state';
 import {type Editor as TiptapEditor} from '@tiptap/react';
-import {
-    useEffect,
-    useRef,
-} from 'react';
+import {useEffect, useRef} from 'react';
 
 import type {EditorActCommands} from '../actCommands/context';
 import {useBuildActCommands} from '../actCommands/useBuildActCommands';
 import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {incrementFullDocJsonSerializeCount, incrementFullIndexBuildCount} from '../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
+import {
+    forcePaginationRecalc,
+    getWindowTarget,
+    resolveInitialSelection,
+} from './editorLifecycleHelpers';
 import {
     sanitizeScriptBlocks,
     type UseEditorLifecycleArgs,
@@ -28,48 +25,6 @@ import {useLatestRef} from './useLatestRef';
 
 export type {UseEditorLifecycleArgs};
 
-const getWindowTarget = () => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    return window;
-};
-
-const forcePaginationRecalc = (editor: TiptapEditor) => {
-    type PaginationCommands = {forcePaginationRecalc?: () => boolean};
-    (editor.commands as PaginationCommands).forcePaginationRecalc?.();
-};
-
-const resolveInitialSelection = (editor: TiptapEditor): Selection => {
-    let firstScenePosition: number | null = null;
-
-    editor.state.doc.descendants((node, pos) => {
-        if (firstScenePosition !== null) {
-            return false;
-        }
-
-        if (node.type.name !== 'scene') {
-            return true;
-        }
-
-        firstScenePosition = pos + 1;
-
-        return false;
-    });
-
-    if (firstScenePosition === null) {
-        return TextSelection.atStart(editor.state.doc);
-    }
-
-    return TextSelection.near(editor.state.doc.resolve(firstScenePosition), 1);
-};
-
-/*
- * Tracks which initial content each editor instance already applied. A cached
- * surface re-attached on a later mount must NOT re-apply the load-time initial
- * value — it would wipe newer live content and re-pay setContent + pagination.
- */
 const appliedInitialByEditor = new WeakMap<TiptapEditor, string>();
 
 export const useEditorLifecycle = ({
@@ -104,16 +59,17 @@ export const useEditorLifecycle = ({
         syncRuntimeSnapshotFromEditor,
         emitIndexFromEditor,
         emitBlockUiEventsFromEditor,
-    } = useEditorLifecycleSync({
-        liveStore,
-        setLatestValue,
-        characters,
-        lastEmittedActiveBlockIdRef,
-        onValueChangeRef,
-        onIndexChangeRef,
-        onActiveBlockChangeRef,
-        onBlockUiEventRef,
-    });
+    } =
+        useEditorLifecycleSync({
+            liveStore,
+            setLatestValue,
+            characters,
+            lastEmittedActiveBlockIdRef,
+            onValueChangeRef,
+            onIndexChangeRef,
+            onActiveBlockChangeRef,
+            onBlockUiEventRef,
+        });
 
     const structureOnIndexChangeRef = useLatestRef((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => {
         if (!meta) {
@@ -235,7 +191,8 @@ export const useEditorLifecycle = ({
 
         if (!isRestoredSurface) {
             isApplyingInitialRef.current = true;
-            instance.chain()
+            instance
+                .chain()
                 .setContent(initialValue, {emitUpdate: false})
                 .command(({tr}) => {
                     tr.setMeta('addToHistory', false);
@@ -263,14 +220,9 @@ export const useEditorLifecycle = ({
 
         if (!isRestoredSurface) {
             instance.view.dispatch(
-                instance.state.tr
-                    .setSelection(resolveInitialSelection(instance))
-                    .setMeta('preventUpdate', true)
-                    .setMeta('addToHistory', false),
+                instance.state.tr.setSelection(resolveInitialSelection(instance)).setMeta('preventUpdate', true).setMeta('addToHistory', false),
             );
         }
-
-        incrementFullDocJsonSerializeCount();
 
         /*
          * A restored surface keeps its live content (potentially newer than the
@@ -286,8 +238,6 @@ export const useEditorLifecycle = ({
 
             return;
         }
-
-        incrementFullIndexBuildCount();
 
         const snapshot = buildIndexSnapshotFromPmDoc(instance.state.doc);
 
@@ -329,21 +279,25 @@ export const useEditorLifecycle = ({
         instance.commands.focus(resolveInitialSelection(instance).from);
     }, [autoFocus, instance]);
 
-    useHotkey('Mod+S', () => {
-        if (!instance || !onManualSave) {
-            return;
-        }
+    useHotkey(
+        'Mod+S',
+        () => {
+            if (!instance || !onManualSave) {
+                return;
+            }
 
-        forcePaginationRecalc(instance);
-        syncValueFromEditor(instance, {
-            source: 'typing',
-            revision: revisionRef.current,
-        });
-        void handleManualSave();
-    }, {
-        enabled: Boolean(instance && onManualSave),
-        target: getWindowTarget(),
-    });
+            forcePaginationRecalc(instance);
+            syncValueFromEditor(instance, {
+                source: 'typing',
+                revision: revisionRef.current,
+            });
+            void handleManualSave();
+        },
+        {
+            enabled: Boolean(instance && onManualSave),
+            target: getWindowTarget(),
+        },
+    );
 
     return {actCommands};
 };

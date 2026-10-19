@@ -39,7 +39,7 @@ const buildFirstAppearanceOrders = (snapshot: ScriptBlockIndexSnapshot) => {
     const firstOrderByKey = new Map<string, number>();
 
     [...snapshot.blocks]
-        .sort((left, right) => left.orderNo - right.orderNo)
+        .toSorted((left, right) => left.orderNo - right.orderNo)
         .forEach(block => {
             block.characterRefs?.forEach(ref => {
                 const key = normalizeCharacterKey(ref.key);
@@ -110,7 +110,7 @@ const collectPlaces = (
 
     [...snapshot.blocks]
         .filter(block => block.blockType === 'scene')
-        .sort((left, right) => left.orderNo - right.orderNo)
+        .toSorted((left, right) => left.orderNo - right.orderNo)
         .forEach(scene => {
             (scenePlaceIds[scene.blockId] ?? []).forEach(placeId => {
                 if (!firstOrderByPlaceId.has(placeId)) {
@@ -133,7 +133,7 @@ const collectPlaces = (
                     },
                 ];
         })
-        .sort((left, right) => left.firstAppearanceOrder - right.firstAppearanceOrder
+        .toSorted((left, right) => left.firstAppearanceOrder - right.firstAppearanceOrder
             || left.name.localeCompare(right.name));
 };
 

@@ -36,7 +36,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 

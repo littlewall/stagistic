@@ -36,7 +36,10 @@ export const paginate = (
 
     if (contentHeight <= 0) {
         return {
-            pageCount: 1, pages: [], breaks: [], endSpacer: null,
+            pageCount: 1,
+            pages: [],
+            breaks: [],
+            endSpacer: null,
         };
     }
 

@@ -1,5 +1,6 @@
 import {
     type ReactNode,
+    useCallback,
     useMemo,
 } from 'react';
 
@@ -23,6 +24,9 @@ interface UseEditorSidebarsResult {
     rightSidebarToggle: SidebarToggle,
     leftSidebar: ReactNode,
     rightSidebar: ReactNode,
+    /** Shows a panel on its selected side, or always on the right when requested. */
+    revealPanel: (panelId: SidebarPanelId, options?: {side: 'right'}) => void,
+    isPanelOpen: (panelId: SidebarPanelId) => boolean,
 }
 
 export const useEditorSidebars = ({
@@ -73,7 +77,58 @@ export const useEditorSidebars = ({
         />
     );
 
+    const {
+        leftPanelId,
+        rightPanelId,
+        isLeftOpen,
+        isRightOpen,
+        toggleLeft,
+        toggleRight,
+        selectRight,
+    } = layout;
+    const revealPanel = useCallback(
+        (panelId: SidebarPanelId, options?: {side: 'right'}) => {
+            if (options?.side !== 'right' && leftPanelId === panelId) {
+                if (!isLeftOpen) {
+                    toggleLeft();
+                }
+
+                return;
+            }
+
+            if (rightPanelId !== panelId) {
+                selectRight(panelId);
+            }
+
+            if (!isRightOpen) {
+                toggleRight();
+            }
+        },
+        [
+            isLeftOpen,
+            isRightOpen,
+            leftPanelId,
+            rightPanelId,
+            selectRight,
+            toggleLeft,
+            toggleRight,
+        ],
+    );
+    const isPanelOpen = useCallback(
+        (panelId: SidebarPanelId) => {
+            return (leftPanelId === panelId && isLeftOpen) || (rightPanelId === panelId && isRightOpen);
+        },
+        [
+            isLeftOpen,
+            isRightOpen,
+            leftPanelId,
+            rightPanelId,
+        ],
+    );
+
     return {
+        revealPanel,
+        isPanelOpen,
         leftSidebarToggle: {
             isOpen: layout.isLeftOpen,
             label: leftPanel?.label ?? 'Left',

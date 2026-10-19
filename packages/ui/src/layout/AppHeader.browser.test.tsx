@@ -1,7 +1,13 @@
 import '../../styles/tokens.css';
 
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {ScriptEditorAppHeader} from './AppHeader';
@@ -103,6 +109,7 @@ describe('ScriptEditorAppHeader', () => {
         await userEvent.click(await waitForElement('button[aria-label="Download script"]'));
         await userEvent.click(await waitForElement('[role="menuitem"]'));
         await userEvent.click(await waitForElement('button[aria-label="Download script"]'));
+
         const stepkgItem = [...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Script & metadata (.stepkg)');
 
         if (!stepkgItem) {
@@ -111,7 +118,12 @@ describe('ScriptEditorAppHeader', () => {
 
         await userEvent.click(stepkgItem);
 
-        expect(actions).toEqual(['settings', 'attributes', 'export-stagistic', 'export-stepkg']);
+        expect(actions).toEqual([
+            'settings',
+            'attributes',
+            'export-stagistic',
+            'export-stepkg',
+        ]);
     });
 
     it('commits a single-line rename and leaves Tab navigation intact', async () => {

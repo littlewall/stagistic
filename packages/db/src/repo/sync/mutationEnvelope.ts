@@ -1,4 +1,5 @@
-export const MUTATION_ENVELOPE_VERSION = 1;
+const MUTATION_ENVELOPE_VERSION = 1;
+
 export const LOCAL_ACTOR_PLACEHOLDER = 'local-actor';
 export const LOCAL_DEVICE_PLACEHOLDER = 'local-device';
 
@@ -54,14 +55,14 @@ export const parseMutationEnvelope = (serialized: string): MutationEnvelope => {
     const value = JSON.parse(serialized) as Partial<MutationEnvelope>;
 
     if (
-        value.version !== MUTATION_ENVELOPE_VERSION
-        || typeof value.operationId !== 'string'
-        || typeof value.operationType !== 'string'
-        || typeof value.entityKey !== 'string'
-        || typeof value.scriptId !== 'string'
-        || typeof value.actorId !== 'string'
-        || typeof value.deviceId !== 'string'
-        || typeof value.occurredAt !== 'number'
+        value.version !== MUTATION_ENVELOPE_VERSION ||
+        typeof value.operationId !== 'string' ||
+        typeof value.operationType !== 'string' ||
+        typeof value.entityKey !== 'string' ||
+        typeof value.scriptId !== 'string' ||
+        typeof value.actorId !== 'string' ||
+        typeof value.deviceId !== 'string' ||
+        typeof value.occurredAt !== 'number'
     ) {
         throw new Error('Unsupported mutation envelope');
     }

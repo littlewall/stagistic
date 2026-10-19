@@ -13,7 +13,7 @@ type MusicMenuButtonProps = {
     children: ReactNode,
 };
 
-export const keepEditorFocus = (event: {preventDefault: () => void}) => {
+const keepEditorFocus = (event: {preventDefault: () => void}) => {
     event.preventDefault();
 };
 
@@ -31,9 +31,7 @@ export const MusicMenuButton = ({
             onMouseDown={keepEditorFocus}
             onClick={onClick}
         >
-            <span className={styles.icon}>
-                {children}
-            </span>
+            <span className={styles.icon}>{children}</span>
         </button>
     </Tooltip>
 );

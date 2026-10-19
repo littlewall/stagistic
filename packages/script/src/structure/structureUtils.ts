@@ -1,5 +1,7 @@
 import {
-    DEFAULT_EDITOR_SETTINGS, type StructureSettings, type StructureSettingsPatch,
+    DEFAULT_EDITOR_SETTINGS,
+    type StructureSettings,
+    type StructureSettingsPatch,
 } from '../settings';
 
 export const normalizeActName = (value: string) => {

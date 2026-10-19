@@ -220,7 +220,9 @@ describe('resolveNewMusicNumber', () => {
 
     it('returns null for an unknown block', () => {
         expect(resolveNewMusicNumber({
-            blocks: [], music: [], orphanMusicOutBlockIds: [],
+            blocks: [],
+            music: [],
+            orphanMusicOutBlockIds: [],
         }, 'missing')).toBeNull();
     });
 });

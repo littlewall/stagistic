@@ -1,9 +1,9 @@
 import {
     canBlockTypeHaveCharacterTags,
-    collectCharacterTags,
     collectMusicAtoms,
     deriveMusicTimeline,
     extractCharacterKeys,
+    indexCharacterTags,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
     type MusicBlockInput,
@@ -13,35 +13,8 @@ import {
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 
-import {
-    isCharacterBlockType,
-    readNormalizedRefsFromAttrs,
-} from '../characters/characterRefUtils';
-import {
-    isScriptBlockNodeName,
-    normalizeBlockNodeType,
-} from '../tiptap/scriptCore';
-
-const toTagCharacterRefs = (node: ProseMirrorNode): IndexedScriptCharacterRef[] | null => {
-    const idByKey = new Map<string, string | null>();
-    const tags = collectCharacterTags(node.toJSON() as ScriptNode);
-
-    tags.forEach(tag => {
-        const existing = idByKey.get(tag.key);
-
-        if (existing === undefined || (existing === null && tag.characterId)) {
-            idByKey.set(tag.key, tag.characterId);
-        }
-    });
-
-    if (idByKey.size === 0) {
-        return null;
-    }
-
-    return Array.from(idByKey.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([key, characterId]) => ({key, characterId}));
-};
+import {isCharacterBlockType, readNormalizedRefsFromAttrs} from '../characters/characterRefUtils';
+import {isScriptBlockNodeName, normalizeBlockNodeType} from '../tiptap/scriptCore';
 
 const toCharacterRefs = (
     node: ProseMirrorNode,
@@ -50,7 +23,7 @@ const toCharacterRefs = (
     attrs: Record<string, unknown> | null | undefined,
 ): IndexedScriptCharacterRef[] | null => {
     if (!isCharacterBlockType(blockType)) {
-        return canBlockTypeHaveCharacterTags(blockType) ? toTagCharacterRefs(node) : null;
+        return canBlockTypeHaveCharacterTags(blockType) ? indexCharacterTags(node.toJSON() as ScriptNode) : null;
     }
 
     const refsByKey = readNormalizedRefsFromAttrs(attrs);
@@ -75,7 +48,7 @@ const toCharacterRefs = (
     }
 
     Object.entries(refsByKey)
-        .sort((left, right) => left[0].localeCompare(right[0]))
+        .toSorted((left, right) => left[0].localeCompare(right[0]))
         .forEach(([key, characterId]) => {
             if (seenKeys.has(key)) {
                 return;
@@ -93,9 +66,7 @@ const toCharacterRefs = (
 
 const resolveBlockType = (node: ProseMirrorNode) => {
     const attrs = node.attrs as Record<string, unknown>;
-    const resolvedBlockType = resolveScriptBlockNodeType(node.type.name)
-        ?? attrs.blockType
-        ?? 'stageDirection';
+    const resolvedBlockType = resolveScriptBlockNodeType(node.type.name) ?? attrs.blockType ?? 'stageDirection';
 
     return normalizeBlockNodeType(resolvedBlockType);
 };
@@ -119,9 +90,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
         }
 
         const blockType = resolveBlockType(node);
-        const blockId = typeof node.attrs.id === 'string' && node.attrs.id.trim().length > 0
-            ? node.attrs.id.trim()
-            : `missing-block-${orderNo + 1}`;
+        const blockId = typeof node.attrs.id === 'string' && node.attrs.id.trim().length > 0 ? node.attrs.id.trim() : `missing-block-${orderNo + 1}`;
         const textContent = node.textContent.trim();
 
         if (blockType === 'act') {
@@ -139,12 +108,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             textContent,
             actBlockId: currentActBlockId,
             sceneBlockId: currentSceneBlockId,
-            characterRefs: toCharacterRefs(
-                node,
-                blockType,
-                textContent,
-                node.attrs as Record<string, unknown>,
-            ),
+            characterRefs: toCharacterRefs(node, blockType, textContent, node.attrs),
         });
 
         musicBlockInputs.push({

@@ -1,18 +1,9 @@
-import type {
-    ScriptRepository,
-    ScriptTitlePageRecord,
-} from '@stagistic/db';
+import type {ScriptRepository, ScriptTitlePageRecord} from '@stagistic/db';
 import type {TitlePageSettings} from '@stagistic/script';
 
-import {
-    createReactiveCollection,
-    createRepositoryStoreRegistry,
-} from '../collections';
+import {createReactiveCollection, createRepositoryStoreRegistry} from '../collections';
 
-export const createScriptTitlePageStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
+const createScriptTitlePageStore = (repository: ScriptRepository, scriptId: string) => {
     const source = repository.getScriptTitlePageSource(scriptId);
     const {
         collection,
@@ -50,6 +41,4 @@ export const createScriptTitlePageStore = (
 
 export type ScriptTitlePageStore = ReturnType<typeof createScriptTitlePageStore>;
 
-export const getScriptTitlePageStore = createRepositoryStoreRegistry(
-    createScriptTitlePageStore,
-);
+export const getScriptTitlePageStore = createRepositoryStoreRegistry(createScriptTitlePageStore);

@@ -4,13 +4,19 @@ import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {
-    createRoot, type Root,
+    createRoot,
+    type Root,
 } from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {
-    page, userEvent,
+    page,
+    userEvent,
 } from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../../context';
@@ -41,7 +47,9 @@ const createDocument = (): ScriptDocument => ({
     type: 'doc',
     content: [
         {
-            type: 'stageDirection', attrs: {id: 'sd-1'}, content: [],
+            type: 'stageDirection',
+            attrs: {id: 'sd-1'},
+            content: [],
         },
     ],
 });
@@ -50,9 +58,14 @@ const createTwoBlockDocument = (): ScriptDocument => ({
     type: 'doc',
     content: [
         {
-            type: 'stageDirection', attrs: {id: 'sd-1'}, content: [],
-        }, {
-            type: 'stageDirection', attrs: {id: 'sd-2'}, content: [],
+            type: 'stageDirection',
+            attrs: {id: 'sd-1'},
+            content: [],
+        },
+        {
+            type: 'stageDirection',
+            attrs: {id: 'sd-2'},
+            content: [],
         },
     ],
 });
@@ -67,11 +80,15 @@ const createNumberedMusicDocument = (): ScriptDocument => ({
                 {
                     type: 'musicStart',
                     attrs: {
-                        musicId: 'music-1', mode: 'open', title: 'Night', kind: null,
+                        musicId: 'music-1',
+                        mode: 'open',
+                        title: 'Night',
+                        kind: null,
                     },
                 },
             ],
-        }, {
+        },
+        {
             type: 'stageDirection',
             attrs: {id: 'sd-2'},
             content: [{type: 'musicOut'}],

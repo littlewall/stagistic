@@ -1,20 +1,9 @@
 import {Extension} from '@tiptap/core';
 
-import {
-    getMusicComposeFromState,
-    musicComposeKey,
-    type MusicComposeState,
-} from './musicInput/composeState';
-import {
-    createMusicComposePlugin,
-    type MusicComposePluginOptions,
-} from './musicInput/plugin';
+import {getMusicComposeFromState} from './musicInput/composeState';
+import {createMusicComposePlugin, type MusicComposePluginOptions} from './musicInput/plugin';
 
-export {
-    getMusicComposeFromState,
-    musicComposeKey,
-    type MusicComposeState,
-};
+export {getMusicComposeFromState};
 
 /**
  * Music title compose, triggered by a single `#` inside a stage direction

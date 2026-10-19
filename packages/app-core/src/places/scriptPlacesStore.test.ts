@@ -30,7 +30,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -90,7 +92,8 @@ const createRepository = () => {
             const otherScenes = (await assignments.read()).filter(row => row.sceneHeadingBlockId !== sceneId);
 
             assignments.emit([
-                ...otherScenes, ...locationIds.map(locationId => ({
+                ...otherScenes,
+                ...locationIds.map(locationId => ({
                     sceneHeadingBlockId: sceneId,
                     locationId,
                 })),

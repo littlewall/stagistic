@@ -1,14 +1,11 @@
-import {
-    DEFAULT_EDITOR_SETTINGS,
-    type TitlePageSettings,
-} from '@stagistic/script';
+import {DEFAULT_EDITOR_SETTINGS, type TitlePageSettings} from '@stagistic/script';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
 
-import type {VisualLine} from '../visualLine';
+import type {VisualLine} from '../model/visualLine';
 import {buildTitlePageItems} from './buildTitlePageItems';
 
 const {page} = DEFAULT_EDITOR_SETTINGS;
@@ -104,5 +101,21 @@ describe('buildTitlePageItems', () => {
         expect(subtitle).toBeDefined();
         expect(subtitle && subtitle.y).toBeGreaterThan(lines[0].y);
         expect(source?.runs[0].italic).toBe(true);
+    });
+
+    it('keeps the title below a tall logo', () => {
+        const titlePage: TitlePageSettings = {
+            logo: {
+                dataUrl: 'data:image/png;base64,aGVsbG8=',
+                filename: 'logo.png',
+                mimeType: 'image/png',
+                widthPx: 400,
+                heightPx: 1000,
+                sizeBytes: 5,
+            },
+        };
+        const lines = buildTitlePageItems(titlePage, 'My Play', DEFAULT_EDITOR_SETTINGS);
+
+        expect(lines[0].y).toBeGreaterThan(DEFAULT_EDITOR_SETTINGS.page.heightPx * 0.28);
     });
 });

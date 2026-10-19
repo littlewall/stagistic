@@ -109,7 +109,7 @@
     /* Halo, so a 5px dot changing hue is not the whole signal. */
     &[data-music-rail-menu-open = 'true'] {
         background: color-mix(in oklch, var(--music-marker-open-color) 16%, transparent);
-        border-radius: var(--radius-full);
+        border-radius: var(--radius-sm);
     }
 }
 
@@ -127,7 +127,7 @@
     width: 20px;
     height: 20px;
     background: color-mix(in oklch, var(--music-marker-open-color) 16%, transparent);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
 
     &::before {
         content: '';
@@ -186,7 +186,7 @@
     letter-spacing: 1px;
     background: transparent;
     border: 0;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
 
     &:hover,
     &:focus-visible {

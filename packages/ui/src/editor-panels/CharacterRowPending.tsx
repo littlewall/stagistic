@@ -1,6 +1,6 @@
 import {Button} from 'react-aria-components';
 
-import {Tooltip} from '../atoms/Tooltip';
+import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {EyeIcon} from '../icons/ui';
 import styles from './EditorSidebar.module.css';
 import type {EditorSidebarCharacter} from './types';
@@ -32,22 +32,18 @@ const getConfirmTooltipLabel = (
     return `Confirm ${characterKey}`;
 };
 
-export const CharacterRowPending = ({
-    model,
-    actions,
-}: CharacterRowPendingProps) => {
+export const CharacterRowPending = ({model, actions}: CharacterRowPendingProps) => {
     const {character, isConfirmPending} = model;
     const {onConfirmCharacter, onFocusCharacter} = actions;
     const isConfirmActionDisabled = isConfirmPending || !onConfirmCharacter;
-    const confirmTooltipLabel = getConfirmTooltipLabel(
-        character.key,
-        isConfirmPending,
-        onConfirmCharacter,
-    );
+    const confirmTooltipLabel = getConfirmTooltipLabel(character.key, isConfirmPending, onConfirmCharacter);
 
     return (
         <div className={styles.characterRow}>
-            <span className={styles.characterColorOutline} aria-hidden="true" />
+            <span
+                className={styles.characterColorOutline}
+                aria-hidden="true"
+            />
             <span className={styles.characterName}>{character.key}</span>
             {onFocusCharacter && (
                 <Tooltip
@@ -59,7 +55,10 @@ export const CharacterRowPending = ({
                         onPress={() => onFocusCharacter(character.key)}
                         aria-label={`Focus ${character.key}`}
                     >
-                        <EyeIcon className={styles.iconGlyph} strokeWidth={2} />
+                        <EyeIcon
+                            className={styles.iconGlyph}
+                            strokeWidth={2}
+                        />
                     </Button>
                 </Tooltip>
             )}
@@ -78,14 +77,18 @@ export const CharacterRowPending = ({
                         onConfirmCharacter(character.key, character.color);
                     }}
                     aria-disabled={isConfirmActionDisabled}
-                    aria-label={isConfirmPending
-                        ? `Saving ${character.key}`
-                        : `Confirm ${character.key}`}
+                    aria-label={isConfirmPending ? `Saving ${character.key}` : `Confirm ${character.key}`}
                 >
                     {isConfirmPending ? (
-                        <span className={styles.confirmSpinner} aria-hidden="true" />
+                        <span
+                            className={styles.confirmSpinner}
+                            aria-hidden="true"
+                        />
                     ) : (
-                        <svg viewBox="0 0 24 24" className={styles.iconGlyph}>
+                        <svg
+                            viewBox="0 0 24 24"
+                            className={styles.iconGlyph}
+                        >
                             <path d="M20 6 9 17l-4-4" />
                         </svg>
                     )}

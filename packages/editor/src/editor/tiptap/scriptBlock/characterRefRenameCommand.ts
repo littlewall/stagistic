@@ -1,7 +1,4 @@
-import {
-    normalizeCharacterKey,
-    splitCharacterTokens,
-} from '@stagistic/script';
+import {normalizeCharacterKey, splitCharacterTokens} from '@stagistic/script';
 import type {Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
@@ -11,10 +8,7 @@ import {
     visitCharacterBlocks,
     writeRefsToNodeAttrs,
 } from '../../characters/characterRefUtils';
-import {
-    applyTagMarkRename,
-    getCharacterTagMarkType,
-} from './characterTagMarkCommands';
+import {applyTagMarkRename, getCharacterTagMarkType} from './characterTagMarkCommands';
 
 /** Splits "NAME (V.O.)" into { base: "NAME", suffix: "(V.O.)" }. */
 const splitTrailingParenthetical = (value: string): {base: string, suffix: string} => {
@@ -35,11 +29,7 @@ const getNodeTextContent = (value: {textContent?: string | null}) => {
     return value.textContent ?? '';
 };
 
-export const findCanonicalKeyForCharacterId = (
-    editor: Editor,
-    characterId: string,
-    fallbackOldName?: string,
-): string | null => {
+const findCanonicalKeyForCharacterId = (editor: Editor, characterId: string, fallbackOldName?: string): string | null => {
     const {state} = editor;
     let canonicalOldKey: string | null = null;
 
@@ -50,7 +40,7 @@ export const findCanonicalKeyForCharacterId = (
                 return false;
             }
 
-            const refs = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
+            const refs = readNormalizedRefsFromAttrs(node.attrs);
             const entry = Object.entries(refs).find(([, id]) => id === characterId);
 
             if (entry) {
@@ -108,7 +98,7 @@ export const runCharacterRefRenameCommand = ({
     visitCharacterBlocks({
         doc: state.doc,
         onCharacterBlock: (node, pos) => {
-            const currentRefs = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
+            const currentRefs = readNormalizedRefsFromAttrs(node.attrs);
             const text = getNodeTextContent(node);
             const tokens = splitCharacterTokens(text);
             const hasLinkedToken = tokens.some(token => {
@@ -122,18 +112,14 @@ export const runCharacterRefRenameCommand = ({
                 return false;
             }
 
-            const formattedName = getCharacterNameForBlockType
-                ? getCharacterNameForBlockType(normalizedNewName, node.attrs.blockType)
-                : normalizedNewName;
+            const formattedName = getCharacterNameForBlockType ? getCharacterNameForBlockType(normalizedNewName, node.attrs.blockType) : normalizedNewName;
             const targetKey = normalizeCharacterKey(formattedName);
             let didRename = false;
             const renamedTokens = tokens.map(token => {
                 const sourceValue = token.value.trim();
                 const sourceKey = normalizeCharacterKey(sourceValue);
                 const tokenCharacterId = sourceKey ? currentRefs[sourceKey] : undefined;
-                const shouldRename = hasLinkedToken
-                    ? tokenCharacterId === characterId
-                    : sourceKey === canonicalOldKey;
+                const shouldRename = hasLinkedToken ? tokenCharacterId === characterId : sourceKey === canonicalOldKey;
 
                 if (!shouldRename) {
                     return {
@@ -143,9 +129,7 @@ export const runCharacterRefRenameCommand = ({
                 }
 
                 const {suffix} = splitTrailingParenthetical(sourceValue);
-                const nextValue = suffix.length > 0
-                    ? `${formattedName} ${suffix}`
-                    : formattedName;
+                const nextValue = suffix.length > 0 ? `${formattedName} ${suffix}` : formattedName;
 
                 if (nextValue === sourceValue) {
                     return {
@@ -209,7 +193,7 @@ export const runCharacterRefRenameCommand = ({
                 contentSize: node.content.size,
                 newText,
                 newRefs: nextRefs,
-                nodeAttrs: node.attrs as Record<string, unknown>,
+                nodeAttrs: node.attrs,
             });
 
             return false;
@@ -221,11 +205,7 @@ export const runCharacterRefRenameCommand = ({
     for (let index = changes.length - 1; index >= 0; index -= 1) {
         const change = changes[index];
 
-        tr = tr.setNodeMarkup(
-            change.pos,
-            undefined,
-            writeRefsToNodeAttrs(change.nodeAttrs, change.newRefs),
-        );
+        tr = tr.setNodeMarkup(change.pos, undefined, writeRefsToNodeAttrs(change.nodeAttrs, change.newRefs));
 
         const from = change.pos + 1;
         const to = change.pos + 1 + change.contentSize;
@@ -237,9 +217,7 @@ export const runCharacterRefRenameCommand = ({
     const tagMarkType = getCharacterTagMarkType(state.schema);
 
     if (tagMarkType) {
-        const tagName = getCharacterNameForBlockType
-            ? getCharacterNameForBlockType(normalizedNewName, 'stageDirection')
-            : normalizedNewName;
+        const tagName = getCharacterNameForBlockType ? getCharacterNameForBlockType(normalizedNewName, 'stageDirection') : normalizedNewName;
         const tagsChanged = applyTagMarkRename(tr, state.doc, state.schema, tagMarkType, {
             characterId,
             canonicalOldKey,

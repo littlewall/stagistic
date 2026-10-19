@@ -1,0 +1,141 @@
+---
+import {Icon} from '@astrojs/starlight/components';
+import Search from 'lucode-starlight/components/overrides/Search.astro';
+import SiteTitle from 'lucode-starlight/components/overrides/SiteTitle.astro';
+
+import KnowledgeBaseSectionNav from './KnowledgeBaseSectionNav.astro';
+---
+
+<div class="knowledgeBaseHeader">
+    <button class="menu" popovertarget="drawer" popovertargetaction="toggle" aria-label="Menu">
+        <Icon name="bars" size="1.25rem" />
+    </button>
+    <SiteTitle />
+    <div class="sections"><KnowledgeBaseSectionNav /></div>
+    <div class="search">
+        <Search />
+    </div>
+    <a class="website" href="https://stagistic.com">
+        <span>stagistic.com</span>
+        <Icon name="external" size="0.875rem" />
+    </a>
+</div>
+
+<style>
+.knowledgeBaseHeader {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.menu {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--kb-header-text);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius);
+}
+
+.menu:hover {
+    background-color: oklch(from var(--kb-header-bg) .3 c h);
+}
+
+.knowledgeBaseHeader :global(.site-title) {
+    gap: 0.625rem;
+    margin-right: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--kb-header-text);
+    letter-spacing: -0.015em;
+}
+
+.knowledgeBaseHeader :global(.title-text) {
+    display: inline;
+    font-weight: 500;
+}
+
+.knowledgeBaseHeader :global(.site-title img) {
+    width: 1.625rem;
+    height: 1.625rem;
+}
+
+.search {
+    justify-self: end;
+}
+
+.search :global([data-open-modal] > span) {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.website {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding-block: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--kb-header-text);
+    text-decoration-color: transparent;
+    text-decoration-line: underline;
+    text-underline-offset: 0.25rem;
+}
+
+.website:hover {
+    text-decoration-color: currentcolor;
+}
+
+.website:focus-visible,
+.menu:focus-visible,
+.knowledgeBaseHeader :global(.site-title:focus-visible) {
+    outline: 2px solid var(--kb-focus);
+    outline-offset: 4px;
+}
+
+@media (max-width: 63.999em) {
+    .knowledgeBaseHeader {
+        grid-template-columns: auto auto auto minmax(0, 1fr) auto;
+        gap: 1rem;
+    }
+
+    .menu {
+        display: inline-flex;
+    }
+}
+
+@media (max-width: 49.999em) {
+    .knowledgeBaseHeader {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 0.25rem 1rem;
+    }
+
+    .knowledgeBaseHeader :global(.site-title) {
+        grid-column: 2 / -1;
+    }
+
+    .sections {
+        grid-column: 1 / -1;
+    }
+
+    .search {
+        grid-column: 1 / 3;
+        justify-self: start;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .search :global([data-open-modal]) {
+        width: 100%;
+    }
+
+}
+</style>

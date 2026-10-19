@@ -19,7 +19,7 @@ const escapeCssAttributeValue = (value: string) => {
     return value.replace(/["\\]/g, '\\$&');
 };
 
-export const asScriptBlockElement = (value: Node | null): HTMLElement | null => {
+const asScriptBlockElement = (value: Node | null): HTMLElement | null => {
     if (!(value instanceof HTMLElement)) {
         return null;
     }
@@ -31,11 +31,7 @@ export const asScriptBlockElement = (value: Node | null): HTMLElement | null => 
     return value.closest<HTMLElement>(SCRIPT_BLOCK_DOM_SELECTOR);
 };
 
-export const resolveScriptBlockElementById = (
-    editor: TiptapEditor,
-    blockId: string,
-    blockPos?: number | null,
-): HTMLElement | null => {
+export const resolveScriptBlockElementById = (editor: TiptapEditor, blockId: string, blockPos?: number | null): HTMLElement | null => {
     if (typeof blockPos === 'number') {
         const blockElementFromPos = asScriptBlockElement(editor.view.nodeDOM(blockPos));
 
@@ -46,15 +42,10 @@ export const resolveScriptBlockElementById = (
 
     const escapedBlockId = escapeCssAttributeValue(blockId);
 
-    return editor.view.dom.querySelector<HTMLElement>(
-        `${SCRIPT_BLOCK_DOM_SELECTOR}[${SCRIPT_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"]`,
-    );
+    return editor.view.dom.querySelector<HTMLElement>(`${SCRIPT_BLOCK_DOM_SELECTOR}[${SCRIPT_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"]`);
 };
 
-export const resolveElementOffsetWithinAncestor = (
-    element: HTMLElement,
-    ancestor: HTMLElement,
-): {top: number, left: number} | null => {
+export const resolveElementOffsetWithinAncestor = (element: HTMLElement, ancestor: HTMLElement): {top: number, left: number} | null => {
     let top = 0;
     let left = 0;
     let current: HTMLElement | null = element;
@@ -82,10 +73,7 @@ export const resolveElementOffsetWithinAncestor = (
     };
 };
 
-export const collectTopLevelBlockMetrics = (
-    _editor: TiptapEditor,
-    canvas: HTMLElement,
-): TopLevelBlockMetrics[] => {
+export const collectTopLevelBlockMetrics = (_editor: TiptapEditor, canvas: HTMLElement): TopLevelBlockMetrics[] => {
     const canvasRect = canvas.getBoundingClientRect();
     const metrics: TopLevelBlockMetrics[] = [];
 
@@ -128,7 +116,7 @@ interface ResolveDropLocationFromMetricsArgs {
     metrics: readonly TopLevelBlockMetrics[],
 }
 
-export const resolveDropLocationFromMetrics = ({
+const resolveDropLocationFromMetrics = ({
     sourceBlockId,
     pointerClientY,
     canvas,

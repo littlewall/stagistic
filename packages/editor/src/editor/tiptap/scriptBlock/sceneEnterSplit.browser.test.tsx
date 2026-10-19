@@ -26,7 +26,9 @@ import {findScriptBlockByIdFromState} from '../scriptCore';
 type SceneTestWindow = Window & {__sceneEnterReproEditor?: Editor | null};
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'scene',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const EditorProbe = () => {

@@ -37,9 +37,12 @@ interface EditorBlockActionsOverlayProps {
 }
 
 const EditorBlockActionsOverlay = ({
-    editor, canvasRef, blockShortcuts,
+    editor,
+    canvasRef,
+    blockShortcuts,
 }: EditorBlockActionsOverlayProps) => {
-    const liveRevision = useEditorLiveSelector(snapshot => snapshot.revision);
+    useEditorLiveSelector(snapshot => snapshot.revision);
+
     const typeTriggerRef = useRef<HTMLButtonElement | null>(null);
     const typeMenuRef = useRef<HTMLDivElement | null>(null);
     const actionTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -163,6 +166,7 @@ const EditorBlockActionsOverlay = ({
 
     useEffect(() => {
         closeGutterMenus();
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Changing the active external editor block closes its menus.
     }, [pointerOverlayState?.blockId, closeGutterMenus]);
 
     useEffect(() => {
@@ -175,7 +179,7 @@ const EditorBlockActionsOverlay = ({
         isMenuDisabledBlock,
     ]);
 
-    const blockActionItems = useMemo(() => {
+    const blockActionItems = (() => {
         if (!editor || !visibleOverlayState || activeDrag) {
             return [];
         }
@@ -185,12 +189,7 @@ const EditorBlockActionsOverlay = ({
             blockId: visibleOverlayState.blockId,
             blockType: visibleOverlayState.blockType,
         });
-    }, [
-        activeDrag,
-        editor,
-        liveRevision,
-        visibleOverlayState,
-    ]);
+    })();
     const hasBlockActions = blockActionItems.length > 0;
 
     useEffect(() => {

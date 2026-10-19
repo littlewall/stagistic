@@ -1,11 +1,17 @@
 import {
     useCallback,
     useEffect,
-    useRef,
     useState,
 } from 'react';
 
-import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
+import {
+    createInitialState,
+    getIsMatchingViewport,
+    getStorageKey,
+    type OverlayDrawer,
+    resolvePanelId,
+    type SidebarLayoutState,
+} from './sidebarLayoutStorage';
 import {SIDEBAR_EXCLUSIVE_QUERY, SIDEBAR_OVERLAY_QUERY} from './sidebarViewport';
 import type {SidebarPanelId} from './types';
 
@@ -21,22 +27,6 @@ import type {SidebarPanelId} from './types';
  * drawer can be open at a time (the overlay range is a subset of the exclusive
  * range), which is why it is a single slot rather than two booleans.
  */
-type OverlayDrawer = 'left' | 'right' | null;
-
-interface SidebarLayoutState {
-    isLeftOpen: boolean,
-    isRightOpen: boolean,
-    leftPanelId: SidebarPanelId,
-    rightPanelId: SidebarPanelId,
-}
-
-interface StoredSidebarLayoutState {
-    isLeftOpen?: boolean,
-    isRightOpen?: boolean,
-    leftPanelId?: SidebarPanelId,
-    rightPanelId?: SidebarPanelId,
-}
-
 interface UseSidebarLayoutArgs {
     availablePanelIds: readonly SidebarPanelId[],
     defaultLeftPanelId: SidebarPanelId,
@@ -44,105 +34,46 @@ interface UseSidebarLayoutArgs {
     storageScope: string,
 }
 
-const getIsMatchingViewport = (query: string) => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-        return false;
-    }
-
-    return window.matchMedia(query).matches;
-};
-
-const isStoredSidebarLayoutState = (value: unknown): value is StoredSidebarLayoutState => {
-    if (!value || typeof value !== 'object') {
-        return false;
-    }
-
-    const candidate = value as Record<string, unknown>;
-
-    return (
-        (candidate.isLeftOpen === undefined || typeof candidate.isLeftOpen === 'boolean')
-        && (candidate.isRightOpen === undefined || typeof candidate.isRightOpen === 'boolean')
-        && (candidate.leftPanelId === undefined || typeof candidate.leftPanelId === 'string')
-        && (candidate.rightPanelId === undefined || typeof candidate.rightPanelId === 'string')
-    );
-};
-
-const getStorageKey = (storageScope: string) => {
-    return `${SIDEBAR_LAYOUT_STORAGE_KEY}:${storageScope}`;
-};
-
-const readStored = (storageScope: string): StoredSidebarLayoutState | null => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    try {
-        const raw = window.localStorage.getItem(getStorageKey(storageScope));
-
-        if (!raw) {
-            return null;
-        }
-
-        const parsed: unknown = JSON.parse(raw);
-
-        if (!isStoredSidebarLayoutState(parsed)) {
-            return null;
-        }
-
-        return parsed;
-    } catch {
-        return null;
-    }
-};
-
-const resolvePanelId = (
-    stored: SidebarPanelId | undefined,
-    fallback: SidebarPanelId,
-    available: readonly SidebarPanelId[],
-): SidebarPanelId => {
-    if (stored && available.includes(stored)) {
-        return stored;
-    }
-
-    return fallback;
-};
-
-const createInitialState = (
-    storageScope: string,
-    defaultLeftPanelId: SidebarPanelId,
-    defaultRightPanelId: SidebarPanelId,
-    availablePanelIds: readonly SidebarPanelId[],
-): SidebarLayoutState => {
-    const stored = readStored(storageScope);
-
-    return {
-        isLeftOpen: stored?.isLeftOpen ?? true,
-        isRightOpen: stored?.isRightOpen ?? true,
-        leftPanelId: resolvePanelId(stored?.leftPanelId, defaultLeftPanelId, availablePanelIds),
-        rightPanelId: resolvePanelId(stored?.rightPanelId, defaultRightPanelId, availablePanelIds),
-    };
-};
-
 export const useSidebarLayout = ({
     availablePanelIds,
     defaultLeftPanelId,
     defaultRightPanelId,
     storageScope,
 }: UseSidebarLayoutArgs) => {
-    const storageScopeRef = useRef(storageScope);
-    const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(
-        storageScope,
-        defaultLeftPanelId,
-        defaultRightPanelId,
-        availablePanelIds,
-    ));
-    const [isExclusiveViewport, setIsExclusiveViewport] = useState(
-        () => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY),
-    );
-    const [isOverlayViewport, setIsOverlayViewport] = useState(
-        () => getIsMatchingViewport(SIDEBAR_OVERLAY_QUERY),
-    );
+    const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
+    const [isExclusiveViewport, setIsExclusiveViewport] = useState(() => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY));
+    const [isOverlayViewport, setIsOverlayViewport] = useState(() => getIsMatchingViewport(SIDEBAR_OVERLAY_QUERY));
     const [overlayDrawer, setOverlayDrawer] = useState<OverlayDrawer>(null);
+    const [previousScope, setPreviousScope] = useState(storageScope);
+    const [previousOverlayViewport, setPreviousOverlayViewport] = useState(isOverlayViewport);
+    const scopeChanged = previousScope !== storageScope;
+    const scopedState = scopeChanged
+        ? createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds)
+        : state;
+    const leftPanelId = resolvePanelId(scopedState.leftPanelId, defaultLeftPanelId, availablePanelIds);
+    const rightPanelId = resolvePanelId(scopedState.rightPanelId, defaultRightPanelId, availablePanelIds);
+    const closeLeft = isExclusiveViewport && !isOverlayViewport && scopedState.isLeftOpen && scopedState.isRightOpen;
+
+    if (scopeChanged) {
+        setPreviousScope(storageScope);
+        setOverlayDrawer(null);
+    }
+
+    if (previousOverlayViewport !== isOverlayViewport) {
+        setPreviousOverlayViewport(isOverlayViewport);
+        if (!isOverlayViewport) {
+            setOverlayDrawer(null);
+        }
+    }
+
+    if (scopeChanged || leftPanelId !== state.leftPanelId || rightPanelId !== state.rightPanelId || closeLeft) {
+        setState({
+            ...scopedState,
+            leftPanelId,
+            rightPanelId,
+            isLeftOpen: closeLeft ? false : scopedState.isLeftOpen,
+        });
+    }
 
     useEffect(() => {
         if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -166,15 +97,8 @@ export const useSidebarLayout = ({
         };
     }, []);
 
-    // Leaving overlay mode retires the drawer, so returning to it starts closed.
     useEffect(() => {
-        if (!isOverlayViewport) {
-            setOverlayDrawer(null);
-        }
-    }, [isOverlayViewport]);
-
-    useEffect(() => {
-        if (typeof window === 'undefined' || storageScopeRef.current !== storageScope) {
+        if (typeof window === 'undefined') {
             return;
         }
 
@@ -184,68 +108,6 @@ export const useSidebarLayout = ({
             // Ignore storage write failures in constrained environments.
         }
     }, [state, storageScope]);
-
-    useEffect(() => {
-        if (storageScopeRef.current === storageScope) {
-            return;
-        }
-
-        storageScopeRef.current = storageScope;
-        setOverlayDrawer(null);
-        setState(createInitialState(
-            storageScope,
-            defaultLeftPanelId,
-            defaultRightPanelId,
-            availablePanelIds,
-        ));
-    }, [
-        availablePanelIds,
-        defaultLeftPanelId,
-        defaultRightPanelId,
-        storageScope,
-    ]);
-
-    // Reconcile state when the set of available panels changes.
-    useEffect(() => {
-        setState(previous => {
-            const nextLeft = resolvePanelId(previous.leftPanelId, defaultLeftPanelId, availablePanelIds);
-            const nextRight = resolvePanelId(previous.rightPanelId, defaultRightPanelId, availablePanelIds);
-
-            if (nextLeft === previous.leftPanelId && nextRight === previous.rightPanelId) {
-                return previous;
-            }
-
-            return {
-                ...previous,
-                leftPanelId: nextLeft,
-                rightPanelId: nextRight,
-            };
-        });
-    }, [
-        availablePanelIds,
-        defaultLeftPanelId,
-        defaultRightPanelId,
-    ]);
-
-    /*
-     * Docked sidebars are mutually exclusive below the exclusive breakpoint.
-     * Overlay mode enforces this through `overlayDrawer` instead, and must not
-     * rewrite the persisted docked preference while the drawers are floating.
-     */
-    useEffect(() => {
-        if (!isExclusiveViewport || isOverlayViewport) {
-            return;
-        }
-
-        if (state.isLeftOpen && state.isRightOpen) {
-            setState(previous => ({...previous, isLeftOpen: false}));
-        }
-    }, [
-        isExclusiveViewport,
-        isOverlayViewport,
-        state.isLeftOpen,
-        state.isRightOpen,
-    ]);
 
     const toggleLeft = useCallback(() => {
         if (isOverlayViewport) {
@@ -262,9 +124,7 @@ export const useSidebarLayout = ({
             return {
                 ...previous,
                 isLeftOpen: nextIsLeftOpen,
-                isRightOpen: isExclusiveViewport && nextIsLeftOpen
-                    ? false
-                    : previous.isRightOpen,
+                isRightOpen: isExclusiveViewport && nextIsLeftOpen ? false : previous.isRightOpen,
             };
         });
     }, [isExclusiveViewport, isOverlayViewport]);
@@ -283,9 +143,7 @@ export const useSidebarLayout = ({
 
             return {
                 ...previous,
-                isLeftOpen: isExclusiveViewport && nextIsRightOpen
-                    ? false
-                    : previous.isLeftOpen,
+                isLeftOpen: isExclusiveViewport && nextIsRightOpen ? false : previous.isLeftOpen,
                 isRightOpen: nextIsRightOpen,
             };
         });

@@ -1,14 +1,31 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
-import {GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute} from '@stagistic/app-routes';
+import {
+    GlobalModalsProvider,
+    HomeRoute,
+    ScriptEditorRoute,
+    ScriptExportRoute,
+    ScriptSettingsRoute,
+    ScriptWorkspaceRoute,
+    useAppBootstrap,
+} from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {getCurrentWindow} from '@tauri-apps/api/window';
-import {useEffect, useState} from 'react';
-import {Navigate, Route, Routes} from 'react-router-dom';
+import {useEffect} from 'react';
+import {
+    Navigate,
+    Route,
+    Routes,
+} from 'react-router-dom';
 
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
-import type {ScriptRepository} from './repo';
+
+const bootstrapOptions = {
+    beforeDatabase: requestPersistentStorage,
+    prepareDatabase: prepareLocalDbWithProgress,
+    loadRepository: () => import('./repo'),
+};
 
 // Runs inside the router + providers so it can use navigation and modal hooks.
 const AppRoutes = () => {
@@ -29,59 +46,17 @@ const AppRoutes = () => {
 };
 
 const App = () => {
-    const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
-    const [bootProgress, setBootProgress] = useState(0);
-    const [bootStatus, setBootStatus] = useState('Preparing');
+    const {
+        services,
+        bootProgress,
+        bootStatus,
+    } = useAppBootstrap(bootstrapOptions);
+    const scriptRepository = services?.scriptRepository ?? null;
 
-    useEffect(() => {
-        let isActive = true;
-
-        const boot = async () => {
-            if (document?.fonts) {
-                await document.fonts.ready;
-            }
-
-            if (!isActive) {
-                return;
-            }
-
-            await requestPersistentStorage();
-
-            if (!isActive) {
-                return;
-            }
-
-            await prepareLocalDbWithProgress(update => {
-                if (!isActive) {
-                    return;
-                }
-
-                setBootProgress(update.progress);
-                setBootStatus(update.label);
-            });
-
-            if (!isActive) {
-                return;
-            }
-
-            const repositoryModule = await import('./repo');
-
-            if (!isActive) {
-                return;
-            }
-
-            setScriptRepository(repositoryModule.scriptRepository);
-        };
-
-        void boot();
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
-
-    // Portable backup snapshots into the app data folder: periodic while running,
-    // plus a best-effort snapshot when the window is closed.
+    /*
+     * Portable backup snapshots into the app data folder: periodic while running,
+     * plus a best-effort snapshot when the window is closed.
+     */
     useEffect(() => {
         if (!scriptRepository) {
             return undefined;

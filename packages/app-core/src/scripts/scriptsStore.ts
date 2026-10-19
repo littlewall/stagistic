@@ -5,6 +5,7 @@ import type {
     ScriptSummary,
 } from '@stagistic/db';
 import {
+    buildScriptSummaryMetadata,
     createNodeId,
     ensureScriptBlockIds,
     ensureScriptStructure,
@@ -119,6 +120,8 @@ export const createScriptsStore = (repository: ScriptRepository) => {
             activeBlockId,
             createdAt: timestamp,
             updatedAt: timestamp,
+            // Same derivation as the repository, so the list shows acts and scenes before the first save.
+            summaryMetadata: buildScriptSummaryMetadata(content ?? {type: 'doc', content: []}),
         }, () => repository.createScriptWithId({
             id,
             title: normalizedTitle,

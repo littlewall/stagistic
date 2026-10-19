@@ -5,10 +5,7 @@ import {
     MUSIC_START_NODE_NAME,
     MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
-import {
-    MicrophoneIcon,
-    MusicDoubleNoteIcon,
-} from '@stagistic/ui';
+import {MicrophoneIcon, MusicDoubleNoteIcon} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
@@ -17,13 +14,15 @@ import {
     type RefObject,
     useCallback,
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 
 import type {PersistentMusicRef} from '../contracts';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
-import {getMusicSuggestions} from './MusicSuggestionsOverlay';
+import {getMusicSuggestions} from './musicSuggestions/musicSuggestionModel';
 import styles from './MusicSuggestionsOverlay.module.css';
+import {handleSuggestionKeyDown} from './suggestionKeyboardNavigation';
 
 interface MusicDraftSuggestionsOverlayProps {
     editor: TiptapEditor | null,
@@ -52,15 +51,16 @@ const getDraftTarget = (): DraftTarget | null => {
 
     const draftMusicId = editable.dataset.musicId;
 
-    return draftMusicId ? {
-        draftMusicId, editable, query: editable.textContent ?? '',
-    } : null;
+    return draftMusicId
+        ? {
+            draftMusicId,
+            editable,
+            query: editable.textContent ?? '',
+        }
+        : null;
 };
 
-const getOverlayStyle = (
-    canvas: HTMLElement,
-    editable: HTMLElement,
-): CSSProperties => {
+const getOverlayStyle = (canvas: HTMLElement, editable: HTMLElement): CSSProperties => {
     const canvasRect = canvas.getBoundingClientRect();
     const editableRect = editable.getBoundingClientRect();
     const left = editableRect.left - canvasRect.left + canvas.scrollLeft;
@@ -72,11 +72,7 @@ const getOverlayStyle = (
     };
 };
 
-const assignDraftMusic = (
-    editor: TiptapEditor,
-    draftMusicId: string,
-    music: PersistentMusicRef,
-) => {
+const assignDraftMusic = (editor: TiptapEditor, draftMusicId: string, music: PersistentMusicRef) => {
     let draftPosition: number | null = null;
 
     editor.state.doc.descendants((node, pos) => {
@@ -99,13 +95,15 @@ const assignDraftMusic = (
         return false;
     }
 
-    editor.view.dispatch(editor.state.tr.setNodeMarkup(draftPosition, undefined, {
-        ...node.attrs,
-        [MUSIC_ID_ATTR]: music.id,
-        [MUSIC_TITLE_ATTR]: music.title,
-        [MUSIC_KIND_ATTR]: music.kind,
-        [MUSIC_DRAFT_ATTR]: false,
-    }));
+    editor.view.dispatch(
+        editor.state.tr.setNodeMarkup(draftPosition, undefined, {
+            ...node.attrs,
+            [MUSIC_ID_ATTR]: music.id,
+            [MUSIC_TITLE_ATTR]: music.title,
+            [MUSIC_KIND_ATTR]: music.kind,
+            [MUSIC_DRAFT_ATTR]: false,
+        }),
+    );
 
     return true;
 };
@@ -118,7 +116,7 @@ const MusicDraftSuggestionsOverlay = ({
 }: MusicDraftSuggestionsOverlayProps) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
-    const suggestions = overlayState?.suggestions ?? [];
+    const suggestions = useMemo(() => overlayState?.suggestions ?? [], [overlayState]);
     const closeOverlay = useCallback(() => {
         setOverlayState(null);
         setActiveSuggestionIndex(null);
@@ -152,30 +150,33 @@ const MusicDraftSuggestionsOverlay = ({
         editor,
         persistentMusic,
     ]);
-    const selectMusic = useCallback((music: PersistentMusicRef) => {
-        if (!editor || !overlayState) {
-            return;
-        }
+    const selectMusic = useCallback(
+        (music: PersistentMusicRef) => {
+            if (!editor || !overlayState) {
+                return;
+            }
 
-        if (assignDraftMusic(editor, overlayState.target.draftMusicId, music)) {
-            onMusicAssigned?.(music.id);
-        }
+            if (assignDraftMusic(editor, overlayState.target.draftMusicId, music)) {
+                onMusicAssigned?.(music.id);
+            }
 
-        closeOverlay();
-    }, [
-        closeOverlay,
-        editor,
-        onMusicAssigned,
-        overlayState,
-    ]);
-    const handleSuggestionMouseDown = useCallback((
-        music: PersistentMusicRef,
-        event: ReactMouseEvent<HTMLButtonElement>,
-    ) => {
-        event.preventDefault();
-        event.stopPropagation();
-        selectMusic(music);
-    }, [selectMusic]);
+            closeOverlay();
+        },
+        [
+            closeOverlay,
+            editor,
+            onMusicAssigned,
+            overlayState,
+        ],
+    );
+    const handleSuggestionMouseDown = useCallback(
+        (music: PersistentMusicRef, event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            event.stopPropagation();
+            selectMusic(music);
+        },
+        [selectMusic],
+    );
 
     useEffect(() => {
         if (!editor) {
@@ -205,41 +206,13 @@ const MusicDraftSuggestionsOverlay = ({
         }
 
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? 0 : (previous + 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null
-                        ? suggestions.length - 1
-                        : (previous + suggestions.length - 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key !== 'Enter' || activeSuggestionIndex === null) {
-                return;
-            }
-
-            const activeSuggestion = suggestions[activeSuggestionIndex];
-
-            if (!activeSuggestion) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            selectMusic(activeSuggestion);
+            handleSuggestionKeyDown({
+                event,
+                suggestions,
+                activeSuggestionIndex,
+                setActiveSuggestionIndex,
+                onSelect: selectMusic,
+            });
         };
 
         document.addEventListener('keydown', handleKeyDown, true);
@@ -252,15 +225,13 @@ const MusicDraftSuggestionsOverlay = ({
         suggestions,
     ]);
 
-    useEffect(() => {
-        setActiveSuggestionIndex(previous => {
-            if (previous === null) {
-                return null;
-            }
+    const boundedActiveIndex = activeSuggestionIndex === null || suggestions.length === 0
+        ? null
+        : Math.min(activeSuggestionIndex, suggestions.length - 1);
 
-            return Math.min(previous, suggestions.length - 1);
-        });
-    }, [suggestions]);
+    if (activeSuggestionIndex !== boundedActiveIndex) {
+        setActiveSuggestionIndex(boundedActiveIndex);
+    }
 
     useExclusiveOverlay(overlayState !== null, closeOverlay);
     if (!overlayState || suggestions.length === 0) {
@@ -268,7 +239,10 @@ const MusicDraftSuggestionsOverlay = ({
     }
 
     return (
-        <div className={styles.overlay} style={overlayState.style}>
+        <div
+            className={styles.overlay}
+            style={overlayState.style}
+        >
             <div
                 className={styles.panel}
                 role="listbox"
@@ -287,7 +261,10 @@ const MusicDraftSuggestionsOverlay = ({
                             aria-selected={isActive}
                             onMouseDown={event => handleSuggestionMouseDown(music, event)}
                         >
-                            <Icon className={styles.itemIcon} aria-hidden="true" />
+                            <Icon
+                                className={styles.itemIcon}
+                                aria-hidden="true"
+                            />
                             <span className={styles.itemLabel}>{music.title}</span>
                         </button>
                     );

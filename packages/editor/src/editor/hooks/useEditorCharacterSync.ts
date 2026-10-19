@@ -4,7 +4,6 @@ import {useEffect} from 'react';
 export const useEditorCharacterSync = (
     editor: TiptapEditor | null,
     persistentCharacters: unknown,
-    characterColorSaturation: number | undefined,
 ) => {
     useEffect(() => {
         if (!editor) {
@@ -18,8 +17,8 @@ export const useEditorCharacterSync = (
         commands.refreshCharacterTagDecorations?.();
     }, [
         editor,
+        // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Record changes invalidate decorations read from the editor's mutable refs.
         persistentCharacters,
-        characterColorSaturation,
     ]);
 
     useEffect(() => {
@@ -32,5 +31,6 @@ export const useEditorCharacterSync = (
         };
 
         syncCommands.syncCharacterRefs?.();
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Character record changes require synchronizing the external editor's references.
     }, [editor, persistentCharacters]);
 };

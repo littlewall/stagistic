@@ -1,5 +1,8 @@
+import {requireValue} from '@stagistic/shared';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {parsePitch} from './pitch';
@@ -10,7 +13,7 @@ import {
     staffPosition,
 } from './staff';
 
-const p = (spn: string) => parsePitch(spn)!;
+const p = (spn: string) => requireValue(parsePitch(spn));
 
 describe('pickClef', () => {
     it('uses treble for a high-centred (soprano) range', () => {

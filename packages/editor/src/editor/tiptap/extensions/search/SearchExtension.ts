@@ -1,0 +1,229 @@
+import {Extension} from '@tiptap/core';
+import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
+import {
+    Plugin,
+    PluginKey,
+    type Transaction,
+} from '@tiptap/pm/state';
+import {Decoration, DecorationSet} from '@tiptap/pm/view';
+
+import {findSearchResults} from './findSearchResults';
+import styles from './SearchExtension.module.css';
+import type {
+    EditorSearchSnapshot,
+    SearchCriteria,
+    SearchResult,
+} from './types';
+import {DEFAULT_SEARCH_CRITERIA} from './types';
+
+type SearchMeta = {type: 'criteria', criteria: SearchCriteria} | {type: 'clear'} | {type: 'next'} | {type: 'previous'} | {type: 'replaced', origin: number};
+
+const editorSearchPluginKey = new PluginKey<EditorSearchSnapshot>('editor-search');
+
+const emptySnapshot: EditorSearchSnapshot = {
+    criteria: DEFAULT_SEARCH_CRITERIA,
+    results: [],
+    currentIndex: -1,
+    decorations: DecorationSet.empty,
+};
+
+const findInitialIndex = (results: readonly SearchResult[], origin: number) => {
+    const index = results.findIndex(result => result.from >= origin);
+
+    return results.length === 0 ? -1 : index === -1 ? 0 : index;
+};
+
+const moveIndex = (current: number, count: number, delta: -1 | 1) => {
+    if (count === 0) {
+        return -1;
+    }
+
+    return (current + delta + count) % count;
+};
+
+const buildDecorations = (document: ProseMirrorNode, results: readonly SearchResult[], currentIndex: number) => DecorationSet.create(
+    document,
+    results.map((result, index) => Decoration.inline(result.from, result.to, {
+        class: index === currentIndex ? `${styles.match} ${styles.current}` : styles.match,
+        'data-editor-search-match': 'true',
+        ...index === currentIndex ? {'data-editor-search-current': 'true'} : {},
+    })),
+);
+
+const buildSnapshot = (document: ProseMirrorNode, criteria: SearchCriteria, results: readonly SearchResult[], currentIndex: number): EditorSearchSnapshot => ({
+    criteria,
+    results,
+    currentIndex,
+    decorations: buildDecorations(document, results, currentIndex),
+});
+
+const buildCriteriaSnapshot = (document: ProseMirrorNode, criteria: SearchCriteria, origin: number) => {
+    const results = findSearchResults(document, criteria);
+
+    return buildSnapshot(document, criteria, results, findInitialIndex(results, origin));
+};
+
+const buildUpdatedDocumentSnapshot = (document: ProseMirrorNode, previous: EditorSearchSnapshot, mappedActiveFrom: number | null, origin: number) => {
+    const results = findSearchResults(document, previous.criteria);
+
+    if (mappedActiveFrom === null) {
+        return buildSnapshot(document, previous.criteria, results, findInitialIndex(results, origin));
+    }
+
+    const exactIndex = results.findIndex(result => result.from === mappedActiveFrom);
+    const currentIndex = exactIndex === -1 ? findInitialIndex(results, mappedActiveFrom) : exactIndex;
+
+    return buildSnapshot(document, previous.criteria, results, currentIndex);
+};
+
+const replaceRange = (tr: Transaction, {from, to}: SearchResult, replacement: string) => {
+    if (replacement) {
+        tr.insertText(replacement, from, to);
+    } else {
+        tr.delete(from, to);
+    }
+};
+
+export const getEditorSearchSnapshot = (state: Parameters<PluginKey<EditorSearchSnapshot>['getState']>[0]) => {
+    return editorSearchPluginKey.getState(state) ?? emptySnapshot;
+};
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        editorSearch: {
+            setSearchCriteria: (criteria: SearchCriteria) => ReturnType,
+            clearSearch: () => ReturnType,
+            goToNextSearchResult: () => ReturnType,
+            goToPreviousSearchResult: () => ReturnType,
+            replaceCurrentSearchResult: (replacement: string) => ReturnType,
+            replaceAllSearchResults: (replacement: string) => ReturnType,
+        },
+    }
+}
+
+export const SearchExtension = Extension.create({
+    name: 'editorSearch',
+
+    addCommands() {
+        return {
+            setSearchCriteria:
+                criteria => ({tr, dispatch}) => {
+                    if (dispatch) {
+                        tr.setMeta(editorSearchPluginKey, {type: 'criteria', criteria} satisfies SearchMeta).setMeta('addToHistory', false);
+                    }
+
+                    return true;
+                },
+            clearSearch:
+                () => ({tr, dispatch}) => {
+                    if (dispatch) {
+                        tr.setMeta(editorSearchPluginKey, {type: 'clear'} satisfies SearchMeta).setMeta('addToHistory', false);
+                    }
+
+                    return true;
+                },
+            goToNextSearchResult:
+                () => ({tr, dispatch}) => {
+                    if (dispatch) {
+                        tr.setMeta(editorSearchPluginKey, {type: 'next'} satisfies SearchMeta).setMeta('addToHistory', false);
+                    }
+
+                    return true;
+                },
+            goToPreviousSearchResult:
+                () => ({tr, dispatch}) => {
+                    if (dispatch) {
+                        tr.setMeta(editorSearchPluginKey, {type: 'previous'} satisfies SearchMeta).setMeta('addToHistory', false);
+                    }
+
+                    return true;
+                },
+            replaceCurrentSearchResult:
+                replacement => ({
+                    tr,
+                    state,
+                    dispatch,
+                }) => {
+                    const snapshot = getEditorSearchSnapshot(state);
+                    const current = snapshot.results[snapshot.currentIndex];
+
+                    if (!current) {
+                        return false;
+                    }
+
+                    if (dispatch) {
+                        replaceRange(tr, current, replacement);
+                        // Activate the first match after the inserted text, so a replacement containing the query is skipped.
+                        tr.setMeta(editorSearchPluginKey, {type: 'replaced', origin: current.from + replacement.length} satisfies SearchMeta);
+                    }
+
+                    return true;
+                },
+            replaceAllSearchResults:
+                replacement => ({
+                    tr,
+                    state,
+                    dispatch,
+                }) => {
+                    const {results} = getEditorSearchSnapshot(state);
+
+                    if (results.length === 0) {
+                        return false;
+                    }
+
+                    if (dispatch) {
+                        // Back to front keeps earlier positions valid without remapping.
+                        results.toReversed().forEach(result => replaceRange(tr, result, replacement));
+                    }
+
+                    return true;
+                },
+        };
+    },
+
+    addProseMirrorPlugins() {
+        return [
+            new Plugin<EditorSearchSnapshot>({
+                key: editorSearchPluginKey,
+                state: {
+                    init: (_config, state) => buildSnapshot(state.doc, DEFAULT_SEARCH_CRITERIA, [], -1),
+                    apply: (tr, previous) => {
+                        const meta = tr.getMeta(editorSearchPluginKey) as SearchMeta | undefined;
+
+                        if (meta?.type === 'criteria') {
+                            return buildCriteriaSnapshot(tr.doc, meta.criteria, tr.selection.anchor);
+                        }
+
+                        if (meta?.type === 'replaced') {
+                            return buildCriteriaSnapshot(tr.doc, previous.criteria, meta.origin);
+                        }
+
+                        // The block filter is a per-script setting, not part of one search: clearing keeps it.
+                        if (meta?.type === 'clear') {
+                            return buildSnapshot(tr.doc, {...DEFAULT_SEARCH_CRITERIA, blockTypes: previous.criteria.blockTypes}, [], -1);
+                        }
+
+                        if (meta?.type === 'next') {
+                            return buildSnapshot(tr.doc, previous.criteria, previous.results, moveIndex(previous.currentIndex, previous.results.length, 1));
+                        }
+
+                        if (meta?.type === 'previous') {
+                            return buildSnapshot(tr.doc, previous.criteria, previous.results, moveIndex(previous.currentIndex, previous.results.length, -1));
+                        }
+
+                        if (!tr.docChanged || !previous.criteria.query) {
+                            return previous;
+                        }
+
+                        const active = previous.results[previous.currentIndex];
+
+                        return buildUpdatedDocumentSnapshot(tr.doc, previous, active ? tr.mapping.map(active.from, 1) : null, tr.selection.anchor);
+                    },
+                },
+                props: {
+                    decorations: state => editorSearchPluginKey.getState(state)?.decorations,
+                },
+            }),
+        ];
+    },
+});

@@ -5,19 +5,16 @@ import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserE
 import {handleSceneCollapseKeyDown} from '../../extensions/sceneCollapse/sceneCollapseKeyDown';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {createBlockContext} from '../context';
-import {
-    deleteSelectionPreservingScenes,
-    selectionSpansScene,
-} from '../deleteSelectionPreservingScenes';
+import {deleteSelectionPreservingScenes, selectionSpansScene} from '../deleteSelectionPreservingScenes';
 import {
     deleteEmptyBlockAfterScene,
     shouldBlockBackspace,
     shouldBlockForwardDelete,
 } from '../sceneDeletionGuard';
-import {enterHandlerMaps, handleEnter} from './enter';
-import {handlePaste, pasteHandlerMaps} from './paste';
+import {handleEnter} from './enter';
+import {handlePaste} from './paste';
 import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
-import {handleTab, tabHandlerMaps} from './tab';
+import {handleTab} from './tab';
 import {handleTextInput, textInputHandlerMaps} from './textInput';
 import {
     type BlockCasingMap,
@@ -47,15 +44,10 @@ interface EmptyEnterChooserCommands {
 }
 
 const getEmptyEnterChooserCommands = (editor: Editor): EmptyEnterChooserCommands => {
-    return editor.commands as EmptyEnterChooserCommands;
+    return editor.commands;
 };
 
-export const handleKeyDown = (
-    editor: Editor,
-    event: KeyboardEvent,
-    blockShortcuts?: BlockShortcutMap,
-    blockNextElements?: BlockNextElementMap,
-) => {
+const handleEmptyEnterChooserKeyDown = (editor: Editor, event: KeyboardEvent): boolean | null => {
     const emptyEnterChooserState = getEmptyEnterChooserFromState(editor.state);
 
     if (emptyEnterChooserState.isOpen) {
@@ -109,6 +101,38 @@ export const handleKeyDown = (
         chooserCommands.closeEmptyEnterChooser?.();
     }
 
+    return null;
+};
+
+const handleSceneDeletionKeyDown = (editor: Editor, event: KeyboardEvent): boolean | null => {
+    if ((event.key === 'Backspace' || event.key === 'Delete') && selectionSpansScene(editor.state)) {
+        event.preventDefault();
+
+        return deleteSelectionPreservingScenes(editor);
+    }
+
+    if (event.key === 'Backspace' && (deleteEmptyBlockAfterScene(editor) || shouldBlockBackspace(editor.state))) {
+        event.preventDefault();
+
+        return true;
+    }
+
+    if (event.key === 'Delete' && shouldBlockForwardDelete(editor.state)) {
+        event.preventDefault();
+
+        return true;
+    }
+
+    return null;
+};
+
+export const handleKeyDown = (editor: Editor, event: KeyboardEvent, blockShortcuts?: BlockShortcutMap, blockNextElements?: BlockNextElementMap) => {
+    const chooserResult = handleEmptyEnterChooserKeyDown(editor, event);
+
+    if (chooserResult !== null) {
+        return chooserResult;
+    }
+
     if (handleSceneCollapseKeyDown(editor, event)) {
         return true;
     }
@@ -129,31 +153,10 @@ export const handleKeyDown = (
         return handleTab(editor, event);
     }
 
-    if (
-        (event.key === 'Backspace' || event.key === 'Delete')
-        && selectionSpansScene(editor.state)
-    ) {
-        event.preventDefault();
+    const deletionResult = handleSceneDeletionKeyDown(editor, event);
 
-        return deleteSelectionPreservingScenes(editor);
-    }
-
-    if (event.key === 'Backspace' && deleteEmptyBlockAfterScene(editor)) {
-        event.preventDefault();
-
-        return true;
-    }
-
-    if (event.key === 'Backspace' && shouldBlockBackspace(editor.state)) {
-        event.preventDefault();
-
-        return true;
-    }
-
-    if (event.key === 'Delete' && shouldBlockForwardDelete(editor.state)) {
-        event.preventDefault();
-
-        return true;
+    if (deletionResult !== null) {
+        return deletionResult;
     }
 
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
@@ -172,15 +175,7 @@ export const handleKeyDown = (
 };
 
 export {
-    handleEnter,
     handlePaste,
     handleTab,
     handleTextInput,
-};
-
-export const scriptBlockHandlerMaps = {
-    ...enterHandlerMaps,
-    ...tabHandlerMaps,
-    ...textInputHandlerMaps,
-    ...pasteHandlerMaps,
 };

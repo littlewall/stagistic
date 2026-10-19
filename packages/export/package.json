@@ -5,13 +5,13 @@
     "type": "module",
     "main": "./src/index.ts",
     "dependencies": {
-        "@pdf-lib/fontkit": "^1.1.1",
         "@stagistic/script": "workspace:*",
         "@stagistic/script-pagination": "workspace:*",
         "jspdf": "^2.5.2",
         "pdf-lib": "^1.17.1"
     },
     "devDependencies": {
+        "@stagistic/shared": "workspace:*",
         "typescript": "^5.9.2"
     }
 }

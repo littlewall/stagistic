@@ -40,11 +40,13 @@ export interface PageMarkParts {
 }
 
 export const buildPageMark = ({
-    actIndex, sceneNumber, pageNumber,
+    actIndex,
+    sceneNumber,
+    pageNumber,
 }: PageMarkParts): string => {
     const scene = Math.max(1, sceneNumber);
 
-    if (actIndex == null || actIndex <= 0) {
+    if (actIndex === null || actIndex === undefined || actIndex <= 0) {
         return `${scene}-${pageNumber}`;
     }
 

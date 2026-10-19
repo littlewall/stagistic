@@ -117,7 +117,9 @@ export const applyTagMarkRename = (
     schema: Schema,
     markType: MarkType,
     {
-        characterId, canonicalOldKey, newName,
+        characterId,
+        canonicalOldKey,
+        newName,
     }: ApplyTagMarkRenameArgs,
 ): boolean => {
     const normalizedNewName = newName.trim();

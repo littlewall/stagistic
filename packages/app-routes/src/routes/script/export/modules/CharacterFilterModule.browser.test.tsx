@@ -23,9 +23,14 @@ const roots: Root[] = [];
 
 const characters: ExportCharacter[] = [
     {
-        id: 'anna', key: 'ANNA', displayName: 'Anna',
-    }, {
-        id: 'stage-manager', key: 'STAGE_MANAGER', displayName: 'Stage Manager',
+        id: 'anna',
+        key: 'ANNA',
+        displayName: 'Anna',
+    },
+    {
+        id: 'stage-manager',
+        key: 'STAGE_MANAGER',
+        displayName: 'Stage Manager',
     },
 ];
 

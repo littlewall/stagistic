@@ -44,7 +44,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -118,7 +120,7 @@ const createRepository = (
             return updateGroup(id, {colorHex});
         },
         replaceScriptCharacterGroupMembers: (_scriptId, id, memberIds) => {
-            return updateGroup(id, {memberIds: [...new Set(memberIds)].sort()});
+            return updateGroup(id, {memberIds: [...new Set(memberIds)].toSorted()});
         },
     };
 
@@ -168,7 +170,8 @@ describe('script character groups store', () => {
             'setScriptCharacterGroupColor',
             '#abcdef',
             'setGroupColor',
-        ], [
+        ],
+        [
             'memberIds',
             'replaceScriptCharacterGroupMembers',
             ['character-2'],

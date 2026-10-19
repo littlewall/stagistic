@@ -22,6 +22,11 @@ describe('getToolbarShortcutLabels', () => {
             bold: '⌘B',
             italic: '⌘I',
             underline: '⌘U',
+            previousResult: '⇧↩',
+            nextResult: '↩',
+            toggleReplace: '⌥⌘F',
+            replace: '↩',
+            replaceAll: '⌘↩',
         });
     });
 
@@ -34,6 +39,11 @@ describe('getToolbarShortcutLabels', () => {
             bold: 'Ctrl+B',
             italic: 'Ctrl+I',
             underline: 'Ctrl+U',
+            previousResult: 'Shift+Enter',
+            nextResult: 'Enter',
+            toggleReplace: 'Ctrl+H',
+            replace: 'Enter',
+            replaceAll: 'Ctrl+Enter',
         });
     });
 });

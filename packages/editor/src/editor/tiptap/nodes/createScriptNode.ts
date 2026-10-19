@@ -62,7 +62,7 @@ const createStableScriptNodeView = (
     }) as Record<string, unknown>;
 
     Object.entries(attributes).forEach(([attribute, value]) => {
-        if (value !== null && value !== undefined && value !== false) {
+        if (typeof value === 'string' || typeof value === 'number' || value === true) {
             dom.setAttribute(attribute, String(value));
         }
     });
@@ -136,7 +136,8 @@ export const createScriptNode = ({name, blockType: defaultBlockType}: CreateScri
 
                         return blockType === defaultBlockType ? {} : false;
                     },
-                }, {
+                },
+                {
                     tag: 'p[data-block-type]',
                     getAttrs: (element: HTMLElement) => {
                         const blockType = resolveParsedBlockType(element, defaultBlockType);

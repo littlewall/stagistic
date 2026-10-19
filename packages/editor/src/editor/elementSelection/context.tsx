@@ -22,7 +22,9 @@ import {
 export type EditorElementSelection =
     | {type: 'music', musicId: string}
     | {
-        type: 'character', characterId: string | null, characterKey: string,
+        type: 'character',
+        characterId: string | null,
+        characterKey: string,
     }
     | null;
 

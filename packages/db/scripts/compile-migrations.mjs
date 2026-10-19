@@ -1,10 +1,13 @@
 import {createHash} from 'node:crypto';
+import {
+    readdir,
+    readFile,
+    writeFile,
+} from 'node:fs/promises';
 import path from 'node:path';
 
-import {readdir, readFile, writeFile} from 'node:fs/promises';
-
 const migrationsDir = path.resolve(process.cwd(), 'drizzle');
-const outputPath = path.resolve(process.cwd(), 'src', 'migrations.compiled.ts');
+const outputPath = path.resolve(process.cwd(), 'src', 'pglite', 'migrations.compiled.ts');
 const checkOnly = process.argv.includes('--check');
 
 /** @param {string} sql */
@@ -26,7 +29,7 @@ const readMigrations = async () => {
     const sqlFiles = entries
         .filter(entry => entry.isFile() && entry.name.endsWith('.sql'))
         .map(entry => entry.name)
-        .sort();
+        .toSorted();
 
     const compiled = [];
 

@@ -11,14 +11,12 @@ export type MutableRefLike<T> = {current: T};
 export type CharacterColorRefsBundle = {
     colorByCharacterIdRef: MutableRefLike<ReadonlyMap<string, string>>,
     rememberedColorByKeyRef: MutableRefLike<ReadonlyMap<string, string>>,
-    rememberedColorSaturationRef: MutableRefLike<number | null>,
     persistentCharactersRef: MutableRefLike<readonly PersistentCharacterRef[]>,
 };
 
 export const createCharacterColorRefsBundle = (): CharacterColorRefsBundle => ({
     colorByCharacterIdRef: {current: new Map()},
     rememberedColorByKeyRef: {current: new Map()},
-    rememberedColorSaturationRef: {current: null},
     persistentCharactersRef: {current: []},
 });
 

@@ -1,23 +1,22 @@
 import * as dbQueries from '../queries';
-import {
-    createPgliteReactiveQuerySource,
-    type ReactiveQuerySource,
-} from '../reactive';
-import type {
-    ScriptEditorSettingsRecord,
-    ScriptSceneLocationAssignment,
-    ScriptTitlePageRecord,
-} from '../scriptRepository';
+import {createPgliteReactiveQuerySource, type ReactiveQuerySource} from '../reactive';
 import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
     ScriptCharacterGroupRef,
     ScriptCharacterRef,
+    ScriptCommentMessage,
+    ScriptCommentThread,
     ScriptLocation,
     ScriptMusic,
     ScriptMusicAttachmentBinding,
     ScriptSummary,
 } from '../types';
+import type {
+    ScriptEditorSettingsRecord,
+    ScriptSceneLocationAssignment,
+    ScriptTitlePageRecord,
+} from '../types/scriptRepository';
 import type {GetDb} from './types';
 
 interface CreateLocalPgliteReactiveSourcesArgs {
@@ -27,17 +26,15 @@ interface CreateLocalPgliteReactiveSourcesArgs {
     listCharacterGroups: (scriptId: string) => Promise<ScriptCharacterGroupRef[]>,
     listCharacterGenders: (scriptId: string) => Promise<ScriptCharacterGenderOption[]>,
     listMusic: (scriptId: string) => Promise<ScriptMusic[]>,
+    listCommentThreads: (scriptId: string) => Promise<ScriptCommentThread[]>,
+    listCommentMessages: (scriptId: string) => Promise<ScriptCommentMessage[]>,
     listLocations: (scriptId: string) => Promise<ScriptLocation[]>,
     listSceneLocations: (scriptId: string) => Promise<ScriptSceneLocationAssignment[]>,
     loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>,
-    loadEditorSettings: (
-        scriptId: string,
-    ) => Promise<ScriptEditorSettingsRecord['settings'] | null>,
+    loadEditorSettings: (scriptId: string) => Promise<ScriptEditorSettingsRecord['settings'] | null>,
 }
 
-const createScriptSourceRegistry = <T>(
-    createSource: (scriptId: string) => ReactiveQuerySource<T>,
-) => {
+const createScriptSourceRegistry = <T>(createSource: (scriptId: string) => ReactiveQuerySource<T>) => {
     const sources = new Map<string, ReactiveQuerySource<T>>();
 
     return (scriptId: string) => {
@@ -62,6 +59,8 @@ export const createLocalPgliteReactiveSources = ({
     listCharacterGroups,
     listCharacterGenders,
     listMusic,
+    listCommentThreads,
+    listCommentMessages,
     listLocations,
     listSceneLocations,
     loadTitlePage,
@@ -71,7 +70,7 @@ export const createLocalPgliteReactiveSources = ({
         getDb,
         readRows: listScripts,
         watchQuery: `
-            SELECT id, title, subtitle, created_at, updated_at, active_block_id
+            SELECT id, title, subtitle, created_at, updated_at, active_block_id, summary_metadata
             FROM scripts
         `,
     });
@@ -129,6 +128,31 @@ export const createLocalPgliteReactiveSources = ({
                 SELECT id, script_id, scene_number, index_in_scene, mode, title,
                     kind, start_block_id, end_block_id, created_at, updated_at
                 FROM script_music
+                WHERE script_id = $1
+            `,
+            watchParams: [scriptId],
+        });
+    });
+    const getScriptCommentThreadsSource = createScriptSourceRegistry(scriptId => {
+        return createPgliteReactiveQuerySource({
+            getDb,
+            readRows: () => listCommentThreads(scriptId),
+            watchQuery: `
+                SELECT id, script_id, anchor_kind, anchor_block_id, quoted_text, status,
+                    resolved_at, resolved_by, created_by, created_at, updated_at
+                FROM script_comment_threads
+                WHERE script_id = $1
+            `,
+            watchParams: [scriptId],
+        });
+    });
+    const getScriptCommentMessagesSource = createScriptSourceRegistry(scriptId => {
+        return createPgliteReactiveQuerySource({
+            getDb,
+            readRows: () => listCommentMessages(scriptId),
+            watchQuery: `
+                SELECT id, script_id, thread_id, author_id, body, created_at, updated_at, edited_at
+                FROM script_comment_messages
                 WHERE script_id = $1
             `,
             watchParams: [scriptId],
@@ -224,15 +248,10 @@ export const createLocalPgliteReactiveSources = ({
             watchParams: [scriptId],
         });
     });
-    const getScriptMusicAttachmentBindingsSource = createScriptSourceRegistry<
-        ScriptMusicAttachmentBinding
-    >(scriptId => {
+    const getScriptMusicAttachmentBindingsSource = createScriptSourceRegistry<ScriptMusicAttachmentBinding>(scriptId => {
         return createPgliteReactiveQuerySource({
             getDb,
-            readRows: async () => dbQueries.listScriptMusicAttachmentBindings(
-                await getDb(),
-                scriptId,
-            ),
+            readRows: async () => dbQueries.listScriptMusicAttachmentBindings(await getDb(), scriptId),
             watchQuery: `
                 SELECT binding.music_id, binding.attachment_id, binding.role,
                     binding.sort_order, binding.created_at
@@ -256,5 +275,7 @@ export const createLocalPgliteReactiveSources = ({
         getScriptEditorSettingsSource,
         getScriptAttachmentsSource,
         getScriptMusicAttachmentBindingsSource,
+        getScriptCommentThreadsSource,
+        getScriptCommentMessagesSource,
     };
 };

@@ -138,12 +138,19 @@ export const useChooserAnchor = ({
         schedule(updateAnchor);
     }, [schedule, updateAnchor]);
 
+    const [wasOpen, setWasOpen] = useState(chooserState.isOpen);
+
+    if (wasOpen !== chooserState.isOpen) {
+        setWasOpen(chooserState.isOpen);
+
+        if (!chooserState.isOpen) {
+            setAnchorStyle(null);
+        }
+    }
+
     useLayoutEffect(() => {
         if (!chooserState.isOpen) {
             cancelScheduledAnchorUpdate();
-            setAnchorStyle(previous => {
-                return previous === null ? previous : null;
-            });
 
             return;
         }
@@ -156,8 +163,6 @@ export const useChooserAnchor = ({
     }, [
         cancelScheduledAnchorUpdate,
         chooserState.isOpen,
-        chooserState.blockId,
-        chooserState.blockPos,
         scheduleAnchorUpdate,
     ]);
 

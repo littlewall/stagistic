@@ -27,7 +27,6 @@ import {
 
 interface UseEditorCharacterColorsArgs {
     persistentCharacters: readonly PersistentCharacterRef[],
-    characterColorSaturation: number | undefined,
     resolvedInitialValue: ScriptDocument,
     /** Externally-owned containers (cached editor surface); falls back to per-mount ones. */
     refs?: CharacterColorRefsBundle,
@@ -36,23 +35,17 @@ interface UseEditorCharacterColorsArgs {
 
 export const useEditorCharacterColors = ({
     persistentCharacters,
-    characterColorSaturation,
     resolvedInitialValue,
     refs,
     liveStore: providedLiveStore,
 }: UseEditorCharacterColorsArgs) => {
-    const localRefs = useRef<CharacterColorRefsBundle | null>(null);
-
-    if (!localRefs.current) {
-        localRefs.current = createCharacterColorRefsBundle();
-    }
+    const [localRefs] = useState(createCharacterColorRefsBundle);
 
     const {
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
-        rememberedColorSaturationRef,
         persistentCharactersRef,
-    } = refs ?? localRefs.current;
+    } = refs ?? localRefs;
 
     const normalizedPersistentCharacters = useMemo(
         () => normalizePersistentCharacterRefs(persistentCharacters),
@@ -68,13 +61,12 @@ export const useEditorCharacterColors = ({
                 getConfirmedCharacterColor(
                     character.id,
                     character.colorHex,
-                    characterColorSaturation,
                 ),
             );
         });
 
         return resolvedColors;
-    }, [normalizedPersistentCharacters, characterColorSaturation]);
+    }, [normalizedPersistentCharacters]);
 
     const confirmedCharacterColorsByKey = useMemo(() => {
         const resolvedColors = new Map<string, string>();
@@ -94,11 +86,7 @@ export const useEditorCharacterColors = ({
 
     useEffect(() => {
         const nextColorByCharacterId = new Map(colorByCharacterIdRef.current);
-        const didSaturationChange = rememberedColorSaturationRef.current !== null
-            && rememberedColorSaturationRef.current !== characterColorSaturation;
-        const nextRememberedColorByKey = didSaturationChange
-            ? new Map<string, string>()
-            : new Map(rememberedColorByKeyRef.current);
+        const nextRememberedColorByKey = new Map(rememberedColorByKeyRef.current);
 
         confirmedCharacterColorsById.forEach((color, characterId) => {
             nextColorByCharacterId.set(characterId, color);
@@ -110,18 +98,18 @@ export const useEditorCharacterColors = ({
         persistentCharactersRef.current = normalizedPersistentCharacters;
         colorByCharacterIdRef.current = nextColorByCharacterId;
         rememberedColorByKeyRef.current = nextRememberedColorByKey;
-        rememberedColorSaturationRef.current = characterColorSaturation ?? null;
     }, [
         confirmedCharacterColorsById,
         confirmedCharacterColorsByKey,
         normalizedPersistentCharacters,
-        characterColorSaturation,
+        colorByCharacterIdRef,
+        persistentCharactersRef,
+        rememberedColorByKeyRef,
     ]);
 
     const initialLiveSnapshot = useMemo(() => {
         const indexSnapshot = buildScriptBlockIndex(resolvedInitialValue).snapshot;
         const projection = buildSidebarProjectionFromIndex(indexSnapshot, {
-            characterColorSaturation,
             colorByCharacterId: confirmedCharacterColorsById,
             rememberedColorByKey: confirmedCharacterColorsByKey,
             persistentCharacters: normalizedPersistentCharacters,
@@ -142,7 +130,6 @@ export const useEditorCharacterColors = ({
         confirmedCharacterColorsByKey,
         normalizedPersistentCharacters,
         resolvedInitialValue,
-        characterColorSaturation,
     ]);
 
     const [localLiveStore] = useState(() => createEditorSnapshotStore(initialLiveSnapshot));

@@ -1,0 +1,22 @@
+---
+import PageTitle from 'lucode-starlight/components/overrides/PageTitle.astro';
+
+const {title, description = ''} = Astro.locals.starlightRoute.entry.data;
+const parts = description.split(/(`[^`]+`)/g);
+const hasLiteralInput = parts.length > 1;
+---
+
+{
+    hasLiteralInput ? (
+        <div class="kb-page-title" data-slot="doc-title">
+            <div data-slot="doc-title-header">
+                <h1 id="_top">{title}</h1>
+            </div>
+            <p class="kb-page-description" slot="doc-title-description">
+                {parts.map(part => (
+                    part.startsWith('`') ? <code>{part.slice(1, -1)}</code> : part
+                ))}
+            </p>
+        </div>
+    ) : <PageTitle />
+}

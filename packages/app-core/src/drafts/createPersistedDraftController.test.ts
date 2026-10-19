@@ -19,7 +19,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -59,23 +61,31 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: '', isHydrated: false,
+            key: 'one',
+            confirmedValue: '',
+            isHydrated: false,
         });
         expect(controller.getSnapshot()).toMatchObject({status: 'loading', isHydrated: false});
 
         controller.setEntity({
-            key: 'one', confirmedValue: 'First', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'First',
+            isHydrated: true,
         });
         expect(controller.getSnapshot().value).toBe('First');
 
         controller.setEntity({
-            key: 'one', confirmedValue: 'External', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'External',
+            isHydrated: true,
         });
         expect(controller.getSnapshot().value).toBe('External');
 
         controller.update('Local');
         controller.setEntity({
-            key: 'one', confirmedValue: 'Other', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Other',
+            isHydrated: true,
         });
         expect(controller.getSnapshot()).toMatchObject({
             value: 'Local',
@@ -87,7 +97,9 @@ describe('persisted draft controller', () => {
         const firstSave = deferred();
         const persisted: string[] = [];
         const {
-            scheduler, run, size,
+            scheduler,
+            run,
+            size,
         } = createScheduler();
         const controller = createPersistedDraftController({
             defaultValue: '',
@@ -103,7 +115,9 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: 'Initial', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Initial',
+            isHydrated: true,
         });
         controller.update('Ignored');
         controller.update('First');
@@ -144,7 +158,9 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: 'Name', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Name',
+            isHydrated: true,
         });
         controller.update('Appearance');
         run();
@@ -153,7 +169,9 @@ describe('persisted draft controller', () => {
 
         controller.update('Name');
         controller.setEntity({
-            key: 'one', confirmedValue: 'Appearance', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Appearance',
+            isHydrated: true,
         });
 
         firstSave.resolve();
@@ -185,7 +203,9 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: 'Name', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Name',
+            isHydrated: true,
         });
         controller.update('Appearance');
         run();
@@ -199,7 +219,9 @@ describe('persisted draft controller', () => {
         });
 
         controller.setEntity({
-            key: 'one', confirmedValue: 'Appearance', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Appearance',
+            isHydrated: true,
         });
         expect(controller.getSnapshot().value).toBe('Name');
 
@@ -220,7 +242,9 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: 'Initial', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'Initial',
+            isHydrated: true,
         });
         controller.update('Failed value');
 
@@ -261,14 +285,18 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: 'One', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'One',
+            isHydrated: true,
         });
         controller.update('Saving one');
 
         const save = controller.flush();
 
         controller.setEntity({
-            key: 'two', confirmedValue: 'Two', isHydrated: true,
+            key: 'two',
+            confirmedValue: 'Two',
+            isHydrated: true,
         });
         pending.resolve();
         await save;
@@ -296,14 +324,18 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: 'One', isHydrated: true,
+            key: 'one',
+            confirmedValue: 'One',
+            isHydrated: true,
         });
         controller.update('Saving one');
 
         const firstSave = controller.flush();
 
         controller.setEntity({
-            key: 'two', confirmedValue: 'Two', isHydrated: true,
+            key: 'two',
+            confirmedValue: 'Two',
+            isHydrated: true,
         });
         controller.update('Saving two');
 
@@ -330,10 +362,14 @@ describe('persisted draft controller', () => {
 
         controller.resume();
         controller.setEntity({
-            key: 'one', confirmedValue: '', isHydrated: false,
+            key: 'one',
+            confirmedValue: '',
+            isHydrated: false,
         });
         controller.setEntity({
-            key: 'two', confirmedValue: 'Two', isHydrated: true,
+            key: 'two',
+            confirmedValue: 'Two',
+            isHydrated: true,
         });
 
         expect(controller.getSnapshot()).toMatchObject({

@@ -5,16 +5,16 @@ import {
     vi,
 } from 'vite-plus/test';
 
-import {InMemoryFileStorage} from '../fileStorage';
 import {dbSchema} from '../schema';
+import {InMemoryFileStorage} from '../storage/fileStorage';
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {createAttachmentHandlers} from './attachments';
-import {createCharacterHandlers} from './characters';
-import {createSettingsHandlers} from './config';
+import {createCharacterHandlers} from './characters/characters';
+import {createSettingsHandlers} from './config/config';
+import {createTitlePageHandlers} from './config/titlePage';
 import {createLocationHandlers} from './locations';
 import {createMusicHandlers} from './music';
 import {createScriptsHandlers} from './scripts';
-import {createTitlePageHandlers} from './titlePage';
 import type {RecordOutbox} from './types';
 
 const outboxFailure = new Error('outbox failed');

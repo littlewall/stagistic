@@ -5,7 +5,6 @@ import type {
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
-import {incrementSidebarStorePatchCount} from '../perf/editorPerfMetrics';
 
 type Listener = () => void;
 
@@ -41,7 +40,7 @@ export const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     displayColorByKey: new Map<string, string>(),
 };
 
-export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
+const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
     return {
         revision: 0,
         index: EMPTY_INDEX,
@@ -66,10 +65,7 @@ export interface EditorSnapshotStore {
     ) => () => void,
 }
 
-const notifySelectors = (
-    selectorListeners: Set<SelectorListener<unknown>>,
-    snapshot: EditorLiveSnapshot,
-) => {
+const notifySelectors = (selectorListeners: Set<SelectorListener<unknown>>, snapshot: EditorLiveSnapshot) => {
     selectorListeners.forEach(selectorListener => {
         const nextSelected = selectorListener.selector(snapshot);
 
@@ -98,7 +94,6 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
         }
 
         snapshot = nextSnapshot;
-        incrementSidebarStorePatchCount();
         emit();
     };
 
@@ -112,21 +107,20 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
             ...patch,
         };
         const didChange =
-            !Object.is(snapshot.revision, nextSnapshot.revision)
-            || !Object.is(snapshot.index, nextSnapshot.index)
-            || !Object.is(snapshot.structure, nextSnapshot.structure)
-            || !Object.is(snapshot.scenePlacement, nextSnapshot.scenePlacement)
-            || !Object.is(snapshot.characters, nextSnapshot.characters)
-            || !Object.is(snapshot.music, nextSnapshot.music)
-            || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId)
-            || !Object.is(snapshot.activeBlockType, nextSnapshot.activeBlockType);
+            !Object.is(snapshot.revision, nextSnapshot.revision) ||
+            !Object.is(snapshot.index, nextSnapshot.index) ||
+            !Object.is(snapshot.structure, nextSnapshot.structure) ||
+            !Object.is(snapshot.scenePlacement, nextSnapshot.scenePlacement) ||
+            !Object.is(snapshot.characters, nextSnapshot.characters) ||
+            !Object.is(snapshot.music, nextSnapshot.music) ||
+            !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId) ||
+            !Object.is(snapshot.activeBlockType, nextSnapshot.activeBlockType);
 
         if (!didChange) {
             return;
         }
 
         snapshot = nextSnapshot;
-        incrementSidebarStorePatchCount();
         emit();
     };
 

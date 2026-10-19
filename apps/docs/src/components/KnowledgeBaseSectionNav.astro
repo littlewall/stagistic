@@ -1,0 +1,44 @@
+---
+import {documentationSections, getDocumentationSection} from '../navigation/sections';
+
+const currentSection = getDocumentationSection(Astro.url.pathname);
+---
+
+<nav class="sectionNav" aria-label="Documentation sections">
+    {documentationSections.map(section => (
+        <a href={section.href} aria-current={section === currentSection ? 'location' : undefined}>
+            {section.label}
+        </a>
+    ))}
+</nav>
+
+<style>
+.sectionNav {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.sectionNav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    padding-inline: 0.625rem;
+    font-weight: 500;
+    color: var(--kb-header-text);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+}
+
+.sectionNav a:hover,
+.sectionNav a[aria-current] {
+    border-bottom-color: currentcolor;
+}
+
+.sectionNav a:focus-visible {
+    outline: 2px solid var(--kb-focus);
+    outline-offset: 3px;
+}
+</style>

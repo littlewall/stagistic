@@ -13,13 +13,7 @@ export const BLOCK_NODE_TYPES = ALL_BLOCK_SPECS.map(spec => spec.nodeType);
 
 export type BlockNodeType = ScriptBlockNodeType;
 
-const BLOCK_NODE_TYPE_SET = new Set<string>(BLOCK_NODE_TYPES);
-
 const DEFAULT_BLOCK_NODE_TYPE: BlockNodeType = DEFAULT_SCRIPT_BLOCK_NODE_TYPE;
-
-export const isBlockNodeType = (value: unknown): value is BlockNodeType => {
-    return typeof value === 'string' && BLOCK_NODE_TYPE_SET.has(value);
-};
 
 export const normalizeBlockNodeType = (value: unknown): BlockNodeType => {
     return resolveScriptBlockNodeType(value) ?? DEFAULT_BLOCK_NODE_TYPE;

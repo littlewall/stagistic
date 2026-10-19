@@ -1,77 +1,30 @@
-import {
-    useScriptActions,
-    useScriptRepository,
-} from '@stagistic/app-core';
-import {
-    type EditorSettings,
-    type EditorSettingsOverride,
-    type TitlePageSettings,
-} from '@stagistic/script';
+import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
 import {isApplePlatform} from '@stagistic/shared';
-import {
-    ScriptSettingsModal,
-    useKeyedFieldDrafts,
-} from '@stagistic/ui';
-import {
-    createContext,
-    type ReactNode,
-    useContext,
-    useMemo,
-} from 'react';
+import {ScriptSettingsModal, useKeyedFieldDrafts} from '@stagistic/ui';
+import {type ReactNode, useMemo} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {type AttributeManagerPanelId} from '../attributes/attributeManagerMenu';
-import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
-import {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
-import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
-import {useScriptMusicState} from '../editor/music';
-import {ScriptEditorSettingsPanel} from '../editor/settings';
-import {ScriptCharactersProvider} from '../ScriptCharactersContext';
-import {useScriptWorkspace} from '../ScriptWorkspaceContext';
-import {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
-import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
-import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
-import {useScriptTitleDraft} from '../useScriptTitleDraft';
-import {useTitlePageDraft} from '../useTitlePageDraft';
-import {deleteAttributeManagerMusic} from './deleteAttributeManagerMusic';
-import {deleteAttributeManagerScene} from './deleteAttributeManagerScene';
-import {DraftSaveError} from './DraftSaveError';
-import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
+import {deleteAttributeManagerMusic} from '../attribute-manager/deleteAttributeManagerMusic';
+import {deleteAttributeManagerScene} from '../attribute-manager/deleteAttributeManagerScene';
+import {ScriptAttributeManagerModal} from '../attribute-manager/ScriptAttributeManagerModal';
+import {useAttributeManagerItems} from '../attribute-manager/useAttributeManagerItems';
+import {useAttributeManagerModalState} from '../attribute-manager/useAttributeManagerModalState';
+import {useMusicAttachmentsState} from '../attribute-manager/useMusicAttachmentsState';
+import {useScriptPlacesState} from '../attribute-manager/useScriptPlacesState';
+import {DraftSaveError} from '../drafts/DraftSaveError';
+import {useScriptEditorSettingsDraft} from '../drafts/useScriptEditorSettingsDraft';
+import {useScriptTitleDraft} from '../drafts/useScriptTitleDraft';
+import {useTitlePageDraft} from '../drafts/useTitlePageDraft';
+import {useScriptMusicState} from '../editor/music/useScriptMusicState';
+import {ScriptCharactersProvider} from '../workspace/ScriptCharactersContext';
+import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
+import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
+import {ScriptEditorSettingsPanel} from './panels';
+import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
-import {useAttributeManagerItems} from './useAttributeManagerItems';
+import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 
-const BLOCK_LABEL_BY_TYPE = new Map(
-    SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
-);
-
-interface ScriptSettingsModalContextValue {
-    resolvedScriptSettings: EditorSettings,
-    effectiveScriptSettingsDraft: EditorSettingsOverride,
-    isEditorPresentationHydrated: boolean,
-    titlePageDraft: TitlePageSettings,
-    scriptTitleDraft: string,
-    updateScriptTitle: (title: string) => void,
-    musicState: ReturnType<typeof useScriptMusicState>,
-    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
-    openSettingsModal: () => void,
-    openAttributeManagerModal: () => void,
-    openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
-    openAttributeManagerCharacter: (characterId: string) => void,
-    openAttributeManagerGroup: (groupId: string) => void,
-    openAttributeManagerMusic: (musicId: string) => void,
-}
-
-const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
-
-export const useScriptSettingsModal = (): ScriptSettingsModalContextValue => {
-    const context = useContext(ScriptSettingsModalContext);
-
-    if (!context) {
-        throw new Error('useScriptSettingsModal must be used inside ScriptSettingsModalProvider');
-    }
-
-    return context;
-};
+const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const));
 
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();
@@ -92,7 +45,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         resolvedScriptSettings,
         updateBlockSettings,
         resetBlockSettings,
-        updateCharacterColorSaturation,
+        updateCharacterDecoration,
         updateStructureSettings,
         updatePageSettings,
         updateHeaderFooterSettings,
@@ -167,7 +120,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characterCatalog,
         initialValue,
         resolvedScriptSettings,
-        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
     const musicState = useScriptMusicState(currentScriptId, musicCatalog);
@@ -189,15 +141,10 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characters: charactersContextValue,
         music: musicState.music,
         getMusicTitleDraft,
-        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
     });
-    const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
-    const draftSaveError = scriptSettingsDraftError
-        ?? titlePageDraftError
-        ?? scriptTitleDraftError;
-    const isEditorPresentationHydrated = isScriptSettingsHydrated
-        && isTitlePageHydrated
-        && isScriptTitleHydrated;
+    const shortcutPrefix = isApplePlatform() ? 'Control' : 'Alt';
+    const draftSaveError = scriptSettingsDraftError ?? titlePageDraftError ?? scriptTitleDraftError;
+    const isEditorPresentationHydrated = isScriptSettingsHydrated && isTitlePageHydrated && isScriptTitleHydrated;
     const retryFailedDrafts = () => {
         void Promise.allSettled([
             scriptSettingsDraftError ? retryScriptSettings() : Promise.resolve(),
@@ -222,37 +169,40 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         applyDocumentChange,
     });
 
-    const contextValue = useMemo<ScriptSettingsModalContextValue>(() => ({
-        resolvedScriptSettings,
-        effectiveScriptSettingsDraft,
-        isEditorPresentationHydrated,
-        titlePageDraft,
-        scriptTitleDraft,
-        updateScriptTitle,
-        musicState,
-        musicAttachmentsState,
-        openSettingsModal,
-        openAttributeManagerModal,
-        openAttributeManagerModalWithPanel,
-        openAttributeManagerCharacter,
-        openAttributeManagerGroup,
-        openAttributeManagerMusic,
-    }), [
-        musicState,
-        musicAttachmentsState,
-        effectiveScriptSettingsDraft,
-        isEditorPresentationHydrated,
-        openAttributeManagerModal,
-        openAttributeManagerModalWithPanel,
-        openAttributeManagerCharacter,
-        openAttributeManagerGroup,
-        openAttributeManagerMusic,
-        openSettingsModal,
-        resolvedScriptSettings,
-        scriptTitleDraft,
-        titlePageDraft,
-        updateScriptTitle,
-    ]);
+    const contextValue = useMemo<ScriptSettingsModalContextValue>(
+        () => ({
+            resolvedScriptSettings,
+            effectiveScriptSettingsDraft,
+            isEditorPresentationHydrated,
+            titlePageDraft,
+            scriptTitleDraft,
+            updateScriptTitle,
+            musicState,
+            musicAttachmentsState,
+            openSettingsModal,
+            openAttributeManagerModal,
+            openAttributeManagerModalWithPanel,
+            openAttributeManagerCharacter,
+            openAttributeManagerGroup,
+            openAttributeManagerMusic,
+        }),
+        [
+            musicState,
+            musicAttachmentsState,
+            effectiveScriptSettingsDraft,
+            isEditorPresentationHydrated,
+            openAttributeManagerModal,
+            openAttributeManagerModalWithPanel,
+            openAttributeManagerCharacter,
+            openAttributeManagerGroup,
+            openAttributeManagerMusic,
+            openSettingsModal,
+            resolvedScriptSettings,
+            scriptTitleDraft,
+            titlePageDraft,
+            updateScriptTitle,
+        ],
+    );
 
     return (
         <ScriptSettingsModalContext.Provider value={contextValue}>
@@ -268,10 +218,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     onSelectPanel={handleSelectSettingsPanel}
                     onToggleExpand={toggleExpanded}
                 >
-                    <DraftSaveError
-                        error={draftSaveError}
-                        onRetry={retryFailedDrafts}
-                    />
+                    <DraftSaveError error={draftSaveError} onRetry={retryFailedDrafts} />
                     <ScriptEditorSettingsPanel
                         panelId={activePanelId}
                         resolvedScriptSettings={resolvedScriptSettings}
@@ -282,7 +229,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             onResetBlockSettings: resetBlockSettings,
                             onUpdateBlockSettings: updateBlockSettings,
                         }}
-                        visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
+                        visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
                         structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
                         pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
                         headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
@@ -313,7 +260,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     characters={charactersContextValue}
                     characterItems={attributeManagerCharacters}
                     groupItems={attributeManagerGroups}
-                    characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
                     sceneItems={attributeManagerScenes}
                     firstSceneHeadingBlockId={firstSceneHeadingBlockId}
                     onDeleteScene={handleDeleteScene}

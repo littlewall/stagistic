@@ -1,7 +1,9 @@
 import {useSortable} from '@dnd-kit/react/sortable';
-import {clsx} from '@stagistic/ui';
+import clsx from 'clsx';
 import {
-    memo, useCallback, useRef,
+    memo,
+    useCallback,
+    useRef,
 } from 'react';
 
 import {ACT_DND_TYPE, SCENE_DND_TYPE} from './dnd';
@@ -143,7 +145,10 @@ export const StructureRowAct = memo(({index, ...content}: StructureRowActProps) 
     });
 
     return (
-        <li ref={ref} data-structure-act-id={content.blockId}>
+        <li
+            ref={ref}
+            data-structure-act-id={content.blockId}
+        >
             <div className={clsx(styles.itemRow, styles.actRow, isDropTarget && styles.actDropTarget)}>
                 <ActRowContent {...content} />
             </div>

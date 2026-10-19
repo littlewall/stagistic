@@ -32,7 +32,8 @@ const initialValue: ScriptDocument = {
                 {
                     type: 'text',
                     text: 'Lights\u00A0fade\u00A0slowly\u00A0across\u00A0the\u00A0empty\u00A0stage ',
-                }, {
+                },
+                {
                     type: 'musicStart',
                     attrs: {
                         musicId: 'music-1',

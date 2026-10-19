@@ -1,4 +1,4 @@
-import type {TranscriptResult} from '../visualLine';
+import type {TranscriptResult} from '../model/visualLine';
 import {drawPdf} from './drawPdf';
 
 interface StartMessage {

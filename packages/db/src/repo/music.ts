@@ -1,7 +1,7 @@
 import {uuidv7} from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
-import type {ScriptMusicRepository} from '../scriptRepository';
+import type {ScriptMusicRepository} from '../types/scriptRepository';
 import type {
     GetDb,
     RecordOutbox,
@@ -135,7 +135,9 @@ export const createMusicHandlers = ({
                 opType: 'music.delete',
                 occurredAt: now,
                 payloadJson: JSON.stringify({
-                    scriptId, musicId, deletedAt: now,
+                    scriptId,
+                    musicId,
+                    deletedAt: now,
                 }),
             }, tx);
         });

@@ -5,10 +5,9 @@ import {
     type RefObject,
     type SetStateAction,
     useCallback,
-    useEffect,
-    useRef,
 } from 'react';
 
+import {useAnimationFrameUpdate} from '../../hooks/useAnimationFrameUpdate';
 import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {
     computeCharacterSuggestions,
@@ -22,7 +21,6 @@ interface UseSuggestionOverlayComputationArgs {
     canvasRef: RefObject<HTMLElement | null>,
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
     liveCountsByKey: ReadonlyMap<string, number>,
-    characterColorSaturation?: number,
     suppressedSelectionRef: MutableRefObject<SuppressedSelection | null>,
     suggestionOrderByKeyRef: MutableRefObject<ReadonlyMap<string, number>>,
     closeOverlay: () => void,
@@ -46,13 +44,11 @@ export const useSuggestionOverlayComputation = ({
     canvasRef,
     normalizedPersistentCharacters,
     liveCountsByKey,
-    characterColorSaturation,
     suppressedSelectionRef,
     suggestionOrderByKeyRef,
     closeOverlay,
     setOverlayState,
 }: UseSuggestionOverlayComputationArgs) => {
-    const rafIdRef = useRef<number | null>(null);
     const updateOverlay = useCallback(() => {
         const canvas = canvasRef.current;
 
@@ -83,7 +79,6 @@ export const useSuggestionOverlayComputation = ({
             liveCountsByKey,
             suppressedSelection: suppressedSelectionRef.current,
             previousOrderByKey: suggestionOrderByKeyRef.current,
-            characterColorSaturation,
         });
 
         if (!overlay || overlay.shouldKeepSuppressedSelection || !overlay.style || !overlay.suggestions || overlay.suggestions.length === 0) {
@@ -125,7 +120,6 @@ export const useSuggestionOverlayComputation = ({
         });
     }, [
         canvasRef,
-        characterColorSaturation,
         closeOverlay,
         editor,
         liveCountsByKey,
@@ -134,34 +128,11 @@ export const useSuggestionOverlayComputation = ({
         suggestionOrderByKeyRef,
         suppressedSelectionRef,
     ]);
-    const cancelScheduledOverlayUpdate = useCallback(() => {
-        if (rafIdRef.current === null) {
-            return;
-        }
-
-        window.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-    }, []);
-    const scheduleOverlayUpdate = useCallback(() => {
-        if (rafIdRef.current !== null) {
-            return;
-        }
-
-        rafIdRef.current = window.requestAnimationFrame(() => {
-            rafIdRef.current = null;
-            updateOverlay();
-        });
-    }, [updateOverlay]);
-    const runOverlayUpdateNow = useCallback(() => {
-        cancelScheduledOverlayUpdate();
-        updateOverlay();
-    }, [cancelScheduledOverlayUpdate, updateOverlay]);
-
-    useEffect(() => {
-        return () => {
-            cancelScheduledOverlayUpdate();
-        };
-    }, [cancelScheduledOverlayUpdate]);
+    const {
+        cancel: cancelScheduledOverlayUpdate,
+        schedule: scheduleOverlayUpdate,
+        runNow: runOverlayUpdateNow,
+    } = useAnimationFrameUpdate(updateOverlay);
 
     return {
         updateOverlay,

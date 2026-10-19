@@ -1,0 +1,143 @@
+.table {
+    width: 100%;
+}
+
+.headerRow {
+    display: grid;
+    column-gap: var(--space-lg);
+    padding: 0 0 var(--space-md);
+
+    & .headerCell {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-muted);
+    }
+}
+
+.dataRow {
+    display: grid;
+    column-gap: var(--space-lg);
+    padding: var(--space-md) 0;
+
+    &:hover {
+        & .removeRowButton {
+            opacity: 1;
+        }
+    }
+
+    & .dataCell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    & .deleteCell {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: var(--space-sm);
+    }
+
+    & .removeRowButton {
+        cursor: pointer;
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-none);
+        color: var(--color-text-muted);
+        opacity: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        transition: opacity var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+
+        &:hover {
+            color: var(--color-status-danger);
+            opacity: 1;
+        }
+    }
+}
+
+.cellInput {
+    composes: control from '../shared/formControlStyles.module.css';
+    display: block;
+    height: var(--control-height-lg);
+    padding: 0 var(--control-trigger-padding-inline);
+
+    &:hover {
+        background: var(--control-trigger-hover-bg);
+    }
+
+    &.withDelete {
+        padding-right: calc(var(--control-trigger-padding-inline) + var(--control-height-sm));
+    }
+}
+
+.arrayCell {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-sm) * .5);
+
+    & .arrayEntry {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            & .removeEntryButton {
+                opacity: 1;
+            }
+        }
+
+        & .removeEntryButton {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            right: var(--space-sm);
+            transform: translateY(-50%);
+            padding: var(--space-px) var(--space-sm);
+            font-size: var(--font-size-sm);
+            line-height: var(--line-height-none);
+            color: var(--color-text-muted);
+            opacity: 0;
+            background: transparent;
+            border: none;
+            transition: opacity var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+
+            &:hover {
+                color: var(--color-status-danger);
+                opacity: 1;
+            }
+        }
+    }
+
+    & .addEntryButton {
+        margin-top: var(--space-xs);
+    }
+}
+
+.footer {
+    display: grid;
+    column-gap: var(--space-lg);
+    padding: var(--space-md) 0;
+
+    & .addRowButton {
+        grid-column: 1 / -2;
+    }
+}
+
+.addEntryButton,
+.addRowButton {
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+    }
+}

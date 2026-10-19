@@ -7,7 +7,7 @@ import {
     vi,
 } from 'vite-plus/test';
 
-import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
+import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attribute-manager/attributeManagerMenu';
 import {AttributeManagerSidebarButton} from './AttributeManagerSidebarButton';
 
 const openAttributeManagerModalWithPanel = vi.fn();
@@ -29,7 +29,7 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+vi.mock('../../settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({openAttributeManagerModalWithPanel}),
 }));
 

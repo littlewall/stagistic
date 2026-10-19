@@ -13,7 +13,9 @@ import {
 import type {EditorView} from '@tiptap/pm/view';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {characterTagComposeKey} from './composeState';

@@ -29,7 +29,9 @@ const isSceneNode = (node: ProseMirrorNode): boolean => {
  */
 export const selectionSpansScene = (state: EditorState): boolean => {
     const {
-        from, to, empty,
+        from,
+        to,
+        empty,
     } = state.selection;
 
     if (empty) {
@@ -66,7 +68,9 @@ export const selectionSpansScene = (state: EditorState): boolean => {
 export const deleteSelectionPreservingScenes = (editor: Editor): boolean => {
     const {state} = editor;
     const {
-        from, to, empty,
+        from,
+        to,
+        empty,
     } = state.selection;
 
     if (empty || !selectionSpansScene(state)) {

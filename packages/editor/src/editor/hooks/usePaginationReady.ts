@@ -1,7 +1,8 @@
 import type {Editor as TiptapEditor} from '@tiptap/core';
 import {
-    useEffect,
+    useCallback,
     useState,
+    useSyncExternalStore,
 } from 'react';
 
 import {paginationKey} from '../tiptap/extensions/pagination/plugin/createPaginationPlugin';
@@ -16,33 +17,26 @@ const hasComputedPagination = (editor: TiptapEditor) => Boolean(
  * appear together instead of exposing the raw text flow first.
  */
 export const usePaginationReady = (editor: TiptapEditor) => {
-    const [, setRevision] = useState(0);
-    const isReady = hasComputedPagination(editor);
-
-    useEffect(() => {
-        if (isReady) {
-            return undefined;
-        }
-
-        const handleTransaction = () => {
-            if (hasComputedPagination(editor)) {
-                setRevision(revision => revision + 1);
-                editor.off('transaction', handleTransaction);
-            }
-        };
-
-        editor.on('transaction', handleTransaction);
-
-        /*
-         * Close the render-to-subscribe race if pagination completed between
-         * the readiness read above and this effect.
-         */
-        handleTransaction();
+    const subscribe = useCallback((notify: () => void) => {
+        editor.on('transaction', notify);
 
         return () => {
-            editor.off('transaction', handleTransaction);
+            editor.off('transaction', notify);
         };
-    }, [editor, isReady]);
+    }, [editor]);
+    const getSnapshot = useCallback(() => hasComputedPagination(editor), [editor]);
 
-    return isReady;
+    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+};
+
+/** Like `usePaginationReady`, but stays true once the canvas has been presented. */
+export const useInitialCanvasReady = (editor: TiptapEditor) => {
+    const isPaginationReady = usePaginationReady(editor);
+    const [hasPresentedCanvas, setHasPresentedCanvas] = useState(isPaginationReady);
+
+    if (isPaginationReady && !hasPresentedCanvas) {
+        setHasPresentedCanvas(true);
+    }
+
+    return hasPresentedCanvas || isPaginationReady;
 };

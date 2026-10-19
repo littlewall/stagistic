@@ -8,12 +8,7 @@ import type {ScriptDocument} from '../document';
 
 describe('removeMusicFromScriptDocument', () => {
     it('removes the selected start and paired out while preserving other music', async () => {
-        const scriptApi = await import('../index') as typeof import('../index') & {
-            removeMusicFromScriptDocument?: (
-                document: ScriptDocument,
-                musicId: string,
-            ) => {value: ScriptDocument, changed: boolean},
-        };
+        const scriptApi = await import('../index');
         const removeMusic = scriptApi.removeMusicFromScriptDocument;
         const document: ScriptDocument = {
             type: 'doc',
@@ -22,7 +17,8 @@ describe('removeMusicFromScriptDocument', () => {
                     type: 'stageDirection',
                     attrs: {id: 'block-1'},
                     content: [
-                        {type: 'text', text: 'First'}, {
+                        {type: 'text', text: 'First'},
+                        {
                             type: 'musicStart',
                             attrs: {
                                 musicId: 'music-1',
@@ -42,7 +38,8 @@ describe('removeMusicFromScriptDocument', () => {
                     type: 'stageDirection',
                     attrs: {id: 'block-3'},
                     content: [
-                        {type: 'text', text: 'Second'}, {
+                        {type: 'text', text: 'Second'},
+                        {
                             type: 'musicStart',
                             attrs: {
                                 musicId: 'music-2',

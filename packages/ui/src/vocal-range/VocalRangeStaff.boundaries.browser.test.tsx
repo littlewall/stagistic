@@ -1,6 +1,7 @@
 import '../../styles/tokens.css';
 
 import {parsePitch} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {ReactElement} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -78,13 +79,22 @@ const dragNoteToPosition = async (
     vi.spyOn(note, 'releasePointerCapture').mockImplementation(() => undefined);
 
     note.dispatchEvent(new PointerEvent('pointerdown', {
-        bubbles: true, pointerId: 1, button: 0, clientY: sourceClientY,
+        bubbles: true,
+        pointerId: 1,
+        button: 0,
+        clientY: sourceClientY,
     }));
     note.dispatchEvent(new PointerEvent('pointermove', {
-        bubbles: true, pointerId: 1, buttons: 1, clientY,
+        bubbles: true,
+        pointerId: 1,
+        buttons: 1,
+        clientY,
     }));
     note.dispatchEvent(new PointerEvent('pointerup', {
-        bubbles: true, pointerId: 1, button: 0, clientY,
+        bubbles: true,
+        pointerId: 1,
+        button: 0,
+        clientY,
     }));
 };
 
@@ -117,10 +127,16 @@ describe('VocalRangeStaff range boundaries', () => {
         vi.spyOn(note, 'releasePointerCapture').mockImplementation(() => undefined);
 
         note.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientY: 84,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientY: 84,
         }));
         note.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId: 1, button: 0, clientY: 84,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientY: 84,
         }));
 
         await waitForElement(host, '[data-selected]');
@@ -185,12 +201,22 @@ describe('VocalRangeStaff range boundaries', () => {
 
     it.each([
         {
-            selected: 'low', action: 'Octave up', low: 'C4', high: 'A4',
-        }, {
-            selected: 'high', action: 'Octave down', low: 'C4', high: 'A4',
+            selected: 'low',
+            action: 'Octave up',
+            low: 'C4',
+            high: 'A4',
+        },
+        {
+            selected: 'high',
+            action: 'Octave down',
+            low: 'C4',
+            high: 'A4',
         },
     ])('disables $action when it would move $selected across the other endpoint', async ({
-        selected, action, low, high,
+        selected,
+        action,
+        low,
+        high,
     }) => {
         const onChange = vi.fn();
         const host = await render(
@@ -216,7 +242,8 @@ describe('VocalRangeStaff range boundaries', () => {
     });
 
     it.each([{selected: 'low', action: 'Sharp'}, {selected: 'high', action: 'Flat'}])('disables $action when it would invert an equal range from the $selected endpoint', async ({
-        selected, action,
+        selected,
+        action,
     }) => {
         const onChange = vi.fn();
         const host = await render(
@@ -249,8 +276,8 @@ describe('VocalRangeStaff note and ledger visibility', () => {
             />,
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const notehead = note.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const halo = note.querySelector<SVGEllipseElement>('[data-selection-halo]')!;
+        const notehead = requireValue(note.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const halo = requireValue(note.querySelector<SVGEllipseElement>('[data-selection-halo]'));
         const restingFill = getComputedStyle(notehead).fill;
 
         await userEvent.hover(note);
@@ -331,7 +358,7 @@ describe('VocalRangeStaff note and ledger visibility', () => {
         );
         const header = await waitForElement<HTMLButtonElement>(host, '[aria-label="Edit low note C3"]');
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const halo = note.querySelector<SVGEllipseElement>('[data-selection-halo]')!;
+        const halo = requireValue(note.querySelector<SVGEllipseElement>('[data-selection-halo]'));
 
         await page.elementLocator(header).click();
 
@@ -348,8 +375,8 @@ describe('VocalRangeStaff note and ledger visibility', () => {
             />,
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const notehead = note.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const hitTarget = note.querySelector<SVGEllipseElement>('ellipse:first-child')!;
+        const notehead = requireValue(note.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const hitTarget = requireValue(note.querySelector<SVGEllipseElement>('ellipse:first-child'));
         const staffLines = [...host.querySelectorAll<SVGLineElement>('[data-staff-line]')];
         const lineSpacing = Math.abs(
             Number(staffLines[1].getAttribute('y1'))
@@ -394,8 +421,8 @@ describe('VocalRangeStaff note and ledger visibility', () => {
             />,
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const notehead = note.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const ledger = note.querySelector<SVGLineElement>('[data-ledger-line]')!;
+        const notehead = requireValue(note.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const ledger = requireValue(note.querySelector<SVGLineElement>('[data-ledger-line]'));
         const ledgerWidth = Number(ledger.getAttribute('x2')) - Number(ledger.getAttribute('x1'));
         const noteWidth = Number(notehead.getAttribute('rx')) * 2;
 

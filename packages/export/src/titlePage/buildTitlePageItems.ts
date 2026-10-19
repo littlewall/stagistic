@@ -5,10 +5,8 @@ import {
     type TitlePageSettings,
 } from '@stagistic/script';
 
-import type {
-    VisualLine,
-    VisualRun,
-} from '../visualLine';
+import type {VisualLine, VisualRun} from '../model/visualLine';
+import {buildTitlePageLogoItem} from './buildTitlePageLogoItem';
 
 /*
  * The title page reuses the same embedded mono font as the script body:
@@ -45,12 +43,7 @@ interface Geometry {
 
 const charWidthFor = (fontSizePx: number) => fontSizePx * CHAR_WIDTH_EM;
 
-const makeRun = (
-    text: string,
-    x: number,
-    fontSizePx: number,
-    emphasis: Emphasis,
-): VisualRun => ({
+const makeRun = (text: string, x: number, fontSizePx: number, emphasis: Emphasis): VisualRun => ({
     text,
     x,
     fontSizePx,
@@ -60,35 +53,19 @@ const makeRun = (
     fontFamily: MONO_FONT_FAMILY,
 });
 
-const centeredLine = (
-    geometry: Geometry,
-    text: string,
-    y: number,
-    fontSizePx: number,
-    emphasis: Emphasis = {},
-): VisualLine => {
+const centeredLine = (geometry: Geometry, text: string, y: number, fontSizePx: number, emphasis: Emphasis = {}): VisualLine => {
     const textWidthPx = text.length * charWidthFor(fontSizePx);
     const x = (geometry.pageWidthPx - textWidthPx) / 2;
 
     return {y, runs: [makeRun(text, x, fontSizePx, emphasis)]};
 };
 
-const leftLine = (
-    geometry: Geometry,
-    text: string,
-    y: number,
-    emphasis: Emphasis = {},
-): VisualLine => ({
+const leftLine = (geometry: Geometry, text: string, y: number, emphasis: Emphasis = {}): VisualLine => ({
     y,
     runs: [makeRun(text, geometry.marginLeftPx, geometry.fontSizePx, emphasis)],
 });
 
-const rightLine = (
-    geometry: Geometry,
-    text: string,
-    y: number,
-    emphasis: Emphasis = {},
-): VisualLine => {
+const rightLine = (geometry: Geometry, text: string, y: number, emphasis: Emphasis = {}): VisualLine => {
     const textWidthPx = text.length * charWidthFor(geometry.fontSizePx);
     const x = geometry.pageWidthPx - geometry.marginRightPx - textWidthPx;
 
@@ -97,7 +74,10 @@ const rightLine = (
 
 const formatCreditLine = (credit: TitlePageCredit): string => {
     const label = credit.credit.trim();
-    const authors = credit.authors.map(author => author.trim()).filter(author => author.length > 0).join(', ');
+    const authors = credit.authors
+        .map(author => author.trim())
+        .filter(author => author.length > 0)
+        .join(', ');
 
     return [label, authors].filter(part => part.length > 0).join(' ');
 };
@@ -107,11 +87,7 @@ const formatCreditLine = (credit: TitlePageCredit): string => {
  * lines in the same coordinate space as the script transcript. Always emits at
  * least the title; the caller appends the page break.
  */
-export const buildTitlePageItems = (
-    titlePage: TitlePageSettings | null,
-    scriptTitle: string,
-    settings: EditorSettings,
-): VisualLine[] => {
+export const buildTitlePageItems = (titlePage: TitlePageSettings | null, scriptTitle: string, settings: EditorSettings): VisualLine[] => {
     const pageHeightPx = settings.page.heightPx;
     const fontSizePx = settings.typography.fontSizePx;
     const geometry: Geometry = {
@@ -127,6 +103,11 @@ export const buildTitlePageItems = (
     const titleFontSizePx = fontSizePx * TITLE_FONT_SCALE;
     const title = scriptTitle.trim().length > 0 ? scriptTitle.trim() : UNTITLED;
     let titleY = pageHeightPx * TITLE_Y_RATIO;
+    const logo = buildTitlePageLogoItem(titlePage, settings);
+
+    if (logo) {
+        titleY = Math.max(titleY, logo.y + logo.heightPx + geometry.lineHeightPx * 2);
+    }
 
     lines.push(centeredLine(geometry, title, titleY, titleFontSizePx, {bold: true}));
 
@@ -137,9 +118,7 @@ export const buildTitlePageItems = (
         lines.push(centeredLine(geometry, subtitle, titleY, fontSizePx));
     }
 
-    const creditLines = (titlePage?.credits ?? [])
-        .map(formatCreditLine)
-        .filter(line => line.length > 0);
+    const creditLines = (titlePage?.credits ?? []).map(formatCreditLine).filter(line => line.length > 0);
     let creditsY = pageHeightPx * CREDITS_Y_RATIO;
 
     creditLines.forEach(line => {

@@ -1,0 +1,26 @@
+.trigger {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    outline: none;
+
+    &[data-hovered],
+    &[data-pressed],
+    &[data-focus-visible] {
+        color: var(--color-text);
+        background: var(--state-hover);
+    }
+}
+
+.icon {
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+}

@@ -1,0 +1,252 @@
+/* Holds the one-row footprint in the toolbar; the surface grows over the content below. */
+.slot {
+    --search-control-width: 23rem;
+    --search-row-height: calc(var(--control-trigger-height) - 2px);
+
+    position: relative;
+    flex: none;
+    width: var(--search-control-width);
+    height: var(--control-trigger-height);
+}
+
+.control {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    align-items: stretch;
+    box-sizing: border-box;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--control-trigger-radius);
+    box-shadow: none;
+    transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        background: var(--control-trigger-hover-bg);
+    }
+
+    &:focus-within {
+        background: var(--color-surface);
+        border-color: var(--color-border);
+    }
+
+    &:has(input[data-focus-visible]) {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    &[data-expanded] {
+        z-index: var(--menu-z-index);
+        background: var(--menu-bg);
+        border-color: var(--color-border);
+        box-shadow: var(--menu-shadow);
+    }
+}
+
+/* Full-height chevron column, as in VS Code's find widget; doubled class outranks IconButton's size. */
+.control .toggle {
+    flex: none;
+    align-self: stretch;
+    width: 1.25rem;
+    height: auto;
+    margin: var(--space-xs);
+    border-radius: calc(var(--control-trigger-radius) - var(--space-xs));
+
+    &[aria-expanded = 'true'] .toggleIcon {
+        transform: none;
+    }
+
+    & .toggleIcon {
+        transform: rotate(-90deg);
+        transition: transform var(--duration-normal) var(--ease-standard);
+    }
+}
+
+.rows {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+}
+
+.input {
+    height: var(--search-row-height);
+
+    /* `Input` pins its own control height; each row is the control minus the surface border. */
+    & input {
+        height: 100%;
+    }
+}
+
+/* Beside the chevron the text starts right after it, as in VS Code. */
+.control:has(.toggle) .input input {
+    padding-left: var(--space-sm);
+}
+
+.replaceRow {
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.actions {
+    display: inline-flex;
+    gap: 0;
+    align-items: center;
+    height: 100%;
+    padding-right: var(--space-xs);
+
+    & > button[aria-pressed = 'true'] {
+        color: var(--color-text);
+    }
+}
+
+.divider {
+    flex: none;
+    width: 1px;
+    height: 1rem;
+    margin: 0 var(--space-sm);
+    background: var(--color-border-subtle);
+}
+
+.clearIcon {
+    opacity: .5;
+}
+
+.indicator {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2rem;
+    font-size: var(--font-size-xxs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+
+    & svg {
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
+    }
+}
+
+/* Toggled-on look while its panel is open, as the pressed match toggles. */
+.filterTrigger[aria-expanded = 'true'] {
+    color: var(--color-text);
+    background: var(--state-hover);
+}
+
+.filterHead {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 1.25rem;
+}
+
+.filterLabel {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+}
+
+.filterSummary {
+    color: var(--color-text-placeholder);
+}
+
+.filterReset {
+    cursor: pointer;
+    margin-right: calc(-1 * var(--space-sm));
+    padding: var(--space-px) var(--space-sm);
+    font: inherit;
+    font-size: var(--font-size-xs);
+    color: var(--color-text);
+    background: var(--state-hover);
+    border: none;
+    border-radius: var(--radius-sm);
+    outline: none;
+
+    &[data-hovered] {
+        background: var(--color-surface-raised);
+    }
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+}
+
+.filterList {
+    display: flex;
+    flex-direction: column;
+    min-width: 12rem;
+    margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-sm)) 0;
+    outline: none;
+}
+
+.filterOption {
+    cursor: pointer;
+    display: flex;
+    gap: var(--menu-item-gap);
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0 var(--space-sm);
+    font-size: var(--menu-item-font-size);
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    outline: none;
+
+    &[data-hovered],
+    &[data-focus-visible] {
+        background: var(--state-hover);
+    }
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: calc(-1 * var(--focus-ring-width));
+    }
+
+    &[data-selected] {
+        color: var(--color-text);
+    }
+}
+
+.filterIcon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+
+    & svg {
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.filterOptionLabel {
+    flex: 1;
+}
+
+.filterCheck {
+    flex: none;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    color: var(--color-text);
+    opacity: 0;
+
+    [data-selected] > & {
+        opacity: 1;
+    }
+}
+
+/* With no filter every block is searched: rows read as included, checks stay faint. */
+.filterList[data-all] {
+    & .filterOption {
+        color: var(--color-text);
+    }
+
+    & .filterCheck {
+        opacity: .28;
+    }
+}

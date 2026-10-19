@@ -1,4 +1,4 @@
-import type {TranscriptResult} from '../visualLine';
+import type {TranscriptResult} from '../model/visualLine';
 
 type WorkerResponse = {type: 'DONE', blob: Blob} | {type: 'ERROR', message: string};
 

@@ -9,6 +9,7 @@
  *   layout     — auto-focus and sidebar slots (also accepted as React children)
  *   requests   — structural mutations driven from outside (insert/rename/move acts)
  *   callbacks  — value/index/active-block change notifications and block UI events
+ *   search     — host-persisted search preferences (the block-type filter)
  *
  * Data flows in via `document` and `settings`; changes flow back out via
  * `callbacks`. Save callbacks are wired separately so the editor can debounce
@@ -17,13 +18,16 @@
 import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
+    ScriptBlockNodeType,
     ScriptDocument,
+    ScriptSummaryMetadata,
 } from '@stagistic/script';
 import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
 import type {EditorSnapshotStore} from './live/store';
 import type {EditorSurfaceCache} from './surface/editorSurfaceCache';
+import type {CommentBlockMerge, EditorCommentThreadRef} from './tiptap/extensions/comments';
 import type {BlockNodeType} from './tiptap/scriptCore';
 
 export interface PersistentCharacterRef {
@@ -166,12 +170,7 @@ export interface EditorLiveSnapshot {
     activeBlockType: BlockNodeType | null,
 }
 
-export type EditorBlockUiEventType =
-    | 'activeBlockChange'
-    | 'blockTypeChange'
-    | 'blockInserted'
-    | 'blockRemoved'
-    | 'blockReordered';
+export type EditorBlockUiEventType = 'activeBlockChange' | 'blockTypeChange' | 'blockInserted' | 'blockRemoved' | 'blockReordered';
 
 export type EditorBlockUiEvent =
     | {
@@ -226,11 +225,20 @@ export interface EditorLifecycleCallbacks {
     onMusicUnassigned?: (musicId: string) => void,
     onRequestDeleteScene?: (sceneHeadingBlockId: string) => void,
     onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void,
+    /** A comment draft started or a margin marker was clicked: reveal the Comments panel. */
+    onRequestRevealComments?: () => void,
+    /** Whether the Comments panel is visible; a marker click on the active thread then closes it instead of revealing. */
+    isCommentsPanelOpen?: () => boolean,
+    /** An open comment underline was clicked (never opens the panel on its own). */
+    onCommentAnchorClick?: (threadIds: readonly string[]) => void,
+    /** Blocks were joined; block-anchored threads of `fromBlockId` belong to `toBlockId` now. */
+    onCommentBlocksMerged?: (merges: readonly CommentBlockMerge[]) => void,
 }
 
 export interface EditorSaveCallbacks {
-    onAutoSave?: (value: ScriptDocument) => SaveResult,
-    onManualSave?: (value: ScriptDocument) => SaveResult,
+    onAutoSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
+    onManualSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
+    onSummaryMetadataChange?: (value: ScriptDocument, metadata: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
     onDirtyChange?: (isDirty: boolean) => void,
 }
 
@@ -262,8 +270,16 @@ export interface EditorDocumentProps {
     initialValue: ScriptDocument,
     persistentCharacters?: readonly PersistentCharacterRef[],
     persistentMusic?: readonly PersistentMusicRef[],
+    /** Host-owned comment thread facts (status, block anchor); content stays in the host. */
+    commentThreads?: readonly EditorCommentThreadRef[],
     scriptTitle?: string,
     draftDate?: string,
+}
+
+export interface EditorSearchProps {
+    /** Block types search and replace are limited to; empty searches every block. */
+    blockTypes: readonly ScriptBlockNodeType[],
+    onBlockTypesChange: (blockTypes: readonly ScriptBlockNodeType[]) => void,
 }
 
 export interface EditorProps {
@@ -273,6 +289,8 @@ export interface EditorProps {
     layout?: EditorLayoutProps,
     requests?: EditorStructureRequests,
     callbacks?: EditorLifecycleCallbacks,
+    /** Search preferences the host persists (per script); search itself stays editor-owned. */
+    search?: EditorSearchProps,
     /**
      * Zooms the page canvas only: page width, render scale, pagination and
      * overlay placement. Chrome sizes from the shared tokens and never sees

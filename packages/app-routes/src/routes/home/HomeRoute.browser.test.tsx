@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import type * as MockedModule from '@stagistic/app-core';
 import type {ScriptSummary} from '@stagistic/app-core';
 import {createRoot, type Root} from 'react-dom/client';
 import {MemoryRouter} from 'react-router-dom';
@@ -12,7 +13,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {createExampleScript} from './example-script/createExampleScript';
+import {createExampleScript} from '../../example-script/createExampleScript';
 import {HomeRoute} from './HomeRoute';
 
 const {
@@ -33,6 +34,7 @@ const {
     },
     scriptsState: {
         summaries: [] as ScriptSummary[],
+        isLoading: false,
     },
     scriptActions: {
         createScript: vi.fn(),
@@ -41,13 +43,13 @@ const {
 }));
 
 vi.mock('@stagistic/app-core', async importOriginal => {
-    const original = await importOriginal<typeof import('@stagistic/app-core')>();
+    const original = await importOriginal<typeof MockedModule>();
 
     return {
         ...original,
         useScripts: () => ({
             scriptSummaries: scriptsState.summaries,
-            isLoading: false,
+            isLoading: scriptsState.isLoading,
             error: null,
             refreshScripts: vi.fn(),
             ...scriptActions,
@@ -56,7 +58,7 @@ vi.mock('@stagistic/app-core', async importOriginal => {
     };
 });
 
-vi.mock('./example-script/createExampleScript', () => ({
+vi.mock('../../example-script/createExampleScript', () => ({
     createExampleScript: vi.fn(),
 }));
 
@@ -173,6 +175,7 @@ afterEach(() => {
     roots.length = 0;
     document.body.innerHTML = '';
     scriptsState.summaries = [];
+    scriptsState.isLoading = false;
     headerProps.showScriptActions = null;
     Object.values(modalActions).forEach(action => action.mockReset());
     Object.values(scriptActions).forEach(action => action.mockReset());
@@ -298,6 +301,21 @@ describe('HomeRoute', () => {
             ]);
     });
 
+    it('hides the example action while scripts are loading', async () => {
+        scriptsState.isLoading = true;
+
+        mountHome();
+        await waitForText('New script');
+
+        const startActions = document.querySelector<HTMLElement>(
+            '[role="group"][aria-label="Start a script"]',
+        );
+
+        expect(findButton('Create example script')).toBeUndefined();
+        expect(getComputedStyle(startActions as HTMLElement).gridTemplateColumns.split(' '))
+            .toHaveLength(2);
+    });
+
     it('prioritizes a new script and removes the example action from a populated library', async () => {
         scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
 
@@ -353,38 +371,25 @@ describe('HomeRoute hover states', () => {
         expect(hovered.transform).not.toBe('none');
     });
 
-    /*
-     * A row has no edge to carry the state, so tone stays — but at a fraction of
-     * the old full-strength `--color-surface-raised` wash.
-     */
-    it('keeps a row hover well under a full surface-raised wash', async () => {
+    it('answers a script-card hover through its neutral edge', async () => {
         scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
 
         mountHome();
         await waitForText('One draft');
 
-        const row = document.querySelector<HTMLElement>('[aria-label="Scripts"] button')
-            ?.closest('[class*="scriptRow"]') as HTMLElement;
+        const card = document.querySelector<HTMLElement>('[aria-label="Scripts"] article') as HTMLElement;
 
         await unhover();
 
-        const restingBackground = getComputedStyle(row).backgroundColor;
+        const restingBackground = getComputedStyle(card).backgroundColor;
+        const restingBorder = getComputedStyle(card).borderTopColor;
 
-        await userEvent.hover(row);
+        await userEvent.hover(card);
         await settle();
 
-        const hoveredBackground = getComputedStyle(row).backgroundColor;
-        const probe = document.createElement('div');
-
-        probe.style.backgroundColor = 'var(--color-surface-raised)';
-        document.body.appendChild(probe);
-
-        const fullWash = getComputedStyle(probe).backgroundColor;
-
-        probe.remove();
-
-        expect(hoveredBackground).not.toBe(restingBackground);
-        expect(hoveredBackground).not.toBe(fullWash);
-        expect(getComputedStyle(row).transform).toBe('none');
+        expect(getComputedStyle(card).backgroundColor).toBe(restingBackground);
+        expect(getComputedStyle(card).borderTopColor).not.toBe(restingBorder);
+        expect(getComputedStyle(card).boxShadow).toBe('none');
+        expect(getComputedStyle(card).transform).toBe('none');
     });
 });

@@ -3,7 +3,7 @@ import {
     type ScriptRepository,
     type ScriptSummary,
 } from '@stagistic/db';
-import {createActlessScriptDocument} from '@stagistic/script';
+import {buildScriptSummaryMetadata, createActlessScriptDocument} from '@stagistic/script';
 import {createLiveQueryCollection} from '@tanstack/react-db';
 import {
     describe,
@@ -65,6 +65,7 @@ const createRepository = () => {
                 activeBlockId: input.activeBlockId ?? null,
                 createdAt: input.timestamp ?? 1,
                 updatedAt: input.timestamp ?? 1,
+                summaryMetadata: buildScriptSummaryMetadata(input.initialContent ?? {type: 'doc', content: []}),
             });
         },
         duplicateScriptWithId: async (sourceId, input) => {
@@ -116,7 +117,9 @@ const createRepository = () => {
     const repository = repositoryAdapter as unknown as ScriptRepository;
 
     return {
-        createInputs, repository, source,
+        createInputs,
+        repository,
+        source,
     };
 };
 

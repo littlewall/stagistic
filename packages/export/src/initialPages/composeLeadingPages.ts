@@ -1,11 +1,11 @@
 import type {EditorSettings} from '@stagistic/script';
 
-import type {LeadingPagesPlan} from '../plan';
+import type {LeadingPagesPlan} from '../model/plan';
 import type {
     InitialPageVisualPage,
     VisualLine,
     VisualRun,
-} from '../visualLine';
+} from '../model/visualLine';
 import {buildInitialPagePages} from './buildInitialPagePages';
 import type {ContentsPageNumbers} from './contents/contentsPageNumbers';
 import {toLowerRoman} from './romanNumerals';

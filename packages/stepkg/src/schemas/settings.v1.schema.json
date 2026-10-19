@@ -6,7 +6,7 @@
     "properties": {
         "page": {"type": "object", "additionalProperties": false, "properties": {"widthPx": {"type": "number"}, "heightPx": {"type": "number"}, "marginTopPx": {"type": "number"}, "marginRightPx": {"type": "number"}, "marginBottomPx": {"type": "number"}, "marginLeftPx": {"type": "number"}, "pageGapPx": {"type": "number"}, "pageBreakBackground": {"type": "string"}, "contentMarginTopPx": {"type": "number"}, "contentMarginBottomPx": {"type": "number"}}},
         "typography": {"type": "object", "additionalProperties": false, "properties": {"fontSizePx": {"type": "number"}, "lineHeight": {"type": "number"}}},
-        "visual": {"type": "object", "additionalProperties": false, "properties": {"characterColorSaturation": {"type": "number"}}},
+        "visual": {"type": "object", "additionalProperties": false, "properties": {"characterColorSaturation": {"type": "number"}, "characterDecoration": {"enum": ["underline", "underline-tint", "underline-tint-lines", "none"]}}},
         "structure": {"type": "object", "additionalProperties": false, "properties": {"actDisplay": {"type": "object", "additionalProperties": false, "properties": {"linesBefore": {"type": "number"}, "linesAfter": {"type": "number"}}}}},
         "initialPages": {"type": "object", "additionalProperties": false, "properties": {"castAndPlace": {"type": "object", "additionalProperties": false, "properties": {"castOrderBy": {"enum": ["name", "appearance"]}, "showOutline": {"type": "boolean"}}}, "songs": {"type": "object", "additionalProperties": false, "properties": {"showCharactersInSongs": {"type": "boolean"}}}}},
         "headerFooter": {"type": "object", "additionalProperties": false, "properties": {"header": {"$ref": "#/$defs/row"}, "footer": {"$ref": "#/$defs/row"}}},

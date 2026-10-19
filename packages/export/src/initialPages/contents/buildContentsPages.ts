@@ -5,8 +5,8 @@ import type {
     ContentsInitialPagePlan,
     ContentsMusicEntry,
     ContentsSceneEntry,
-} from '../../plan';
-import type {VisualRun} from '../../visualLine';
+} from '../../model/plan';
+import type {VisualRun} from '../../model/visualLine';
 import type {VisualPage} from '../buildCharactersAndPlacesPages';
 import {
     type ContentsGeometry,
@@ -224,7 +224,10 @@ export const buildContentsPages = (
     const geometry = createContentsGeometry(settings, plan.showScoreColumn);
     const heading = HEADINGS[plan.variant];
     const cursor: Cursor = {
-        pages: [], current: [], y: 0, actName: null,
+        pages: [],
+        current: [],
+        y: 0,
+        actName: null,
     };
 
     startPage(cursor, geometry, heading);
@@ -246,16 +249,18 @@ export const buildContentsPages = (
             return;
         }
 
-        act.preSceneMusic.forEach((entry, index) => {
-            pushMusicEntry(cursor, geometry, heading, entry, NESTED_MUSIC_INDENT_CHARS, pageNumbers);
+        if (plan.variant === 'scenes-and-musical-numbers') {
+            act.preSceneMusic.forEach((entry, index) => {
+                pushMusicEntry(cursor, geometry, heading, entry, NESTED_MUSIC_INDENT_CHARS, pageNumbers);
 
-            const isLast = index === act.preSceneMusic.length - 1;
-            const gapScale = isLast
-                ? act.scenes.length > 0 ? MUSIC_TO_SCENE_GAP_SCALE : 0
-                : MUSIC_TO_MUSIC_GAP_SCALE;
+                const isLast = index === act.preSceneMusic.length - 1;
+                const gapScale = isLast
+                    ? act.scenes.length > 0 ? MUSIC_TO_SCENE_GAP_SCALE : 0
+                    : MUSIC_TO_MUSIC_GAP_SCALE;
 
-            cursor.y += geometry.bodyLineHeightPx * gapScale;
-        });
+                cursor.y += geometry.bodyLineHeightPx * gapScale;
+            });
+        }
 
         act.scenes.forEach((scene, sceneIndex) => {
             const isLastScene = sceneIndex === act.scenes.length - 1;

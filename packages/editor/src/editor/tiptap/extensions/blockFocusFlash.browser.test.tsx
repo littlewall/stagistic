@@ -24,11 +24,15 @@ import {BLOCK_FOCUS_FLASH_ATTRIBUTE} from './BlockFocusFlashExtension';
 type FlashTestWindow = Window & {__blockFocusFlashTestEditor?: Editor | null};
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: [{type: 'text', text}],
+    type: 'scene',
+    attrs: {id},
+    content: [{type: 'text', text}],
 });
 
 const dialogue = (id: string, text: string): ScriptNode => ({
-    type: 'dialogue', attrs: {id}, content: [{type: 'text', text}],
+    type: 'dialogue',
+    attrs: {id},
+    content: [{type: 'text', text}],
 });
 
 const EditorProbe = () => {

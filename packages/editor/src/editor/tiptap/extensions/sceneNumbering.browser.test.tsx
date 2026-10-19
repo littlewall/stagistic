@@ -1,10 +1,19 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {EditorSettingsOverride, ScriptDocument, ScriptNode} from '@stagistic/script';
+import type {
+    EditorSettingsOverride,
+    ScriptDocument,
+    ScriptNode,
+} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {useEditorInstance} from '../../context';
 import ScriptEditor from '../../Editor';
@@ -138,7 +147,11 @@ describe('scene numbering', () => {
     it('numbers multiple scenes sequentially', async () => {
         renderEditor({
             type: 'doc',
-            content: [scene('s1', 'FIRST'), stageDirection('b1', 'x'), scene('s2', 'SECOND')],
+            content: [
+                scene('s1', 'FIRST'),
+                stageDirection('b1', 'x'),
+                scene('s2', 'SECOND'),
+            ],
         });
 
         const scenes = await poll(() => {

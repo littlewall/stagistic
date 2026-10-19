@@ -8,7 +8,7 @@ import {
 import type {
     InitialPageVisualPage,
     VisualLine,
-} from '../visualLine';
+} from '../model/visualLine';
 import {
     composeLeadingPages,
     composeRenderedLeadingPages,

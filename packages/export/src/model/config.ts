@@ -1,0 +1,114 @@
+export interface CharacterFilterValue {
+    mode: 'all' | 'only',
+    characterIds: string[],
+    /** Defaults to true for both export templates. */
+    preserveFullScriptPagination?: boolean,
+}
+
+export interface PageBreakValue {
+    sceneOnNewPage: boolean,
+    sceneOnOddPage: boolean,
+}
+
+export type CharacterInitialPageOrder = 'name' | 'first-appearance';
+
+export interface CharactersAndPlacesValue {
+    /** Controls character content; the shared initial page exists when this or showPlaces is true. */
+    enabled: boolean,
+    showPlaces: boolean,
+    showCharacterOutlines: boolean,
+    characterOrder: CharacterInitialPageOrder,
+}
+
+export type ContentsVariant =
+    | 'scenes'
+    | 'musical-numbers'
+    | 'scenes-and-musical-numbers';
+
+export interface ContentsValue {
+    enabled: boolean,
+    variant: ContentsVariant,
+}
+
+export interface VocalRangesValue {
+    enabled: boolean,
+}
+
+export interface InitialPagesValue {
+    startEachInitialPageOnOddPage: boolean,
+    showPageNumbers: boolean,
+    charactersAndPlaces: CharactersAndPlacesValue,
+    contents: ContentsValue,
+    vocalRanges: VocalRangesValue,
+}
+
+export interface BlankPageSpec {
+    enabled: boolean,
+    count: number,
+}
+
+export interface BlankPagesValue {
+    betweenInitialPagesAndScript: BlankPageSpec,
+}
+
+export interface BasicExportConfig {
+    showNotes: boolean,
+    characterFilter: CharacterFilterValue,
+    pageBreaks: PageBreakValue,
+    initialPages: InitialPagesValue,
+    blankPages: BlankPagesValue,
+}
+
+export const BASIC_DEFAULTS: BasicExportConfig = {
+    showNotes: true,
+    characterFilter: {
+        mode: 'all',
+        characterIds: [],
+        preserveFullScriptPagination: true,
+    },
+    pageBreaks: {
+        sceneOnNewPage: true,
+        sceneOnOddPage: false,
+    },
+    initialPages: {
+        startEachInitialPageOnOddPage: false,
+        showPageNumbers: true,
+        charactersAndPlaces: {
+            enabled: true,
+            showPlaces: true,
+            showCharacterOutlines: false,
+            characterOrder: 'name',
+        },
+        contents: {
+            enabled: true,
+            variant: 'scenes-and-musical-numbers',
+        },
+        vocalRanges: {
+            enabled: true,
+        },
+    },
+    blankPages: {
+        betweenInitialPagesAndScript: {
+            enabled: false,
+            count: 1,
+        },
+    },
+};
+
+/** Integrated Score deliberately shares every user configurable option with Basic. */
+export type IntegratedScoreExportConfig = BasicExportConfig;
+
+export const INTEGRATED_SCORE_DEFAULTS: IntegratedScoreExportConfig = {
+    ...BASIC_DEFAULTS,
+    characterFilter: {...BASIC_DEFAULTS.characterFilter},
+    pageBreaks: {...BASIC_DEFAULTS.pageBreaks},
+    initialPages: {
+        ...BASIC_DEFAULTS.initialPages,
+        charactersAndPlaces: {...BASIC_DEFAULTS.initialPages.charactersAndPlaces},
+        contents: {...BASIC_DEFAULTS.initialPages.contents},
+        vocalRanges: {...BASIC_DEFAULTS.initialPages.vocalRanges},
+    },
+    blankPages: {
+        betweenInitialPagesAndScript: {...BASIC_DEFAULTS.blankPages.betweenInitialPagesAndScript},
+    },
+};

@@ -1,10 +1,13 @@
 import {PGlite} from '@electric-sql/pglite';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
-import {compiledMigrations} from '../migrations.compiled';
 import {runPgliteMigrations} from './migrations';
+import {compiledMigrations} from './migrations.compiled';
 
 const clients: PGlite[] = [];
 
@@ -205,7 +208,8 @@ describe('runPgliteMigrations', () => {
             {
                 attachmentId: 'attachment-1',
                 role: 'legacy_attachment:attachment-1',
-            }, {
+            },
+            {
                 attachmentId: 'attachment-2',
                 role: 'integrated_score',
             },

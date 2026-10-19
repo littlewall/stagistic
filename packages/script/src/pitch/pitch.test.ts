@@ -1,5 +1,8 @@
+import {requireValue} from '@stagistic/shared';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -11,19 +14,25 @@ import {
 describe('parsePitch', () => {
     it('parses a natural note', () => {
         expect(parsePitch('C4')).toEqual({
-            step: 'C', alter: 0, octave: 4,
+            step: 'C',
+            alter: 0,
+            octave: 4,
         });
     });
 
     it('parses a sharp', () => {
         expect(parsePitch('F#3')).toEqual({
-            step: 'F', alter: 1, octave: 3,
+            step: 'F',
+            alter: 1,
+            octave: 3,
         });
     });
 
     it('parses a flat', () => {
         expect(parsePitch('Bb2')).toEqual({
-            step: 'B', alter: -1, octave: 2,
+            step: 'B',
+            alter: -1,
+            octave: 2,
         });
     });
 
@@ -42,7 +51,7 @@ describe('formatPitch', () => {
             'Bb2',
             'A5',
         ]) {
-            expect(formatPitch(parsePitch(spn)!)).toBe(spn);
+            expect(formatPitch(requireValue(parsePitch(spn)))).toBe(spn);
         }
     });
 });
@@ -50,15 +59,17 @@ describe('formatPitch', () => {
 describe('pitchToMidi', () => {
     it('places middle C at 60', () => {
         expect(pitchToMidi({
-            step: 'C', alter: 0, octave: 4,
+            step: 'C',
+            alter: 0,
+            octave: 4,
         })).toBe(60);
     });
 
     it('orders low below high', () => {
-        expect(pitchToMidi(parsePitch('F#3')!)).toBeLessThan(pitchToMidi(parsePitch('Bb4')!));
+        expect(pitchToMidi(requireValue(parsePitch('F#3')))).toBeLessThan(pitchToMidi(requireValue(parsePitch('Bb4'))));
     });
 
     it('treats enharmonics as equal semitone', () => {
-        expect(pitchToMidi(parsePitch('A#3')!)).toBe(pitchToMidi(parsePitch('Bb3')!));
+        expect(pitchToMidi(requireValue(parsePitch('A#3')))).toBe(pitchToMidi(requireValue(parsePitch('Bb3'))));
     });
 });

@@ -14,15 +14,14 @@ import type {
     EditorLiveCharacterSnapshot,
     EditorLiveStructureRow,
     EditorLiveStructureSnapshot,
+    PersistentCharacterRef,
 } from '../contracts';
-import type {PersistentCharacterRef} from '../contracts';
 import {
     EMPTY_CHARACTERS,
     EMPTY_STRUCTURE,
 } from './store';
 
 export interface SidebarProjectionColorContext {
-    characterColorSaturation?: number,
     colorByCharacterId?: ReadonlyMap<string, string>,
     rememberedColorByKey?: ReadonlyMap<string, string>,
     persistentCharacters?: readonly PersistentCharacterRef[],
@@ -181,7 +180,6 @@ const buildCharacterSnapshot = (
         return getConfirmedCharacterColor(
             characterId,
             colorContext?.colorByCharacterId?.get(characterId) ?? persistentCharacter?.colorHex ?? null,
-            colorContext?.characterColorSaturation,
         );
     };
 
@@ -215,7 +213,7 @@ const buildCharacterSnapshot = (
         displayColorByKey.set(
             key,
             rememberedColor
-                ?? getUnconfirmedCharacterColor(key, colorContext?.characterColorSaturation),
+                ?? getUnconfirmedCharacterColor(key),
         );
     });
 

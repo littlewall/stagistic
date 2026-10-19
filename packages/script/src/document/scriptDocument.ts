@@ -8,7 +8,7 @@ import {
 } from '../syntax';
 
 export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
-export const SCRIPT_DOCUMENT_SCHEMA_VERSION = 3;
+export const SCRIPT_DOCUMENT_SCHEMA_VERSION = 4;
 
 export type ScriptNode = {
     type?: string,
@@ -52,9 +52,7 @@ export interface ScriptImportMetadata {
 }
 
 export const getNodeAttrs = (node: ScriptNode): Record<string, unknown> | undefined => {
-    return node.attrs && typeof node.attrs === 'object'
-        ? node.attrs
-        : undefined;
+    return node.attrs && typeof node.attrs === 'object' ? node.attrs : undefined;
 };
 
 export const hasNodeChildren = (node: ScriptNode): node is ScriptNode & {content: ScriptNode[]} => {
@@ -73,10 +71,7 @@ export const isScriptBlockNode = (node: ScriptNode): boolean => {
     return getScriptBlockNodeTypeFromNode(node) !== null;
 };
 
-export const getScriptBlockNodeType = (
-    node: ScriptNode,
-    fallback: ScriptBlockNodeType = DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
-): ScriptBlockNodeType => {
+export const getScriptBlockNodeType = (node: ScriptNode, fallback: ScriptBlockNodeType = DEFAULT_SCRIPT_BLOCK_NODE_TYPE): ScriptBlockNodeType => {
     return getScriptBlockNodeTypeFromNode(node) ?? fallback;
 };
 
@@ -86,17 +81,12 @@ export const getScriptBlockId = (node: ScriptNode): string | null => {
     }
 
     const attrs = getNodeAttrs(node);
-    const rawId = typeof attrs?.id === 'string'
-        ? attrs.id.trim()
-        : '';
+    const rawId = typeof attrs?.id === 'string' ? attrs.id.trim() : '';
 
     return rawId.length > 0 ? rawId : null;
 };
 
-export const createScriptBlockNode = (
-    rawBlockType: unknown = DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
-    id?: string,
-): ScriptNode => {
+export const createScriptBlockNode = (rawBlockType: unknown = DEFAULT_SCRIPT_BLOCK_NODE_TYPE, id?: string): ScriptNode => {
     const nodeType = resolveScriptBlockNodeType(rawBlockType) ?? DEFAULT_SCRIPT_BLOCK_NODE_TYPE;
 
     return {
@@ -108,10 +98,7 @@ export const createScriptBlockNode = (
     };
 };
 
-export const createEmptyScriptDocument = (
-    blockId?: string,
-    settings?: EditorSettingsOverride,
-): ScriptDocument => {
+export const createEmptyScriptDocument = (blockId?: string, settings?: EditorSettingsOverride): ScriptDocument => {
     const actBlock = createScriptBlockNode('act', createNodeId());
 
     return {
@@ -121,23 +108,18 @@ export const createEmptyScriptDocument = (
             {
                 ...actBlock,
                 content: [{type: 'text', text: 'ACT ONE'}],
-            }, createScriptBlockNode('scene', blockId),
+            },
+            createScriptBlockNode('scene', blockId),
         ],
     };
 };
 
-export const createActlessScriptDocument = (
-    blockId?: string,
-    settings?: EditorSettingsOverride,
-): ScriptDocument => ({
+export const createActlessScriptDocument = (blockId?: string, settings?: EditorSettingsOverride): ScriptDocument => ({
     type: 'doc',
     attrs: settings ? {settings} : undefined,
     content: [createScriptBlockNode('scene', blockId)],
 });
 
-export const createDefaultScriptDocument = (
-    blockId?: string,
-    settings?: EditorSettingsOverride,
-): ScriptDocument => {
+export const createDefaultScriptDocument = (blockId?: string, settings?: EditorSettingsOverride): ScriptDocument => {
     return createEmptyScriptDocument(blockId, settings);
 };
