@@ -4,11 +4,13 @@
  * touching the index. Stop also catches changes made through shell commands.
  * Recheck lint after formatting: formatting can introduce max-lines errors.
  * jscpd scans all source roots so copies of unchanged code are caught too.
+ * Stop then runs the node tests related to the changed scripts.
  * https://code.claude.com/docs/en/hooks#stop
  */
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {
+    existsSync,
     lstatSync,
     mkdirSync,
     readFileSync,
@@ -158,6 +160,28 @@ const fixFiles = files => {
     return results.filter(result => !result.ok);
 };
 
+/*
+ * Stop only (moon.yml `test-related`): node tests that import a changed script.
+ * Browser, e2e and marketing suites stay manual (`root:test-all`).
+ */
+const testFiles = files => {
+    const scripts = files.filter(file => SCRIPT.test(file) && existsSync(path.join(root, file)));
+
+    if (scripts.length === 0) {
+        return [];
+    }
+
+    const result = run('root:test-related', [
+        'vp',
+        'test',
+        'related',
+        '--run',
+        '--passWithNoTests',
+    ], scripts);
+
+    return result.ok ? [] : [result];
+};
+
 const stopStateFile = input => {
     if (input.hook_event_name !== 'Stop' || typeof input.session_id !== 'string') {
         return null;
@@ -212,17 +236,19 @@ try {
     const files = input.hook_event_name === 'Stop'
         ? changedFiles()
         : [supportedFile(input?.tool_input?.file_path ?? input?.tool_input?.notebook_path)].filter(file => file !== null);
-    const failures = fixFiles(files);
+    const fixFailures = fixFiles(files);
+    // Tests run once the code lints, so a lint failure is not reported twice.
+    const failures = fixFailures.length === 0 && input.hook_event_name === 'Stop' ? testFiles(files) : fixFailures;
     const stateFile = stopStateFile(input);
 
     if (failures.length > 0) {
-        const message = 'Lint/format/duplication problems remain (commit hook would fail). Fix these before finishing:\n'
+        const message = 'Lint/format/duplication or related test failures remain. Fix these before finishing:\n'
             + failures.map(failure => `\n[${failure.name}]\n${failure.output}\n`).join('');
 
         if (repeatedStopFailure(input, stateFile, files, failures)) {
             // Avoid an endless continuation when Claude makes no progress on the same failure.
             process.stdout.write(JSON.stringify({
-                systemMessage: `The same lint/format/duplication errors remain unchanged; stopping repeated automatic retries.\n${message}`,
+                systemMessage: `The same lint/format/duplication/test errors remain unchanged; stopping repeated automatic retries.\n${message}`,
             }));
             process.exit(0);
         }

@@ -18,7 +18,7 @@
                     {
                         "type": "command",
                         "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agent-fix.mjs\"",
-                        "timeout": 120
+                        "timeout": 240
                     }
                 ]
             }

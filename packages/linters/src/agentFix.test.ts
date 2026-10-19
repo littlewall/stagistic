@@ -53,6 +53,13 @@ for (const file of files) {
         content = content.replaceAll('STYLE_FIX', 'GOOD');
         fs.writeFileSync(file, content);
     }
+    if (bin === 'vp' && args[0] === 'test') {
+        if (content.includes('TEST_ERROR')) {
+            process.stderr.write('Failing test for ' + file + '\\n');
+            failed = true;
+        }
+        continue;
+    }
     if ((bin === 'vp' && content.includes('LINT_ERROR'))
         || (bin === 'stylelint' && content.includes('STYLE_ERROR'))
         || (bin === 'jscpd' && content.includes('CLONE_ERROR'))) {
@@ -180,6 +187,56 @@ describe('Claude lint/format hooks', () => {
         expect(result.status).toBe(2);
         expect(result.stderr).toContain('broken.ts');
         expect(result.stderr).toContain('broken.css');
+    });
+
+    it('runs the node tests related to changed scripts on Stop only', () => {
+        const repo = fixture();
+        const testRuns = () => repo.commands().filter(command => command.bin === 'vp' && command.args[0] === 'test');
+
+        repo.write('edited.ts', 'GOOD');
+        repo.write('styles.css', 'GOOD');
+
+        expect(repo.run({tool_input: {file_path: path.join(repo.root, 'edited.ts')}}).status).toBe(0);
+        expect(testRuns()).toHaveLength(0);
+
+        expect(repo.run(stop).status).toBe(0);
+        expect(testRuns()).toEqual([
+            {
+                bin: 'vp',
+                args: [
+                    'test',
+                    'related',
+                    '--run',
+                    '--passWithNoTests',
+                    '--',
+                    'edited.ts',
+                ],
+            },
+        ]);
+    });
+
+    it('blocks completion on failing related tests', () => {
+        const repo = fixture();
+
+        repo.write('edited.ts', 'TEST_ERROR');
+
+        const result = repo.run(stop);
+
+        expect(result.status).toBe(2);
+        expect(result.stderr).toContain('[root:test-related]');
+        expect(result.stderr).toContain('Failing test for edited.ts');
+    });
+
+    it('skips related tests while lint still fails', () => {
+        const repo = fixture();
+
+        repo.write('edited.ts', 'LINT_ERROR TEST_ERROR');
+
+        const result = repo.run(stop);
+
+        expect(result.status).toBe(2);
+        expect(result.stderr).not.toContain('root:test-related');
+        expect(repo.commands().some(command => command.bin === 'vp' && command.args[0] === 'test')).toBe(false);
     });
 
     it('handles spaces and newlines in paths, ignoring deleted, ignored and unsupported files', () => {
