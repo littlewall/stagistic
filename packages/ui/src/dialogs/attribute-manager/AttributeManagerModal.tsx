@@ -48,12 +48,11 @@ export const AttributeManagerModal = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onClose]);
 
-    const handleBackdropClick = useCallback(() => {
-        onClose();
+    const handleBackdropClick = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+        if (event.target === event.currentTarget) {
+            onClose();
+        }
     }, [onClose]);
-    const handleModalClick = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
-        event.stopPropagation();
-    }, []);
     const activeTab = tabs.find(tab => tab.id === activeTabId) ?? tabs[0];
 
     if (!isOpen) {
@@ -71,7 +70,6 @@ export const AttributeManagerModal = ({
                 role="dialog"
                 aria-modal="true"
                 aria-label={title}
-                onClick={handleModalClick}
             >
                 <header className={styles.header}>
                     <h2 className={styles.title}>{title}</h2>

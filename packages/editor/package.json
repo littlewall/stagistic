@@ -5,6 +5,7 @@
     "type": "module",
     "main": "./src/index.ts",
     "dependencies": {
+        "use-sync-external-store": "1.6.0",
         "@stagistic/script": "workspace:*",
         "@stagistic/script-pagination": "workspace:*",
         "@stagistic/shared": "workspace:*",
@@ -28,6 +29,8 @@
         "react-dom": "^19.0.0"
     },
     "devDependencies": {
+        "@types/use-sync-external-store": "0.0.6",
+        "@stagistic/vite-config": "workspace:*",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "playwright": "^1.61.0",

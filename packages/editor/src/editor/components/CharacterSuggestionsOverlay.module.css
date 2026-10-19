@@ -16,27 +16,12 @@
 }
 
 .item {
-    cursor: pointer;
-    display: grid;
+    composes: item from './SuggestionOverlay.module.css';
     grid-template-columns: 10px 1fr;
-    gap: var(--space-md);
-    align-items: center;
-    padding: var(--space-sm) var(--space-md);
-    font-family: inherit;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-    text-align: left;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 9px;
+}
 
-    &:hover {
-        background: var(--state-hover);
-    }
-
-    &.active {
-        background: var(--state-selected);
-    }
+.active {
+    composes: active from './SuggestionOverlay.module.css';
 }
 
 .itemDot {

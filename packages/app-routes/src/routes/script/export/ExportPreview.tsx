@@ -11,6 +11,7 @@ import {
     useState,
 } from 'react';
 
+import {usePropState} from '../../../usePropState';
 import {ExportDownloadButton} from './ExportDownloadButton';
 import styles from './ExportPreview.module.css';
 import {DEFAULT_EXPORT_PREVIEW_ZOOM} from './exportPreviewZoom';
@@ -26,7 +27,7 @@ export const ExportPreview = () => {
     const pagesRef = useRef<HTMLDivElement | null>(null);
     const [pageCount, setPageCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageNumberInput, setPageNumberInput] = useState('');
+    const [pageNumberInput, setPageNumberInput] = usePropState(pageCount > 0 ? String(currentPage) : '');
     const [isRenderingPreview, setIsRenderingPreview] = useState(false);
     const [renderedArtifact, setRenderedArtifact] = useState<Blob | null>(null);
     const [zoom, setZoom] = useState(DEFAULT_EXPORT_PREVIEW_ZOOM);
@@ -88,10 +89,6 @@ export const ExportPreview = () => {
         canExport,
         zoom,
     ]);
-
-    useEffect(() => {
-        setPageNumberInput(pageCount > 0 ? String(currentPage) : '');
-    }, [currentPage, pageCount]);
 
     const goToPage = (requestedPage: number) => {
         if (pageCount === 0) {

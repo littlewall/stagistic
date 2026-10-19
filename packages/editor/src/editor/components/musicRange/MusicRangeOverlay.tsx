@@ -3,7 +3,6 @@ import {
     type RefObject,
     useCallback,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -37,7 +36,8 @@ const MusicRangeOverlay = ({
     onRequestRemoveMusic,
 }: MusicRangeOverlayProps) => {
     const [menu, setMenu] = useState<MusicRailMenuState | null>(null);
-    const [railRevision, setRailRevision] = useState(0);
+    const [, setRailRevision] = useState(0);
+    const [activeRailLeft, setActiveRailLeft] = useState<number | null>(null);
     // Read by the canvas click handler, which is bound once and cannot see state.
     const openMenuRef = useRef<MusicRailMenuState | null>(null);
     const {activeBlockState} = useOverlayPosition({
@@ -50,14 +50,11 @@ const MusicRangeOverlay = ({
         canvasRef,
         visibleOverlayState: activeBlockState,
     });
-    const railState = useMemo(() => {
-        return editor ? musicRailPluginKey.getState(editor.state) : null;
-    }, [editor, railRevision]);
+    const railState = editor ? musicRailPluginKey.getState(editor.state) : null;
     const activeBoundary = activeBlockState
         ? railState?.boundaries.find(boundary => boundary.blockId === activeBlockState.blockId) ?? null
         : null;
     const showActiveTrigger = activeBoundary?.markerKind === 'none' && activeBoundary.hasActions;
-    const activeRailLeft = canvasRef.current ? resolveMusicRailLeft(canvasRef.current) : null;
 
     const handleDragStart = useCallback(() => {
         setMenu(null);
@@ -194,6 +191,7 @@ const MusicRangeOverlay = ({
         let rebuildCount = musicRailPluginKey.getState(editor.state)?.rebuildCount ?? 0;
         const refresh = () => {
             frame = null;
+            setActiveRailLeft(resolveMusicRailLeft(canvas));
 
             const state = musicRailPluginKey.getState(editor.state);
 

@@ -13,7 +13,7 @@ The theatre before the house lights come up. Attention belongs to the work on th
 - **Quiet, precise, theatrical**: The interface carries the discipline of a prompt book.
 - **Two visual registers**:
   - **Product register**: Steel Wool neutrals around warm paper, with restrained Primrose Yellow and Creamed Corn semantics. The script canvas remains dominant.
-  - **Brand register**: The landing page uses paper, graphite, Primrose Yellow, and Creamed Corn more expressively, while preserving editorial restraint.
+  - **Brand register**: The marketing website uses paper, graphite, Primrose Yellow, and Creamed Corn more expressively, while preserving editorial restraint.
 
 ## Design Principles
 1. **The script is the center.** Every UI decision is measured against whether it serves or distracts from the act of writing. When in doubt, subtract.

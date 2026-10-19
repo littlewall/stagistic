@@ -9,19 +9,12 @@ import {
 import {IconButton} from '../../atoms/IconButton/IconButton';
 import {SearchInput, type SearchInputProps} from '../../atoms/SearchInput/SearchInput';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
-import {CaseSensitiveIcon} from '../../icons/ui/CaseSensitiveIcon';
 import {ChevronDownIcon} from '../../icons/ui/ChevronDownIcon';
-import {ChevronUpIcon} from '../../icons/ui/ChevronUpIcon';
-import {CloseIcon} from '../../icons/ui/CloseIcon';
-import {FilterIcon} from '../../icons/ui/FilterIcon';
-import {SearchIcon} from '../../icons/ui/SearchIcon';
-import {WholeWordIcon} from '../../icons/ui/WholeWordIcon';
-import {IconPopover} from '../IconPopover/IconPopover';
+import {SearchActions} from './SearchActions';
 import styles from './SearchControl.module.css';
 import {
     isSearchFilterActive,
     type SearchControlFilter,
-    SearchFilterList,
 } from './SearchFilterList';
 import {type SearchControlReplace, SearchReplaceRow} from './SearchReplaceRow';
 
@@ -87,138 +80,11 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
         const isActive = hasQuery || hasFocusWithin || isReplaceOpen || isFilterOpen;
         const isFilterActive = Boolean(filter && isSearchFilterActive(filter));
         const isNavigationDisabled = !hasQuery || resultCount === 0;
-        const hasClear = hasQuery && Boolean(onClear);
-        const hasCaseToggle = isActive && Boolean(onCaseSensitiveChange);
-        const hasWholeWordToggle = isActive && Boolean(onWholeWordChange);
-        // An active filter stays visible at rest: it changes what every later search finds.
-        const hasFilter = Boolean(filter) && (isActive || isFilterActive);
         const onSurfaceBlur = (event: ReactFocusEvent<HTMLDivElement>) => {
             if (!event.currentTarget.contains(event.relatedTarget)) {
                 setHasFocusWithin(false);
             }
         };
-        const indicator = isActive ? (
-            <output
-                className={styles.indicator}
-                aria-label="Search result position"
-                aria-live="polite"
-                aria-atomic="true"
-            >
-                {currentResult} / {resultCount}
-            </output>
-        ) : (
-            <label
-                className={styles.indicator}
-                htmlFor={inputId}
-                aria-label="Focus search"
-            >
-                <SearchIcon aria-hidden="true" />
-            </label>
-        );
-        const controls = (
-            <span className={styles.actions}>
-                {hasClear ? (
-                    <Tooltip
-                        label="Clear search"
-                        placement="bottom"
-                    >
-                        <IconButton
-                            size="xs"
-                            aria-label="Clear search"
-                            onPress={onClear}
-                        >
-                            <CloseIcon
-                                className={styles.clearIcon}
-                                aria-hidden="true"
-                            />
-                        </IconButton>
-                    </Tooltip>
-                ) : null}
-                {hasCaseToggle && onCaseSensitiveChange ? (
-                    <Tooltip
-                        label="Match case"
-                        placement="bottom"
-                    >
-                        <IconButton
-                            size="xs"
-                            aria-label="Match case"
-                            aria-pressed={isCaseSensitive}
-                            isSelected={isCaseSensitive}
-                            preventFocusOnPress
-                            onPress={() => onCaseSensitiveChange(!isCaseSensitive)}
-                        >
-                            <CaseSensitiveIcon aria-hidden="true" />
-                        </IconButton>
-                    </Tooltip>
-                ) : null}
-                {hasWholeWordToggle && onWholeWordChange ? (
-                    <Tooltip
-                        label="Match whole word"
-                        placement="bottom"
-                    >
-                        <IconButton
-                            size="xs"
-                            aria-label="Match whole word"
-                            aria-pressed={isWholeWord}
-                            isSelected={isWholeWord}
-                            preventFocusOnPress
-                            onPress={() => onWholeWordChange(!isWholeWord)}
-                        >
-                            <WholeWordIcon aria-hidden="true" />
-                        </IconButton>
-                    </Tooltip>
-                ) : null}
-                {hasFilter && filter ? (
-                    <IconPopover
-                        aria-label={isFilterActive ? 'Search filter (active)' : 'Search filter'}
-                        icon={<FilterIcon aria-hidden="true" />}
-                        size="xs"
-                        placement="bottom"
-                        hasIndicator={isFilterActive}
-                        className={styles.filterTrigger}
-                        onOpenChange={setIsFilterOpen}
-                    >
-                        <SearchFilterList filter={filter} />
-                    </IconPopover>
-                ) : null}
-                {hasClear || hasCaseToggle || hasWholeWordToggle || hasFilter ? (
-                    <span
-                        className={styles.divider}
-                        data-search-divider=""
-                        aria-hidden="true"
-                    />
-                ) : null}
-                {indicator}
-                <Tooltip
-                    label="Previous result"
-                    shortcut={shortcuts.previousResult}
-                    placement="bottom"
-                >
-                    <IconButton
-                        aria-label="Previous search result"
-                        isDisabled={isNavigationDisabled}
-                        preventFocusOnPress
-                        onPress={onPreviousResult}
-                    >
-                        <ChevronUpIcon aria-hidden="true" />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip
-                    label="Next result"
-                    shortcut={shortcuts.nextResult}
-                    placement="bottom"
-                >
-                    <IconButton
-                        aria-label="Next search result"
-                        isDisabled={isNavigationDisabled}
-                        preventFocusOnPress
-                        onPress={onNextResult}
-                    >
-                        <ChevronDownIcon aria-hidden="true" />
-                    </IconButton>
-                </Tooltip>
-            </span>
-        );
 
         return (
             <div
@@ -263,7 +129,27 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                             size="toolbar"
                             value={value}
                             startAdornment={null}
-                            endAdornment={controls}
+                            endAdornment={(
+                                <SearchActions
+                                    isActive={isActive}
+                                    hasQuery={hasQuery}
+                                    inputId={inputId}
+                                    currentResult={currentResult}
+                                    resultCount={resultCount}
+                                    onClear={onClear}
+                                    isCaseSensitive={isCaseSensitive}
+                                    onCaseSensitiveChange={onCaseSensitiveChange}
+                                    isWholeWord={isWholeWord}
+                                    onWholeWordChange={onWholeWordChange}
+                                    filter={filter}
+                                    isFilterActive={isFilterActive}
+                                    isNavigationDisabled={isNavigationDisabled}
+                                    onPreviousResult={onPreviousResult}
+                                    onNextResult={onNextResult}
+                                    shortcuts={shortcuts}
+                                    onFilterOpenChange={setIsFilterOpen}
+                                />
+                            )}
                         />
                         {replace && isReplaceOpen ? (
                             <SearchReplaceRow

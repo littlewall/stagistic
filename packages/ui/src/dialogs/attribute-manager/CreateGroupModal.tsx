@@ -34,12 +34,19 @@ export const CreateGroupModal = ({
     const [isTouched, setIsTouched] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
         if (!isOpen) {
             setName('');
             setIsTouched(false);
             setIsSubmitting(false);
+        }
+    }
 
+    useEffect(() => {
+        if (!isOpen) {
             return;
         }
 

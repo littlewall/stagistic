@@ -43,7 +43,7 @@ const groupMessagesByThread = (messages: readonly ScriptCommentMessage[]) => {
     const grouped = new Map<string, ScriptCommentMessage[]>();
 
     [...messages]
-        .sort((left, right) => left.createdAt - right.createdAt)
+        .toSorted((left, right) => left.createdAt - right.createdAt)
         .forEach(message => grouped.set(message.threadId, [...grouped.get(message.threadId) ?? [], message]));
 
     return grouped;

@@ -1,0 +1,14 @@
+.articleMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    font-size: .8125rem;
+    color: var(--color-text-muted);
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    list-style: none;
+}

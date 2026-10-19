@@ -13,6 +13,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
@@ -202,17 +203,17 @@ const MiniScriptEditorSurface = ({
     );
 };
 
+const subscribeToMount = () => () => {};
+const getMountedSnapshot = () => true;
+const getServerMountedSnapshot = () => false;
+
 export const MiniScriptEditor = ({
     className,
     document,
     musicNumberLabel,
     staticFallback = null,
 }: MiniScriptEditorProps): ReactElement | null => {
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    const isMounted = useSyncExternalStore(subscribeToMount, getMountedSnapshot, getServerMountedSnapshot);
 
     if (!isMounted) {
         return staticFallback ? <>{staticFallback}</> : null;

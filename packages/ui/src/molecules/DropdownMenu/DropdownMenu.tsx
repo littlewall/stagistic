@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import type {ReactNode} from 'react';
-import type {Key} from 'react-aria-components';
 import {
+    type Key,
     Menu,
     MenuItem,
     Popover,

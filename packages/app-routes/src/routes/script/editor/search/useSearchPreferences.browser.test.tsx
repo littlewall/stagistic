@@ -13,7 +13,11 @@ const roots: Root[] = [];
 let latest: ReturnType<typeof useSearchPreferences> | null = null;
 
 const Probe = ({scriptScope}: {scriptScope: string}) => {
-    latest = useSearchPreferences(scriptScope);
+    const preferences = useSearchPreferences(scriptScope);
+
+    useLayoutEffect(() => {
+        latest = preferences;
+    }, [preferences]);
 
     return null;
 };
@@ -67,3 +71,4 @@ describe('useSearchPreferences', () => {
         expect(latest?.blockTypes).toEqual(['dialogue']);
     });
 });
+import {useLayoutEffect} from 'react';

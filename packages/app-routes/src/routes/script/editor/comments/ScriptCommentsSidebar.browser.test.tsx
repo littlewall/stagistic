@@ -16,9 +16,11 @@ import type {
     ScriptDocument,
     ScriptNode,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {ToastProvider} from '@stagistic/ui';
 import {
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -106,8 +108,10 @@ const useFakeComments = (initialThreads: ScriptCommentThread[], initialMessages:
     const messagesRef = useRef(messages);
     const nextId = useRef(1);
 
-    threadsRef.current = threads;
-    messagesRef.current = messages;
+    useLayoutEffect(() => {
+        threadsRef.current = threads;
+        messagesRef.current = messages;
+    }, [threads, messages]);
 
     return useMemo(() => {
         const allocate = (prefix: string) => `${prefix}-${nextId.current++}`;
@@ -219,8 +223,10 @@ const Harness = ({
         isPanelOpen: () => isOpen,
     });
 
-    testWindow.__comments = comments;
-    testWindow.__setPanelOpen = setIsOpen;
+    useLayoutEffect(() => {
+        testWindow.__comments = comments;
+        testWindow.__setPanelOpen = setIsOpen;
+    }, [comments]);
 
     return (
         <ScriptEditor
@@ -560,7 +566,7 @@ describe('ScriptCommentsSidebar', () => {
         const [blockCard, rangeCard] = await poll(() => {
             const cards = [card('tb'), card('t1')];
 
-            return cards.every(Boolean) ? cards.map(element => element!.getBoundingClientRect()) : null;
+            return cards.every(Boolean) ? cards.map(element => requireValue(element).getBoundingClientRect()) : null;
         }, 'both cards');
 
         expect(blockCard.top).toBeLessThan(rangeCard.top);
@@ -573,7 +579,7 @@ describe('ScriptCommentsSidebar', () => {
         await poll(() => card('t2')?.dataset.highlighted === 'true', 't2 lit');
         expect(getCommentsState(editor.state).hoveredThreadId).toBe('t2');
 
-        await userEvent.unhover(card('t2')!);
+        await userEvent.unhover(requireValue(card('t2')));
         await poll(() => getCommentsState(editor.state).hoveredThreadId === null, 'hover cleared');
     });
 
@@ -587,10 +593,10 @@ describe('ScriptCommentsSidebar', () => {
         expect(card('t2')?.dataset.highlighted).toBeUndefined();
 
         // Only the head strip lights, not the whole card.
-        const summary = card('t1')!.querySelector<HTMLElement>('button[aria-expanded="false"]')!;
+        const summary = requireValue(requireValue(card('t1')).querySelector<HTMLElement>('button[aria-expanded="false"]'));
         const isTinted = (element: Element) => getComputedStyle(element).backgroundColor !== 'rgba(0, 0, 0, 0)';
 
-        expect(isTinted(summary.firstElementChild!)).toBe(true);
+        expect(isTinted(requireValue(summary.firstElementChild))).toBe(true);
         expect(isTinted(summary)).toBe(false);
 
         await userEvent.unhover(b1Marker);
@@ -679,7 +685,7 @@ describe('ScriptCommentsSidebar', () => {
                 't3',
             ].map(id => card(id));
 
-            return cards.every(Boolean) ? cards.map(element => element!.getBoundingClientRect()) : null;
+            return cards.every(Boolean) ? cards.map(element => requireValue(element).getBoundingClientRect()) : null;
         }, 'three cards');
 
         rects.slice(1).forEach((rect, index) => {

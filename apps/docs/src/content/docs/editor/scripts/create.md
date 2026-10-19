@@ -36,5 +36,6 @@ If you already have a `.stagistic` or `.stepkg` file, choose **Import script** o
 
 ## Related tasks
 
+- [Write your first scene with Robin and Alex](/editor/getting-started/).
 - [Write the first dialogue and stage directions](/editor/writing/).
 - [Rename the script or create a working copy](/editor/scripts/copies/).

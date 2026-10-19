@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -240,7 +241,7 @@ describe('EditorSidebar group rows', () => {
         expect(document.querySelector('aside')?.textContent).toContain('Empty');
         expect(Array.from(document.querySelectorAll('h2')).map(heading => heading.textContent))
             .toEqual(['Groups', 'Unconfirmed']);
-        expect(getComputedStyle(document.querySelector('h2')!).fontWeight).toBe('400');
+        expect(getComputedStyle(requireValue(document.querySelector('h2'))).fontWeight).toBe('400');
 
         const host = document.createElement('div');
         const root = createRoot(host);

@@ -3,6 +3,7 @@ import {
     MUSIC_START_NODE_NAME,
     type ScriptDocument,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -59,7 +60,7 @@ describe('mini editor structure signature', () => {
 
         expect(matchesMiniEditorStructureSignature(
             editor.schema.nodeFromJSON(edited),
-            signature!,
+            requireValue(signature),
         )).toBe(true);
 
         editor.destroy();
@@ -86,7 +87,7 @@ describe('mini editor structure signature', () => {
         ].forEach(candidate => {
             expect(matchesMiniEditorStructureSignature(
                 editor.schema.nodeFromJSON(candidate),
-                signature!,
+                requireValue(signature),
             )).toBe(false);
         });
 
@@ -122,7 +123,7 @@ describe('mini editor structure signature', () => {
         ].forEach(candidate => {
             expect(matchesMiniEditorStructureSignature(
                 editor.schema.nodeFromJSON(candidate),
-                signature!,
+                requireValue(signature),
             )).toBe(false);
         });
 

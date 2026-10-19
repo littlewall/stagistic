@@ -21,6 +21,7 @@ export const useMenuPlacement = ({
 
     useLayoutEffect(() => {
         if (!isMenuOpen) {
+            // oxlint-disable-next-line react/set-state-in-effect -- Reset the DOM measurement on close so a reopened menu never uses its previous placement.
             setIsMenuAbove(false);
             setMenuStyle(undefined);
 
@@ -68,7 +69,10 @@ export const useMenuPlacement = ({
             rafId = requestAnimationFrame(updatePlacement);
         };
 
-        // Resolve placement immediately on open to avoid below->above flicker.
+        /*
+         * Resolve placement immediately on open to avoid below->above flicker.
+         * oxlint-disable-next-line react/set-state-in-effect -- The menu's mounted dimensions are only available after commit and must be applied before paint.
+         */
         updatePlacement();
 
         const resizeObserver = new ResizeObserver(() => {

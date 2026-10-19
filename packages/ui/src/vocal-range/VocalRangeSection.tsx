@@ -3,7 +3,7 @@ import {
     parsePitch,
     type Pitch,
 } from '@stagistic/script';
-import {useRef} from 'react';
+import {useLayoutEffect, useRef} from 'react';
 
 import {
     DEFAULT_VOCAL_RANGE_HIGH,
@@ -34,9 +34,15 @@ export const VocalRangeSection = ({
 }: VocalRangeSectionProps) => {
     const rangeTouchedCharacterIds = useRef(new Set<string>());
 
-    if (character.vocalRangeLow !== null || character.vocalRangeHigh !== null) {
-        rangeTouchedCharacterIds.current.add(character.id);
-    }
+    useLayoutEffect(() => {
+        if (character.vocalRangeLow !== null || character.vocalRangeHigh !== null) {
+            rangeTouchedCharacterIds.current.add(character.id);
+        }
+    }, [
+        character.id,
+        character.vocalRangeLow,
+        character.vocalRangeHigh,
+    ]);
 
     const low = (character.vocalRangeLow ? parsePitch(character.vocalRangeLow) : null)
         ?? DEFAULT_VOCAL_RANGE_LOW;

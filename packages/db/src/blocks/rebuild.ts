@@ -66,7 +66,7 @@ const toScriptDocumentFromStoredRows = (
     });
 
     const blockRowsSorted = [...blockRows]
-        .sort((a, b) => a.blockOrder < b.blockOrder ? -1 : a.blockOrder > b.blockOrder ? 1 : 0);
+        .toSorted((a, b) => a.blockOrder < b.blockOrder ? -1 : a.blockOrder > b.blockOrder ? 1 : 0);
 
     const createBlockNode = (row: RewriteStoredBlockRow): ScriptNode => {
         const nodeType = isScriptBlockType(row.blockType)

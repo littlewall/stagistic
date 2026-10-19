@@ -1,3 +1,5 @@
+import {requireValue} from '@stagistic/shared';
+import {useLayoutEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -45,7 +47,11 @@ type Api = ReturnType<typeof useImportScriptModalState>;
 const mount = (args: Parameters<typeof useImportScriptModalState>[0]) => {
     let api: Api | null = null;
     const Harness = () => {
-        api = useImportScriptModalState(args);
+        const state = useImportScriptModalState(args);
+
+        useLayoutEffect(() => {
+            api = state;
+        }, [state]);
 
         return null;
     };
@@ -78,11 +84,11 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['x'], 'play.fountain')));
-        await waitFor(() => getApi()!.fileError !== null);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['x'], 'play.fountain')));
+        await waitFor(() => requireValue(getApi()).fileError !== null);
 
-        expect(getApi()!.fileError).toBe('Only .stagistic or .stepkg files are supported.');
-        expect(getApi()!.selectedFile).toBeNull();
+        expect(requireValue(getApi()).fileError).toBe('Only .stagistic or .stepkg files are supported.');
+        expect(requireValue(getApi()).selectedFile).toBeNull();
     });
 
     it('shows the name field immediately for a .stagistic selection', async () => {
@@ -101,12 +107,12 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['---\ntitle: X\n---'], 'When Night Falls.stagistic')));
-        await waitFor(() => getApi()!.selectedFile !== null);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['---\ntitle: X\n---'], 'When Night Falls.stagistic')));
+        await waitFor(() => requireValue(getApi()).selectedFile !== null);
 
-        expect(getApi()!.showNameField).toBe(true);
-        expect(getApi()!.showChoiceToggle).toBe(false);
-        expect(getApi()!.name).toBe('When Night Falls');
+        expect(requireValue(getApi()).showNameField).toBe(true);
+        expect(requireValue(getApi()).showChoiceToggle).toBe(false);
+        expect(requireValue(getApi()).name).toBe('When Night Falls');
     });
 
     it('peeks a .stepkg selection and shows only the name field when there is no collision', async () => {
@@ -126,14 +132,14 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
-        await waitFor(() => getApi()!.stepkgPeek !== null);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
+        await waitFor(() => requireValue(getApi()).stepkgPeek !== null);
 
         expect(onPeekStepkg).toHaveBeenCalledTimes(1);
-        expect(getApi()!.showNameField).toBe(true);
-        expect(getApi()!.showChoiceToggle).toBe(false);
-        expect(getApi()!.name).toBe('My Play');
-        expect(getApi()!.canSubmitNew).toBe(true);
+        expect(requireValue(getApi()).showNameField).toBe(true);
+        expect(requireValue(getApi()).showChoiceToggle).toBe(false);
+        expect(requireValue(getApi()).name).toBe('My Play');
+        expect(requireValue(getApi()).canSubmitNew).toBe(true);
     });
 
     it('reveals the New/Replace choice on collision, and the replace panel when Replace is selected', async () => {
@@ -153,20 +159,20 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
-        await waitFor(() => getApi()!.stepkgPeek !== null);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
+        await waitFor(() => requireValue(getApi()).stepkgPeek !== null);
 
-        expect(getApi()!.showChoiceToggle).toBe(true);
-        expect(getApi()!.importChoice).toBe('new');
-        expect(getApi()!.showNameField).toBe(true);
-        expect(getApi()!.showReplacePanel).toBe(false);
+        expect(requireValue(getApi()).showChoiceToggle).toBe(true);
+        expect(requireValue(getApi()).importChoice).toBe('new');
+        expect(requireValue(getApi()).showNameField).toBe(true);
+        expect(requireValue(getApi()).showReplacePanel).toBe(false);
 
-        getApi()!.handleChoiceChange('replace');
-        await waitFor(() => getApi()!.importChoice === 'replace');
+        requireValue(getApi()).handleChoiceChange('replace');
+        await waitFor(() => requireValue(getApi()).importChoice === 'replace');
 
-        expect(getApi()!.showReplacePanel).toBe(true);
-        expect(getApi()!.showNameField).toBe(false);
-        expect(getApi()!.canSubmitNew).toBe(false);
+        expect(requireValue(getApi()).showReplacePanel).toBe(true);
+        expect(requireValue(getApi()).showNameField).toBe(false);
+        expect(requireValue(getApi()).canSubmitNew).toBe(false);
     });
 
     it('surfaces a peek failure as a file error and does not reveal the name field', async () => {
@@ -180,11 +186,11 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['not a zip'], 'broken.stepkg')));
-        await waitFor(() => getApi()!.fileError !== null);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['not a zip'], 'broken.stepkg')));
+        await waitFor(() => requireValue(getApi()).fileError !== null);
 
-        expect(getApi()!.fileError).toBe('This file isn\'t a valid Stagistic package.');
-        expect(getApi()!.showNameField).toBe(false);
+        expect(requireValue(getApi()).fileError).toBe('This file isn\'t a valid Stagistic package.');
+        expect(requireValue(getApi()).showNameField).toBe(false);
     });
 
     it('calls onReplaceWithStepkg with the selected bytes when replace is confirmed', async () => {
@@ -204,12 +210,12 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
-        await waitFor(() => getApi()!.stepkgPeek !== null);
-        getApi()!.handleChoiceChange('replace');
-        await waitFor(() => getApi()!.showReplacePanel);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
+        await waitFor(() => requireValue(getApi()).stepkgPeek !== null);
+        requireValue(getApi()).handleChoiceChange('replace');
+        await waitFor(() => requireValue(getApi()).showReplacePanel);
 
-        await getApi()!.handleReplaceConfirm();
+        await requireValue(getApi()).handleReplaceConfirm();
 
         expect(onReplaceWithStepkg).toHaveBeenCalledTimes(1);
         expect(onReplaceWithStepkg.mock.calls[0]?.[0]?.fileName).toBe('play.stepkg');
@@ -232,10 +238,10 @@ describe('useImportScriptModalState', () => {
         });
 
         await waitFor(() => getApi() !== null);
-        getApi()!.handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
-        await waitFor(() => getApi()!.stepkgPeek !== null);
+        requireValue(getApi()).handleFileSelect(buildFileList(new File(['zip-bytes'], 'play.stepkg')));
+        await waitFor(() => requireValue(getApi()).stepkgPeek !== null);
 
-        await getApi()!.handleDownloadBackup();
+        await requireValue(getApi()).handleDownloadBackup();
 
         expect(onDownloadStepkgBackup).toHaveBeenCalledWith('script-1');
     });

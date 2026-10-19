@@ -29,7 +29,7 @@ export const buildAccessibilityPlugin = (
         announcements: {
             dragstart: (event: DragStartEventArg) => {
                 const id = event.operation.source?.id;
-                const scene = id != null ? sceneByBlockId.get(String(id)) : null;
+                const scene = id !== null && id !== undefined ? sceneByBlockId.get(String(id)) : null;
 
                 return scene
                     ? `Picked up scene "${scene.title}".`
@@ -37,7 +37,7 @@ export const buildAccessibilityPlugin = (
             },
             dragend: (event: DragEndEventArg) => {
                 const id = event.operation.source?.id;
-                const scene = id != null ? sceneByBlockId.get(String(id)) : null;
+                const scene = id !== null && id !== undefined ? sceneByBlockId.get(String(id)) : null;
                 const title = scene?.title ?? 'scene';
 
                 if (event.canceled) {

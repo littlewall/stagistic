@@ -1,4 +1,5 @@
 import {parseStagistic} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -137,7 +138,7 @@ describe('restoreScriptFromPackage', () => {
         await repository.createScriptFromPackage(baseWrite());
 
         const original = await repository.getScriptPackageSource('script-1');
-        const oldAttachmentKey = original!.attachments.find(attachment => attachment.id === 'a1')!.storageKey;
+        const oldAttachmentKey = requireValue(requireValue(original).attachments.find(attachment => attachment.id === 'a1')).storageKey;
 
         expect(await fileStorage.get(oldAttachmentKey)).not.toBeNull();
 
@@ -213,7 +214,7 @@ describe('restoreScriptFromPackage', () => {
         await repository.createScriptFromPackage(baseWrite());
 
         const original = await repository.getScriptPackageSource('script-1');
-        const oldAttachmentKey = original!.attachments.find(attachment => attachment.id === 'a1')!.storageKey;
+        const oldAttachmentKey = requireValue(requireValue(original).attachments.find(attachment => attachment.id === 'a1')).storageKey;
 
         const broken: ScriptPackageWrite = {
             ...baseWrite(),

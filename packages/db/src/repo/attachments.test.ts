@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -108,7 +109,7 @@ describe('createAttachmentHandlers', () => {
         expect(created?.filename).toBe('score.pdf');
         expect(created?.role).toBe(MUSIC_ATTACHMENT_ROLES.integratedScore);
         expect(stored?.id).toBe(created?.id);
-        expect(await handlers.getBlob(created!.storageKey)).not.toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).not.toBeNull();
     });
 
     it('replaces the existing attachment in the same music role', async () => {
@@ -135,8 +136,8 @@ describe('createAttachmentHandlers', () => {
 
         expect(stored?.id).toBe(second?.id);
         expect(links).toHaveLength(1);
-        expect(await handlers.getBlob(first!.storageKey)).toBeNull();
-        expect(await handlers.getBlob(second!.storageKey)).not.toBeNull();
+        expect(await handlers.getBlob(requireValue(first).storageKey)).toBeNull();
+        expect(await handlers.getBlob(requireValue(second).storageKey)).not.toBeNull();
     });
 
     it('removes the link and GCs the orphaned attachment + blob', async () => {
@@ -155,7 +156,7 @@ describe('createAttachmentHandlers', () => {
         await handlers.removeFromMusic(scriptId, musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
 
         expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore)).toBeNull();
-        expect(await handlers.getBlob(created!.storageKey)).toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).toBeNull();
     });
 
     it('deletes a newly stored blob when SQL persistence fails', async () => {
@@ -192,7 +193,7 @@ describe('createAttachmentHandlers', () => {
         await handlers.removeFromMusic(scriptId, musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
 
         expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore)).toBeNull();
-        expect(await handlers.getBlob(created!.storageKey)).not.toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).not.toBeNull();
         expect(consoleError).toHaveBeenCalledWith(
             '[attachments] Failed to clean up a removed blob.',
         );
@@ -214,10 +215,10 @@ describe('createAttachmentHandlers', () => {
             upload('missing.pdf'),
         );
 
-        await fileStorage.delete(created!.storageKey);
+        await fileStorage.delete(requireValue(created).storageKey);
 
         expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore))
             .toMatchObject({filename: 'missing.pdf'});
-        expect(await handlers.getBlob(created!.storageKey)).toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).toBeNull();
     });
 });

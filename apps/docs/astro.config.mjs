@@ -12,7 +12,7 @@ export default defineConfig({
         starlight({
             title: 'Knowledge base',
             description: 'Documentation for Stagistic tools and the Stagistic text format.',
-            favicon: '/favicon.svg',
+            favicon: '/favicon.svg?v=theme-aware',
             logo: {src: './src/assets/stagistic-mark-on-dark.svg', alt: 'Stagistic'},
             components: {
                 Header: './src/components/KnowledgeBaseHeader.astro',

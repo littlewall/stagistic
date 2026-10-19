@@ -4,6 +4,7 @@ import {
     BASIC_DEFAULTS,
     type InitialPagesValue,
 } from '@stagistic/export';
+import {requireValue} from '@stagistic/shared';
 import {useState} from 'react';
 import {
     createRoot,
@@ -203,16 +204,16 @@ describe('InitialPagesModule', () => {
         const orderPrefix = await waitFor(() => Array
             .from(document.querySelectorAll<HTMLSpanElement>('span'))
             .find(element => element.textContent?.trim() === 'Order characters by') ?? null);
-        const switchTrack = oddPageSwitch.querySelector<HTMLSpanElement>('span[aria-hidden="true"]')!;
-        const blankRow = blankLabel.parentElement!;
-        const orderRow = orderPrefix.parentElement!;
-        const oddPageRow = oddPageSwitch.parentElement!;
-        const numberingRow = numberingSwitch.parentElement!;
-        const charactersRow = charactersSwitch.parentElement!;
-        const outlineRow = outlineSwitch.parentElement!;
-        const placesRow = placesSwitch.parentElement!;
-        const contentsRow = contentsSwitch.parentElement!;
-        const vocalRangesRow = vocalRangesSwitch.parentElement!;
+        const switchTrack = requireValue(oddPageSwitch.querySelector<HTMLSpanElement>('span[aria-hidden="true"]'));
+        const blankRow = requireValue(blankLabel.parentElement);
+        const orderRow = requireValue(orderPrefix.parentElement);
+        const oddPageRow = requireValue(oddPageSwitch.parentElement);
+        const numberingRow = requireValue(numberingSwitch.parentElement);
+        const charactersRow = requireValue(charactersSwitch.parentElement);
+        const outlineRow = requireValue(outlineSwitch.parentElement);
+        const placesRow = requireValue(placesSwitch.parentElement);
+        const contentsRow = requireValue(contentsSwitch.parentElement);
+        const vocalRangesRow = requireValue(vocalRangesSwitch.parentElement);
         const rowHeights = [
             oddPageRow,
             numberingRow,
@@ -258,10 +259,10 @@ describe('InitialPagesModule', () => {
         expect(orderSelectStyle.borderRadius).toBe(blankSelectStyle.borderRadius);
         expect(getComputedStyle(blankLabel).color).toBe(getComputedStyle(oddPageSwitch).color);
         expect(getComputedStyle(blankLabel).fontSize).toBe(getComputedStyle(oddPageSwitch).fontSize);
-        expect(getComputedStyle(charactersRow.parentElement!).borderTopWidth).toBe('0px');
-        expect(getComputedStyle(placesRow.parentElement!).borderTopWidth).toBe('0px');
-        expect(getComputedStyle(contentsRow.parentElement!).borderTopWidth).toBe('0px');
-        expect(getComputedStyle(vocalRangesRow.parentElement!).borderTopWidth).toBe('0px');
+        expect(getComputedStyle(requireValue(charactersRow.parentElement)).borderTopWidth).toBe('0px');
+        expect(getComputedStyle(requireValue(placesRow.parentElement)).borderTopWidth).toBe('0px');
+        expect(getComputedStyle(requireValue(contentsRow.parentElement)).borderTopWidth).toBe('0px');
+        expect(getComputedStyle(requireValue(vocalRangesRow.parentElement)).borderTopWidth).toBe('0px');
     });
 
     it('toggles the contents page and switches its variant', async () => {

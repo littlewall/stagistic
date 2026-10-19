@@ -8,11 +8,11 @@ import {
 import clsx from 'clsx';
 import {
     startTransition,
-    useEffect,
+    useLayoutEffect,
     useRef,
-    useState,
 } from 'react';
 
+import {usePropState} from '../../../../../usePropState';
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
 import {IndentRangeSlider} from '../IndentRangeSlider';
 import {clamp, formatInches} from '../math';
@@ -91,27 +91,18 @@ export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSet
 
     const marginSliderStep = 0.05 * 96; // 0.05"
 
-    const [localTopMarginRows, setLocalTopMarginRows] = useState(topMarginRows);
-    const [localBottomMarginRows, setLocalBottomMarginRows] = useState(bottomMarginRows);
+    const [localTopMarginRows, setLocalTopMarginRows] = usePropState(topMarginRows);
+    const [localBottomMarginRows, setLocalBottomMarginRows] = usePropState(bottomMarginRows);
 
-    useEffect(() => {
-        setLocalTopMarginRows(topMarginRows);
-    }, [topMarginRows]);
-    useEffect(() => {
-        setLocalBottomMarginRows(bottomMarginRows);
-    }, [bottomMarginRows]);
-
-    const [localSliderStart, setLocalSliderStart] = useState(sliderStart);
-    const [localSliderEnd, setLocalSliderEnd] = useState(sliderEnd);
+    const [localSliderStart, setLocalSliderStart] = usePropState(sliderStart);
+    const [localSliderEnd, setLocalSliderEnd] = usePropState(sliderEnd);
     const latestStart = useRef(sliderStart);
     const latestEnd = useRef(sliderEnd);
 
-    useEffect(() => {
-        setLocalSliderStart(sliderStart);
+    useLayoutEffect(() => {
         latestStart.current = sliderStart;
     }, [sliderStart]);
-    useEffect(() => {
-        setLocalSliderEnd(sliderEnd);
+    useLayoutEffect(() => {
         latestEnd.current = sliderEnd;
     }, [sliderEnd]);
 

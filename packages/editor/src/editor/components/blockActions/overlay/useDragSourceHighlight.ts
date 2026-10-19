@@ -48,7 +48,7 @@ export const useDragSourceHighlight = () => {
 
         const escapedBlockId = escapeCssAttributeValue(blockId);
 
-        styleElement.textContent = [
+        const cssText = [
             `[data-editor="true"] ${SCRIPT_BLOCK_DOM_SELECTOR}[${SCRIPT_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"] {`,
             'background: color-mix(in oklch, var(--color-accent) 22%, transparent) !important;',
             'box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 38%, transparent) !important;',
@@ -56,6 +56,8 @@ export const useDragSourceHighlight = () => {
             'border-radius: var(--radius-xs) !important;',
             '}',
         ].join('');
+
+        styleElement.replaceChildren(document.createTextNode(cssText));
 
         highlightedDragSourceIdRef.current = blockId;
     }, []);

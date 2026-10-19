@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -62,7 +63,7 @@ describe('App', () => {
 
         expect(startedWorkerCount).toBe(0);
 
-        const continueButton = document.querySelector<HTMLButtonElement>('dialog button')!;
+        const continueButton = requireValue(document.querySelector<HTMLButtonElement>('dialog button'));
 
         await page.elementLocator(continueButton).click();
         await waitFor(() => startedWorkerCount === 1);

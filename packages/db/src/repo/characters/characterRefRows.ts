@@ -4,7 +4,7 @@ import type {ExtractedBlockRow} from '../../blocks';
 export const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<string>) => {
     return Object.entries(block.characterRefByKey)
         .filter(([, characterId]) => knownCharacterIds.has(characterId))
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .toSorted((a, b) => a[0].localeCompare(b[0]))
         .map(([characterKey, characterId]) => ({
             characterId,
             characterKey,

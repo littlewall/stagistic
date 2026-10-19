@@ -1,7 +1,6 @@
 import {
     coerceUnknownBlocksToStageDirections,
     DEFAULT_SCENE_NUMBER_FORMAT,
-    type ScriptDocument,
 } from '@stagistic/script';
 import {
     type ReactNode,
@@ -31,14 +30,15 @@ import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
+import {useInitialEditorContent} from './hooks/useInitialEditorContent';
 import {useInitialCanvasReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
 import {EditorSceneNumberFormatContext} from './sceneNumberFormatContext';
-import {type CharacterColorRefsBundle, createCharacterColorRefsBundle} from './surface/editorSurfaceCache';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
+import {useSurfaceCharacterRefs} from './surface/useSurfaceCharacterRefs';
 import {useEditorExtensions} from './useEditorExtensions';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -123,11 +123,7 @@ const Editor = ({
      * restored cached surface must keep using the bundle its extensions hold.
      * Resolved once per mount, before extensions are built.
      */
-    const surfaceRefsRef = useRef<CharacterColorRefsBundle | null>(null);
-
-    if (!surfaceRefsRef.current) {
-        surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs ?? createCharacterColorRefsBundle();
-    }
+    const surfaceRefs = useSurfaceCharacterRefs(surfaceCache, surfaceSignature);
 
     const commentCallbacksRef = useCommentCallbacksRef({
         onRequestReveal: onRequestRevealComments,
@@ -151,7 +147,7 @@ const Editor = ({
     } = useEditorCharacterColors({
         persistentCharacters,
         resolvedInitialValue,
-        refs: surfaceRefsRef.current,
+        refs: surfaceRefs,
         liveStore: providedLiveStore,
     });
 
@@ -194,13 +190,13 @@ const Editor = ({
         enableBlockUiEvents: Boolean(onBlockUiEvent),
         isReadOnly,
     });
-    const initialDoc = useMemo<ScriptDocument>(() => resolvedInitialValue, [initialContentSignature]);
+    const initialDoc = useInitialEditorContent(initialContentSignature, resolvedInitialValue);
     const {editor} = useScriptEditorInstance({
         surfaceCache,
         signature: surfaceSignature,
         extensions,
         content: initialDoc,
-        characterColorRefs: surfaceRefsRef.current,
+        characterColorRefs: surfaceRefs,
         isReadOnly,
     });
 

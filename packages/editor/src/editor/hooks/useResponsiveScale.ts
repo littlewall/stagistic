@@ -39,6 +39,8 @@ export const useResponsiveScale = ({
     editorZoom,
 }: UseResponsiveScaleArgs) => {
     const [responsiveScale, setResponsiveScale] = useState(1);
+    const pageWidth = pageWidthPx * editorZoom;
+    const hasValidPageWidth = Number.isFinite(pageWidth) && pageWidth > 0;
 
     useEffect(() => {
         const rootElement = rootRef.current;
@@ -48,11 +50,7 @@ export const useResponsiveScale = ({
             return;
         }
 
-        const pageWidth = pageWidthPx * editorZoom;
-
-        if (!Number.isFinite(pageWidth) || pageWidth <= 0) {
-            setResponsiveScale(1);
-
+        if (!hasValidPageWidth) {
             return;
         }
 
@@ -127,10 +125,10 @@ export const useResponsiveScale = ({
         };
     }, [
         canvasHostRef,
-        editorZoom,
-        pageWidthPx,
+        hasValidPageWidth,
+        pageWidth,
         rootRef,
     ]);
 
-    return responsiveScale;
+    return hasValidPageWidth ? responsiveScale : 1;
 };

@@ -1,5 +1,6 @@
 import {fileURLToPath} from 'node:url';
 
+import {BROWSER_TEST_SETUP} from '@stagistic/vite-config/browser-test';
 import {playwright} from 'vite-plus/test/browser-playwright';
 import {defineConfig} from 'vite-plus/test/config';
 
@@ -21,6 +22,7 @@ export default defineConfig({
     },
     test: {
         include: ['src/**/*.browser.{test,spec}.{ts,tsx}'],
+        setupFiles: [BROWSER_TEST_SETUP],
         testTimeout: 30_000,
         browser: {
             enabled: true,

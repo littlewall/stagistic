@@ -12,7 +12,7 @@ import type {
 import {MusicAttachmentPreviewModal} from './MusicAttachmentPreviewModal';
 import {
     INTEGRATED_SCORE_ROLE,
-    useMusicAttachmentsState,
+    type useMusicAttachmentsState,
 } from './useMusicAttachmentsState';
 
 interface MusicAttachmentsDetailProps {

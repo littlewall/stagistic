@@ -1,10 +1,10 @@
 import clsx from 'clsx';
 import {
-    useEffect,
     useMemo,
     useState,
 } from 'react';
 
+import {useItemSelection} from '../../hooks/useItemSelection';
 import {useKeyedFieldDrafts} from '../../hooks/useKeyedFieldDrafts';
 import {AttributeManagerCharacterDetail} from './AttributeManagerCharacterDetail';
 import styles from './AttributeManagerCharactersPanel.module.css';
@@ -15,6 +15,8 @@ import {CreateCharacterModal} from './CreateCharacterModal';
 import {CreateGroupModal} from './CreateGroupModal';
 import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterNames';
 import {useOptimisticAttributeManagerColors} from './useOptimisticAttributeManagerColors';
+
+const includesId = (ids: string[] | undefined, id: string) => ids?.includes(id) ?? false;
 
 const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
     {id: 'characters', label: 'Characters'},
@@ -30,12 +32,12 @@ export const AttributeManagerCharactersPanel = ({
     initialWorkspaceId = 'characters',
     isLoading = false,
     draftScopeKey = null,
-    deletingCharacterIds = [],
-    renamingCharacterIds = [],
-    colorUpdatingCharacterIds = [],
-    deletingGroupIds = [],
-    renamingGroupIds = [],
-    colorUpdatingGroupIds = [],
+    deletingCharacterIds,
+    renamingCharacterIds,
+    colorUpdatingCharacterIds,
+    deletingGroupIds,
+    renamingGroupIds,
+    colorUpdatingGroupIds,
     onSetCharacterColor,
     onSetCharacterOutline,
     onSetCharacterVoiceType,
@@ -51,8 +53,8 @@ export const AttributeManagerCharactersPanel = ({
     isReadOnly = false,
 }: AttributeManagerCharactersPanelProps) => {
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>(initialWorkspaceId);
-    const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(initialSelectedCharacterId ?? null);
-    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(initialSelectedGroupId ?? null);
+    const [selectedCharacterId, setSelectedCharacterId] = useItemSelection(characters, initialSelectedCharacterId);
+    const [selectedGroupId, setSelectedGroupId] = useItemSelection(groups, initialSelectedGroupId, true);
     const [isCreateCharacterOpen, setIsCreateCharacterOpen] = useState(false);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
     const {colorizedItems: colorizedCharacters, setColor: handleSetCharacterColor} = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
@@ -90,34 +92,12 @@ export const AttributeManagerCharactersPanel = ({
         ...displayedGroups.map(item => ({id: item.id, name: item.name})),
     ];
 
-    useEffect(() => setActiveWorkspaceId(initialWorkspaceId), [initialWorkspaceId]);
-    useEffect(() => setSelectedGroupId(initialSelectedGroupId ?? null), [initialSelectedGroupId]);
-    useEffect(() => {
-        if (characters.some(item => item.id === selectedCharacterId)) {
-            return;
-        }
+    const [previousWorkspaceId, setPreviousWorkspaceId] = useState(initialWorkspaceId);
 
-        const initialExists = characters.some(item => item.id === initialSelectedCharacterId);
-
-        setSelectedCharacterId(initialExists ? initialSelectedCharacterId ?? null : characters[0]?.id ?? null);
-    }, [
-        characters,
-        initialSelectedCharacterId,
-        selectedCharacterId,
-    ]);
-    useEffect(() => {
-        if (groups.some(item => item.id === selectedGroupId)) {
-            return;
-        }
-
-        const initialExists = groups.some(item => item.id === initialSelectedGroupId);
-
-        setSelectedGroupId(initialExists ? initialSelectedGroupId ?? null : groups[0]?.id ?? null);
-    }, [
-        groups,
-        initialSelectedGroupId,
-        selectedGroupId,
-    ]);
+    if (previousWorkspaceId !== initialWorkspaceId) {
+        setPreviousWorkspaceId(initialWorkspaceId);
+        setActiveWorkspaceId(initialWorkspaceId);
+    }
 
     const handleCreateGroup = async (name: string) => {
         const created = await onCreateGroup?.(name);
@@ -133,6 +113,82 @@ export const AttributeManagerCharactersPanel = ({
     const isCharactersWorkspace = activeWorkspaceId === 'characters';
     const browserItems = isCharactersWorkspace ? displayedCharacters : displayedGroups;
     const selectedItemId = isCharactersWorkspace ? selectedCharacterId : selectedGroupId;
+
+    const renderBrowser = () => (
+        <AttributeManagerEntityBrowser
+            key={activeWorkspaceId}
+            items={browserItems}
+            selectedItemId={selectedItemId}
+            listLabel={`${activeWorkspace.label} list`}
+            searchLabel={`Search ${activeWorkspace.label.toLocaleLowerCase()}`}
+            createAriaLabel={isCharactersWorkspace ? 'Create characters' : 'Create group'}
+            createTooltipLabel={isCharactersWorkspace ? 'Create character' : 'Create group'}
+            emptyLabel={isCharactersWorkspace ? 'No characters yet.' : 'No groups yet.'}
+            loadingLabel={isCharactersWorkspace ? 'Loading characters…' : 'Loading groups…'}
+            noMatchesLabel={isCharactersWorkspace ? 'No characters match your search.' : 'No groups match your search.'}
+            isLoading={isLoading}
+            isCreateDisabled={isReadOnly || (isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup)}
+            onSelectItem={isCharactersWorkspace ? setSelectedCharacterId : setSelectedGroupId}
+            onCreate={isCharactersWorkspace ? () => setIsCreateCharacterOpen(true) : () => setIsCreateGroupOpen(true)}
+        />
+    );
+
+    const renderDetails = () => (
+        <section
+            className={styles.detail}
+            aria-label={`${activeWorkspace.label} detail`}
+            inert={isReadOnly}
+            data-selected-group-id={!isCharactersWorkspace ? selectedGroupId ?? undefined : undefined}
+        >
+            {isCharactersWorkspace && selectedCharacter && selectedConfirmedCharacter ? (
+                <AttributeManagerCharacterDetail
+                    character={selectedCharacter}
+                    confirmedName={selectedConfirmedCharacter.name}
+                    characters={allEntityNames.map(entity => ({
+                        ...entity,
+                        color: null,
+                        outline: null,
+                        voiceType: null,
+                        vocalRangeLow: null,
+                        vocalRangeHigh: null,
+                    }))}
+                    isDeleting={includesId(deletingCharacterIds, selectedCharacter.id)}
+                    isRenaming={includesId(renamingCharacterIds, selectedCharacter.id)}
+                    isColorUpdating={includesId(colorUpdatingCharacterIds, selectedCharacter.id)}
+                    onNameDraftChange={name => setName(selectedCharacter.id, name)}
+                    onResetNameDraft={() => resetName(selectedCharacter.id)}
+                    onRenameCharacter={persistName}
+                    onSetCharacterColor={handleSetCharacterColor}
+                    onSetCharacterOutline={onSetCharacterOutline}
+                    onSetCharacterVoiceType={onSetCharacterVoiceType}
+                    onSetCharacterVocalRange={onSetCharacterVocalRange}
+                    onDeleteCharacter={onDeleteCharacter}
+                />
+            ) : null}
+            {!isCharactersWorkspace && selectedGroup && selectedConfirmedGroup ? (
+                <AttributeManagerGroupDetail
+                    group={selectedGroup}
+                    confirmedName={selectedConfirmedGroup.name}
+                    speakingEntities={allEntityNames}
+                    characters={displayedCharacters}
+                    isDeleting={includesId(deletingGroupIds, selectedGroup.id)}
+                    isRenaming={includesId(renamingGroupIds, selectedGroup.id)}
+                    isColorUpdating={includesId(colorUpdatingGroupIds, selectedGroup.id)}
+                    onNameDraftChange={name => setGroupName(selectedGroup.id, name)}
+                    onResetNameDraft={() => resetGroupName(selectedGroup.id)}
+                    onRenameGroup={(id, previousName, nextName) => persistGroupName(id, nextName, name => onRenameGroup?.(id, previousName, name))}
+                    onSetGroupColor={onSetGroupColor}
+                    onChangeMemberIds={memberIds => onChangeGroupMemberIds?.(selectedGroup.id, memberIds)}
+                    onDeleteGroup={onDeleteGroup}
+                />
+            ) : null}
+            {(isCharactersWorkspace ? !selectedCharacter || !selectedConfirmedCharacter : !selectedGroup || !selectedConfirmedGroup) ? (
+                <div className={styles.emptyDetail}>
+                    <p>{isCharactersWorkspace ? 'Create a character to edit details here.' : 'Create a group to edit details here.'}</p>
+                </div>
+            ) : null}
+        </section>
+    );
 
     return (
         <div className={styles.panel}>
@@ -157,76 +213,8 @@ export const AttributeManagerCharactersPanel = ({
                 </div>
             </header>
             <div className={styles.workspace}>
-                <AttributeManagerEntityBrowser
-                    key={activeWorkspaceId}
-                    items={browserItems}
-                    selectedItemId={selectedItemId}
-                    listLabel={`${activeWorkspace.label} list`}
-                    searchLabel={`Search ${activeWorkspace.label.toLocaleLowerCase()}`}
-                    createAriaLabel={isCharactersWorkspace ? 'Create characters' : 'Create group'}
-                    createTooltipLabel={isCharactersWorkspace ? 'Create character' : 'Create group'}
-                    emptyLabel={isCharactersWorkspace ? 'No characters yet.' : 'No groups yet.'}
-                    loadingLabel={isCharactersWorkspace ? 'Loading characters…' : 'Loading groups…'}
-                    noMatchesLabel={isCharactersWorkspace ? 'No characters match your search.' : 'No groups match your search.'}
-                    isLoading={isLoading}
-                    isCreateDisabled={isReadOnly || (isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup)}
-                    onSelectItem={isCharactersWorkspace ? setSelectedCharacterId : setSelectedGroupId}
-                    onCreate={isCharactersWorkspace ? () => setIsCreateCharacterOpen(true) : () => setIsCreateGroupOpen(true)}
-                />
-                <section
-                    className={styles.detail}
-                    aria-label={`${activeWorkspace.label} detail`}
-                    inert={isReadOnly}
-                    data-selected-group-id={!isCharactersWorkspace ? selectedGroupId ?? undefined : undefined}
-                >
-                    {isCharactersWorkspace && selectedCharacter && selectedConfirmedCharacter ? (
-                        <AttributeManagerCharacterDetail
-                            character={selectedCharacter}
-                            confirmedName={selectedConfirmedCharacter.name}
-                            characters={allEntityNames.map(entity => ({
-                                ...entity,
-                                color: null,
-                                outline: null,
-                                voiceType: null,
-                                vocalRangeLow: null,
-                                vocalRangeHigh: null,
-                            }))}
-                            isDeleting={deletingCharacterIds.includes(selectedCharacter.id)}
-                            isRenaming={renamingCharacterIds.includes(selectedCharacter.id)}
-                            isColorUpdating={colorUpdatingCharacterIds.includes(selectedCharacter.id)}
-                            onNameDraftChange={name => setName(selectedCharacter.id, name)}
-                            onResetNameDraft={() => resetName(selectedCharacter.id)}
-                            onRenameCharacter={persistName}
-                            onSetCharacterColor={handleSetCharacterColor}
-                            onSetCharacterOutline={onSetCharacterOutline}
-                            onSetCharacterVoiceType={onSetCharacterVoiceType}
-                            onSetCharacterVocalRange={onSetCharacterVocalRange}
-                            onDeleteCharacter={onDeleteCharacter}
-                        />
-                    ) : null}
-                    {!isCharactersWorkspace && selectedGroup && selectedConfirmedGroup ? (
-                        <AttributeManagerGroupDetail
-                            group={selectedGroup}
-                            confirmedName={selectedConfirmedGroup.name}
-                            speakingEntities={allEntityNames}
-                            characters={displayedCharacters}
-                            isDeleting={deletingGroupIds.includes(selectedGroup.id)}
-                            isRenaming={renamingGroupIds.includes(selectedGroup.id)}
-                            isColorUpdating={colorUpdatingGroupIds.includes(selectedGroup.id)}
-                            onNameDraftChange={name => setGroupName(selectedGroup.id, name)}
-                            onResetNameDraft={() => resetGroupName(selectedGroup.id)}
-                            onRenameGroup={(id, previousName, nextName) => persistGroupName(id, nextName, name => onRenameGroup?.(id, previousName, name))}
-                            onSetGroupColor={onSetGroupColor}
-                            onChangeMemberIds={memberIds => onChangeGroupMemberIds?.(selectedGroup.id, memberIds)}
-                            onDeleteGroup={onDeleteGroup}
-                        />
-                    ) : null}
-                    {(isCharactersWorkspace ? !selectedCharacter || !selectedConfirmedCharacter : !selectedGroup || !selectedConfirmedGroup) ? (
-                        <div className={styles.emptyDetail}>
-                            <p>{isCharactersWorkspace ? 'Create a character to edit details here.' : 'Create a group to edit details here.'}</p>
-                        </div>
-                    ) : null}
-                </section>
+                {renderBrowser()}
+                {renderDetails()}
             </div>
             {onCreateCharacter ? (
                 <CreateCharacterModal

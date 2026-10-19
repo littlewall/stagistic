@@ -107,7 +107,7 @@ const Harness = ({
 
     return (
         <div>
-            <output data-testid="document">{JSON.stringify(override ?? valueRef.current)}</output>
+            <output data-testid="document">{JSON.stringify(override ?? initialDocument)}</output>
             <output data-testid="rename-events">{renameEvents.join(',')}</output>
             <button type="button" onClick={() => void actions.handleCreateGroup('ALL')}>Create</button>
             <button type="button" onClick={() => void actions.handleRenameGroup('group-1', 'ALL', 'CHORUS')}>Rename</button>

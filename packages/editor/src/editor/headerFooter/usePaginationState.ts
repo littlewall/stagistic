@@ -1,7 +1,7 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    useEffect,
-    useState,
+    useCallback,
+    useSyncExternalStore,
 } from 'react';
 
 import {paginationKey} from '../tiptap/extensions/pagination/plugin/createPaginationPlugin';
@@ -16,24 +16,18 @@ const readState = (editor: TiptapEditor | null): PaginationState | null => {
 };
 
 export const usePaginationState = (editor: TiptapEditor | null): PaginationState | null => {
-    const [state, setState] = useState<PaginationState | null>(() => readState(editor));
-
-    useEffect(() => {
+    const subscribe = useCallback((notify: () => void) => {
         if (!editor) {
-            setState(null);
-
-            return;
+            return () => {};
         }
 
-        const update = () => setState(readState(editor));
-
-        update();
-        editor.on('transaction', update);
+        editor.on('transaction', notify);
 
         return () => {
-            editor.off('transaction', update);
+            editor.off('transaction', notify);
         };
     }, [editor]);
+    const getSnapshot = useCallback(() => readState(editor), [editor]);
 
-    return state;
+    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 };

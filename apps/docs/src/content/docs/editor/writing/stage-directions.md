@@ -29,7 +29,7 @@ In Dialogue and Aside, <kbd><span aria-hidden="true">⇥</span> Tab</kbd> change
 
 For a character's action, use [character references](/editor/characters/references/). You can finish the reference and continue the sentence in the same Stage direction.
 
-Music references also belong inside stage directions. Their dedicated guide will be part of [Music and lyrics](/editor/music/); that category is still being prepared.
+For music, [type `#` to place a musical number](/editor/music/add/) in a Stage direction, then [choose where its musical span ends](/editor/music/range/).
 
 ## Related tasks
 

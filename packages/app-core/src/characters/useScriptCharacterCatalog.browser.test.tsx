@@ -5,6 +5,7 @@ import {
     type ScriptCharacterRef,
     type ScriptRepository,
 } from '@stagistic/db';
+import {useLayoutEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -91,9 +92,13 @@ const Harness = ({
 let latestCatalog: ReturnType<typeof useScriptCharacterCatalog> | null = null;
 
 const CatalogProbe = ({repository}: {repository: ScriptRepository}) => {
-    latestCatalog = useScriptCharacterCatalog('script-1', repository);
+    const catalog = useScriptCharacterCatalog('script-1', repository);
 
-    return <output>{latestCatalog.groups.map(row => row.key).join(',')}</output>;
+    useLayoutEffect(() => {
+        latestCatalog = catalog;
+    }, [catalog]);
+
+    return <output>{catalog.groups.map(row => row.key).join(',')}</output>;
 };
 
 const getLatestCatalog = () => {

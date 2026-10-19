@@ -1,6 +1,6 @@
 import {PlusIcon} from '@stagistic/ui';
 
-import {SidebarContextButton} from '../sidebar';
+import {SidebarContextButton} from '../sidebar/SidebarContextButton';
 
 interface CharactersSidebarContextActionsProps {
     onAddCharacter: () => void,

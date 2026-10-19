@@ -39,14 +39,7 @@
 }
 
 .searchIcon {
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-    top: calc((var(--control-trigger-height) - var(--icon-size-md)) / 2);
-    left: var(--space-md);
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
-    color: var(--color-text-muted);
+    composes: search-icon from '../attribute-manager/attributeManagerWorkspace.module.css';
 }
 
 .iconButton {
@@ -94,28 +87,15 @@
 }
 
 .listItem {
-    cursor: pointer;
+    composes: list-item from '../attribute-manager/attributeManagerWorkspace.module.css';
     display: flex;
     flex-direction: column;
     gap: calc(var(--space-px) * 2);
-    width: 100%;
-    padding: var(--space-md) var(--space-lg);
-    color: var(--color-text-muted);
-    text-align: left;
-    background: transparent;
-    border: 0;
-    border-radius: var(--radius-sm);
-    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
+    align-items: stretch;
+}
 
-    &:hover {
-        color: var(--color-text);
-        background: var(--menu-item-hover-bg);
-    }
-
-    &.selected {
-        color: var(--color-text);
-        background: var(--menu-item-active-bg);
-    }
+.selected {
+    composes: selected from '../attribute-manager/attributeManagerWorkspace.module.css';
 }
 
 .itemLabel {

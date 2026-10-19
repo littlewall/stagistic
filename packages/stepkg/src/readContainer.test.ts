@@ -10,7 +10,7 @@ import {readStepkgContainer} from './readContainer';
 const encoder = new TextEncoder();
 
 const zipWith = (entries: Record<string, string>): Uint8Array => {
-    const files = Object.entries(entries).map(([path, value]) => [path, encoder.encode(value)]);
+    const files = Object.entries(entries).map(([path, value]): [string, Uint8Array] => [path, encoder.encode(value)]);
 
     return zipSync(Object.fromEntries(files));
 };

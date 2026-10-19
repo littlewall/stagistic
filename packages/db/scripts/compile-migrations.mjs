@@ -29,7 +29,7 @@ const readMigrations = async () => {
     const sqlFiles = entries
         .filter(entry => entry.isFile() && entry.name.endsWith('.sql'))
         .map(entry => entry.name)
-        .sort();
+        .toSorted();
 
     const compiled = [];
 

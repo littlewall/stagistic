@@ -173,7 +173,7 @@ export const SearchExtension = Extension.create({
 
                     if (dispatch) {
                         // Back to front keeps earlier positions valid without remapping.
-                        [...results].reverse().forEach(result => replaceRange(tr, result, replacement));
+                        results.toReversed().forEach(result => replaceRange(tr, result, replacement));
                     }
 
                     return true;

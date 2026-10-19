@@ -120,20 +120,7 @@
 }
 
 .item {
-    cursor: pointer;
-    display: flex;
-    gap: var(--space-lg);
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-md) var(--space-lg);
-    color: var(--color-text);
-    border-radius: var(--radius-md);
-    outline: none;
-
-    &[data-focused],
-    &[data-hovered] {
-        background: var(--state-hover);
-    }
+    composes: item from '../../molecules/DropdownMenu/DropdownMenu.module.css';
 }
 
 .itemText {

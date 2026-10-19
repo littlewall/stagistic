@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -89,7 +90,7 @@ describe('NewScriptModal', () => {
         const modal = renderModal(onCreate);
         const oneAct = await waitForElement<HTMLInputElement>('input[type="radio"][value="one-act"]');
 
-        await page.elementLocator(oneAct.closest('label')!).click();
+        await page.elementLocator(requireValue(oneAct.closest('label'))).click();
         await page.elementLocator(await waitForElement('button[type="submit"]')).click();
         expect(onCreate).toHaveBeenCalledWith('', 'one-act');
 
@@ -117,7 +118,7 @@ describe('NewScriptModal', () => {
         const oneAct = await waitForElement<HTMLInputElement>('input[type="radio"][value="one-act"]');
 
         await page.elementLocator(nameInput).fill('Long Day');
-        await page.elementLocator(oneAct.closest('label')!).click();
+        await page.elementLocator(requireValue(oneAct.closest('label'))).click();
         await page.elementLocator(await waitForElement('button[type="submit"]')).click();
         await waitFor(() => document.querySelector('[role="progressbar"][aria-label="Preparing editor"]') !== null);
 

@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import type {
     ComponentProps,
     ComponentType,
@@ -207,7 +208,7 @@ describe('ScriptAttributeManagerModal music actions', () => {
         const titleInput = await waitForElement<HTMLInputElement>('#music-title');
 
         await page.elementLocator(titleInput).fill('Finale');
-        await page.elementLocator(findButton('Add music')!).click();
+        await page.elementLocator(requireValue(findButton('Add music'))).click();
 
         expect(createMusic).toHaveBeenCalledWith({
             title: 'Finale',
@@ -224,7 +225,7 @@ describe('ScriptAttributeManagerModal music actions', () => {
 
         expect(deleteMusic).not.toHaveBeenCalled();
 
-        await page.elementLocator(findButton('Delete')!).click();
+        await page.elementLocator(requireValue(findButton('Delete'))).click();
 
         expect(deleteMusic).toHaveBeenCalledWith('music-1');
     });
@@ -237,7 +238,7 @@ describe('ScriptAttributeManagerModal music actions', () => {
         await page.elementLocator(
             await waitForElement<HTMLButtonElement>('[aria-label="Delete Overture"]'),
         ).click();
-        await page.elementLocator(findButton('Delete')!).click();
+        await page.elementLocator(requireValue(findButton('Delete'))).click();
         await new Promise(resolve => window.setTimeout(resolve, 20));
 
         expect(document.querySelector('dialog[aria-label="Delete music"]')).not.toBeNull();
@@ -325,7 +326,7 @@ describe('ScriptAttributeManagerModal group actions', () => {
         await page.elementLocator(await waitForElement('[aria-label="Remove ALL"]')).click();
         expect(document.body.textContent).toContain('become unconfirmed characters');
 
-        await page.elementLocator(findButton('Remove')!).click();
+        await page.elementLocator(requireValue(findButton('Remove'))).click();
         expect(handleDeleteGroup).toHaveBeenCalledWith('group-1');
     });
 });
@@ -344,7 +345,7 @@ describe('ScriptAttributeManagerModal scene actions', () => {
         const {deleteScene} = renderStructureManager();
 
         await waitForElement('[aria-label="Scene list"]');
-        await page.elementLocator(findByText('Kitchen')!).click();
+        await page.elementLocator(requireValue(findByText('Kitchen'))).click();
 
         const deleteButton = await waitForElement<HTMLButtonElement>('[aria-label="Delete scene heading"]');
 
@@ -353,7 +354,7 @@ describe('ScriptAttributeManagerModal scene actions', () => {
 
         expect(deleteScene).not.toHaveBeenCalled();
 
-        await page.elementLocator(findButton('Delete heading')!).click();
+        await page.elementLocator(requireValue(findButton('Delete heading'))).click();
 
         expect(deleteScene).toHaveBeenCalledWith('s2');
     });
@@ -364,11 +365,11 @@ describe('ScriptAttributeManagerModal scene actions', () => {
         renderStructureManager(deleteScene);
 
         await waitForElement('[aria-label="Scene list"]');
-        await page.elementLocator(findByText('Kitchen')!).click();
+        await page.elementLocator(requireValue(findByText('Kitchen'))).click();
         await page.elementLocator(
             await waitForElement<HTMLButtonElement>('[aria-label="Delete scene heading"]'),
         ).click();
-        await page.elementLocator(findButton('Delete heading')!).click();
+        await page.elementLocator(requireValue(findButton('Delete heading'))).click();
         await new Promise(resolve => window.setTimeout(resolve, 20));
 
         expect(document.querySelector('dialog[aria-label="Delete scene heading"]')).not.toBeNull();

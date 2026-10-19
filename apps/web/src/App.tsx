@@ -1,4 +1,4 @@
-import {ScriptRepositoryProvider, type SnapshotViewRepository} from '@stagistic/app-core';
+import {ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
     GlobalModalsProvider,
     HomeRoute,
@@ -6,12 +6,9 @@ import {
     ScriptExportRoute,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
+    useAppBootstrap,
 } from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
-import {
-    useEffect,
-    useState,
-} from 'react';
 import {
     Navigate,
     Route,
@@ -20,56 +17,21 @@ import {
 
 import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
-import type {ScriptRepository} from './repo';
 import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
+const bootstrapOptions = {
+    prepareDatabase: prepareLocalDbWithProgress,
+    loadRepository: () => import('./repo'),
+};
+
 const BootedApp = () => {
-    const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
-    const [snapshotViews, setSnapshotViews] = useState<SnapshotViewRepository | null>(null);
-    const [bootProgress, setBootProgress] = useState(0);
-    const [bootStatus, setBootStatus] = useState('Preparing');
-
-    useEffect(() => {
-        let isActive = true;
-
-        const boot = async () => {
-            if (document?.fonts) {
-                await document.fonts.ready;
-            }
-
-            if (!isActive) {
-                return;
-            }
-
-            await prepareLocalDbWithProgress(update => {
-                if (!isActive) {
-                    return;
-                }
-
-                setBootProgress(update.progress);
-                setBootStatus(update.label);
-            });
-
-            if (!isActive) {
-                return;
-            }
-
-            const repositoryModule = await import('./repo');
-
-            if (!isActive) {
-                return;
-            }
-
-            setSnapshotViews(repositoryModule.snapshotViews);
-            setScriptRepository(repositoryModule.scriptRepository);
-        };
-
-        void boot();
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
+    const {
+        services,
+        bootProgress,
+        bootStatus,
+    } = useAppBootstrap(bootstrapOptions);
+    const scriptRepository = services?.scriptRepository;
+    const snapshotViews = services?.snapshotViews ?? null;
 
     if (!scriptRepository) {
         return <LoaderOverlay label="Starting Stagistic" messages={[bootStatus]} progress={bootProgress} />;

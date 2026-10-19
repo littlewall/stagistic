@@ -33,7 +33,7 @@ const orderByKey = (ids: string[], keyById: ReadonlyMap<string, string>): string
         return 0;
     };
 
-    return [...ids].sort(compare);
+    return [...ids].toSorted(compare);
 };
 
 describe('computeOrderKeyAssignments', () => {

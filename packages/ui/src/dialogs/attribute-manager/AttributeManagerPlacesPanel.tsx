@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import {
-    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -8,6 +7,7 @@ import {
 import {Button} from '../../atoms/Button/Button';
 import {Input} from '../../atoms/Input/Input';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
+import {useItemSelection} from '../../hooks/useItemSelection';
 import {useKeyedFieldDrafts} from '../../hooks/useKeyedFieldDrafts';
 import {PlusIcon, SearchIcon} from '../../icons';
 import {AttributeManagerPlaceDetail} from './AttributeManagerPlaceDetail';
@@ -39,7 +39,7 @@ export const AttributeManagerPlacesPanel = ({
     onDeletePlace,
     isReadOnly = false,
 }: AttributeManagerPlacesPanelProps) => {
-    const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+    const [selectedPlaceId, setSelectedPlaceId] = useItemSelection(places);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const {
@@ -64,16 +64,6 @@ export const AttributeManagerPlacesPanel = ({
 
         return displayedPlaces.filter(place => place.name.toLocaleLowerCase().includes(normalizedSearchQuery));
     }, [displayedPlaces, normalizedSearchQuery]);
-
-    useEffect(() => {
-        const selectionStillExists = places.some(place => place.id === selectedPlaceId);
-
-        if (selectionStillExists) {
-            return;
-        }
-
-        setSelectedPlaceId(places[0]?.id ?? null);
-    }, [places, selectedPlaceId]);
 
     const handleCreatePlace = async (name: string) => {
         const createdPlace = await onCreatePlace(name);

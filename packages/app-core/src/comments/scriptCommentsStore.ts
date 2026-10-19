@@ -47,7 +47,7 @@ export const createScriptCommentsStore = (repository: ScriptRepository, scriptId
             messages: [...messages.collection.values()]
                 .filter(message => message.threadId === threadId)
                 .map(message => toDomainCollectionValue(message))
-                .sort((left, right) => left.createdAt - right.createdAt),
+                .toSorted((left, right) => left.createdAt - right.createdAt),
         };
     };
 

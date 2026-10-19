@@ -145,11 +145,13 @@ export const useBlockActionsOverlayAnchor = ({
     useLayoutEffect(() => {
         if (!visibleOverlayState) {
             cancelScheduledOverlayAnchorUpdate();
+            // oxlint-disable-next-line react/set-state-in-effect -- Clear the layout-derived position immediately when its external editor selection disappears.
             updateOverlayAnchor({allowClearOnMiss: true});
 
             return;
         }
 
+        // oxlint-disable-next-line react/set-state-in-effect -- Measure mounted DOM before paint so the gutter stays aligned with the selected block.
         updateOverlayAnchor({allowClearOnMiss: false});
         scheduleOverlayAnchorUpdate({allowClearOnMiss: true});
 

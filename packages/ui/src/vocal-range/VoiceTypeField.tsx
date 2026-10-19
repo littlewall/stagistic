@@ -1,5 +1,5 @@
 import {
-    useEffect,
+    useId,
     useRef,
     useState,
 } from 'react';
@@ -26,9 +26,13 @@ export const VoiceTypeField = ({
 
     useDropdownDismiss(isOpen, setIsOpen, rootRef);
 
-    useEffect(() => {
+    const listboxId = useId();
+    const [previousValue, setPreviousValue] = useState(value);
+
+    if (previousValue !== value) {
+        setPreviousValue(value);
         setDraft(value ?? '');
-    }, [value]);
+    }
 
     const normalizedDraft = draft.trim().toLowerCase();
     const suggestions = VOICE_TYPE_SUGGESTIONS.filter(option => option.includes(normalizedDraft));
@@ -48,12 +52,19 @@ export const VoiceTypeField = ({
         <div
             ref={rootRef}
             className={styles.root}
+            onBlur={event => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setIsOpen(false);
+                    commit();
+                }
+            }}
         >
             <Input
                 id={id}
                 size="lg"
                 role="combobox"
                 aria-expanded={isOpen}
+                aria-controls={listboxId}
                 aria-autocomplete="list"
                 aria-label="Voice type"
                 placeholder="Voice type"
@@ -63,13 +74,10 @@ export const VoiceTypeField = ({
                     setIsOpen(true);
                 }}
                 onFocus={() => setIsOpen(true)}
-                onBlur={() => {
-                    setIsOpen(false);
-                    commit();
-                }}
             />
             {isOpen ? (
                 <ul
+                    id={listboxId}
                     role="listbox"
                     aria-label="Voice type suggestions"
                     className={styles.menu}
@@ -83,6 +91,13 @@ export const VoiceTypeField = ({
                                 className={styles.item}
                                 onMouseDown={event => event.preventDefault()}
                                 onClick={() => selectSuggestion(option)}
+                                onKeyDown={event => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        selectSuggestion(option);
+                                    }
+                                }}
+                                tabIndex={0}
                             >
                                 {option}
                             </li>

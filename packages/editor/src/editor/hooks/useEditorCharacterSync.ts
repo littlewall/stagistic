@@ -17,6 +17,7 @@ export const useEditorCharacterSync = (
         commands.refreshCharacterTagDecorations?.();
     }, [
         editor,
+        // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Record changes invalidate decorations read from the editor's mutable refs.
         persistentCharacters,
     ]);
 
@@ -30,5 +31,6 @@ export const useEditorCharacterSync = (
         };
 
         syncCommands.syncCharacterRefs?.();
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Character record changes require synchronizing the external editor's references.
     }, [editor, persistentCharacters]);
 };

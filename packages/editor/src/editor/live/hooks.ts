@@ -1,8 +1,4 @@
-import {
-    useCallback,
-    useRef,
-    useSyncExternalStore,
-} from 'react';
+import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-selector';
 
 import type {
     EditorLiveActiveBlockInfo,
@@ -17,60 +13,20 @@ import {useEditorSnapshotStore} from './context';
 const identity = <TValue>(value: TValue) => value;
 
 const defaultIsEqual = <TValue>(previous: TValue, next: TValue) => Object.is(previous, next);
-const useLatestValue = <TValue>(value: TValue) => {
-    const ref = useRef(value);
-
-    ref.current = value;
-
-    return ref;
-};
 
 export const useEditorLiveSelector = <TSelected>(
     selector: (snapshot: EditorLiveSnapshot) => TSelected,
     isEqual: (previous: TSelected, next: TSelected) => boolean = defaultIsEqual,
 ) => {
     const store = useEditorSnapshotStore();
-    const selectorRef = useLatestValue(selector);
-    const isEqualRef = useLatestValue(isEqual);
-    const selectedRef = useRef<TSelected>(selector(store.getSnapshot()));
 
-    const maybeSyncSelected = useCallback(() => {
-        const nextSelected = selectorRef.current(store.getSnapshot());
-
-        if (isEqualRef.current(selectedRef.current, nextSelected)) {
-            return;
-        }
-
-        selectedRef.current = nextSelected;
-    }, [
-        isEqualRef,
-        selectorRef,
-        store,
-    ]);
-
-    maybeSyncSelected();
-
-    const subscribe = useCallback(
-        (notify: () => void) => {
-            return store.subscribeSelector(
-                snapshot => selectorRef.current(snapshot),
-                (previous, next) => isEqualRef.current(previous, next),
-                () => {
-                    maybeSyncSelected();
-                    notify();
-                },
-            );
-        },
-        [
-            isEqualRef,
-            maybeSyncSelected,
-            selectorRef,
-            store,
-        ],
+    return useSyncExternalStoreWithSelector(
+        store.subscribe,
+        store.getSnapshot,
+        store.getSnapshot,
+        selector,
+        isEqual,
     );
-    const getSnapshot = useCallback(() => selectedRef.current, []);
-
-    return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 };
 
 export const useEditorLiveSnapshot = () => {

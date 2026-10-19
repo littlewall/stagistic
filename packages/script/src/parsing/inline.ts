@@ -107,7 +107,7 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
 
         if (source[index] === '@' && source[index + 1] !== '@') {
             const tagStart = index + 1;
-            let tagText = '';
+            let tagText: string;
             let tagEnd = tagStart;
 
             if (source[tagStart] === '"') {

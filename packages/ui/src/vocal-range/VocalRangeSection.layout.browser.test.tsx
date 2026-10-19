@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -63,10 +64,10 @@ describe('VocalRangeSection layout', () => {
         const name = await waitForElement<HTMLInputElement>('#character-name-char-1');
         const voiceType = await waitForElement<HTMLInputElement>('[aria-label="Voice type"]');
         const staff = await waitForElement<SVGSVGElement>('[aria-label="Vocal range staff"]');
-        const widget = staff.parentElement!;
-        const fields = widget.parentElement!;
-        const hitTarget = staff.querySelector<SVGEllipseElement>('[data-note-hit-target]')!;
-        const staffLine = staff.querySelector<SVGLineElement>('[data-staff-line]')!;
+        const widget = requireValue(staff.parentElement);
+        const fields = requireValue(widget.parentElement);
+        const hitTarget = requireValue(staff.querySelector<SVGEllipseElement>('[data-note-hit-target]'));
+        const staffLine = requireValue(staff.querySelector<SVGLineElement>('[data-staff-line]'));
         const noteheads = [...staff.querySelectorAll<SVGEllipseElement>('[data-notehead]')];
         const nameRect = name.getBoundingClientRect();
         const voiceTypeRect = voiceType.getBoundingClientRect();
