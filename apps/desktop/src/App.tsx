@@ -47,11 +47,12 @@ const AppRoutes = () => {
 
 const App = () => {
     const {
-        scriptRepository,
-        documentSync,
+        services,
         bootProgress,
         bootStatus,
     } = useAppBootstrap(bootstrapOptions);
+    const scriptRepository = services?.scriptRepository ?? null;
+    const documentSync = services?.documentSync ?? null;
 
     /*
      * Portable backup snapshots into the app data folder: periodic while running,

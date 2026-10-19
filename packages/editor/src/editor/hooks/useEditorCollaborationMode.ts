@@ -1,10 +1,6 @@
 import type {ScriptDocument} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/core';
-import {
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+import {useEffect, useMemo} from 'react';
 
 import type {EditorCollaboration} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
@@ -27,16 +23,4 @@ export const useEditorReadOnly = (editor: TiptapEditor | null, readOnly: boolean
             editor.setEditable(!readOnly);
         }
     }, [editor, readOnly]);
-};
-
-export const useInitialEditorContent = (signature: string, value: ScriptDocument) => {
-    const [content, setContent] = useState({signature, value});
-
-    if (content.signature !== signature) {
-        setContent({signature, value});
-
-        return value;
-    }
-
-    return content.value;
 };

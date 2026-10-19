@@ -1,4 +1,3 @@
-import type {SyncEngineClient} from '@stagistic/sync-engine';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -10,19 +9,20 @@ import {
 
 import {useAppBootstrap} from './useAppBootstrap';
 
-type Options = Parameters<typeof useAppBootstrap<string>>[0];
+const services = {scriptRepository: 'ready'};
 
-const services = {scriptRepository: 'ready', documentSync: {} as SyncEngineClient};
+type Options = Parameters<typeof useAppBootstrap<typeof services>>[0];
+
 const roots: Root[] = [];
 
 const Harness = ({options}: {options: Options}) => {
     const {
-        scriptRepository,
+        services: loaded,
         bootStatus,
         bootProgress,
     } = useAppBootstrap(options);
 
-    return <p>{scriptRepository ?? `${bootStatus}: ${bootProgress}`}</p>;
+    return <p>{loaded?.scriptRepository ?? `${bootStatus}: ${bootProgress}`}</p>;
 };
 
 const mount = (options: Options) => {

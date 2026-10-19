@@ -1,4 +1,3 @@
-import type {SyncEngineClient} from '@stagistic/sync-engine';
 import {useEffect, useState} from 'react';
 
 interface BootProgress {
@@ -6,20 +5,16 @@ interface BootProgress {
     label: string,
 }
 
-interface AppServices<Repository> {
-    scriptRepository: Repository,
-    documentSync: SyncEngineClient,
-}
-
-interface AppBootstrapOptions<Repository> {
+interface AppBootstrapOptions<Services> {
     beforeDatabase?: () => Promise<void>,
     prepareDatabase: (onProgress: (update: BootProgress) => void) => Promise<void>,
-    loadRepository: () => Promise<AppServices<Repository>>,
+    /** Loads the app's services (repository module) once the database is ready. */
+    loadRepository: () => Promise<Services>,
 }
 
 /** Keep options stable so a render does not restart database initialization. */
-export const useAppBootstrap = <Repository>(options: AppBootstrapOptions<Repository>) => {
-    const [services, setServices] = useState<AppServices<Repository> | null>(null);
+export const useAppBootstrap = <Services>(options: AppBootstrapOptions<Services>) => {
+    const [services, setServices] = useState<Services | null>(null);
     const [bootProgress, setBootProgress] = useState(0);
     const [bootStatus, setBootStatus] = useState('Preparing');
 
@@ -69,8 +64,7 @@ export const useAppBootstrap = <Repository>(options: AppBootstrapOptions<Reposit
     }, [options]);
 
     return {
-        scriptRepository: services?.scriptRepository ?? null,
-        documentSync: services?.documentSync ?? null,
+        services,
         bootProgress,
         bootStatus,
     };

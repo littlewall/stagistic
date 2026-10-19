@@ -27,13 +27,10 @@ import {useCommentCallbacksRef} from './hooks/useCommentCallbacksRef';
 import {useEditorAutosave} from './hooks/useEditorAutosave';
 import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
-import {
-    useEditorReadOnly,
-    useInitialContentSignature,
-    useInitialEditorContent,
-} from './hooks/useEditorCollaborationMode';
+import {useEditorReadOnly, useInitialContentSignature} from './hooks/useEditorCollaborationMode';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
+import {useInitialEditorContent} from './hooks/useInitialEditorContent';
 import {useInitialCanvasReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';

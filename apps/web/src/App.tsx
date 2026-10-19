@@ -31,11 +31,12 @@ const bootstrapOptions = {
 
 const BootedApp = () => {
     const {
-        scriptRepository,
-        documentSync,
+        services,
         bootProgress,
         bootStatus,
     } = useAppBootstrap(bootstrapOptions);
+    const scriptRepository = services?.scriptRepository ?? null;
+    const documentSync = services?.documentSync ?? null;
 
     if (!scriptRepository) {
         return <LoaderOverlay label="Starting Stagistic" messages={[bootStatus]} progress={bootProgress} />;
