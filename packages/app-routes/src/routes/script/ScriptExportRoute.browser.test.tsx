@@ -108,6 +108,10 @@ vi.mock('./settings/ScriptSettingsModalContext', () => ({
     }),
 }));
 
+vi.mock('../../global-modals/GlobalModalsProvider', () => ({
+    useGlobalModals: () => ({openAppSettings: () => {}}),
+}));
+
 const mountedRoots: Root[] = [];
 
 const LocationProbe = () => {

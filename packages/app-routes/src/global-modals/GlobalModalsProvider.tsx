@@ -13,9 +13,12 @@ import {
     useCallback,
     useContext,
     useMemo,
+    useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
+import {AppSettingsModal} from '../app-settings/AppSettingsModal';
+import type {AppSettingsSection} from '../app-settings/types';
 import {
     type ScriptToDelete,
     type ScriptToDuplicate,
@@ -30,6 +33,7 @@ type GlobalModalsController = {
     openDeleteScript: (script: ScriptToDelete) => void,
     openRenameScript: (script: ScriptToRename) => void,
     openDuplicateScript: (script: ScriptToDuplicate) => void,
+    openAppSettings: () => void,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -46,10 +50,15 @@ export const useGlobalModals = () => {
 
 interface GlobalModalsProviderProps {
     children: ReactNode,
+    /** Platform sections of the app settings, listed after Appearance. Keep the array stable. */
+    settingsSections?: AppSettingsSection[],
 }
 
-export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
+export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
+    const [isAppSettingsOpen, setIsAppSettingsOpen] = useState(false);
+    const openAppSettings = useCallback(() => setIsAppSettingsOpen(true), []);
+    const closeAppSettings = useCallback(() => setIsAppSettingsOpen(false), []);
     const scriptRepository = useScriptRepository();
     const scriptActions = useScriptActions();
     const saveTitlePage = useCallback(
@@ -118,8 +127,10 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
             openDeleteScript,
             openRenameScript,
             openDuplicateScript,
+            openAppSettings,
         }),
         [
+            openAppSettings,
             openDeleteScript,
             openDuplicateScript,
             openImportScript,
@@ -165,6 +176,11 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 isPending={isDuplicating}
                 onClose={closeDuplicateScript}
                 onSubmit={handleDuplicate}
+            />
+            <AppSettingsModal
+                isOpen={isAppSettingsOpen}
+                sections={settingsSections}
+                onClose={closeAppSettings}
             />
         </GlobalModalsContext.Provider>
     );

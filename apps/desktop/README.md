@@ -47,11 +47,12 @@ moon run desktop:build
 ## Local MCP
 
 The backend exposes seven read-only tools over a native stdio executable.
-Script text uses Stagistic syntax. Access starts disabled; no settings UI is
-included yet. The editor must be running and its local database ready.
+Script text uses Stagistic syntax. Access starts disabled. The editor must be
+running and its local database ready.
 
-`src/mcp/client.ts` provides status, enable/disable, manual configuration and
-Claude installation functions for the future settings UI. Manual preparation
+Settings (the header's user icon) › MCP turns the server on and off, opens the
+`.mcpb` bundle in Claude and shows the manual client configuration. It calls the
+functions in `src/mcp/client.ts` through `src/mcp/useMcpSettings.ts`. Manual preparation
 returns the user's actual absolute executable path and `args: []`; it does not
 enable access. Each stdio client launches that executable directly, without
 Node, shell interpolation or a separate runtime.

@@ -1,5 +1,3 @@
-import type {ReactNode} from 'react';
-
 import type {ImportPayload} from './import/model';
 import type {ImportScriptFile, StepkgPeekResult} from './import/types';
 
@@ -28,56 +26,4 @@ export interface ImportScriptModalProps {
     preselectedFile?: ImportScriptFile | null,
     isLoading?: boolean,
     isDownloadingBackup?: boolean,
-}
-
-export interface SettingsNavSubItem {
-    id: string,
-    label: string,
-    panelId: string,
-    icon?: ReactNode,
-}
-
-export interface SettingsNavLinkItem {
-    id: string,
-    label: string,
-    panelId: string,
-}
-
-export interface SettingsNavExpandableItem {
-    id: string,
-    label: string,
-    subItems: SettingsNavSubItem[],
-}
-
-export interface SettingsNavSeparatorItem {
-    id: string,
-}
-
-export type SettingsNavItem =
-    | ({
-        kind: 'item',
-    } & SettingsNavLinkItem)
-    | ({
-        kind: 'expandable',
-    } & SettingsNavExpandableItem)
-    | ({
-        kind: 'separator',
-    } & SettingsNavSeparatorItem);
-
-export interface SettingsNavGroup {
-    id: string,
-    label: string,
-    items: SettingsNavItem[],
-}
-
-export interface ScriptSettingsModalProps {
-    isOpen: boolean,
-    title?: string,
-    groups: SettingsNavGroup[],
-    activePanelId: string,
-    expandedItemIds: string[],
-    onClose: () => void,
-    onSelectPanel: (panelId: string) => void,
-    onToggleExpand: (itemId: string) => void,
-    children: ReactNode,
 }

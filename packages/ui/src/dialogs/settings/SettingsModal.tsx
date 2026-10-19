@@ -1,31 +1,34 @@
 import clsx from 'clsx';
 
 import {ModalDialog} from '../modal/ModalDialog';
-import styles from './ScriptSettingsModal.module.css';
-import type {ScriptSettingsModalProps} from './types';
+import styles from './SettingsModal.module.css';
+import type {SettingsModalProps} from './types';
 export type {
     SettingsNavGroup,
     SettingsNavItem,
     SettingsNavSubItem,
 } from './types';
 
-export const ScriptSettingsModal = ({
+const NO_EXPANDED_ITEMS: string[] = [];
+
+export const SettingsModal = ({
     isOpen,
     title = 'Settings',
+    size = 'workspace',
     groups,
     activePanelId,
-    expandedItemIds,
+    expandedItemIds = NO_EXPANDED_ITEMS,
     onClose,
     onSelectPanel,
     onToggleExpand,
     children,
-}: ScriptSettingsModalProps) => {
+}: SettingsModalProps) => {
     return (
         <ModalDialog
             isOpen={isOpen}
             onClose={onClose}
-            ariaLabel="Script settings"
-            panelClassName={styles.modal}
+            ariaLabel={title}
+            panelClassName={clsx(styles.modal, size === 'compact' && styles.compact)}
         >
             <header className={styles.header}>
                 <h2 className={styles.title}>{title}</h2>
@@ -88,7 +91,7 @@ export const ScriptSettingsModal = ({
                                             <button
                                                 type="button"
                                                 className={styles.navExpandButton}
-                                                onClick={() => onToggleExpand(item.id)}
+                                                onClick={() => onToggleExpand?.(item.id)}
                                                 aria-expanded={isExpanded}
                                             >
                                                 <span>{item.label}</span>

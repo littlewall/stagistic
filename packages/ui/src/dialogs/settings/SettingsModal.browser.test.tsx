@@ -10,7 +10,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {ScriptSettingsModal} from './ScriptSettingsModal';
+import {SettingsModal} from './SettingsModal';
 
 let mountedRoot: Root | null = null;
 
@@ -39,7 +39,7 @@ const SettingsHarness = () => {
             >
                 Open settings
             </button>
-            <ScriptSettingsModal
+            <SettingsModal
                 isOpen={isOpen}
                 groups={[
                     {
@@ -62,7 +62,7 @@ const SettingsHarness = () => {
                 onToggleExpand={() => {}}
             >
                 <input aria-label="Script title" />
-            </ScriptSettingsModal>
+            </SettingsModal>
             <button type="button">Outside action</button>
         </>
     );
@@ -74,7 +74,7 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('ScriptSettingsModal', () => {
+describe('SettingsModal', () => {
     it('traps focus while open and restores it to the trigger on close', async () => {
         const host = document.createElement('div');
 
@@ -87,9 +87,9 @@ describe('ScriptSettingsModal', () => {
         const trigger = document.querySelector<HTMLButtonElement>('button');
 
         await userEvent.click(trigger as HTMLButtonElement);
-        await waitFor(() => document.querySelector('dialog[aria-label="Script settings"]') !== null);
+        await waitFor(() => document.querySelector('dialog[aria-label="Settings"]') !== null);
 
-        const dialog = document.querySelector<HTMLDialogElement>('dialog[aria-label="Script settings"]');
+        const dialog = document.querySelector<HTMLDialogElement>('dialog[aria-label="Settings"]');
 
         await waitFor(() => dialog?.open === true);
 

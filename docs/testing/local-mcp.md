@@ -16,8 +16,8 @@ outline, scenes, excerpts, characters, confirmed dialogue and PostgreSQL FTS.
 Text uses the shared **Stagistic syntax** serializer, including whole speeches,
 multiple speakers, inline markup, stage directions and fragment context.
 
-Access defaults off. The frontend functions in
-`apps/desktop/src/mcp/client.ts` are ready for a later settings UI:
+Access defaults off. Settings › MCP in the desktop app drives the frontend
+functions in `apps/desktop/src/mcp/client.ts`:
 
 | Function | Behavior |
 | --- | --- |
@@ -134,8 +134,8 @@ does not grant data access. No clients or Claude config files were modified.
 
 ## Manual smoke still required
 
-Use the client helpers from a developer test build with WebView devtools, or
-wire them into the forthcoming settings UI. For production-endpoint inspection,
+Use Settings › MCP in the app, or the client helpers from a developer test build
+with WebView devtools. For production-endpoint inspection,
 a local build can enable Tauri's `tauri/devtools` feature while retaining the
 release profile. Do not install the debug MCPB into Claude.
 

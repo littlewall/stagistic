@@ -1,5 +1,6 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
+    type AppSettingsSection,
     GlobalModalsProvider,
     HomeRoute,
     ScriptEditorRoute,
@@ -19,6 +20,7 @@ import {
 
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
+import {McpSettingsPanel} from './mcp/McpSettingsPanel';
 import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
 
@@ -27,6 +29,14 @@ const bootstrapOptions = {
     prepareDatabase: prepareLocalDbWithProgress,
     loadRepository: () => import('./repo'),
 };
+
+const settingsSections: AppSettingsSection[] = [
+    {
+        id: 'mcp',
+        label: 'MCP',
+        content: <McpSettingsPanel />,
+    },
+];
 
 // Runs inside the router + providers so it can use navigation and modal hooks.
 const AppRoutes = () => {
@@ -94,7 +104,7 @@ const App = () => {
             snapshotViews={snapshotViews}
         >
             <ToastProvider>
-                <GlobalModalsProvider>
+                <GlobalModalsProvider settingsSections={settingsSections}>
                     <AppRoutes />
                 </GlobalModalsProvider>
             </ToastProvider>

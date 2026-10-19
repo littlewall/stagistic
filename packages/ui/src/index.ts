@@ -20,6 +20,7 @@ export {
     toggleAppTheme,
     toggleAppThemeMode,
 } from './theme/theme';
+export {useAppThemeMode} from './theme/useAppThemeMode';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 export * from './icons';
@@ -56,6 +57,7 @@ export {
     CardFooter,
     CardHeader,
 } from './molecules/Card/Card';
+export {CodeSnippet} from './molecules/CodeSnippet/CodeSnippet';
 export {ListPanel, type ListPanelProps} from './molecules/ListPanel/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow/ListRow';
 export {
@@ -154,6 +156,12 @@ export {ModalActions, type ModalActionsProps} from './dialogs/modal/ModalActions
 export {ModalDialog} from './dialogs/modal/ModalDialog';
 export {ModalHeader, type ModalHeaderProps} from './dialogs/modal/ModalHeader';
 export {TypeToConfirmAction, type TypeToConfirmActionProps} from './dialogs/modal/TypeToConfirmAction';
+export {
+    SettingsModal,
+    type SettingsNavGroup,
+    type SettingsNavItem,
+    type SettingsNavSubItem,
+} from './dialogs/settings/SettingsModal';
 
 // ─── Dialogs: script ────────────────────────────────────────────────────────
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
@@ -178,12 +186,6 @@ export {
     type RestoreScriptStateMode,
 } from './dialogs/script/RestoreScriptStateModal';
 export {SaveScriptStateModal, type SaveScriptStateModalProps} from './dialogs/script/SaveScriptStateModal';
-export {
-    ScriptSettingsModal,
-    type SettingsNavGroup,
-    type SettingsNavItem,
-    type SettingsNavSubItem,
-} from './dialogs/script/ScriptSettingsModal';
 export type {ScriptStateDetails, ScriptStateKind} from './dialogs/script/ScriptStateDetailsFields';
 export {
     type ScriptStateRecord,
