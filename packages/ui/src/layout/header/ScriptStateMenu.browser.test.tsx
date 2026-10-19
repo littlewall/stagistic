@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -102,12 +103,12 @@ describe('ScriptStateMenu', () => {
         });
 
         await userEvent.click(await waitForElement('[aria-label="Script state: Draft 1"]'));
-        await userEvent.click([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent?.startsWith('Festival'))!);
+        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent?.startsWith('Festival'))));
 
         expect(onSelect).toHaveBeenLastCalledWith('v1');
 
         await userEvent.click(await waitForElement('[aria-label="Script state: Draft 1"]'));
-        await userEvent.click([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent?.startsWith('Current'))!);
+        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent?.startsWith('Current'))));
 
         expect(onSelect).toHaveBeenLastCalledWith(null);
     });
@@ -128,9 +129,9 @@ describe('ScriptStateMenu', () => {
         expect(menuTexts().some(text => text?.startsWith('Save as'))).toBe(false);
 
         await userEvent.keyboard('{Escape}');
-        await userEvent.click([...document.querySelectorAll('button')].find(button => button.textContent === 'Restore…')!);
+        await userEvent.click(requireValue([...document.querySelectorAll('button')].find(button => button.textContent === 'Restore…')));
         await waitForElement('[aria-label="Restore"] [role="menuitem"]');
-        await userEvent.click([...document.querySelectorAll('[aria-label="Restore"] [role="menuitem"]')].find(item => item.textContent === 'Restore as new script')!);
+        await userEvent.click(requireValue([...document.querySelectorAll('[aria-label="Restore"] [role="menuitem"]')].find(item => item.textContent === 'Restore as new script')));
 
         expect(onRestoreAsNew).toHaveBeenCalledOnce();
         expect(onRestore).not.toHaveBeenCalled();

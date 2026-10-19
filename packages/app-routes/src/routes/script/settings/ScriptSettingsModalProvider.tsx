@@ -1,5 +1,8 @@
-import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
-import {getScriptSnapshotLabel} from '@stagistic/app-core';
+import {
+    getScriptSnapshotLabel,
+    useScriptActions,
+    useScriptRepository,
+} from '@stagistic/app-core';
 import {isApplePlatform} from '@stagistic/shared';
 import {
     Notice,

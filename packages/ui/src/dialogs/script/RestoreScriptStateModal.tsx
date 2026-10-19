@@ -1,6 +1,5 @@
 import {
     type FormEvent,
-    useEffect,
     useId,
     useState,
 } from 'react';
@@ -38,13 +37,15 @@ export const RestoreScriptStateModal = ({
 }: RestoreScriptStateModalProps) => {
     const titleId = useId();
     const [title, setTitle] = useState(initialTitle);
+    const [previous, setPrevious] = useState({isOpen, initialTitle});
     const canSubmit = mode === 'restore' || title.trim().length > 0;
 
-    useEffect(() => {
+    if (previous.isOpen !== isOpen || previous.initialTitle !== initialTitle) {
+        setPrevious({isOpen, initialTitle});
         if (isOpen) {
             setTitle(initialTitle);
         }
-    }, [initialTitle, isOpen]);
+    }
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();

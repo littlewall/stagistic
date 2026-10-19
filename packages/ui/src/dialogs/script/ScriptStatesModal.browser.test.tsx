@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -100,7 +101,7 @@ describe('ScriptStatesModal', () => {
         renderModal({onCreate: vi.fn()});
         await settle();
 
-        const items = [...modal()!.querySelectorAll('[aria-label="Draft list"] li button')].map(item => item.textContent);
+        const items = [...requireValue(modal()).querySelectorAll('[aria-label="Draft list"] li button')].map(item => item.textContent);
 
         expect(items).toEqual(['Draft 2Oct 9, 2026 · new final monologue', 'Draft 1Oct 8, 2026']);
         expect(button('Save the current script as a new draft')).toBeTruthy();
@@ -124,7 +125,7 @@ describe('ScriptStatesModal', () => {
 
         expect(submit.disabled).toBe(true);
 
-        await userEvent.type(modal()!.querySelector<HTMLInputElement>('input[autocomplete="off"]')!, 'Tour 2027');
+        await userEvent.type(requireValue(requireValue(modal()).querySelector<HTMLInputElement>('input[autocomplete="off"]')), 'Tour 2027');
         await userEvent.click(submit);
 
         expect(onUpdate).toHaveBeenCalledWith('d2', {
@@ -144,7 +145,7 @@ describe('ScriptStatesModal', () => {
 
         expect(onDelete).not.toHaveBeenCalled();
 
-        await userEvent.click(button('Delete', document.querySelector('dialog[open]')!));
+        await userEvent.click(button('Delete', requireValue(document.querySelector('dialog[open]'))));
 
         expect(onDelete).toHaveBeenCalledWith('d2');
     });
@@ -155,7 +156,7 @@ describe('ScriptStatesModal', () => {
         renderModal({shownStateId: 'd2', onOpen});
         await settle();
 
-        expect(button('On screen', modal()!.querySelector('section[aria-label="Draft 2 actions"]')!).disabled).toBe(true);
+        expect(button('On screen', requireValue(requireValue(modal()).querySelector('section[aria-label="Draft 2 actions"]'))).disabled).toBe(true);
 
         await userEvent.click(button('Draft 1Oct 8, 2026'));
         await userEvent.click(button('Open'));

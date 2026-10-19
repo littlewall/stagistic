@@ -6,6 +6,7 @@ import {
 } from '@stagistic/db';
 import {createTestDb} from '@stagistic/db/testing';
 import {createEmptyScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -52,7 +53,7 @@ const setup = async () => {
         const loaded = await loadScriptSnapshot({
             repository: live,
             scriptId: SCRIPT_ID,
-            snapshotId: snapshot!.id,
+            snapshotId: requireValue(snapshot).id,
         });
 
         if (!loaded.ok) throw new Error('snapshot did not load');

@@ -14,7 +14,7 @@ export const useScriptSnapshots = (
         : null, [repository, scriptId]);
     const status = useReactiveCollectionStatus(store?.status);
     const confirmed = useReactiveSourceSnapshot(store?.confirmed);
-    const snapshots = useMemo(() => [...confirmed.rows].sort((left, right) => {
+    const snapshots = useMemo(() => confirmed.rows.toSorted((left, right) => {
         return right.createdAt - left.createdAt || (left.id < right.id ? 1 : -1);
     }), [confirmed.rows]);
 

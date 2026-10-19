@@ -18,7 +18,6 @@ import {
     type ReactNode,
     useCallback,
     useMemo,
-    useRef,
     useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -66,8 +65,9 @@ export const useScriptStateControls = ({
     const [saveRequest, setSaveRequest] = useState<SaveRequest | null>(null);
     const [manager, setManager] = useState<ManagerState | null>(null);
     const [restoreTarget, setRestoreTarget] = useState<{snapshot: ScriptSnapshot, mode: RestoreScriptStateMode} | null>(null);
-    // A kept request survives the closing animation of the save dialog.
-    const lastSaveKindRef = useRef<ScriptStateKind>('draft');
+    // The kind outlives the request so the closing save dialog keeps its copy.
+    const [lastSaveKind, setLastSaveKind] = useState<ScriptStateKind>('draft');
+    const shownId = shownSnapshot?.id ?? null;
 
     const versions = useMemo(() => snapshots.filter(snapshot => snapshot.kind === 'version').map(toMenuItem), [snapshots]);
     const drafts = useMemo(() => snapshots.filter(snapshot => snapshot.kind === 'draft').map(toMenuItem), [snapshots]);
@@ -75,7 +75,7 @@ export const useScriptStateControls = ({
     const findSnapshot = (snapshotId: string) => snapshots.find(snapshot => snapshot.id === snapshotId) ?? null;
 
     const selectState = useCallback(async (snapshotId: string | null) => {
-        if (!scriptId || snapshotId === (shownSnapshot?.id ?? null)) {
+        if (!scriptId || snapshotId === shownId) {
             return;
         }
 
@@ -89,13 +89,13 @@ export const useScriptStateControls = ({
         isReadOnly,
         navigate,
         scriptId,
-        shownSnapshot?.id,
+        shownId,
         view,
     ]);
 
     /** Opens the save dialog; `afterSave` runs once the state is stored (e.g. to download a PDF). */
     const openSave = useCallback((kind: ScriptStateKind, options?: Omit<SaveRequest, 'kind'>) => {
-        lastSaveKindRef.current = kind;
+        setLastSaveKind(kind);
         setSaveRequest({kind, ...options});
     }, []);
 
@@ -153,13 +153,13 @@ export const useScriptStateControls = ({
     const stateMenu: ReactNode = scriptId ? (
         <ScriptStateMenu
             label={shownLabel}
-            selectedId={shownSnapshot?.id ?? null}
+            selectedId={shownId}
             versions={versions}
             drafts={drafts}
             onSelect={snapshotId => void selectState(snapshotId)}
             onSaveDraft={isReadOnly ? undefined : () => openSave('draft')}
             onSaveVersion={isReadOnly ? undefined : () => openSave('version')}
-            onManage={() => setManager({kind: shownSnapshot?.kind ?? 'draft', selectedId: shownSnapshot?.id ?? null})}
+            onManage={() => setManager({kind: shownSnapshot?.kind ?? 'draft', selectedId: shownId})}
             restore={shownSnapshot ? {
                 onRestore: () => requestRestore(shownSnapshot.id, 'restore'),
                 onRestoreAsNew: () => requestRestore(shownSnapshot.id, 'restore-as-new'),
@@ -173,7 +173,7 @@ export const useScriptStateControls = ({
                 isOpen={manager !== null}
                 activeKind={manager?.kind ?? 'draft'}
                 states={records}
-                shownStateId={shownSnapshot?.id ?? null}
+                shownStateId={shownId}
                 initialSelectedId={manager?.selectedId ?? null}
                 isPending={actions.isPending}
                 onClose={() => setManager(null)}
@@ -192,7 +192,7 @@ export const useScriptStateControls = ({
             />
             <SaveScriptStateModal
                 isOpen={saveRequest !== null}
-                kind={saveRequest?.kind ?? lastSaveKindRef.current}
+                kind={saveRequest?.kind ?? lastSaveKind}
                 submitLabel={saveRequest?.submitLabel}
                 isPending={actions.isPending}
                 onClose={() => setSaveRequest(null)}

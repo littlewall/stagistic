@@ -9,6 +9,7 @@ import {
     COMMENT_ANCHOR_MARK_NAME,
     type ScriptDocument,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -228,7 +229,7 @@ describe('script snapshot operations', () => {
         const loaded = await loadScriptSnapshot({
             repository,
             scriptId: SCRIPT_ID,
-            snapshotId: snapshot!.id,
+            snapshotId: requireValue(snapshot).id,
         });
 
         expect(flushed).toEqual(['flush']);
@@ -249,14 +250,14 @@ describe('script snapshot operations', () => {
             kind: 'draft',
         });
         const draftOneSource = await repository.getScriptPackageSource(SCRIPT_ID);
-        const attachmentKey = draftOneSource!.attachments[0].storageKey;
+        const attachmentKey = requireValue(draftOneSource).attachments[0].storageKey;
 
         await editAfterDraftOne(repository);
 
         const result = await restoreScriptSnapshot({
             repository,
             scriptId: SCRIPT_ID,
-            snapshot: draftOne!,
+            snapshot: requireValue(draftOne),
         });
         const restored = await repository.getScriptPackageSource(SCRIPT_ID);
 
@@ -288,7 +289,7 @@ describe('script snapshot operations', () => {
         await restoreScriptSnapshot({
             repository,
             scriptId: SCRIPT_ID,
-            snapshot: draftOne!,
+            snapshot: requireValue(draftOne),
         });
 
         const restored = await repository.getScriptPackageSource(SCRIPT_ID);
@@ -299,10 +300,10 @@ describe('script snapshot operations', () => {
             snapshotId: backup.id,
         });
 
-        expect(restored?.comments.threads.map(item => item.id).sort()).toEqual(['block-b1', 'range-kept']);
-        expect(restored?.comments.messages.map(item => item.threadId).sort()).toEqual(['block-b1', 'range-kept']);
-        expect([...collectCommentAnchorThreadIds(restored!.document)]).toEqual(['range-kept']);
-        expect(backupPayload.ok && backupPayload.snapshot.comments.threads.map(item => item.id).sort()).toEqual([
+        expect(restored?.comments.threads.map(item => item.id).toSorted()).toEqual(['block-b1', 'range-kept']);
+        expect(restored?.comments.messages.map(item => item.threadId).toSorted()).toEqual(['block-b1', 'range-kept']);
+        expect([...collectCommentAnchorThreadIds(requireValue(restored).document)]).toEqual(['range-kept']);
+        expect(backupPayload.ok && backupPayload.snapshot.comments.threads.map(item => item.id).toSorted()).toEqual([
             'block-b1',
             'block-new',
             'range-kept',
@@ -321,7 +322,7 @@ describe('script snapshot operations', () => {
         const result = await restoreScriptSnapshotAsNew({
             repository,
             scriptId: SCRIPT_ID,
-            snapshotId: version!.id,
+            snapshotId: requireValue(version).id,
             title: 'The door — Festival',
         });
 
@@ -346,12 +347,12 @@ describe('script snapshot operations', () => {
             kind: 'draft',
         });
 
-        await fileStorage.delete(draft!.payloadStorageKey);
+        await fileStorage.delete(requireValue(draft).payloadStorageKey);
 
         const result = await restoreScriptSnapshot({
             repository,
             scriptId: SCRIPT_ID,
-            snapshot: draft!,
+            snapshot: requireValue(draft),
         });
 
         expect(result.ok).toBe(false);

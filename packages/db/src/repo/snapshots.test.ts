@@ -1,4 +1,5 @@
 import {parseStagistic} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -79,7 +80,7 @@ const setup = async () => {
     await repository.createScriptFromPackage(packageWrite());
 
     const source = await repository.getScriptPackageSource(SCRIPT_ID);
-    const attachmentKey = source!.attachments[0].storageKey;
+    const attachmentKey = requireValue(source).attachments[0].storageKey;
     let nextId = 0;
     const snapshotInput = (input: Partial<CreateScriptSnapshotInput> = {}): CreateScriptSnapshotInput => {
         nextId += 1;
@@ -118,7 +119,7 @@ describe('script snapshots', () => {
         });
         expect(second?.number).toBe(2);
 
-        await repository.deleteScriptSnapshot(SCRIPT_ID, second!.id);
+        await repository.deleteScriptSnapshot(SCRIPT_ID, requireValue(second).id);
 
         const third = await repository.createScriptSnapshot(SCRIPT_ID, snapshotInput());
 
@@ -145,9 +146,9 @@ describe('script snapshots', () => {
         const {repository, snapshotInput} = await setup();
         const draft = await repository.createScriptSnapshot(SCRIPT_ID, snapshotInput({note: 'new final monologue'}));
 
-        await expect(repository.updateScriptSnapshot(SCRIPT_ID, draft!.id, {kind: 'version'})).rejects.toThrow('A version needs a name.');
+        await expect(repository.updateScriptSnapshot(SCRIPT_ID, requireValue(draft).id, {kind: 'version'})).rejects.toThrow('A version needs a name.');
 
-        const version = await repository.updateScriptSnapshot(SCRIPT_ID, draft!.id, {kind: 'version', name: 'Festival'});
+        const version = await repository.updateScriptSnapshot(SCRIPT_ID, requireValue(draft).id, {kind: 'version', name: 'Festival'});
 
         expect(version).toMatchObject({
             kind: 'version',
@@ -156,7 +157,7 @@ describe('script snapshots', () => {
             note: 'new final monologue',
         });
 
-        const renamed = await repository.updateScriptSnapshot(SCRIPT_ID, draft!.id, {name: 'Festival cut', note: null});
+        const renamed = await repository.updateScriptSnapshot(SCRIPT_ID, requireValue(draft).id, {name: 'Festival cut', note: null});
 
         expect(renamed).toMatchObject({
             kind: 'version',
@@ -172,15 +173,15 @@ describe('script snapshots', () => {
             snapshotInput,
         } = await setup();
         const snapshot = await repository.createScriptSnapshot(SCRIPT_ID, snapshotInput());
-        const payload = await repository.loadScriptSnapshotPayload(SCRIPT_ID, snapshot!.id);
+        const payload = await repository.loadScriptSnapshotPayload(SCRIPT_ID, requireValue(snapshot).id);
 
         expect(await payload?.text()).toBe('payload-1');
         expect(snapshot?.payloadByteLength).toBe(9);
 
-        await repository.deleteScriptSnapshot(SCRIPT_ID, snapshot!.id);
+        await repository.deleteScriptSnapshot(SCRIPT_ID, requireValue(snapshot).id);
 
-        expect(await fileStorage.get(snapshot!.payloadStorageKey)).toBeNull();
-        expect(await repository.getScriptSnapshot(SCRIPT_ID, snapshot!.id)).toBeNull();
+        expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).toBeNull();
+        expect(await repository.getScriptSnapshot(SCRIPT_ID, requireValue(snapshot).id)).toBeNull();
     });
 
     it('keeps attachment blobs referenced by a snapshot until the last reference goes', async () => {
@@ -196,7 +197,7 @@ describe('script snapshots', () => {
 
         expect(await fileStorage.get(attachmentKey)).not.toBeNull();
 
-        await repository.deleteScriptSnapshot(SCRIPT_ID, snapshot!.id);
+        await repository.deleteScriptSnapshot(SCRIPT_ID, requireValue(snapshot).id);
 
         expect(await fileStorage.get(attachmentKey)).toBeNull();
     });
@@ -257,7 +258,7 @@ describe('script snapshots', () => {
         await repository.removeMusicAttachment(SCRIPT_ID, 'm1', 'integrated_score');
         await repository.deleteScript(SCRIPT_ID);
 
-        expect(await fileStorage.get(snapshot!.payloadStorageKey)).toBeNull();
+        expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).toBeNull();
         expect(await fileStorage.get(attachmentKey)).toBeNull();
     });
 

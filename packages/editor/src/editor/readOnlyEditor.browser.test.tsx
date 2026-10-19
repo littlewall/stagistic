@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -102,7 +103,7 @@ describe('read-only editor', () => {
 
         expect(editor.isEditable).toBe(false);
 
-        await userEvent.click(paragraph!);
+        await userEvent.click(requireValue(paragraph));
         await userEvent.keyboard('XYZ{Enter}{Backspace}');
         editor.commands.insertContent('Inserted by a command');
         editor.commands.setTextSelection({from: 1, to: 4});

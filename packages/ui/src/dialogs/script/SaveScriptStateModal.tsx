@@ -1,8 +1,4 @@
-import {
-    type FormEvent,
-    useEffect,
-    useState,
-} from 'react';
+import {type FormEvent, useState} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from '../modal/ModalActions';
@@ -52,14 +48,16 @@ export const SaveScriptStateModal = ({
     onSubmit,
 }: SaveScriptStateModalProps) => {
     const [details, setDetails] = useState<ScriptStateDetails>({name: '', note: ''});
+    const [previous, setPrevious] = useState({isOpen, kind});
     const copy = COPY[kind];
     const canSubmit = isScriptStateDetailsValid(kind, details);
 
-    useEffect(() => {
+    if (previous.isOpen !== isOpen || previous.kind !== kind) {
+        setPrevious({isOpen, kind});
         if (isOpen) {
             setDetails({name: '', note: ''});
         }
-    }, [isOpen, kind]);
+    }
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault();
