@@ -16,7 +16,7 @@ export const resolvePageStructureMarks = (
     blocks: StructureBlockPos[],
     pages: PageStartInfo[],
 ): PageStructureMark[] => {
-    const sorted = [...blocks].sort((a, b) => a.pos - b.pos);
+    const sorted = blocks.toSorted((a, b) => a.pos - b.pos);
     const running: {
         pos: number,
         actIndex: number,

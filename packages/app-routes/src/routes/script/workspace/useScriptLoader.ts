@@ -9,6 +9,7 @@ import {
 } from '@stagistic/script';
 import {
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 
@@ -36,20 +37,31 @@ export const useScriptLoader = (
     const [storageError, setStorageErrorState] = useState<string | null>(null);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
 
+    const loadRequest = useMemo(() => ({
+        scriptId: currentScriptId,
+        repository: scriptRepository,
+    }), [currentScriptId, scriptRepository]);
+    const [previousRequest, setPreviousRequest] = useState(loadRequest);
+
+    if (previousRequest !== loadRequest) {
+        setPreviousRequest(loadRequest);
+        setInitialValue(undefined);
+        setInitialIndexSnapshot(undefined);
+        setShouldAutoFocus(false);
+    }
+
     useEffect(() => {
-        if (!currentScriptId) {
+        const {scriptId, repository} = loadRequest;
+
+        if (!scriptId) {
             return;
         }
 
         let isActive = true;
 
-        setInitialValue(undefined);
-        setInitialIndexSnapshot(undefined);
-        setShouldAutoFocus(false);
-
         const loadLatest = async () => {
             try {
-                const stored = await scriptRepository.loadLatest(currentScriptId);
+                const stored = await repository.loadLatest(scriptId);
 
                 if (!isActive) {
                     return;
@@ -72,7 +84,11 @@ export const useScriptLoader = (
                 const coerced = coerceUnknownBlocksToStageDirections(stored);
 
                 if (coerced.changed) {
-                    await scriptRepository.saveLatest(currentScriptId, coerced.value);
+                    await repository.saveLatest(scriptId, coerced.value);
+                }
+
+                if (!isActive) {
+                    return;
                 }
 
                 const withIds = ensureScriptBlockIds(coerced.value);
@@ -84,6 +100,10 @@ export const useScriptLoader = (
                 setInitialIndexSnapshot(fallbackIndex);
                 setShouldAutoFocus(needsFocus);
             } catch {
+                if (!isActive) {
+                    return;
+                }
+
                 console.error('Failed to load latest script');
                 setStorageErrorState('Failed to load script data.');
 
@@ -101,7 +121,7 @@ export const useScriptLoader = (
         return () => {
             isActive = false;
         };
-    }, [currentScriptId, scriptRepository]);
+    }, [loadRequest]);
 
     return {
         initialValue,

@@ -36,6 +36,6 @@ export const buildHomeDashboardModel = ({
     const filtered = scripts.filter(script => matchesQuery(script, normalizedQuery));
 
     return {
-        scripts: [...filtered].sort(sort === 'title' ? sortByTitle : sortNewest),
+        scripts: [...filtered].toSorted(sort === 'title' ? sortByTitle : sortNewest),
     };
 };

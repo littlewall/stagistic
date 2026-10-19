@@ -62,14 +62,7 @@ const validateAttachment = (attachment: StepkgAttachmentSnapshot, assetPaths: Se
     assetPaths.add(assetPath);
 };
 
-export const validateStepkgSnapshot = (snapshot: StepkgSnapshot): StepkgExportIssue[] => {
-    const issues: StepkgExportIssue[] = [];
-    const {script} = snapshot;
-
-    if (script.id.length === 0 || script.title.length === 0 || !hasValidTimestamp(script.createdAt) || !hasValidTimestamp(script.updatedAt)) {
-        issues.push(issue('invalid_snapshot', 'script', script.id));
-    }
-
+const validateCharacters = (snapshot: StepkgSnapshot, issues: StepkgExportIssue[]) => {
     const characterIds = addDuplicateAndEmptyIdIssues(snapshot.characters.characters, 'character', issues);
     const genderKeys = new Set(snapshot.characters.genderOptions.map(option => option.key));
 
@@ -84,6 +77,17 @@ export const validateStepkgSnapshot = (snapshot: StepkgSnapshot): StepkgExportIs
             issues.push(issue(group.id.length === 0 ? 'invalid_snapshot' : 'broken_reference', 'character', group.id));
         }
     }
+};
+
+export const validateStepkgSnapshot = (snapshot: StepkgSnapshot): StepkgExportIssue[] => {
+    const issues: StepkgExportIssue[] = [];
+    const {script} = snapshot;
+
+    if (script.id.length === 0 || script.title.length === 0 || !hasValidTimestamp(script.createdAt) || !hasValidTimestamp(script.updatedAt)) {
+        issues.push(issue('invalid_snapshot', 'script', script.id));
+    }
+
+    validateCharacters(snapshot, issues);
 
     const blockIds = collectBlockIds(snapshot.document.content);
     const locationIds = new Set(snapshot.scenes.locations.map(location => location.id));

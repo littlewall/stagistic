@@ -228,6 +228,7 @@ export const ContextMenu = ({
                             key={item.id}
                             type="button"
                             role="menuitem"
+                            aria-label={item.label}
                             className={clsx(styles.menuItem, styles.submenu)}
                             data-submenu-id={item.id}
                             aria-haspopup="menu"

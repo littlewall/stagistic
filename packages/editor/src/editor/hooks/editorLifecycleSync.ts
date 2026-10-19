@@ -130,6 +130,11 @@ export const useEditorLifecycleSync = ({
     onActiveBlockChangeRef,
     onBlockUiEventRef,
 }: UseEditorLifecycleSyncArgs): EditorLifecycleSyncCallbacks => {
+    const {
+        colorByCharacterIdRef,
+        rememberedColorByKeyRef,
+        persistentCharactersRef,
+    } = characters ?? {};
     /*
      * Scene placement is derived from the last measured pagination pass. Recomputing
      * walks the doc + reads laid-out geometry, so we rebuild only when the pagination
@@ -176,9 +181,9 @@ export const useEditorLifecycleSync = ({
         (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => {
             const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
             const {projection, change} = resolveSidebarProjection(snapshot, {
-                colorByCharacterId: characters?.colorByCharacterIdRef?.current,
-                rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
-                persistentCharacters: characters?.persistentCharactersRef?.current,
+                colorByCharacterId: colorByCharacterIdRef?.current,
+                rememberedColorByKey: rememberedColorByKeyRef?.current,
+                persistentCharacters: persistentCharactersRef?.current,
             });
             const patch: Partial<EditorLiveSnapshot> = {
                 revision: meta.revision,
@@ -206,9 +211,9 @@ export const useEditorLifecycleSync = ({
             }
         },
         [
-            characters?.colorByCharacterIdRef,
-            characters?.rememberedColorByKeyRef,
-            characters?.persistentCharactersRef,
+            colorByCharacterIdRef,
+            rememberedColorByKeyRef,
+            persistentCharactersRef,
             liveStore,
             onIndexChangeRef,
         ],
@@ -225,9 +230,9 @@ export const useEditorLifecycleSync = ({
             const currentSnapshot = liveStore.getSnapshot();
             const fallbackProjection = snapshot
                 ? buildSidebarProjectionFromIndex(snapshot, {
-                    colorByCharacterId: characters?.colorByCharacterIdRef?.current,
-                    rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
-                    persistentCharacters: characters?.persistentCharactersRef?.current,
+                    colorByCharacterId: colorByCharacterIdRef?.current,
+                    rememberedColorByKey: rememberedColorByKeyRef?.current,
+                    persistentCharacters: persistentCharactersRef?.current,
                 })
                 : null;
             const nextStructure = hasStructureRows(runtime.structure) ? runtime.structure : fallbackProjection?.structure ?? currentSnapshot.structure;
@@ -250,9 +255,9 @@ export const useEditorLifecycleSync = ({
             }
         },
         [
-            characters?.colorByCharacterIdRef,
-            characters?.persistentCharactersRef,
-            characters?.rememberedColorByKeyRef,
+            colorByCharacterIdRef,
+            persistentCharactersRef,
+            rememberedColorByKeyRef,
             lastEmittedActiveBlockIdRef,
             liveStore,
             onActiveBlockChangeRef,

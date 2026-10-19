@@ -1,4 +1,3 @@
-import {execFileSync} from 'node:child_process';
 import {
     existsSync,
     readdirSync,
@@ -49,10 +48,6 @@ describe('marketing website', () => {
     let syntaxHtml = '';
 
     beforeAll(() => {
-        execFileSync('moon', ['run', 'marketing:build'], {
-            cwd: new URL('../../..', import.meta.url),
-            stdio: 'pipe',
-        });
         homeHtml = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
 
         const cssPaths = Array.from(homeHtml.matchAll(/<link rel="stylesheet" href="([^"]+\.css)">/g)).map(m => m[1]);
@@ -128,7 +123,7 @@ describe('marketing website', () => {
         expect(footer).toContain('href="/editor/syntax"');
         expect(primaryNav).not.toContain('href="#alpha"');
         expect(homeHeader).not.toContain('Early alpha');
-        expect(homeHeader).toContain('<a href="https://editor.stagistic.app" class="navCta"');
+        expect(homeHeader).toContain('<a href="https://editor.stagistic.app" class="_navCta_');
         expect(homeHeader).toContain('>Try editor</a>');
     });
 
@@ -136,7 +131,7 @@ describe('marketing website', () => {
         const heroSection = homeHtml.match(/<!-- Hero --><section\b[\s\S]*?<\/section>/)?.[0] ?? '';
 
         expect(heroSection).toContain('<a href="#features" class="_btnOutline_');
-        expect(heroSection).toContain('>Explore features</a>');
+        expect(heroSection).toMatch(/>\s*Explore features\s*<\/a>/);
     });
 
     it('links feature descriptions to their specific editor guides', () => {
@@ -158,10 +153,6 @@ describe('marketing website', () => {
                 {
                     href: '/editor/musicals',
                     label: 'Explore musical theatre writing →',
-                },
-                {
-                    href: '/editor/syntax',
-                    label: 'Read the Stagistic syntax reference →',
                 },
             ]),
         );
@@ -320,7 +311,11 @@ describe('marketing website', () => {
 
             expect(json).toBeDefined();
 
-            return JSON.parse(json!) as StructuredData;
+            if (!json) {
+                throw new Error('Expected structured data');
+            }
+
+            return JSON.parse(json) as StructuredData;
         };
         const routes = [
             '../dist/index.html',

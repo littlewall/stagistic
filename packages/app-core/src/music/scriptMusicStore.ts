@@ -16,7 +16,7 @@ export const createScriptMusicStore = (
     scriptId: string,
 ) => {
     const source = repository.getScriptMusicSource(scriptId);
-    const music = createReactiveCollection<ScriptMusic, string>({
+    const musicState = createReactiveCollection<ScriptMusic, string>({
         id: `script-music:${scriptId}`,
         source,
         getKey: music => music.id,
@@ -60,7 +60,7 @@ export const createScriptMusicStore = (
 
         const id = repository.allocateScriptMusicId();
         const timestamp = Date.now();
-        const transaction = music.collection.insert({
+        const transaction = musicState.collection.insert({
             id,
             scriptId,
             sceneNumber: 0,
@@ -76,7 +76,7 @@ export const createScriptMusicStore = (
 
         await transaction.isPersisted.promise;
 
-        const createdMusic = music.collection.get(id);
+        const createdMusic = musicState.collection.get(id);
 
         return createdMusic ? toDomainCollectionValue(createdMusic) : null;
     };
@@ -84,35 +84,35 @@ export const createScriptMusicStore = (
     const updateMusic = async (musicId: string, input: UpdateScriptMusicInput) => {
         const title = input.title.trim();
 
-        if (!musicId || !title || !music.collection.has(musicId)) {
+        if (!musicId || !title || !musicState.collection.has(musicId)) {
             return null;
         }
 
-        const transaction = music.collection.update(musicId, draft => {
+        const transaction = musicState.collection.update(musicId, draft => {
             draft.title = title;
             draft.kind = input.kind;
         });
 
         await transaction.isPersisted.promise;
 
-        const updatedMusic = music.collection.get(musicId);
+        const updatedMusic = musicState.collection.get(musicId);
 
         return updatedMusic ? toDomainCollectionValue(updatedMusic) : null;
     };
 
     const deleteMusic = async (musicId: string) => {
-        if (!musicId || !music.collection.has(musicId)) {
+        if (!musicId || !musicState.collection.has(musicId)) {
             return;
         }
 
-        const transaction = music.collection.delete(musicId);
+        const transaction = musicState.collection.delete(musicId);
 
         await transaction.isPersisted.promise;
     };
 
     return {
-        collection: music.collection,
-        status: music.status,
+        collection: musicState.collection,
+        status: musicState.status,
         createMusic,
         updateMusic,
         deleteMusic,

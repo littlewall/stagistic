@@ -65,7 +65,10 @@ export const buildMiniEditorCharacterPresentation = (
         ]),
     );
     const displayColorByKey = new Map(
-        characters.map(character => [character.key, colorByCharacterId.get(character.id)!]),
+        characters.map(character => [
+            character.key,
+            getConfirmedCharacterColor(character.id, character.colorHex ?? null),
+        ]),
     );
     const snapshot: EditorLiveCharacterSnapshot = {
         countsByKey: stats.countsByKey,

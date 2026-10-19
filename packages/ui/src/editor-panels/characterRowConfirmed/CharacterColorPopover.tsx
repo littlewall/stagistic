@@ -13,9 +13,7 @@ import styles from '../EditorSidebar.module.css';
 import {getPastelHueFromHex} from './colorUtils';
 
 interface CharacterColorPopoverProps {
-    refs: {
-        triggerRef: RefObject<HTMLSpanElement | null>,
-    },
+    triggerRef: RefObject<HTMLSpanElement | null>,
     model: {
         characterKey: string,
         colorDraftHex: string,
@@ -35,12 +33,11 @@ interface CharacterColorPopoverProps {
 }
 
 export const CharacterColorPopover = ({
-    refs,
+    triggerRef,
     model,
     state,
     actions,
 }: CharacterColorPopoverProps) => {
-    const {triggerRef} = refs;
     const {
         characterKey,
         colorDraftHex,
@@ -56,7 +53,7 @@ export const CharacterColorPopover = ({
         onReset,
     } = actions;
 
-    if (!isOpen || !triggerRef.current) {
+    if (!isOpen) {
         return null;
     }
 

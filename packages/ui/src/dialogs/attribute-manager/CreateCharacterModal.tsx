@@ -33,11 +33,18 @@ export const CreateCharacterModal = ({
     const [name, setName] = useState('');
     const [isTouched, setIsTouched] = useState(false);
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
         if (!isOpen) {
             setName('');
             setIsTouched(false);
+        }
+    }
 
+    useEffect(() => {
+        if (!isOpen) {
             return;
         }
 

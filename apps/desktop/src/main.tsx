@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 import './index.css';
 
+import {requireValue} from '@stagistic/shared';
 import {bootstrapAppTheme} from '@stagistic/ui';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -17,7 +18,7 @@ applyPlatformClass();
  * HashRouter keeps routing self-contained under Tauri's custom protocol, so deep
  * links never depend on the host serving index.html for arbitrary paths.
  */
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(requireValue(document.getElementById('root'))).render(
     <React.StrictMode>
         <HashRouter>
             <App />

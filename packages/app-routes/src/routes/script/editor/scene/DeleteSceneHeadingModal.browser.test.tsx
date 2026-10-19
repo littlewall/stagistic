@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -72,7 +73,7 @@ describe('DeleteSceneHeadingModal', () => {
 
         await vi.waitFor(() => expect(findButton('Delete heading')).not.toBeNull());
 
-        await userEvent.click(findButton('Delete heading')!);
+        await userEvent.click(requireValue(findButton('Delete heading')));
 
         expect(onConfirm).toHaveBeenCalledOnce();
         expect(onClose).not.toHaveBeenCalled();
@@ -86,7 +87,7 @@ describe('DeleteSceneHeadingModal', () => {
 
         await vi.waitFor(() => expect(findButton('Cancel')).not.toBeNull());
 
-        await userEvent.click(findButton('Cancel')!);
+        await userEvent.click(requireValue(findButton('Cancel')));
 
         expect(onClose).toHaveBeenCalledOnce();
         expect(onConfirm).not.toHaveBeenCalled();

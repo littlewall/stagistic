@@ -51,11 +51,18 @@ export const NewScriptModal = ({
 
     const isLoading = loadingMessages.length > 0;
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
         if (!isOpen) {
             setName('');
             setShape('multi-act');
+        }
+    }
 
+    useEffect(() => {
+        if (!isOpen) {
             return;
         }
 
@@ -66,23 +73,16 @@ export const NewScriptModal = ({
         return () => window.clearTimeout(focusTimer);
     }, [isOpen]);
 
-    const handleSubmit = useCallback(
-        async (event: FormEvent) => {
-            event.preventDefault();
-            setIsPending(true);
+    const handleSubmit = async (event: FormEvent) => {
+        event.preventDefault();
+        setIsPending(true);
 
-            try {
-                await onCreate(name, shape);
-            } finally {
-                setIsPending(false);
-            }
-        },
-        [
-            name,
-            onCreate,
-            shape,
-        ],
-    );
+        try {
+            await onCreate(name, shape);
+        } finally {
+            setIsPending(false);
+        }
+    };
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     }, []);

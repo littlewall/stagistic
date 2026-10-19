@@ -39,11 +39,18 @@ export const CreatePlaceModal = ({
     const canSubmit = trimmedName.length > 0 && !isDuplicate && !isCreating;
     const errorId = isDuplicate ? 'create-place-error' : undefined;
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
         if (!isOpen) {
             setName('');
             setIsCreating(false);
+        }
+    }
 
+    useEffect(() => {
+        if (!isOpen) {
             return;
         }
 
@@ -56,31 +63,23 @@ export const CreatePlaceModal = ({
         setName(event.target.value);
     }, []);
 
-    const handleSubmit = useCallback(
-        async (event: FormEvent) => {
-            event.preventDefault();
+    const handleSubmit = async (event: FormEvent) => {
+        event.preventDefault();
 
-            if (!canSubmit) {
-                return;
-            }
+        if (!canSubmit) {
+            return;
+        }
 
-            setIsCreating(true);
+        setIsCreating(true);
 
-            try {
-                await onCreate(trimmedName);
-                setName('');
-                onClose();
-            } finally {
-                setIsCreating(false);
-            }
-        },
-        [
-            canSubmit,
-            onClose,
-            onCreate,
-            trimmedName,
-        ],
-    );
+        try {
+            await onCreate(trimmedName);
+            setName('');
+            onClose();
+        } finally {
+            setIsCreating(false);
+        }
+    };
 
     return (
         <ModalDialog

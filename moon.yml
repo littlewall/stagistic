@@ -9,12 +9,12 @@ workspace:
 
 tasks:
   lint:
-    script: 'vp lint && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
+    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
     options:
       cache: false
 
   lint-fix:
-    script: 'vp lint --fix && stylelint "**/*.{css,scss}" --fix'
+    script: 'vp lint --fix && stylelint "**/*.{css,scss}" --fix && jscpd --config .jscpd.json'
     options:
       cache: false
 
@@ -38,6 +38,21 @@ tasks:
     options:
       cache: false
 
+  duplicates:
+    command: 'jscpd --config .jscpd.json'
+    options:
+      cache: false
+
+  duplicates-changed:
+    command: 'node scripts/check-duplicates.mjs'
+    options:
+      cache: false
+
+  duplicates-baseline:
+    command: 'jscpd --config .jscpd.json --update-baseline --reporters silent'
+    options:
+      cache: false
+
   typecheck:
     command: 'tsc -b'
     deps: ['db:db-check-migrations']
@@ -55,7 +70,7 @@ tasks:
     preset: 'server'
 
   staged:
-    command: 'vp staged'
+    script: 'vp staged && node scripts/check-duplicates.mjs'
     options:
       cache: false
 

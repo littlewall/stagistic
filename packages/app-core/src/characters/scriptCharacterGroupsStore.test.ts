@@ -120,7 +120,7 @@ const createRepository = (
             return updateGroup(id, {colorHex});
         },
         replaceScriptCharacterGroupMembers: (_scriptId, id, memberIds) => {
-            return updateGroup(id, {memberIds: [...new Set(memberIds)].sort()});
+            return updateGroup(id, {memberIds: [...new Set(memberIds)].toSorted()});
         },
     };
 

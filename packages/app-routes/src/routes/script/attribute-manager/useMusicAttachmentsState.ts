@@ -26,6 +26,7 @@ export const useMusicAttachmentsState = (
     scriptRepository: ScriptRepository,
 ): MusicAttachmentsState => {
     const attachments = useScriptAttachments(scriptId, scriptRepository);
+    const {upload, remove} = attachments;
     const integratedScoresByMusic = useMemo(() => {
         const byMusic = new Map<string, MusicAttachmentRecord | null>();
 
@@ -40,11 +41,11 @@ export const useMusicAttachmentsState = (
         return byMusic;
     }, [attachments.byMusicRole]);
     const uploadIntegratedScore = useCallback((musicId: string, file: File) => {
-        return attachments.upload(musicId, INTEGRATED_SCORE_ROLE, file);
-    }, [attachments.upload]);
+        return upload(musicId, INTEGRATED_SCORE_ROLE, file);
+    }, [upload]);
     const removeIntegratedScore = useCallback((musicId: string) => {
-        return attachments.remove(musicId, INTEGRATED_SCORE_ROLE);
-    }, [attachments.remove]);
+        return remove(musicId, INTEGRATED_SCORE_ROLE);
+    }, [remove]);
 
     return {
         integratedScoresByMusic,

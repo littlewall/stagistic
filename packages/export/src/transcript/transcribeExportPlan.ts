@@ -176,7 +176,7 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
 
         y += item.spacingBeforePx;
 
-        const splits = (splitsByKey.get(key) ?? []).sort((left, right) => left - right);
+        const splits = (splitsByKey.get(key) ?? []).toSorted((left, right) => left - right);
         let splitIndex = 0;
 
         item.wrapped.forEach((line, lineIndex) => {

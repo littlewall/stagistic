@@ -1,0 +1,29 @@
+{
+    "path": ["apps", "packages", "scripts"],
+    "format": ["javascript", "jsx", "typescript", "tsx", "css", "scss", "astro"],
+    "crossFormats": "js-ts",
+    "minLines": 10,
+    "minTokens": 100,
+    "mode": "weak",
+    "ignore": [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/target/**",
+        "**/.astro/**",
+        "**/*.{test,spec}.{ts,tsx,js,jsx,mjs,cjs}",
+        "**/__tests__/**",
+        "**/__snapshots__/**",
+        "**/e2e/**",
+        "**/fixtures/**",
+        "**/*.d.{ts,mts}",
+        "**/migrations.compiled.ts",
+        "**/sanity.types.ts"
+    ],
+    "baseline": ".jscpd-baseline.json",
+    "failOnNewClones": 0,
+    "failOnEmpty": true,
+    "reporters": ["ai"],
+    "noColors": true,
+    "noTips": true
+}

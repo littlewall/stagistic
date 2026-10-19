@@ -62,8 +62,31 @@ const EditorToolbar = ({
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const search = useEditorSearch({editor, search: searchProps});
-    const {blockTypes, onBlockTypesChange} = search;
+    const {
+        inputRef,
+        query,
+        currentResult,
+        resultCount,
+        onQueryChange,
+        onInputKeyDown,
+        onClear,
+        onPreviousResult,
+        onNextResult,
+        isCaseSensitive,
+        onCaseSensitiveChange,
+        isWholeWord,
+        onWholeWordChange,
+        isReplaceOpen,
+        onReplaceOpenChange,
+        replacement,
+        onReplacementChange,
+        onReplace,
+        onReplaceAll,
+        canReplace,
+        replaceInputRef,
+        blockTypes,
+        onBlockTypesChange,
+    } = useEditorSearch({editor, search: searchProps});
     const searchFilter = useMemo<SearchControlFilter>(() => ({
         label: 'Search in',
         allLabel: 'All blocks',
@@ -90,15 +113,16 @@ const EditorToolbar = ({
 
     useExclusiveOverlay(isOpen, () => setIsOpen(false));
 
-    useEffect(() => {
-        setIsOpen(false);
-    }, [activeType, isMultiBlockSelection]);
+    const [previousSelection, setPreviousSelection] = useState({activeType, isMultiBlockSelection});
 
-    useEffect(() => {
-        if (!canChangeBlockType && isOpen) {
-            setIsOpen(false);
-        }
-    }, [canChangeBlockType, isOpen]);
+    if (previousSelection.activeType !== activeType || previousSelection.isMultiBlockSelection !== isMultiBlockSelection) {
+        setPreviousSelection({activeType, isMultiBlockSelection});
+        setIsOpen(false);
+    }
+
+    if (!canChangeBlockType && isOpen) {
+        setIsOpen(false);
+    }
 
     useEffect(() => {
         if (toolbarRef.current) {
@@ -226,31 +250,31 @@ const EditorToolbar = ({
             />
             <span className={styles.spacer} />
             <SearchControl
-                ref={search.inputRef}
-                value={search.query}
-                currentResult={search.currentResult}
-                resultCount={search.resultCount}
+                ref={inputRef}
+                value={query}
+                currentResult={currentResult}
+                resultCount={resultCount}
                 aria-label="Search script"
                 placeholder="Find in script…"
-                onChange={search.onQueryChange}
-                onKeyDown={search.onInputKeyDown}
-                onClear={search.onClear}
-                onPreviousResult={search.onPreviousResult}
-                onNextResult={search.onNextResult}
-                isCaseSensitive={search.isCaseSensitive}
-                onCaseSensitiveChange={search.onCaseSensitiveChange}
-                isWholeWord={search.isWholeWord}
-                onWholeWordChange={search.onWholeWordChange}
+                onChange={onQueryChange}
+                onKeyDown={onInputKeyDown}
+                onClear={onClear}
+                onPreviousResult={onPreviousResult}
+                onNextResult={onNextResult}
+                isCaseSensitive={isCaseSensitive}
+                onCaseSensitiveChange={onCaseSensitiveChange}
+                isWholeWord={isWholeWord}
+                onWholeWordChange={onWholeWordChange}
                 filter={searchFilter}
                 replace={{
-                    isOpen: search.isReplaceOpen,
-                    onOpenChange: search.onReplaceOpenChange,
-                    value: search.replacement,
-                    onChange: search.onReplacementChange,
-                    onReplace: search.onReplace,
-                    onReplaceAll: search.onReplaceAll,
-                    isDisabled: !search.canReplace,
-                    inputRef: search.replaceInputRef,
+                    isOpen: isReplaceOpen,
+                    onOpenChange: onReplaceOpenChange,
+                    value: replacement,
+                    onChange: onReplacementChange,
+                    onReplace: onReplace,
+                    onReplaceAll: onReplaceAll,
+                    isDisabled: !canReplace,
+                    inputRef: replaceInputRef,
                 }}
                 shortcuts={searchShortcuts}
             />

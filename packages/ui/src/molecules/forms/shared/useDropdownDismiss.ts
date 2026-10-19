@@ -1,13 +1,16 @@
 import {
     type RefObject,
     useEffect,
+    useLayoutEffect,
     useRef,
 } from 'react';
 
 export const useDropdownDismiss = (isOpen: boolean, setIsOpen: (value: boolean) => void, containerRef: RefObject<HTMLElement | null>) => {
     const setIsOpenRef = useRef(setIsOpen);
 
-    setIsOpenRef.current = setIsOpen;
+    useLayoutEffect(() => {
+        setIsOpenRef.current = setIsOpen;
+    }, [setIsOpen]);
 
     useEffect(() => {
         if (!isOpen) {

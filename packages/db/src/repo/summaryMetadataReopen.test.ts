@@ -15,6 +15,7 @@ import {
 import {runPgliteMigrations} from '../pglite/migrations';
 import {dbSchema} from '../schema';
 import {InMemoryFileStorage} from '../storage/fileStorage';
+import {loadMigratedDataDir} from '../testing/createTestDb';
 import {createLocalPgliteRepository} from './createLocalPgliteRepository';
 
 const repositoryFor = (client: PGlite) => {
@@ -32,8 +33,7 @@ it('reopens a filesystem database with the same saved document and summary metad
     let client: PGlite | undefined;
 
     try {
-        client = await PGlite.create({dataDir: directory});
-        await runPgliteMigrations(client);
+        client = await PGlite.create({dataDir: directory, loadDataDir: await loadMigratedDataDir()});
 
         const repository = repositoryFor(client);
         const value: ScriptDocument = {

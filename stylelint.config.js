@@ -3,7 +3,8 @@ import guards from '@stagistic/linters/stylelint/guards';
 
 export default {
     ...base,
-    ignoreFiles: ['**/dist/**'],
+    // Gitignored local design prototypes are not product CSS.
+    ignoreFiles: ['**/dist/**', 'docs/designs/**'],
     rules: {
         ...base.rules,
         'custom-property-empty-line-before': null,

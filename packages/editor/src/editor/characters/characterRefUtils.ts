@@ -55,8 +55,8 @@ export const areCharacterRefsEqual = (
     left: CharacterRefByKey,
     right: CharacterRefByKey,
 ): boolean => {
-    const leftEntries = Object.entries(left).sort((a, b) => a[0].localeCompare(b[0]));
-    const rightEntries = Object.entries(right).sort((a, b) => a[0].localeCompare(b[0]));
+    const leftEntries = Object.entries(left).toSorted((a, b) => a[0].localeCompare(b[0]));
+    const rightEntries = Object.entries(right).toSorted((a, b) => a[0].localeCompare(b[0]));
 
     if (leftEntries.length !== rightEntries.length) {
         return false;

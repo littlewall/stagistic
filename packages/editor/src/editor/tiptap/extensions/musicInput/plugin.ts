@@ -56,8 +56,8 @@ const findExactUnassignedMusic = (
         return null;
     }
 
-    return music.find(music => !music.assignmentLabel
-        && normalizeMusicTitle(music.title) === normalizedTitle) ?? null;
+    return music.find(item => !item.assignmentLabel
+        && normalizeMusicTitle(item.title) === normalizedTitle) ?? null;
 };
 
 export const createMusicComposePlugin = (

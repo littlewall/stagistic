@@ -1,5 +1,5 @@
 import {buildScriptSummaryMetadata} from '@stagistic/script';
-import {uuidv7} from '@stagistic/shared';
+import {requireValue, uuidv7} from '@stagistic/shared';
 import {eq, inArray} from 'drizzle-orm';
 
 import {
@@ -67,7 +67,7 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
     const [sourceScript] = await db.select({summaryMetadata: scripts.summaryMetadata}).from(scripts).where(eq(scripts.id, sourceScriptId));
     const sourceMetadata = sourceScript?.summaryMetadata ?? buildScriptSummaryMetadata({
         type: 'doc',
-        content: [...blockRows].sort((a, b) => a.blockOrder.localeCompare(b.blockOrder)).map(row => ({type: row.blockType})),
+        content: [...blockRows].toSorted((a, b) => a.blockOrder.localeCompare(b.blockOrder)).map(row => ({type: row.blockType})),
     });
 
     await db.update(scripts).set({
@@ -78,13 +78,13 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
     const actMap = new Map(actRows.map(row => [row.id, uuidv7()]));
     const sceneMap = new Map(sceneRows.map(row => [row.id, uuidv7()]));
     const blockMap = new Map(blockRows.map(row => [row.id, uuidv7()]));
-    const entityIdMap = copyAttributes ? new Map(speakingEntities.map(entity => [entity.id, uuidv7()])) : null;
+    const entityIdMap = new Map(speakingEntities.map(entity => [entity.id, uuidv7()]));
 
     if (locationRows.length > 0) {
         await db.insert(scriptLocations).values(
             locationRows.map(row => ({
                 ...row,
-                id: locationMap.get(row.id)!,
+                id: requireValue(locationMap.get(row.id)),
                 scriptId: targetScriptId,
                 createdAt: now,
                 updatedAt: now,
@@ -96,7 +96,7 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
         await db.insert(scriptActs).values(
             actRows.map(row => ({
                 ...row,
-                id: actMap.get(row.id)!,
+                id: requireValue(actMap.get(row.id)),
                 scriptId: targetScriptId,
                 headingBlockId: remapNullable(blockMap, row.headingBlockId),
                 createdAt: now,
@@ -109,7 +109,7 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
         await db.insert(scriptScenes).values(
             sceneRows.map(row => ({
                 ...row,
-                id: sceneMap.get(row.id)!,
+                id: requireValue(sceneMap.get(row.id)),
                 scriptId: targetScriptId,
                 headingBlockId: remapNullable(blockMap, row.headingBlockId),
                 locationId: remapNullable(locationMap, row.locationId),
@@ -122,8 +122,8 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
     if (sceneLocationRows.length > 0) {
         await db.insert(scriptSceneLocations).values(
             sceneLocationRows.map(row => ({
-                sceneId: sceneMap.get(row.sceneId)!,
-                locationId: locationMap.get(row.locationId)!,
+                sceneId: requireValue(sceneMap.get(row.sceneId)),
+                locationId: requireValue(locationMap.get(row.locationId)),
             })),
         );
     }
@@ -132,7 +132,7 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
         await db.insert(scriptBlocks).values(
             blockRows.map(row => ({
                 ...row,
-                id: blockMap.get(row.id)!,
+                id: requireValue(blockMap.get(row.id)),
                 scriptId: targetScriptId,
                 contentJson: remapCharacterTagIds(row.contentJson, entityIdMap),
                 sceneId: remapNullable(sceneMap, row.sceneId),
@@ -163,7 +163,7 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
         if (speakingEntities.length > 0) {
             await db.insert(scriptCharacters).values(
                 speakingEntities.map(entity => ({
-                    id: entityIdMap!.get(entity.id)!,
+                    id: requireValue(entityIdMap.get(entity.id)),
                     scriptId: targetScriptId,
                     characterKey: entity.key,
                     kind: entity.kind,
@@ -186,8 +186,8 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
                 }
 
                 return entity.memberIds.map(characterId => ({
-                    groupId: entityIdMap!.get(entity.id)!,
-                    characterId: entityIdMap!.get(characterId)!,
+                    groupId: requireValue(entityIdMap.get(entity.id)),
+                    characterId: requireValue(entityIdMap.get(characterId)),
                 }));
             });
 
@@ -214,15 +214,15 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
                 ? (await db
                     .select()
                     .from(scriptBlockCharacterRefs)
-                    .where(inArray(scriptBlockCharacterRefs.blockId, blockIds))).filter(row => entityIdMap!.has(row.characterId))
+                    .where(inArray(scriptBlockCharacterRefs.blockId, blockIds))).filter(row => entityIdMap.has(row.characterId))
                 : [];
 
         if (refRows.length > 0) {
             await db.insert(scriptBlockCharacterRefs).values(
                 refRows.map(row => ({
                     ...row,
-                    blockId: blockMap.get(row.blockId)!,
-                    characterId: entityIdMap!.get(row.characterId)!,
+                    blockId: requireValue(blockMap.get(row.blockId)),
+                    characterId: requireValue(entityIdMap.get(row.characterId)),
                 })),
             );
         }

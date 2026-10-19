@@ -1,8 +1,8 @@
 import type {InferSelectModel} from 'drizzle-orm';
 
 import {
-    scriptCharacterGenders,
-    scriptCharacters,
+    type scriptCharacterGenders,
+    type scriptCharacters,
 } from '../schema';
 
 export type ScriptCharacter = InferSelectModel<typeof scriptCharacters>;

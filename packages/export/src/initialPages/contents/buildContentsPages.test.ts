@@ -1,4 +1,5 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -21,14 +22,14 @@ const findLine = (page: VisualLine[], value: string) => {
 
     expect(line).toBeDefined();
 
-    return line!;
+    return requireValue(line);
 };
 const runWithText = (page: VisualLine[], value: string) => {
     const run = page.flatMap(line => line.runs).find(item => item.text === value);
 
     expect(run).toBeDefined();
 
-    return run!;
+    return requireValue(run);
 };
 
 const scenesPlan = (

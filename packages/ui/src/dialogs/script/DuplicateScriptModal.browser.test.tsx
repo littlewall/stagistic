@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -88,7 +89,7 @@ describe('DuplicateScriptModal', () => {
          * intercepts pointer events, so click the wrapping label instead.
          */
         const switchInputs = Array.from(document.querySelectorAll<HTMLInputElement>('[role="switch"]'));
-        const switchLabels = switchInputs.map(input => input.closest('label')!);
+        const switchLabels = switchInputs.map(input => requireValue(input.closest('label')));
 
         await page.elementLocator(switchLabels[0]).click();
         await page.elementLocator(switchLabels[1]).click();

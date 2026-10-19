@@ -17,11 +17,10 @@ import {
 } from '@stagistic/ui';
 import {
     useCallback,
-    useEffect,
     useMemo,
-    useState,
 } from 'react';
 
+import {usePropState} from '../../../../../usePropState';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import {TitlePageLogoField} from './TitlePageLogoField';
 import styles from './TitlePageSettingsPanel.module.css';
@@ -61,19 +60,9 @@ export const TitlePageSettingsPanel = ({
 }: TitlePageSettingsPanelProps) => {
     const draftDateMode = settings.draftDateMode ?? 'auto';
     const dateFormat = settings.dateFormat ?? 'mdy';
-    const [localDraftDateMode, setLocalDraftDateMode] = useState(draftDateMode);
-    const [localDraftDate, setLocalDraftDate] = useState(settings.draftDate ?? '');
-    const [localDateFormat, setLocalDateFormat] = useState(dateFormat);
-
-    useEffect(() => {
-        setLocalDraftDateMode(draftDateMode);
-    }, [draftDateMode]);
-    useEffect(() => {
-        setLocalDraftDate(settings.draftDate ?? '');
-    }, [settings.draftDate]);
-    useEffect(() => {
-        setLocalDateFormat(dateFormat);
-    }, [dateFormat]);
+    const [localDraftDateMode, setLocalDraftDateMode] = usePropState(draftDateMode);
+    const [localDraftDate, setLocalDraftDate] = usePropState(settings.draftDate ?? '');
+    const [localDateFormat, setLocalDateFormat] = usePropState(dateFormat);
 
     const draftDatePreview = (() => {
         if (localDraftDateMode === 'auto') {

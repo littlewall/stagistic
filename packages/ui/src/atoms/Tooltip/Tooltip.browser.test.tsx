@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -71,13 +72,13 @@ describe('Tooltip shortcut', () => {
         expect(tooltip.textContent).toBe('Bold⌘B');
         expect(shortcut?.textContent).toBe('⌘B');
 
-        const shortcutBox = shortcut!.getBoundingClientRect();
-        const labelBox = label!.getBoundingClientRect();
+        const shortcutBox = requireValue(shortcut).getBoundingClientRect();
+        const labelBox = requireValue(label).getBoundingClientRect();
         const middle = (box: DOMRect) => box.top + box.height / 2;
 
         expect(shortcutBox.left).toBeGreaterThan(labelBox.right);
         expect(Math.abs(middle(shortcutBox) - middle(labelBox))).toBeLessThanOrEqual(1);
-        expect(getComputedStyle(shortcut!).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(requireValue(shortcut)).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     });
 
     it('keeps a tooltip without a shortcut unchanged', async () => {

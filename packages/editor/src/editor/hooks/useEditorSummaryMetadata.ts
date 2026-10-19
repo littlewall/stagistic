@@ -23,6 +23,10 @@ type SummarySnapshot = {
     settings: string,
 };
 
+/** A rejected refresh is retried without waiting for another layout event. */
+const MAX_REFRESH_ATTEMPTS = 3;
+const REFRESH_RETRY_DELAY_MS = 250;
+
 const matchesSnapshot = (left: SummarySnapshot | null, right: SummarySnapshot) => {
     return left?.document === right.document && left.metadata === right.metadata && left.settings === right.settings;
 };
@@ -45,6 +49,8 @@ export const useEditorSummaryMetadata = (
         }
 
         let disposed = false;
+        let retryTimer: number | undefined;
+        let rejected: {snapshot: SummarySnapshot, attempts: number} | null = null;
 
         lastSnapshotRef.current = null;
         pendingSnapshotRef.current = null;
@@ -77,6 +83,13 @@ export const useEditorSummaryMetadata = (
                 return;
             }
 
+            const attempts = rejected && matchesSnapshot(rejected.snapshot, snapshot) ? rejected.attempts : 0;
+
+            // A rejected snapshot is only retried by its timer, not by every layout event.
+            if (attempts >= MAX_REFRESH_ATTEMPTS || (attempts > 0 && retryTimer !== undefined)) {
+                return;
+            }
+
             pendingSnapshotRef.current = snapshot;
             void Promise.resolve().then(async () => {
                 if (disposed || editor.isDestroyed || dirtyRef.current
@@ -89,8 +102,20 @@ export const useEditorSummaryMetadata = (
 
                 const result = await callback(value, metadata, settings ?? null);
 
-                if (result !== false && !disposed && pendingSnapshotRef.current === snapshot) {
+                if (disposed || pendingSnapshotRef.current !== snapshot) {
+                    return;
+                }
+
+                if (result === false) {
+                    rejected = {snapshot, attempts: attempts + 1};
+                    window.clearTimeout(retryTimer);
+                    retryTimer = rejected.attempts >= MAX_REFRESH_ATTEMPTS ? undefined : window.setTimeout(() => {
+                        retryTimer = undefined;
+                        refreshMetadata();
+                    }, REFRESH_RETRY_DELAY_MS);
+                } else {
                     lastSnapshotRef.current = snapshot;
+                    rejected = null;
                 }
             }).catch(() => {})
                 .finally(() => {
@@ -112,6 +137,7 @@ export const useEditorSummaryMetadata = (
 
         return () => {
             disposed = true;
+            window.clearTimeout(retryTimer);
             refreshRef.current = null;
             editor.off('transaction', handleTransaction);
         };

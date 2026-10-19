@@ -149,6 +149,7 @@ export const useAutosaveController = ({
         })();
     }, [
         onAutoSaveRef,
+        onValueSyncedRef,
         resolveLatestValueNow,
         updateDirty,
     ]);
@@ -237,6 +238,7 @@ export const useAutosaveController = ({
     }, [
         clearAutosaveTimer,
         onManualSaveRef,
+        onValueSyncedRef,
         resolveLatestValueNow,
         updateDirty,
     ]);

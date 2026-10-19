@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
@@ -479,7 +480,7 @@ describe('music pill node views', () => {
             .toBeCloseTo(plainAside.getBoundingClientRect().height, 1);
         expect(getComputedStyle(asideWithMusicOut, '::after').content).toBe('none');
         expect(musicOutWrapper).not.toBeNull();
-        expect(getComputedStyle(musicOutWrapper!, '::after').content).toBe('")"');
+        expect(getComputedStyle(requireValue(musicOutWrapper), '::after').content).toBe('")"');
     });
 
     it('keeps a note closing marker on its text line when the music ends there', async () => {
@@ -517,7 +518,7 @@ describe('music pill node views', () => {
             .toBeCloseTo(plainNote.getBoundingClientRect().height, 1);
         expect(getComputedStyle(noteWithMusicOut, '::after').content).toBe('none');
         expect(musicOutWrapper).not.toBeNull();
-        expect(getComputedStyle(musicOutWrapper!, '::after').content).toBe('"]]"');
+        expect(getComputedStyle(requireValue(musicOutWrapper), '::after').content).toBe('"]]"');
     });
 
     const musicStartAttrs = (editor: Editor): Record<string, unknown> | undefined => {
@@ -1073,7 +1074,7 @@ describe('music pill node views', () => {
         const content = editor.view.dom.parentElement;
 
         expect(content).not.toBeNull();
-        expect(getComputedStyle(content!, '::after').content).toBe('none');
+        expect(getComputedStyle(requireValue(content), '::after').content).toBe('none');
         expect(document.querySelector('[data-music-rail-range]')).toBeNull();
     });
 

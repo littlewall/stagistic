@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import {useState} from 'react';
 import {
     createRoot,
@@ -64,7 +65,7 @@ describe('ContentModule', () => {
         expect(label?.textContent?.trim()).toBe('Show notes');
         expect(notesSwitch.checked).toBe(true);
 
-        await userEvent.click(label!);
+        await userEvent.click(requireValue(label));
 
         expect(notesSwitch.checked).toBe(false);
         expect(document.querySelector('[data-testid="value"]')?.textContent).toBe('false');

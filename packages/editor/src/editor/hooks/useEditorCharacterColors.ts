@@ -39,17 +39,13 @@ export const useEditorCharacterColors = ({
     refs,
     liveStore: providedLiveStore,
 }: UseEditorCharacterColorsArgs) => {
-    const localRefs = useRef<CharacterColorRefsBundle | null>(null);
-
-    if (!localRefs.current) {
-        localRefs.current = createCharacterColorRefsBundle();
-    }
+    const [localRefs] = useState(createCharacterColorRefsBundle);
 
     const {
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
         persistentCharactersRef,
-    } = refs ?? localRefs.current;
+    } = refs ?? localRefs;
 
     const normalizedPersistentCharacters = useMemo(
         () => normalizePersistentCharacterRefs(persistentCharacters),
@@ -106,6 +102,9 @@ export const useEditorCharacterColors = ({
         confirmedCharacterColorsById,
         confirmedCharacterColorsByKey,
         normalizedPersistentCharacters,
+        colorByCharacterIdRef,
+        persistentCharactersRef,
+        rememberedColorByKeyRef,
     ]);
 
     const initialLiveSnapshot = useMemo(() => {

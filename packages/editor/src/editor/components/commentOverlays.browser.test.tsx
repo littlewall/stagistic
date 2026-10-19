@@ -5,6 +5,7 @@ import {
     type ScriptDocument,
     type ScriptNode,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
@@ -373,7 +374,7 @@ describe('comment indicators', () => {
         ]});
 
         const rect = (await poll(() => marker('b1'), 'b1 marker')).getBoundingClientRect();
-        const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]')!;
+        const canvas = requireValue(document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]'));
         const railX = canvas.getBoundingClientRect().left + resolveMusicRailLeft(canvas) - canvas.scrollLeft;
 
         expect(rect.left - railX).toBeGreaterThanOrEqual(4);
@@ -401,7 +402,7 @@ describe('comment marker placement', () => {
             ],
         });
         const markerRect = (await poll(() => marker('s1'), 's1 marker')).getBoundingClientRect();
-        const block = findScriptBlockByIdFromState(editor.state, 's1')!;
+        const block = requireValue(findScriptBlockByIdFromState(editor.state, 's1'));
         const firstLine = editor.view.coordsAtPos(block.from);
         const blockRect = (editor.view.nodeDOM(block.pos) as HTMLElement).getBoundingClientRect();
 
@@ -420,7 +421,7 @@ describe('comment marker placement', () => {
         ]});
 
         const rect = (await poll(() => marker('b1'), 'b1 marker')).getBoundingClientRect();
-        const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]')!;
+        const canvas = requireValue(document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]'));
         const canvasLeft = canvas.getBoundingClientRect().left;
         const railX = canvasLeft + resolveMusicRailLeft(canvas) - canvas.scrollLeft;
         const scrollbarX = canvasLeft + canvas.clientWidth;
@@ -472,7 +473,7 @@ describe('active comment dismissal', () => {
 
     it('closes the active thread when a text selection leaves its anchor', async () => {
         const editor = await mountWithActiveThread();
-        const anchor = getCommentsState(editor.state).anchors.get('t1')!;
+        const anchor = requireValue(getCommentsState(editor.state).anchors.get('t1'));
 
         selectRange(editor, anchor.from + 1, anchor.to + 2);
 
@@ -500,7 +501,7 @@ describe('active comment dismissal', () => {
         await page.elementLocator(anchor).click();
         expect(getCommentsState(editor.state).activeThreadId).toBe('t1');
 
-        const block = findScriptBlockByIdFromState(editor.state, 'b2')!;
+        const block = requireValue(findScriptBlockByIdFromState(editor.state, 'b2'));
         const otherBlock = editor.view.nodeDOM(block.from - 1) as HTMLElement;
 
         await page.elementLocator(otherBlock).click();
@@ -510,7 +511,7 @@ describe('active comment dismissal', () => {
 
     it('keeps the active thread for caret and selection within its anchor and for comment UI', async () => {
         const editor = await mountWithActiveThread();
-        const anchor = getCommentsState(editor.state).anchors.get('t1')!;
+        const anchor = requireValue(getCommentsState(editor.state).anchors.get('t1'));
 
         editor.commands.setTextSelection(anchor.from + 1);
         selectRange(editor, anchor.from + 1, anchor.to - 1);

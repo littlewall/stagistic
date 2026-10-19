@@ -8,16 +8,13 @@ export default defineConfig({
         '*.{css,scss}': 'pnpm exec moon run root:stylelint-fix --',
     },
     test: {
-        include: [
-            'apps/**/*.test.{ts,tsx}',
-            'apps/**/*.spec.{ts,tsx}',
-            'packages/**/*.test.{ts,tsx}',
-            'packages/**/*.spec.{ts,tsx}',
-        ],
-        exclude: [
-            '**/node_modules/**',
-            '**/.git/**',
-            '**/*.browser.{test,spec}.{ts,tsx}',
+        /*
+         * Each project keeps its own include/timeouts, same as `moon run <project>:test`.
+         * Browser, e2e, cloud and marketing suites run through their own moon tasks.
+         */
+        projects: [
+            'packages/*/vite.config.ts',
+            'apps/web/vitest.config.ts',
         ],
     },
 });

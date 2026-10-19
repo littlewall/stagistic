@@ -5,6 +5,7 @@
     "type": "module",
     "main": "./src/index.ts",
     "dependencies": {
+        "@stagistic/shared": "workspace:*",
         "@fontsource-variable/ibm-plex-sans": "^5.2.8",
         "@fontsource/courier-prime": "^5.2.8",
         "@stagistic/script": "workspace:*",
@@ -21,6 +22,7 @@
         "react-dom": "^19.0.0"
     },
     "devDependencies": {
+        "@stagistic/vite-config": "workspace:*",
         "@types/node": "^24.13.1",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",

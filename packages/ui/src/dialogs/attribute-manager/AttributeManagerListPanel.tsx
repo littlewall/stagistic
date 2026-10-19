@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import {
     type ReactNode,
-    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -9,6 +8,7 @@ import {
 import {Button} from '../../atoms/Button/Button';
 import {Input} from '../../atoms/Input/Input';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
+import {useItemSelection} from '../../hooks/useItemSelection';
 import {PlusIcon, SearchIcon} from '../../icons';
 import styles from './AttributeManagerListPanel.module.css';
 
@@ -99,7 +99,7 @@ export const AttributeManagerListPanel = ({
     renderDetail,
     renderDetailAction,
 }: AttributeManagerListPanelProps) => {
-    const [selectedItemId, setSelectedItemId] = useState<string | null>(initialSelectedItemId ?? null);
+    const [selectedItemId, setSelectedItemId] = useItemSelection(items, initialSelectedItemId);
     const [searchQuery, setSearchQuery] = useState('');
     const selectedItem = items.find(item => item.id === selectedItemId) ?? null;
     const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
@@ -113,23 +113,36 @@ export const AttributeManagerListPanel = ({
     const itemGroups = groupListItems(visibleItems);
     const hasToolbar = Boolean(search || createAction);
 
-    useEffect(() => {
-        const selectionStillExists = items.some(item => item.id === selectedItemId);
-
-        if (selectionStillExists) {
-            return;
-        }
-
-        const initialSelectionExists = items.some(item => item.id === initialSelectedItemId);
-
-        setSelectedItemId(initialSelectionExists ? initialSelectedItemId ?? null : items[0]?.id ?? null);
-    }, [
-        initialSelectedItemId,
-        items,
-        selectedItemId,
-    ]);
-
     const listStatus = isLoading ? 'Loading...' : emptyListLabel;
+
+    const renderDetailHeader = (item: AttributeManagerListItem) => (
+        <header className={styles.detailHeader}>
+            <div className={styles.detailIdentity}>
+                {!hideDetailTypeLabel ? <p className={styles.detailType}>{detailTypeLabel}</p> : null}
+                <h3 className={clsx(styles.detailTitle, wrapDetailTitle && styles.detailTitleWrapped)}>
+                    {item.detailTitlePrefix ? `${item.detailTitlePrefix} ` : null}
+                    {item.title}
+                </h3>
+                {item.detailSubtitle ? <p className={styles.detailSubtitle}>{item.detailSubtitle}</p> : null}
+            </div>
+            <div className={styles.detailHeaderAside}>
+                {item.detailMetadata?.length ? (
+                    <dl className={styles.detailMetadata}>
+                        {item.detailMetadata.map(metadata => (
+                            <div
+                                key={metadata.label}
+                                className={styles.detailMetadataRow}
+                            >
+                                <dt>{metadata.label}:</dt>
+                                <dd>{metadata.value}</dd>
+                            </div>
+                        ))}
+                    </dl>
+                ) : null}
+                {renderDetailAction?.(item)}
+            </div>
+        </header>
+    );
 
     return (
         <div className={styles.panel}>
@@ -214,32 +227,7 @@ export const AttributeManagerListPanel = ({
             >
                 {selectedItem ? (
                     <>
-                        <header className={styles.detailHeader}>
-                            <div className={styles.detailIdentity}>
-                                {!hideDetailTypeLabel ? <p className={styles.detailType}>{detailTypeLabel}</p> : null}
-                                <h3 className={clsx(styles.detailTitle, wrapDetailTitle && styles.detailTitleWrapped)}>
-                                    {selectedItem.detailTitlePrefix ? `${selectedItem.detailTitlePrefix} ` : null}
-                                    {selectedItem.title}
-                                </h3>
-                                {selectedItem.detailSubtitle ? <p className={styles.detailSubtitle}>{selectedItem.detailSubtitle}</p> : null}
-                            </div>
-                            <div className={styles.detailHeaderAside}>
-                                {selectedItem.detailMetadata?.length ? (
-                                    <dl className={styles.detailMetadata}>
-                                        {selectedItem.detailMetadata.map(metadata => (
-                                            <div
-                                                key={metadata.label}
-                                                className={styles.detailMetadataRow}
-                                            >
-                                                <dt>{metadata.label}:</dt>
-                                                <dd>{metadata.value}</dd>
-                                            </div>
-                                        ))}
-                                    </dl>
-                                ) : null}
-                                {renderDetailAction?.(selectedItem)}
-                            </div>
-                        </header>
+                        {renderDetailHeader(selectedItem)}
                         <div className={styles.detailBody}>{renderDetail?.(selectedItem)}</div>
                     </>
                 ) : (

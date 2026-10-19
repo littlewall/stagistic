@@ -1,4 +1,4 @@
-import {canBlockTypeHaveCharacterTags, collectCharacterTags} from '../characters/characterTagMarks';
+import {canBlockTypeHaveCharacterTags} from '../characters/characterTagMarks';
 import {
     getCharacterRefByKey,
     getNodeTextContent,
@@ -15,6 +15,7 @@ import {collectMusicAtoms} from '../music/collectMusicAtoms';
 import {deriveMusicTimeline} from '../music/deriveMusic';
 import type {DerivedMusic, MusicBlockInput} from '../music/types';
 import {extractCharacterKeys} from '../syntax';
+import {indexCharacterTags} from './indexCharacterTags';
 
 export const SCRIPT_BLOCK_INDEX_SCHEMA_VERSION = 2;
 
@@ -44,26 +45,6 @@ export interface BuildScriptBlockIndexResult {
     blockCount: number,
 }
 
-const toTagCharacterRefs = (node: ScriptNode): IndexedScriptCharacterRef[] | null => {
-    const idByKey = new Map<string, string | null>();
-
-    collectCharacterTags(node).forEach(tag => {
-        const existing = idByKey.get(tag.key);
-
-        if (existing === undefined || (existing === null && tag.characterId)) {
-            idByKey.set(tag.key, tag.characterId);
-        }
-    });
-
-    if (idByKey.size === 0) {
-        return null;
-    }
-
-    return Array.from(idByKey.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([key, characterId]) => ({key, characterId}));
-};
-
 const toCharacterRefs = (
     node: ScriptNode,
     blockType: string,
@@ -71,7 +52,7 @@ const toCharacterRefs = (
     attrs: Record<string, unknown> | undefined,
 ): IndexedScriptCharacterRef[] | null => {
     if (!isCharacterBlockType(blockType)) {
-        return canBlockTypeHaveCharacterTags(blockType) ? toTagCharacterRefs(node) : null;
+        return canBlockTypeHaveCharacterTags(blockType) ? indexCharacterTags(node) : null;
     }
 
     const characterRefByKey = getCharacterRefByKey(attrs);
@@ -91,7 +72,7 @@ const toCharacterRefs = (
     });
 
     Object.entries(characterRefByKey)
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .toSorted((a, b) => a[0].localeCompare(b[0]))
         .forEach(([key, characterId]) => {
             if (seenKeys.has(key)) {
                 return;

@@ -2,9 +2,9 @@ import {redoDepth, undoDepth} from '@tiptap/pm/history';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEditorState} from '@tiptap/react';
 import {
-    useEffect,
+    useCallback,
     useMemo,
-    useState,
+    useSyncExternalStore,
 } from 'react';
 
 import {BLOCKS} from '../../blocks/blockRegistry';
@@ -20,7 +20,17 @@ interface UseToolbarStateArgs {
 }
 
 export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
-    const [hasEditorFocus, setHasEditorFocus] = useState(() => Boolean(editor?.isFocused));
+    const subscribeFocus = useCallback((notify: () => void) => {
+        editor?.on('focus', notify);
+        editor?.on('blur', notify);
+
+        return () => {
+            editor?.off('focus', notify);
+            editor?.off('blur', notify);
+        };
+    }, [editor]);
+    const getFocusSnapshot = useCallback(() => Boolean(editor?.isFocused), [editor]);
+    const hasEditorFocus = useSyncExternalStore(subscribeFocus, getFocusSnapshot, getFocusSnapshot);
 
     const toolbarState = useEditorState({
         editor,
@@ -112,25 +122,6 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
         canChangeBlockType,
         isMultiBlockSelection,
     ]);
-
-    useEffect(() => {
-        setHasEditorFocus(Boolean(editor?.isFocused));
-
-        if (!editor) {
-            return;
-        }
-
-        const handleFocus = () => setHasEditorFocus(true);
-        const handleBlur = () => setHasEditorFocus(false);
-
-        editor.on('focus', handleFocus);
-        editor.on('blur', handleBlur);
-
-        return () => {
-            editor.off('focus', handleFocus);
-            editor.off('blur', handleBlur);
-        };
-    }, [editor]);
 
     return {
         activeType,

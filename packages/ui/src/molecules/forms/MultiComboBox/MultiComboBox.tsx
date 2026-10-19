@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import {
     type MouseEvent,
-    useEffect,
     useId,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
@@ -68,6 +68,7 @@ export const MultiComboBox = ({
     const rootRef = useRef<HTMLDivElement>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [selectedValue, setSelectedValue] = useState(value);
+    const [previousValue, setPreviousValue] = useState(value);
     const selectedValueRef = useRef(value);
     const selectedTags = selectedValue.flatMap(id => {
         const option = options.find(candidate => candidate.id === id);
@@ -76,9 +77,13 @@ export const MultiComboBox = ({
     });
     const suggestions = options.map(toTag);
 
-    useEffect(() => {
-        selectedValueRef.current = value;
+    if (previousValue !== value) {
+        setPreviousValue(value);
         setSelectedValue(value);
+    }
+
+    useLayoutEffect(() => {
+        selectedValueRef.current = value;
     }, [value]);
 
     const closeSuggestions = () => {

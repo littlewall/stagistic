@@ -1,5 +1,6 @@
 import '../../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -225,7 +226,7 @@ describe('MultiComboBox', () => {
         await page.elementLocator(await waitForSuggestion('Backstage')).click();
         await page.elementLocator(input).click();
         await page.elementLocator(await waitForSuggestion('Main stage')).click();
-        await page.elementLocator(Array.from(document.querySelectorAll('button')).find(button => button.textContent === 'Rollback')!).click();
+        await page.elementLocator(requireValue(Array.from(document.querySelectorAll('button')).find(button => button.textContent === 'Rollback'))).click();
         await new Promise(resolve => window.setTimeout(resolve, 0));
 
         expect(Array.from(document.querySelectorAll('[data-testid="tag"]')).map(tag => tag.textContent)).toEqual(['Main stage']);

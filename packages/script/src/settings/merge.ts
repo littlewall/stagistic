@@ -9,6 +9,77 @@ import type {
     TypographySettings,
 } from './types';
 
+const mergePageSettings = (base: PageSettings, override: Partial<PageSettings>): PageSettings => {
+    const merged = {...base};
+
+    for (const [key, value] of Object.entries(override)) {
+        if (value !== undefined) {
+            merged[key as keyof PageSettings] = value as never;
+        }
+    }
+
+    return merged;
+};
+
+const mergeTypographySettings = (base: TypographySettings, override: Partial<TypographySettings>): TypographySettings => {
+    const merged = {...base};
+
+    for (const [key, value] of Object.entries(override)) {
+        if (value !== undefined) {
+            merged[key as keyof TypographySettings] = value;
+        }
+    }
+
+    return merged;
+};
+
+const mergeBlocks = (base: BlockSettings, override: EditorSettingsOverride['blocks']): BlockSettings => {
+    const merged = {...base};
+
+    for (const [blockType, blockOverrides] of Object.entries(override ?? {})) {
+        const key = normalizeEditorSettingsBlockType(blockType);
+
+        if (!blockOverrides || !key) {
+            continue;
+        }
+
+        const block = {...merged[key]};
+
+        for (const [settingKey, value] of Object.entries(blockOverrides)) {
+            if (value !== undefined) {
+                block[settingKey as keyof BlockSpacingSettings] = value as never;
+            }
+        }
+
+        merged[key] = block;
+    }
+
+    return merged;
+};
+
+const mergeHeaderFooter = (base: EditorSettings['headerFooter'], override: NonNullable<EditorSettingsOverride['headerFooter']>) => ({
+    header: {
+        left: {...base.header.left, ...override.header?.left},
+        center: {...base.header.center, ...override.header?.center},
+        right: {...base.header.right, ...override.header?.right},
+    },
+    footer: {
+        left: {...base.footer.left, ...override.footer?.left},
+        center: {...base.footer.center, ...override.footer?.center},
+        right: {...base.footer.right, ...override.footer?.right},
+    },
+});
+
+const mergeInitialPages = (base: EditorSettings['initialPages'], override: NonNullable<EditorSettingsOverride['initialPages']>) => ({
+    castAndPlace: {
+        castOrderBy: override.castAndPlace?.castOrderBy ?? base.castAndPlace.castOrderBy,
+        showOutline: override.castAndPlace?.showOutline ?? base.castAndPlace.showOutline,
+    },
+    songs: {
+        showCharactersInSongs: override.songs?.showCharactersInSongs ?? base.songs.showCharactersInSongs,
+    },
+});
+
 export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<EditorSettingsOverride | null | undefined>): EditorSettings => {
     let next: EditorSettings = {
         page: {...base.page},
@@ -45,35 +116,11 @@ export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<Ed
         }
 
         if (override.page) {
-            const mergedPage = {
-                ...next.page,
-            };
-
-            for (const [key, value] of Object.entries(override.page)) {
-                if (value === undefined) {
-                    continue;
-                }
-
-                mergedPage[key as keyof PageSettings] = value as never;
-            }
-
-            next.page = mergedPage;
+            next.page = mergePageSettings(next.page, override.page);
         }
 
         if (override.typography) {
-            const mergedTypography = {
-                ...next.typography,
-            };
-
-            for (const [key, value] of Object.entries(override.typography)) {
-                if (value === undefined) {
-                    continue;
-                }
-
-                mergedTypography[key as keyof TypographySettings] = value;
-            }
-
-            next.typography = mergedTypography;
+            next.typography = mergeTypographySettings(next.typography, override.typography);
         }
 
         // Stored overrides may still carry retired keys; only accept known values.
@@ -94,66 +141,17 @@ export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<Ed
         }
 
         if (override.initialPages) {
-            next.initialPages = {
-                castAndPlace: {
-                    castOrderBy: override.initialPages.castAndPlace?.castOrderBy ?? next.initialPages.castAndPlace.castOrderBy,
-                    showOutline: override.initialPages.castAndPlace?.showOutline ?? next.initialPages.castAndPlace.showOutline,
-                },
-                songs: {
-                    showCharactersInSongs: override.initialPages.songs?.showCharactersInSongs ?? next.initialPages.songs.showCharactersInSongs,
-                },
-            };
+            next.initialPages = mergeInitialPages(next.initialPages, override.initialPages);
         }
 
         if (override.headerFooter) {
-            next.headerFooter = {
-                header: {
-                    left: {...next.headerFooter.header.left, ...override.headerFooter.header?.left},
-                    center: {...next.headerFooter.header.center, ...override.headerFooter.header?.center},
-                    right: {...next.headerFooter.header.right, ...override.headerFooter.header?.right},
-                },
-                footer: {
-                    left: {...next.headerFooter.footer.left, ...override.headerFooter.footer?.left},
-                    center: {...next.headerFooter.footer.center, ...override.headerFooter.footer?.center},
-                    right: {...next.headerFooter.footer.right, ...override.headerFooter.footer?.right},
-                },
-            };
+            next.headerFooter = mergeHeaderFooter(next.headerFooter, override.headerFooter);
         }
 
         if (override.blocks) {
-            const mergedBlocks: BlockSettings = {
-                ...next.blocks,
-            };
-
-            for (const [blockType, blockOverrides] of Object.entries(override.blocks)) {
-                if (!blockOverrides) {
-                    continue;
-                }
-
-                const key = normalizeEditorSettingsBlockType(blockType);
-
-                if (!key) {
-                    continue;
-                }
-
-                const mergedBlock = {
-                    ...mergedBlocks[key],
-                };
-
-                for (const [settingKey, settingValue] of Object.entries(blockOverrides)) {
-                    if (settingValue === undefined) {
-                        continue;
-                    }
-
-                    mergedBlock[settingKey as keyof BlockSpacingSettings] = settingValue as never;
-                }
-
-                mergedBlocks[key] = mergedBlock;
-            }
-
             next = {
                 ...next,
-                blocks: mergedBlocks,
+                blocks: mergeBlocks(next.blocks, override.blocks),
             };
         }
     }

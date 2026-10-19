@@ -3,8 +3,8 @@ import {
     PanelHeader,
     SettingsGroup,
     TypeToConfirmAction,
+    useToastController,
 } from '@stagistic/ui';
-import {useToastController} from '@stagistic/ui';
 import {useCallback, useState} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';

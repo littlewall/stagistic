@@ -18,8 +18,19 @@ export const getMeasuredEditorPageCount = (editor: TiptapEditor): number | null 
     const storage = getEditorPaginationStorage(editor);
     const pluginState = paginationKey.getState(editor.state);
 
-    if (!storage || !pluginState?.hasMeasuredLayout || !editor.view.dom.isConnected
-        || editor.view.dom.clientWidth <= storage.options.marginLeft + storage.options.marginRight
+    if (!storage || !pluginState?.hasMeasuredLayout) {
+        return null;
+    }
+
+    /*
+     * A detached view cannot be measured, but its last full measurement still
+     * holds: `hasMeasuredLayout` resets on any document change.
+     */
+    if (!editor.view.dom.isConnected) {
+        return storage.measuredOptionsVersion === storage.optionsVersion ? storage.state.pageCount : null;
+    }
+
+    if (editor.view.dom.clientWidth <= storage.options.marginLeft + storage.options.marginRight
         || storage.options.pageHeight <= storage.options.marginTop + storage.options.marginBottom) {
         return null;
     }
@@ -31,7 +42,7 @@ export const getMeasuredEditorPageCount = (editor: TiptapEditor): number | null 
 export const captureEditorSaveSnapshot = (editor: TiptapEditor) => {
     const wasMeasured = getEditorPaginationStorage(editor)?.flushRecalc?.() ?? false;
     const value = stripScriptSettings(editor.getJSON() as ScriptDocument);
-    const pageCount = wasMeasured ? getMeasuredEditorPageCount(editor) : null;
+    const pageCount = wasMeasured || !editor.view.dom.isConnected ? getMeasuredEditorPageCount(editor) : null;
 
     return {value, metadata: buildScriptSummaryMetadata(value, pageCount)};
 };

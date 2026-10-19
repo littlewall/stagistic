@@ -1,19 +1,19 @@
 import type {InferSelectModel} from 'drizzle-orm';
 
 import {
-    scriptActs,
-    scriptAttachments,
-    scriptBlockCharacterRefs,
-    scriptBlocks,
-    scriptCommentMessages,
-    scriptCommentThreads,
-    scriptLocations,
-    scriptMusic,
-    scriptMusicAttachments,
-    scripts,
-    scriptScenes,
-    scriptSettingsBlocks,
-    scriptSettingsTitlePage,
+    type scriptActs,
+    type scriptAttachments,
+    type scriptBlockCharacterRefs,
+    type scriptBlocks,
+    type scriptCommentMessages,
+    type scriptCommentThreads,
+    type scriptLocations,
+    type scriptMusic,
+    type scriptMusicAttachments,
+    type scripts,
+    type scriptScenes,
+    type scriptSettingsBlocks,
+    type scriptSettingsTitlePage,
 } from '../schema';
 import type {MusicAttachmentRole} from './musicAttachments';
 

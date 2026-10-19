@@ -31,27 +31,7 @@ export const CharacterGroupRow = ({
         <div className={styles.characterRow}>
             <CharacterColorControl
                 characterKey={group.key}
-                color={{
-                    state: {
-                        isActionDisabled: isColorActionDisabled,
-                        isPickerOpen: colorPicker.isColorPickerOpen,
-                        currentColorHex: colorPicker.currentCharacterColorHex,
-                        colorDraftHex: colorPicker.colorDraftHex,
-                        pickerColorValue: colorPicker.pickerColorValue,
-                        presetColorHexes: colorPicker.presetColorHexes,
-                        resolvedColorSaturation: colorPicker.resolvedColorSaturation,
-                    },
-                    refs: {
-                        triggerRef: colorPicker.colorTriggerRef,
-                    },
-                    actions: {
-                        togglePicker: colorPicker.toggleColorPicker,
-                        setPickerOpen: colorPicker.setIsColorPickerOpen,
-                        applyColor: colorPicker.applyColor,
-                        resetColor: colorPicker.resetColor,
-                        setDraftHue: colorPicker.setColorDraftHue,
-                    },
-                }}
+                color={colorPicker.control}
             />
             <span className={styles.characterName}>{group.key}</span>
             {group.isEmpty ? <Tag className={styles.groupEmptyTag}>Empty</Tag> : null}

@@ -22,18 +22,7 @@
 }
 
 .item {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: var(--menu-item-min-height);
-    padding: var(--menu-item-padding);
-    font-size: var(--menu-item-font-size);
-    color: var(--menu-item-color);
-    text-align: left;
-    background: transparent;
-    border: none;
-    border-radius: var(--menu-item-radius);
+    composes: item from '../molecules/forms/shared/menuItem.module.css';
 
     &:hover {
         background: var(--menu-item-hover-bg);

@@ -1,5 +1,6 @@
 import '../../../styles/tokens.css';
 
+import {requireValue} from '@stagistic/shared';
 import {
     createRef,
     type KeyboardEvent as ReactKeyboardEvent,
@@ -119,7 +120,7 @@ describe('SearchControl', () => {
         }
 
         expect(getComputedStyle(clearButton).cursor).toBe('pointer');
-        expect(Number.parseFloat(getComputedStyle(clearButton.querySelector('svg')!).opacity)).toBeLessThanOrEqual(0.6);
+        expect(Number.parseFloat(getComputedStyle(requireValue(clearButton.querySelector('svg'))).opacity)).toBeLessThanOrEqual(0.6);
 
         await userEvent.click(clearButton);
 
@@ -446,7 +447,7 @@ describe('SearchControl replace', () => {
         const surface = await waitForElement<HTMLElement>('[data-search-surface]');
 
         expect(toggle.getAttribute('aria-expanded')).toBe('true');
-        expect(document.getElementById(toggle.getAttribute('aria-controls')!)?.contains(replaceInput)).toBe(true);
+        expect(document.getElementById(requireValue(toggle.getAttribute('aria-controls')))?.contains(replaceInput)).toBe(true);
         expect(surface.getBoundingClientRect().height).toBeGreaterThan(slot.getBoundingClientRect().height * 1.5);
         expect(replaceInput.getBoundingClientRect().top).toBeGreaterThanOrEqual(input.getBoundingClientRect().bottom);
         expect(Math.round(replaceInput.getBoundingClientRect().left)).toBe(Math.round(input.getBoundingClientRect().left));

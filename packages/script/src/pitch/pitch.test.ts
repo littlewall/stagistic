@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -50,7 +51,7 @@ describe('formatPitch', () => {
             'Bb2',
             'A5',
         ]) {
-            expect(formatPitch(parsePitch(spn)!)).toBe(spn);
+            expect(formatPitch(requireValue(parsePitch(spn)))).toBe(spn);
         }
     });
 });
@@ -65,10 +66,10 @@ describe('pitchToMidi', () => {
     });
 
     it('orders low below high', () => {
-        expect(pitchToMidi(parsePitch('F#3')!)).toBeLessThan(pitchToMidi(parsePitch('Bb4')!));
+        expect(pitchToMidi(requireValue(parsePitch('F#3')))).toBeLessThan(pitchToMidi(requireValue(parsePitch('Bb4'))));
     });
 
     it('treats enharmonics as equal semitone', () => {
-        expect(pitchToMidi(parsePitch('A#3')!)).toBe(pitchToMidi(parsePitch('Bb3')!));
+        expect(pitchToMidi(requireValue(parsePitch('A#3')))).toBe(pitchToMidi(requireValue(parsePitch('Bb3'))));
     });
 });

@@ -1,4 +1,5 @@
 import type {ScriptDocument} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -104,7 +105,7 @@ describe('deriveContentsPlan', () => {
             musicStart('m2', 'music-2', 'Silent Song'),
             block('stageDirection', 'sd2', 'Music out.'),
         ]), [], []);
-        const [first, second] = plan!.acts[0].scenes[0].music;
+        const [first, second] = requireValue(plan).acts[0].scenes[0].music;
 
         expect(first.isInstrumental).toBe(true);
         expect(second.isInstrumental).toBe(true);
@@ -125,7 +126,7 @@ describe('deriveContentsPlan', () => {
                 displayName: 'Kylie',
             },
         ], []);
-        const [entry] = plan!.acts[0].scenes[0].music;
+        const [entry] = requireValue(plan).acts[0].scenes[0].music;
 
         expect(entry.singers).toEqual(['Kylie']);
         expect(entry.isInstrumental).toBe(false);

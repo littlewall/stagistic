@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -58,7 +59,7 @@ describe('PublicPreviewGate', () => {
 
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 
-        const dialog = document.querySelector<HTMLDialogElement>('dialog')!;
+        const dialog = requireValue(document.querySelector<HTMLDialogElement>('dialog'));
 
         expect(document.body.textContent).not.toContain('Application content');
         expect(dialog.textContent).toContain(
@@ -92,7 +93,7 @@ describe('PublicPreviewGate', () => {
 
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 
-        const continueButton = document.querySelector<HTMLButtonElement>('dialog button')!;
+        const continueButton = requireValue(document.querySelector<HTMLButtonElement>('dialog button'));
 
         await page.elementLocator(continueButton).click();
         await waitFor(() => document.body.textContent?.includes('Application content') === true);

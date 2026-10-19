@@ -1,10 +1,11 @@
-import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {
     collectMusicAtoms,
     deriveMusic,
     getScriptBlockTypeFromNodeType,
     isScriptBlockNodeType,
     type MusicBlockInput,
+    type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 import {isObjectRecord} from '@stagistic/shared';
 
@@ -216,15 +217,15 @@ export const extractScriptBlocks = (
 
     walk(sourceDocument.content);
 
-    const music: ExtractedMusicRow[] = deriveMusic(musicBlockInputs).map(music => ({
-        id: music.musicId,
-        sceneNumber: music.sceneNumber,
-        indexInScene: music.indexInScene,
-        mode: music.mode,
-        title: music.title,
-        kind: music.kind,
-        startBlockId: music.startBlockId,
-        endBlockId: music.endBlockId,
+    const music: ExtractedMusicRow[] = deriveMusic(musicBlockInputs).map(item => ({
+        id: item.musicId,
+        sceneNumber: item.sceneNumber,
+        indexInScene: item.indexInScene,
+        mode: item.mode,
+        title: item.title,
+        kind: item.kind,
+        startBlockId: item.startBlockId,
+        endBlockId: item.endBlockId,
     }));
 
     return {
