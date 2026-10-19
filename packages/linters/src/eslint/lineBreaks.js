@@ -37,6 +37,11 @@ const lineBreaks = {
         },
         {
             blankLine: 'always',
+            prev: '*',
+            next: 'if',
+        },
+        {
+            blankLine: 'always',
             prev: ['const', 'let'],
             next: '*',
         },
