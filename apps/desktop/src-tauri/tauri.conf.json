@@ -25,6 +25,9 @@
     },
     "bundle": {
         "active": true,
-        "targets": "all"
+        "targets": "all",
+        "resources": {
+            "../../../packages/mcp/tauri-resources/": "mcp/"
+        }
     }
 }

@@ -1,15 +1,16 @@
 # Stagistic Desktop (Tauri)
 
 Offline-first desktop shell for the Stagistic editor. Tauri 3 (`next`) with a
-React + Vite frontend. The editor itself is not wired up yet — the frontend is
-currently a placeholder while the foundations are brought up to date.
+React + Vite frontend and local PGlite storage.
 
 ## Prerequisites
 
 - Node.js >= 24.12.0
 - pnpm >= 11.0.0
-- Rust toolchain (stable)
+- Rust 1.95.0 (selected by the repository's `rust-toolchain.toml`)
 - Tauri system prerequisites (platform-specific)
+- macOS distribution builds: both `aarch64-apple-darwin` and
+  `x86_64-apple-darwin` Rust targets, plus Xcode command line tools
 
 > Tauri is pinned to the `3.0.0-alpha` line (`next`). Tauri 3 no longer bundles
 > a webview runtime, so the app depends on `tauri-runtime-wry` and selects it
@@ -37,8 +38,34 @@ moon run desktop:build
 
 ## Notes
 
-- The desktop app is offline-first; local storage is not wired up yet.
+- The desktop app is offline-first.
 - File dialogs and filesystem access are available via `tauri-plugin-dialog`
   and `tauri-plugin-fs` for future export/import features.
 - The native menu (File / Edit / View / Window / Help) emits `menu-action`
   events the frontend can listen to.
+
+## Local MCP
+
+The backend exposes seven read-only tools over a native stdio executable.
+Script text uses Stagistic syntax. Access starts disabled; no settings UI is
+included yet. The editor must be running and its local database ready.
+
+`src/mcp/client.ts` provides status, enable/disable, manual configuration and
+Claude installation functions for the future settings UI. Manual preparation
+returns the user's actual absolute executable path and `args: []`; it does not
+enable access. Each stdio client launches that executable directly, without
+Node, shell interpolation or a separate runtime.
+
+`desktop:dev` builds a host-only bridge with a separate development socket and
+settings directory. `desktop:build` packages the same universal macOS binary
+for manual use and inside `stagistic.mcpb`, with a local ad-hoc signature.
+Developer ID builds use `desktop:build-release` with
+`STAGISTIC_MCP_SIGNING_IDENTITY` set. Notarization remains a release step.
+Claude installation is intentionally unavailable in debug builds.
+
+Reprepare the manual executable after an app upgrade; its path stays stable.
+Restart client connections after a protocol mismatch. Reinstall the updated
+MCPB for Claude. Opening its installation dialog returns
+`installation_requested`, never a claim that the user installed it.
+
+See [validation and manual smoke instructions](../../docs/testing/local-mcp.md).

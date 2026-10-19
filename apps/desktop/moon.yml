@@ -4,11 +4,37 @@ $schema: 'https://moonrepo.dev/schemas/project.json'
 # Inherits `lint` (vp lint) + `typecheck` (tsc -b). No tests here.
 workspace:
   inheritedTasks:
-    exclude: ['test']
+    exclude: []
 
 tasks:
+  build-test-host:
+    command: 'cargo build --manifest-path src-tauri/Cargo.toml --example local_mcp_host --locked'
+    options:
+      cache: false
+  test:
+    command: 'vp test run --config vitest.config.ts'
+    options:
+      mergeArgs: 'replace'
+      cache: false
+  test-rust:
+    command: 'cargo test --manifest-path src-tauri/Cargo.toml --lib --tests --locked'
+    options:
+      cache: false
+  check-rust:
+    command: 'cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked'
+    options:
+      cache: false
+  lint-rust:
+    script: 'cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --locked -- -D warnings'
+    options:
+      cache: false
+  format-rust:
+    command: 'cargo fmt --manifest-path src-tauri/Cargo.toml'
+    options:
+      cache: false
   dev:
     command: 'tauri dev'
+    deps: ['mcp:bundle-dev']
     preset: 'server'
 
   dev-ui:
@@ -17,10 +43,17 @@ tasks:
 
   build:
     command: 'tauri build'
+    deps: ['mcp:bundle']
     options:
       cache: false
 
   build-ui:
     command: 'vp build'
+    options:
+      cache: false
+
+  build-release:
+    command: 'tauri build'
+    deps: ['mcp:bundle-release']
     options:
       cache: false

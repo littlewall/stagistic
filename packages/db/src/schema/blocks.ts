@@ -1,3 +1,4 @@
+import {sql} from 'drizzle-orm';
 import {
     bigint,
     boolean,
@@ -36,6 +37,7 @@ export const scriptBlocks = pgTable(
         scriptTypeIdx: index('script_blocks_script_type_idx').on(table.scriptId, table.blockType),
         scriptSceneIdx: index('script_blocks_script_scene_idx').on(table.scriptId, table.sceneId),
         scriptActIdx: index('script_blocks_script_act_idx').on(table.scriptId, table.actId),
+        searchIdx: index('script_blocks_text_search_idx').using('gin', sql`to_tsvector('simple', ${table.textContent})`),
     }),
 );
 

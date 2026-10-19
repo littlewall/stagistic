@@ -8,6 +8,7 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
+        "@stagistic/mcp-contract": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "@tauri-apps/api": "^3.0.0-alpha.0",

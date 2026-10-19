@@ -1,5 +1,8 @@
 # Dependencies
 node_modules
+packages/mcp/target/
+packages/mcp/dist-dev/
+packages/mcp/tauri-resources/
 .pnp
 .pnp.js
 
