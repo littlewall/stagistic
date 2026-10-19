@@ -31,6 +31,18 @@ export interface ScriptCommentsState {
 const resolveNull = () => Promise.resolve(null);
 const resolveVoid = () => Promise.resolve();
 
+const commentActions = (store: ReturnType<typeof getScriptCommentsStore> | null) => ({
+    allocateThreadId: () => store?.allocateThreadId() ?? '',
+    createThread: store?.createThread ?? resolveNull,
+    reply: store?.reply ?? resolveNull,
+    editMessage: store?.editMessage ?? resolveNull,
+    deleteMessage: store?.deleteMessage ?? resolveVoid,
+    setStatus: store?.setStatus ?? resolveVoid,
+    deleteThread: store?.deleteThread ?? resolveNull,
+    restoreThread: store?.restoreThread ?? resolveVoid,
+    moveBlockAnchors: store?.moveBlockAnchors ?? resolveVoid,
+});
+
 export const useScriptComments = (scriptId: string | null, repository: ScriptRepository): ScriptCommentsState => {
     const store = useMemo(() => scriptId ? getScriptCommentsStore(repository, scriptId) : null, [repository, scriptId]);
     const threadsStatus = useReactiveCollectionStatus(store?.threadsStatus);
@@ -62,15 +74,7 @@ export const useScriptComments = (scriptId: string | null, repository: ScriptRep
             messages: messagesQuery.data ?? [],
             isLoading: Boolean(store) && (!threadsStatus.isReady || !messagesStatus.isReady || threadsQuery.isLoading || messagesQuery.isLoading),
             error: threadsStatus.sourceError ?? messagesStatus.sourceError ?? null,
-            allocateThreadId: () => store?.allocateThreadId() ?? '',
-            createThread: store?.createThread ?? resolveNull,
-            reply: store?.reply ?? resolveNull,
-            editMessage: store?.editMessage ?? resolveNull,
-            deleteMessage: store?.deleteMessage ?? resolveVoid,
-            setStatus: store?.setStatus ?? resolveVoid,
-            deleteThread: store?.deleteThread ?? resolveNull,
-            restoreThread: store?.restoreThread ?? resolveVoid,
-            moveBlockAnchors: store?.moveBlockAnchors ?? resolveVoid,
+            ...commentActions(store),
         }),
         [
             messagesQuery.data,

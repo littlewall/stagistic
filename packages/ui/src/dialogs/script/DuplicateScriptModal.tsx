@@ -43,15 +43,22 @@ export const DuplicateScriptModal = ({
     const [openInEditor, setOpenInEditor] = useState(false);
     const canSubmit = title.trim().length > 0;
 
+    const [previous, setPrevious] = useState({isOpen, initialTitle});
+
+    if (previous.isOpen !== isOpen || previous.initialTitle !== initialTitle) {
+        setPrevious({isOpen, initialTitle});
+        if (isOpen) {
+            setTitle(initialTitle);
+            setCopySettings(false);
+            setCopyAttributes(false);
+            setOpenInEditor(false);
+        }
+    }
+
     useEffect(() => {
-        if (!isOpen) {
+        if (!isOpen || titleInputRef.current?.value !== initialTitle) {
             return;
         }
-
-        setTitle(initialTitle);
-        setCopySettings(false);
-        setCopyAttributes(false);
-        setOpenInEditor(false);
 
         const focusTimer = window.setTimeout(() => {
             titleInputRef.current?.focus();

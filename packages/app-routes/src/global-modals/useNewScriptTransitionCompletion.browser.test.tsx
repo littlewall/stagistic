@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     MemoryRouter,
@@ -70,7 +71,7 @@ describe('useNewScriptTransitionCompletion', () => {
 
         expect(onComplete).not.toHaveBeenCalled();
 
-        await page.elementLocator(document.querySelector('button')!).click();
+        await page.elementLocator(requireValue(document.querySelector('button'))).click();
         await waitFor(() => onComplete.mock.calls.length === 1);
 
         expect(onComplete).toHaveBeenCalledTimes(1);

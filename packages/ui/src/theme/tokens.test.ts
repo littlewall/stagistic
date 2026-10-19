@@ -95,7 +95,7 @@ describe('css custom properties', () => {
             }
         }
 
-        expect([...missing].sort()).toEqual([]);
+        expect([...missing].toSorted()).toEqual([]);
     });
 
     it('declares no --select-* or --segment-* variable in :root', () => {

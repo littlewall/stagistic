@@ -175,7 +175,7 @@ describe('script character groups store concurrency', () => {
         expect(results.filter(Boolean)).toHaveLength(1);
         expect(results.filter(result => result === null)).toHaveLength(1);
         expect(actions.renames).toBe(1);
-        expect((await groups.read()).map(row => row.key).sort()).toEqual(['CHORUS', 'PLAYERS']);
+        expect((await groups.read()).map(row => row.key).toSorted()).toEqual(['CHORUS', 'PLAYERS']);
         expect(Array.from(store.groupsCollection.values())).toHaveLength(2);
     });
 });

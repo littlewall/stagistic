@@ -151,14 +151,16 @@ export const buildPaginationState = (
         ));
     });
 
-    if (plan.endSpacer && plan.endSpacer.height > 0) {
-        const endPos = plan.endSpacer.afterBlockKey !== null
-            ? Number(plan.endSpacer.afterBlockKey)
+    const {endSpacer} = plan;
+
+    if (endSpacer && endSpacer.height > 0) {
+        const endPos = endSpacer.afterBlockKey !== null
+            ? Number(endSpacer.afterBlockKey)
             : 0;
 
         decorations.push(Decoration.widget(
             endPos,
-            () => createSpacerElement(plan.endSpacer!.height, options),
+            () => createSpacerElement(endSpacer.height, options),
             {side: 1},
         ));
     }

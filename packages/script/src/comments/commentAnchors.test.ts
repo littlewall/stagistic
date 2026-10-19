@@ -54,7 +54,7 @@ const doc: ScriptDocument = {
 
 describe('collectCommentAnchorThreadIds', () => {
     it('collects unique thread ids across blocks and ignores empty ids and other marks', () => {
-        expect([...collectCommentAnchorThreadIds(doc)].sort()).toEqual(['t1', 't2']);
+        expect([...collectCommentAnchorThreadIds(doc)].toSorted()).toEqual(['t1', 't2']);
     });
 
     it('returns an empty set for a document without anchors', () => {

@@ -18,9 +18,9 @@ export const ProgressBar = ({
 }: ProgressBarProps) => {
     const hasValue = typeof value === 'number';
     const progressValue = hasValue ? clampProgress(value) : null;
-    const percent = hasValue ? Math.round(progressValue! * 100) : null;
+    const percent = progressValue === null ? null : Math.round(progressValue * 100);
     const progressStyle = hasValue ? {width: `${percent}%`} : undefined;
-    const ariaValue = hasValue ? Math.round(progressValue! * 100) : undefined;
+    const ariaValue = percent ?? undefined;
 
     return (
         <div

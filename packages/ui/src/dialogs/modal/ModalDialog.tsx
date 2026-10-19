@@ -1,7 +1,5 @@
 import {clsx} from 'clsx';
 import {
-    type KeyboardEvent as ReactKeyboardEvent,
-    type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type SyntheticEvent,
     useCallback,
@@ -40,11 +38,9 @@ export const ModalDialog = ({
     const restoreFocusRef = useRef<HTMLElement | null>(null);
     const [isMounted, setIsMounted] = useState(isOpen);
 
-    useEffect(() => {
-        if (isOpen) {
-            setIsMounted(true);
-        }
-    }, [isOpen]);
+    if (isOpen && !isMounted) {
+        setIsMounted(true);
+    }
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -64,7 +60,7 @@ export const ModalDialog = ({
             restoreFocusRef.current = null;
             setIsMounted(false);
         }
-    }, [isOpen, isMounted]);
+    }, [isOpen]);
 
     useEffect(() => {
         return () => {
@@ -82,12 +78,8 @@ export const ModalDialog = ({
         [onClose],
     );
 
-    const handleMouseDown = useCallback((event: ReactMouseEvent<HTMLDialogElement>) => {
-        mouseDownTargetRef.current = event.target;
-    }, []);
-
     const handleClick = useCallback(
-        (event: ReactMouseEvent<HTMLDialogElement>) => {
+        (event: MouseEvent) => {
             if (event.target === dialogRef.current && mouseDownTargetRef.current === dialogRef.current) {
                 onClose();
             }
@@ -95,7 +87,7 @@ export const ModalDialog = ({
         [onClose],
     );
 
-    const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDialogElement>) => {
+    const handleKeyDown = useCallback((event: KeyboardEvent) => {
         if (event.key !== 'Tab') {
             return;
         }
@@ -132,6 +124,31 @@ export const ModalDialog = ({
         }
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const dialog = dialogRef.current;
+        const handleMouseDown = (event: MouseEvent) => {
+            mouseDownTargetRef.current = event.target;
+        };
+
+        dialog?.addEventListener('mousedown', handleMouseDown);
+        dialog?.addEventListener('click', handleClick);
+        dialog?.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            dialog?.removeEventListener('mousedown', handleMouseDown);
+            dialog?.removeEventListener('click', handleClick);
+            dialog?.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [
+        isOpen,
+        handleClick,
+        handleKeyDown,
+    ]);
+
     if (!isMounted) {
         return null;
     }
@@ -142,9 +159,6 @@ export const ModalDialog = ({
             className={styles.dialog}
             aria-label={ariaLabel}
             onCancel={handleCancel}
-            onMouseDown={handleMouseDown}
-            onClick={handleClick}
-            onKeyDown={handleKeyDown}
         >
             <div className={clsx(panelClassName, styles.panel)}>{children}</div>
         </dialog>

@@ -53,8 +53,8 @@ export const ActionCard = <T extends ElementType = 'button'>({
         className={styles.copy}
     >
         <span className={styles.title}>{title}</span>
-        {description != null && <span className={styles.description}>{description}</span>}
-        {error != null && (
+        {(description !== null && description !== undefined) && <span className={styles.description}>{description}</span>}
+        {(error !== null && error !== undefined) && (
             <span
                 role="alert"
                 className={styles.error}

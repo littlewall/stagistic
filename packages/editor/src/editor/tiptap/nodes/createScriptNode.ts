@@ -62,7 +62,7 @@ const createStableScriptNodeView = (
     }) as Record<string, unknown>;
 
     Object.entries(attributes).forEach(([attribute, value]) => {
-        if (value !== null && value !== undefined && value !== false) {
+        if (typeof value === 'string' || typeof value === 'number' || value === true) {
             dom.setAttribute(attribute, String(value));
         }
     });

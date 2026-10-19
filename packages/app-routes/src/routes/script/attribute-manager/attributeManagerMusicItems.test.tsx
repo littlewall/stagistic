@@ -3,6 +3,7 @@ import type {
     EditorLiveStructureSnapshot,
 } from '@stagistic/editor';
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {MusicDoubleNoteIcon} from '@stagistic/ui';
 import {
     describe,
     expect,
@@ -151,5 +152,95 @@ describe('buildAttributeManagerMusicItems', () => {
         expect(item.group).toEqual({id: 'unassigned', label: 'Unassigned'});
         expect(item.detailSubtitle).toBeNull();
         expect(item.detailMetadata).toBeUndefined();
+    });
+
+    it('keeps both adapters equivalent for missing labels, catalog overrides and unassigned ordering', () => {
+        const document: ScriptDocument = {
+            type: 'doc',
+            content: [
+                block('act', 'act', ''),
+                block('scene', 'scene', ''),
+                block('stageDirection', 'start', '', [
+                    {
+                        type: 'musicStart',
+                        attrs: {
+                            musicId: 'assigned',
+                            mode: 'open',
+                            title: 'Document title',
+                            kind: 'song',
+                        },
+                    },
+                ]),
+            ],
+        };
+        const liveMusic: EditorLiveMusicSnapshot = [
+            {
+                musicId: 'assigned',
+                sceneNumber: 1,
+                indexInScene: 0,
+                sceneMusicCount: 1,
+                mode: 'open',
+                title: 'Document title',
+                kind: 'song',
+                startBlockId: 'start',
+                endBlockId: null,
+                effectiveEndBlockId: 'start',
+                endKind: 'document-end',
+            },
+        ];
+        const liveStructure: EditorLiveStructureSnapshot = {
+            rows: [
+                {
+                    kind: 'act',
+                    blockId: 'act',
+                    name: '',
+                    index: 0,
+                },
+                {
+                    kind: 'scene',
+                    blockId: 'scene',
+                    title: '',
+                    index: 1,
+                },
+            ],
+            rowIndexByBlockId: new Map(),
+            sceneByBlockId: new Map([['start', 'scene']]),
+            actByBlockId: new Map([['start', 'act']]),
+        };
+        const music: ScriptMusicListItem[] = [
+            {
+                id: 'unassigned-2',
+                title: 'Second',
+                kind: 'song',
+                assignmentLabel: null,
+            },
+            {
+                id: 'assigned',
+                title: '',
+                kind: 'instrumental',
+                assignmentLabel: 'Assigned',
+            },
+            {
+                id: 'unassigned-1',
+                title: 'First',
+                kind: 'instrumental',
+                assignmentLabel: null,
+            },
+        ];
+        const fromDocument = buildAttributeManagerMusicItems(document, music);
+        const fromLive = buildAttributeManagerMusicItemsFromLive(liveMusic, liveStructure, music);
+
+        expect(fromLive).toEqual(fromDocument);
+        expect(fromDocument.map(item => item.id)).toEqual([
+            'assigned',
+            'unassigned-2',
+            'unassigned-1',
+        ]);
+        expect(fromDocument[0]).toMatchObject({
+            title: 'Document title',
+            group: {id: 'act', label: 'Untitled act'},
+            detailSubtitle: 'Untitled act · 1. Untitled scene',
+        });
+        expect(fromDocument[0]?.icon).toMatchObject({type: MusicDoubleNoteIcon});
     });
 });

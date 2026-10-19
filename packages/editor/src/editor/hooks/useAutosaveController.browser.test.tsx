@@ -1,4 +1,5 @@
 import type {ScriptDocument} from '@stagistic/script';
+import {useEffect} from 'react';
 import {
     createRoot,
     type Root,
@@ -57,7 +58,9 @@ const AutosaveFixture = ({
         onValueSynced,
     });
 
-    controllerRef.current = controller;
+    useEffect(() => {
+        controllerRef.current = controller;
+    }, [controller, controllerRef]);
 
     return null;
 };

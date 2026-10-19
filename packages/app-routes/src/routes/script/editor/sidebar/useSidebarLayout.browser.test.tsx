@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -67,14 +68,14 @@ const openBoth = async () => {
     await expect.poll(() => document.querySelectorAll('button').length).toBe(2);
 
     if (readState()?.startsWith('true')) {
-        await userEvent.click(document.querySelector('button')!);
+        await userEvent.click(requireValue(document.querySelector('button')));
     }
 
     if (readState()?.endsWith('true')) {
         await userEvent.click(document.querySelectorAll('button')[1]);
     }
 
-    await userEvent.click(document.querySelector('button')!);
+    await userEvent.click(requireValue(document.querySelector('button')));
     await userEvent.click(document.querySelectorAll('button')[1]);
 };
 
@@ -140,7 +141,7 @@ describe('useSidebarLayout viewport contract', () => {
         await userEvent.click(document.querySelectorAll('button')[1]);
         await expect.poll(readState).toBe('false:true');
 
-        await userEvent.click(document.querySelector('button')!);
+        await userEvent.click(requireValue(document.querySelector('button')));
         await expect.poll(readState).toBe('true:false');
     });
 
@@ -184,7 +185,7 @@ describe('useSidebarLayout viewport contract', () => {
         const firstRoot = mount('script-1');
 
         await expect.poll(readState).toBe('true:true');
-        await userEvent.click(document.querySelector('button')!);
+        await userEvent.click(requireValue(document.querySelector('button')));
         await expect.poll(readState).toBe('false:true');
         await expect.poll(() => window.localStorage.getItem(`${SIDEBAR_LAYOUT_STORAGE_KEY}:script-1`))
             .not.toBeNull();

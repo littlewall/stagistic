@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -57,8 +58,8 @@ describe('createStaffRowDrawingGeometry', () => {
         };
         const sharpGeometry = createStaffRowDrawingGeometry(sharpStaffRow);
 
-        expect(flatGeometry.notes[1].accidental!.heightPx).toBeCloseTo(19.2);
-        expect(sharpGeometry.notes[1].accidental!.heightPx).toBeCloseTo(12.8);
+        expect(requireValue(flatGeometry.notes[1].accidental).heightPx).toBeCloseTo(19.2);
+        expect(requireValue(sharpGeometry.notes[1].accidental).heightPx).toBeCloseTo(12.8);
     });
 
     it('aligns the flat bowl with its note center', () => {
@@ -66,16 +67,16 @@ describe('createStaffRowDrawingGeometry', () => {
         const high = geometry.notes[1];
 
         expect(high.accidental).not.toBeNull();
-        expect(high.accidental!.bowlCenterYPx).toBe(high.yPx);
+        expect(requireValue(high.accidental).bowlCenterYPx).toBe(high.yPx);
     });
 
     it('keeps the connector clear of both notes and the high accidental', () => {
         const geometry = createStaffRowDrawingGeometry(staffRow);
         const [low, high] = geometry.notes;
-        const connector = geometry.connector!;
+        const connector = requireValue(geometry.connector);
 
         expect(connector.x1Px).toBeGreaterThan(low.xPx + geometry.noteRxPx);
-        expect(connector.x2Px).toBeLessThan(high.accidental!.xPx);
+        expect(connector.x2Px).toBeLessThan(requireValue(high.accidental).xPx);
     });
 
     it('extends ledger lines beyond both sides of the notehead', () => {

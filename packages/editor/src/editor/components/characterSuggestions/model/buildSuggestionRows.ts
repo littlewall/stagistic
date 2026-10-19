@@ -30,7 +30,7 @@ export const buildSuggestionRows = ({
         });
 
     return rows
-        .sort((a, b) => {
+        .toSorted((a, b) => {
             if (query.length === 0 && previousOrderByKey) {
                 const aPreviousOrder = previousOrderByKey.get(a[0]);
                 const bPreviousOrder = previousOrderByKey.get(b[0]);

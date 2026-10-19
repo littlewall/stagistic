@@ -23,6 +23,20 @@ import ScriptEditor from '../../Editor';
 
 type TestWindow = Window & {__clipboardEditor?: Editor | null};
 
+const getClipboardSelectionTextNodes = (editor: Editor) => {
+    const block = editor.view.dom.querySelector<HTMLElement>('[data-id="stage-direction-1"]');
+    const title = block?.querySelector<HTMLElement>('[data-music-title-input="start"]');
+    const startText = block?.firstChild;
+    const titleText = title?.firstChild;
+
+    if (!block || !title || !startText || startText.nodeType !== Node.TEXT_NODE
+        || !titleText || titleText.nodeType !== Node.TEXT_NODE) {
+        throw new Error('Rendered clipboard selection fixtures not found');
+    }
+
+    return {startText, titleText};
+};
+
 const initialValue: ScriptDocument = {
     type: 'doc',
     content: [
@@ -202,21 +216,7 @@ describe('script clipboard transformation', () => {
         renderEditor();
 
         const editor = await getEditor();
-        const block = editor.view.dom.querySelector<HTMLElement>('[data-id="stage-direction-1"]');
-        const title = block?.querySelector<HTMLElement>('[data-music-title-input="start"]');
-        const startText = block?.firstChild;
-        const titleText = title?.firstChild;
-
-        if (
-            !block
-            || !title
-            || !startText
-            || startText.nodeType !== Node.TEXT_NODE
-            || !titleText
-            || titleText.nodeType !== Node.TEXT_NODE
-        ) {
-            throw new Error('Rendered clipboard selection fixtures not found');
-        }
+        const {startText, titleText} = getClipboardSelectionTextNodes(editor);
 
         const range = document.createRange();
         const selection = window.getSelection();

@@ -66,7 +66,7 @@ const toEntries = ({
         }));
     });
 
-    return entries.sort((left, right) => left.desired - right.desired || left.order - right.order);
+    return entries.toSorted((left, right) => left.desired - right.desired || left.order - right.order);
 };
 
 /*

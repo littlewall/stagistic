@@ -12,9 +12,9 @@ import {
     type MouseEvent as ReactMouseEvent,
     type RefObject,
     useEffect,
+    useEffectEvent,
     useId,
     useMemo,
-    useRef,
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
@@ -121,9 +121,19 @@ export const EditorShell = ({
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
     const isAnySidebarOpen = isLeftSidebarOpen || isRightSidebarOpen;
-    const sidebarTogglesRef = useRef({leftSidebarToggle, rightSidebarToggle});
+    const handleBeforeInput = useEffectEvent(() => {
+        if (!window.matchMedia('(max-width: 1199px)').matches) {
+            return;
+        }
 
-    sidebarTogglesRef.current = {leftSidebarToggle, rightSidebarToggle};
+        if (leftSidebarToggle?.isOpen) {
+            leftSidebarToggle.onToggle();
+        }
+
+        if (rightSidebarToggle?.isOpen) {
+            rightSidebarToggle.onToggle();
+        }
+    });
 
     useEffect(() => {
         const editorElement = editor?.view.dom;
@@ -131,22 +141,6 @@ export const EditorShell = ({
         if (!editorElement) {
             return;
         }
-
-        const handleBeforeInput = () => {
-            if (!window.matchMedia('(max-width: 1199px)').matches) {
-                return;
-            }
-
-            const {leftSidebarToggle: leftToggle, rightSidebarToggle: rightToggle} = sidebarTogglesRef.current;
-
-            if (leftToggle?.isOpen) {
-                leftToggle.onToggle();
-            }
-
-            if (rightToggle?.isOpen) {
-                rightToggle.onToggle();
-            }
-        };
 
         editorElement.addEventListener('beforeinput', handleBeforeInput);
 

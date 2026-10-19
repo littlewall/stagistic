@@ -3,6 +3,7 @@ import {
     act,
     type Dispatch,
     type SetStateAction,
+    useLayoutEffect,
 } from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import type {NavigateFunction} from 'react-router-dom';
@@ -53,7 +54,7 @@ describe('useGlobalModalMutations', () => {
         let handleCreate: ((name: string, shape: 'multi-act' | 'one-act') => Promise<void>) | null = null;
 
         const Harness = () => {
-            ({handleCreate} = useGlobalModalMutations({
+            const mutations = useGlobalModalMutations({
                 scriptActions: {
                     createScript: () => Promise.resolve('script-1'),
                     renameScript: () => Promise.resolve(),
@@ -78,7 +79,11 @@ describe('useGlobalModalMutations', () => {
                 setIsRenaming: noopSetter,
                 setScriptToDuplicate: noopSetter,
                 setIsDuplicating: noopSetter,
-            }));
+            });
+
+            useLayoutEffect(() => {
+                handleCreate = mutations.handleCreate;
+            }, [mutations]);
 
             return null;
         };

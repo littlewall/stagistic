@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import type {ComponentType} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -68,7 +69,7 @@ describe('AddMusicModal', () => {
 
         const cancel = findButton('Cancel');
 
-        await userEvent.click(cancel!);
+        await userEvent.click(requireValue(cancel));
 
         expect(onCancel).toHaveBeenCalledOnce();
         expect(onClose).not.toHaveBeenCalled();
@@ -89,7 +90,7 @@ describe('AddMusicModal', () => {
 
         const submit = findButton('Add music');
 
-        await userEvent.click(submit!);
+        await userEvent.click(requireValue(submit));
 
         await vi.waitFor(() => expect(onClose).toHaveBeenCalledOnce());
         expect(onCancel).not.toHaveBeenCalled();

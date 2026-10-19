@@ -3,7 +3,7 @@ export const isApplePlatform = () => {
         return false;
     }
 
-    const platform = navigator.platform || navigator.userAgent;
+    const platform: unknown = Reflect.get(navigator, 'platform') || Reflect.get(navigator, 'userAgent');
 
-    return (/mac|iphone|ipad|ipod/i).test(platform);
+    return typeof platform === 'string' && (/mac|iphone|ipad|ipod/i).test(platform);
 };

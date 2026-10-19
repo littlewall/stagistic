@@ -55,7 +55,7 @@ export const ListRow = <T extends ElementType = 'div'>({
             className,
         ),
     },
-    leading != null && (
+    (leading !== null && leading !== undefined) && (
         <span
             key="leading"
             className={styles.leading}
@@ -69,7 +69,7 @@ export const ListRow = <T extends ElementType = 'div'>({
     >
         {children}
     </span>,
-    trailing != null && (
+    (trailing !== null && trailing !== undefined) && (
         <span
             key="trailing"
             className={styles.trailing}

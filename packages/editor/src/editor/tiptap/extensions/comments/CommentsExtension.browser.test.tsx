@@ -1,7 +1,11 @@
 import '@stagistic/ui/styles/base.css';
 
-import {COMMENT_ANCHOR_MARK_NAME, type ScriptDocument} from '@stagistic/script';
-import {createNodeId} from '@stagistic/script';
+import {
+    COMMENT_ANCHOR_MARK_NAME,
+    createNodeId,
+    type ScriptDocument,
+} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     Editor,
     Extension,
@@ -87,7 +91,7 @@ const collectThreadIds = (editor: Editor) => {
         node.marks.filter(mark => mark.type.name === COMMENT_ANCHOR_MARK_NAME).forEach(mark => ids.add(String(mark.attrs.threadId)));
     });
 
-    return [...ids].sort();
+    return [...ids].toSorted();
 };
 
 describe('CommentAnchorMark', () => {
@@ -414,7 +418,7 @@ describe('CommentsExtension', () => {
         const anchor = getCommentsState(editor.state).anchors.get('tb');
 
         expect(anchor?.blockIndex).toBe(0);
-        expect(editor.state.doc.textBetween(anchor!.from, anchor!.to)).toBe('Hel');
+        expect(editor.state.doc.textBetween(requireValue(anchor).from, requireValue(anchor).to)).toBe('Hel');
     });
 
     it('reports block merges on Backspace-join but not on undo', () => {

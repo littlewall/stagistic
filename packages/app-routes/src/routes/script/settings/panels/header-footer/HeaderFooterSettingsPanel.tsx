@@ -79,6 +79,12 @@ export const HeaderFooterSettingsPanel = ({
     const [selection, setSelection] = useState<Selection | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const activeCell = selection ? settings[selection.area][selection.alignment] : null;
+    const activeFormatting = activeCell ?? {
+        isBold: false,
+        isItalic: false,
+        isUnderline: false,
+        isHiddenInEditor: false,
+    };
     const activeFixed = selection ? getFixedCell(selection.area, selection.alignment) : null;
 
     const selectCell = (nextSelection: Selection) => {
@@ -170,38 +176,38 @@ export const HeaderFooterSettingsPanel = ({
                         >
                             <IconButton
                                 variant="filled"
-                                className={clsx(activeCell?.isBold && styles.activeFormat)}
+                                className={clsx(activeFormatting.isBold && styles.activeFormat)}
                                 isDisabled={!activeCell}
-                                onPress={() => updateActiveCell({isBold: !activeCell?.isBold})}
+                                onPress={() => updateActiveCell({isBold: !activeFormatting.isBold})}
                                 aria-label="Bold"
-                                aria-pressed={activeCell?.isBold ?? false}
+                                aria-pressed={activeFormatting.isBold}
                             >
                                 <BoldIcon />
                             </IconButton>
                             <IconButton
                                 variant="filled"
-                                className={clsx(activeCell?.isItalic && styles.activeFormat)}
+                                className={clsx(activeFormatting.isItalic && styles.activeFormat)}
                                 isDisabled={!activeCell}
-                                onPress={() => updateActiveCell({isItalic: !activeCell?.isItalic})}
+                                onPress={() => updateActiveCell({isItalic: !activeFormatting.isItalic})}
                                 aria-label="Italic"
-                                aria-pressed={activeCell?.isItalic ?? false}
+                                aria-pressed={activeFormatting.isItalic}
                             >
                                 <ItalicIcon />
                             </IconButton>
                             <IconButton
                                 variant="filled"
-                                className={clsx(activeCell?.isUnderline && styles.activeFormat)}
+                                className={clsx(activeFormatting.isUnderline && styles.activeFormat)}
                                 isDisabled={!activeCell}
-                                onPress={() => updateActiveCell({isUnderline: !activeCell?.isUnderline})}
+                                onPress={() => updateActiveCell({isUnderline: !activeFormatting.isUnderline})}
                                 aria-label="Underline"
-                                aria-pressed={activeCell?.isUnderline ?? false}
+                                aria-pressed={activeFormatting.isUnderline}
                             >
                                 <UnderlineIcon />
                             </IconButton>
                         </div>
                         <Switch
                             isDisabled={!activeCell}
-                            isSelected={activeCell?.isHiddenInEditor ?? false}
+                            isSelected={activeFormatting.isHiddenInEditor}
                             onChange={isHiddenInEditor => updateActiveCell({isHiddenInEditor})}
                         >
                             Hide in editor

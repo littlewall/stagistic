@@ -1,6 +1,8 @@
 import type {ScriptDocument, ScriptSummaryMetadata} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {Editor as TiptapEditor} from '@tiptap/core';
 import Text from '@tiptap/extension-text';
+import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 
 import {DocumentWithSettings} from '../tiptap/extensions/DocumentExtension';
@@ -72,13 +74,17 @@ const Fixture = ({
     onValueChange?: () => void,
     onSummaryMetadataChange?: SaveSummary,
 }) => {
-    controllerRef.current = useEditorAutosave(editor, {
+    const controller = useEditorAutosave(editor, {
         onAutoSave: onSave,
         onManualSave: onSave,
         autoSaveDelayMs: 20,
         onValueChange,
         onSummaryMetadataChange,
     });
+
+    useEffect(() => {
+        controllerRef.current = controller;
+    }, [controller, controllerRef]);
 
     return null;
 };
@@ -133,7 +139,7 @@ export const renderFixture = async (
     roots.push(root);
     await waitFor(() => Boolean(controllerRef.current && paginationKey.getState(editor.state)?.hasComputed));
 
-    return {editor, controller: controllerRef.current!};
+    return {editor, controller: requireValue(controllerRef.current)};
 };
 
 export const cleanupFixtures = () => {

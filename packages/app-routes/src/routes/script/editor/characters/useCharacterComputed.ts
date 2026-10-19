@@ -133,7 +133,7 @@ export const useCharacterComputed = ({
         [characterSnapshot, confirmedGroupRecords],
     );
     const normalizedSpeakingEntityRecords = useMemo(
-        () => [...normalizedConfirmedCharacterRecords, ...normalizedConfirmedGroupRecords].sort((left, right) => left.key.localeCompare(right.key)),
+        () => [...normalizedConfirmedCharacterRecords, ...normalizedConfirmedGroupRecords].toSorted((left, right) => left.key.localeCompare(right.key)),
         [normalizedConfirmedCharacterRecords, normalizedConfirmedGroupRecords],
     );
 
@@ -212,7 +212,7 @@ export const useCharacterComputed = ({
             return Array.from(unconfirmedCharacterKeys.values())
                 .filter(key => !confirmedCharacterSet.has(key))
                 .filter(key => !renamingCharacterKeySet.has(key))
-                .sort((a, b) => a.localeCompare(b))
+                .toSorted((a, b) => a.localeCompare(b))
                 .map(key => ({
                     key,
                     color: characterSnapshot?.displayColorByKey.get(key)

@@ -1,4 +1,5 @@
 import {parseStagistic} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -10,7 +11,7 @@ import {createTestDb} from '../../testing/createTestDb';
 import type {ScriptPackageWrite} from '../../types/scriptPackageWrite';
 import {createLocalPgliteRepository} from '../createLocalPgliteRepository';
 
-const source = `# Act One
+const sourceText = `# Act One
 
 ## Scene One
 
@@ -28,7 +29,7 @@ const write = (): ScriptPackageWrite => ({
         createdAt: 1_000,
         updatedAt: 2_000,
     },
-    document: parseStagistic(source).document,
+    document: parseStagistic(sourceText).document,
     titlePage: {source: 'Original'},
     settings: {visual: {characterDecoration: 'none'}},
     characters: [],
@@ -160,7 +161,7 @@ describe('createScriptFromPackage', () => {
         expect(source?.attachments.some(attachment => attachment.id === 'a1')).toBe(true);
         expect(source?.musicAttachmentBindings.some(binding => binding.attachmentId === 'a1')).toBe(true);
 
-        const blob = await fileStorage.get(source!.attachments.find(attachment => attachment.id === 'a1')!.storageKey);
+        const blob = await fileStorage.get(requireValue(requireValue(source).attachments.find(attachment => attachment.id === 'a1')).storageKey);
 
         expect(blob).not.toBeNull();
     });

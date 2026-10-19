@@ -3,6 +3,7 @@ import {
     type MutableRefObject,
     type RefObject,
     useEffect,
+    useEffectEvent,
 } from 'react';
 
 import {
@@ -41,7 +42,7 @@ export const useSuggestionPointerHandlers = ({
     suppressedSelectionRef,
     closeOverlay,
 }: UseSuggestionPointerHandlersArgs) => {
-    const dismissOverlayForCurrentSelection = () => {
+    const dismissOverlayForCurrentSelection = useEffectEvent(() => {
         if (!editor) {
             closeOverlay();
 
@@ -63,7 +64,7 @@ export const useSuggestionPointerHandlers = ({
         };
 
         closeOverlay();
-    };
+    });
 
     useEffect(() => {
         if (!overlayState) {
@@ -104,7 +105,6 @@ export const useSuggestionPointerHandlers = ({
         };
     }, [
         canvasRef,
-        dismissOverlayForCurrentSelection,
         overlayRef,
         overlayState,
     ]);

@@ -27,7 +27,7 @@ export const useStructureSidebarDnd = ({
             return;
         }
 
-        const targetGroupId = operation.source.group != null ? String(operation.source.group) : ROOT_ACT_GROUP;
+        const targetGroupId = operation.source.group !== null && operation.source.group !== undefined ? String(operation.source.group) : ROOT_ACT_GROUP;
         const targetIndex = typeof operation.source.index === 'number' ? operation.source.index : 0;
 
         const newBeforeBlockId = computeBeforeBlockId(groups, sourceId, targetGroupId, targetIndex);

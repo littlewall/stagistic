@@ -166,13 +166,13 @@ export const ScriptMusicSidebar = ({
     const musicMetadataById = useMemo(
         () => new Map(
             documentMusic.map(
-                (music, index) => [
-                    music.musicId,
+                (item, index) => [
+                    item.musicId,
                     {
-                        number: formatMusicNumber(music),
+                        number: formatMusicNumber(item),
                         order: index,
-                        startBlockId: music.startBlockId,
-                        title: music.title,
+                        startBlockId: item.startBlockId,
+                        title: item.title,
                     },
                 ] as const,
             ),
@@ -180,17 +180,17 @@ export const ScriptMusicSidebar = ({
         [documentMusic],
     );
     const displayedMusic = useMemo(
-        () => music.map(music => {
-            const liveMetadata = musicMetadataById.get(music.id);
+        () => music.map(item => {
+            const liveMetadata = musicMetadataById.get(item.id);
 
             if (!liveMetadata) {
-                return music;
+                return item;
             }
 
             return {
-                ...music,
-                assignmentLabel: music.assignmentLabel ?? liveMetadata.number,
-                title: liveMetadata.title.trim() || music.title,
+                ...item,
+                assignmentLabel: item.assignmentLabel ?? liveMetadata.number,
+                title: liveMetadata.title.trim() || item.title,
             };
         }),
         [musicMetadataById, music],
@@ -198,13 +198,13 @@ export const ScriptMusicSidebar = ({
     const {assignedMusic, unassignedMusic} = useMemo(
         () => ({
             assignedMusic: displayedMusic
-                .filter(music => music.assignmentLabel)
-                .sort((left, right) => {
+                .filter(item => item.assignmentLabel)
+                .toSorted((left, right) => {
                     return (
                         (musicMetadataById.get(left.id)?.order ?? Number.MAX_SAFE_INTEGER) - (musicMetadataById.get(right.id)?.order ?? Number.MAX_SAFE_INTEGER)
                     );
                 }),
-            unassignedMusic: displayedMusic.filter(music => !music.assignmentLabel),
+            unassignedMusic: displayedMusic.filter(item => !item.assignmentLabel),
         }),
         [musicMetadataById, displayedMusic],
     );
@@ -227,13 +227,13 @@ export const ScriptMusicSidebar = ({
 
     const renderMusicList = (items: readonly ScriptMusicListItem[]) => (
         <ul className={styles.itemList}>
-            {items.map(music => (
+            {items.map(item => (
                 <MusicRow
-                    key={music.id}
-                    music={music}
-                    isActive={elementSelection?.type === 'music' && elementSelection.musicId === music.id}
-                    number={musicMetadataById.get(music.id)?.number ?? null}
-                    startBlockId={musicMetadataById.get(music.id)?.startBlockId ?? null}
+                    key={item.id}
+                    music={item}
+                    isActive={elementSelection?.type === 'music' && elementSelection.musicId === item.id}
+                    number={musicMetadataById.get(item.id)?.number ?? null}
+                    startBlockId={musicMetadataById.get(item.id)?.startBlockId ?? null}
                     onFocus={focusMusic}
                     onRequestUnassign={setUnassignTarget}
                     onOpenMusicManager={openAttributeManagerMusic}

@@ -1,7 +1,7 @@
 import {splitCharacterTokens} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
-import {getActiveScriptBlockFromState} from '../../../tiptap/scriptCore';
+import {type getActiveScriptBlockFromState} from '../../../tiptap/scriptCore';
 import {getActiveTokenIndex} from './tokenUtils';
 
 type ActiveTokenResult = {

@@ -40,13 +40,28 @@ export const RenameScriptModal = ({
     const [subtitle, setSubtitle] = useState(initialSubtitle);
     const canSubmit = title.trim().length > 0;
 
+    const [previous, setPrevious] = useState({
+        isOpen,
+        initialTitle,
+        initialSubtitle,
+    });
+
+    if (previous.isOpen !== isOpen || previous.initialTitle !== initialTitle || previous.initialSubtitle !== initialSubtitle) {
+        setPrevious({
+            isOpen,
+            initialTitle,
+            initialSubtitle,
+        });
+        if (isOpen) {
+            setTitle(initialTitle);
+            setSubtitle(initialSubtitle);
+        }
+    }
+
     useEffect(() => {
-        if (!isOpen) {
+        if (!isOpen || previous.initialSubtitle !== initialSubtitle || titleInputRef.current?.value !== initialTitle) {
             return;
         }
-
-        setTitle(initialTitle);
-        setSubtitle(initialSubtitle);
 
         const focusTimer = window.setTimeout(() => {
             titleInputRef.current?.focus();
@@ -58,6 +73,7 @@ export const RenameScriptModal = ({
         isOpen,
         initialTitle,
         initialSubtitle,
+        previous.initialSubtitle,
     ]);
 
     const handleSubmit = useCallback(

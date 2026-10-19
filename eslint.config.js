@@ -7,6 +7,9 @@ export default [
         // tsc -b build artifacts of the root TS configs (gitignored).
         'vite.config.js',
         'oxlint.config.js',
+        // Gitignored local design prototypes and Astro's generated types.
+        'docs/designs/**',
+        '**/.astro/**',
     ]},
     ...config,
 ];

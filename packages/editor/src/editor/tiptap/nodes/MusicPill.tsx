@@ -1,13 +1,11 @@
 import {
-    MUSIC_DRAFT_ATTR,
-    MUSIC_ID_ATTR,
-    MUSIC_MODE_ATTR,
     MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import {ArrowRightIcon, EditPencilIcon} from '@stagistic/ui';
 import {type NodeViewProps, NodeViewWrapper} from '@tiptap/react';
 import clsx from 'clsx';
 import {
+    type FocusEvent,
     useEffect,
     useId,
     useRef,
@@ -22,16 +20,14 @@ import type {
 import styles from './MusicPill.module.css';
 import {
     MusicMenuButton,
-    type MusicMode,
     MusicUnassignIcon,
 } from './MusicPillControls';
 import {requestMusicPillCreation} from './musicPillCreation';
 import {
     findMusicPillElement,
+    getMusicStartPillData,
     handleBlurWithin,
     handleFocusWithin,
-    normalizeMusicTitle,
-    readDecorationLabel,
     scrollToMusicPill,
     usePillActivation,
 } from './musicPillHelpers';
@@ -69,17 +65,24 @@ export const MusicStartPill = ({
     } = usePillActivation();
     const anchorName = `--music-pill-${useId().replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
     const titleRef = useRef<HTMLSpanElement>(null);
-    const mode: MusicMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
-    const isDraft = node.attrs[MUSIC_DRAFT_ATTR] === true;
-    const musicId = String(node.attrs[MUSIC_ID_ATTR] ?? '');
-    const title = normalizeMusicTitle(node.attrs[MUSIC_TITLE_ATTR]);
-    const musicNumber = numberLabel ?? readDecorationLabel(decorations, 'musicNumber');
+    const {
+        mode,
+        isDraft,
+        musicId,
+        title,
+        musicNumber,
+    } = getMusicStartPillData(node, decorations, numberLabel);
     const [draftTitle, setDraftTitle] = useState(title);
+    const [previousTitle, setPreviousTitle] = useState(title);
+
+    if (previousTitle !== title) {
+        setPreviousTitle(title);
+        setDraftTitle(title);
+    }
+
     const hasEndMusic = Boolean(musicId && findMusicPillElement(editor, 'out', musicId));
 
     useEffect(() => {
-        setDraftTitle(title);
-
         if (titleRef.current && titleRef.current.textContent !== title) {
             titleRef.current.textContent = title;
         }
@@ -153,11 +156,12 @@ export const MusicStartPill = ({
             style={{'--music-pill-anchor': anchorName}}
             contentEditable={false}
             onFocus={locked ? undefined : handleFocusWithin(setActive)}
-            onBlur={locked ? undefined : handleBlurWithin(rootRef, setActive)}
+            onBlur={locked ? undefined : (event: FocusEvent<HTMLSpanElement>) => handleBlurWithin(rootRef, setActive)(event)}
         >
             {' '}
             <span
                 className={styles.tagBody}
+                role="presentation"
                 onMouseDown={event => {
                     if (event.target !== titleRef.current) {
                         event.preventDefault();
@@ -178,7 +182,7 @@ export const MusicStartPill = ({
                     className={styles.titleInput}
                     data-music-title-input="start"
                     data-music-draft={isDraft ? 'true' : undefined}
-                    data-music-id={String(node.attrs[MUSIC_ID_ATTR] ?? '')}
+                    data-music-id={musicId}
                     data-placeholder={active ? 'music' : undefined}
                     role="textbox"
                     aria-label="Music title"

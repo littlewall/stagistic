@@ -14,6 +14,7 @@ import {
     type RefObject,
     useCallback,
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 
@@ -21,6 +22,7 @@ import type {PersistentMusicRef} from '../contracts';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {getMusicSuggestions} from './musicSuggestions/musicSuggestionModel';
 import styles from './MusicSuggestionsOverlay.module.css';
+import {handleSuggestionKeyDown} from './suggestionKeyboardNavigation';
 
 interface MusicDraftSuggestionsOverlayProps {
     editor: TiptapEditor | null,
@@ -114,7 +116,7 @@ const MusicDraftSuggestionsOverlay = ({
 }: MusicDraftSuggestionsOverlayProps) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
-    const suggestions = overlayState?.suggestions ?? [];
+    const suggestions = useMemo(() => overlayState?.suggestions ?? [], [overlayState]);
     const closeOverlay = useCallback(() => {
         setOverlayState(null);
         setActiveSuggestionIndex(null);
@@ -204,39 +206,13 @@ const MusicDraftSuggestionsOverlay = ({
         }
 
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? 0 : (previous + 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? suggestions.length - 1 : (previous + suggestions.length - 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key !== 'Enter' || activeSuggestionIndex === null) {
-                return;
-            }
-
-            const activeSuggestion = suggestions[activeSuggestionIndex];
-
-            if (!activeSuggestion) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            selectMusic(activeSuggestion);
+            handleSuggestionKeyDown({
+                event,
+                suggestions,
+                activeSuggestionIndex,
+                setActiveSuggestionIndex,
+                onSelect: selectMusic,
+            });
         };
 
         document.addEventListener('keydown', handleKeyDown, true);
@@ -249,15 +225,13 @@ const MusicDraftSuggestionsOverlay = ({
         suggestions,
     ]);
 
-    useEffect(() => {
-        setActiveSuggestionIndex(previous => {
-            if (previous === null) {
-                return null;
-            }
+    const boundedActiveIndex = activeSuggestionIndex === null || suggestions.length === 0
+        ? null
+        : Math.min(activeSuggestionIndex, suggestions.length - 1);
 
-            return Math.min(previous, suggestions.length - 1);
-        });
-    }, [suggestions]);
+    if (activeSuggestionIndex !== boundedActiveIndex) {
+        setActiveSuggestionIndex(boundedActiveIndex);
+    }
 
     useExclusiveOverlay(overlayState !== null, closeOverlay);
     if (!overlayState || suggestions.length === 0) {

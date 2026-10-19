@@ -12,9 +12,9 @@ import {useCharacterColorPickerState} from '../../editor-panels/characterRowConf
 import type {EditorSidebarCharacter} from '../../editor-panels/types';
 import {TrashIcon} from '../../icons';
 import {MultiComboBox} from '../../molecules/forms/MultiComboBox/MultiComboBox';
-import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import styles from './AttributeManagerCharactersPanel.module.css';
 import type {AttributeManagerCharacter, AttributeManagerGroup} from './attributeManagerCharacterTypes';
+import {AttributeNameForm} from './AttributeNameForm';
 import {RemoveGroupModal} from './RemoveGroupModal';
 
 interface AttributeManagerGroupDetailProps {
@@ -111,25 +111,7 @@ export const AttributeManagerGroupDetail = ({
                         characterKey={group.name}
                         className={styles.detailColorControl}
                         swatchClassName={styles.detailColorSwatch}
-                        color={{
-                            state: {
-                                isActionDisabled: isColorActionDisabled,
-                                isPickerOpen: colorPicker.isColorPickerOpen,
-                                currentColorHex: colorPicker.currentCharacterColorHex,
-                                colorDraftHex: colorPicker.colorDraftHex,
-                                pickerColorValue: colorPicker.pickerColorValue,
-                                presetColorHexes: colorPicker.presetColorHexes,
-                                resolvedColorSaturation: colorPicker.resolvedColorSaturation,
-                            },
-                            refs: {triggerRef: colorPicker.colorTriggerRef},
-                            actions: {
-                                togglePicker: colorPicker.toggleColorPicker,
-                                setPickerOpen: colorPicker.setIsColorPickerOpen,
-                                applyColor: colorPicker.applyColor,
-                                resetColor: colorPicker.resetColor,
-                                setDraftHue: colorPicker.setColorDraftHue,
-                            },
-                        }}
+                        color={colorPicker.control}
                     />
                     <h3 className={styles.detailTitle}>{group.name}</h3>
                 </div>
@@ -153,42 +135,19 @@ export const AttributeManagerGroupDetail = ({
                 </Tooltip>
             </header>
             <div className={styles.detailBody}>
-                <form
-                    className={styles.nameForm}
+                <AttributeNameForm
+                    fieldId={`group-name-${group.id}`}
+                    name={group.name}
+                    isBusy={isRenaming}
+                    isDisabled={isDeleting || isRenaming || !onRenameGroup}
+                    isInvalid={isInvalid}
+                    isDuplicate={isDuplicate}
+                    errorId={errorId}
                     onSubmit={handleNameSubmit}
-                    aria-busy={isRenaming}
-                >
-                    <label
-                        className={formControlStyles.label}
-                        htmlFor={`group-name-${group.id}`}
-                    >
-                        Name
-                    </label>
-                    <input
-                        id={`group-name-${group.id}`}
-                        type="text"
-                        className={formControlStyles.input}
-                        value={group.name}
-                        disabled={isDeleting || isRenaming || !onRenameGroup}
-                        aria-describedby={errorId}
-                        aria-invalid={isInvalid}
-                        onChange={event => onNameDraftChange(event.target.value)}
-                        onBlur={() => void persistName()}
-                        onKeyDown={event => {
-                            if (event.key === 'Escape') {
-                                onResetNameDraft();
-                            }
-                        }}
-                    />
-                    {isInvalid ? (
-                        <p
-                            id={errorId}
-                            className={styles.error}
-                        >
-                            {isDuplicate ? 'A character or group with this name already exists.' : 'Name cannot be empty.'}
-                        </p>
-                    ) : null}
-                </form>
+                    onChange={onNameDraftChange}
+                    onCommit={() => void persistName()}
+                    onReset={onResetNameDraft}
+                />
                 <div className={styles.membersSection}>
                     <MultiComboBox
                         label="Members"

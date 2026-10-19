@@ -1,6 +1,7 @@
 import '../../styles/tokens.css';
 
 import {parsePitch} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {ReactElement} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -60,8 +61,8 @@ describe('VocalRangeStaff visual states', () => {
         );
         const low = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
         const high = await waitForElement<SVGGElement>(host, '[aria-label="Select high note A4"]');
-        const lowHead = low.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const highHead = high.querySelector<SVGEllipseElement>('[data-notehead]')!;
+        const lowHead = requireValue(low.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const highHead = requireValue(high.querySelector<SVGEllipseElement>('[data-notehead]'));
         const restingFill = getComputedStyle(lowHead).fill;
         const restingStroke = getComputedStyle(lowHead).stroke;
 
@@ -96,7 +97,7 @@ describe('VocalRangeStaff visual states', () => {
         const sharp = await waitForElement<SVGGElement>(host, '[aria-label="Select low note F#3"] [data-accidental]');
         const flat = await waitForElement<SVGGElement>(host, '[aria-label="Select high note Ab4"] [data-accidental]');
         const flatNote = await waitForElement<SVGEllipseElement>(host, '[aria-label="Select high note Ab4"] [data-notehead]');
-        const flatMatrix = flat.transform.baseVal.consolidate()!.matrix;
+        const flatMatrix = requireValue(flat.transform.baseVal.consolidate()).matrix;
         const flatBowlCenterY = flatMatrix.f + 13 * flatMatrix.d;
         const flatRect = flat.getBoundingClientRect();
         const sharpRect = sharp.getBoundingClientRect();
@@ -115,8 +116,8 @@ describe('VocalRangeStaff visual states', () => {
         );
         const treble = await waitForElement<SVGGElement>(trebleHost, '[data-clef="treble"]');
         const octaveTreble = await waitForElement<SVGGElement>(octaveHost, '[data-clef="treble-8vb"]');
-        const trebleScale = treble.transform.baseVal.consolidate()!.matrix.a;
-        const octaveTrebleScale = octaveTreble.transform.baseVal.consolidate()!.matrix.a;
+        const trebleScale = requireValue(treble.transform.baseVal.consolidate()).matrix.a;
+        const octaveTrebleScale = requireValue(octaveTreble.transform.baseVal.consolidate()).matrix.a;
 
         expect(octaveTrebleScale).toBeCloseTo(trebleScale, 8);
         expect(octaveTreble.getBoundingClientRect().height).toBeGreaterThan(

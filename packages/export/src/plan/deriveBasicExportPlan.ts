@@ -64,7 +64,7 @@ const buildCharactersAndPlacesPlan = (
         ...value.enabled ? {} : {showCharacters: false},
         characters: value.enabled
             ? [...script.initialCharacters]
-                .sort(compareCharacters)
+                .toSorted(compareCharacters)
                 .map(character => ({
                     id: character.id,
                     displayName: character.displayName,
@@ -96,7 +96,7 @@ const buildVocalRangesPlan = (
     return {
         kind: 'vocal-ranges',
         entries: [...script.initialVocalRanges]
-            .sort(compareCharacters)
+            .toSorted(compareCharacters)
             .map(entry => ({
                 id: entry.id,
                 displayName: entry.displayName,

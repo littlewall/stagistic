@@ -147,13 +147,19 @@ export const EditorStatusBar = ({editor, blockNextElements}: EditorStatusBarProp
                 asideToggleTarget: resolveAsideToggleTarget(stateEditor.state.doc, activeBlock.blockType, activeBlock.pos),
             };
         },
-        equalityFn: (previous, next) => previous?.type === next?.type &&
-            previous?.isEmpty === next?.isEmpty &&
-            previous?.hasOnlyNonTextContent === next?.hasOnlyNonTextContent &&
-            previous?.isAtStart === next?.isAtStart &&
-            previous?.isAtEnd === next?.isAtEnd &&
-            previous?.asideFlowTarget === next?.asideFlowTarget &&
-            previous?.asideToggleTarget === next?.asideToggleTarget,
+        equalityFn: (previous, next) => {
+            if (!previous || !next) {
+                return previous === next;
+            }
+
+            return previous.type === next.type &&
+                previous.isEmpty === next.isEmpty &&
+                previous.hasOnlyNonTextContent === next.hasOnlyNonTextContent &&
+                previous.isAtStart === next.isAtStart &&
+                previous.isAtEnd === next.isAtEnd &&
+                previous.asideFlowTarget === next.asideFlowTarget &&
+                previous.asideToggleTarget === next.asideToggleTarget;
+        },
     });
 
     const segments = getEditorStatusBarSegments(activeBlockStatus?.type ?? null, blockNextElements, {

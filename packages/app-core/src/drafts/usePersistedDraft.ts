@@ -1,8 +1,7 @@
 import {
     useEffect,
     useLayoutEffect,
-    useMemo,
-    useRef,
+    useState,
     useSyncExternalStore,
 } from 'react';
 
@@ -32,19 +31,7 @@ export const usePersistedDraft = <TKey, TValue>({
     equals,
     scheduler,
 }: UsePersistedDraftOptions<TKey, TValue>) => {
-    const entityRef = useRef({
-        key: entityKey,
-        confirmedValue,
-        isHydrated,
-    });
-
-    entityRef.current = {
-        key: entityKey,
-        confirmedValue,
-        isHydrated,
-    };
-
-    const controller = useMemo(() => {
+    const createController = () => {
         const nextController = createPersistedDraftController({
             defaultValue,
             persist,
@@ -58,21 +45,40 @@ export const usePersistedDraft = <TKey, TValue>({
          * default null-entity snapshot reports hydrated=true for one render,
          * which can expose default values as if they belonged to entityKey.
          */
-        nextController.setEntity(entityRef.current);
+        nextController.setEntity({
+            key: entityKey,
+            confirmedValue,
+            isHydrated,
+        });
 
         /*
          * Entity changes are applied by the layout effect below without
          * replacing the controller or losing a dirty draft.
          */
-        return nextController;
-    }, [
-        debounceMs,
-        defaultValue,
-        equals,
-        scheduler,
-    ]);
+        return {
+            debounceMs,
+            defaultValue,
+            equals,
+            scheduler,
+            controller: nextController,
+        };
+    };
+    const [state, setState] = useState(createController);
 
-    controller.setPersist(persist);
+    if (
+        state.debounceMs !== debounceMs
+        || !Object.is(state.defaultValue, defaultValue)
+        || state.equals !== equals
+        || state.scheduler !== scheduler
+    ) {
+        setState(createController());
+    }
+
+    const {controller} = state;
+
+    useLayoutEffect(() => {
+        controller.setPersist(persist);
+    }, [controller, persist]);
 
     useLayoutEffect(() => {
         controller.setEntity({

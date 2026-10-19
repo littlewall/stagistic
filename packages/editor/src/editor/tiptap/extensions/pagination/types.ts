@@ -49,6 +49,8 @@ export interface PaginationStorage {
     optionsVersion: number,
     state: PaginationState,
     forceRecalcToken: number,
+    /** `optionsVersion` of the last fully measured layout; unset after a fallback pass. */
+    measuredOptionsVersion?: number,
     /** Recalculate now; false means the current document could not be measured. */
     flushRecalc?: () => boolean,
 }

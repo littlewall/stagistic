@@ -5,10 +5,9 @@ import {
     type RefObject,
     type SetStateAction,
     useCallback,
-    useEffect,
-    useRef,
 } from 'react';
 
+import {useAnimationFrameUpdate} from '../../hooks/useAnimationFrameUpdate';
 import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {
     computeCharacterSuggestions,
@@ -50,7 +49,6 @@ export const useSuggestionOverlayComputation = ({
     closeOverlay,
     setOverlayState,
 }: UseSuggestionOverlayComputationArgs) => {
-    const rafIdRef = useRef<number | null>(null);
     const updateOverlay = useCallback(() => {
         const canvas = canvasRef.current;
 
@@ -130,34 +128,11 @@ export const useSuggestionOverlayComputation = ({
         suggestionOrderByKeyRef,
         suppressedSelectionRef,
     ]);
-    const cancelScheduledOverlayUpdate = useCallback(() => {
-        if (rafIdRef.current === null) {
-            return;
-        }
-
-        window.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-    }, []);
-    const scheduleOverlayUpdate = useCallback(() => {
-        if (rafIdRef.current !== null) {
-            return;
-        }
-
-        rafIdRef.current = window.requestAnimationFrame(() => {
-            rafIdRef.current = null;
-            updateOverlay();
-        });
-    }, [updateOverlay]);
-    const runOverlayUpdateNow = useCallback(() => {
-        cancelScheduledOverlayUpdate();
-        updateOverlay();
-    }, [cancelScheduledOverlayUpdate, updateOverlay]);
-
-    useEffect(() => {
-        return () => {
-            cancelScheduledOverlayUpdate();
-        };
-    }, [cancelScheduledOverlayUpdate]);
+    const {
+        cancel: cancelScheduledOverlayUpdate,
+        schedule: scheduleOverlayUpdate,
+        runNow: runOverlayUpdateNow,
+    } = useAnimationFrameUpdate(updateOverlay);
 
     return {
         updateOverlay,

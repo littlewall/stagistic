@@ -125,6 +125,7 @@ export const SceneCollapseOverlay = ({
         };
         const observer = new ResizeObserver(scheduleUpdate);
 
+        // oxlint-disable-next-line react/set-state-in-effect -- Measure the mounted scene controls before paint to prevent their initial position flashing.
         updateItems();
         editor.on('transaction', scheduleUpdate);
         canvas.addEventListener('scroll', scheduleUpdate, {passive: true});

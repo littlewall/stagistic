@@ -10,7 +10,7 @@ import Italic from '@tiptap/extension-italic';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import UniqueID from '@tiptap/extension-unique-id';
-import {useMemo, useRef} from 'react';
+import {useMemo, useState} from 'react';
 
 import type {
     EditorMusicCreateRequest,
@@ -90,13 +90,7 @@ export const useEditorExtensions = ({
     commentCallbacksRef,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
-    const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(null);
-
-    if (!paginationExtensionRef.current) {
-        paginationExtensionRef.current = createPaginationExtension(resolvedSettings, editorZoom);
-    }
-
-    const paginationExtension = paginationExtensionRef.current;
+    const [paginationExtension] = useState(() => createPaginationExtension(resolvedSettings, editorZoom));
     const blockShortcuts = useMemo(() => getBlockShortcuts(resolvedSettings.blocks), [resolvedSettings.blocks]);
     const blockNextElements = useMemo(() => getBlockNextElements(resolvedSettings.blocks), [resolvedSettings.blocks]);
     const blockCasing = useMemo(() => getBlockCasing(resolvedSettings.blocks), [resolvedSettings.blocks]);
@@ -130,9 +124,6 @@ export const useEditorExtensions = ({
             },
         }),
         [
-            characterTagStyles.characterLine,
-            characterTagStyles.characterSeparator,
-            characterTagStyles.characterTag,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
             persistentCharactersRef,
@@ -195,6 +186,7 @@ export const useEditorExtensions = ({
         ],
     );
     const musicOutNode = useMemo(() => MusicOutNode.configure({onOpenMusicManager}), [onOpenMusicManager]);
+    // oxlint-disable-next-line react/refs -- Tiptap stores getCallbacks and invokes it from plugin events, never while configuring the extension.
     const commentsExtension = useMemo(() => CommentsExtension.configure({getCallbacks: () => commentCallbacksRef?.current ?? {}}), [commentCallbacksRef]);
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];

@@ -70,6 +70,22 @@ const musicPassesThroughBlock = (
         && block.orderNo < end.orderNo;
 };
 
+const resolveBoundaryEnd = (endings: DerivedMusic[], start: DerivedMusic | null) => {
+    return endings.find(music => music.musicId !== start?.musicId) ?? endings[0] ?? null;
+};
+
+const resolveBoundaryEndTone = (isOrphan: boolean, end: DerivedMusic | null): MusicRailEndTone | null => {
+    if (isOrphan) {
+        return 'orphan';
+    }
+
+    if (!end) {
+        return null;
+    }
+
+    return end.endKind === 'explicit' ? 'explicit' : 'implicit';
+};
+
 export const buildMusicRailBoundaries = (
     snapshot: ScriptBlockIndexSnapshot,
     sites: readonly MusicRailBoundarySite[],
@@ -92,7 +108,7 @@ export const buildMusicRailBoundaries = (
     });
 
     return [...sites]
-        .sort((left, right) => {
+        .toSorted((left, right) => {
             return (blocksById.get(left.blockId)?.orderNo ?? 0)
                 - (blocksById.get(right.blockId)?.orderNo ?? 0);
         })
@@ -102,17 +118,9 @@ export const buildMusicRailBoundaries = (
             const candidate = latestOpenByScene.get(sceneBlockId) ?? null;
             const start = startsByBlockId.get(site.blockId) ?? null;
             const endings = endingsByBlockId.get(site.blockId) ?? [];
-            const end = endings.find(music => music.musicId !== start?.musicId)
-                ?? endings[0]
-                ?? null;
+            const end = resolveBoundaryEnd(endings, start);
             const isOrphan = site.hasMusicOut && orphanBlockIds.has(site.blockId);
-            const endTone: MusicRailEndTone | null = isOrphan
-                ? 'orphan'
-                : end?.endKind === 'explicit'
-                    ? 'explicit'
-                    : end
-                        ? 'implicit'
-                        : null;
+            const endTone = resolveBoundaryEndTone(isOrphan, end);
             const canPlaceEnd = !site.hasMusicStart
                 && !site.hasMusicOut
                 && musicPassesThroughBlock(candidate, block, blocksById);

@@ -1,4 +1,5 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -15,7 +16,7 @@ const findLine = (lines: VisualLine[], text: string) => {
 
     expect(line).toBeDefined();
 
-    return line!;
+    return requireValue(line);
 };
 
 const centeredX = (text: string, fontSizePx: number, pageWidthPx: number) => (pageWidthPx - text.length * fontSizePx * 0.6) / 2;
@@ -79,7 +80,7 @@ describe('buildCharactersAndPlacesPages', () => {
             lineHeight * 3,
         );
         expect(placesHeading.runs[0]?.bold).toBe(true);
-        expect(textOf(page.at(-1)!)).toBe('Stage');
+        expect(textOf(requireValue(page.at(-1)))).toBe('Stage');
     });
 
     it('gives character names extra line height without outlines', () => {

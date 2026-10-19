@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {Schema} from '@tiptap/pm/model';
 import {
     describe,
@@ -46,7 +47,7 @@ describe('buildCommentAnchorIndex', () => {
             sceneNumber: 1,
             sceneTitle: 'INT. ROOM',
         });
-        expect(doc.textBetween(t1!.from, t1!.to, '|')).toBe('world|Bye');
+        expect(doc.textBetween(requireValue(t1).from, requireValue(t1).to, '|')).toBe('world|Bye');
         expect(index.get('t2')).toMatchObject({blockId: 'b2', blockIndex: 2});
     });
 
@@ -78,7 +79,7 @@ describe('buildCommentAnchorIndex', () => {
             blockId: 'b2',
             blockIndex: 2,
         });
-        expect(doc.textBetween(index.get('t3')!.from, index.get('t3')!.to)).toBe('Bye');
+        expect(doc.textBetween(requireValue(index.get('t3')).from, requireValue(index.get('t3')).to)).toBe('Bye');
         expect(index.has('t4')).toBe(false);
     });
 

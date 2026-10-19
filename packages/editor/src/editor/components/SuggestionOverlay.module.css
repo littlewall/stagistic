@@ -1,0 +1,22 @@
+.item {
+    cursor: pointer;
+    display: grid;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+
+    &:hover {
+        background: var(--state-hover);
+    }
+
+    &.active {
+        background: var(--state-selected);
+    }
+}

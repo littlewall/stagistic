@@ -57,40 +57,13 @@
 }
 
 .cellInput {
+    composes: control from '../shared/formControlStyles.module.css';
     display: block;
-    box-sizing: border-box;
-    width: 100%;
     height: var(--control-height-lg);
     padding: 0 var(--control-trigger-padding-inline);
-    font-family: inherit;
-    font-size: var(--control-trigger-font-size);
-    font-weight: var(--control-trigger-font-weight);
-    color: var(--control-trigger-color);
-    background: var(--color-input-bg, var(--color-surface));
-    border: var(--control-trigger-border-width) solid var(--color-border);
-    border-radius: var(--control-trigger-radius);
-    transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
 
     &:hover {
         background: var(--control-trigger-hover-bg);
-    }
-
-    &:focus {
-        border-color: var(--state-selected-edge);
-    }
-
-    &:focus-visible {
-        outline: none;
-    }
-
-    &::placeholder {
-        color: var(--color-text-placeholder);
-        opacity: 1;
-    }
-
-    :global(:root[data-focus-ring-visible]) &:focus {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
     }
 
     &.withDelete {
@@ -137,21 +110,7 @@
     }
 
     & .addEntryButton {
-        cursor: pointer;
         margin-top: var(--space-xs);
-        padding: var(--space-xs) var(--space-sm);
-        font-family: inherit;
-        font-size: var(--font-size-sm);
-        color: var(--color-text-muted);
-        text-align: left;
-        background: transparent;
-        border: none;
-        border-radius: var(--radius-sm);
-
-        &:hover {
-            color: var(--color-text);
-            background: var(--color-surface-raised);
-        }
     }
 }
 
@@ -161,20 +120,24 @@
     padding: var(--space-md) 0;
 
     & .addRowButton {
-        cursor: pointer;
         grid-column: 1 / -2;
-        padding: var(--space-xs) var(--space-sm);
-        font-family: inherit;
-        font-size: var(--font-size-sm);
-        color: var(--color-text-muted);
-        text-align: left;
-        background: transparent;
-        border: none;
-        border-radius: var(--radius-sm);
+    }
+}
 
-        &:hover {
-            color: var(--color-text);
-            background: var(--color-surface-raised);
-        }
+.addEntryButton,
+.addRowButton {
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
     }
 }
