@@ -15,6 +15,7 @@ import {
 
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {
+    AttributeManagerIcon,
     ChevronDownIcon,
     ClockIcon,
     LockIcon,
@@ -199,7 +200,10 @@ export const ScriptStateMenu = ({
                             ) : null}
                             {onManage ? (
                                 <MenuSection className={hasPrimaryActions ? styles.section : styles.firstSection}>
-                                    <MenuItem id="manage" className={styles.item}>Manage drafts and versions</MenuItem>
+                                    <MenuItem id="manage" className={styles.item} textValue="Manage drafts and versions">
+                                        Manage drafts and versions
+                                        <AttributeManagerIcon className={styles.itemIcon} aria-hidden="true" />
+                                    </MenuItem>
                                 </MenuSection>
                             ) : null}
                         </Menu>

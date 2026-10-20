@@ -181,6 +181,13 @@
     color: var(--color-text-muted);
 }
 
+.itemIcon {
+    flex: 0 0 auto;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    color: var(--color-text-muted);
+}
+
 .currentMark {
     flex: 0 0 auto;
     color: var(--state-selected-ink);
