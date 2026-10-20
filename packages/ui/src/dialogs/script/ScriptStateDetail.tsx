@@ -86,14 +86,14 @@ export const ScriptStateDetail = ({
                     {isShown ? 'On screen' : 'Open'}
                 </Button>
                 <Button variant="ghost" size="sm" isDisabled={isPending} onPress={onRestore}>
-                    Restore…
+                    Restore
                 </Button>
                 <Button variant="ghost" size="sm" isDisabled={isPending} onPress={onRestoreAsNew}>
-                    Restore as new script…
+                    Restore as new script
                 </Button>
                 {state.kind === 'draft' && !isMarkingAsVersion ? (
                     <Button variant="ghost" size="sm" isDisabled={isPending} onPress={() => setKind('version')}>
-                        Mark as version…
+                        Mark as version
                     </Button>
                 ) : null}
             </section>

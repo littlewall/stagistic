@@ -175,15 +175,15 @@ export const ScriptStateMenu = ({
                         >
                             {hasPrimaryActions ? (
                                 <MenuSection className={styles.firstSection}>
-                                    {onSaveDraft ? <MenuItem id="save-draft" className={styles.item}>Save as new draft…</MenuItem> : null}
-                                    {onSaveVersion ? <MenuItem id="save-version" className={styles.item}>Save as version…</MenuItem> : null}
-                                    {restore ? <MenuItem id="restore" className={styles.item}>Restore to this script…</MenuItem> : null}
-                                    {restore ? <MenuItem id="restore-as-new" className={styles.item}>Restore as new script…</MenuItem> : null}
+                                    {onSaveDraft ? <MenuItem id="save-draft" className={styles.item}>Save as new draft</MenuItem> : null}
+                                    {onSaveVersion ? <MenuItem id="save-version" className={styles.item}>Save as version</MenuItem> : null}
+                                    {restore ? <MenuItem id="restore" className={styles.item}>Restore to this script</MenuItem> : null}
+                                    {restore ? <MenuItem id="restore-as-new" className={styles.item}>Restore as new script</MenuItem> : null}
                                 </MenuSection>
                             ) : null}
                             {onManage ? (
                                 <MenuSection className={hasPrimaryActions ? styles.section : styles.firstSection}>
-                                    <MenuItem id="manage" className={styles.item}>Manage drafts and versions…</MenuItem>
+                                    <MenuItem id="manage" className={styles.item}>Manage drafts and versions</MenuItem>
                                 </MenuSection>
                             ) : null}
                         </Menu>

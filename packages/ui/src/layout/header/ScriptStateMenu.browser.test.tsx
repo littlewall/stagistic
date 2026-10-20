@@ -109,12 +109,12 @@ describe('ScriptStateMenu', () => {
         await openActions();
 
         expect(menuTexts()).toEqual([
-            'Save as new draft…',
-            'Save as version…',
-            'Manage drafts and versions…',
+            'Save as new draft',
+            'Save as version',
+            'Manage drafts and versions',
         ]);
 
-        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Save as new draft…')));
+        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Save as new draft')));
 
         expect(onSaveDraft).toHaveBeenCalledOnce();
     });
@@ -157,12 +157,12 @@ describe('ScriptStateMenu', () => {
         await openActions();
 
         expect(menuTexts()).toEqual([
-            'Restore to this script…',
-            'Restore as new script…',
-            'Manage drafts and versions…',
+            'Restore to this script',
+            'Restore as new script',
+            'Manage drafts and versions',
         ]);
 
-        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Restore as new script…')));
+        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Restore as new script')));
 
         expect(onRestoreAsNew).toHaveBeenCalledOnce();
         expect(onRestore).not.toHaveBeenCalled();

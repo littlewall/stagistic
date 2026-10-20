@@ -91,6 +91,10 @@
     display: flex;
     flex-direction: column;
     gap: calc(var(--space-px) * 2);
+}
+
+/* The composed list-item centres its row; this column must start at the left. */
+.list .listItem {
     align-items: stretch;
 }
 

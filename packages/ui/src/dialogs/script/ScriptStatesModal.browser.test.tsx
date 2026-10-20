@@ -118,7 +118,7 @@ describe('ScriptStatesModal', () => {
 
         renderModal({onUpdate});
         await settle();
-        await userEvent.click(button('Mark as version…'));
+        await userEvent.click(button('Mark as version'));
         await settle();
 
         const submit = button('Mark as version');
