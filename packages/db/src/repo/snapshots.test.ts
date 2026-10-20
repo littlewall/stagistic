@@ -180,8 +180,13 @@ describe('script snapshots', () => {
 
         await repository.deleteScriptSnapshot(SCRIPT_ID, requireValue(snapshot).id);
 
-        expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).toBeNull();
+        // The payload outlives the row until collection, so a reload that brings back an unflushed row still finds it.
         expect(await repository.getScriptSnapshot(SCRIPT_ID, requireValue(snapshot).id)).toBeNull();
+        expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).not.toBeNull();
+
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
+
+        expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).toBeNull();
     });
 
     it('keeps attachment blobs referenced by a snapshot until the last reference goes', async () => {
@@ -197,7 +202,12 @@ describe('script snapshots', () => {
 
         expect(await fileStorage.get(attachmentKey)).not.toBeNull();
 
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
+
+        expect(await fileStorage.get(attachmentKey)).not.toBeNull();
+
         await repository.deleteScriptSnapshot(SCRIPT_ID, requireValue(snapshot).id);
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
 
         expect(await fileStorage.get(attachmentKey)).toBeNull();
     });
@@ -212,6 +222,7 @@ describe('script snapshots', () => {
 
         await repository.createScriptSnapshot(SCRIPT_ID, snapshotInput());
         await repository.restoreScriptFromPackage(packageWrite({attachments: [], bindings: []}));
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
 
         expect(await fileStorage.get(attachmentKey)).not.toBeNull();
         expect(await repository.listScriptSnapshots(SCRIPT_ID)).toHaveLength(1);
@@ -257,6 +268,7 @@ describe('script snapshots', () => {
 
         await repository.removeMusicAttachment(SCRIPT_ID, 'm1', 'integrated_score');
         await repository.deleteScript(SCRIPT_ID);
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
 
         expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).toBeNull();
         expect(await fileStorage.get(attachmentKey)).toBeNull();

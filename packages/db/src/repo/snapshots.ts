@@ -181,14 +181,13 @@ export const createSnapshotHandlers = ({
     const remove: ScriptSnapshotsRepository['delete'] = async (scriptId, snapshotId) => {
         const db = await getDb();
         const now = Date.now();
-        const released = await db.transaction(async tx => {
+        // The payload and attachment blobs are released by `collectUnreferencedFiles` at the next startup.
+        const isDeleted = await db.transaction(async tx => {
             const row = await dbQueries.getScriptSnapshotById(tx, {scriptId, snapshotId});
 
             if (!row) {
-                return null;
+                return false;
             }
-
-            const attachmentStorageKeys = await dbQueries.listScriptSnapshotAttachmentRefs(tx, snapshotId);
 
             await dbQueries.deleteScriptSnapshot(tx, {scriptId, snapshotId});
             await recordOutbox({
@@ -203,19 +202,12 @@ export const createSnapshotHandlers = ({
                 }),
             }, tx);
 
-            return {payloadStorageKey: row.payloadStorageKey, attachmentStorageKeys};
+            return true;
         });
 
-        if (!released) {
-            return;
+        if (isDeleted) {
+            await syncDb();
         }
-
-        await syncDb();
-
-        const unreferenced = await dbQueries.filterUnreferencedStorageKeys(db, released.attachmentStorageKeys);
-
-        await deleteBlobsBestEffort([released.payloadStorageKey], 'a deleted snapshot payload');
-        await deleteBlobsBestEffort(unreferenced, 'an unreferenced attachment blob');
     };
 
     const loadPayload: ScriptSnapshotsRepository['loadPayload'] = async (scriptId, snapshotId) => {

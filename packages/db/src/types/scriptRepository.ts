@@ -258,6 +258,8 @@ export interface ScriptRepository {
     duplicateScript(sourceScriptId: string, input: DuplicateScriptInput): Promise<string>,
     duplicateScriptWithId(sourceScriptId: string, input: DuplicateScriptWithIdInput): Promise<void>,
     deleteScript(scriptId: string): Promise<void>,
+    /** Delete stored blobs no row references (see `createUnreferencedFilesCollector`); returns how many. */
+    collectUnreferencedFiles(options?: {minAgeMs?: number, now?: number}): Promise<number>,
     setActiveBlock(scriptId: string, blockId: string | null): Promise<void>,
     confirmScriptCharacter(scriptId: string, characterKey: string): Promise<ScriptCharacterRef | null>,
     createScriptCharacterGroup(scriptId: string, key: string): Promise<ScriptCharacterGroupRef | null>,

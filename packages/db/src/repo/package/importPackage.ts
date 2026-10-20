@@ -236,6 +236,7 @@ export const createImportPackageHandler = ({
                     createdAt: input.script.createdAt,
                     updatedAt: input.script.updatedAt,
                 });
+
                 if (input.script.subtitle) {
                     await dbQueries.updateScriptSubtitle(tx, {
                         id: scriptId,
@@ -270,8 +271,8 @@ export const createImportPackageHandler = ({
         const scriptId = input.script.id;
         const now = input.script.updatedAt;
         const {storageKeyByAttachment, savedKeys} = await saveAttachmentBlobs(fileStorage, input);
-        let removedStorageKeys: string[] = [];
 
+        // Replaced attachment blobs are released by `collectUnreferencedFiles` at the next startup.
         try {
             await db.transaction(async tx => {
                 await dbQueries.updateScript(tx, {
@@ -280,10 +281,6 @@ export const createImportPackageHandler = ({
                     subtitle: input.script.subtitle,
                     updatedAt: now,
                 });
-
-                const existingAttachments = await dbQueries.listScriptAttachments(tx, scriptId);
-
-                removedStorageKeys = existingAttachments.map(attachment => attachment.storageKey);
 
                 await dbQueries.deleteScriptCharactersByScriptId(tx, scriptId);
                 await dbQueries.deleteScriptCharacterGendersByScriptId(tx, scriptId);
@@ -311,11 +308,6 @@ export const createImportPackageHandler = ({
         }
 
         await syncDb();
-        await deleteBlobsBestEffort(
-            fileStorage,
-            await dbQueries.filterUnreferencedStorageKeys(db, removedStorageKeys),
-            'a replaced blob',
-        );
     };
 
     return {createScriptFromPackage, restoreScriptFromPackage};

@@ -16,6 +16,11 @@ export const scriptRepository: ScriptRepository = createLocalPgliteRepository({
     syncToFs,
     fileStorage,
 });
+// Loaded once the database is ready, so this runs once per app start.
+void scriptRepository.collectUnreferencedFiles().catch((error: unknown) => {
+    console.error('[files] Failed to collect unreferenced blobs.', error);
+});
+
 export const snapshotViews = createSnapshotViewRepository({
     createLocalDb: createSnapshotViewDb,
     fileStorage,

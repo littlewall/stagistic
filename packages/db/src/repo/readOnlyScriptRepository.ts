@@ -32,4 +32,5 @@ export const createReadThroughFileStorage = (fileStorage: FileStorage): FileStor
     save: () => Promise.reject(new ReadOnlyScriptRepositoryError('save a file')),
     get: key => fileStorage.get(key),
     delete: () => Promise.resolve(),
+    listKeys: () => Promise.resolve([]),
 });

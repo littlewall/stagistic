@@ -2,7 +2,6 @@ import {
     and,
     desc,
     eq,
-    inArray,
     type InferInsertModel,
     sql,
 } from 'drizzle-orm';
@@ -66,15 +65,6 @@ export const insertScriptSnapshotAttachmentRefs = async (
     }
 };
 
-export const listScriptSnapshotAttachmentRefs = async (db: DbClient, snapshotId: string): Promise<string[]> => {
-    const rows = await db
-        .select({storageKey: scriptSnapshotAttachmentRefs.storageKey})
-        .from(scriptSnapshotAttachmentRefs)
-        .where(eq(scriptSnapshotAttachmentRefs.snapshotId, snapshotId));
-
-    return rows.map(row => row.storageKey);
-};
-
 export const updateScriptSnapshot = async (
     db: DbClient,
     payload: {
@@ -103,52 +93,21 @@ export const deleteScriptSnapshot = async (db: DbClient, payload: {scriptId: str
         .where(and(eq(scriptSnapshots.scriptId, payload.scriptId), eq(scriptSnapshots.id, payload.snapshotId)));
 };
 
-/**
- * Snapshot payloads of a script, read before a script delete cascades the rows
- * away, so their blobs can be released afterwards.
- */
-export const listScriptSnapshotStorageKeys = async (db: DbClient, scriptId: string) => {
-    const snapshotRows = await db
-        .select({id: scriptSnapshots.id, payloadStorageKey: scriptSnapshots.payloadStorageKey})
-        .from(scriptSnapshots)
-        .where(eq(scriptSnapshots.scriptId, scriptId));
-    const snapshotIds = snapshotRows.map(row => row.id);
-    const refRows = snapshotIds.length > 0
-        ? await db
-            .select({storageKey: scriptSnapshotAttachmentRefs.storageKey})
-            .from(scriptSnapshotAttachmentRefs)
-            .where(inArray(scriptSnapshotAttachmentRefs.snapshotId, snapshotIds))
-        : [];
-
-    return {
-        payloadStorageKeys: snapshotRows.map(row => row.payloadStorageKey),
-        attachmentStorageKeys: [...new Set(refRows.map(row => row.storageKey))],
-    };
-};
-
-/**
- * Keep only storage keys no attachment row or snapshot still references. Every
- * attachment blob deletion goes through this, because snapshots and scripts
- * restored from them share blobs instead of copying them.
- */
-export const filterUnreferencedStorageKeys = async (db: DbClient, storageKeys: readonly string[]): Promise<string[]> => {
-    const candidates = [...new Set(storageKeys)];
-
-    if (candidates.length === 0) {
-        return [];
-    }
-
-    const [attachmentRows, refRows] = await Promise.all([
-        db
-            .select({storageKey: scriptAttachments.storageKey})
-            .from(scriptAttachments)
-            .where(inArray(scriptAttachments.storageKey, candidates)),
-        db
-            .select({storageKey: scriptSnapshotAttachmentRefs.storageKey})
-            .from(scriptSnapshotAttachmentRefs)
-            .where(inArray(scriptSnapshotAttachmentRefs.storageKey, candidates)),
+/** Every storage key a row still points at: attachments, snapshot payloads and snapshot attachment refs. */
+export const listReferencedStorageKeys = async (db: DbClient): Promise<Set<string>> => {
+    const [
+        attachmentRows,
+        payloadRows,
+        refRows,
+    ] = await Promise.all([
+        db.select({storageKey: scriptAttachments.storageKey}).from(scriptAttachments),
+        db.select({storageKey: scriptSnapshots.payloadStorageKey}).from(scriptSnapshots),
+        db.select({storageKey: scriptSnapshotAttachmentRefs.storageKey}).from(scriptSnapshotAttachmentRefs),
     ]);
-    const referenced = new Set([...attachmentRows, ...refRows].map(row => row.storageKey));
 
-    return candidates.filter(storageKey => !referenced.has(storageKey));
+    return new Set([
+        ...attachmentRows,
+        ...payloadRows,
+        ...refRows,
+    ].map(row => row.storageKey));
 };

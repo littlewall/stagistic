@@ -61,4 +61,10 @@ export class IndexedDbFileStorage implements FileStorage {
     async delete(key: string): Promise<void> {
         await runTransaction('readwrite', store => store.delete(key));
     }
+
+    async listKeys(): Promise<string[]> {
+        const keys = await runTransaction('readonly', store => store.getAllKeys());
+
+        return (keys ?? []).map(String);
+    }
 }

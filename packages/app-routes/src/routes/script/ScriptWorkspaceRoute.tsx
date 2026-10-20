@@ -173,6 +173,8 @@ const SnapshotScriptWorkspace = ({scriptId, snapshotId}: {scriptId: string, snap
             });
 
             if (!loaded.ok) {
+                console.error('[snapshots] Could not load the saved state.', loaded.issues);
+
                 if (isActive) {
                     setViewState({status: 'error', message: describeSnapshotError(loaded.issues[0]?.code)});
                 }
@@ -187,7 +189,9 @@ const SnapshotScriptWorkspace = ({scriptId, snapshotId}: {scriptId: string, snap
             }
         };
 
-        void open().catch(() => {
+        void open().catch((error: unknown) => {
+            console.error('[snapshots] Could not open the saved state.', error);
+
             if (isActive) {
                 setViewState({status: 'error', message: describeSnapshotError(undefined)});
             }

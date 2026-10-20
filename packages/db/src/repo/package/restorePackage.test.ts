@@ -184,6 +184,10 @@ describe('restoreScriptFromPackage', () => {
         expect(restored?.locations).toEqual([]);
         expect(restored?.attachments).toEqual([]);
         expect(restored?.comments).toEqual({threads: [], messages: []});
+        expect(await fileStorage.get(oldAttachmentKey)).not.toBeNull();
+
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
+
         expect(await fileStorage.get(oldAttachmentKey)).toBeNull();
     });
 

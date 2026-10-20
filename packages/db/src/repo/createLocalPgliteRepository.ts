@@ -20,6 +20,7 @@ import {createReadScriptPackageSource} from './package/readScriptPackageSource';
 import {createScriptsHandlers} from './scripts';
 import {createSnapshotHandlers} from './snapshots';
 import type {GetDb} from './types';
+import {createUnreferencedFilesCollector} from './unreferencedFiles';
 
 export interface LocalPgliteRepositoryDeps {
     getLocalDb: () => Promise<LocalDb>,
@@ -65,19 +66,9 @@ export const createLocalPgliteRepository = ({
         return dbQueries.listScriptCharacters(await getDb(), scriptId);
     };
     const getScriptPackageSource = createReadScriptPackageSource({getDb});
-    const deleteScript = async (scriptId: string) => {
-        const released = await dbQueries.listScriptSnapshotStorageKeys(await getDb(), scriptId);
-
-        await scripts.delete(scriptId);
-
-        const unreferenced = await dbQueries.filterUnreferencedStorageKeys(await getDb(), released.attachmentStorageKeys);
-
-        await Promise.all([...released.payloadStorageKeys, ...unreferenced].map(storageKey => {
-            return fileStorage.delete(storageKey).catch(() => {
-                console.error('[scripts] Failed to clean up a snapshot blob.');
-            });
-        }));
-    };
+    // Blobs of the deleted script are released by `collectUnreferencedFiles` at the next startup.
+    const deleteScript = (scriptId: string) => scripts.delete(scriptId);
+    const collectUnreferencedFiles = createUnreferencedFilesCollector({getDb, fileStorage});
     const reactiveSources = createLocalPgliteReactiveSources({
         getDb,
         listScripts: () => scripts.list(),
@@ -148,6 +139,7 @@ export const createLocalPgliteRepository = ({
         duplicateScript: (scriptId, input) => scripts.duplicate(scriptId, input),
         duplicateScriptWithId: (scriptId, input) => scripts.duplicateWithId(scriptId, input),
         deleteScript,
+        collectUnreferencedFiles,
         setActiveBlock: (scriptId, blockId) => scripts.setActiveBlock(scriptId, blockId),
         confirmScriptCharacter: (scriptId, key) => characterHandlers.confirmScriptCharacter(scriptId, key),
         createScriptCharacterGroup: (scriptId, key) => {

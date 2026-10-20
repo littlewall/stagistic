@@ -4,6 +4,8 @@ export interface FileStorage {
     save(blob: Blob): Promise<string>,
     get(key: string): Promise<Blob | null>,
     delete(key: string): Promise<void>,
+    /** Every stored key; used to collect blobs no row references any more. */
+    listKeys(): Promise<string[]>,
 }
 
 export class InMemoryFileStorage implements FileStorage {
@@ -25,5 +27,9 @@ export class InMemoryFileStorage implements FileStorage {
         this.blobs.delete(key);
 
         return Promise.resolve();
+    }
+
+    listKeys(): Promise<string[]> {
+        return Promise.resolve([...this.blobs.keys()]);
     }
 }
