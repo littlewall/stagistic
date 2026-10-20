@@ -7,6 +7,10 @@ workspace:
     exclude: []
 
 tasks:
+  icons:
+    command: 'node scripts/generate-icons.mjs'
+    options:
+      cache: false
   build-test-host:
     command: 'cargo build --manifest-path src-tauri/Cargo.toml --example local_mcp_host --locked'
     options:

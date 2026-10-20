@@ -70,3 +70,25 @@ MCPB for Claude. Opening its installation dialog returns
 `installation_requested`, never a claim that the user installed it.
 
 See [validation and manual smoke instructions](../../docs/testing/local-mcp.md).
+
+## App icons
+
+The desktop and MCP extension use the Stagistic favicon geometry. The macOS
+bundle includes a native Icon Composer catalog with light, dark and tinted
+appearances, plus Apple's compiled ICNS fallback. The Apple icon has a solid
+white background and a glossy mark. MCP uses a separate flat 512 px PNG with
+no glass, shadows or rounded enclosure.
+
+After changing the favicon or Icon Composer settings, regenerate on macOS with
+full Xcode (including Icon Composer), then rebuild:
+
+```sh
+moon run desktop:icons
+moon run desktop:build
+```
+
+The editable source is `src-tauri/icons/Stagistic.icon`. Its `Assets/Mark.svg`
+is generated from `apps/web/public/favicon.svg`; edit geometry in the favicon
+and appearances/materials in `icon.json`. Generated icons are checked in so
+ordinary builds do not regenerate them. See
+[icon design and validation](../../docs/testing/desktop-icons.md).

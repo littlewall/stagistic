@@ -78,7 +78,7 @@ run('/usr/bin/codesign', [
 ]);
 await chmod(executable, 0o755);
 await copyFile(executable, path.join(stage, 'server/stagistic-mcp'));
-await copyFile(path.resolve(root, '../../apps/desktop/src-tauri/icons/128x128.png'), path.join(stage, 'icon.png'));
+await copyFile(path.join(root, 'icon.png'), path.join(stage, 'icon.png'));
 
 const manifest = JSON.parse(await readFile(path.join(root, 'manifest.json'), 'utf8'));
 const tools = JSON.parse(await readFile(path.join(root, 'src/generated/tools.json'), 'utf8'));
