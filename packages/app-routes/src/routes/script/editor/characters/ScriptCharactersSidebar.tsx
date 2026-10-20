@@ -145,12 +145,9 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                     unconfirmedCharacters,
                     isLoading: characters.isCharactersLoading,
                 }}
+                // A saved draft or version keeps only the header's manager link.
                 actions={isReadOnly
-                    ? {
-                        onEditCharacter: openAttributeManagerCharacter,
-                        onEditGroup: openAttributeManagerGroup,
-                        onFocusCharacter: handleFocusCharacter,
-                    }
+                    ? {onFocusCharacter: handleFocusCharacter}
                     : {
                         onConfirmCharacter: handleConfirmCharacter,
                         onEditCharacter: openAttributeManagerCharacter,

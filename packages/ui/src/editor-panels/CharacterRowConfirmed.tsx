@@ -19,7 +19,7 @@ export const CharacterRowConfirmed = ({
     onSetCharacterColor,
 }: CharacterRowConfirmedProps) => {
     const isColorActionDisabled = Boolean(character.isColorUpdatePending) || !onSetCharacterColor;
-    const isEditDisabled = !character.id || !onEditCharacter;
+    const isEditDisabled = !character.id;
     const colorPicker = useCharacterColorPickerState({
         character,
         isColorActionDisabled,
@@ -33,29 +33,31 @@ export const CharacterRowConfirmed = ({
                 color={colorPicker.control}
             />
             <span className={styles.characterName}>{character.key}</span>
-            <Tooltip
-                label={`Manage ${character.key}`}
-                placement="left"
-                isDisabled={isEditDisabled}
-            >
-                <Button
-                    className={styles.editIconButton}
-                    aria-disabled={isEditDisabled}
-                    aria-label={`Manage ${character.key}`}
-                    onPress={() => {
-                        if (!character.id || isEditDisabled) {
-                            return;
-                        }
-
-                        onEditCharacter(character.id);
-                    }}
+            {onEditCharacter ? (
+                <Tooltip
+                    label={`Manage ${character.key}`}
+                    placement="left"
+                    isDisabled={isEditDisabled}
                 >
-                    <EditPencilIcon
-                        className={styles.iconGlyph}
-                        aria-hidden="true"
-                    />
-                </Button>
-            </Tooltip>
+                    <Button
+                        className={styles.editIconButton}
+                        aria-disabled={isEditDisabled}
+                        aria-label={`Manage ${character.key}`}
+                        onPress={() => {
+                            if (!character.id) {
+                                return;
+                            }
+
+                            onEditCharacter(character.id);
+                        }}
+                    >
+                        <EditPencilIcon
+                            className={styles.iconGlyph}
+                            aria-hidden="true"
+                        />
+                    </Button>
+                </Tooltip>
+            ) : null}
         </div>
     );
 };

@@ -276,9 +276,20 @@
     }
 }
 
+/* Quiet until the row is pointed at or focused, like the music row actions. */
+.editIconButton {
+    opacity: .38;
+    transition: opacity var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
+
+    .characterItem:hover &,
+    .characterItem:focus-within & {
+        opacity: 1;
+    }
+}
+
 .editIconButton[aria-disabled = 'true'] {
     cursor: default;
-    opacity: .65;
+    opacity: .38;
 }
 
 .iconGlyph {

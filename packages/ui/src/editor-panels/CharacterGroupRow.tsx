@@ -20,7 +20,7 @@ export const CharacterGroupRow = ({
     onSetGroupColor,
 }: CharacterGroupRowProps) => {
     const isColorActionDisabled = Boolean(group.isColorUpdatePending) || !onSetGroupColor;
-    const isEditDisabled = !group.id || !onEditGroup;
+    const isEditDisabled = !group.id;
     const colorPicker = useCharacterColorPickerState({
         character: group,
         isColorActionDisabled,
@@ -35,29 +35,31 @@ export const CharacterGroupRow = ({
             />
             <span className={styles.characterName}>{group.key}</span>
             {group.isEmpty ? <Tag className={styles.groupEmptyTag}>Empty</Tag> : null}
-            <Tooltip
-                label={`Manage group ${group.key}`}
-                placement="left"
-                isDisabled={isEditDisabled}
-            >
-                <Button
-                    className={styles.editIconButton}
-                    aria-disabled={isEditDisabled}
-                    aria-label={`Manage group ${group.key}`}
-                    onPress={() => {
-                        if (!group.id || isEditDisabled) {
-                            return;
-                        }
-
-                        onEditGroup(group.id);
-                    }}
+            {onEditGroup ? (
+                <Tooltip
+                    label={`Manage group ${group.key}`}
+                    placement="left"
+                    isDisabled={isEditDisabled}
                 >
-                    <EditPencilIcon
-                        className={styles.iconGlyph}
-                        aria-hidden="true"
-                    />
-                </Button>
-            </Tooltip>
+                    <Button
+                        className={styles.editIconButton}
+                        aria-disabled={isEditDisabled}
+                        aria-label={`Manage group ${group.key}`}
+                        onPress={() => {
+                            if (!group.id) {
+                                return;
+                            }
+
+                            onEditGroup(group.id);
+                        }}
+                    >
+                        <EditPencilIcon
+                            className={styles.iconGlyph}
+                            aria-hidden="true"
+                        />
+                    </Button>
+                </Tooltip>
+            ) : null}
         </div>
     );
 };

@@ -77,7 +77,8 @@ interface MusicRowProps {
     onFocus: (blockId: string) => void,
     /** Absent for a saved draft or version, where music stays assigned. */
     onRequestUnassign?: (music: ScriptMusicListItem) => void,
-    onOpenMusicManager: (musicId: string) => void,
+    /** Absent for a saved draft or version; the header's manager link stays. */
+    onOpenMusicManager?: (musicId: string) => void,
 }
 
 const MusicRow = ({
@@ -108,7 +109,7 @@ const MusicRow = ({
             selected={isActive}
             /* The navigable label already carries aria-current; the row must not add aria-selected. */
             announceSelected={false}
-            className={clsx(styles.row, !startBlockId && styles.staticRow)}
+            className={clsx(styles.row, isActive && styles.active, !startBlockId && styles.staticRow)}
             trailing={(
                 <span className={styles.actions}>
                     {isAssigned && onRequestUnassign ? (
@@ -120,13 +121,15 @@ const MusicRow = ({
                             <LinkSlashIcon aria-hidden="true" />
                         </RowActionButton>
                     ) : null}
-                    <RowActionButton
-                        ariaLabel={`Edit ${music.title}`}
-                        tooltipLabel="Manage music"
-                        onPress={() => onOpenMusicManager(music.id)}
-                    >
-                        <EditPencilIcon aria-hidden="true" />
-                    </RowActionButton>
+                    {onOpenMusicManager ? (
+                        <RowActionButton
+                            ariaLabel={`Edit ${music.title}`}
+                            tooltipLabel="Manage music"
+                            onPress={() => onOpenMusicManager(music.id)}
+                        >
+                            <EditPencilIcon aria-hidden="true" />
+                        </RowActionButton>
+                    ) : null}
                 </span>
             )}
         >
@@ -239,7 +242,7 @@ export const ScriptMusicSidebar = ({
                     startBlockId={musicMetadataById.get(item.id)?.startBlockId ?? null}
                     onFocus={focusMusic}
                     onRequestUnassign={isReadOnly ? undefined : setUnassignTarget}
-                    onOpenMusicManager={openAttributeManagerMusic}
+                    onOpenMusicManager={isReadOnly ? undefined : openAttributeManagerMusic}
                 />
             ))}
         </ul>
