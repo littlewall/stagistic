@@ -19,12 +19,17 @@ export const AppHeader = ({
     ...props
 }: AppHeaderProps) => {
     const navigate = useNavigate();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {
+        openNewScript,
+        openImportScript,
+        openAppSettings,
+    } = useGlobalModals();
 
     return (
         <UIAppHeader
             {...props}
             onHome={() => void navigate('/')}
+            onOpenSettings={openAppSettings}
             onNewScript={showScriptActions ? openNewScript : undefined}
             onImportScript={showScriptActions ? openImportScript : undefined}
         />
@@ -33,17 +38,19 @@ export const AppHeader = ({
 
 type ScriptEditorAppHeaderProps = Omit<
     UIScriptEditorAppHeaderProps,
-    'onHome' | 'onSelectView'
+    'onHome' | 'onOpenSettings' | 'onSelectView'
 >;
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
     const {basePath} = useScriptReadOnlyState();
+    const {openAppSettings} = useGlobalModals();
 
     return (
         <UIScriptEditorAppHeader
             {...props}
             onHome={() => void navigate('/')}
+            onOpenSettings={openAppSettings}
             // A saved draft or version keeps its own path when switching between Editor and Export.
             onSelectView={(view: ScriptView) => void navigate(`${basePath ?? getScriptBasePath(props.currentScript.id)}/${view}`)}
         />

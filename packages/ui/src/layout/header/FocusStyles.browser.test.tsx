@@ -9,7 +9,6 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {ThemeModeToggle} from './ThemeModeToggle';
 import {ViewSwitcher} from './ViewSwitcher';
 
 let mountedRoot: Root | null = null;
@@ -29,20 +28,12 @@ afterEach(() => {
 });
 
 describe('Header keyboard focus styles', () => {
-    it('shows the shared focus ring on view and theme controls', async () => {
+    it('shows the shared focus ring on view controls', async () => {
         const host = document.createElement('div');
 
         document.body.appendChild(host);
         mountedRoot = createRoot(host);
-        mountedRoot.render(
-            <>
-                <ViewSwitcher activeView="editor" onSelectView={() => {}} />
-                <ThemeModeToggle themeMode="auto" onChange={() => {}} />
-            </>,
-        );
-
-        await userEvent.tab();
-        expectFocusRing(document.activeElement as HTMLElement);
+        mountedRoot.render(<ViewSwitcher activeView="editor" onSelectView={() => {}} />);
 
         await userEvent.tab();
         expectFocusRing(document.activeElement as HTMLElement);

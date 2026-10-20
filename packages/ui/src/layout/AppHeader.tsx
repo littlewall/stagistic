@@ -1,9 +1,5 @@
 import clsx from 'clsx';
-import {
-    type ReactNode,
-    useEffect,
-    useState,
-} from 'react';
+import type {ReactNode} from 'react';
 import {Button as RACButton, MenuTrigger} from 'react-aria-components';
 
 import {Button} from '../atoms/Button/Button';
@@ -15,16 +11,10 @@ import {
     PlusIcon,
     SettingsIcon,
     UploadIcon,
+    UserCircleIcon,
 } from '../icons/ui';
 import {DropdownMenu} from '../molecules/DropdownMenu/DropdownMenu';
-import {
-    applyAppThemeMode,
-    type AppThemeMode,
-    readPreferredAppThemeMode,
-    subscribeToSystemThemeChange,
-} from '../theme/theme';
 import styles from './AppHeader.module.css';
-import {AccountMenu} from './header/AccountMenu';
 import {ScriptTitle} from './header/ScriptTitle';
 import {SyncIndicator} from './header/SyncIndicator';
 import type {
@@ -47,6 +37,8 @@ export type AppHeaderProps = {
     onHome: () => void,
     onNewScript?: () => void,
     onImportScript?: () => void,
+    /** Opens the app settings (appearance and platform integrations). */
+    onOpenSettings?: () => void,
     isFullWidth?: boolean,
     contentInset?: 'default' | 'page',
 };
@@ -58,23 +50,10 @@ export const AppHeader = ({
     onHome,
     onNewScript,
     onImportScript,
+    onOpenSettings,
     isFullWidth = false,
     contentInset = 'default',
 }: AppHeaderProps) => {
-    const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
-
-    useEffect(() => {
-        applyAppThemeMode(themeMode);
-
-        if (themeMode !== 'auto') {
-            return;
-        }
-
-        return subscribeToSystemThemeChange(() => {
-            applyAppThemeMode('auto');
-        });
-    }, [themeMode]);
-
     return (
         <header className={styles.header}>
             <div
@@ -163,12 +142,30 @@ export const AppHeader = ({
                             />
                         </>
                     ) : null}
-                    <div className={styles.actionGroup}>
-                        <AccountMenu
-                            themeMode={themeMode}
-                            onThemeChange={setThemeMode}
-                        />
-                    </div>
+                    {onOpenSettings ? (
+                        <div className={styles.actionGroup}>
+                            {/*
+                             * Not a cog: the gear beside it already opens the script's own
+                             * settings. These belong to the person, not the script.
+                             */}
+                            <Tooltip
+                                label="Settings"
+                                placement="bottom"
+                            >
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onPress={onOpenSettings}
+                                    aria-label="Open settings"
+                                >
+                                    <UserCircleIcon
+                                        className={styles.icon}
+                                        aria-hidden="true"
+                                    />
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </header>
@@ -181,6 +178,7 @@ export type ScriptEditorAppHeaderProps = {
     onRenameScript?: (name: string) => void,
     scriptSyncState?: ScriptSyncState,
     onHome: () => void,
+    onOpenSettings?: () => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
     isFullWidth?: boolean,
@@ -196,6 +194,7 @@ export const ScriptEditorAppHeader = ({
     onRenameScript,
     scriptSyncState,
     onHome,
+    onOpenSettings,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
     isFullWidth = true,
@@ -206,6 +205,7 @@ export const ScriptEditorAppHeader = ({
     return (
         <AppHeader
             onHome={onHome}
+            onOpenSettings={onOpenSettings}
             isFullWidth={isFullWidth}
             scriptControls={(
                 <ViewSwitcher

@@ -1,0 +1,343 @@
+{
+  "$defs": {
+    "DialogueArgs": {
+      "additionalProperties": false,
+      "properties": {
+        "character_id": {
+          "type": "string"
+        },
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scene_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "script_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "script_id",
+        "character_id"
+      ],
+      "type": "object"
+    },
+    "ExcerptArgs": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "script_id": {
+          "type": "string"
+        },
+        "start_block_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "script_id"
+      ],
+      "type": "object"
+    },
+    "ListArgs": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "ReadOperation": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/ListArgs"
+            },
+            "tool": {
+              "const": "list_scripts",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/ScriptArgs"
+            },
+            "tool": {
+              "const": "get_script_outline",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/SceneArgs"
+            },
+            "tool": {
+              "const": "get_scene",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/ExcerptArgs"
+            },
+            "tool": {
+              "const": "get_script_excerpt",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/ScriptArgs"
+            },
+            "tool": {
+              "const": "get_characters",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/DialogueArgs"
+            },
+            "tool": {
+              "const": "get_character_dialogue",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/SearchArgs"
+            },
+            "tool": {
+              "const": "search_script",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "SceneArgs": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scene_id": {
+          "type": "string"
+        },
+        "script_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "script_id",
+        "scene_id"
+      ],
+      "type": "object"
+    },
+    "ScriptArgs": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "script_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "script_id"
+      ],
+      "type": "object"
+    },
+    "SearchArgs": {
+      "additionalProperties": false,
+      "properties": {
+        "block_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "query": {
+          "type": "string"
+        },
+        "scene_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "script_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "script_id",
+        "query"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "operation": {
+      "$ref": "#/$defs/ReadOperation"
+    },
+    "protocol_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "protocol_version",
+    "operation"
+  ],
+  "title": "LocalRequest",
+  "type": "object"
+}

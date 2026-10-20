@@ -6,7 +6,7 @@ import {
 import {isApplePlatform} from '@stagistic/shared';
 import {
     Notice,
-    ScriptSettingsModal,
+    SettingsModal,
     useKeyedFieldDrafts,
 } from '@stagistic/ui';
 import {type ReactNode, useMemo} from 'react';
@@ -219,7 +219,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         <ScriptSettingsModalContext.Provider value={contextValue}>
             <ScriptCharactersProvider value={charactersContextValue}>
                 {children}
-                <ScriptSettingsModal
+                <SettingsModal
                     isOpen={isSettingsOpen}
                     title="Script settings"
                     groups={groups}
@@ -263,7 +263,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             }}
                         />
                     </div>
-                </ScriptSettingsModal>
+                </SettingsModal>
                 <ScriptAttributeManagerModal
                     currentScriptId={currentScriptId}
                     isOpen={isAttributeManagerOpen}

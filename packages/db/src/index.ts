@@ -1,4 +1,6 @@
 // ─── Types & repository contracts ──────────────────────────────────────────────
+export {createLocalMcpReadService} from './mcp/createLocalMcpReadService';
+export type {McpReadService} from './mcp/types';
 export {InvalidScriptSnapshotError} from './repo/snapshots';
 export type {
     CommentAnchorKind,

@@ -15,6 +15,7 @@ export default defineConfig({
         projects: [
             'packages/*/vite.config.ts',
             'apps/web/vitest.config.ts',
+            'apps/desktop/vitest.config.ts',
         ],
     },
 });

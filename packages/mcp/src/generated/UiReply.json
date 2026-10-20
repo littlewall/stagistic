@@ -1,0 +1,129 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "APP_NOT_RUNNING",
+        "APP_NOT_READY",
+        "INTEGRATION_DISABLED",
+        "VERSION_MISMATCH",
+        "INVALID_ARGUMENT",
+        "NOT_FOUND",
+        "BUSY",
+        "TIMEOUT",
+        "STALE_CURSOR",
+        "CONTENT_TOO_LARGE",
+        "INTERNAL_ERROR"
+      ],
+      "type": "string"
+    },
+    "McpReadError": {
+      "additionalProperties": false,
+      "properties": {
+        "block_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "ReadPage": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string"
+        },
+        "incomplete": {
+          "type": "boolean"
+        },
+        "items": {
+          "items": true,
+          "type": "array"
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "string"
+        },
+        "scope": true
+      },
+      "required": [
+        "format",
+        "scope",
+        "revision",
+        "items",
+        "incomplete"
+      ],
+      "type": "object"
+    },
+    "ReadReply": {
+      "anyOf": [
+        {
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            },
+            "page": {
+              "$ref": "#/$defs/ReadPage"
+            }
+          },
+          "required": [
+            "ok",
+            "page"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/McpReadError"
+            },
+            "ok": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "ok",
+            "error"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "generation": {
+      "type": "string"
+    },
+    "reply": {
+      "$ref": "#/$defs/ReadReply"
+    },
+    "request_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "generation",
+    "request_id",
+    "reply"
+  ],
+  "title": "UiReply",
+  "type": "object"
+}
