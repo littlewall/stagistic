@@ -69,8 +69,13 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
+const openActions = async () => {
+    await userEvent.click(await waitForElement('button[aria-label="Script state actions"]'));
+    await waitForElement('[role="menu"]');
+};
+
 describe('ScriptStateMenu', () => {
-    it('lists the current script, versions and drafts with the save actions', async () => {
+    it('lists the current script, versions and drafts in the state menu only', async () => {
         renderMenu({
             onSaveDraft: vi.fn(),
             onSaveVersion: vi.fn(),
@@ -87,10 +92,31 @@ describe('ScriptStateMenu', () => {
             'Drafts',
             'Draft 2',
             'Draft 1first pass',
+        ]);
+    });
+
+    it('offers saving and managing behind the chevron for the current script', async () => {
+        const onSaveDraft = vi.fn();
+
+        renderMenu({
+            onSaveDraft,
+            onSaveVersion: vi.fn(),
+            onManage: vi.fn(),
+        });
+
+        expect((await waitForElement('[aria-label="Script state: Current"]')).querySelector('svg')).toBeNull();
+
+        await openActions();
+
+        expect(menuTexts()).toEqual([
             'Save as new draft…',
             'Save as version…',
             'Manage drafts and versions…',
         ]);
+
+        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Save as new draft…')));
+
+        expect(onSaveDraft).toHaveBeenCalledOnce();
     });
 
     it('reports the chosen state and the current script', async () => {
@@ -113,25 +139,30 @@ describe('ScriptStateMenu', () => {
         expect(onSelect).toHaveBeenLastCalledWith(null);
     });
 
-    it('offers restore only for a stored state and no saving there', async () => {
+    it('marks a stored state with a lock and offers restore instead of saving', async () => {
         const onRestore = vi.fn();
         const onRestoreAsNew = vi.fn();
 
         renderMenu({
             label: 'Draft 1',
             selectedId: 'd1',
+            onManage: vi.fn(),
             restore: {onRestore, onRestoreAsNew},
         });
 
-        await userEvent.click(await waitForElement('[aria-label="Script state: Draft 1"]'));
-        await waitForElement('[role="menu"]');
+        const trigger = await waitForElement('[aria-label="Script state: Draft 1"]');
 
-        expect(menuTexts().some(text => text?.startsWith('Save as'))).toBe(false);
+        expect(trigger.querySelector('svg')).not.toBeNull();
 
-        await userEvent.keyboard('{Escape}');
-        await userEvent.click(requireValue([...document.querySelectorAll('button')].find(button => button.textContent === 'Restore…')));
-        await waitForElement('[aria-label="Restore"] [role="menuitem"]');
-        await userEvent.click(requireValue([...document.querySelectorAll('[aria-label="Restore"] [role="menuitem"]')].find(item => item.textContent === 'Restore as new script')));
+        await openActions();
+
+        expect(menuTexts()).toEqual([
+            'Restore to this script…',
+            'Restore as new script…',
+            'Manage drafts and versions…',
+        ]);
+
+        await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Restore as new script…')));
 
         expect(onRestoreAsNew).toHaveBeenCalledOnce();
         expect(onRestore).not.toHaveBeenCalled();

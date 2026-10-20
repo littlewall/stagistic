@@ -5,12 +5,18 @@
 .root {
     display: inline-flex;
     flex: 0 0 auto;
-    gap: var(--space-xs);
-    align-items: center;
+    align-items: stretch;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
-.trigger,
-.restoreTrigger {
+/* Grouped button: state choice on the left, actions behind the chevron. */
+.split {
+    border-color: var(--color-border-subtle);
+}
+
+.trigger {
     cursor: pointer;
     display: inline-flex;
     gap: var(--space-xs);
@@ -20,10 +26,10 @@
     color: var(--color-text-muted);
     white-space: nowrap;
     background: transparent;
-    border: 1px solid transparent;
+    border: 0;
     border-radius: var(--radius-sm);
     outline: none;
-    transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+    transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 
     &[data-hovered],
     &[data-pressed] {
@@ -37,10 +43,16 @@
     }
 }
 
-.triggerStored {
-    color: var(--color-text);
-    background: var(--color-surface-accent);
-    border-color: var(--color-border-subtle);
+.split .stateTrigger {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.actionsTrigger {
+    padding-inline: var(--space-sm);
+    border-inline-start: 1px solid var(--color-border-subtle);
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
 }
 
 .triggerLabel {
@@ -49,13 +61,11 @@
     text-overflow: ellipsis;
 }
 
+.lock,
 .chevron {
+    flex: 0 0 auto;
     width: var(--icon-size-sm);
     height: var(--icon-size-sm);
-}
-
-.restoreTrigger {
-    border-color: var(--color-border);
 }
 
 .popover {
@@ -102,6 +112,12 @@
     padding: var(--space-md);
     font-size: var(--font-size-md);
     outline: none;
+}
+
+.firstSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
 }
 
 .section {
