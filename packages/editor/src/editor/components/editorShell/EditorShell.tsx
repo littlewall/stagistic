@@ -263,6 +263,7 @@ export const EditorShell = ({
             <EditorStatusBar
                 editor={editor}
                 blockNextElements={blockNextElements ?? {}}
+                isReadOnly={isReadOnly}
             />
         </div>
     );

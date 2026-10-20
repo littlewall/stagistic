@@ -74,6 +74,8 @@
 }
 
 .itemRow {
+    --drag-handle-width: 6px;
+
     position: relative;
     display: grid;
     grid-template-columns: auto 1fr;
@@ -146,16 +148,26 @@
     border-radius: var(--radius-md);
 }
 
+/* A stored script state cannot be reordered, so its rows have no drag handle. */
+.readOnlySceneRow {
+    grid-template-columns: 1fr auto;
+
+    /* Keep scene titles where the handle column would put them. */
+    & .itemButton {
+        padding-left: calc(var(--drag-handle-width) + var(--space-sm) * 2);
+    }
+}
+
 .dragHandle {
     touch-action: none;
     cursor: grab;
     user-select: none;
     display: inline-flex;
-    flex: 0 0 6px;
+    flex: 0 0 var(--drag-handle-width);
     align-items: center;
     justify-content: center;
     box-sizing: content-box;
-    width: 6px;
+    width: var(--drag-handle-width);
     min-height: 15px;
     margin: 0;
     padding-inline: var(--space-sm);

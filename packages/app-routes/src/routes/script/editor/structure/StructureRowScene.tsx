@@ -30,9 +30,9 @@ export const StructureRowScene = memo(({
     return (
         <li
             ref={ref}
-            className={clsx(styles.itemRow, styles.sceneRow, isActive && styles.active)}
+            className={clsx(styles.itemRow, styles.sceneRow, isReadOnly && styles.readOnlySceneRow, isActive && styles.active)}
         >
-            {isReadOnly ? <span className={styles.dragHandle} aria-hidden="true" /> : (
+            {isReadOnly ? null : (
                 <button
                     type="button"
                     ref={handleRef}
