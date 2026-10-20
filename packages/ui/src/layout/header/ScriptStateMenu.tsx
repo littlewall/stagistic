@@ -13,18 +13,25 @@ import {
     SearchField,
 } from 'react-aria-components';
 
-import {ChevronDownIcon, LockIcon} from '../../icons';
+import {Tooltip} from '../../atoms/Tooltip/Tooltip';
+import {
+    ChevronDownIcon,
+    ClockIcon,
+    LockIcon,
+} from '../../icons';
 import styles from './ScriptStateMenu.module.css';
 
 export interface ScriptStateMenuItem {
     id: string,
     label: string,
-    /** Secondary line, e.g. date · reason, or “from Draft 7”. */
+    /** Secondary line, e.g. “from Draft #7” · reason. */
     detail?: string | null,
+    /** Save time, shown as a tooltip on the clock after the label. */
+    savedAt?: string | null,
 }
 
 export interface ScriptStateMenuProps {
-    /** Trigger text: “Current”, “Draft 3” or a version name. */
+    /** Trigger text: “Current”, “Draft #3” or a version name. */
     label: string,
     /** Id of the stored state on screen; null for the current script. */
     selectedId: string | null,
@@ -54,7 +61,16 @@ const StateItem = ({item, isSelected}: {item: ScriptStateMenuItem, isSelected: b
         aria-current={isSelected ? 'true' : undefined}
     >
         <span className={styles.itemText}>
-            <span className={styles.itemLabel}>{item.label}</span>
+            <span className={styles.itemTitle}>
+                <span className={styles.itemLabel}>{item.label}</span>
+                {item.savedAt ? (
+                    <Tooltip label={`Saved ${item.savedAt}`}>
+                        <span className={styles.savedAt} role="img" aria-label={`Saved ${item.savedAt}`} tabIndex={-1}>
+                            <ClockIcon className={styles.savedAtIcon} aria-hidden="true" />
+                        </span>
+                    </Tooltip>
+                ) : null}
+            </span>
             {item.detail ? <span className={styles.itemDetail}>{item.detail}</span> : null}
         </span>
         {isSelected ? <span className={styles.currentMark} aria-hidden="true">✓</span> : null}

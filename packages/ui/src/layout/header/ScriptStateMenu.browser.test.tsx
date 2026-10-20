@@ -50,12 +50,12 @@ const renderMenu = (props: Partial<ScriptStateMenuProps> = {}) => {
                 },
             ]}
             drafts={[
-                {id: 'd2', label: 'Draft 2'},
                 {
-                    id: 'd1',
-                    label: 'Draft 1',
-                    detail: 'first pass',
+                    id: 'd2',
+                    label: '#2',
+                    savedAt: 'Oct 9, 2026, 1:56 PM',
                 },
+                {id: 'd1', label: '#1 first pass'},
             ]}
             onSelect={vi.fn()}
             {...props}
@@ -90,9 +90,21 @@ describe('ScriptStateMenu', () => {
             'Versions',
             'Festivalsent to Avignon',
             'Drafts',
-            'Draft 2',
-            'Draft 1first pass',
+            '#2',
+            '#1 first pass',
         ]);
+    });
+
+    it('shows the save time as a tooltip on a clock after the label', async () => {
+        renderMenu();
+
+        await userEvent.click(await waitForElement('[aria-label="Script state: Current"]'));
+
+        const clock = await waitForElement<HTMLElement>('[role="menu"] [role="img"][aria-label="Saved Oct 9, 2026, 1:56 PM"]');
+
+        await userEvent.hover(clock);
+
+        expect((await waitForElement('[role="tooltip"]')).textContent).toBe('Saved Oct 9, 2026, 1:56 PM');
     });
 
     it('offers saving and managing behind the chevron for the current script', async () => {
@@ -123,17 +135,17 @@ describe('ScriptStateMenu', () => {
         const onSelect = vi.fn();
 
         renderMenu({
-            label: 'Draft 1',
+            label: 'Draft #1',
             selectedId: 'd1',
             onSelect,
         });
 
-        await userEvent.click(await waitForElement('[aria-label="Script state: Draft 1"]'));
+        await userEvent.click(await waitForElement('[aria-label="Script state: Draft #1"]'));
         await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent?.startsWith('Festival'))));
 
         expect(onSelect).toHaveBeenLastCalledWith('v1');
 
-        await userEvent.click(await waitForElement('[aria-label="Script state: Draft 1"]'));
+        await userEvent.click(await waitForElement('[aria-label="Script state: Draft #1"]'));
         await userEvent.click(requireValue([...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent?.startsWith('Current'))));
 
         expect(onSelect).toHaveBeenLastCalledWith(null);
@@ -144,13 +156,13 @@ describe('ScriptStateMenu', () => {
         const onRestoreAsNew = vi.fn();
 
         renderMenu({
-            label: 'Draft 1',
+            label: 'Draft #1',
             selectedId: 'd1',
             onManage: vi.fn(),
             restore: {onRestore, onRestoreAsNew},
         });
 
-        const trigger = await waitForElement('[aria-label="Script state: Draft 1"]');
+        const trigger = await waitForElement('[aria-label="Script state: Draft #1"]');
 
         expect(trigger.querySelector('svg')).not.toBeNull();
 

@@ -44,7 +44,7 @@ export const ScriptExportRoute = () => {
         musicAttachmentsState,
     } = useScriptSettingsModal();
     const shownTitle = isReadOnly ? liveScriptTitle ?? scriptTitleDraft : scriptTitleDraft;
-    // Files of a saved draft or version carry its label, e.g. “The door – Draft 3”.
+    // Files of a saved draft or version carry its label, e.g. “The door – Draft #3”.
     const fileTitle = snapshotLabel ? `${shownTitle} – ${snapshotLabel}` : shownTitle;
     const scriptStateControls = useScriptStateControls({scriptId: currentScript?.id ?? null, view: 'export'});
     const {openSave} = scriptStateControls;

@@ -10,19 +10,28 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {dateStyle: 'medium', timeSt
 
 const formatSnapshotDate = (timestamp: number) => dateFormat.format(new Date(timestamp));
 
-const describeSnapshot = (snapshot: ScriptSnapshot) => {
-    return [
-        getScriptSnapshotOrigin(snapshot),
-        formatSnapshotDate(snapshot.createdAt),
-        snapshot.note,
-    ].filter(Boolean).join(' · ');
-};
+/*
+ * Menu entries sit under a “Drafts” or “Versions” heading, so a draft reads
+ * “#3 new scene” rather than repeating the kind; the save time is a tooltip.
+ */
+export const toMenuItem = (snapshot: ScriptSnapshot): ScriptStateMenuItem => {
+    const savedAt = formatSnapshotDate(snapshot.createdAt);
 
-export const toMenuItem = (snapshot: ScriptSnapshot): ScriptStateMenuItem => ({
-    id: snapshot.id,
-    label: getScriptSnapshotLabel(snapshot),
-    detail: describeSnapshot(snapshot),
-});
+    if (snapshot.kind === 'draft') {
+        return {
+            id: snapshot.id,
+            label: [snapshot.number === null ? 'Draft' : `#${snapshot.number}`, snapshot.note].filter(Boolean).join(' '),
+            savedAt,
+        };
+    }
+
+    return {
+        id: snapshot.id,
+        label: getScriptSnapshotLabel(snapshot),
+        detail: [getScriptSnapshotOrigin(snapshot), snapshot.note].filter(Boolean).join(' · ') || null,
+        savedAt,
+    };
+};
 
 export const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'An unexpected error occurred.');
 

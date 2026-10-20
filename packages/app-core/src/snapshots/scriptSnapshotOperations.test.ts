@@ -266,7 +266,7 @@ describe('script snapshot operations', () => {
             backup: {
                 kind: 'draft',
                 number: 2,
-                note: 'Before restoring Draft 1',
+                note: 'Before restoring Draft #1',
             },
         });
         expect(blockTexts(restored?.document)).toEqual(blockTexts(draftOneSource?.document));

@@ -5,6 +5,7 @@ export {CaseSensitiveIcon} from './CaseSensitiveIcon';
 export {CheckIcon} from './CheckIcon';
 export {ChevronDownIcon} from './ChevronDownIcon';
 export {ChevronUpIcon} from './ChevronUpIcon';
+export {ClockIcon} from './ClockIcon';
 export {CloseIcon} from './CloseIcon';
 export {CommentIcon} from './CommentIcon';
 export {DownloadIcon} from './DownloadIcon';

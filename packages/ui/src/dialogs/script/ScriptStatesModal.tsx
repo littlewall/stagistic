@@ -8,13 +8,13 @@ import {ScriptStatesBrowser} from './ScriptStatesBrowser';
 export interface ScriptStateRecord {
     id: string,
     kind: ScriptStateKind,
-    /** “Draft 3” or the version name. */
+    /** “Draft #3” or the version name. */
     label: string,
     name: string | null,
     note: string | null,
     /** Preformatted save date. */
     savedAt: string,
-    /** “from Draft 7” for a version marked from a draft. */
+    /** “from Draft #7” for a version marked from a draft. */
     origin: string | null,
     /** Short facts, e.g. “4 scenes”, “12 pages”. */
     facts: readonly string[],

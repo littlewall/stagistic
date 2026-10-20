@@ -15,7 +15,7 @@ export type RestoreScriptStateMode = 'restore' | 'restore-as-new';
 export interface RestoreScriptStateModalProps {
     isOpen: boolean,
     mode: RestoreScriptStateMode,
-    /** “Draft 3” or the version name. */
+    /** “Draft #3” or the version name. */
     stateLabel: string,
     /** Suggested title of a script created from the state. */
     initialTitle: string,
@@ -42,6 +42,7 @@ export const RestoreScriptStateModal = ({
 
     if (previous.isOpen !== isOpen || previous.initialTitle !== initialTitle) {
         setPrevious({isOpen, initialTitle});
+
         if (isOpen) {
             setTitle(initialTitle);
         }
