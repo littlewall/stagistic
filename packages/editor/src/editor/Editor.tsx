@@ -55,6 +55,7 @@ const Editor = ({
     surfaceCache,
     liveStore: providedLiveStore,
     isReadOnly = false,
+    readOnlyLabel = null,
     children,
 }: EditorProps & {children?: ReactNode}) => {
     const {
@@ -286,6 +287,7 @@ const Editor = ({
                             <EditorShell
                                 isCanvasReady={isInitialCanvasReady}
                                 isReadOnly={isReadOnly}
+                                readOnlyLabel={readOnlyLabel}
                                 canvas={{
                                     autoFocus,
                                     editor,

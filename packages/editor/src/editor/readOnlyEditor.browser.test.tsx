@@ -45,7 +45,7 @@ const EditorProbe = () => {
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (isReadOnly: boolean) => {
+const renderEditor = (isReadOnly: boolean, readOnlyLabel?: string) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -55,7 +55,7 @@ const renderEditor = (isReadOnly: boolean) => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue: DOCUMENT}} isReadOnly={isReadOnly}>
+        <ScriptEditor document={{initialValue: DOCUMENT}} isReadOnly={isReadOnly} readOnlyLabel={readOnlyLabel}>
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -110,6 +110,13 @@ describe('read-only editor', () => {
 
         expect(texts(editor)).toEqual(['INT. LIGHTHOUSE', 'The room is dark.']);
         expect(editor.state.selection.empty).toBe(false);
+    });
+
+    it('names the stored state in place of the formatting tools', async () => {
+        renderEditor(true, 'Draft #3');
+        await getEditor();
+
+        expect(document.querySelector('[data-editor-toolbar] [role="status"]')?.textContent).toBe('Draft #3 · Read-only');
     });
 
     it('shows only search in the toolbar', async () => {

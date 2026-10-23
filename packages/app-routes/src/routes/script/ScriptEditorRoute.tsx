@@ -240,6 +240,7 @@ export const ScriptEditorRoute = () => {
                 <DeferredScriptEditor
                     key={currentScript?.id ?? 'editor'}
                     isReadOnly={isReadOnly}
+                    readOnlyLabel={snapshot ? getScriptSnapshotLabel(snapshot) : null}
                     surfaceCache={editorSurfaceCache}
                     liveStore={editorSnapshotStore}
                     document={{

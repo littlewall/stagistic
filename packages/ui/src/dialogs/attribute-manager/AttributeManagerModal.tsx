@@ -20,6 +20,8 @@ export interface AttributeManagerModalProps {
     activeTabId: string,
     onClose: () => void,
     onSelectTab: (tabId: string) => void,
+    /** A strip between the header and the tabs, e.g. the read-only notice of a stored draft or version. */
+    notice?: ReactNode,
     children?: ReactNode,
 }
 
@@ -30,6 +32,7 @@ export const AttributeManagerModal = ({
     activeTabId,
     onClose,
     onSelectTab,
+    notice,
     children,
 }: AttributeManagerModalProps) => {
     useEffect(() => {
@@ -82,6 +85,7 @@ export const AttributeManagerModal = ({
                         Close
                     </button>
                 </header>
+                {notice ? <div className={styles.notice}>{notice}</div> : null}
                 <nav
                     className={styles.tabs}
                     aria-label={`${title} sections`}

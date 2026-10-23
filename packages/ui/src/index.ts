@@ -60,6 +60,7 @@ export {
 export {CodeSnippet} from './molecules/CodeSnippet/CodeSnippet';
 export {ListPanel, type ListPanelProps} from './molecules/ListPanel/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow/ListRow';
+export {ReadOnlyNotice, type ReadOnlyNoticeProps} from './molecules/ReadOnlyNotice/ReadOnlyNotice';
 export {
     ScriptCard,
     ScriptCardGrid,

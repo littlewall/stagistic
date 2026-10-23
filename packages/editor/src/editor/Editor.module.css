@@ -76,6 +76,11 @@
     padding: 0 var(--space-lg);
     background: var(--layer-panel-bg);
     border-bottom: 1px solid var(--layer-shell-edge);
+
+    /* A stored draft or version: the row that held the formatting tools says why they are gone. */
+    .root[data-read-only = 'true'] & {
+        background: var(--color-surface-read-only);
+    }
 }
 
 .toolbarToggleStart {

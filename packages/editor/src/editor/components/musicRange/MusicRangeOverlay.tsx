@@ -75,6 +75,7 @@ const MusicRangeOverlay = ({
 
     useMusicRailDrag({
         editor,
+        isEnabled: editor?.isEditable ?? false,
         canvasRef,
         onDragStart: handleDragStart,
         previewClassName: styles.dropPreview,

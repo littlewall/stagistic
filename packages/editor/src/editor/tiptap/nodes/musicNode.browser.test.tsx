@@ -118,6 +118,7 @@ const mountedRoots: Root[] = [];
 const renderEditor = (
     initialValue: ScriptDocument = createDocument(),
     callbacks?: EditorLifecycleCallbacks,
+    isReadOnly = false,
 ) => {
     const host = document.createElement('div');
 
@@ -132,6 +133,7 @@ const renderEditor = (
             document={{initialValue}}
             layout={{autoFocus: true}}
             callbacks={callbacks}
+            isReadOnly={isReadOnly}
         >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
@@ -582,6 +584,55 @@ describe('music pill node views', () => {
         await clickMenuButton('Manage music');
 
         expect(onOpenMusicManager).toHaveBeenCalledWith(musicStartAttrs(editor)?.musicId);
+    });
+
+    it('offers no manage or unassign action in a read-only script', async () => {
+        renderEditor(createTwoBlockDocument(), {onOpenMusicManager: vi.fn()});
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Night');
+        editor.commands.insertMusicOut('sd-2');
+        editor.setEditable(false);
+
+        await activatePill();
+        await new Promise(resolve => window.setTimeout(resolve, 100));
+
+        // Nothing to offer but navigation, and the end is reached from the rail: no empty menu.
+        expect(document.querySelector('[data-music-menu="start"]')).toBeNull();
+    });
+
+    it('keeps the music title read-only in a read-only script', async () => {
+        renderEditor({
+            type: 'doc',
+            content: [
+                createStageDirection('sd-1', [
+                    {
+                        type: 'musicStart',
+                        attrs: {
+                            musicId: 'music-1',
+                            mode: 'open',
+                            title: 'Night',
+                            kind: null,
+                            isDraft: false,
+                        },
+                    },
+                ]),
+            ],
+        }, undefined, true);
+
+        const input = await poll(
+            () => document.querySelector<HTMLElement>('[data-music-title-input="start"]'),
+            'title input',
+        );
+
+        expect(input.isContentEditable).toBe(false);
+        await page.elementLocator(input).click();
+        await userEvent.keyboard('X');
+
+        expect(input.textContent).toBe('Night');
+        expect(input.getAttribute('aria-readonly')).toBe('true');
+        expect(getComputedStyle(input).cursor).toBe('pointer');
     });
 
     it('keeps endpoint navigation in the music rail instead of inline out text', async () => {

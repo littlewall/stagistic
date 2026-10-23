@@ -306,4 +306,6 @@ export interface EditorProps {
      * affordance is hidden. Reading, search, selection and copy stay available.
      */
     isReadOnly?: boolean,
+    /** Name of the stored state shown in the read-only toolbar notice, e.g. “Draft #3”. */
+    readOnlyLabel?: string | null,
 }

@@ -1,5 +1,6 @@
 import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
 import {
+    ReadOnlyNotice,
     SearchControl,
     type SearchControlFilter,
     useDropdownDismiss,
@@ -39,6 +40,8 @@ interface EditorToolbarProps {
     search?: EditorSearchProps,
     /** Only search remains: no formatting, block types, undo or replace. */
     isReadOnly?: boolean,
+    /** Shown in place of the formatting controls while read-only. */
+    readOnlyLabel?: string | null,
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
@@ -60,6 +63,7 @@ const EditorToolbar = ({
     blockShortcuts,
     search: searchProps,
     isReadOnly = false,
+    readOnlyLabel = null,
 }: EditorToolbarProps) => {
     const searchShortcuts = getToolbarShortcutLabels();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -136,6 +140,7 @@ const EditorToolbar = ({
     const handleUndoMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
+
             if (canUndo) {
                 editor?.chain().focus().undo()
                     .run();
@@ -146,6 +151,7 @@ const EditorToolbar = ({
     const handleRedoMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
+
             if (canRedo) {
                 editor?.chain().focus().redo()
                     .run();
@@ -180,6 +186,7 @@ const EditorToolbar = ({
     const handleSelectMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
+
             if (!canChangeBlockType) {
                 return;
             }
@@ -192,6 +199,7 @@ const EditorToolbar = ({
         (optionType: ScriptBlockNodeType, event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
             setIsOpen(false);
+
             if (!editor) {
                 return;
             }
@@ -242,7 +250,7 @@ const EditorToolbar = ({
 
     return (
         <div className={styles.toolbar} ref={toolbarRef} data-editor-toolbar="true">
-            {isReadOnly ? null : (
+            {isReadOnly ? <ReadOnlyNotice label={readOnlyLabel} /> : (
                 <>
                     <InlineMarksGroup state={inlineMarksState} actions={inlineMarksActions} />
                     <span className={styles.divider} aria-hidden="true" />

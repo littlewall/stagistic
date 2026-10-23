@@ -110,7 +110,7 @@
 
 .actions {
     display: inline-flex;
-    gap: var(--space-px);
+    gap: var(--space-sm);
     opacity: .38;
     transition: opacity var(--duration-normal) var(--ease-standard);
 }

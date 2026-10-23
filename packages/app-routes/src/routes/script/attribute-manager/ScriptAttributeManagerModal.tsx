@@ -1,3 +1,4 @@
+import {getScriptSnapshotLabel} from '@stagistic/app-core';
 import {
     type AttributeManagerCharacter,
     AttributeManagerCharactersPanel,
@@ -8,6 +9,7 @@ import {
     AttributeManagerPlacesPanel,
     AttributeManagerSceneDetail,
     Button,
+    ReadOnlyNotice,
     Tooltip,
     TrashIcon,
 } from '@stagistic/ui';
@@ -83,7 +85,7 @@ export const ScriptAttributeManagerModal = ({
     persistMusicTitleDraft,
     onDeleteMusic,
 }: ScriptAttributeManagerModalProps) => {
-    const {isReadOnly} = useScriptReadOnlyState();
+    const {isReadOnly, snapshot} = useScriptReadOnlyState();
     const {music: musicCatalog} = musicState;
     const [isAddMusicOpen, setIsAddMusicOpen] = useState(false);
     const [createdMusicId, setCreatedMusicId] = useState<string | null>(null);
@@ -94,7 +96,14 @@ export const ScriptAttributeManagerModal = ({
 
     return (
         <>
-            <AttributeManagerModal isOpen={isOpen} tabs={tabs} activeTabId={activePanelId} onClose={onClose} onSelectTab={onSelectPanel}>
+            <AttributeManagerModal
+                isOpen={isOpen}
+                tabs={tabs}
+                activeTabId={activePanelId}
+                notice={isReadOnly ? <ReadOnlyNotice label={snapshot ? getScriptSnapshotLabel(snapshot) : null} /> : null}
+                onClose={onClose}
+                onSelectTab={onSelectPanel}
+            >
                 {activePanelId === ATTRIBUTE_MANAGER_PANEL_STRUCTURE ? (
                     <AttributeManagerListPanel
                         items={sceneItems}

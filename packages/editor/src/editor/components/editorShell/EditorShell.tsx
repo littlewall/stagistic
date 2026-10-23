@@ -60,6 +60,7 @@ interface EditorShellProps {
     isCanvasReady?: boolean,
     /** Hides every editing affordance; see EditorProps.isReadOnly. */
     isReadOnly?: boolean,
+    readOnlyLabel?: string | null,
     layout?: EditorLayoutProps,
     rootRef: RefObject<HTMLDivElement | null>,
     canvasHostRef: RefObject<HTMLDivElement | null>,
@@ -73,6 +74,7 @@ export const EditorShell = ({
     canvas,
     isCanvasReady = true,
     isReadOnly = false,
+    readOnlyLabel,
     layout,
     rootRef,
     canvasHostRef,
@@ -217,6 +219,7 @@ export const EditorShell = ({
                                 blockShortcuts={blockShortcuts}
                                 search={search}
                                 isReadOnly={isReadOnly}
+                                readOnlyLabel={readOnlyLabel}
                             />
                         </div>
                         {rightSidebarToggle ? (

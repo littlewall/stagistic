@@ -155,6 +155,8 @@
     --color-surface: oklch(from var(--base-surface) var(--L-surface) calc(c * var(--C-bg)) h);
     --color-surface-raised: oklch(from var(--base-surface) var(--L-highlight) calc(c * var(--C-bg)) h);
     --color-surface-accent: oklch(from var(--base-selection) .93 calc(c * .45) h);
+    /* A stored draft or version on screen: a cool Steel Wool wash, never the accent. */
+    --color-surface-read-only: oklch(from var(--base-neutral) .93 calc(c * 1.6) h);
     --color-surface-paper: oklch(from var(--base-surface) var(--L-paper) calc(c * .1) h);
 
     /* Text */
@@ -318,6 +320,7 @@
 
     /* dark mode overrides */
     --color-surface-accent: oklch(from var(--base-selection) .3 calc(c * .4) h);
+    --color-surface-read-only: oklch(from var(--base-neutral) .24 calc(c * 1.6) h);
 
     /* A tint carries far less contrast over a .17 surface than over a .98 one,
        so selection keeps its own lightness here and its edge is pushed past the
