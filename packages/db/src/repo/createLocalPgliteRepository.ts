@@ -120,6 +120,7 @@ export const createLocalPgliteRepository = ({
         createScriptSnapshot: (scriptId, input) => snapshots.create(scriptId, input),
         updateScriptSnapshot: (scriptId, snapshotId, input) => snapshots.update(scriptId, snapshotId, input),
         deleteScriptSnapshot: (scriptId, snapshotId) => snapshots.delete(scriptId, snapshotId),
+        replaceScriptSnapshotPayload: (scriptId, snapshotId, input) => snapshots.replacePayload(scriptId, snapshotId, input),
         loadScriptSnapshotPayload: (scriptId, snapshotId) => snapshots.loadPayload(scriptId, snapshotId),
         listScriptLocations: scriptId => locations.list(scriptId),
         listScriptSceneLocations: scriptId => locations.listSceneAssignments(scriptId),

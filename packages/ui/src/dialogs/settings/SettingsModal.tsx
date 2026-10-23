@@ -17,6 +17,7 @@ export const SettingsModal = ({
     size = 'workspace',
     groups,
     activePanelId,
+    notice,
     expandedItemIds = NO_EXPANDED_ITEMS,
     onClose,
     onSelectPanel,
@@ -42,6 +43,7 @@ export const SettingsModal = ({
                     Close
                 </button>
             </header>
+            {notice ? <div className={styles.notice}>{notice}</div> : null}
             <div className={styles.body}>
                 <aside
                     className={styles.sidebar}

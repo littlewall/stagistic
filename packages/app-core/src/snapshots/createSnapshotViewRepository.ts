@@ -17,9 +17,31 @@ export interface SnapshotViewRepositoryDeps {
     fileStorage: FileStorage,
 }
 
+/*
+ * The content of a stored state never changes, but its settings may: a
+ * version often has to be printed with a corrected title page or a different
+ * block layout. These writes reach the view database; the caller saves them
+ * back into the snapshot from `onSettingsWrite`.
+ */
+const SNAPSHOT_SETTINGS_WRITES: ReadonlySet<keyof ScriptRepository> = new Set<keyof ScriptRepository>([
+    'saveScriptSettings',
+    'deleteScriptSettings',
+    'saveTitlePage',
+    'deleteTitlePage',
+    'renameScriptTitle',
+]);
+
+/** Page and scene counts follow the settings; recomputing them is not an edit by itself. */
+const SNAPSHOT_DERIVED_WRITES: ReadonlySet<keyof ScriptRepository> = new Set<keyof ScriptRepository>(['saveSummaryMetadata']);
+
+export interface SnapshotViewOptions {
+    /** A settings write or, after one, a recomputed summary reached the view database. */
+    onSettingsWrite?: () => void,
+}
+
 export interface SnapshotViewRepository {
-    /** Load a stored script state and return a read-only repository over it. */
-    open: (snapshot: StepkgSnapshot) => Promise<ScriptRepository>,
+    /** Load a stored script state and return a repository over it that only lets settings change. */
+    open: (snapshot: StepkgSnapshot, options?: SnapshotViewOptions) => Promise<ScriptRepository>,
 }
 
 /**
@@ -42,7 +64,7 @@ export const createSnapshotViewRepository = ({createLocalDb, fileStorage}: Snaps
         return repositoryPromise;
     };
 
-    const load = async (snapshot: StepkgSnapshot) => {
+    const load = async (snapshot: StepkgSnapshot, {onSettingsWrite}: SnapshotViewOptions = {}) => {
         const repository = await getRepository();
 
         for (const script of await repository.listScripts()) {
@@ -51,12 +73,23 @@ export const createSnapshotViewRepository = ({createLocalDb, fileStorage}: Snaps
 
         await repository.createScriptFromPackage(mapStepkgSnapshotToPackageWrite(snapshot, 'existing-storage-keys'));
 
-        return createReadOnlyScriptRepository(repository);
+        let hasSettingsEdits = false;
+
+        return createReadOnlyScriptRepository(repository, {
+            writable: new Set([...SNAPSHOT_SETTINGS_WRITES, ...SNAPSHOT_DERIVED_WRITES]),
+            onWrite: operation => {
+                hasSettingsEdits ||= SNAPSHOT_SETTINGS_WRITES.has(operation);
+
+                if (hasSettingsEdits) {
+                    onSettingsWrite?.();
+                }
+            },
+        });
     };
 
     return {
-        open: snapshot => {
-            const opened = queue.then(() => load(snapshot));
+        open: (snapshot, options) => {
+            const opened = queue.then(() => load(snapshot, options));
 
             queue = opened.catch(() => undefined);
 

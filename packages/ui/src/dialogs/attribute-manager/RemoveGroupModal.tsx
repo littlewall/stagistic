@@ -1,5 +1,4 @@
-import type {ReactNode} from 'react';
-
+import type {ChangeSummaryItem} from '../../molecules/ChangeSummary/ChangeSummary';
 import {ConfirmModal} from '../modal/ConfirmModal';
 
 export interface RemoveGroupModalProps {
@@ -19,15 +18,27 @@ export const RemoveGroupModal = ({
     onClose,
     onConfirm,
 }: RemoveGroupModalProps) => {
-    const notes: ReactNode[] = usageCount > 0 ? ['Its occurrences stay in the script and become unconfirmed characters.'] : [];
+    const changes: ChangeSummaryItem[] = [
+        {
+            tone: 'out',
+            label: 'Deleted',
+            text: 'The group record and its membership',
+        },
+        ...usageCount > 0 ? [
+            {
+                tone: 'kept' as const,
+                label: 'Kept',
+                text: 'Its occurrences in the script, as unconfirmed characters',
+            },
+        ] : [],
+    ];
 
     return (
         <ConfirmModal
             isOpen={isOpen}
             ariaLabel="Remove group"
             title={<>Remove {groupName}?</>}
-            description="This deletes the group record and its membership."
-            notes={notes}
+            changes={changes}
             confirmLabel="Remove"
             isPending={isRemoving}
             onClose={onClose}

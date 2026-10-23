@@ -5,7 +5,7 @@ import {
 } from '@stagistic/app-core';
 import {isApplePlatform} from '@stagistic/shared';
 import {
-    Notice,
+    ReadOnlyNotice,
     SettingsModal,
     useKeyedFieldDrafts,
 } from '@stagistic/ui';
@@ -30,8 +30,12 @@ import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {ScriptEditorSettingsPanel} from './panels';
 import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
-import styles from './ScriptSettingsModalProvider.module.css';
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
+import {
+    readOnlyScriptSettingsMenu,
+    SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
+    SCRIPT_SETTINGS_PANEL_DANGER_ZONE,
+    SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
+} from './settingsMenu';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 
 const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const));
@@ -180,6 +184,10 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         applyDocumentChange,
     });
 
+    // A saved draft or version has no danger zone; a link to it opens the title page instead.
+    const shownPanelId = isReadOnly && activePanelId === SCRIPT_SETTINGS_PANEL_DANGER_ZONE
+        ? SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO
+        : activePanelId;
     const contextValue = useMemo<ScriptSettingsModalContextValue>(
         () => ({
             resolvedScriptSettings,
@@ -222,47 +230,46 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                 <SettingsModal
                     isOpen={isSettingsOpen}
                     title="Script settings"
-                    groups={groups}
-                    activePanelId={activePanelId}
+                    groups={isReadOnly ? readOnlyScriptSettingsMenu : groups}
+                    activePanelId={shownPanelId}
+                    notice={isReadOnly ? (
+                        <ReadOnlyNotice
+                            label={snapshot ? getScriptSnapshotLabel(snapshot) : null}
+                            message={`Changes apply to this ${snapshot?.kind === 'version' ? 'version' : 'draft'} only`}
+                        />
+                    ) : null}
                     expandedItemIds={expandedItemIds}
                     onClose={handleCloseSettings}
                     onSelectPanel={handleSelectSettingsPanel}
                     onToggleExpand={toggleExpanded}
                 >
                     <DraftSaveError error={draftSaveError} onRetry={retryFailedDrafts} />
-                    {isReadOnly ? (
-                        <Notice variant="empty" className={styles.readOnlyNotice}>
-                            {snapshot ? `${getScriptSnapshotLabel(snapshot)} is read-only.` : 'These settings are read-only.'}
-                        </Notice>
-                    ) : null}
-                    <div className={styles.panelContent} inert={isReadOnly}>
-                        <ScriptEditorSettingsPanel
-                            panelId={activePanelId}
-                            resolvedScriptSettings={resolvedScriptSettings}
-                            settingsOverride={effectiveScriptSettingsDraft}
-                            blockLabelByType={BLOCK_LABEL_BY_TYPE}
-                            shortcutPrefix={shortcutPrefix}
-                            elementsHandlers={{
-                                onResetBlockSettings: resetBlockSettings,
-                                onUpdateBlockSettings: updateBlockSettings,
-                            }}
-                            visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
-                            structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
-                            pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
-                            headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
-                            initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
-                            titlePageHandlers={{
-                                titlePageSettings: titlePageDraft,
-                                scriptTitle: scriptTitleDraft,
-                                onUpdateScriptTitle: updateScriptTitle,
-                                onUpdateTitlePage: updateTitlePage,
-                            }}
-                            dangerZoneHandlers={{
-                                scriptTitle: scriptTitleDraft,
-                                onDeleteScript: handleDeleteScript,
-                            }}
-                        />
-                    </div>
+                    <ScriptEditorSettingsPanel
+                        panelId={shownPanelId}
+                        resolvedScriptSettings={resolvedScriptSettings}
+                        settingsOverride={effectiveScriptSettingsDraft}
+                        blockLabelByType={BLOCK_LABEL_BY_TYPE}
+                        shortcutPrefix={shortcutPrefix}
+                        elementsHandlers={{
+                            onResetBlockSettings: resetBlockSettings,
+                            onUpdateBlockSettings: updateBlockSettings,
+                        }}
+                        visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
+                        structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
+                        pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                        headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
+                        initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
+                        titlePageHandlers={{
+                            titlePageSettings: titlePageDraft,
+                            scriptTitle: scriptTitleDraft,
+                            onUpdateScriptTitle: updateScriptTitle,
+                            onUpdateTitlePage: updateTitlePage,
+                        }}
+                        dangerZoneHandlers={{
+                            scriptTitle: scriptTitleDraft,
+                            onDeleteScript: handleDeleteScript,
+                        }}
+                    />
                 </SettingsModal>
                 <ScriptAttributeManagerModal
                     currentScriptId={currentScriptId}

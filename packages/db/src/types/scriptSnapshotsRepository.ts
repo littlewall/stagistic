@@ -25,11 +25,19 @@ export interface UpdateScriptSnapshotInput {
     kind?: 'version',
 }
 
+/** New serialized state of a snapshot whose settings were edited; content is unchanged. */
+export interface ReplaceScriptSnapshotPayloadInput {
+    payload: Blob,
+    documentSchemaVersion: number,
+    summaryMetadata: ScriptSummaryMetadata | null,
+}
+
 export interface ScriptSnapshotsRepository {
     list(scriptId: string): Promise<ScriptSnapshot[]>,
     get(scriptId: string, snapshotId: string): Promise<ScriptSnapshot | null>,
     create(scriptId: string, input: CreateScriptSnapshotInput): Promise<ScriptSnapshot | null>,
     update(scriptId: string, snapshotId: string, input: UpdateScriptSnapshotInput): Promise<ScriptSnapshot | null>,
     delete(scriptId: string, snapshotId: string): Promise<void>,
+    replacePayload(scriptId: string, snapshotId: string, input: ReplaceScriptSnapshotPayloadInput): Promise<ScriptSnapshot | null>,
     loadPayload(scriptId: string, snapshotId: string): Promise<Blob | null>,
 }

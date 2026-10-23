@@ -175,6 +175,13 @@
     }
 }
 
+.notice {
+    flex: 0 0 auto;
+    padding: var(--space-md) var(--space-2xl);
+    background: var(--color-surface-read-only);
+    border-bottom: 1px solid var(--color-border);
+}
+
 .header {
     composes: header from '../shared/workspaceModal.module.css';
 }

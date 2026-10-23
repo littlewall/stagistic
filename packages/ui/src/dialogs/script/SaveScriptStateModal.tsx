@@ -1,6 +1,7 @@
 import {type FormEvent, useState} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
+import type {ChangeSummaryItem} from '../../molecules/ChangeSummary/ChangeSummary';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
@@ -24,17 +25,39 @@ export interface SaveScriptStateModalProps {
 
 const COPY: Record<ScriptStateKind, {
     title: string,
-    description: string,
+    changes: ChangeSummaryItem[],
     submitLabel: string,
 }> = {
     draft: {
         title: 'Save as new draft',
-        description: 'Keeps the script as it is now under the next draft number. You keep writing in the current script.',
+        changes: [
+            {
+                tone: 'in',
+                label: 'Saved',
+                text: 'The script as it is now, under the next draft number',
+            },
+            {
+                tone: 'kept',
+                label: 'Unchanged',
+                text: 'The current script — you keep writing in it',
+            },
+        ],
         submitLabel: 'Save draft',
     },
     version: {
         title: 'Save as version',
-        description: 'Keeps the script as it is now under a name, e.g. for a festival or a tour. You keep writing in the current script.',
+        changes: [
+            {
+                tone: 'in',
+                label: 'Saved',
+                text: 'The script as it is now, under a name, e.g. for a festival or a tour',
+            },
+            {
+                tone: 'kept',
+                label: 'Unchanged',
+                text: 'The current script — you keep writing in it',
+            },
+        ],
         submitLabel: 'Save version',
     },
 };
@@ -54,6 +77,7 @@ export const SaveScriptStateModal = ({
 
     if (previous.isOpen !== isOpen || previous.kind !== kind) {
         setPrevious({isOpen, kind});
+
         if (isOpen) {
             setDetails({name: '', note: ''});
         }
@@ -69,7 +93,7 @@ export const SaveScriptStateModal = ({
 
     return (
         <ModalDialog isOpen={isOpen} onClose={onClose} ariaLabel={copy.title}>
-            <ModalHeader title={copy.title} description={copy.description} />
+            <ModalHeader title={copy.title} changes={copy.changes} />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <ScriptStateDetailsFields
                     kind={kind}

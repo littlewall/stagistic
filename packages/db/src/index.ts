@@ -59,6 +59,7 @@ export type {
     ListScriptsOptions,
     MusicAttachmentUpload,
     RenameScriptInput,
+    ReplaceScriptSnapshotPayloadInput,
     ScriptCommentsRepository,
     ScriptCommentThreadSnapshot,
     ScriptEditorSettingsRecord,
@@ -105,6 +106,7 @@ export {
     createReadOnlyScriptRepository,
     createReadThroughFileStorage,
     ReadOnlyScriptRepositoryError,
+    type ReadOnlyScriptRepositoryOptions,
 } from './repo/readOnlyScriptRepository';
 
 // ─── Reactive sources ──────────────────────────────────────────────────────────

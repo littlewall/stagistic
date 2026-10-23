@@ -3,13 +3,14 @@ import type {ReactNode} from 'react';
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
-import {ModalHeader} from './ModalHeader';
+import {ModalHeader, type ModalHeaderProps} from './ModalHeader';
 
 export interface ConfirmModalProps {
     isOpen: boolean,
     ariaLabel: string,
     title: ReactNode,
     description?: ReactNode,
+    changes?: ModalHeaderProps['changes'],
     notes?: ReactNode[],
     confirmLabel: string,
     cancelLabel?: string,
@@ -25,6 +26,7 @@ export const ConfirmModal = ({
     ariaLabel,
     title,
     description,
+    changes,
     notes,
     confirmLabel,
     cancelLabel = 'Cancel',
@@ -45,6 +47,7 @@ export const ConfirmModal = ({
         <ModalHeader
             title={title}
             description={description}
+            changes={changes}
             notes={notes}
         />
         <ModalActions spacing="lg">

@@ -116,3 +116,11 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
         ],
     },
 ];
+
+const DANGER_ZONE_ITEM_IDS = new Set(['danger-zone-separator', SCRIPT_SETTINGS_PANEL_DANGER_ZONE]);
+
+/** A saved draft or version cannot be deleted from its settings, so the danger zone goes. */
+export const readOnlyScriptSettingsMenu: SettingsNavGroup[] = scriptSettingsMenu.map(group => ({
+    ...group,
+    items: group.items.filter(item => !DANGER_ZONE_ITEM_IDS.has(item.id)),
+}));

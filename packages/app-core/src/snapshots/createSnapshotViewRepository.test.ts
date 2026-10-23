@@ -14,7 +14,11 @@ import {
 } from 'vite-plus/test';
 
 import {createSnapshotViewRepository} from './createSnapshotViewRepository';
-import {createScriptSnapshotFromCurrent, loadScriptSnapshot} from './scriptSnapshotOperations';
+import {
+    createScriptSnapshotFromCurrent,
+    loadScriptSnapshot,
+    saveScriptSnapshotFromView,
+} from './scriptSnapshotOperations';
 
 const SCRIPT_ID = 'script-1';
 
@@ -69,26 +73,78 @@ const setup = async () => {
     };
 };
 
-const mutations = (repository: ScriptRepository) => [
+const contentMutations = (repository: ScriptRepository) => [
     () => repository.saveLatest(SCRIPT_ID, createEmptyScriptDocument()),
-    () => repository.renameScriptTitle(SCRIPT_ID, 'Changed'),
     () => repository.setActiveBlock(SCRIPT_ID, null),
     () => repository.createScriptMusic(SCRIPT_ID, {title: 'Song', kind: 'song'}),
-    () => repository.saveScriptSettings(SCRIPT_ID, {}),
     () => repository.deleteScript(SCRIPT_ID),
 ];
 
 describe('snapshot view repository', () => {
-    it('serves the stored state and rejects every mutation', async () => {
+    it('serves the stored state and rejects every content mutation', async () => {
         const {views, snapshotOf} = await setup();
         const repository = await views.open(await snapshotOf('Draft one title'));
 
         expect((await repository.getScriptSummary(SCRIPT_ID))?.title).toBe('Draft one title');
         expect(await repository.loadLatest(SCRIPT_ID)).not.toBeNull();
 
-        for (const mutate of mutations(repository)) {
+        for (const mutate of contentMutations(repository)) {
             await expect(mutate()).rejects.toBeInstanceOf(ReadOnlyScriptRepositoryError);
         }
+    });
+
+    it('lets settings change and saves them back into the snapshot', async () => {
+        const {live, views} = await setup();
+        const snapshot = requireValue(await createScriptSnapshotFromCurrent({
+            repository: live,
+            scriptId: SCRIPT_ID,
+            kind: 'version',
+            name: 'Festival',
+        }));
+        const loaded = await loadScriptSnapshot({
+            repository: live,
+            scriptId: SCRIPT_ID,
+            snapshotId: snapshot.id,
+        });
+
+        if (!loaded.ok) throw new Error('snapshot did not load');
+
+        let writes = 0;
+        const repository = await views.open(loaded.snapshot, {
+            onSettingsWrite: () => {
+                writes += 1;
+            },
+        });
+
+        await repository.saveSummaryMetadata(SCRIPT_ID, createEmptyScriptDocument(), {
+            pageCount: 1,
+            sceneCount: 0,
+            actSceneCounts: [],
+            unassignedSceneCount: 0,
+        });
+
+        // A recomputed summary alone is not an edit.
+        expect(writes).toBe(0);
+
+        await repository.renameScriptTitle(SCRIPT_ID, 'The door (festival cut)');
+
+        expect(writes).toBe(1);
+
+        await saveScriptSnapshotFromView({
+            viewRepository: repository,
+            liveRepository: live,
+            scriptId: SCRIPT_ID,
+            snapshotId: snapshot.id,
+        });
+
+        const reloaded = await loadScriptSnapshot({
+            repository: live,
+            scriptId: SCRIPT_ID,
+            snapshotId: snapshot.id,
+        });
+
+        expect(reloaded.ok && reloaded.snapshot.script.title).toBe('The door (festival cut)');
+        expect((await live.getScriptSummary(SCRIPT_ID))?.title).toBe('The door');
     });
 
     it('reuses one database and replaces the previously opened state', async () => {

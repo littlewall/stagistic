@@ -30,6 +30,19 @@ const readCurrentSnapshot = async (repository: ScriptRepository, scriptId: strin
     return source;
 };
 
+/** Serialized state of a script, with the metadata a snapshot row keeps beside it. */
+const encodeSnapshotState = async (repository: ScriptRepository, scriptId: string) => {
+    const source = await readCurrentSnapshot(repository, scriptId);
+    const payload = encodeStepkgSnapshotPayload(mapScriptPackageSourceToStepkg(source));
+
+    return {
+        source,
+        payload: new Blob([toArrayBuffer(payload)], {type: 'application/octet-stream'}),
+        documentSchemaVersion: SCRIPT_DOCUMENT_SCHEMA_VERSION,
+        summaryMetadata: source.script.summaryMetadata ?? buildScriptSummaryMetadata(source.document),
+    };
+};
+
 export interface CreateScriptSnapshotArgs {
     repository: ScriptRepository,
     scriptId: string,
@@ -50,18 +63,51 @@ export const createScriptSnapshotFromCurrent = async ({
 }: CreateScriptSnapshotArgs): Promise<ScriptSnapshot | null> => {
     await flush?.();
 
-    const source = await readCurrentSnapshot(repository, scriptId);
-    const payload = encodeStepkgSnapshotPayload(mapScriptPackageSourceToStepkg(source));
+    const {
+        source,
+        payload,
+        documentSchemaVersion,
+        summaryMetadata,
+    } = await encodeSnapshotState(repository, scriptId);
 
     return repository.createScriptSnapshot(scriptId, {
         id: repository.allocateScriptSnapshotId(),
         kind,
         name,
         note,
-        payload: new Blob([toArrayBuffer(payload)], {type: 'application/octet-stream'}),
-        documentSchemaVersion: SCRIPT_DOCUMENT_SCHEMA_VERSION,
-        summaryMetadata: source.script.summaryMetadata ?? buildScriptSummaryMetadata(source.document),
+        payload,
+        documentSchemaVersion,
+        summaryMetadata,
         attachmentStorageKeys: source.attachments.map(attachment => attachment.storageKey),
+    });
+};
+
+/**
+ * Save the settings edited in a snapshot view back into the snapshot. The view
+ * holds the only copy of the edit, so the whole state is re-serialized; the
+ * content inside it cannot have changed.
+ */
+export const saveScriptSnapshotFromView = async ({
+    viewRepository,
+    liveRepository,
+    scriptId,
+    snapshotId,
+}: {
+    viewRepository: ScriptRepository,
+    liveRepository: ScriptRepository,
+    scriptId: string,
+    snapshotId: string,
+}): Promise<ScriptSnapshot | null> => {
+    const {
+        payload,
+        documentSchemaVersion,
+        summaryMetadata,
+    } = await encodeSnapshotState(viewRepository, scriptId);
+
+    return liveRepository.replaceScriptSnapshotPayload(scriptId, snapshotId, {
+        payload,
+        documentSchemaVersion,
+        summaryMetadata,
     });
 };
 

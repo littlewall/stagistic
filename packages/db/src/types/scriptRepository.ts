@@ -25,7 +25,11 @@ import type {
 } from './';
 import type {ScriptPackageSource} from './scriptPackageSource';
 import type {ScriptPackageWrite} from './scriptPackageWrite';
-import type {CreateScriptSnapshotInput, UpdateScriptSnapshotInput} from './scriptSnapshotsRepository';
+import type {
+    CreateScriptSnapshotInput,
+    ReplaceScriptSnapshotPayloadInput,
+    UpdateScriptSnapshotInput,
+} from './scriptSnapshotsRepository';
 
 export type {
     ScriptCharacterGenderOption,
@@ -35,6 +39,7 @@ export type {
 export type {ScriptPackageWrite} from './scriptPackageWrite';
 export type {
     CreateScriptSnapshotInput,
+    ReplaceScriptSnapshotPayloadInput,
     ScriptSnapshotsRepository,
     UpdateScriptSnapshotInput,
 } from './scriptSnapshotsRepository';
@@ -237,6 +242,8 @@ export interface ScriptRepository {
     createScriptSnapshot(scriptId: string, input: CreateScriptSnapshotInput): Promise<ScriptSnapshot | null>,
     updateScriptSnapshot(scriptId: string, snapshotId: string, input: UpdateScriptSnapshotInput): Promise<ScriptSnapshot | null>,
     deleteScriptSnapshot(scriptId: string, snapshotId: string): Promise<void>,
+    /** Store a snapshot's re-serialized state after its settings were edited; the old blob is collected later. */
+    replaceScriptSnapshotPayload(scriptId: string, snapshotId: string, input: ReplaceScriptSnapshotPayloadInput): Promise<ScriptSnapshot | null>,
     loadScriptSnapshotPayload(scriptId: string, snapshotId: string): Promise<Blob | null>,
     listScriptLocations(scriptId: string): Promise<ScriptLocation[]>,
     listScriptSceneLocations(scriptId: string): Promise<ScriptSceneLocationAssignment[]>,

@@ -99,7 +99,18 @@ export const ScriptStatesModal = ({
                 isOpen={deleteTarget !== null}
                 ariaLabel={`Delete ${deleteTarget?.label ?? ''}`}
                 title={`Delete ${deleteTarget?.label ?? ''}?`}
-                description="The stored state is removed permanently. The current script does not change."
+                changes={[
+                    {
+                        tone: 'out',
+                        label: 'Deleted',
+                        text: `${deleteTarget?.label ?? 'This state'}, permanently`,
+                    },
+                    {
+                        tone: 'kept',
+                        label: 'Unchanged',
+                        text: 'The current script',
+                    },
+                ]}
                 confirmLabel="Delete"
                 isPending={isPending}
                 lockWhilePending

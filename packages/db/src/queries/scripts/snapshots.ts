@@ -87,6 +87,33 @@ export const updateScriptSnapshot = async (
         .where(and(eq(scriptSnapshots.scriptId, payload.scriptId), eq(scriptSnapshots.id, payload.snapshotId)));
 };
 
+export const replaceScriptSnapshotPayload = async (
+    db: DbClient,
+    payload: {
+        scriptId: string,
+        snapshotId: string,
+        payloadStorageKey: string,
+        payloadByteLength: number,
+        documentSchemaVersion: number,
+        summaryMetadata: InsertScriptSnapshotRow['summaryMetadata'],
+        updatedAt: number,
+    },
+) => {
+    const rows = await db
+        .update(scriptSnapshots)
+        .set({
+            payloadStorageKey: payload.payloadStorageKey,
+            payloadByteLength: payload.payloadByteLength,
+            documentSchemaVersion: payload.documentSchemaVersion,
+            summaryMetadata: payload.summaryMetadata,
+            updatedAt: payload.updatedAt,
+        })
+        .where(and(eq(scriptSnapshots.scriptId, payload.scriptId), eq(scriptSnapshots.id, payload.snapshotId)))
+        .returning({id: scriptSnapshots.id});
+
+    return rows.length > 0;
+};
+
 export const deleteScriptSnapshot = async (db: DbClient, payload: {scriptId: string, snapshotId: string}) => {
     await db
         .delete(scriptSnapshots)

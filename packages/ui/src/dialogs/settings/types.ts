@@ -47,6 +47,8 @@ export interface SettingsModalProps {
     size?: 'workspace' | 'compact',
     groups: SettingsNavGroup[],
     activePanelId: string,
+    /** A strip between the header and the body, e.g. the read-only notice of a stored draft or version. */
+    notice?: ReactNode,
     expandedItemIds?: string[],
     onClose: () => void,
     onSelectPanel: (panelId: string) => void,

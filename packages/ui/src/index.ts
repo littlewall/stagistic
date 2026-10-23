@@ -163,6 +163,12 @@ export {
     type SettingsNavItem,
     type SettingsNavSubItem,
 } from './dialogs/settings/SettingsModal';
+export {
+    ChangeSummary,
+    type ChangeSummaryItem,
+    type ChangeSummaryProps,
+    type ChangeTone,
+} from './molecules/ChangeSummary/ChangeSummary';
 
 // ─── Dialogs: script ────────────────────────────────────────────────────────
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';

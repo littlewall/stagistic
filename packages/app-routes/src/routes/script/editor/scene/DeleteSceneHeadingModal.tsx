@@ -17,7 +17,18 @@ export const DeleteSceneHeadingModal = ({
         isOpen={isOpen}
         ariaLabel="Delete scene heading"
         title="Delete scene heading?"
-        description="Its synopsis and places will be removed. Blocks in this scene stay and move under the previous scene."
+        changes={[
+            {
+                tone: 'out',
+                label: 'Removed',
+                text: 'Its synopsis and places',
+            },
+            {
+                tone: 'kept',
+                label: 'Kept',
+                text: 'Blocks in this scene, moved under the previous scene',
+            },
+        ]}
         confirmLabel="Delete heading"
         isPending={isDeleting}
         lockWhilePending

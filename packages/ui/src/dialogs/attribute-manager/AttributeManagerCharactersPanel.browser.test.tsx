@@ -271,11 +271,11 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         await page.elementLocator(findButtonByText('Apply')).click();
         expect(onSetGroupColor).toHaveBeenCalledWith('group-1', expect.any(String));
         await page.elementLocator(await waitForElement('[aria-label="Remove ALL"]')).click();
-        expect(document.body.textContent).toContain('Its occurrences stay in the script and become unconfirmed characters.');
+        expect(document.body.textContent).toContain('Its occurrences in the script, as unconfirmed characters');
         await page.elementLocator(findButtonByText('Cancel')).click();
         await page.elementLocator(findButtonByText('ENSEMBLE')).click();
         await page.elementLocator(await waitForElement('[aria-label="Remove ENSEMBLE"]')).click();
-        expect(document.body.textContent).not.toContain('Its occurrences stay in the script and become unconfirmed characters.');
+        expect(document.body.textContent).not.toContain('Its occurrences in the script, as unconfirmed characters');
     });
 
     it('restores confirmed group color when persistence rejects', async () => {

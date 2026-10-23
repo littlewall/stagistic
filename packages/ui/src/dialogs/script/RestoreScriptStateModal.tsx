@@ -62,18 +62,47 @@ export const RestoreScriptStateModal = ({
         ? (
             <ModalHeader
                 title={`Restore ${stateLabel}?`}
-                description={`The script returns to ${stateLabel}. The current state is saved as a new draft first, so nothing is lost.`}
-                notes={[
-                    'Replaced: text, acts and scenes, characters and music.',
-                    'Kept: title, settings, title page and other drafts and versions.',
-                    'Comments stay only where their text exists in the restored script.',
+                description={`The script returns to ${stateLabel}.`}
+                changes={[
+                    {
+                        tone: 'in',
+                        label: 'Restored',
+                        text: 'Text, acts and scenes, characters and music',
+                    },
+                    {
+                        tone: 'kept',
+                        label: 'Kept',
+                        text: 'Title, settings, title page, other drafts and versions',
+                    },
+                    {
+                        tone: 'kept',
+                        label: 'Saved first',
+                        text: 'The current state, as a new draft — nothing is lost',
+                    },
+                    {
+                        tone: 'out',
+                        label: 'Dropped',
+                        text: 'Comments on text that is not in the restored script',
+                    },
                 ]}
             />
         )
         : (
             <ModalHeader
                 title={`Restore ${stateLabel} as a new script`}
-                description="Creates a separate script from this state. The current script does not change."
+                description="Creates a separate script from this state."
+                changes={[
+                    {
+                        tone: 'in',
+                        label: 'Copied',
+                        text: `Everything in ${stateLabel}, including its settings and title page`,
+                    },
+                    {
+                        tone: 'kept',
+                        label: 'Unchanged',
+                        text: 'The current script',
+                    },
+                ]}
             />
         );
 

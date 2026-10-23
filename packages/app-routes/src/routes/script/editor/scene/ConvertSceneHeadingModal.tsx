@@ -17,7 +17,18 @@ export const ConvertSceneHeadingModal = ({
         isOpen={isOpen}
         ariaLabel="Convert scene heading"
         title="Convert scene heading?"
-        description="Its synopsis and places will be removed. The heading text stays as the new block type."
+        changes={[
+            {
+                tone: 'out',
+                label: 'Removed',
+                text: 'Its synopsis and places',
+            },
+            {
+                tone: 'kept',
+                label: 'Kept',
+                text: 'The heading text, as the new block type',
+            },
+        ]}
         confirmLabel="Convert heading"
         isPending={isConverting}
         lockWhilePending

@@ -210,6 +210,60 @@ export const createSnapshotHandlers = ({
         }
     };
 
+    /*
+     * The previous payload blob is left for `collectUnreferencedFiles`: deleting
+     * it here would lose the snapshot if the row update did not reach disk.
+     */
+    const replacePayload: ScriptSnapshotsRepository['replacePayload'] = async (scriptId, snapshotId, input) => {
+        const db = await getDb();
+        const now = Date.now();
+        const payloadStorageKey = await fileStorage.save(input.payload);
+        let isReplaced: boolean;
+
+        try {
+            isReplaced = await db.transaction(async tx => {
+                const replaced = await dbQueries.replaceScriptSnapshotPayload(tx, {
+                    scriptId,
+                    snapshotId,
+                    payloadStorageKey,
+                    payloadByteLength: input.payload.size,
+                    documentSchemaVersion: input.documentSchemaVersion,
+                    summaryMetadata: input.summaryMetadata,
+                    updatedAt: now,
+                });
+
+                if (replaced) {
+                    await recordOutbox({
+                        scriptId,
+                        entityKey: `snapshot:${snapshotId}`,
+                        opType: 'snapshot.replacePayload',
+                        occurredAt: now,
+                        payloadJson: JSON.stringify({
+                            scriptId,
+                            snapshotId,
+                            updatedAt: now,
+                        }),
+                    }, tx);
+                }
+
+                return replaced;
+            });
+        } catch (error) {
+            await deleteBlobsBestEffort([payloadStorageKey], 'an uncommitted snapshot payload');
+            throw error;
+        }
+
+        if (!isReplaced) {
+            await deleteBlobsBestEffort([payloadStorageKey], 'a payload for a missing snapshot');
+
+            return null;
+        }
+
+        await syncDb();
+
+        return get(scriptId, snapshotId);
+    };
+
     const loadPayload: ScriptSnapshotsRepository['loadPayload'] = async (scriptId, snapshotId) => {
         const row = await dbQueries.getScriptSnapshotById(await getDb(), {scriptId, snapshotId});
 
@@ -222,6 +276,7 @@ export const createSnapshotHandlers = ({
         create,
         update,
         delete: remove,
+        replacePayload,
         loadPayload,
     };
 };

@@ -324,7 +324,7 @@ describe('ScriptAttributeManagerModal group actions', () => {
         expect(handleReplaceGroupMembers).toHaveBeenCalledWith('group-1', ['char-1']);
 
         await page.elementLocator(await waitForElement('[aria-label="Remove ALL"]')).click();
-        expect(document.body.textContent).toContain('become unconfirmed characters');
+        expect(document.body.textContent).toContain('as unconfirmed characters');
 
         await page.elementLocator(requireValue(findButton('Remove'))).click();
         expect(handleDeleteGroup).toHaveBeenCalledWith('group-1');

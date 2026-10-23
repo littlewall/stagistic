@@ -34,6 +34,7 @@ import {
 import {AppHeader} from '../../layout/AppHeader';
 import styles from './ScriptWorkspaceRoute.module.css';
 import {ScriptSettingsModalProvider} from './settings/ScriptSettingsModalProvider';
+import {useSnapshotSettingsSaver} from './states/useSnapshotSettingsSaver';
 import {
     getScriptBasePath,
     type ScriptAccess,
@@ -155,6 +156,7 @@ const SnapshotScriptWorkspace = ({scriptId, snapshotId}: {scriptId: string, snap
     const {snapshots, isLoading: areSnapshotsLoading} = useScriptSnapshots(scriptId, liveRepository);
     const snapshot: ScriptSnapshot | null = snapshots.find(item => item.id === snapshotId) ?? null;
     const [viewState, setViewState] = useState<SnapshotViewState>({status: 'loading'});
+    const settingsSaver = useSnapshotSettingsSaver(liveRepository, scriptId, snapshotId);
 
     useEffect(() => {
         let isActive = true;
@@ -182,7 +184,10 @@ const SnapshotScriptWorkspace = ({scriptId, snapshotId}: {scriptId: string, snap
                 return;
             }
 
-            const repository = await snapshotViews.open(loaded.snapshot);
+            // Content stays read-only; settings edits are saved back into the snapshot.
+            const repository = await snapshotViews.open(loaded.snapshot, {onSettingsWrite: settingsSaver.request});
+
+            settingsSaver.bind(repository);
 
             if (isActive) {
                 setViewState({status: 'ready', repository});
@@ -203,6 +208,7 @@ const SnapshotScriptWorkspace = ({scriptId, snapshotId}: {scriptId: string, snap
     }, [
         liveRepository,
         scriptId,
+        settingsSaver,
         snapshotId,
         snapshotViews,
     ]);

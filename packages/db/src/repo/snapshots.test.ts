@@ -189,6 +189,34 @@ describe('script snapshots', () => {
         expect(await fileStorage.get(requireValue(snapshot).payloadStorageKey)).toBeNull();
     });
 
+    it('replaces a snapshot payload and keeps the old blob until collection', async () => {
+        const {
+            repository,
+            fileStorage,
+            snapshotInput,
+        } = await setup();
+        const snapshot = requireValue(await repository.createScriptSnapshot(SCRIPT_ID, snapshotInput()));
+        const replaced = requireValue(await repository.replaceScriptSnapshotPayload(SCRIPT_ID, snapshot.id, {
+            payload: new Blob(['edited settings']),
+            documentSchemaVersion: snapshot.documentSchemaVersion,
+            summaryMetadata: null,
+        }));
+
+        expect(await (await repository.loadScriptSnapshotPayload(SCRIPT_ID, snapshot.id))?.text()).toBe('edited settings');
+        expect(replaced.payloadByteLength).toBe(15);
+        expect(replaced.number).toBe(snapshot.number);
+        expect(await fileStorage.get(snapshot.payloadStorageKey)).not.toBeNull();
+
+        await repository.collectUnreferencedFiles({minAgeMs: 0});
+
+        expect(await fileStorage.get(snapshot.payloadStorageKey)).toBeNull();
+        expect(await repository.replaceScriptSnapshotPayload(SCRIPT_ID, 'missing', {
+            payload: new Blob(['x']),
+            documentSchemaVersion: 4,
+            summaryMetadata: null,
+        })).toBeNull();
+    });
+
     it('keeps attachment blobs referenced by a snapshot until the last reference goes', async () => {
         const {
             repository,

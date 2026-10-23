@@ -1,6 +1,9 @@
 export {buildSnapshotRestoreWrite} from './buildSnapshotRestoreWrite';
+export {createCoalescingSaver} from './createCoalescingSaver';
+export {createSnapshotSettingsSaver} from './createSnapshotSettingsSaver';
 export {
     createSnapshotViewRepository,
+    type SnapshotViewOptions,
     type SnapshotViewRepository,
     type SnapshotViewRepositoryDeps,
 } from './createSnapshotViewRepository';
@@ -14,5 +17,6 @@ export {
     restoreScriptSnapshotAsNew,
     type RestoreScriptSnapshotAsNewResult,
     type RestoreScriptSnapshotResult,
+    saveScriptSnapshotFromView,
 } from './scriptSnapshotOperations';
 export {useScriptSnapshots} from './useScriptSnapshots';

@@ -22,14 +22,18 @@ export const UnassignMusicModal = ({
                 {musicTitle ? ` ${musicTitle}` : ' music'}?
             </>
         )}
-        description={(
-            <>
-                This removes
-                {musicTitle ? <strong>{` ${musicTitle} `}</strong> : ' the music '}
-                from the script, including its out marker if one exists. The music stays
-                in the Music list for reuse.
-            </>
-        )}
+        changes={[
+            {
+                tone: 'out',
+                label: 'Removed',
+                text: 'Its place in the script, including the out marker if there is one',
+            },
+            {
+                tone: 'kept',
+                label: 'Kept',
+                text: 'The music in the Music list, for reuse',
+            },
+        ]}
         confirmLabel="Unassign music"
         onClose={onClose}
         onConfirm={onConfirm}
