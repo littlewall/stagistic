@@ -106,7 +106,7 @@
         }
     }
 
-    & .actDeleteButton:focus-visible {
+    :global(:root[data-focus-ring-visible]) & .actDeleteButton:focus {
         opacity: 1;
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;

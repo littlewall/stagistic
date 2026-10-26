@@ -8,7 +8,11 @@ import {
     ScriptWorkspaceRoute,
     useAppBootstrap,
 } from '@stagistic/app-routes';
-import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
+import {
+    FocusVisibilityManager,
+    LoaderOverlay,
+    ToastProvider,
+} from '@stagistic/ui';
 import {
     Navigate,
     Route,
@@ -66,11 +70,14 @@ const BootedApp = () => {
 };
 
 const App = () => (
-    <UnsupportedScreenGate>
-        <PublicPreviewGate>
-            <BootedApp />
-        </PublicPreviewGate>
-    </UnsupportedScreenGate>
+    <>
+        <FocusVisibilityManager />
+        <UnsupportedScreenGate>
+            <PublicPreviewGate>
+                <BootedApp />
+            </PublicPreviewGate>
+        </UnsupportedScreenGate>
+    </>
 );
 
 export default App;

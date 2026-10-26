@@ -11,11 +11,6 @@
         opacity: .5;
     }
 
-    &[data-focus-visible] .box {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 2px;
-    }
-
     &[data-hovered]:not([data-disabled]) .box {
         border-color: var(--color-border-strong, var(--color-border));
     }
@@ -29,6 +24,11 @@
     &[data-selected] .mark,
     &[data-indeterminate] .mark {
         opacity: 1;
+    }
+
+    :global(:root[data-focus-ring-visible]) &[data-focused] .box {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
     }
 }
 

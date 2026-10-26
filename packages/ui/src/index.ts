@@ -143,6 +143,7 @@ export {
     type ScriptView,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
+export {FocusVisibilityManager} from './layout/FocusVisibilityManager';
 export {
     ScriptStateMenu,
     type ScriptStateMenuItem,

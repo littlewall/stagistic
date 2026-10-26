@@ -19,7 +19,7 @@
         cursor: pointer;
 
         &:hover,
-        &:focus-visible {
+        :global(:root[data-focus-ring-visible]) &:focus {
             transform: translateY(-1px);
             border-color: var(--color-border-strong);
             outline: none;
@@ -28,7 +28,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             &:hover,
-            &:focus-visible {
+            :global(:root[data-focus-ring-visible]) &:focus {
                 transform: none;
             }
         }

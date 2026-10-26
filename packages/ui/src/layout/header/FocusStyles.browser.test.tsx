@@ -9,6 +9,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {FocusVisibilityManager} from '../FocusVisibilityManager';
 import {ViewSwitcher} from './ViewSwitcher';
 
 let mountedRoot: Root | null = null;
@@ -33,7 +34,9 @@ describe('Header keyboard focus styles', () => {
 
         document.body.appendChild(host);
         mountedRoot = createRoot(host);
-        mountedRoot.render(<ViewSwitcher activeView="editor" onSelectView={() => {}} />);
+        mountedRoot.render(<><FocusVisibilityManager /><ViewSwitcher activeView="editor" onSelectView={() => {}} /></>);
+        await expect.poll(() => host.querySelector('button')).not.toBeNull();
+        await new Promise(resolve => requestAnimationFrame(resolve));
 
         await userEvent.tab();
         expectFocusRing(document.activeElement as HTMLElement);

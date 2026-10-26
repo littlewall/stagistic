@@ -101,7 +101,7 @@
         background: var(--menu-item-hover-bg);
     }
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }
@@ -193,7 +193,7 @@
 .closeButton {
     composes: close-button from '../shared/workspaceModal.module.css';
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }

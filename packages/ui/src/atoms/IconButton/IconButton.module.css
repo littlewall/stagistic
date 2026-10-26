@@ -17,14 +17,14 @@
         transform: scale(.96);
     }
 
-    &[data-focus-visible] {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
-    }
-
     &[data-disabled] {
         cursor: not-allowed;
         opacity: .4;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     & svg {

@@ -48,7 +48,7 @@
     padding: var(--space-2xl);
     text-align: center;
 
-    &[data-focus-visible] {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }

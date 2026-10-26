@@ -10,6 +10,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {FocusVisibilityManager} from '../../layout/FocusVisibilityManager';
 import {SettingsModal} from './SettingsModal';
 
 let mountedRoot: Root | null = null;
@@ -80,7 +81,7 @@ describe('SettingsModal', () => {
 
         document.body.appendChild(host);
         mountedRoot = createRoot(host);
-        mountedRoot.render(<SettingsHarness />);
+        mountedRoot.render(<><FocusVisibilityManager /><SettingsHarness /></>);
 
         await waitFor(() => document.querySelector('button') !== null);
 

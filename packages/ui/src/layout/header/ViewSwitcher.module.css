@@ -27,11 +27,6 @@
         color: var(--color-text);
     }
 
-    &[data-focus-visible] {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
-    }
-
     &[data-selected] {
         color: var(--color-text);
 
@@ -45,5 +40,10 @@
             background: var(--state-current-edge);
             border-radius: var(--state-current-bar-width) var(--state-current-bar-width) 0 0;
         }
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 }

@@ -21,7 +21,7 @@
 
     &[data-visible = 'true'],
     &:hover,
-    &:focus-within {
+    :global(:root[data-focus-ring-visible]) &:focus-within {
         opacity: 1;
     }
 }

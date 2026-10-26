@@ -127,7 +127,7 @@
         background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
     }
 
-    &[data-focus-visible] {
+    :global(:root[data-focus-ring-visible]) &:focus {
         background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
         border-color: transparent;
         outline: var(--focus-ring);
@@ -217,6 +217,9 @@
         &:focus {
             background: var(--layer-panel-bg);
             border-color: var(--layer-panel-edge);
+        }
+
+        :global(:root[data-focus-ring-visible]) &:focus {
             outline: var(--focus-ring);
             outline-offset: 1px;
         }
@@ -236,7 +239,7 @@
     opacity: 1;
     transition: opacity var(--duration-slow) var(--ease-standard);
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         border-radius: var(--radius-sm);
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);

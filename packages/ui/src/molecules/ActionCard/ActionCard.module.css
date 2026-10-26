@@ -27,15 +27,15 @@
         }
     }
 
-    &:focus-visible {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
-    }
-
     &:disabled {
         cursor: not-allowed;
         color: var(--color-text-muted);
         background: color-mix(in oklch, var(--color-surface) 70%, transparent);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     @media (prefers-reduced-motion: reduce) {

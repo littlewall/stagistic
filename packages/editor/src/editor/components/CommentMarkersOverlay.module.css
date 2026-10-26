@@ -18,10 +18,6 @@
         --comment-marker-color: oklch(from var(--base-selection) .5 c h);
     }
 
-    &:focus-visible {
-        box-shadow: 0 0 0 2px var(--color-focus-ring);
-    }
-
     /* Several comments on one block: a larger dot, no count (too small to read). */
     &[data-multiple = 'true'] {
         width: 10px;
@@ -30,5 +26,9 @@
 
     &[data-active = 'true'] {
         box-shadow: 0 0 0 2px var(--color-surface-paper), 0 0 0 3px var(--comment-marker-color);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        box-shadow: 0 0 0 2px var(--color-focus-ring);
     }
 }

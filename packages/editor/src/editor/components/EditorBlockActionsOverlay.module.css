@@ -264,7 +264,7 @@
         background: var(--state-hover);
     }
 
-    &:focus-visible .menuItemSurface {
+    :global(:root[data-focus-ring-visible]) &:focus .menuItemSurface {
         box-shadow: 0 0 0 2px var(--color-focus-ring);
     }
 

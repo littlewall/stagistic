@@ -10,6 +10,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {FocusVisibilityManager} from '../../../layout/FocusVisibilityManager';
 import {ImportDropZone} from './ImportDropZone';
 
 let mountedRoot: Root | null = null;
@@ -20,14 +21,16 @@ const renderDropZone = (onPickFile?: () => void) => {
     document.body.appendChild(host);
     mountedRoot = createRoot(host);
     mountedRoot.render(
-        <ImportDropZone
-            fileLabel="Choose a script"
-            hint="Drop a .stagistic or .stepkg file here, or click to browse."
-            acceptedExtensions={['.stagistic', '.stepkg']}
-            onDrop={() => {}}
-            onFileSelect={() => {}}
-            onPickFile={onPickFile}
-        />,
+        <><FocusVisibilityManager />
+            <ImportDropZone
+                fileLabel="Choose a script"
+                hint="Drop a .stagistic or .stepkg file here, or click to browse."
+                acceptedExtensions={['.stagistic', '.stepkg']}
+                onDrop={() => {}}
+                onFileSelect={() => {}}
+                onPickFile={onPickFile}
+            />
+        </>,
     );
 
     return host;
