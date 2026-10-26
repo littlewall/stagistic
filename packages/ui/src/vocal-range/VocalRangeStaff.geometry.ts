@@ -1,4 +1,4 @@
-import type {Pitch} from '@stagistic/script';
+import {ACCIDENTAL_GLYPHS, type Pitch} from '@stagistic/script';
 
 export const UNIT_PX = 5;
 export const STAFF_LINE_POSITIONS = [
@@ -34,4 +34,12 @@ export const accidentalAnchorY = (pitch: Pitch) => {
     return pitch.alter === -1
         ? FLAT_BOWL_CENTER_Y
         : ACCIDENTAL_CENTER_Y;
+};
+
+export const getAccidentalGlyph = (pitch: Pitch | null) => {
+    if (pitch?.alter === 1) {
+        return ACCIDENTAL_GLYPHS.sharp;
+    }
+
+    return pitch?.alter === -1 ? ACCIDENTAL_GLYPHS.flat : null;
 };

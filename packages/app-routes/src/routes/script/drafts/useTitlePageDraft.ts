@@ -19,11 +19,12 @@ const EMPTY_TITLE_PAGE: TitlePageSettings = {
 
 export const useTitlePageDraft = ({currentScriptId, repository}: UseTitlePageDraftArgs) => {
     const record = useScriptTitlePageRecord(currentScriptId, repository);
+    const {save} = record;
     const persist = useCallback(
         (_scriptId: string, value: TitlePageSettings) => {
-            return record.save(value);
+            return save(value);
         },
-        [record.save],
+        [save],
     );
     const draft = usePersistedDraft({
         entityKey: currentScriptId,
@@ -32,11 +33,12 @@ export const useTitlePageDraft = ({currentScriptId, repository}: UseTitlePageDra
         defaultValue: EMPTY_TITLE_PAGE,
         persist,
     });
+    const {setDraft} = draft;
     const updateTitlePage = useCallback(
         (patch: Partial<TitlePageSettings>) => {
-            draft.setDraft(previous => ({...previous, ...patch}));
+            setDraft(previous => ({...previous, ...patch}));
         },
-        [draft.setDraft],
+        [setDraft],
     );
 
     return {

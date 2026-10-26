@@ -20,10 +20,16 @@ import type {
     ScriptMusic,
     ScriptMusicAttachment,
     ScriptMusicAttachmentBinding,
+    ScriptSnapshot,
     ScriptSummary,
 } from './';
 import type {ScriptPackageSource} from './scriptPackageSource';
 import type {ScriptPackageWrite} from './scriptPackageWrite';
+import type {
+    CreateScriptSnapshotInput,
+    ReplaceScriptSnapshotPayloadInput,
+    UpdateScriptSnapshotInput,
+} from './scriptSnapshotsRepository';
 
 export type {
     ScriptCharacterGenderOption,
@@ -31,6 +37,12 @@ export type {
     ScriptCharacterRef,
 } from './';
 export type {ScriptPackageWrite} from './scriptPackageWrite';
+export type {
+    CreateScriptSnapshotInput,
+    ReplaceScriptSnapshotPayloadInput,
+    ScriptSnapshotsRepository,
+    UpdateScriptSnapshotInput,
+} from './scriptSnapshotsRepository';
 
 export interface ListScriptsOptions {
     limit?: number,
@@ -192,6 +204,7 @@ export interface ScriptRepository {
     allocateScriptLocationId(): string,
     allocateScriptCommentThreadId(): string,
     allocateScriptCommentMessageId(): string,
+    allocateScriptSnapshotId(): string,
     getScriptCharactersSource(scriptId: string): ReactiveQuerySource<ScriptCharacterRef>,
     getScriptCharacterGroupsSource(scriptId: string): ReactiveQuerySource<ScriptCharacterGroupRef>,
     getScriptCharacterGendersSource(scriptId: string): ReactiveQuerySource<ScriptCharacterGenderOption>,
@@ -204,6 +217,7 @@ export interface ScriptRepository {
     getScriptMusicAttachmentBindingsSource(scriptId: string): ReactiveQuerySource<ScriptMusicAttachmentBinding>,
     getScriptCommentThreadsSource(scriptId: string): ReactiveQuerySource<ScriptCommentThread>,
     getScriptCommentMessagesSource(scriptId: string): ReactiveQuerySource<ScriptCommentMessage>,
+    getScriptSnapshotsSource(scriptId: string): ReactiveQuerySource<ScriptSnapshot>,
     listScripts(options?: ListScriptsOptions): Promise<ScriptSummary[]>,
     getScriptSummary(scriptId: string): Promise<ScriptSummary | null>,
     getScriptPackageSource(scriptId: string): Promise<ScriptPackageSource | null>,
@@ -223,6 +237,14 @@ export interface ScriptRepository {
     moveScriptCommentBlockAnchors(scriptId: string, fromBlockId: string, toBlockId: string): Promise<void>,
     deleteScriptCommentThread(scriptId: string, threadId: string): Promise<void>,
     restoreScriptCommentThread(scriptId: string, snapshot: ScriptCommentThreadSnapshot): Promise<void>,
+    listScriptSnapshots(scriptId: string): Promise<ScriptSnapshot[]>,
+    getScriptSnapshot(scriptId: string, snapshotId: string): Promise<ScriptSnapshot | null>,
+    createScriptSnapshot(scriptId: string, input: CreateScriptSnapshotInput): Promise<ScriptSnapshot | null>,
+    updateScriptSnapshot(scriptId: string, snapshotId: string, input: UpdateScriptSnapshotInput): Promise<ScriptSnapshot | null>,
+    deleteScriptSnapshot(scriptId: string, snapshotId: string): Promise<void>,
+    /** Store a snapshot's re-serialized state after its settings were edited; the old blob is collected later. */
+    replaceScriptSnapshotPayload(scriptId: string, snapshotId: string, input: ReplaceScriptSnapshotPayloadInput): Promise<ScriptSnapshot | null>,
+    loadScriptSnapshotPayload(scriptId: string, snapshotId: string): Promise<Blob | null>,
     listScriptLocations(scriptId: string): Promise<ScriptLocation[]>,
     listScriptSceneLocations(scriptId: string): Promise<ScriptSceneLocationAssignment[]>,
     createScriptLocation(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>,
@@ -243,6 +265,8 @@ export interface ScriptRepository {
     duplicateScript(sourceScriptId: string, input: DuplicateScriptInput): Promise<string>,
     duplicateScriptWithId(sourceScriptId: string, input: DuplicateScriptWithIdInput): Promise<void>,
     deleteScript(scriptId: string): Promise<void>,
+    /** Delete stored blobs no row references (see `createUnreferencedFilesCollector`); returns how many. */
+    collectUnreferencedFiles(options?: {minAgeMs?: number, now?: number}): Promise<number>,
     setActiveBlock(scriptId: string, blockId: string | null): Promise<void>,
     confirmScriptCharacter(scriptId: string, characterKey: string): Promise<ScriptCharacterRef | null>,
     createScriptCharacterGroup(scriptId: string, key: string): Promise<ScriptCharacterGroupRef | null>,

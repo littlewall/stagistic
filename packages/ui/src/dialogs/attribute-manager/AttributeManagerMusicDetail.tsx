@@ -32,8 +32,8 @@ export interface AttributeManagerMusicDetailProps {
     onUpdateMusic: (input: {title: string, kind: MusicKind}) => unknown,
     onMusicTitleChange: (title: string) => void,
     onUploadPdf: (slotId: string, file: File) => void,
-    onPreview: (attachmentId: string) => void,
-    onRemove: (slotId: string) => void,
+    onPreview: (attachmentId: string, trigger?: HTMLElement) => void,
+    onRemove: (slotId: string, trigger?: HTMLElement) => void,
 }
 
 interface MusicMetadataFieldsProps {
@@ -167,7 +167,7 @@ const AttachmentSlot = ({
                             size="sm"
                             className={styles.fileButton}
                             isDisabled={!attachment.isAvailable}
-                            onPress={() => onPreview(attachment.id)}
+                            onPress={event => onPreview(attachment.id, event.target as HTMLElement)}
                         >
                             {attachment.filename}
                         </Button>
@@ -190,7 +190,7 @@ const AttachmentSlot = ({
                     <Button
                         variant="ghost"
                         size="sm"
-                        onPress={() => onRemove(slot.id)}
+                        onPress={event => onRemove(slot.id, event.target as HTMLElement)}
                     >
                         Remove
                     </Button>

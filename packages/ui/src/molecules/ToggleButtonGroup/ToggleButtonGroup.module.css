@@ -33,14 +33,14 @@
         background: var(--state-selected);
     }
 
-    &[data-focus-visible] {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 1px;
-    }
-
     &[data-disabled] {
         cursor: not-allowed;
         opacity: .4;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 1px;
     }
 }
 

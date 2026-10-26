@@ -21,6 +21,7 @@ type UseScriptEditorInstanceArgs = {
     extensions: Extensions,
     content: ScriptDocument,
     characterColorRefs: CharacterColorRefsBundle,
+    isReadOnly?: boolean,
 };
 
 type InstanceState = {
@@ -43,6 +44,7 @@ export const useScriptEditorInstance = ({
     extensions,
     content,
     characterColorRefs,
+    isReadOnly = false,
 }: UseScriptEditorInstanceArgs): {editor: TiptapEditor} => {
     const createState = (): InstanceState => {
         if (surfaceCache) {
@@ -61,6 +63,7 @@ export const useScriptEditorInstance = ({
             extensions,
             content,
             autofocus: false,
+            editable: !isReadOnly,
             editorProps: {
                 attributes: {
                     'aria-describedby': SCRIPT_EDITOR_DESCRIPTION_ID,
@@ -107,7 +110,9 @@ export const useScriptEditorInstance = ({
 
     const stateRef = useRef(currentState);
 
-    stateRef.current = currentState;
+    useEffect(() => {
+        stateRef.current = currentState;
+    }, [currentState]);
 
     const pendingDestroyRef = useRef<number | null>(null);
 

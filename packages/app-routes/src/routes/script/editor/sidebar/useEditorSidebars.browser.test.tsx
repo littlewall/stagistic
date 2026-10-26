@@ -1,4 +1,4 @@
-import {act} from 'react';
+import {act, useLayoutEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -46,12 +46,16 @@ const mount = (initialState?: SidebarLayoutState) => {
     }
 
     const Probe = () => {
-        captured.current = useEditorSidebars({
+        const sidebars = useEditorSidebars({
             panels,
             defaultLeftPanelId: 'structure',
             defaultRightPanelId: 'characters',
             storageScope,
         });
+
+        useLayoutEffect(() => {
+            captured.current = sidebars;
+        }, [sidebars]);
 
         return null;
     };

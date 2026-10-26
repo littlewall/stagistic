@@ -55,11 +55,11 @@ const Harness = ({
     scriptId: string,
     repository: ScriptRepository,
 }) => {
-    const {music, isLoading} = useScriptMusic(scriptId, repository);
+    const {music: entries, isLoading} = useScriptMusic(scriptId, repository);
 
     return (
         <output data-testid={consumer} data-ready={String(!isLoading)}>
-            {music.map(row => `${row.title}:${row.startBlockId ? 'assigned' : 'unassigned'}`).join(',')}
+            {entries.map(row => `${row.title}:${row.startBlockId ? 'assigned' : 'unassigned'}`).join(',')}
         </output>
     );
 };

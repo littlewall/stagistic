@@ -102,7 +102,7 @@ export const readScriptSettings = async (db: DbClient, scriptId: string): Promis
     });
     settings.blocks = {};
     [...blocks]
-        .sort((a, b) => Number(normalizeSettingsBlockType(a.blockType) === a.blockType) - Number(normalizeSettingsBlockType(b.blockType) === b.blockType))
+        .toSorted((a, b) => Number(normalizeSettingsBlockType(a.blockType) === a.blockType) - Number(normalizeSettingsBlockType(b.blockType) === b.blockType))
         .forEach(block => hydrateBlockSettings(settings, block));
     if (Object.keys(settings.blocks).length === 0) delete settings.blocks;
 

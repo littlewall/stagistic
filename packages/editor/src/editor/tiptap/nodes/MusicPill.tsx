@@ -1,13 +1,11 @@
 import {
-    MUSIC_DRAFT_ATTR,
-    MUSIC_ID_ATTR,
-    MUSIC_MODE_ATTR,
     MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import {ArrowRightIcon, EditPencilIcon} from '@stagistic/ui';
 import {type NodeViewProps, NodeViewWrapper} from '@tiptap/react';
 import clsx from 'clsx';
 import {
+    type FocusEvent,
     useEffect,
     useId,
     useRef,
@@ -22,16 +20,14 @@ import type {
 import styles from './MusicPill.module.css';
 import {
     MusicMenuButton,
-    type MusicMode,
     MusicUnassignIcon,
 } from './MusicPillControls';
 import {requestMusicPillCreation} from './musicPillCreation';
 import {
     findMusicPillElement,
+    getMusicStartPillData,
     handleBlurWithin,
     handleFocusWithin,
-    normalizeMusicTitle,
-    readDecorationLabel,
     scrollToMusicPill,
     usePillActivation,
 } from './musicPillHelpers';
@@ -46,6 +42,71 @@ interface MusicStartPillProps extends NodeViewProps {
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
     persistentMusicRef?: {current: readonly PersistentMusicRef[]},
 }
+
+/** A saved draft or version: the title stays focusable for the menu but takes no typing. */
+const getTitleAccess = (isEditable: boolean) => (isEditable
+    ? {className: styles.titleInput, contentEditable: true}
+    : {
+        className: clsx(styles.titleInput, styles.readOnlyTitle),
+        contentEditable: false,
+        'aria-readonly': true,
+    });
+
+interface MusicStartPillMenuProps {
+    /** False for a saved draft or version: only navigation is offered. */
+    canEdit: boolean,
+    onClose: (isOpen: boolean) => void,
+    onGoToEnd?: () => void,
+    onManage?: () => void,
+    onUnassign: () => void,
+}
+
+const MusicStartPillMenu = ({
+    canEdit,
+    onClose,
+    onGoToEnd,
+    onManage,
+    onUnassign,
+}: MusicStartPillMenuProps) => {
+    const onEditManage = canEdit ? onManage : undefined;
+
+    // A read-only pill with nothing to navigate to opens no empty menu.
+    if (!canEdit && !onGoToEnd) {
+        return null;
+    }
+
+    return (
+        <MusicPillMenuPopover
+            isOpen
+            onOpenChange={onClose}
+        >
+            {onGoToEnd ? (
+                <MusicMenuButton
+                    label="Go to music end"
+                    onClick={onGoToEnd}
+                >
+                    <ArrowRightIcon aria-hidden="true" />
+                </MusicMenuButton>
+            ) : null}
+            {onEditManage ? (
+                <MusicMenuButton
+                    label="Manage music"
+                    onClick={onEditManage}
+                >
+                    <EditPencilIcon aria-hidden="true" />
+                </MusicMenuButton>
+            ) : null}
+            {canEdit ? (
+                <MusicMenuButton
+                    label="Unassign music"
+                    onClick={onUnassign}
+                >
+                    <MusicUnassignIcon />
+                </MusicMenuButton>
+            ) : null}
+        </MusicPillMenuPopover>
+    );
+};
 
 export const MusicStartPill = ({
     node,
@@ -69,17 +130,24 @@ export const MusicStartPill = ({
     } = usePillActivation();
     const anchorName = `--music-pill-${useId().replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
     const titleRef = useRef<HTMLSpanElement>(null);
-    const mode: MusicMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
-    const isDraft = node.attrs[MUSIC_DRAFT_ATTR] === true;
-    const musicId = String(node.attrs[MUSIC_ID_ATTR] ?? '');
-    const title = normalizeMusicTitle(node.attrs[MUSIC_TITLE_ATTR]);
-    const musicNumber = numberLabel ?? readDecorationLabel(decorations, 'musicNumber');
+    const {
+        mode,
+        isDraft,
+        musicId,
+        title,
+        musicNumber,
+    } = getMusicStartPillData(node, decorations, numberLabel);
     const [draftTitle, setDraftTitle] = useState(title);
+    const [previousTitle, setPreviousTitle] = useState(title);
+
+    if (previousTitle !== title) {
+        setPreviousTitle(title);
+        setDraftTitle(title);
+    }
+
     const hasEndMusic = Boolean(musicId && findMusicPillElement(editor, 'out', musicId));
 
     useEffect(() => {
-        setDraftTitle(title);
-
         if (titleRef.current && titleRef.current.textContent !== title) {
             titleRef.current.textContent = title;
         }
@@ -153,11 +221,12 @@ export const MusicStartPill = ({
             style={{'--music-pill-anchor': anchorName}}
             contentEditable={false}
             onFocus={locked ? undefined : handleFocusWithin(setActive)}
-            onBlur={locked ? undefined : handleBlurWithin(rootRef, setActive)}
+            onBlur={locked ? undefined : (event: FocusEvent<HTMLSpanElement>) => handleBlurWithin(rootRef, setActive)(event)}
         >
             {' '}
             <span
                 className={styles.tagBody}
+                role="presentation"
                 onMouseDown={event => {
                     if (event.target !== titleRef.current) {
                         event.preventDefault();
@@ -175,20 +244,23 @@ export const MusicStartPill = ({
                 {draftTitle.length > 0 || active ? '\u00A0' : null}
                 <span
                     ref={titleRef}
-                    className={styles.titleInput}
+                    {...getTitleAccess(editor.isEditable)}
                     data-music-title-input="start"
                     data-music-draft={isDraft ? 'true' : undefined}
-                    data-music-id={String(node.attrs[MUSIC_ID_ATTR] ?? '')}
+                    data-music-id={musicId}
                     data-placeholder={active ? 'music' : undefined}
                     role="textbox"
                     aria-label="Music title"
                     aria-multiline="false"
-                    contentEditable
                     tabIndex={locked ? 0 : -1}
                     suppressContentEditableWarning
                     spellCheck={false}
                     onInput={event => updateTitle(event.currentTarget.textContent ?? '')}
                     onBlur={event => {
+                        if (!editor.isEditable) {
+                            return;
+                        }
+
                         const value = event.currentTarget.textContent ?? '';
 
                         if (isDraft && !value.trim()) {
@@ -205,6 +277,10 @@ export const MusicStartPill = ({
                     }}
                     onKeyDown={event => {
                         event.stopPropagation();
+
+                        if (!editor.isEditable) {
+                            return;
+                        }
 
                         if (event.key === 'Enter') {
                             const currentTitle = event.currentTarget.textContent ?? '';
@@ -236,33 +312,13 @@ export const MusicStartPill = ({
                 />
             </span>
             {active && !locked ? (
-                <MusicPillMenuPopover
-                    isOpen
-                    onOpenChange={setActive}
-                >
-                    {hasEndMusic ? (
-                        <MusicMenuButton
-                            label="Go to music end"
-                            onClick={goToEndMusic}
-                        >
-                            <ArrowRightIcon aria-hidden="true" />
-                        </MusicMenuButton>
-                    ) : null}
-                    {musicId && onOpenMusicManager ? (
-                        <MusicMenuButton
-                            label="Manage music"
-                            onClick={openMusicManager}
-                        >
-                            <EditPencilIcon aria-hidden="true" />
-                        </MusicMenuButton>
-                    ) : null}
-                    <MusicMenuButton
-                        label="Unassign music"
-                        onClick={unassignMusic}
-                    >
-                        <MusicUnassignIcon />
-                    </MusicMenuButton>
-                </MusicPillMenuPopover>
+                <MusicStartPillMenu
+                    canEdit={editor.isEditable}
+                    onClose={setActive}
+                    onGoToEnd={hasEndMusic ? goToEndMusic : undefined}
+                    onManage={musicId && onOpenMusicManager ? openMusicManager : undefined}
+                    onUnassign={unassignMusic}
+                />
             ) : null}{' '}
         </NodeViewWrapper>
     );

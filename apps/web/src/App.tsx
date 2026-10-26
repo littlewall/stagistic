@@ -6,12 +6,13 @@ import {
     ScriptExportRoute,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
+    useAppBootstrap,
 } from '@stagistic/app-routes';
-import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {
-    useEffect,
-    useState,
-} from 'react';
+    FocusVisibilityManager,
+    LoaderOverlay,
+    ToastProvider,
+} from '@stagistic/ui';
 import {
     Navigate,
     Route,
@@ -20,66 +21,41 @@ import {
 
 import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
-import type {ScriptRepository} from './repo';
 import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
+const bootstrapOptions = {
+    prepareDatabase: prepareLocalDbWithProgress,
+    loadRepository: () => import('./repo'),
+};
+
 const BootedApp = () => {
-    const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
-    const [bootProgress, setBootProgress] = useState(0);
-    const [bootStatus, setBootStatus] = useState('Preparing');
-
-    useEffect(() => {
-        let isActive = true;
-
-        const boot = async () => {
-            if (document?.fonts) {
-                await document.fonts.ready;
-            }
-
-            if (!isActive) {
-                return;
-            }
-
-            await prepareLocalDbWithProgress(update => {
-                if (!isActive) {
-                    return;
-                }
-
-                setBootProgress(update.progress);
-                setBootStatus(update.label);
-            });
-
-            if (!isActive) {
-                return;
-            }
-
-            const repositoryModule = await import('./repo');
-
-            if (!isActive) {
-                return;
-            }
-
-            setScriptRepository(repositoryModule.scriptRepository);
-        };
-
-        void boot();
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
+    const {
+        services,
+        bootProgress,
+        bootStatus,
+    } = useAppBootstrap(bootstrapOptions);
+    const scriptRepository = services?.scriptRepository;
+    const snapshotViews = services?.snapshotViews ?? null;
 
     if (!scriptRepository) {
         return <LoaderOverlay label="Starting Stagistic" messages={[bootStatus]} progress={bootProgress} />;
     }
 
     return (
-        <ScriptRepositoryProvider repository={scriptRepository}>
+        <ScriptRepositoryProvider
+            repository={scriptRepository}
+            snapshotViews={snapshotViews}
+        >
             <ToastProvider>
                 <GlobalModalsProvider>
                     <Routes>
                         <Route path="/" element={<HomeRoute />} />
                         <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                            <Route index element={<Navigate to="editor" replace />} />
+                            <Route path="editor" element={<ScriptEditorRoute />} />
+                            <Route path="export" element={<ScriptExportRoute />} />
+                        </Route>
+                        <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                             <Route index element={<Navigate to="editor" replace />} />
                             <Route path="editor" element={<ScriptEditorRoute />} />
                             <Route path="export" element={<ScriptExportRoute />} />
@@ -94,11 +70,14 @@ const BootedApp = () => {
 };
 
 const App = () => (
-    <UnsupportedScreenGate>
-        <PublicPreviewGate>
-            <BootedApp />
-        </PublicPreviewGate>
-    </UnsupportedScreenGate>
+    <>
+        <FocusVisibilityManager />
+        <UnsupportedScreenGate>
+            <PublicPreviewGate>
+                <BootedApp />
+            </PublicPreviewGate>
+        </UnsupportedScreenGate>
+    </>
 );
 
 export default App;

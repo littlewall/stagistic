@@ -1,6 +1,7 @@
 import type {ScriptSummaryMetadata} from '@stagistic/script';
 import {
     bigint,
+    integer,
     jsonb,
     pgTable,
     text,
@@ -14,6 +15,8 @@ export const scripts = pgTable('scripts', {
     updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     activeBlockId: text('active_block_id'),
     summaryMetadata: jsonb('summary_metadata').$type<ScriptSummaryMetadata>(),
+    // Draft numbers are never reused, so the counter outlives deleted snapshots.
+    lastDraftNumber: integer('last_draft_number').notNull().default(0),
 });
 
 /*

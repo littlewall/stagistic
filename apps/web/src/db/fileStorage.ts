@@ -16,7 +16,7 @@ const openDatabase = (): Promise<IDBDatabase> => new Promise((resolve, reject) =
     };
 
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(request.error ?? new Error('IndexedDB open failed'));
 });
 
 const runTransaction = async <T>(
@@ -31,8 +31,8 @@ const runTransaction = async <T>(
             const request = run(transaction.objectStore(STORE));
 
             transaction.oncomplete = () => resolve(request?.result);
-            transaction.onerror = () => reject(transaction.error);
-            transaction.onabort = () => reject(transaction.error);
+            transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed'));
+            transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted'));
         });
     } finally {
         db.close();
@@ -60,5 +60,11 @@ export class IndexedDbFileStorage implements FileStorage {
 
     async delete(key: string): Promise<void> {
         await runTransaction('readwrite', store => store.delete(key));
+    }
+
+    async listKeys(): Promise<string[]> {
+        const keys = await runTransaction('readonly', store => store.getAllKeys());
+
+        return (keys ?? []).map(String);
     }
 }

@@ -1,16 +1,14 @@
 import {
     useEffect,
+    useEffectEvent,
     useId,
-    useRef,
 } from 'react';
 
 const OVERLAY_EVENT = 'overlay:exclusive-open';
 
 export const useExclusiveOverlay = (isOpen: boolean, close: () => void) => {
     const id = useId();
-    const closeRef = useRef(close);
-
-    closeRef.current = close;
+    const closeOverlay = useEffectEvent(close);
 
     useEffect(() => {
         if (!isOpen) {
@@ -25,7 +23,7 @@ export const useExclusiveOverlay = (isOpen: boolean, close: () => void) => {
             const {id: openedId} = (event as CustomEvent<{id: string}>).detail;
 
             if (openedId !== id) {
-                closeRef.current();
+                closeOverlay();
             }
         };
 

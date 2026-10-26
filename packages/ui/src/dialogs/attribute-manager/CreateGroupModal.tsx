@@ -3,7 +3,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -13,10 +12,11 @@ import {Button} from '../../atoms/Button/Button';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './CreateCharacterModal.module.css';
 
-export interface CreateGroupModalProps {
+export interface CreateGroupModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     existingEntityNames: readonly string[],
     onClose: () => void,
@@ -28,25 +28,25 @@ export const CreateGroupModal = ({
     existingEntityNames,
     onClose,
     onCreate,
+    returnFocus,
+    fallbackFocus,
 }: CreateGroupModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [isTouched, setIsTouched] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
+
         if (!isOpen) {
             setName('');
             setIsTouched(false);
             setIsSubmitting(false);
-
-            return;
         }
-
-        const focusTimer = window.setTimeout(() => inputRef.current?.focus(), 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen]);
+    }
 
     const existingKeys = useMemo(() => new Set(existingEntityNames.map(entityName => normalizeCharacterKey(entityName))), [existingEntityNames]);
     const normalizedName = useMemo(() => normalizeCharacterKey(name), [name]);
@@ -91,6 +91,9 @@ export const CreateGroupModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Create group"
+            initialFocus={inputRef}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
         >
             <ModalHeader title="Create group" />
             <form

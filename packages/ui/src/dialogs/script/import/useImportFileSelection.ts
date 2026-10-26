@@ -1,7 +1,6 @@
 import {
     type ChangeEvent,
     useCallback,
-    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -26,41 +25,42 @@ export const useImportFileSelection = ({
     onPickFile,
     preselectedFile,
 }: UseImportFileSelectionArgs) => {
-    const [name, setName] = useState('');
-    const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
+    const [name, setName] = useState(isOpen && preselectedFile ? getFileBaseName(preselectedFile.fileName) : '');
+    const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(isOpen && preselectedFile ? {
+        kind: 'stagistic',
+        name: preselectedFile.fileName,
+        text: preselectedFile.text,
+    } : null);
     const [fileError, setFileError] = useState<string | null>(null);
     const [isPeeking, setIsPeeking] = useState(false);
     const [stepkgPeek, setStepkgPeek] = useState<StepkgPeekResult | null>(null);
     const [importChoice, setImportChoice] = useState<'new' | 'replace'>('new');
 
-    useEffect(() => {
-        if (isOpen) {
-            return;
+    const [previousSelection, setPreviousSelection] = useState({isOpen, preselectedFile});
+
+    if (previousSelection.isOpen !== isOpen || previousSelection.preselectedFile !== preselectedFile) {
+        setPreviousSelection({isOpen, preselectedFile});
+        if (!isOpen) {
+            setName('');
+            setSelectedFile(null);
+            setFileError(null);
+            setIsPeeking(false);
+            setStepkgPeek(null);
+            setImportChoice('new');
         }
 
-        setName('');
-        setSelectedFile(null);
-        setFileError(null);
-        setIsPeeking(false);
-        setStepkgPeek(null);
-        setImportChoice('new');
-    }, [isOpen]);
-
-    useEffect(() => {
-        if (!isOpen || !preselectedFile) {
-            return;
+        if (isOpen && preselectedFile) {
+            setSelectedFile({
+                kind: 'stagistic',
+                name: preselectedFile.fileName,
+                text: preselectedFile.text,
+            });
+            setFileError(null);
+            setStepkgPeek(null);
+            setImportChoice('new');
+            setName(previousName => (previousName.trim() === '' ? getFileBaseName(preselectedFile.fileName) : previousName));
         }
-
-        setSelectedFile({
-            kind: 'stagistic',
-            name: preselectedFile.fileName,
-            text: preselectedFile.text,
-        });
-        setFileError(null);
-        setStepkgPeek(null);
-        setImportChoice('new');
-        setName(previous => (previous.trim() === '' ? getFileBaseName(preselectedFile.fileName) : previous));
-    }, [isOpen, preselectedFile]);
+    }
 
     const fileLabel = useMemo(() => {
         if (!selectedFile) {

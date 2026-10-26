@@ -1,15 +1,17 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
+    type AppSettingsSection,
     GlobalModalsProvider,
     HomeRoute,
     ScriptEditorRoute,
     ScriptExportRoute,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
+    useAppBootstrap,
 } from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {getCurrentWindow} from '@tauri-apps/api/window';
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {
     Navigate,
     Route,
@@ -18,17 +20,39 @@ import {
 
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
+import {McpSettingsPanel} from './mcp/McpSettingsPanel';
+import {useDeepLinkNavigation} from './mcp/useDeepLinkNavigation';
+import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
-import type {ScriptRepository} from './repo';
+
+const bootstrapOptions = {
+    beforeDatabase: requestPersistentStorage,
+    prepareDatabase: prepareLocalDbWithProgress,
+    loadRepository: () => import('./repo'),
+};
+
+const settingsSections: AppSettingsSection[] = [
+    {
+        id: 'mcp',
+        label: 'MCP',
+        content: <McpSettingsPanel />,
+    },
+];
 
 // Runs inside the router + providers so it can use navigation and modal hooks.
 const AppRoutes = () => {
     useNativeMenuActions();
+    useDeepLinkNavigation();
 
     return (
         <Routes>
             <Route path="/" element={<HomeRoute />} />
             <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                <Route index element={<Navigate to="editor" replace />} />
+                <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="export" element={<ScriptExportRoute />} />
+            </Route>
+            <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                 <Route index element={<Navigate to="editor" replace />} />
                 <Route path="editor" element={<ScriptEditorRoute />} />
                 <Route path="export" element={<ScriptExportRoute />} />
@@ -40,56 +64,15 @@ const AppRoutes = () => {
 };
 
 const App = () => {
-    const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
-    const [bootProgress, setBootProgress] = useState(0);
-    const [bootStatus, setBootStatus] = useState('Preparing');
+    const {
+        services,
+        bootProgress,
+        bootStatus,
+    } = useAppBootstrap(bootstrapOptions);
+    const scriptRepository = services?.scriptRepository ?? null;
+    const snapshotViews = services?.snapshotViews ?? null;
 
-    useEffect(() => {
-        let isActive = true;
-
-        const boot = async () => {
-            if (document?.fonts) {
-                await document.fonts.ready;
-            }
-
-            if (!isActive) {
-                return;
-            }
-
-            await requestPersistentStorage();
-
-            if (!isActive) {
-                return;
-            }
-
-            await prepareLocalDbWithProgress(update => {
-                if (!isActive) {
-                    return;
-                }
-
-                setBootProgress(update.progress);
-                setBootStatus(update.label);
-            });
-
-            if (!isActive) {
-                return;
-            }
-
-            const repositoryModule = await import('./repo');
-
-            if (!isActive) {
-                return;
-            }
-
-            setScriptRepository(repositoryModule.scriptRepository);
-        };
-
-        void boot();
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
+    useLocalMcp(Boolean(scriptRepository));
 
     /*
      * Portable backup snapshots into the app data folder: periodic while running,
@@ -118,9 +101,12 @@ const App = () => {
     }
 
     return (
-        <ScriptRepositoryProvider repository={scriptRepository}>
+        <ScriptRepositoryProvider
+            repository={scriptRepository}
+            snapshotViews={snapshotViews}
+        >
             <ToastProvider>
-                <GlobalModalsProvider>
+                <GlobalModalsProvider settingsSections={settingsSections}>
                     <AppRoutes />
                 </GlobalModalsProvider>
             </ToastProvider>

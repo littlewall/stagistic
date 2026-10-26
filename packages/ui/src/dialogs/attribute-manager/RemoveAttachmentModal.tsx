@@ -1,6 +1,7 @@
 import {ConfirmModal} from '../modal/ConfirmModal';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 
-export interface RemoveAttachmentModalProps {
+export interface RemoveAttachmentModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     attachmentName: string,
     isRemoving?: boolean,
@@ -9,6 +10,8 @@ export interface RemoveAttachmentModalProps {
 }
 
 export const RemoveAttachmentModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     attachmentName,
     isRemoving = false,
@@ -16,6 +19,8 @@ export const RemoveAttachmentModal = ({
     onConfirm,
 }: RemoveAttachmentModalProps) => (
     <ConfirmModal
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         ariaLabel="Remove attachment"
         title={<>Remove {attachmentName}?</>}

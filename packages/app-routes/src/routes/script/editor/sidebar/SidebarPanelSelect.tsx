@@ -6,14 +6,9 @@ import {
 } from 'react';
 
 import styles from './SidebarPanelSelect.module.css';
-import type {
-    SidebarPanel,
-    SidebarPanelId,
-    SidebarSide,
-} from './types';
+import type {SidebarPanel, SidebarPanelId} from './types';
 
 interface SidebarPanelSelectProps {
-    side: SidebarSide,
     panels: readonly SidebarPanel[],
     selectedPanelId: SidebarPanelId,
     onSelectPanel: (panelId: SidebarPanelId) => void,
@@ -21,7 +16,6 @@ interface SidebarPanelSelectProps {
 }
 
 export const SidebarPanelSelect = ({
-    side,
     panels,
     selectedPanelId,
     onSelectPanel,
@@ -39,7 +33,8 @@ export const SidebarPanelSelect = ({
         <Select
             className={styles.select}
             variant="panel"
-            align={side === 'right' ? 'end' : 'start'}
+            // The select sits at the left edge of either panel, so the free space is always to its right.
+            align="start"
             preserveFocus
             value={selectedPanelId}
             options={options}

@@ -37,7 +37,7 @@ const collectCharacters = (catalogEntities: ExportCatalogEntity[]): ExportCharac
             displayName: toDisplayName(key),
         };
     })
-    .sort((left, right) => left.displayName.localeCompare(right.displayName));
+    .toSorted((left, right) => left.displayName.localeCompare(right.displayName));
 const collectGroups = (catalogEntities: ExportCatalogEntity[]): ExportCharacterGroup[] => catalogEntities
     .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'group'}> => entity.kind === 'group')
     .map(group => ({

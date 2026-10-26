@@ -10,14 +10,11 @@
     background: var(--input-bg, var(--color-input-bg, var(--color-surface)));
     border: var(--control-trigger-border-width) solid var(--input-border-color, var(--color-border));
     border-radius: var(--input-radius, var(--control-trigger-radius));
+    outline: none;
     transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
 
     &:hover {
         background: var(--input-hover-bg, var(--control-trigger-hover-bg));
-    }
-
-    &:focus-visible {
-        outline: none;
     }
 
     &:disabled {
@@ -34,11 +31,6 @@
         border-color: var(--state-selected-edge);
     }
 
-    &[data-focus-visible] {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
-    }
-
     &[data-size = 'sm'] {
         --input-height: var(--control-trigger-height);
     }
@@ -53,6 +45,11 @@
 
     &[data-size = 'lg'] {
         --input-height: var(--control-height-lg);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     &.raised {

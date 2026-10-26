@@ -28,6 +28,7 @@ export const useScriptEditorSettingsModal = ({
 }: UseScriptEditorSettingsModalArgs) => {
     const {
         isOpen: isSettingsOpen,
+        returnFocus: settingsReturnFocus,
         activePanelId,
         expandedItemIds,
         groups,
@@ -64,6 +65,7 @@ export const useScriptEditorSettingsModal = ({
 
     return {
         isSettingsOpen,
+        settingsReturnFocus,
         activePanelId,
         expandedItemIds,
         groups,

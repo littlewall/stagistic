@@ -1,6 +1,7 @@
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {ConfirmModal} from '@stagistic/ui';
 
-interface DeleteMusicModalProps {
+interface DeleteMusicModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     isDeleting?: boolean,
     musicTitle?: string,
@@ -9,6 +10,8 @@ interface DeleteMusicModalProps {
 }
 
 export const DeleteMusicModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     isDeleting = false,
     musicTitle,
@@ -16,6 +19,8 @@ export const DeleteMusicModal = ({
     onConfirm,
 }: DeleteMusicModalProps) => (
     <ConfirmModal
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         ariaLabel="Delete music"
         title={(

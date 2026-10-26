@@ -10,7 +10,7 @@ import type {EditorSidebarGroup} from './types';
 
 interface CharacterGroupRowProps {
     group: EditorSidebarGroup,
-    onEditGroup?: (groupId: string) => void,
+    onEditGroup?: (groupId: string, returnFocus?: HTMLElement | null) => void,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void,
 }
 
@@ -20,7 +20,7 @@ export const CharacterGroupRow = ({
     onSetGroupColor,
 }: CharacterGroupRowProps) => {
     const isColorActionDisabled = Boolean(group.isColorUpdatePending) || !onSetGroupColor;
-    const isEditDisabled = !group.id || !onEditGroup;
+    const isEditDisabled = !group.id;
     const colorPicker = useCharacterColorPickerState({
         character: group,
         isColorActionDisabled,
@@ -31,53 +31,35 @@ export const CharacterGroupRow = ({
         <div className={styles.characterRow}>
             <CharacterColorControl
                 characterKey={group.key}
-                color={{
-                    state: {
-                        isActionDisabled: isColorActionDisabled,
-                        isPickerOpen: colorPicker.isColorPickerOpen,
-                        currentColorHex: colorPicker.currentCharacterColorHex,
-                        colorDraftHex: colorPicker.colorDraftHex,
-                        pickerColorValue: colorPicker.pickerColorValue,
-                        presetColorHexes: colorPicker.presetColorHexes,
-                        resolvedColorSaturation: colorPicker.resolvedColorSaturation,
-                    },
-                    refs: {
-                        triggerRef: colorPicker.colorTriggerRef,
-                    },
-                    actions: {
-                        togglePicker: colorPicker.toggleColorPicker,
-                        setPickerOpen: colorPicker.setIsColorPickerOpen,
-                        applyColor: colorPicker.applyColor,
-                        resetColor: colorPicker.resetColor,
-                        setDraftHue: colorPicker.setColorDraftHue,
-                    },
-                }}
+                color={colorPicker.control}
             />
             <span className={styles.characterName}>{group.key}</span>
             {group.isEmpty ? <Tag className={styles.groupEmptyTag}>Empty</Tag> : null}
-            <Tooltip
-                label={`Manage group ${group.key}`}
-                placement="left"
-                isDisabled={isEditDisabled}
-            >
-                <Button
-                    className={styles.editIconButton}
-                    aria-disabled={isEditDisabled}
-                    aria-label={`Manage group ${group.key}`}
-                    onPress={() => {
-                        if (!group.id || isEditDisabled) {
-                            return;
-                        }
-
-                        onEditGroup(group.id);
-                    }}
+            {onEditGroup ? (
+                <Tooltip
+                    label={`Manage group ${group.key}`}
+                    placement="left"
+                    isDisabled={isEditDisabled}
                 >
-                    <EditPencilIcon
-                        className={styles.iconGlyph}
-                        aria-hidden="true"
-                    />
-                </Button>
-            </Tooltip>
+                    <Button
+                        className={styles.editIconButton}
+                        aria-disabled={isEditDisabled}
+                        aria-label={`Manage group ${group.key}`}
+                        onPress={event => {
+                            if (!group.id) {
+                                return;
+                            }
+
+                            onEditGroup(group.id, event.target as HTMLElement);
+                        }}
+                    >
+                        <EditPencilIcon
+                            className={styles.iconGlyph}
+                            aria-hidden="true"
+                        />
+                    </Button>
+                </Tooltip>
+            ) : null}
         </div>
     );
 };

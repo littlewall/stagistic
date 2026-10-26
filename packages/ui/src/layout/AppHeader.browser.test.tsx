@@ -10,7 +10,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {ScriptEditorAppHeader} from './AppHeader';
+import {AppHeader, ScriptEditorAppHeader} from './AppHeader';
 
 let root: Root | null = null;
 
@@ -158,5 +158,41 @@ describe('ScriptEditorAppHeader', () => {
         await userEvent.keyboard('{Tab}');
 
         expect(document.activeElement).not.toBe(input);
+    });
+});
+
+describe('AppHeader settings', () => {
+    it('opens the app settings from the header', async () => {
+        const onOpenSettings = vi.fn();
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+        root = createRoot(host);
+        root.render(<AppHeader onHome={() => {}} onOpenSettings={onOpenSettings} />);
+
+        await userEvent.click(await waitForElement('button[aria-label="Open settings"]'));
+
+        expect(onOpenSettings).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the app settings apart from the script settings', async () => {
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+        root = createRoot(host);
+        root.render(
+            <ScriptEditorAppHeader
+                currentScript={{id: 'script-1', name: 'One Small Light'}}
+                onHome={() => {}}
+                onOpenSettings={() => {}}
+                activeView="editor"
+                onSelectView={() => {}}
+                onMenuAction={() => {}}
+            />,
+        );
+
+        await waitForElement('button[aria-label="Open settings"]');
+
+        expect(document.querySelector('button[aria-label="Open script settings"]')).not.toBeNull();
     });
 });

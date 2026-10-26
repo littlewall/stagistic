@@ -94,8 +94,7 @@ export const buildDeleteSelectionPreservingMusicAtoms = (state: EditorState): Tr
     const tr = state.tr;
 
     deleteRanges
-        .slice()
-        .reverse()
+        .toReversed()
         .forEach(range => {
             tr.delete(range.from, range.to);
         });

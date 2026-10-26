@@ -34,7 +34,7 @@ export const normalizeSpeakingEntityRecords = <T extends SpeakingEntityRecord>(
         });
     });
 
-    return normalized.sort((left, right) => left.key.localeCompare(right.key));
+    return normalized.toSorted((left, right) => left.key.localeCompare(right.key));
 };
 
 export const collectUnconfirmedCharacterKeysFromSnapshot = (

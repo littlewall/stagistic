@@ -6,6 +6,11 @@ $schema: 'https://moonrepo.dev/schemas/project.json'
 # defs MERGE with the inherited ones, so `typecheck` keeps `tsc -b` and only
 # gains the dep.
 tasks:
+  test-mcp-e2e:
+    command: 'vp test run --config vitest.mcp.config.ts'
+    deps: ['mcp:build-native', 'desktop:build-test-host']
+    options:
+      cache: false
   db-generate:
     script: 'drizzle-kit generate && node ./scripts/compile-migrations.mjs'
     options:

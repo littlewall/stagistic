@@ -1,0 +1,17 @@
+<script>
+    const observer = new IntersectionObserver(
+        entries => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    entry.target.setAttribute('data-visible', '');
+                    observer.unobserve(entry.target);
+                }
+            }
+        },
+        {threshold: 0.06, rootMargin: '-20px'},
+    );
+
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+        observer.observe(el);
+    });
+</script>

@@ -1,0 +1,17 @@
+{
+    "manifest_version": "0.3",
+    "name": "stagistic",
+    "display_name": "Stagistic",
+    "version": "0.1.0",
+    "description": "Read your local Stagistic scripts, scenes, characters and dialogue.",
+    "long_description": "Read-only access to saved local scripts while Stagistic is running and local MCP access is enabled. Text is returned in Stagistic syntax. Selected content is passed to your MCP client and may be processed by its model provider.",
+    "author": {"name": "Stagistic"},
+    "icon": "icon.png",
+    "server": {
+        "type": "binary",
+        "entry_point": "server/stagistic-mcp",
+        "mcp_config": {"command": "${__dirname}/server/stagistic-mcp", "args": []}
+    },
+    "compatibility": {"platforms": ["darwin"]},
+    "tools_generated": false
+}

@@ -1,5 +1,6 @@
 import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
 import {
+    ReadOnlyNotice,
     SearchControl,
     type SearchControlFilter,
     useDropdownDismiss,
@@ -37,6 +38,10 @@ interface EditorToolbarProps {
     editor: TiptapEditor | null,
     blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
     search?: EditorSearchProps,
+    /** Only search remains: no formatting, block types, undo or replace. */
+    isReadOnly?: boolean,
+    /** Shown in place of the formatting controls while read-only. */
+    readOnlyLabel?: string | null,
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
@@ -57,13 +62,38 @@ const EditorToolbar = ({
     editor,
     blockShortcuts,
     search: searchProps,
+    isReadOnly = false,
+    readOnlyLabel = null,
 }: EditorToolbarProps) => {
     const searchShortcuts = getToolbarShortcutLabels();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const search = useEditorSearch({editor, search: searchProps});
-    const {blockTypes, onBlockTypesChange} = search;
+    const {
+        inputRef,
+        query,
+        currentResult,
+        resultCount,
+        onQueryChange,
+        onInputKeyDown,
+        onClear,
+        onPreviousResult,
+        onNextResult,
+        isCaseSensitive,
+        onCaseSensitiveChange,
+        isWholeWord,
+        onWholeWordChange,
+        isReplaceOpen,
+        onReplaceOpenChange,
+        replacement,
+        onReplacementChange,
+        onReplace,
+        onReplaceAll,
+        canReplace,
+        replaceInputRef,
+        blockTypes,
+        onBlockTypesChange,
+    } = useEditorSearch({editor, search: searchProps});
     const searchFilter = useMemo<SearchControlFilter>(() => ({
         label: 'Search in',
         allLabel: 'All blocks',
@@ -90,15 +120,16 @@ const EditorToolbar = ({
 
     useExclusiveOverlay(isOpen, () => setIsOpen(false));
 
-    useEffect(() => {
-        setIsOpen(false);
-    }, [activeType, isMultiBlockSelection]);
+    const [previousSelection, setPreviousSelection] = useState({activeType, isMultiBlockSelection});
 
-    useEffect(() => {
-        if (!canChangeBlockType && isOpen) {
-            setIsOpen(false);
-        }
-    }, [canChangeBlockType, isOpen]);
+    if (previousSelection.activeType !== activeType || previousSelection.isMultiBlockSelection !== isMultiBlockSelection) {
+        setPreviousSelection({activeType, isMultiBlockSelection});
+        setIsOpen(false);
+    }
+
+    if (!canChangeBlockType && isOpen) {
+        setIsOpen(false);
+    }
 
     useEffect(() => {
         if (toolbarRef.current) {
@@ -109,6 +140,7 @@ const EditorToolbar = ({
     const handleUndoMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
+
             if (canUndo) {
                 editor?.chain().focus().undo()
                     .run();
@@ -119,6 +151,7 @@ const EditorToolbar = ({
     const handleRedoMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
+
             if (canRedo) {
                 editor?.chain().focus().redo()
                     .run();
@@ -153,6 +186,7 @@ const EditorToolbar = ({
     const handleSelectMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
+
             if (!canChangeBlockType) {
                 return;
             }
@@ -165,6 +199,7 @@ const EditorToolbar = ({
         (optionType: ScriptBlockNodeType, event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
             setIsOpen(false);
+
             if (!editor) {
                 return;
             }
@@ -215,42 +250,46 @@ const EditorToolbar = ({
 
     return (
         <div className={styles.toolbar} ref={toolbarRef} data-editor-toolbar="true">
-            <InlineMarksGroup state={inlineMarksState} actions={inlineMarksActions} />
-            <span className={styles.divider} aria-hidden="true" />
-            <BlockTypeSelect
-                options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
-                blockShortcuts={blockShortcuts}
-                dropdownRef={dropdownRef}
-                state={blockTypeState}
-                actions={blockTypeActions}
-            />
+            {isReadOnly ? <ReadOnlyNotice label={readOnlyLabel} /> : (
+                <>
+                    <InlineMarksGroup state={inlineMarksState} actions={inlineMarksActions} />
+                    <span className={styles.divider} aria-hidden="true" />
+                    <BlockTypeSelect
+                        options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
+                        blockShortcuts={blockShortcuts}
+                        dropdownRef={dropdownRef}
+                        state={blockTypeState}
+                        actions={blockTypeActions}
+                    />
+                </>
+            )}
             <span className={styles.spacer} />
             <SearchControl
-                ref={search.inputRef}
-                value={search.query}
-                currentResult={search.currentResult}
-                resultCount={search.resultCount}
+                ref={inputRef}
+                value={query}
+                currentResult={currentResult}
+                resultCount={resultCount}
                 aria-label="Search script"
                 placeholder="Find in script…"
-                onChange={search.onQueryChange}
-                onKeyDown={search.onInputKeyDown}
-                onClear={search.onClear}
-                onPreviousResult={search.onPreviousResult}
-                onNextResult={search.onNextResult}
-                isCaseSensitive={search.isCaseSensitive}
-                onCaseSensitiveChange={search.onCaseSensitiveChange}
-                isWholeWord={search.isWholeWord}
-                onWholeWordChange={search.onWholeWordChange}
+                onChange={onQueryChange}
+                onKeyDown={onInputKeyDown}
+                onClear={onClear}
+                onPreviousResult={onPreviousResult}
+                onNextResult={onNextResult}
+                isCaseSensitive={isCaseSensitive}
+                onCaseSensitiveChange={onCaseSensitiveChange}
+                isWholeWord={isWholeWord}
+                onWholeWordChange={onWholeWordChange}
                 filter={searchFilter}
-                replace={{
-                    isOpen: search.isReplaceOpen,
-                    onOpenChange: search.onReplaceOpenChange,
-                    value: search.replacement,
-                    onChange: search.onReplacementChange,
-                    onReplace: search.onReplace,
-                    onReplaceAll: search.onReplaceAll,
-                    isDisabled: !search.canReplace,
-                    inputRef: search.replaceInputRef,
+                replace={isReadOnly ? undefined : {
+                    isOpen: isReplaceOpen,
+                    onOpenChange: onReplaceOpenChange,
+                    value: replacement,
+                    onChange: onReplacementChange,
+                    onReplace: onReplace,
+                    onReplaceAll: onReplaceAll,
+                    isDisabled: !canReplace,
+                    inputRef: replaceInputRef,
                 }}
                 shortcuts={searchShortcuts}
             />

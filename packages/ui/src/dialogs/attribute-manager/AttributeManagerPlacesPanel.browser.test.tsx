@@ -6,7 +6,7 @@ import {
     it,
     vi,
 } from 'vite-plus/test';
-import {page} from 'vite-plus/test/browser';
+import {page, userEvent} from 'vite-plus/test/browser';
 
 import {AttributeManagerPlacesPanel} from './AttributeManagerPlacesPanel';
 
@@ -99,10 +99,29 @@ describe('AttributeManagerPlacesPanel', () => {
 
         const nameInput = await waitForElement<HTMLInputElement>('#create-place-name');
 
+        await expect.poll(() => document.activeElement).toBe(nameInput);
         await page.elementLocator(nameInput).fill('Green room');
         await page.elementLocator(findButtonByText('Create place')).click();
 
         expect(onCreatePlace).toHaveBeenCalledWith('Green room');
+    });
+
+    it('returns focus to the create action when Escape closes its dialog', async () => {
+        renderPanel();
+
+        const searchInput = await waitForElement<HTMLInputElement>('[aria-label="Search places"]');
+        const createButton = await waitForElement<HTMLButtonElement>('[aria-label="Create place"]');
+
+        searchInput.focus();
+        createButton.click();
+
+        const nameInput = await waitForElement<HTMLInputElement>('#create-place-name');
+
+        await expect.poll(() => document.activeElement).toBe(nameInput);
+        await userEvent.keyboard('{Escape}');
+
+        await expect.poll(() => document.querySelector('dialog[open]')).toBeNull();
+        await expect.poll(() => document.activeElement).toBe(createButton);
     });
 
     it('renames the selected place on blur', async () => {

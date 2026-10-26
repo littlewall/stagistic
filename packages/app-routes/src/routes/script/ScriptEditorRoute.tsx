@@ -1,9 +1,17 @@
-import {useScriptComments, useScriptRepository} from '@stagistic/app-core';
-import {ScriptEditor} from '@stagistic/editor';
+import {
+    getScriptSnapshotLabel,
+    useScriptComments,
+    useScriptRepository,
+} from '@stagistic/app-core';
+import {ScriptEditor, useFocusEditorBlock} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
-import {useCallback, useMemo} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
@@ -22,12 +30,40 @@ import {useSearchPreferences} from './editor/search/useSearchPreferences';
 import {useEditorSidebars, useScriptSidebarPanels} from './editor/sidebar';
 import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
+import {useScriptStateControls} from './states/useScriptStateControls';
+import {useScriptAccess} from './workspace/ScriptAccessContext';
 import {useScriptCharacters} from './workspace/ScriptCharactersContext';
 import {ScriptSessionProvider} from './workspace/ScriptSessionContext';
 import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
+
+const ScriptEditorBlockFocusWatcher = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const focusBlock = useFocusEditorBlock();
+    const blockId = searchParams.get('block');
+
+    useEffect(() => {
+        if (!blockId) {
+            return;
+        }
+
+        focusBlock(blockId);
+
+        const next = new URLSearchParams(searchParams);
+
+        next.delete('block');
+        setSearchParams(next, {replace: true});
+    }, [
+        blockId,
+        focusBlock,
+        searchParams,
+        setSearchParams,
+    ]);
+
+    return null;
+};
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -59,7 +95,14 @@ export const ScriptEditorRoute = () => {
         openAttributeManagerMusic,
     } = useScriptSettingsModal();
 
-    useDocumentTitle(scriptTitleDraft);
+    const {
+        isReadOnly,
+        snapshot,
+        liveScriptTitle,
+    } = useScriptAccess();
+    const shownTitle = isReadOnly ? liveScriptTitle ?? scriptTitleDraft : scriptTitleDraft;
+
+    useDocumentTitle(snapshot ? `${shownTitle} — ${getScriptSnapshotLabel(snapshot)}` : shownTitle);
 
     const {
         pendingSceneDelete,
@@ -85,7 +128,11 @@ export const ScriptEditorRoute = () => {
     const commentsPanelState = useCommentsPanelState(currentScriptId ?? 'new-script');
     const searchPreferences = useSearchPreferences(currentScriptId ?? 'new-script');
 
-    const displayedCurrentScript = useMemo(() => currentScript ? {...currentScript, name: scriptTitleDraft} : null, [currentScript, scriptTitleDraft]);
+    const displayedCurrentScript = useMemo(() => currentScript ? {...currentScript, name: shownTitle} : null, [currentScript, shownTitle]);
+    // Downloads of a saved draft or version carry its label in the file name.
+    const exportedScript = useMemo(() => displayedCurrentScript && snapshot
+        ? {...displayedCurrentScript, name: `${displayedCurrentScript.name} – ${getScriptSnapshotLabel(snapshot)}`}
+        : displayedCurrentScript, [displayedCurrentScript, snapshot]);
 
     const {
         getEditorValue,
@@ -94,21 +141,35 @@ export const ScriptEditorRoute = () => {
         handleEditorValueChange: handleResolvedEditorValueChange,
     } = useScriptCharacters();
 
+    const flushScript = useCallback(async () => {
+        const editorValue = getEditorValue();
+
+        if (!editorValue || !await handleManualSave(editorValue)) {
+            throw new Error('Could not flush script before export.');
+        }
+    }, [getEditorValue, handleManualSave]);
     const {handleMenuAction, isPreparingPackage} = useScriptEditorHeaderActions({
         navigate,
-        currentScript: displayedCurrentScript,
+        currentScript: exportedScript,
         openSettingsModal,
         openAttributeManagerModal,
         getEditorValue,
         titlePage: titlePageDraft,
         scriptRepository,
-        flushScript: async () => {
-            const editorValue = getEditorValue();
+        flushScript,
+    });
+    // Switching states or saving a draft persists pending edits without the manual-save toast.
+    const flushScriptQuietly = useCallback(async () => {
+        const editorValue = getEditorValue();
 
-            if (!editorValue || !await handleManualSave(editorValue)) {
-                throw new Error('Could not flush script before export.');
-            }
-        },
+        if (!editorValue || !await handleAutoSave(editorValue)) {
+            throw new Error('Could not save the script.');
+        }
+    }, [getEditorValue, handleAutoSave]);
+    const scriptStateControls = useScriptStateControls({
+        scriptId: currentScriptId,
+        view: 'editor',
+        flush: flushScriptQuietly,
     });
     const musicModals = useMusicModalsState(musicState);
 
@@ -180,10 +241,11 @@ export const ScriptEditorRoute = () => {
                     displayedCurrentScript ? (
                         <ScriptEditorAppHeader
                             currentScript={displayedCurrentScript}
-                            scriptSyncState={saveIndicator}
+                            scriptSyncState={isReadOnly ? undefined : saveIndicator}
                             onMenuAction={handleMenuAction}
-                            onRenameScript={updateScriptTitle}
+                            onRenameScript={isReadOnly ? undefined : updateScriptTitle}
                             activeView="editor"
+                            scriptState={scriptStateControls.stateMenu}
                         />
                     ) : (
                         <AppHeader />
@@ -207,6 +269,8 @@ export const ScriptEditorRoute = () => {
                 ) : null}
                 <DeferredScriptEditor
                     key={currentScript?.id ?? 'editor'}
+                    isReadOnly={isReadOnly}
+                    readOnlyLabel={snapshot ? getScriptSnapshotLabel(snapshot) : null}
                     surfaceCache={editorSurfaceCache}
                     liveStore={editorSnapshotStore}
                     document={{
@@ -250,10 +314,12 @@ export const ScriptEditorRoute = () => {
                 >
                     <ScriptEditor.LeftSidebar>{leftSidebar}</ScriptEditor.LeftSidebar>
                     <ScriptEditor.RightSidebar>{rightSidebar}</ScriptEditor.RightSidebar>
+                    <ScriptEditorBlockFocusWatcher />
                 </DeferredScriptEditor>
                 <AddMusicModal
                     isOpen={musicModals.addMusic.isOpen}
                     initialTitle={musicModals.addMusic.initialTitle}
+                    returnFocus={musicModals.addMusic.returnFocus}
                     onCancel={musicModals.addMusic.cancel}
                     onClose={musicModals.addMusic.close}
                     onCreate={musicModals.addMusic.create}
@@ -274,6 +340,7 @@ export const ScriptEditorRoute = () => {
                     onClose={closeSceneConvertModal}
                     onConfirm={confirmConvertScene}
                 />
+                {scriptStateControls.modals}
             </AppLayout>
         </ScriptSessionProvider>
     );

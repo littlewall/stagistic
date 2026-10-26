@@ -17,6 +17,10 @@
     color: var(--color-text-muted);
 }
 
+.changes {
+    margin-block: var(--space-sm);
+}
+
 .note {
     margin-top: var(--space-md);
     color: var(--color-text-muted);

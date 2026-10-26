@@ -1,3 +1,5 @@
+export type {AppSettingsSection} from './app-settings/types';
+export {useAppBootstrap} from './bootstrap/useAppBootstrap';
 export {GlobalModalsProvider, useGlobalModals} from './global-modals/GlobalModalsProvider';
 export {HomeRoute} from './routes/home/HomeRoute';
 export {ScriptEditorRoute} from './routes/script/ScriptEditorRoute';

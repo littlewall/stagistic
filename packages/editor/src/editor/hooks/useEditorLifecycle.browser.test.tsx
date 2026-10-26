@@ -134,7 +134,7 @@ describe('useEditorLifecycle', () => {
         colorProbe.style.color = 'var(--color-text-muted)';
         document.body.appendChild(colorProbe);
 
-        expect(sceneBlocks.map(block => block.dataset.sceneNumber)).toEqual(['1', '2']);
+        expect(sceneBlocks.map(block => block.dataset.sceneNumber)).toEqual(['1.', '2.']);
         expect(markerStyle.content).toContain('1');
         expect(markerStyle.fontWeight).toBe('700');
         expect(markerStyle.color).toBe(getComputedStyle(colorProbe).color);
@@ -198,7 +198,8 @@ describe('useEditorLifecycle', () => {
 
         expect(activeBlock.blockType).toBe('scene');
         expect(activeBlock.id).toBe('scene-1');
-        expect(document.activeElement).toBe(editor.view.dom);
+        // tiptap applies `autofocus` one animation frame after mount.
+        expect(await poll(() => document.activeElement === editor.view.dom || null, 'initial editor focus')).toBe(true);
     });
 
     it('does not make Undo available right after a script loads', async () => {

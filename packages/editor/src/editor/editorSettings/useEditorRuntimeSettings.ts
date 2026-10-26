@@ -3,17 +3,6 @@ import {useMemo} from 'react';
 
 type EditorRuntimeSettingsOverride = Omit<EditorSettingsOverride, 'initialPages'>;
 
-const selectEditorRuntimeSettings = (
-    settings: EditorSettingsOverride,
-): EditorRuntimeSettingsOverride => ({
-    page: settings.page,
-    typography: settings.typography,
-    visual: settings.visual,
-    structure: settings.structure,
-    headerFooter: settings.headerFooter,
-    blocks: settings.blocks,
-});
-
 /**
  * Keeps export-only settings out of the editor's runtime configuration.
  * Dependency fields are intentionally explicit: adding a persisted setting
@@ -21,14 +10,31 @@ const selectEditorRuntimeSettings = (
  */
 export const useEditorRuntimeSettings = (
     settings?: EditorSettingsOverride,
-): EditorRuntimeSettingsOverride | undefined => useMemo(
-    () => settings ? selectEditorRuntimeSettings(settings) : undefined,
-    [
-        settings?.blocks,
-        settings?.headerFooter,
-        settings?.page,
-        settings?.structure,
-        settings?.typography,
-        settings?.visual,
-    ],
-);
+): EditorRuntimeSettingsOverride | undefined => {
+    const {
+        blocks,
+        headerFooter,
+        page,
+        structure,
+        typography,
+        visual,
+    } = settings ?? {};
+    const hasSettings = settings !== undefined;
+
+    return useMemo(() => hasSettings ? {
+        blocks,
+        headerFooter,
+        page,
+        structure,
+        typography,
+        visual,
+    } : undefined, [
+        blocks,
+        hasSettings,
+        headerFooter,
+        page,
+        structure,
+        typography,
+        visual,
+    ]);
+};

@@ -12,9 +12,9 @@ import {
     type MouseEvent as ReactMouseEvent,
     type RefObject,
     useEffect,
+    useEffectEvent,
     useId,
     useMemo,
-    useRef,
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
@@ -58,6 +58,9 @@ interface EditorShellProps {
      * remains measurable and focusable behind it.
      */
     isCanvasReady?: boolean,
+    /** Hides every editing affordance; see EditorProps.isReadOnly. */
+    isReadOnly?: boolean,
+    readOnlyLabel?: string | null,
     layout?: EditorLayoutProps,
     rootRef: RefObject<HTMLDivElement | null>,
     canvasHostRef: RefObject<HTMLDivElement | null>,
@@ -70,6 +73,8 @@ interface EditorShellProps {
 export const EditorShell = ({
     canvas,
     isCanvasReady = true,
+    isReadOnly = false,
+    readOnlyLabel,
     layout,
     rootRef,
     canvasHostRef,
@@ -121,9 +126,19 @@ export const EditorShell = ({
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
     const isAnySidebarOpen = isLeftSidebarOpen || isRightSidebarOpen;
-    const sidebarTogglesRef = useRef({leftSidebarToggle, rightSidebarToggle});
+    const handleBeforeInput = useEffectEvent(() => {
+        if (!window.matchMedia('(max-width: 1199px)').matches) {
+            return;
+        }
 
-    sidebarTogglesRef.current = {leftSidebarToggle, rightSidebarToggle};
+        if (leftSidebarToggle?.isOpen) {
+            leftSidebarToggle.onToggle();
+        }
+
+        if (rightSidebarToggle?.isOpen) {
+            rightSidebarToggle.onToggle();
+        }
+    });
 
     useEffect(() => {
         const editorElement = editor?.view.dom;
@@ -131,22 +146,6 @@ export const EditorShell = ({
         if (!editorElement) {
             return;
         }
-
-        const handleBeforeInput = () => {
-            if (!window.matchMedia('(max-width: 1199px)').matches) {
-                return;
-            }
-
-            const {leftSidebarToggle: leftToggle, rightSidebarToggle: rightToggle} = sidebarTogglesRef.current;
-
-            if (leftToggle?.isOpen) {
-                leftToggle.onToggle();
-            }
-
-            if (rightToggle?.isOpen) {
-                rightToggle.onToggle();
-            }
-        };
 
         editorElement.addEventListener('beforeinput', handleBeforeInput);
 
@@ -170,6 +169,7 @@ export const EditorShell = ({
             data-editor-ready={isCanvasReady ? 'true' : 'false'}
             {...{[CHARACTER_HIGHLIGHT_ATTR]: characterDecoration}}
             aria-busy={!isCanvasReady}
+            data-read-only={isReadOnly ? 'true' : undefined}
             ref={rootRef}
             style={rootStyle}
         >
@@ -218,6 +218,8 @@ export const EditorShell = ({
                                 editor={editor}
                                 blockShortcuts={blockShortcuts}
                                 search={search}
+                                isReadOnly={isReadOnly}
+                                readOnlyLabel={readOnlyLabel}
                             />
                         </div>
                         {rightSidebarToggle ? (
@@ -247,6 +249,7 @@ export const EditorShell = ({
                             scriptTitle={scriptTitle}
                             draftDate={draftDate}
                             blockShortcuts={blockShortcuts}
+                            isReadOnly={isReadOnly}
                         />
                     </div>
                 </main>
@@ -263,6 +266,7 @@ export const EditorShell = ({
             <EditorStatusBar
                 editor={editor}
                 blockNextElements={blockNextElements ?? {}}
+                isReadOnly={isReadOnly}
             />
         </div>
     );

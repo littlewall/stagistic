@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Notice} from '../../feedback/Notice/Notice';
@@ -16,6 +16,8 @@ import type {ImportScriptModalProps} from './types';
 const REPLACE_SCRIPT_CONFIRM_PHRASE = 'replace me';
 
 export const ImportScriptModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     onClose,
     onImportStagistic,
@@ -65,16 +67,25 @@ export const ImportScriptModal = ({
     const [replaceConfirmText, setReplaceConfirmText] = useState('');
     const canSubmitReplace = replaceConfirmText.trim() === REPLACE_SCRIPT_CONFIRM_PHRASE && !isLoading;
 
-    useEffect(() => {
-        setReplaceConfirmText('');
-    }, [
+    const [previous, setPrevious] = useState({
         existingScriptId,
         isOpen,
         showReplacePanel,
-    ]);
+    });
+
+    if (previous.existingScriptId !== existingScriptId || previous.isOpen !== isOpen || previous.showReplacePanel !== showReplacePanel) {
+        setPrevious({
+            existingScriptId,
+            isOpen,
+            showReplacePanel,
+        });
+        setReplaceConfirmText('');
+    }
 
     return (
         <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Import script"

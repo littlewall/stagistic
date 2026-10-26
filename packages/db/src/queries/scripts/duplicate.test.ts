@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {
     and,
     eq,
@@ -287,8 +288,8 @@ describe('duplicateScriptRows', () => {
             .select()
             .from(scriptBlockCharacterRefs)
             .where(and(
-                eq(scriptBlockCharacterRefs.blockId, dialogueBlock!.id),
-                eq(scriptBlockCharacterRefs.characterId, character!.id),
+                eq(scriptBlockCharacterRefs.blockId, requireValue(dialogueBlock).id),
+                eq(scriptBlockCharacterRefs.characterId, requireValue(character).id),
             ));
 
         expect(characterRefs).toHaveLength(1);
@@ -299,10 +300,10 @@ describe('duplicateScriptRows', () => {
             .select()
             .from(scriptBlockCharacterRefs)
             .where(and(
-                eq(scriptBlockCharacterRefs.blockId, groupBlock!.id),
-                eq(scriptBlockCharacterRefs.characterId, group!.id),
+                eq(scriptBlockCharacterRefs.blockId, requireValue(groupBlock).id),
+                eq(scriptBlockCharacterRefs.characterId, requireValue(group).id),
             ));
-        const inline = JSON.parse(groupBlock!.contentJson!) as Array<{
+        const inline = JSON.parse(requireValue(requireValue(groupBlock).contentJson)) as Array<{
             text?: string,
             marks?: Array<{attrs?: {characterId?: string | null}}>,
         }>;
@@ -334,7 +335,7 @@ describe('duplicateScriptRows', () => {
         const allRefs = await db.select().from(scriptBlockCharacterRefs);
         const targetRefs = allRefs.filter(ref => blockIds.includes(ref.blockId));
         const groupBlock = blocks.find(block => block.blockType === 'stageDirection');
-        const inline = JSON.parse(groupBlock!.contentJson!) as Array<{
+        const inline = JSON.parse(requireValue(requireValue(groupBlock).contentJson)) as Array<{
             text?: string,
             marks?: Array<{attrs?: {characterId?: string | null}}>,
         }>;

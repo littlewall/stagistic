@@ -54,7 +54,7 @@ export const resolveMusicOutCandidate = (
                 && startBlock.orderNo < targetBlock.orderNo
                 && startBlock.sceneBlockId === targetBlock.sceneBlockId;
         })
-        .sort((left, right) => {
+        .toSorted((left, right) => {
             const leftOrder = blocksById.get(left.startBlockId)?.orderNo ?? -1;
             const rightOrder = blocksById.get(right.startBlockId)?.orderNo ?? -1;
 

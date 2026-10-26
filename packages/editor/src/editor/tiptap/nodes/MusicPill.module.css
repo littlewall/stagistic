@@ -104,6 +104,12 @@
     }
 }
 
+/* A saved draft or version: clicking the title opens the menu, it does not place a caret. */
+.titleInput.readOnlyTitle {
+    cursor: pointer;
+    user-select: none;
+}
+
 .number {
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -153,21 +159,7 @@
 }
 
 .icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--bubble-menu-icon-size);
-    height: var(--bubble-menu-icon-size);
-
-    & :global(svg) {
-        width: var(--bubble-menu-icon-size);
-        height: var(--bubble-menu-icon-size);
-        fill: none;
-        stroke: currentcolor;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-width: 1.6;
-    }
+    composes: icon from '../../components/BubbleMenuIcon.module.css';
 }
 
 @media (prefers-reduced-motion: reduce) {

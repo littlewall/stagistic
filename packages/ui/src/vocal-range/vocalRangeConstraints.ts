@@ -70,7 +70,7 @@ export const constrainStaffPitch = ({
     const candidatePositions = Array.from(
         {length: maxPosition - minPosition + 1},
         (_, index) => minPosition + index,
-    ).sort((left, right) => Math.abs(left - position) - Math.abs(right - position));
+    ).toSorted((left, right) => Math.abs(left - position) - Math.abs(right - position));
 
     for (const candidatePosition of candidatePositions) {
         const candidate = positionToPitch(candidatePosition, clef, alter);

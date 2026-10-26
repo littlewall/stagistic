@@ -1,0 +1,236 @@
+/*
+ * Drafts and versions manager: the attribute-manager layout (list and detail)
+ * in the interface voice, since stored states are not script content.
+ */
+.panel {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+}
+
+.browser {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
+    border-right: 1px solid var(--color-border);
+}
+
+.searchRow {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-xl);
+}
+
+.searchField {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+
+    & input {
+        padding-left: calc(var(--space-xl) + var(--icon-size-md));
+        background: var(--color-surface);
+    }
+}
+
+.searchIcon {
+    composes: search-icon from '../attribute-manager/attributeManagerWorkspace.module.css';
+}
+
+.iconButton {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: var(--control-trigger-height);
+    height: var(--control-trigger-height);
+    padding: 0;
+    color: var(--color-text);
+
+    &:hover:not(:disabled) {
+        background: var(--menu-item-hover-bg);
+    }
+}
+
+.deleteButton {
+    color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
+
+    &:hover:not(:disabled) {
+        color: var(--color-status-danger);
+        background: color-mix(in oklch, var(--color-status-danger) 16%, transparent);
+    }
+}
+
+.actionIcon {
+    display: block;
+    flex: 0 0 auto;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+}
+
+.list {
+    overflow-y: auto;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-height: 0;
+    margin: 0;
+    padding: 0 var(--space-md) var(--space-xl);
+    list-style: none;
+}
+
+.listItem {
+    composes: list-item from '../attribute-manager/attributeManagerWorkspace.module.css';
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-px) * 2);
+}
+
+/* The composed list-item centres its row; this column must start at the left. */
+.list .listItem {
+    align-items: stretch;
+}
+
+.selected {
+    composes: selected from '../attribute-manager/attributeManagerWorkspace.module.css';
+}
+
+.itemLabel {
+    display: flex;
+    gap: var(--space-md);
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.itemShown {
+    flex: 0 0 auto;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-muted);
+}
+
+.itemDetail {
+    overflow: hidden;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.emptyList {
+    margin: 0;
+    padding: 0 var(--space-xl) var(--space-xl);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.detailColumn {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: var(--color-surface);
+}
+
+.detailHeader {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 76px;
+    padding: var(--space-xl) var(--space-2xl);
+}
+
+.detailIdentity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+.detailType,
+.detailFacts {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.detailTitle {
+    overflow: hidden;
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.detailBody {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+}
+
+.emptyDetail {
+    display: grid;
+    flex: 1 1 auto;
+    place-items: center;
+    padding: var(--space-2xl);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    max-width: 65ch;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.formActions,
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.actions {
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+@media (max-width: 45em) {
+    .panel {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
+    }
+
+    .browser {
+        border-right: 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+}

@@ -155,6 +155,8 @@
     --color-surface: oklch(from var(--base-surface) var(--L-surface) calc(c * var(--C-bg)) h);
     --color-surface-raised: oklch(from var(--base-surface) var(--L-highlight) calc(c * var(--C-bg)) h);
     --color-surface-accent: oklch(from var(--base-selection) .93 calc(c * .45) h);
+    /* A stored draft or version on screen: a cool Steel Wool wash, never the accent. */
+    --color-surface-read-only: oklch(from var(--base-neutral) .93 calc(c * 1.6) h);
     --color-surface-paper: oklch(from var(--base-surface) var(--L-paper) calc(c * .1) h);
 
     /* Text */
@@ -197,6 +199,8 @@
     --state-selected: oklch(from var(--base-selection) .94 calc(c * .38) h);
     --state-selected-edge: oklch(from var(--base-selection) .8 calc(c * .75) h);
     --state-selected-strong: oklch(from var(--base-selection) .58 c h);
+    /* Darkest ink that still reads as the "chosen" yellow: marks and icons. */
+    --state-selected-ink: oklch(from var(--base-selection) .5 calc(c * 1.2) h);
 
     /* Where I am in the application — ink, outside the two-accent system. */
     --state-current-edge: var(--color-text);
@@ -316,6 +320,7 @@
 
     /* dark mode overrides */
     --color-surface-accent: oklch(from var(--base-selection) .3 calc(c * .4) h);
+    --color-surface-read-only: oklch(from var(--base-neutral) .24 calc(c * 1.6) h);
 
     /* A tint carries far less contrast over a .17 surface than over a .98 one,
        so selection keeps its own lightness here and its edge is pushed past the
@@ -323,6 +328,7 @@
     --state-selected: oklch(from var(--base-selection) .28 calc(c * .35) h);
     --state-selected-edge: oklch(from var(--base-selection) .62 calc(c * .8) h);
     --state-selected-strong: oklch(from var(--base-selection) .68 c h);
+    --state-selected-ink: oklch(from var(--base-selection) .82 c h);
     --state-drop-edge: 1.5px dashed oklch(from var(--base-selection) .62 calc(c * .8) h);
     --state-flash: oklch(from var(--base-flash) .3 calc(c * .24) h);
 

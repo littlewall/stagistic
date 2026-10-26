@@ -82,24 +82,66 @@ const stageDirectionRunContinuesSpeech = (content: ScriptNode[], fromIndex: numb
     return index < content.length && SPEECH_CONTINUATION_TYPES.includes(getScriptBlockNodeType(content[index]));
 };
 
-const serializeBody = (document: ScriptDocument) => {
-    const sections: string[] = [];
+export interface StagisticFragmentContext {
+    hasActs: boolean,
+    actHeadingBlockId: string | null,
+    sceneHeadingBlockId: string | null,
+    musicNumber: number,
+    openMusicNumber: number | null,
+}
+
+export interface StagisticUnit {
+    blockIds: string[],
+    text: string,
+    kind: 'speech' | 'block',
+    contextBefore: StagisticFragmentContext,
+}
+
+const getBlockId = (node: ScriptNode): string => (typeof node.attrs?.id === 'string' ? node.attrs.id : '');
+
+export const serializeStagisticUnits = (document: ScriptDocument): StagisticUnit[] => {
+    const sections: StagisticUnit[] = [];
     const state: SerializationState = {musicNumber: 0, openMusicNumber: null};
     const hasActs = document.content.some(node => getScriptBlockNodeType(node) === 'act');
+    let actHeadingBlockId: string | null = null;
+    let sceneHeadingBlockId: string | null = null;
 
     for (let index = 0; index < document.content.length; index += 1) {
         const node = document.content[index];
         const blockType = getScriptBlockNodeType(node);
+        const blockIds = [getBlockId(node)];
+
+        if (blockType === 'act') {
+            actHeadingBlockId = blockIds[0];
+            sceneHeadingBlockId = null;
+        }
+
+        if (blockType === 'scene') {
+            sceneHeadingBlockId = blockIds[0];
+        }
+
+        const contextBefore = {
+            hasActs,
+            actHeadingBlockId,
+            sceneHeadingBlockId,
+            ...state,
+        };
+        const append = (text: string) => sections.push({
+            text,
+            blockIds,
+            kind: blockType === 'character' ? 'speech' : 'block',
+            contextBefore,
+        });
 
         if (blockType === 'act') {
             state.openMusicNumber = null;
-            sections.push(`# ${serializeInlineContent(node.content, state).text.trim()}`);
+            append(`# ${serializeInlineContent(node.content, state).text.trim()}`);
             continue;
         }
 
         if (blockType === 'scene') {
             state.openMusicNumber = null;
-            sections.push(`${hasActs ? '##' : '#'} ${serializeInlineContent(node.content, state).text.trim()}`);
+            append(`${hasActs ? '##' : '#'} ${serializeInlineContent(node.content, state).text.trim()}`);
             continue;
         }
 
@@ -118,15 +160,16 @@ const serializeBody = (document: ScriptDocument) => {
                 }
 
                 index += 1;
+                blockIds.push(getBlockId(nextNode));
                 speechLines.push(serializeSpeechBlock(nextNode, state));
             }
 
-            sections.push(speechLines.join('\n'));
+            append(speechLines.join('\n'));
             continue;
         }
 
         if (blockType === 'note') {
-            sections.push(`[[ ${serializeInlineContent(node.content, state).text.trim()} ]]`);
+            append(`[[ ${serializeInlineContent(node.content, state).text.trim()} ]]`);
             continue;
         }
 
@@ -134,19 +177,25 @@ const serializeBody = (document: ScriptDocument) => {
             const {text, hitOut} = serializeInlineContent(node.content, state);
             const serializedText = shouldForceStageDirection(text) ? `!${text}` : text;
 
-            sections.push(hitOut ? `${serializedText}\n\n${hitOut}` : serializedText);
+            append(hitOut ? `${serializedText}\n\n${hitOut}` : serializedText);
             continue;
         }
 
-        sections.push(serializeSpeechBlock(node, state));
+        append(serializeSpeechBlock(node, state));
     }
 
-    return sections.filter(section => section.length > 0).join('\n\n');
+    return sections.filter(section => section.text.length > 0);
 };
+
+export const serializeStagisticFragment = (units: readonly StagisticUnit[]) => ({
+    text: units.map(unit => unit.text).join('\n\n'),
+    blockIds: units.flatMap(unit => unit.blockIds),
+    context: units[0]?.contextBefore ?? null,
+});
 
 export const serializeStagistic = (document: ScriptDocument, options: SerializeStagisticOptions): string => {
     const frontmatter = serializeStagisticFrontmatter(options);
-    const body = serializeBody(document);
+    const body = serializeStagisticFragment(serializeStagisticUnits(document)).text;
 
     return `${frontmatter}${body ? `\n\n${body}` : ''}\n`;
 };

@@ -46,7 +46,8 @@ afterEach(async () => {
     await Promise.all(clients.splice(0).map(client => client.close()));
 });
 
-describe('runPgliteMigrations', () => {
+// Each test migrates a fresh PGlite instead of cloning the template; slow under a full parallel run.
+describe('runPgliteMigrations', {timeout: 20_000}, () => {
     it('applies each migration once and records its checksum', async () => {
         const client = await createClient();
 

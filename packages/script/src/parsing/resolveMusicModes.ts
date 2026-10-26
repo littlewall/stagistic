@@ -18,6 +18,21 @@ const endsWithMusicStart = (block: ParsedBlock) => {
     return getSingleMusicMarker(block)?.role === 'start' && block.node.content?.at(-1)?.type === MUSIC_START_NODE_NAME;
 };
 
+const isMusicHit = (block: ParsedBlock, next: ParsedBlock | undefined) => {
+    const marker = getSingleMusicMarker(block);
+
+    return marker?.role === 'start' && endsWithMusicStart(block) && next !== undefined
+        && isPureMusicBlock(next, 'out') && getSingleMusicMarker(next)?.number === marker.number;
+};
+
+const validateMusicNumber = (musicNumber: number | null, line: number) => {
+    if (musicNumber === null || !Number.isSafeInteger(musicNumber) || musicNumber < 1) {
+        throw new StagisticParseError('Music numbers must be positive integers.', line);
+    }
+
+    return musicNumber;
+};
+
 export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
     const result: ScriptNode[] = [];
     const seenMusicNumbers = new Set<number>();
@@ -37,13 +52,7 @@ export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
             continue;
         }
 
-        const marker = getSingleMusicMarker(block);
-        const next = blocks[index + 1];
-        const nextMarker = next ? getSingleMusicMarker(next) : null;
-        const isHit =
-            marker?.role === 'start' && endsWithMusicStart(block) && next && isPureMusicBlock(next, 'out') && nextMarker?.number === marker.number;
-
-        if (isHit) {
+        if (isMusicHit(block, blocks[index + 1])) {
             const musicNode = block.node.content?.at(-1);
 
             if (musicNode?.attrs) {
@@ -57,11 +66,7 @@ export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
 
         for (const current of markers) {
             if (current.role === 'start') {
-                const musicNumber = current.number;
-
-                if (musicNumber === null || !Number.isSafeInteger(musicNumber) || musicNumber < 1) {
-                    throw new StagisticParseError('Music numbers must be positive integers.', current.line);
-                }
+                const musicNumber = validateMusicNumber(current.number, current.line);
 
                 if (seenMusicNumbers.has(musicNumber)) {
                     throw new StagisticParseError(`Music ${musicNumber} is declared more than once.`, current.line);

@@ -1,6 +1,14 @@
-import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
+import {
+    getScriptSnapshotLabel,
+    useScriptActions,
+    useScriptRepository,
+} from '@stagistic/app-core';
 import {isApplePlatform} from '@stagistic/shared';
-import {ScriptSettingsModal, useKeyedFieldDrafts} from '@stagistic/ui';
+import {
+    ReadOnlyNotice,
+    SettingsModal,
+    useKeyedFieldDrafts,
+} from '@stagistic/ui';
 import {type ReactNode, useMemo} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
@@ -16,19 +24,20 @@ import {useScriptEditorSettingsDraft} from '../drafts/useScriptEditorSettingsDra
 import {useScriptTitleDraft} from '../drafts/useScriptTitleDraft';
 import {useTitlePageDraft} from '../drafts/useTitlePageDraft';
 import {useScriptMusicState} from '../editor/music/useScriptMusicState';
+import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {ScriptCharactersProvider} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {ScriptEditorSettingsPanel} from './panels';
 import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
+import {readOnlyScriptSettingsMenu} from './settingsMenu';
+import {BLOCK_LABEL_BY_TYPE, getShownSettingsPanelId} from './settingsPanelPresentation';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
-
-const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const));
 
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
+    const {isReadOnly, snapshot} = useScriptReadOnlyState();
     const {deleteScript, renameScriptTitle} = useScriptActions();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
@@ -79,6 +88,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const {
         isSettingsOpen,
+        settingsReturnFocus,
         activePanelId,
         expandedItemIds,
         groups,
@@ -96,6 +106,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const {
         isOpen: isAttributeManagerOpen,
+        returnFocus: attributeManagerReturnFocus,
         activePanelId: activeAttributeManagerPanelId,
         selectedCharacterId: selectedAttributeManagerCharacterId,
         selectedGroupId: selectedAttributeManagerGroupId,
@@ -169,6 +180,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         applyDocumentChange,
     });
 
+    const shownPanelId = getShownSettingsPanelId(activePanelId, isReadOnly);
     const contextValue = useMemo<ScriptSettingsModalContextValue>(
         () => ({
             resolvedScriptSettings,
@@ -208,11 +220,18 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         <ScriptSettingsModalContext.Provider value={contextValue}>
             <ScriptCharactersProvider value={charactersContextValue}>
                 {children}
-                <ScriptSettingsModal
+                <SettingsModal
+                    returnFocus={settingsReturnFocus}
                     isOpen={isSettingsOpen}
                     title="Script settings"
-                    groups={groups}
-                    activePanelId={activePanelId}
+                    groups={isReadOnly ? readOnlyScriptSettingsMenu : groups}
+                    activePanelId={shownPanelId}
+                    notice={isReadOnly ? (
+                        <ReadOnlyNotice
+                            label={snapshot ? getScriptSnapshotLabel(snapshot) : null}
+                            message={`Changes apply to this ${snapshot?.kind === 'version' ? 'version' : 'draft'} only`}
+                        />
+                    ) : null}
                     expandedItemIds={expandedItemIds}
                     onClose={handleCloseSettings}
                     onSelectPanel={handleSelectSettingsPanel}
@@ -220,7 +239,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                 >
                     <DraftSaveError error={draftSaveError} onRetry={retryFailedDrafts} />
                     <ScriptEditorSettingsPanel
-                        panelId={activePanelId}
+                        panelId={shownPanelId}
                         resolvedScriptSettings={resolvedScriptSettings}
                         settingsOverride={effectiveScriptSettingsDraft}
                         blockLabelByType={BLOCK_LABEL_BY_TYPE}
@@ -245,8 +264,9 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             onDeleteScript: handleDeleteScript,
                         }}
                     />
-                </ScriptSettingsModal>
+                </SettingsModal>
                 <ScriptAttributeManagerModal
+                    returnFocus={attributeManagerReturnFocus}
                     currentScriptId={currentScriptId}
                     isOpen={isAttributeManagerOpen}
                     tabs={attributeManagerTabs}

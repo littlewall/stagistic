@@ -1,11 +1,8 @@
 import clsx from 'clsx';
-import {
-    type MouseEvent as ReactMouseEvent,
-    type ReactNode,
-    useCallback,
-    useEffect,
-} from 'react';
+import type {ReactNode} from 'react';
 
+import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import styles from './AttributeManagerModal.module.css';
 
 export interface AttributeManagerTab {
@@ -13,13 +10,15 @@ export interface AttributeManagerTab {
     label: string,
 }
 
-export interface AttributeManagerModalProps {
+export interface AttributeManagerModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     title?: string,
     tabs: AttributeManagerTab[],
     activeTabId: string,
     onClose: () => void,
     onSelectTab: (tabId: string) => void,
+    /** A strip between the header and the tabs. */
+    notice?: ReactNode,
     children?: ReactNode,
 }
 
@@ -30,97 +29,73 @@ export const AttributeManagerModal = ({
     activeTabId,
     onClose,
     onSelectTab,
+    notice,
     children,
+    returnFocus,
+    fallbackFocus,
 }: AttributeManagerModalProps) => {
-    useEffect(() => {
-        if (!isOpen) {
-            return undefined;
-        }
-
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
-
-    const handleBackdropClick = useCallback(() => {
-        onClose();
-    }, [onClose]);
-    const handleModalClick = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
-        event.stopPropagation();
-    }, []);
     const activeTab = tabs.find(tab => tab.id === activeTabId) ?? tabs[0];
 
-    if (!isOpen) {
-        return null;
-    }
-
     return (
-        <div
-            className={styles.backdrop}
-            role="presentation"
-            onClick={handleBackdropClick}
+        <ModalDialog
+            isOpen={isOpen}
+            onClose={onClose}
+            ariaLabel={title}
+            panelClassName={styles.modal}
+            dialogClassName={styles.backdrop}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
+            initialFocus={dialog => dialog.querySelector('[role="tab"][aria-selected="true"]')}
         >
-            <div
-                className={styles.modal}
-                role="dialog"
-                aria-modal="true"
-                aria-label="Attribute manager"
-                onClick={handleModalClick}
+            <header className={styles.header}>
+                <h2 className={styles.title}>{title}</h2>
+                <button
+                    type="button"
+                    className={styles.closeButton}
+                    onClick={onClose}
+                    aria-label={`Close ${title.toLocaleLowerCase()}`}
+                >
+                    Close
+                </button>
+            </header>
+            {notice ? <div className={styles.notice}>{notice}</div> : null}
+            <nav
+                className={styles.tabs}
+                aria-label={`${title} sections`}
             >
-                <header className={styles.header}>
-                    <h2 className={styles.title}>{title}</h2>
-                    <button
-                        type="button"
-                        className={styles.closeButton}
-                        onClick={onClose}
-                        aria-label="Close attribute manager"
-                    >
-                        Close
-                    </button>
-                </header>
-                <nav
-                    className={styles.tabs}
-                    aria-label="Attribute manager sections"
+                <div
+                    className={styles.tabList}
+                    role="tablist"
                 >
-                    <div
-                        className={styles.tabList}
-                        role="tablist"
-                    >
-                        {tabs.map(tab => {
-                            const isActive = tab.id === activeTabId;
+                    {tabs.map(tab => {
+                        const isActive = tab.id === activeTabId;
 
-                            return (
-                                <button
-                                    key={tab.id}
-                                    type="button"
-                                    id={`attribute-manager-tab-${tab.id}`}
-                                    className={clsx(styles.tab, isActive && styles.active)}
-                                    role="tab"
-                                    aria-selected={isActive}
-                                    aria-controls={`attribute-manager-panel-${tab.id}`}
-                                    onClick={() => onSelectTab(tab.id)}
-                                >
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </nav>
-                <section
-                    id={`attribute-manager-panel-${activeTab.id}`}
-                    className={styles.content}
-                    role="tabpanel"
-                    aria-labelledby={`attribute-manager-tab-${activeTab.id}`}
-                >
-                    {children}
-                </section>
-            </div>
-        </div>
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                id={`attribute-manager-tab-${tab.id}`}
+                                className={clsx(styles.tab, isActive && styles.active)}
+                                role="tab"
+                                aria-selected={isActive}
+                                data-modal-initial-focus={isActive ? '' : undefined}
+                                aria-controls={`attribute-manager-panel-${tab.id}`}
+                                onClick={() => onSelectTab(tab.id)}
+                            >
+                                {tab.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </nav>
+            <section
+                id={`attribute-manager-panel-${activeTab.id}`}
+                className={styles.content}
+                role="tabpanel"
+                aria-labelledby={`attribute-manager-tab-${activeTab.id}`}
+            >
+                {children}
+            </section>
+        </ModalDialog>
     );
 };

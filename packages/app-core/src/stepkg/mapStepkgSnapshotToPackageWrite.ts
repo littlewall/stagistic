@@ -2,6 +2,7 @@ import {
     MUSIC_ATTACHMENT_ROLES,
     type MusicAttachmentRole,
     type ScriptPackageWrite,
+    type ScriptPackageWriteAttachment,
 } from '@stagistic/db';
 import type {StepkgSnapshot} from '@stagistic/stepkg';
 
@@ -17,7 +18,37 @@ const toMusicAttachmentRole = (role: string): MusicAttachmentRole => {
     return known as MusicAttachmentRole;
 };
 
-export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets: Map<string, Uint8Array>): ScriptPackageWrite => ({
+/*
+ * Attachment content comes either from package asset bytes (.stepkg import) or
+ * from blobs already in FileStorage (stored snapshot restore), whose keys are
+ * the snapshot's contentKey values.
+ */
+export type StepkgAttachmentContent = Map<string, Uint8Array> | 'existing-storage-keys';
+
+const mapAttachment = (
+    attachment: StepkgSnapshot['attachments'][number],
+    content: StepkgAttachmentContent,
+): ScriptPackageWriteAttachment => {
+    const base = {
+        id: attachment.id,
+        filename: attachment.filename,
+        mimeType: attachment.mimeType,
+        sizeBytes: attachment.sizeBytes,
+        createdAt: toEpoch(attachment.createdAt),
+        updatedAt: toEpoch(attachment.updatedAt),
+    };
+
+    if (content === 'existing-storage-keys') {
+        return {...base, existingStorageKey: attachment.contentKey};
+    }
+
+    return {
+        ...base,
+        blob: new Blob([toBlobPart(content.get(attachment.contentKey) ?? new Uint8Array())], {type: attachment.mimeType}),
+    };
+};
+
+export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets: StepkgAttachmentContent): ScriptPackageWrite => ({
     script: {
         id: snapshot.script.id,
         title: snapshot.script.title,
@@ -82,15 +113,7 @@ export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets
         synopsis: scene.synopsis,
         locationIds: scene.locationIds,
     })),
-    attachments: snapshot.attachments.map(attachment => ({
-        id: attachment.id,
-        filename: attachment.filename,
-        mimeType: attachment.mimeType,
-        sizeBytes: attachment.sizeBytes,
-        blob: new Blob([toBlobPart(assets.get(attachment.contentKey) ?? new Uint8Array())], {type: attachment.mimeType}),
-        createdAt: toEpoch(attachment.createdAt),
-        updatedAt: toEpoch(attachment.updatedAt),
-    })),
+    attachments: snapshot.attachments.map(attachment => mapAttachment(attachment, assets)),
     bindings: snapshot.attachmentBindings.map(binding => ({
         musicId: binding.target.id,
         attachmentId: binding.attachmentId,

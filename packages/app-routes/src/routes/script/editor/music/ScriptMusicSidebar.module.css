@@ -33,19 +33,24 @@
     display: grid;
     /* minmax(0, …) so a long title truncates instead of widening the track. */
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-xs);
+    gap: var(--space-md);
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-/* Sizing, hover and selected surfaces come from ListRow; this only adds row-scoped behaviour. */
+/* Hover comes from ListRow; the outlined card matches the character rows next door. */
 .row {
     color: var(--color-text);
+    border: 1px solid var(--color-border);
 
     &:hover .actions,
-    &:focus-within .actions {
+    :global(:root[data-focus-ring-visible]) &:focus-within .actions {
         opacity: 1;
+    }
+
+    &.active {
+        border-color: transparent;
     }
 }
 
@@ -80,9 +85,32 @@
     color: var(--color-text-muted);
 }
 
+/*
+ * The character row's box: 30px of content and padding inside a 1px border.
+ * Scoped under the list to outrank ListRow's own `.row` regardless of
+ * stylesheet order.
+ */
+.itemList .row {
+    gap: var(--space-md);
+    box-sizing: content-box;
+    min-height: calc(30px - var(--space-sm) * 2);
+    padding: var(--space-sm) var(--space-md);
+}
+
+/* The size of the character rows' edit button, so both panels share one row height. */
+.actions > button {
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
+
+    & svg {
+        width: 13px;
+        height: 13px;
+    }
+}
+
 .actions {
     display: inline-flex;
-    gap: var(--space-px);
+    gap: var(--space-sm);
     opacity: .38;
     transition: opacity var(--duration-normal) var(--ease-standard);
 }

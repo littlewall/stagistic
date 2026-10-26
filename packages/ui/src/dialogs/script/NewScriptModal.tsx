@@ -2,7 +2,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useRef,
     useState,
 } from 'react';
@@ -34,6 +33,8 @@ export const NewScriptModal = ({
     isTransitioning = false,
     onClose,
     onCreate,
+    returnFocus,
+    fallbackFocus,
 }: NewScriptModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
@@ -51,38 +52,27 @@ export const NewScriptModal = ({
 
     const isLoading = loadingMessages.length > 0;
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
+
         if (!isOpen) {
             setName('');
             setShape('multi-act');
-
-            return;
         }
+    }
 
-        const focusTimer = window.setTimeout(() => {
-            inputRef.current?.focus();
-        }, 0);
+    const handleSubmit = async (event: FormEvent) => {
+        event.preventDefault();
+        setIsPending(true);
 
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen]);
-
-    const handleSubmit = useCallback(
-        async (event: FormEvent) => {
-            event.preventDefault();
-            setIsPending(true);
-
-            try {
-                await onCreate(name, shape);
-            } finally {
-                setIsPending(false);
-            }
-        },
-        [
-            name,
-            onCreate,
-            shape,
-        ],
-    );
+        try {
+            await onCreate(name, shape);
+        } finally {
+            setIsPending(false);
+        }
+    };
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     }, []);
@@ -99,6 +89,9 @@ export const NewScriptModal = ({
             isOpen={isOpen}
             onClose={handleClose}
             ariaLabel="Create new script"
+            initialFocus={inputRef}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
         >
             {isLoading ? (
                 <LoaderOverlay

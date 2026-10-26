@@ -16,6 +16,15 @@ tauri = { version = "3.0.0-alpha", features = [] }
 tauri-runtime-wry = "3.0.0-alpha"
 tauri-plugin-dialog = "3.0.0-alpha"
 tauri-plugin-fs = "3.0.0-alpha"
+stagistic-mcp-protocol = { path = "../../../packages/mcp/crates/protocol" }
+tokio = { version = "1", features = ["full", "test-util"] }
+tokio-util = "0.7"
+uuid = { version = "1", features = ["v4"] }
+libc = "0.2"
+fs2 = "0.4"
+
+[dev-dependencies]
+tempfile = "3"
 
 [features]
 # Enabled automatically by `tauri build` to switch from the dev server to the

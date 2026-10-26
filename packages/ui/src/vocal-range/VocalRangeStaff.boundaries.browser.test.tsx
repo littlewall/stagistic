@@ -1,6 +1,7 @@
 import '../../styles/tokens.css';
 
 import {parsePitch} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import type {ReactElement} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -275,8 +276,8 @@ describe('VocalRangeStaff note and ledger visibility', () => {
             />,
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const notehead = note.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const halo = note.querySelector<SVGEllipseElement>('[data-selection-halo]')!;
+        const notehead = requireValue(note.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const halo = requireValue(note.querySelector<SVGEllipseElement>('[data-selection-halo]'));
         const restingFill = getComputedStyle(notehead).fill;
 
         await userEvent.hover(note);
@@ -357,7 +358,7 @@ describe('VocalRangeStaff note and ledger visibility', () => {
         );
         const header = await waitForElement<HTMLButtonElement>(host, '[aria-label="Edit low note C3"]');
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const halo = note.querySelector<SVGEllipseElement>('[data-selection-halo]')!;
+        const halo = requireValue(note.querySelector<SVGEllipseElement>('[data-selection-halo]'));
 
         await page.elementLocator(header).click();
 
@@ -374,8 +375,8 @@ describe('VocalRangeStaff note and ledger visibility', () => {
             />,
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const notehead = note.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const hitTarget = note.querySelector<SVGEllipseElement>('ellipse:first-child')!;
+        const notehead = requireValue(note.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const hitTarget = requireValue(note.querySelector<SVGEllipseElement>('ellipse:first-child'));
         const staffLines = [...host.querySelectorAll<SVGLineElement>('[data-staff-line]')];
         const lineSpacing = Math.abs(
             Number(staffLines[1].getAttribute('y1'))
@@ -420,8 +421,8 @@ describe('VocalRangeStaff note and ledger visibility', () => {
             />,
         );
         const note = await waitForElement<SVGGElement>(host, '[aria-label="Select low note C3"]');
-        const notehead = note.querySelector<SVGEllipseElement>('[data-notehead]')!;
-        const ledger = note.querySelector<SVGLineElement>('[data-ledger-line]')!;
+        const notehead = requireValue(note.querySelector<SVGEllipseElement>('[data-notehead]'));
+        const ledger = requireValue(note.querySelector<SVGLineElement>('[data-ledger-line]'));
         const ledgerWidth = Number(ledger.getAttribute('x2')) - Number(ledger.getAttribute('x1'));
         const noteWidth = Number(notehead.getAttribute('rx')) * 2;
 

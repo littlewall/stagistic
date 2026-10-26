@@ -1,5 +1,6 @@
 import {MUSIC_OUT_NODE_NAME} from '@stagistic/script';
 import {Plugin} from '@tiptap/pm/state';
+import type {EditorView} from '@tiptap/pm/view';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {
@@ -20,6 +21,40 @@ import {
     findMusicAtomRange,
     resolveMusicOutCandidate,
 } from './musicOutCommands';
+
+const isUnmodifiedArrow = (event: KeyboardEvent, key: string) => {
+    return event.key === key && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
+};
+
+const isMusicOutShortcut = (event: KeyboardEvent) => {
+    return event.key.toLocaleLowerCase() === 'o' && event.shiftKey && (event.metaKey || event.ctrlKey)
+        && !event.altKey && !event.isComposing;
+};
+
+const handleMusicOutShortcut = (view: EditorView, event: KeyboardEvent) => {
+    const block = resolveScriptTargetBlock(view.state);
+
+    if (!block) {
+        return false;
+    }
+
+    const hasOut = findMusicAtomRange(block, MUSIC_OUT_NODE_NAME) !== null;
+    const snapshot = buildIndexSnapshotFromPmDoc(view.state.doc);
+
+    if (!hasOut && !resolveMusicOutCandidate(snapshot, block.id)) {
+        return false;
+    }
+
+    event.preventDefault();
+
+    const tr = hasOut ? null : buildSetMusicOutAtBlock(view.state, block.id);
+
+    if (tr) {
+        view.dispatch(tr);
+    }
+
+    return true;
+};
 
 /*
  * Music boundary: the caret never rests after a trailing music atom, arrow
@@ -65,29 +100,8 @@ export const createMusicBoundaryPlugin = () => new Plugin({
 
             const {selection} = view.state;
 
-            if (event.key.toLocaleLowerCase() === 'o' && event.shiftKey && (event.metaKey || event.ctrlKey) && !event.altKey && !event.isComposing) {
-                const block = resolveScriptTargetBlock(view.state);
-
-                if (!block) {
-                    return false;
-                }
-
-                const hasOut = findMusicAtomRange(block, MUSIC_OUT_NODE_NAME) !== null;
-                const snapshot = buildIndexSnapshotFromPmDoc(view.state.doc);
-
-                if (!hasOut && !resolveMusicOutCandidate(snapshot, block.id)) {
-                    return false;
-                }
-
-                event.preventDefault();
-
-                const tr = hasOut ? null : buildSetMusicOutAtBlock(view.state, block.id);
-
-                if (tr) {
-                    view.dispatch(tr);
-                }
-
-                return true;
+            if (isMusicOutShortcut(event)) {
+                return handleMusicOutShortcut(view, event);
             }
 
             if ((event.key === 'Backspace' || event.key === 'Delete') && !selection.empty) {
@@ -107,7 +121,7 @@ export const createMusicBoundaryPlugin = () => new Plugin({
                 return false;
             }
 
-            if (event.key === 'ArrowLeft' && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+            if (isUnmodifiedArrow(event, 'ArrowLeft')) {
                 const tr = moveCaretBeforeTrailingMusicInPreviousBlock(view.state);
 
                 if (tr) {
@@ -119,12 +133,7 @@ export const createMusicBoundaryPlugin = () => new Plugin({
             }
 
             if (
-                event.key === 'ArrowRight' &&
-                    !event.altKey &&
-                    !event.ctrlKey &&
-                    !event.metaKey &&
-                    !event.shiftKey &&
-                    isCaretBeforeTrailingMusic(view.state)
+                isUnmodifiedArrow(event, 'ArrowRight') && isCaretBeforeTrailingMusic(view.state)
             ) {
                 event.preventDefault();
 

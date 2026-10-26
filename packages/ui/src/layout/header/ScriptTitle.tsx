@@ -80,6 +80,8 @@ export const ScriptTitle = ({name, onRename}: ScriptTitleProps) => {
                 ref={inputRef}
                 className={styles.scriptTitleInput}
                 value={draft}
+                // The hidden ::after copy sizes the field; a default 20-char input would keep it wider than the title.
+                size={1}
                 maxLength={MAX_SCRIPT_TITLE_LENGTH}
                 spellCheck={false}
                 aria-label="Script name"

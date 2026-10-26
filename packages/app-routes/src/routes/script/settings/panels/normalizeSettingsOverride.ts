@@ -1,5 +1,5 @@
-import {type EditorSettings} from '@stagistic/script';
 import {
+    type EditorSettings,
     type EditorSettingsOverride,
     isSceneNumberFormat,
     normalizeEditorSettingsBlockType,

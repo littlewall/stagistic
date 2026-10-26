@@ -38,6 +38,7 @@ export const SearchReplaceRow = ({
     shortcuts,
     searchInputId,
 }: SearchReplaceRowProps) => {
+    const {inputRef, ...replacement} = replace;
     const onKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
         if (event.nativeEvent.isComposing) {
             return;
@@ -45,7 +46,7 @@ export const SearchReplaceRow = ({
 
         if (event.key === 'Escape') {
             event.preventDefault();
-            replace.onOpenChange(false);
+            replacement.onOpenChange(false);
             document.getElementById(searchInputId)?.focus();
 
             return;
@@ -57,14 +58,14 @@ export const SearchReplaceRow = ({
 
         event.preventDefault();
 
-        if (replace.isDisabled) {
+        if (replacement.isDisabled) {
             return;
         }
 
         if (event.metaKey || event.ctrlKey) {
-            replace.onReplaceAll();
+            replacement.onReplaceAll();
         } else {
-            replace.onReplace();
+            replacement.onReplace();
         }
     };
 
@@ -75,14 +76,14 @@ export const SearchReplaceRow = ({
             data-search-replace=""
         >
             <SearchInput
-                ref={replace.inputRef}
+                ref={inputRef}
                 className={styles.input}
                 size="toolbar"
-                value={replace.value}
+                value={replacement.value}
                 aria-label="Replace with"
                 placeholder="Replace with…"
                 startAdornment={null}
-                onChange={replace.onChange}
+                onChange={replacement.onChange}
                 onKeyDown={onKeyDown}
                 endAdornment={(
                     <span className={styles.actions}>
@@ -93,9 +94,9 @@ export const SearchReplaceRow = ({
                         >
                             <IconButton
                                 aria-label="Replace"
-                                isDisabled={replace.isDisabled}
+                                isDisabled={replacement.isDisabled}
                                 preventFocusOnPress
-                                onPress={replace.onReplace}
+                                onPress={replacement.onReplace}
                             >
                                 <ReplaceIcon aria-hidden="true" />
                             </IconButton>
@@ -107,9 +108,9 @@ export const SearchReplaceRow = ({
                         >
                             <IconButton
                                 aria-label="Replace all"
-                                isDisabled={replace.isDisabled}
+                                isDisabled={replacement.isDisabled}
                                 preventFocusOnPress
-                                onPress={replace.onReplaceAll}
+                                onPress={replacement.onReplaceAll}
                             >
                                 <ReplaceAllIcon aria-hidden="true" />
                             </IconButton>

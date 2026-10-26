@@ -61,7 +61,7 @@
             border-color: transparent;
         }
 
-        &[data-focus-visible] {
+        :global(:root[data-focus-ring-visible]) &:focus {
             outline: none;
         }
     }

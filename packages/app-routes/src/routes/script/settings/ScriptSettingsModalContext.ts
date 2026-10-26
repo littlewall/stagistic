@@ -18,12 +18,12 @@ export interface ScriptSettingsModalContextValue {
     updateScriptTitle: (title: string) => void,
     musicState: ReturnType<typeof useScriptMusicState>,
     musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
-    openSettingsModal: () => void,
-    openAttributeManagerModal: () => void,
-    openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
-    openAttributeManagerCharacter: (characterId: string) => void,
-    openAttributeManagerGroup: (groupId: string) => void,
-    openAttributeManagerMusic: (musicId: string) => void,
+    openSettingsModal: (returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerModal: (returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId, returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerCharacter: (characterId: string, returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerGroup: (groupId: string, returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerMusic: (musicId: string, returnFocus?: HTMLElement | null) => void,
 }
 
 export const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);

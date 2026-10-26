@@ -138,26 +138,23 @@ export const useStepkgPackageMutations = ({
             setPrefilledImport,
         ],
     );
-    const handleDownloadStepkgBackup = useCallback(
-        async (scriptId: string) => {
-            setIsDownloadingBackup(true);
+    const handleDownloadStepkgBackup = async (scriptId: string) => {
+        setIsDownloadingBackup(true);
 
-            try {
-                const result = await exportScriptPackage({
-                    repository,
-                    scriptId,
-                    generator: {name: 'Stagistic', version: 'web'},
-                });
+        try {
+            const result = await exportScriptPackage({
+                repository,
+                scriptId,
+                generator: {name: 'Stagistic', version: 'web'},
+            });
 
-                if (result.ok) {
-                    downloadBlob(result.fileName, result.blob);
-                }
-            } finally {
-                setIsDownloadingBackup(false);
+            if (result.ok) {
+                downloadBlob(result.fileName, result.blob);
             }
-        },
-        [repository, setIsDownloadingBackup],
-    );
+        } finally {
+            setIsDownloadingBackup(false);
+        }
+    };
 
     return {
         handlePeekStepkg,

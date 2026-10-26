@@ -3,9 +3,9 @@ import {
     type ReactNode,
     useLayoutEffect,
     useRef,
-    useState,
 } from 'react';
 
+import {usePropState} from '../../../../../usePropState';
 import {
     SCREENPLAY_CHARS_PER_INCH,
 } from '../constants';
@@ -50,17 +50,15 @@ export const ElementPreview = ({
     const defaultSliderStartChars = 0;
     const defaultSliderEndChars = previewReferenceChars;
 
-    const [localStart, setLocalStart] = useState(sliderStart);
-    const [localEnd, setLocalEnd] = useState(sliderEnd);
+    const [localStart, setLocalStart] = usePropState(sliderStart);
+    const [localEnd, setLocalEnd] = usePropState(sliderEnd);
     const latestStart = useRef(sliderStart);
     const latestEnd = useRef(sliderEnd);
 
     useLayoutEffect(() => {
-        setLocalStart(sliderStart);
         latestStart.current = sliderStart;
     }, [sliderStart]);
     useLayoutEffect(() => {
-        setLocalEnd(sliderEnd);
         latestEnd.current = sliderEnd;
     }, [sliderEnd]);
 

@@ -1,19 +1,20 @@
 import type {InferSelectModel} from 'drizzle-orm';
 
 import {
-    scriptActs,
-    scriptAttachments,
-    scriptBlockCharacterRefs,
-    scriptBlocks,
-    scriptCommentMessages,
-    scriptCommentThreads,
-    scriptLocations,
-    scriptMusic,
-    scriptMusicAttachments,
-    scripts,
-    scriptScenes,
-    scriptSettingsBlocks,
-    scriptSettingsTitlePage,
+    type scriptActs,
+    type scriptAttachments,
+    type scriptBlockCharacterRefs,
+    type scriptBlocks,
+    type scriptCommentMessages,
+    type scriptCommentThreads,
+    type scriptLocations,
+    type scriptMusic,
+    type scriptMusicAttachments,
+    type scripts,
+    type scriptScenes,
+    type scriptSettingsBlocks,
+    type scriptSettingsTitlePage,
+    type scriptSnapshots,
 } from '../schema';
 import type {MusicAttachmentRole} from './musicAttachments';
 
@@ -45,6 +46,14 @@ type ScriptMusicAttachmentBindingRow = InferSelectModel<typeof scriptMusicAttach
 
 export interface ScriptMusicAttachmentBinding extends Omit<ScriptMusicAttachmentBindingRow, 'role'> {
     role: MusicAttachmentRole,
+}
+
+/** UI: a numbered Draft or a named Version. */
+export type ScriptSnapshotKind = 'draft' | 'version';
+type ScriptSnapshotRow = InferSelectModel<typeof scriptSnapshots>;
+
+export interface ScriptSnapshot extends Omit<ScriptSnapshotRow, 'kind'> {
+    kind: ScriptSnapshotKind,
 }
 
 export interface ScriptMusicAttachment extends ScriptAttachment {

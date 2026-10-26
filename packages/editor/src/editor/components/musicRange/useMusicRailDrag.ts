@@ -13,6 +13,8 @@ import {
 
 type MusicRailDragProps = {
     editor: TiptapEditor | null,
+    /** False for a saved draft or version: its music cannot move. */
+    isEnabled: boolean,
     canvasRef: RefObject<HTMLElement | null>,
     onDragStart: () => void,
     previewClassName: string,
@@ -68,6 +70,7 @@ const resolveClosestBlockId = (canvas: HTMLElement, pointerClientY: number) => {
 
 export const useMusicRailDrag = ({
     editor,
+    isEnabled,
     canvasRef,
     onDragStart,
     previewClassName,
@@ -77,7 +80,7 @@ export const useMusicRailDrag = ({
     useEffect(() => {
         const canvas = canvasRef.current;
 
-        if (!editor || !canvas) {
+        if (!editor || !canvas || !isEnabled) {
             return undefined;
         }
 
@@ -242,6 +245,7 @@ export const useMusicRailDrag = ({
     }, [
         canvasRef,
         editor,
+        isEnabled,
         onDragStart,
         previewClassName,
         rangePreviewClassName,

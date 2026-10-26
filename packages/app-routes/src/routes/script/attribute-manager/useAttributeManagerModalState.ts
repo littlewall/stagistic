@@ -1,6 +1,7 @@
 import {
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -15,6 +16,7 @@ import {
 export type AttributeManagerCharacterWorkspaceId = 'characters' | 'groups';
 
 export const useAttributeManagerModalState = () => {
+    const returnFocus = useRef<HTMLElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [activePanelId, setActivePanelId] = useState<AttributeManagerPanelId>(
         ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
@@ -24,14 +26,16 @@ export const useAttributeManagerModalState = () => {
     const [selectedMusicId, setSelectedMusicId] = useState<string | null>(null);
     const [initialWorkspaceId, setInitialWorkspaceId] = useState<AttributeManagerCharacterWorkspaceId>('characters');
 
-    const open = useCallback(() => {
+    const open = useCallback((trigger?: HTMLElement | null) => {
+        returnFocus.current = trigger ?? null;
         setSelectedCharacterId(null);
         setSelectedGroupId(null);
         setSelectedMusicId(null);
         setInitialWorkspaceId('characters');
         setIsOpen(true);
     }, []);
-    const openWithPanel = useCallback((panelId: AttributeManagerPanelId) => {
+    const openWithPanel = useCallback((panelId: AttributeManagerPanelId, trigger?: HTMLElement | null) => {
+        returnFocus.current = trigger ?? null;
         setSelectedCharacterId(null);
         setSelectedGroupId(null);
         setSelectedMusicId(null);
@@ -39,7 +43,8 @@ export const useAttributeManagerModalState = () => {
         setActivePanelId(panelId);
         setIsOpen(true);
     }, []);
-    const openCharacter = useCallback((characterId: string) => {
+    const openCharacter = useCallback((characterId: string, trigger?: HTMLElement | null) => {
+        returnFocus.current = trigger ?? null;
         setSelectedCharacterId(characterId);
         setSelectedGroupId(null);
         setSelectedMusicId(null);
@@ -47,7 +52,8 @@ export const useAttributeManagerModalState = () => {
         setActivePanelId(ATTRIBUTE_MANAGER_PANEL_CHARACTERS);
         setIsOpen(true);
     }, []);
-    const openGroup = useCallback((groupId: string) => {
+    const openGroup = useCallback((groupId: string, trigger?: HTMLElement | null) => {
+        returnFocus.current = trigger ?? null;
         setSelectedCharacterId(null);
         setSelectedGroupId(groupId);
         setSelectedMusicId(null);
@@ -55,7 +61,8 @@ export const useAttributeManagerModalState = () => {
         setActivePanelId(ATTRIBUTE_MANAGER_PANEL_CHARACTERS);
         setIsOpen(true);
     }, []);
-    const openMusic = useCallback((musicId: string) => {
+    const openMusic = useCallback((musicId: string, trigger?: HTMLElement | null) => {
+        returnFocus.current = trigger ?? null;
         setSelectedCharacterId(null);
         setSelectedGroupId(null);
         setSelectedMusicId(musicId);
@@ -77,6 +84,7 @@ export const useAttributeManagerModalState = () => {
     const tabs = useMemo(() => attributeManagerTabs, []);
 
     return {
+        returnFocus,
         isOpen,
         activePanelId,
         selectedCharacterId,

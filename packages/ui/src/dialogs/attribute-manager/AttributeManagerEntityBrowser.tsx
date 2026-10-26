@@ -26,7 +26,7 @@ interface AttributeManagerEntityBrowserProps {
     isLoading: boolean,
     isCreateDisabled: boolean,
     onSelectItem: (itemId: string) => void,
-    onCreate: () => void,
+    onCreate: (trigger?: HTMLElement) => void,
 }
 
 export const AttributeManagerEntityBrowser = ({
@@ -83,7 +83,7 @@ export const AttributeManagerEntityBrowser = ({
                         size="sm"
                         isDisabled={isCreateDisabled}
                         aria-label={createAriaLabel}
-                        onPress={onCreate}
+                        onPress={event => onCreate(event.target as HTMLElement)}
                     >
                         <PlusIcon
                             className={styles.actionIcon}

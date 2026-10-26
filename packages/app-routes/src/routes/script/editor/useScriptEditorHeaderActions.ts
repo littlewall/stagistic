@@ -7,15 +7,14 @@ import {
 import {useCallback, useState} from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-import {useGlobalModals} from '../../../global-modals/GlobalModalsProvider';
 import {downloadBlob, downloadStagistic} from '../../../shared/downloadStagistic';
 import type {CurrentScriptItem} from '../workspace/types';
 
 interface HeaderActionsParams {
     navigate: NavigateFunction,
     currentScript: CurrentScriptItem | null,
-    openSettingsModal: () => void,
-    openAttributeManagerModal: () => void,
+    openSettingsModal: (returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerModal: (returnFocus?: HTMLElement | null) => void,
     getEditorValue: () => ScriptDocument | null,
     titlePage: TitlePageSettings,
     scriptRepository: ScriptRepository,
@@ -23,7 +22,6 @@ interface HeaderActionsParams {
 }
 
 export const useScriptEditorHeaderActions = ({
-    navigate,
     currentScript,
     openSettingsModal,
     openAttributeManagerModal,
@@ -32,19 +30,18 @@ export const useScriptEditorHeaderActions = ({
     scriptRepository,
     flushScript,
 }: HeaderActionsParams) => {
-    const {openNewScript} = useGlobalModals();
     const [isPreparingPackage, setIsPreparingPackage] = useState(false);
 
     const handleMenuAction = useCallback(
-        (actionId: string) => {
+        (actionId: string, returnFocus?: HTMLElement | null) => {
             if (actionId === 'settings' && currentScript) {
-                openSettingsModal();
+                openSettingsModal(returnFocus);
 
                 return;
             }
 
             if (actionId === 'attributes' && currentScript) {
-                openAttributeManagerModal();
+                openAttributeManagerModal(returnFocus);
 
                 return;
             }
@@ -87,8 +84,6 @@ export const useScriptEditorHeaderActions = ({
         [
             currentScript,
             getEditorValue,
-            navigate,
-            openNewScript,
             openAttributeManagerModal,
             openSettingsModal,
             scriptRepository,

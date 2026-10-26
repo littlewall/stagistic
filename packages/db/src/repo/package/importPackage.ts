@@ -1,4 +1,5 @@
 import {buildScriptSummaryMetadata} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {eq} from 'drizzle-orm';
 
 import type {DbClient} from '../../queries';
@@ -168,7 +169,7 @@ const writePackageDomainRowsTx = async (
             filename: attachment.filename,
             mimeType: attachment.mimeType,
             sizeBytes: attachment.sizeBytes,
-            storageKey: storageKeyByAttachment.get(attachment.id)!,
+            storageKey: requireValue(storageKeyByAttachment.get(attachment.id)),
             createdAt: attachment.createdAt,
             updatedAt: attachment.updatedAt,
         });
@@ -193,6 +194,11 @@ const saveAttachmentBlobs = async (
     const savedKeys: string[] = [];
 
     for (const attachment of input.attachments) {
+        if (attachment.existingStorageKey !== undefined) {
+            storageKeyByAttachment.set(attachment.id, attachment.existingStorageKey);
+            continue;
+        }
+
         const key = await fileStorage.save(attachment.blob);
 
         storageKeyByAttachment.set(attachment.id, key);
@@ -230,6 +236,7 @@ export const createImportPackageHandler = ({
                     createdAt: input.script.createdAt,
                     updatedAt: input.script.updatedAt,
                 });
+
                 if (input.script.subtitle) {
                     await dbQueries.updateScriptSubtitle(tx, {
                         id: scriptId,
@@ -264,8 +271,8 @@ export const createImportPackageHandler = ({
         const scriptId = input.script.id;
         const now = input.script.updatedAt;
         const {storageKeyByAttachment, savedKeys} = await saveAttachmentBlobs(fileStorage, input);
-        let removedStorageKeys: string[] = [];
 
+        // Replaced attachment blobs are released by `collectUnreferencedFiles` at the next startup.
         try {
             await db.transaction(async tx => {
                 await dbQueries.updateScript(tx, {
@@ -274,10 +281,6 @@ export const createImportPackageHandler = ({
                     subtitle: input.script.subtitle,
                     updatedAt: now,
                 });
-
-                const existingAttachments = await dbQueries.listScriptAttachments(tx, scriptId);
-
-                removedStorageKeys = existingAttachments.map(attachment => attachment.storageKey);
 
                 await dbQueries.deleteScriptCharactersByScriptId(tx, scriptId);
                 await dbQueries.deleteScriptCharacterGendersByScriptId(tx, scriptId);
@@ -305,7 +308,6 @@ export const createImportPackageHandler = ({
         }
 
         await syncDb();
-        await deleteBlobsBestEffort(fileStorage, removedStorageKeys, 'a replaced blob');
     };
 
     return {createScriptFromPackage, restoreScriptFromPackage};

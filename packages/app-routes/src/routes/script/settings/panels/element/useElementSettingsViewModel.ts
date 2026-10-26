@@ -1,17 +1,10 @@
 import {BLOCK_ICONS} from '@stagistic/editor';
 import {
-    BLOCK_CASING_OPTIONS,
     BLOCK_SHORTCUT_OPTIONS,
-    BLOCK_TEXT_ALIGN_OPTIONS,
     DEFAULT_EDITOR_SETTINGS,
-    DEFAULT_SCENE_NUMBER_FORMAT,
-    isSceneNumberFormat,
-    SCENE_NUMBER_FORMAT_OPTIONS,
-    type SceneNumberFormat,
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from '../../settingsMenu';
 import {
     BLOCK_PREVIEW_TEXT,
     BLOCK_PREVIEW_TEXT_COLOR,
@@ -29,72 +22,56 @@ import {
     getClosestStepValue,
 } from '../math';
 import type {ElementSettingsPanelProps, ElementSettingsViewModel} from '../types';
-
-const SCENE_NUMBER_FORMAT_LABELS: Record<SceneNumberFormat, string> = {
-    none: 'No numbering',
-    dot: '1.',
-    paren: '1)',
-};
+import {
+    getFormattingValues,
+    getIndents,
+    getNavigationValues,
+    getPageValues,
+    NEXT_ELEMENT_ITEMS,
+} from './elementSettingsValues';
 
 export const useElementSettingsViewModel = ({
     blockType,
     resolvedScriptSettings,
 }: Pick<ElementSettingsPanelProps, 'blockType' | 'resolvedScriptSettings'>): ElementSettingsViewModel => {
     return useMemo(() => {
-        const nextElementItems = SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.filter(
-            item => item.blockType !== 'act' && item.blockType !== 'scene' && item.blockType !== 'note',
-        );
+        const nextElementItems = NEXT_ELEMENT_ITEMS;
         const blockDefaults = DEFAULT_EDITOR_SETTINGS.blocks[blockType];
         const blockSettings = resolvedScriptSettings.blocks[blockType];
-        const pageWidthPx = resolvedScriptSettings.page.widthPx ?? DEFAULT_EDITOR_SETTINGS.page.widthPx;
-        const pageMarginLeftPx = resolvedScriptSettings.page.marginLeftPx ?? DEFAULT_EDITOR_SETTINGS.page.marginLeftPx;
-        const pageMarginRightPx = resolvedScriptSettings.page.marginRightPx ?? DEFAULT_EDITOR_SETTINGS.page.marginRightPx;
-        const typographyFontSizePx = resolvedScriptSettings.typography.fontSizePx ?? DEFAULT_EDITOR_SETTINGS.typography.fontSizePx;
-        const fallbackTypographyLineHeight = resolvedScriptSettings.typography.lineHeight ?? DEFAULT_EDITOR_SETTINGS.typography.lineHeight;
+        const {
+            pageWidthPx,
+            pageMarginLeftPx,
+            pageMarginRightPx,
+            typographyFontSizePx,
+            fallbackTypographyLineHeight,
+        } = getPageValues(resolvedScriptSettings);
         const previewReferenceChars = Math.max(
             MIN_PREVIEW_CONTENT_CHARS,
             Math.round(Math.max(0, (pageWidthPx - pageMarginLeftPx - pageMarginRightPx) / PX_PER_INCH) * SCREENPLAY_CHARS_PER_INCH),
         );
-        const defaultContentChars = Math.max(1, previewReferenceChars - (blockDefaults.indentLeftChars ?? 0) - (blockDefaults.indentRightChars ?? 0));
+        const {leftIndent: defaultLeftIndent, rightIndent: defaultRightIndent} = getIndents({blockType, resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS});
+        const defaultContentChars = Math.max(1, previewReferenceChars - defaultLeftIndent - defaultRightIndent);
         const minPreviewContentChars = Math.min(MIN_PREVIEW_CONTENT_CHARS, defaultContentChars);
         const spacingBefore = getClosestStepValue(SPACING_BEFORE_OPTIONS, blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0);
         const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined;
         const spacingAfterRaw = hasSpacingAfter ? blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0 : undefined;
         const spacingAfter = spacingAfterRaw === undefined ? undefined : getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw);
         const lineHeight = getClosestStepValue(LINE_HEIGHT_OPTIONS, blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight);
-        const leftIndent = blockSettings.indentLeftChars ?? blockDefaults.indentLeftChars ?? 0;
-        const rightIndent = blockSettings.indentRightChars ?? blockDefaults.indentRightChars ?? 0;
-        const isActBlock = blockType === 'act';
-        const shortcut = isActBlock ? undefined : blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
-        const isValidNextElement = (value: unknown): value is ElementSettingsViewModel['numeric']['nextElement'] => {
-            return typeof value === 'string' && nextElementItems.some(item => item.blockType === value);
-        };
-        const nextElement = isActBlock
-            ? undefined
-            : (() => {
-                const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
-
-                return isValidNextElement(candidate) ? candidate : nextElementItems[0]?.blockType;
-            })();
-        const isSceneBlock = blockType === 'scene';
-        const sceneNumberFormat = isSceneBlock
-            ? (() => {
-                const candidate = blockSettings.sceneNumberFormat ?? blockDefaults.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
-
-                return isSceneNumberFormat(candidate) ? candidate : DEFAULT_SCENE_NUMBER_FORMAT;
-            })()
-            : undefined;
-        const sceneNumberFormatOptions = isSceneBlock
-            ? SCENE_NUMBER_FORMAT_OPTIONS.map(option => ({
-                value: option,
-                label: SCENE_NUMBER_FORMAT_LABELS[option],
-            }))
-            : undefined;
-        const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
-        const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
-        const isBold = blockSettings.isBold ?? blockDefaults.isBold ?? false;
-        const isItalic = blockSettings.isItalic ?? blockDefaults.isItalic ?? false;
-        const isUnderline = blockSettings.isUnderline ?? blockDefaults.isUnderline ?? false;
+        const {leftIndent, rightIndent} = getIndents({blockType, resolvedScriptSettings});
+        const {
+            isActBlock,
+            shortcut,
+            nextElement,
+            sceneNumberFormat,
+            sceneNumberFormatOptions,
+        } = getNavigationValues({blockType, resolvedScriptSettings});
+        const {
+            textAlign,
+            casing,
+            isBold,
+            isItalic,
+            isUnderline,
+        } = getFormattingValues({blockType, resolvedScriptSettings});
         const previewText = BLOCK_PREVIEW_TEXT[blockType];
         const previewTextOffsetChars = blockType === 'aside' ? 1 : 0;
         const spacingBeforeOptions = SPACING_BEFORE_OPTIONS.map(option => ({

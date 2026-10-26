@@ -1,53 +1,13 @@
 .backdrop {
-    position: fixed;
-    z-index: 15;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: var(--space-3xl);
-    background: var(--color-overlay-scrim);
+    --modal-dialog-padding: var(--space-3xl);
 }
 
 .modal {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    width: min(1080px, 100%);
-    height: calc(100vh - (var(--space-3xl) * 2));
-    max-height: calc(100vh - (var(--space-3xl) * 2));
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-popover);
+    --modal-panel-gap: 0;
+    --modal-panel-padding: 0;
+    --modal-panel-width: min(1080px, 100%);
 
-    & .header {
-        display: flex;
-        gap: var(--space-lg);
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--space-xl) var(--space-2xl);
-        border-bottom: 1px solid var(--color-border);
-
-        & .title {
-            font-size: var(--font-size-2xl);
-            font-weight: var(--font-weight-semibold);
-        }
-
-        & .closeButton {
-            cursor: pointer;
-            padding: var(--space-md) var(--space-lg);
-            font-size: var(--font-size-sm);
-            color: var(--color-text-muted);
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-
-            &:hover {
-                color: var(--color-text);
-                background: var(--color-surface-raised);
-            }
-        }
-    }
+    composes: modal from '../shared/workspaceModal.module.css';
 
     & .tabs {
         flex: 0 0 auto;
@@ -56,15 +16,17 @@
         border-bottom: 1px solid var(--color-border);
     }
 
+    & .notice {
+        flex: 0 0 auto;
+        padding: var(--space-md) var(--space-2xl);
+        background: var(--color-surface-read-only);
+        border-bottom: 1px solid var(--color-border);
+    }
+
     & .content {
         overflow: hidden;
         flex: 1 1 auto;
         min-height: 0;
-    }
-
-    @media (max-width: 56.25em) {
-        height: calc(100vh - (var(--space-xl) * 2));
-        max-height: calc(100vh - (var(--space-xl) * 2));
     }
 }
 
@@ -100,7 +62,7 @@
 
 @media (max-width: 56.25em) {
     .backdrop {
-        padding: var(--space-xl);
+        --modal-dialog-padding: var(--space-xl);
     }
 
     .tabList {
@@ -110,4 +72,16 @@
     .tab {
         flex: 0 0 auto;
     }
+}
+
+.header {
+    composes: header from '../shared/workspaceModal.module.css';
+}
+
+.title {
+    composes: title from '../shared/workspaceModal.module.css';
+}
+
+.closeButton {
+    composes: close-button from '../shared/workspaceModal.module.css';
 }

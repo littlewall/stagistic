@@ -3,6 +3,7 @@ import {
     type ScriptDocument,
     type ScriptNode,
 } from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 
 import type {
     StepkgAttachmentSnapshot,
@@ -123,14 +124,14 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
     let comments: StepkgSnapshot['comments'] = {threads: [], messages: []};
 
     try {
-        document = decode(files.get('document.json')!) as ScriptDocument;
-        script = decode(files.get('data/script.json')!) as StepkgSnapshot['script'];
-        titlePage = decode(files.get('data/title-page.json')!) as StepkgSnapshot['titlePage'];
-        settings = decode(files.get('data/settings.json')!) as StepkgSnapshot['settings'];
-        characters = decode(files.get('data/characters.json')!) as StepkgSnapshot['characters'];
-        music = decode(files.get('data/music.json')!) as StepkgSnapshot['music'];
-        scenes = decode(files.get('data/scenes.json')!) as StepkgSnapshot['scenes'];
-        attachmentsFile = decode(files.get('data/attachments.json')!) as StepkgAttachmentsFile;
+        document = decode(requireValue(files.get('document.json'))) as ScriptDocument;
+        script = decode(requireValue(files.get('data/script.json'))) as StepkgSnapshot['script'];
+        titlePage = decode(requireValue(files.get('data/title-page.json'))) as StepkgSnapshot['titlePage'];
+        settings = decode(requireValue(files.get('data/settings.json'))) as StepkgSnapshot['settings'];
+        characters = decode(requireValue(files.get('data/characters.json'))) as StepkgSnapshot['characters'];
+        music = decode(requireValue(files.get('data/music.json'))) as StepkgSnapshot['music'];
+        scenes = decode(requireValue(files.get('data/scenes.json'))) as StepkgSnapshot['scenes'];
+        attachmentsFile = decode(requireValue(files.get('data/attachments.json'))) as StepkgAttachmentsFile;
 
         // Optional: packages written before comments existed have no comments file.
         const commentsBytes = files.get('data/comments.json');

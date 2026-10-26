@@ -50,7 +50,7 @@ const normalizeMusicKindInNode = (node: ScriptNode): ScriptNode => {
 };
 
 const sameKeys = (left: Iterable<string>, right: Iterable<string>) => {
-    return [...left].sort().join('\n') === [...right].sort().join('\n');
+    return [...left].toSorted().join('\n') === [...right].toSorted().join('\n');
 };
 
 export const prepareExampleScriptDocument = (document: ScriptDocument): PreparedExampleScript => {
@@ -59,8 +59,8 @@ export const prepareExampleScriptDocument = (document: ScriptDocument): Prepared
         content: document.content.map(normalizeMusicKindInNode),
     };
     const cueKeys = collectScriptCharacterStats(normalizedDocument, new Set()).countsByKey.keys();
-    const characterKeys = EXAMPLE_CHARACTERS.map(character => character.key).sort();
-    const groupKeys = EXAMPLE_GROUPS.map(group => group.key).sort();
+    const characterKeys = EXAMPLE_CHARACTERS.map(character => character.key).toSorted();
+    const groupKeys = EXAMPLE_GROUPS.map(group => group.key).toSorted();
 
     if (!sameKeys(cueKeys, [...characterKeys, ...groupKeys])) {
         invalidExampleScript('cues must match the example characters and groups.');

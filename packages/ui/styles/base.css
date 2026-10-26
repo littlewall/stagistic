@@ -69,22 +69,18 @@ select {
  * a rule for it, which left keyboard users looking at two different focus
  * styles in one window.
  *
- * The native `:focus-visible` fallback sits in `:where()`. The app-level
- * modality attribute adds only one attribute of weight, so explicit component
- * indicators still win — including the home script rows' inset shadow.
- * Text entry relies on that modality attribute because browsers may treat a
- * pointer-focused input as `:focus-visible`.
- * Elements that are focusable but not text entry (`[contenteditable]`, the
- * script canvas) stay out on purpose: a ring around the page would fight the
- * distraction-free canvas.
+ * The application modality signal is the sole source of ring visibility.
+ * Native heuristics inherit rings from text entry during programmatic focus,
+ * including pointer-opened menus and restored dialog triggers.
+ * Custom tab stops use the same baseline. The contenteditable script canvas
+ * stays outside it to keep the page quiet.
  */
 /* stylelint-disable selector-max-type -- global reset combines HTML element selectors in :where() */
-:where(a, button, input, textarea, select, summary):where(:focus) {
+:where(a, button, input, textarea, select, summary, [tabindex]:not([contenteditable])):where(:focus) {
     outline: none;
 }
 
-:where(a, button, select, summary):where(:focus-visible),
-:root[data-focus-ring-visible] :where(a, button, input, textarea, select, summary):where(:focus) {
+:where(:root[data-focus-ring-visible]) :where(a, button, input, textarea, select, summary, [tabindex]:not([contenteditable])):where(:focus) {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
 }

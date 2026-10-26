@@ -82,12 +82,12 @@ export const buildCharacterTagPaletteCss = ({
     const cssLines: string[] = [];
 
     [...idRules.entries()]
-        .sort((left, right) => left[0].localeCompare(right[0]))
+        .toSorted((left, right) => left[0].localeCompare(right[0]))
         .forEach(([className, color]) => {
             cssLines.push(toRule(scopeSelectorPrefix, className, color));
         });
     [...keyRules.entries()]
-        .sort((left, right) => left[0].localeCompare(right[0]))
+        .toSorted((left, right) => left[0].localeCompare(right[0]))
         .forEach(([className, color]) => {
             cssLines.push(toRule(scopeSelectorPrefix, className, color));
         });

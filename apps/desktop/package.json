@@ -8,6 +8,7 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
+        "@stagistic/mcp-contract": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "@tauri-apps/api": "^3.0.0-alpha.0",
@@ -17,6 +18,7 @@
         "react-router-dom": "^7.13.0"
     },
     "devDependencies": {
+        "@stagistic/vite-config": "workspace:*",
         "@tauri-apps/cli": "^3.0.0-alpha.1",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",

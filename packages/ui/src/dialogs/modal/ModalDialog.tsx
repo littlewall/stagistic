@@ -1,32 +1,34 @@
 import {clsx} from 'clsx';
 import {
-    type KeyboardEvent as ReactKeyboardEvent,
-    type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type SyntheticEvent,
     useCallback,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
+import {UNSAFE_PortalProvider} from 'react-aria';
 
 import styles from './ModalDialog.module.css';
+import {
+    createModalFocusSession,
+    focusModalInitial,
+    getModalTabStops,
+    type ModalFocusSession,
+    restoreModalFocus,
+} from './modalFocus';
+import type {ModalFocusRestoreOptions, ModalInitialFocusTarget} from './modalFocusTypes';
 
-const FOCUSABLE_SELECTOR = [
-    'button:not([disabled])',
-    'input:not([disabled])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
-    'a[href]',
-    '[tabindex]:not([tabindex="-1"])',
-].join(',');
-
-interface ModalDialogProps {
+interface ModalDialogProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     onClose: () => void,
     ariaLabel: string,
     children: ReactNode,
     panelClassName?: string,
+    dialogClassName?: string,
+    initialFocus?: ModalInitialFocusTarget,
+    selectInitialFocus?: boolean,
 }
 
 export const ModalDialog = ({
@@ -35,18 +37,33 @@ export const ModalDialog = ({
     ariaLabel,
     children,
     panelClassName,
+    dialogClassName,
+    initialFocus,
+    selectInitialFocus = false,
+    returnFocus,
+    fallbackFocus,
 }: ModalDialogProps) => {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
-    const restoreFocusRef = useRef<HTMLElement | null>(null);
+    const focusSessionRef = useRef<ModalFocusSession | null>(null);
     const [isMounted, setIsMounted] = useState(isOpen);
 
-    useEffect(() => {
-        if (isOpen) {
-            setIsMounted(true);
-        }
-    }, [isOpen]);
+    if (isOpen && !isMounted) {
+        setIsMounted(true);
+    }
 
-    useEffect(() => {
+    const closeAndRestore = useCallback((dialog: HTMLDialogElement | null) => {
+        const session = focusSessionRef.current;
+
+        if (!dialog || !session) {
+            return;
+        }
+
+        focusSessionRef.current = null;
+        dialog.close();
+        restoreModalFocus(dialog, session);
+    }, []);
+
+    useLayoutEffect(() => {
         const dialog = dialogRef.current;
 
         if (!dialog) {
@@ -54,40 +71,60 @@ export const ModalDialog = ({
         }
 
         if (isOpen && !dialog.open) {
-            restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            const session = createModalFocusSession(dialog, {returnFocus, fallbackFocus});
+
+            focusSessionRef.current = session;
+
+            // Align native restoration with the explicit contract, including on WebKit.
+            if (session.hasExplicitTarget) {
+                restoreModalFocus(dialog, session);
+            }
+
             dialog.showModal();
+            focusModalInitial(dialog, initialFocus, selectInitialFocus);
         }
 
         if (!isOpen && dialog.open) {
-            dialog.close();
-            restoreFocusRef.current?.focus();
-            restoreFocusRef.current = null;
+            closeAndRestore(dialog);
             setIsMounted(false);
         }
-    }, [isOpen, isMounted]);
+    }, [
+        isOpen,
+        initialFocus,
+        selectInitialFocus,
+        returnFocus,
+        fallbackFocus,
+        closeAndRestore,
+    ]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        if (!isMounted) {
+            return;
+        }
+
+        const dialog = dialogRef.current;
+
         return () => {
-            restoreFocusRef.current?.focus();
+            closeAndRestore(dialog);
         };
-    }, []);
+    }, [isMounted, closeAndRestore]);
 
     const mouseDownTargetRef = useRef<EventTarget | null>(null);
 
     const handleCancel = useCallback(
         (event: SyntheticEvent) => {
+            if (event.target !== event.currentTarget) {
+                return;
+            }
+
             event.preventDefault();
             onClose();
         },
         [onClose],
     );
 
-    const handleMouseDown = useCallback((event: ReactMouseEvent<HTMLDialogElement>) => {
-        mouseDownTargetRef.current = event.target;
-    }, []);
-
     const handleClick = useCallback(
-        (event: ReactMouseEvent<HTMLDialogElement>) => {
+        (event: MouseEvent) => {
             if (event.target === dialogRef.current && mouseDownTargetRef.current === dialogRef.current) {
                 onClose();
             }
@@ -95,7 +132,7 @@ export const ModalDialog = ({
         [onClose],
     );
 
-    const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDialogElement>) => {
+    const handleKeyDown = useCallback((event: KeyboardEvent) => {
         if (event.key !== 'Tab') {
             return;
         }
@@ -106,9 +143,11 @@ export const ModalDialog = ({
             return;
         }
 
-        const focusableElements = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-            element => !element.hidden && element.getAttribute('aria-hidden') !== 'true',
-        );
+        if (event.target instanceof Element && event.target.closest('dialog[open]') !== dialog) {
+            return;
+        }
+
+        const focusableElements = getModalTabStops(dialog);
         const firstElement = focusableElements.at(0);
         const lastElement = focusableElements.at(-1);
 
@@ -132,6 +171,31 @@ export const ModalDialog = ({
         }
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const dialog = dialogRef.current;
+        const handleMouseDown = (event: MouseEvent) => {
+            mouseDownTargetRef.current = event.target;
+        };
+
+        dialog?.addEventListener('mousedown', handleMouseDown);
+        dialog?.addEventListener('click', handleClick);
+        dialog?.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            dialog?.removeEventListener('mousedown', handleMouseDown);
+            dialog?.removeEventListener('click', handleClick);
+            dialog?.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [
+        isOpen,
+        handleClick,
+        handleKeyDown,
+    ]);
+
     if (!isMounted) {
         return null;
     }
@@ -139,14 +203,13 @@ export const ModalDialog = ({
     return (
         <dialog
             ref={dialogRef}
-            className={styles.dialog}
+            className={clsx(styles.dialog, dialogClassName)}
             aria-label={ariaLabel}
             onCancel={handleCancel}
-            onMouseDown={handleMouseDown}
-            onClick={handleClick}
-            onKeyDown={handleKeyDown}
         >
-            <div className={clsx(panelClassName, styles.panel)}>{children}</div>
+            <UNSAFE_PortalProvider getContainer={() => dialogRef.current}>
+                <div className={clsx(panelClassName, styles.panel)}>{children}</div>
+            </UNSAFE_PortalProvider>
         </dialog>
     );
 };

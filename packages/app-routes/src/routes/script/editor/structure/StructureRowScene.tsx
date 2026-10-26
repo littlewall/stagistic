@@ -14,6 +14,7 @@ export const StructureRowScene = memo(({
     groupId,
     isActive,
     startPage,
+    isReadOnly = false,
     onFocus,
 }: StructureRowSceneProps) => {
     const {ref, handleRef} = useSortable({
@@ -23,19 +24,22 @@ export const StructureRowScene = memo(({
         type: SCENE_DND_TYPE,
         accept: [SCENE_DND_TYPE],
         feedback: 'clone',
+        disabled: isReadOnly,
     });
 
     return (
         <li
             ref={ref}
-            className={clsx(styles.itemRow, styles.sceneRow, isActive && styles.active)}
+            className={clsx(styles.itemRow, styles.sceneRow, isReadOnly && styles.readOnlySceneRow, isActive && styles.active)}
         >
-            <button
-                type="button"
-                ref={handleRef}
-                className={styles.dragHandle}
-                aria-label="Drag scene"
-            />
+            {isReadOnly ? null : (
+                <button
+                    type="button"
+                    ref={handleRef}
+                    className={styles.dragHandle}
+                    aria-label="Drag scene"
+                />
+            )}
             <button
                 type="button"
                 className={styles.itemButton}

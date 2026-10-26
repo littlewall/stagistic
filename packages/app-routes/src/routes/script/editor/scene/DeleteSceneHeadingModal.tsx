@@ -1,6 +1,7 @@
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {ConfirmModal} from '@stagistic/ui';
 
-interface DeleteSceneHeadingModalProps {
+interface DeleteSceneHeadingModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     isDeleting?: boolean,
     onClose: () => void,
@@ -8,16 +9,31 @@ interface DeleteSceneHeadingModalProps {
 }
 
 export const DeleteSceneHeadingModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     isDeleting = false,
     onClose,
     onConfirm,
 }: DeleteSceneHeadingModalProps) => (
     <ConfirmModal
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         ariaLabel="Delete scene heading"
         title="Delete scene heading?"
-        description="Its synopsis and places will be removed. Blocks in this scene stay and move under the previous scene."
+        changes={[
+            {
+                tone: 'out',
+                label: 'Removed',
+                text: 'Its synopsis and places',
+            },
+            {
+                tone: 'kept',
+                label: 'Kept',
+                text: 'Blocks in this scene, moved under the previous scene',
+            },
+        ]}
         confirmLabel="Delete heading"
         isPending={isDeleting}
         lockWhilePending

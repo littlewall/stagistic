@@ -3,7 +3,7 @@ import {
     type MusicAttachmentSlotView,
     RemoveAttachmentModal,
 } from '@stagistic/ui';
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 
 import type {
     ScriptMusicListItem,
@@ -12,7 +12,7 @@ import type {
 import {MusicAttachmentPreviewModal} from './MusicAttachmentPreviewModal';
 import {
     INTEGRATED_SCORE_ROLE,
-    useMusicAttachmentsState,
+    type useMusicAttachmentsState,
 } from './useMusicAttachmentsState';
 
 interface MusicAttachmentsDetailProps {
@@ -32,6 +32,8 @@ export const MusicAttachmentsDetail = ({
 }: MusicAttachmentsDetailProps) => {
     const [previewId, setPreviewId] = useState<string | null>(null);
     const [removeId, setRemoveId] = useState<string | null>(null);
+    const previewTriggerRef = useRef<HTMLElement | null>(null);
+    const removeTriggerRef = useRef<HTMLElement | null>(null);
     const musicId = music.id;
     const {
         integratedScoresByMusic,
@@ -69,10 +71,17 @@ export const MusicAttachmentsDetail = ({
                 onUpdateMusic={input => onUpdateMusic(music.id, input)}
                 onMusicTitleChange={onTitleDraftChange}
                 onUploadPdf={(_slotId, file) => void uploadIntegratedScore(musicId, file)}
-                onPreview={setPreviewId}
-                onRemove={() => setRemoveId(integratedScore?.id ?? null)}
+                onPreview={(attachmentId, trigger) => {
+                    previewTriggerRef.current = trigger ?? null;
+                    setPreviewId(attachmentId);
+                }}
+                onRemove={(_slotId, trigger) => {
+                    removeTriggerRef.current = trigger ?? null;
+                    setRemoveId(integratedScore?.id ?? null);
+                }}
             />
             <MusicAttachmentPreviewModal
+                returnFocus={previewTriggerRef}
                 isOpen={previewRow !== null}
                 attachmentName={previewRow?.filename ?? ''}
                 storageKey={previewRow?.storageKey ?? null}
@@ -80,6 +89,7 @@ export const MusicAttachmentsDetail = ({
                 onClose={() => setPreviewId(null)}
             />
             <RemoveAttachmentModal
+                returnFocus={removeTriggerRef}
                 isOpen={removeRow !== null}
                 attachmentName={removeRow?.filename ?? ''}
                 onClose={() => setRemoveId(null)}

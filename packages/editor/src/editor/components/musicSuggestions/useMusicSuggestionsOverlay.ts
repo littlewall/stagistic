@@ -2,16 +2,19 @@ import {
     type MouseEvent as ReactMouseEvent,
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
 
 import type {PersistentMusicRef} from '../../contracts';
+import {useAnimationFrameUpdate} from '../../hooks/useAnimationFrameUpdate';
 import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
 import {getMusicComposeFromState} from '../../tiptap/extensions';
 import {buildCommitMusic} from '../../tiptap/extensions/musicInput/transactions';
 import {getActiveScriptBlockFromState} from '../../tiptap/scriptCore';
 import {computeOverlayStyle} from '../characterSuggestions/model/overlayPosition';
+import {handleSuggestionKeyDown} from '../suggestionKeyboardNavigation';
 import {
     getMusicSuggestions,
     getSafeIsFocused,
@@ -26,10 +29,9 @@ export const useMusicSuggestionsOverlay = ({
     onMusicAssigned,
 }: Required<Pick<MusicSuggestionsOverlayProps, 'persistentMusic'>> & MusicSuggestionsOverlayProps) => {
     const overlayRef = useRef<HTMLDivElement | null>(null);
-    const rafIdRef = useRef<number | null>(null);
     const [overlayState, setOverlayState] = useState<MusicSuggestionOverlayState | null>(null);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
-    const suggestions = overlayState?.suggestions ?? [];
+    const suggestions = useMemo(() => overlayState?.suggestions ?? [], [overlayState]);
     const closeOverlay = useCallback(() => {
         setOverlayState(null);
         setActiveSuggestionIndex(null);
@@ -93,24 +95,7 @@ export const useMusicSuggestionsOverlay = ({
         editor,
         persistentMusic,
     ]);
-    const cancelScheduledOverlayUpdate = useCallback(() => {
-        if (rafIdRef.current === null) {
-            return;
-        }
-
-        window.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-    }, []);
-    const scheduleOverlayUpdate = useCallback(() => {
-        if (rafIdRef.current !== null) {
-            return;
-        }
-
-        rafIdRef.current = window.requestAnimationFrame(() => {
-            rafIdRef.current = null;
-            updateOverlay();
-        });
-    }, [updateOverlay]);
+    const {cancel: cancelScheduledOverlayUpdate, schedule: scheduleOverlayUpdate} = useAnimationFrameUpdate(updateOverlay);
     const selectMusic = useCallback(
         (music: PersistentMusicRef) => {
             if (!editor) {
@@ -188,27 +173,13 @@ export const useMusicSuggestionsOverlay = ({
         scheduleOverlayUpdate,
     ]);
 
-    useEffect(() => {
-        return () => {
-            cancelScheduledOverlayUpdate();
-        };
-    }, [cancelScheduledOverlayUpdate]);
+    const boundedActiveIndex = activeSuggestionIndex === null || suggestions.length === 0
+        ? null
+        : Math.min(activeSuggestionIndex, suggestions.length - 1);
 
-    useEffect(() => {
-        if (suggestions.length === 0) {
-            setActiveSuggestionIndex(null);
-
-            return;
-        }
-
-        setActiveSuggestionIndex(previous => {
-            if (previous === null) {
-                return null;
-            }
-
-            return Math.min(previous, suggestions.length - 1);
-        });
-    }, [suggestions.length]);
+    if (activeSuggestionIndex !== boundedActiveIndex) {
+        setActiveSuggestionIndex(boundedActiveIndex);
+    }
 
     useEffect(() => {
         if (!overlayState || suggestions.length === 0) {
@@ -220,39 +191,13 @@ export const useMusicSuggestionsOverlay = ({
                 return;
             }
 
-            if (event.key === 'ArrowDown') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? 0 : (previous + 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key === 'ArrowUp') {
-                event.preventDefault();
-                event.stopPropagation();
-                setActiveSuggestionIndex(previous => {
-                    return previous === null ? suggestions.length - 1 : (previous + suggestions.length - 1) % suggestions.length;
-                });
-
-                return;
-            }
-
-            if (event.key !== 'Enter' || activeSuggestionIndex === null) {
-                return;
-            }
-
-            const activeSuggestion = suggestions[activeSuggestionIndex];
-
-            if (!activeSuggestion) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            selectMusic(activeSuggestion);
+            handleSuggestionKeyDown({
+                event,
+                suggestions,
+                activeSuggestionIndex,
+                setActiveSuggestionIndex,
+                onSelect: selectMusic,
+            });
         };
 
         document.addEventListener('keydown', handleKeyDown, true);

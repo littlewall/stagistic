@@ -184,6 +184,8 @@ const buildBoundarySection = (
     };
 };
 
+const NAVIGATION_ITEM_IDS: ReadonlySet<string> = new Set(['go-to-start', 'go-to-end']);
+
 export const MusicRailMenu = ({
     editor,
     menu,
@@ -237,7 +239,14 @@ export const MusicRailMenu = ({
         }
     }
 
-    if (sections.length === 0) {
+    // A saved draft or version keeps only navigation; its music cannot change.
+    const shownSections = editor.isEditable
+        ? sections
+        : sections
+            .map(section => ({...section, items: section.items.filter(item => NAVIGATION_ITEM_IDS.has(item.id))}))
+            .filter(section => section.items.length > 0);
+
+    if (shownSections.length === 0) {
         return null;
     }
 
@@ -253,7 +262,7 @@ export const MusicRailMenu = ({
             }}
             onPointerDown={event => event.stopPropagation()}
         >
-            {sections.map(section => (
+            {shownSections.map(section => (
                 <div
                     key={section.id}
                     className={styles.section}

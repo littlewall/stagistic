@@ -30,11 +30,14 @@ export const PanelHeader = ({
     description,
     className,
     level = 2,
+    size = 'panel',
 }: {
     title: ReactNode,
     description?: ReactNode,
     className?: string,
     level?: 2 | 3 | 4,
+    /** `section` titles a group inside a panel: smaller type, tighter gap. */
+    size?: 'panel' | 'section',
 }) => {
     /*
      * The tag and the type size are independent: settings panels sit under the route's own
@@ -43,7 +46,7 @@ export const PanelHeader = ({
     const Heading = `h${level}` as const;
 
     return (
-        <div className={clsx(styles.panelHeader, className)}>
+        <div className={clsx(styles.panelHeader, size === 'section' && styles.sectionHeader, className)}>
             <Heading className={styles.panelTitle}>{title}</Heading>
             {description ? <p className={styles.panelDescription}>{description}</p> : null}
         </div>

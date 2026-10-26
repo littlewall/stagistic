@@ -3,7 +3,7 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {getCharacterColor} from '../../../characters/characterColors';
 import {isCaretAtCharacterTagEnd, readCommittedTagCharacterId} from '../../../tiptap/extensions/characterTagInput/markRanges';
-import {getCharacterTagComposeFromState} from '../../../tiptap/extensions/CharacterTagInputExtension';
+import {type getCharacterTagComposeFromState} from '../../../tiptap/extensions/CharacterTagInputExtension';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../../tiptap/scriptCore';
 import type {
     CharacterSuggestionsResult,

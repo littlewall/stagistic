@@ -1,8 +1,8 @@
-import type {ReactNode} from 'react';
-
+import type {ChangeSummaryItem} from '../../molecules/ChangeSummary/ChangeSummary';
 import {ConfirmModal} from '../modal/ConfirmModal';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 
-export interface RemoveCharacterModalProps {
+export interface RemoveCharacterModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     characterKey?: string,
     groupNames?: string[],
@@ -12,6 +12,8 @@ export interface RemoveCharacterModalProps {
 }
 
 export const RemoveCharacterModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     characterKey,
     groupNames = [],
@@ -19,18 +21,32 @@ export const RemoveCharacterModal = ({
     onClose,
     onConfirm,
 }: RemoveCharacterModalProps) => {
-    const notes: ReactNode[] = ['Its lines and blocks stay in the script — nothing is removed from the screenplay.'];
-
-    if (characterKey && groupNames.length > 0) {
-        notes.push(
-            <>
-                {characterKey} belongs to {formatGroupNames(groupNames)}. Deleting {characterKey} removes them from these groups.
-            </>,
-        );
-    }
+    const changes: ChangeSummaryItem[] = [
+        {
+            tone: 'out',
+            label: 'Cleared',
+            text: 'Its color, outline and other metadata; it stops being confirmed',
+        },
+        ...characterKey && groupNames.length > 0
+            ? [
+                {
+                    tone: 'out' as const,
+                    label: 'Removed from',
+                    text: formatGroupNames(groupNames),
+                },
+            ]
+            : [],
+        {
+            tone: 'kept',
+            label: 'Kept',
+            text: 'Its lines and blocks in the script',
+        },
+    ];
 
     return (
         <ConfirmModal
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             ariaLabel="Remove character"
             title={(
@@ -39,14 +55,8 @@ export const RemoveCharacterModal = ({
                     {characterKey ? ` ${characterKey}` : ' character'}?
                 </>
             )}
-            description={(
-                <>
-                    This only deletes the character record:
-                    {characterKey ? <strong>{` ${characterKey} `}</strong> : ' the character '}
-                    stops being confirmed and its color, outline, and other metadata are cleared.
-                </>
-            )}
-            notes={notes}
+            description="This only deletes the character record."
+            changes={changes}
             confirmLabel="Remove"
             isPending={isRemoving}
             onClose={onClose}

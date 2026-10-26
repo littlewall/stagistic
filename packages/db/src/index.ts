@@ -1,4 +1,7 @@
 // ─── Types & repository contracts ──────────────────────────────────────────────
+export {createLocalMcpReadService} from './mcp/createLocalMcpReadService';
+export type {McpReadService} from './mcp/types';
+export {InvalidScriptSnapshotError} from './repo/snapshots';
 export type {
     CommentAnchorKind,
     CommentThreadStatus,
@@ -22,6 +25,8 @@ export type {
     ScriptMusicAttachmentBinding,
     ScriptScene,
     ScriptSettingsBlock,
+    ScriptSnapshot,
+    ScriptSnapshotKind,
     ScriptSpeakingEntityRef,
     ScriptSummary,
     ScriptTitlePageField,
@@ -47,12 +52,14 @@ export type {
     CreateScriptLocationInput,
     CreateScriptLocationWithIdInput,
     CreateScriptMusicInput,
+    CreateScriptSnapshotInput,
     CreateScriptWithIdInput,
     DuplicateScriptInput,
     DuplicateScriptWithIdInput,
     ListScriptsOptions,
     MusicAttachmentUpload,
     RenameScriptInput,
+    ReplaceScriptSnapshotPayloadInput,
     ScriptCommentsRepository,
     ScriptCommentThreadSnapshot,
     ScriptEditorSettingsRecord,
@@ -60,9 +67,11 @@ export type {
     ScriptMusicRepository,
     ScriptRepository,
     ScriptSceneLocationAssignment,
+    ScriptSnapshotsRepository,
     ScriptTitlePageRecord,
     ScriptTitlePageRepository,
     UpdateScriptMusicInput,
+    UpdateScriptSnapshotInput,
 } from './types/scriptRepository';
 
 // ─── Schema ────────────────────────────────────────────────────────────────────
@@ -93,6 +102,12 @@ export {
     type ScriptDocumentProjectionWriter,
     type ScriptDocumentSource,
 } from './repo/document/documentProjection';
+export {
+    createReadOnlyScriptRepository,
+    createReadThroughFileStorage,
+    ReadOnlyScriptRepositoryError,
+    type ReadOnlyScriptRepositoryOptions,
+} from './repo/readOnlyScriptRepository';
 
 // ─── Reactive sources ──────────────────────────────────────────────────────────
 export * from './reactive';

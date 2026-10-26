@@ -1,7 +1,6 @@
 import {
     useCallback,
     useEffect,
-    useRef,
     useState,
 } from 'react';
 
@@ -41,11 +40,40 @@ export const useSidebarLayout = ({
     defaultRightPanelId,
     storageScope,
 }: UseSidebarLayoutArgs) => {
-    const storageScopeRef = useRef(storageScope);
     const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
     const [isExclusiveViewport, setIsExclusiveViewport] = useState(() => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY));
     const [isOverlayViewport, setIsOverlayViewport] = useState(() => getIsMatchingViewport(SIDEBAR_OVERLAY_QUERY));
     const [overlayDrawer, setOverlayDrawer] = useState<OverlayDrawer>(null);
+    const [previousScope, setPreviousScope] = useState(storageScope);
+    const [previousOverlayViewport, setPreviousOverlayViewport] = useState(isOverlayViewport);
+    const scopeChanged = previousScope !== storageScope;
+    const scopedState = scopeChanged
+        ? createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds)
+        : state;
+    const leftPanelId = resolvePanelId(scopedState.leftPanelId, defaultLeftPanelId, availablePanelIds);
+    const rightPanelId = resolvePanelId(scopedState.rightPanelId, defaultRightPanelId, availablePanelIds);
+    const closeLeft = isExclusiveViewport && !isOverlayViewport && scopedState.isLeftOpen && scopedState.isRightOpen;
+
+    if (scopeChanged) {
+        setPreviousScope(storageScope);
+        setOverlayDrawer(null);
+    }
+
+    if (previousOverlayViewport !== isOverlayViewport) {
+        setPreviousOverlayViewport(isOverlayViewport);
+        if (!isOverlayViewport) {
+            setOverlayDrawer(null);
+        }
+    }
+
+    if (scopeChanged || leftPanelId !== state.leftPanelId || rightPanelId !== state.rightPanelId || closeLeft) {
+        setState({
+            ...scopedState,
+            leftPanelId,
+            rightPanelId,
+            isLeftOpen: closeLeft ? false : scopedState.isLeftOpen,
+        });
+    }
 
     useEffect(() => {
         if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -69,15 +97,8 @@ export const useSidebarLayout = ({
         };
     }, []);
 
-    // Leaving overlay mode retires the drawer, so returning to it starts closed.
     useEffect(() => {
-        if (!isOverlayViewport) {
-            setOverlayDrawer(null);
-        }
-    }, [isOverlayViewport]);
-
-    useEffect(() => {
-        if (typeof window === 'undefined' || storageScopeRef.current !== storageScope) {
+        if (typeof window === 'undefined') {
             return;
         }
 
@@ -87,63 +108,6 @@ export const useSidebarLayout = ({
             // Ignore storage write failures in constrained environments.
         }
     }, [state, storageScope]);
-
-    useEffect(() => {
-        if (storageScopeRef.current === storageScope) {
-            return;
-        }
-
-        storageScopeRef.current = storageScope;
-        setOverlayDrawer(null);
-        setState(createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
-    }, [
-        availablePanelIds,
-        defaultLeftPanelId,
-        defaultRightPanelId,
-        storageScope,
-    ]);
-
-    // Reconcile state when the set of available panels changes.
-    useEffect(() => {
-        setState(previous => {
-            const nextLeft = resolvePanelId(previous.leftPanelId, defaultLeftPanelId, availablePanelIds);
-            const nextRight = resolvePanelId(previous.rightPanelId, defaultRightPanelId, availablePanelIds);
-
-            if (nextLeft === previous.leftPanelId && nextRight === previous.rightPanelId) {
-                return previous;
-            }
-
-            return {
-                ...previous,
-                leftPanelId: nextLeft,
-                rightPanelId: nextRight,
-            };
-        });
-    }, [
-        availablePanelIds,
-        defaultLeftPanelId,
-        defaultRightPanelId,
-    ]);
-
-    /*
-     * Docked sidebars are mutually exclusive below the exclusive breakpoint.
-     * Overlay mode enforces this through `overlayDrawer` instead, and must not
-     * rewrite the persisted docked preference while the drawers are floating.
-     */
-    useEffect(() => {
-        if (!isExclusiveViewport || isOverlayViewport) {
-            return;
-        }
-
-        if (state.isLeftOpen && state.isRightOpen) {
-            setState(previous => ({...previous, isLeftOpen: false}));
-        }
-    }, [
-        isExclusiveViewport,
-        isOverlayViewport,
-        state.isLeftOpen,
-        state.isRightOpen,
-    ]);
 
     const toggleLeft = useCallback(() => {
         if (isOverlayViewport) {

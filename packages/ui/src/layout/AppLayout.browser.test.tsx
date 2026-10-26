@@ -1,5 +1,6 @@
 import '../../styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -12,6 +13,7 @@ import {page, userEvent} from 'vite-plus/test/browser';
 
 import {formControlStyles} from '../molecules/forms/shared/formControlStyles';
 import {AppLayout} from './AppLayout';
+import {FocusVisibilityManager} from './FocusVisibilityManager';
 
 const mountedRoots: Root[] = [];
 
@@ -36,7 +38,7 @@ const renderLayout = (children: ReactNode = <div>Script canvas</div>) => {
 
     const root = createRoot(host);
 
-    root.render(<AppLayout>{children}</AppLayout>);
+    root.render(<><FocusVisibilityManager /><AppLayout>{children}</AppLayout></>);
     mountedRoots.push(root);
 };
 
@@ -101,20 +103,19 @@ describe('AppLayout', () => {
         expect(explainPreview?.textContent).toBe('what does it mean?');
         expect(explainPreview?.parentElement?.textContent).toBe('💛 Stagistic Editor • Public preview (what does it mean?)');
 
-        await page.elementLocator(explainPreview!).click();
+        await page.elementLocator(requireValue(explainPreview)).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 
-        const dialog = document.querySelector<HTMLDialogElement>('dialog')!;
+        const dialog = requireValue(document.querySelector<HTMLDialogElement>('dialog'));
         const dialogText = dialog.textContent;
 
         expect(dialogText).toContain('Public preview notice');
         expect(dialogText).toContain('Stagistic Editor is in public preview.');
         expect(dialogText).toContain('Use it at your own risk.');
         expect(dialogText).toContain('stored only in this browser');
-        expect(dialogText).toContain('Sync is not available yet.');
-        expect(dialogText).toContain('Nothing you create is sent from your device.');
-        expect(dialogText).toContain('does not send analytics, telemetry, or other usage data');
-        expect(dialogText).toContain('including theme and layout');
+        expect(dialogText).not.toContain('Sync');
+        expect(dialogText).toContain('Nothing you create is sent from your device to external servers.');
+        expect(dialogText).toContain('including theme, layout or filters');
         expect(dialogText).toContain('Back up your work regularly.');
         expect(dialogText).toContain('may permanently remove it');
 
@@ -122,7 +123,7 @@ describe('AppLayout', () => {
 
         expect(closeButton).toBeDefined();
 
-        await page.elementLocator(closeButton!).click();
+        await page.elementLocator(requireValue(closeButton)).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog') === null);
     });
 });

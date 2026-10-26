@@ -86,7 +86,7 @@ export const normalizeFormerStageDirectionContent = (
         }
     });
 
-    changes.reverse().forEach(applyChange => applyChange());
+    changes.toReversed().forEach(applyChange => applyChange());
 
     return tr;
 };

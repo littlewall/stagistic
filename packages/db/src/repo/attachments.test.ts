@@ -1,8 +1,8 @@
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
     it,
-    vi,
 } from 'vite-plus/test';
 
 import {dbSchema} from '../schema';
@@ -13,6 +13,7 @@ import {
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {MUSIC_ATTACHMENT_ROLES} from '../types';
 import {createAttachmentHandlers} from './attachments';
+import {createUnreferencedFilesCollector} from './unreferencedFiles';
 
 const upload = (name: string) => ({
     name,
@@ -51,6 +52,10 @@ class TrackingFileStorage implements FileStorage {
 
         return Promise.resolve();
     }
+
+    listKeys() {
+        return Promise.resolve([...this.blobs.keys()]);
+    }
 }
 
 const setup = async (fileStorage: FileStorage = new InMemoryFileStorage()) => {
@@ -80,12 +85,15 @@ const setup = async (fileStorage: FileStorage = new InMemoryFileStorage()) => {
         fileStorage,
     });
 
+    const collect = createUnreferencedFilesCollector({getDb: () => Promise.resolve(db), fileStorage});
+
     return {
         db,
         scriptId,
         musicId,
         handlers,
         fileStorage,
+        collectUnreferencedFiles: () => collect({minAgeMs: 0}),
     };
 };
 
@@ -108,7 +116,7 @@ describe('createAttachmentHandlers', () => {
         expect(created?.filename).toBe('score.pdf');
         expect(created?.role).toBe(MUSIC_ATTACHMENT_ROLES.integratedScore);
         expect(stored?.id).toBe(created?.id);
-        expect(await handlers.getBlob(created!.storageKey)).not.toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).not.toBeNull();
     });
 
     it('replaces the existing attachment in the same music role', async () => {
@@ -117,6 +125,7 @@ describe('createAttachmentHandlers', () => {
             scriptId,
             musicId,
             handlers,
+            collectUnreferencedFiles,
         } = await setup();
         const first = await handlers.setForMusic(
             scriptId,
@@ -135,15 +144,20 @@ describe('createAttachmentHandlers', () => {
 
         expect(stored?.id).toBe(second?.id);
         expect(links).toHaveLength(1);
-        expect(await handlers.getBlob(first!.storageKey)).toBeNull();
-        expect(await handlers.getBlob(second!.storageKey)).not.toBeNull();
+        expect(await handlers.getBlob(requireValue(first).storageKey)).not.toBeNull();
+
+        await collectUnreferencedFiles();
+
+        expect(await handlers.getBlob(requireValue(first).storageKey)).toBeNull();
+        expect(await handlers.getBlob(requireValue(second).storageKey)).not.toBeNull();
     });
 
-    it('removes the link and GCs the orphaned attachment + blob', async () => {
+    it('removes the link and the orphaned attachment; the blob goes at collection', async () => {
         const {
             scriptId,
             musicId,
             handlers,
+            collectUnreferencedFiles,
         } = await setup();
         const created = await handlers.setForMusic(
             scriptId,
@@ -155,7 +169,11 @@ describe('createAttachmentHandlers', () => {
         await handlers.removeFromMusic(scriptId, musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
 
         expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore)).toBeNull();
-        expect(await handlers.getBlob(created!.storageKey)).toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).not.toBeNull();
+
+        await collectUnreferencedFiles();
+
+        expect(await handlers.getBlob(requireValue(created).storageKey)).toBeNull();
     });
 
     it('deletes a newly stored blob when SQL persistence fails', async () => {
@@ -173,33 +191,6 @@ describe('createAttachmentHandlers', () => {
         expect(fileStorage.blobs.size).toBe(0);
     });
 
-    it('keeps SQL removal committed when orphan blob deletion fails', async () => {
-        const fileStorage = new TrackingFileStorage();
-        const {
-            scriptId,
-            musicId,
-            handlers,
-        } = await setup(fileStorage);
-        const created = await handlers.setForMusic(
-            scriptId,
-            musicId,
-            MUSIC_ATTACHMENT_ROLES.integratedScore,
-            upload('score.pdf'),
-        );
-        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-        fileStorage.failDelete = true;
-        await handlers.removeFromMusic(scriptId, musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
-
-        expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore)).toBeNull();
-        expect(await handlers.getBlob(created!.storageKey)).not.toBeNull();
-        expect(consoleError).toHaveBeenCalledWith(
-            '[attachments] Failed to clean up a removed blob.',
-        );
-
-        consoleError.mockRestore();
-    });
-
     it('keeps metadata readable when its blob is missing', async () => {
         const fileStorage = new TrackingFileStorage();
         const {
@@ -214,10 +205,10 @@ describe('createAttachmentHandlers', () => {
             upload('missing.pdf'),
         );
 
-        await fileStorage.delete(created!.storageKey);
+        await fileStorage.delete(requireValue(created).storageKey);
 
         expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore))
             .toMatchObject({filename: 'missing.pdf'});
-        expect(await handlers.getBlob(created!.storageKey)).toBeNull();
+        expect(await handlers.getBlob(requireValue(created).storageKey)).toBeNull();
     });
 });

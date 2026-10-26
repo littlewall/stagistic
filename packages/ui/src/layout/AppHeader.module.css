@@ -127,7 +127,7 @@
         background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
     }
 
-    &[data-focus-visible] {
+    :global(:root[data-focus-ring-visible]) &:focus {
         background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
         border-color: transparent;
         outline: var(--focus-ring);
@@ -173,6 +173,11 @@
     max-width: 100%;
 }
 
+/* Title, then the shown script state (current, draft or version), then the save indicator. */
+.scriptIdentityWithState {
+    grid-template-columns: minmax(0, 1fr) auto 24px;
+}
+
 .scriptTitle {
     display: inline-grid;
     width: max-content;
@@ -212,6 +217,9 @@
         &:focus {
             background: var(--layer-panel-bg);
             border-color: var(--layer-panel-edge);
+        }
+
+        :global(:root[data-focus-ring-visible]) &:focus {
             outline: var(--focus-ring);
             outline-offset: 1px;
         }
@@ -220,112 +228,6 @@
 
 .scriptTitleStatic {
     padding: var(--space-xs) var(--space-sm);
-}
-
-.menuPopover {
-    padding: 0;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-popover);
-
-    &:focus-visible {
-        outline: none;
-    }
-}
-
-.themeControlsContainer {
-    display: flex;
-    justify-content: flex-start;
-    padding: var(--space-xs) var(--space-md) var(--space-md);
-}
-
-.settingsMenu {
-    padding: var(--space-md) 0;
-}
-
-.settingsMenuHeader {
-    padding: var(--space-sm) var(--space-lg);
-    font-size: var(--font-size-xxs);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-muted);
-}
-
-.themeControls {
-    /* Icon-sized modes sharing one track (theme mode today). The track is
-       recessed and the chosen pill floats out of it, so the pill needs no
-       border of its own — a third one, inside a bordered popover on a
-       bordered track, was all any of them read as. Hover moves toward ink
-       in both themes, away from wherever the track sits. */
-    --segment-track-bg: var(--color-surface-raised);
-    --segment-active-bg: var(--color-surface);
-    --segment-active-shadow: var(--shadow-hairline);
-    --segment-hover-bg: color-mix(in oklch, var(--color-text) 7%, var(--segment-track-bg));
-    --segment-active-hover-bg: color-mix(in oklch, var(--color-text) 5%, var(--segment-active-bg));
-
-    display: inline-flex;
-    gap: var(--space-xs);
-    align-items: center;
-    padding: var(--space-xs);
-    background: var(--segment-track-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-
-    & .themeButton {
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        color: var(--color-text-muted);
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: var(--radius-full);
-        transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
-
-        &:focus {
-            border-color: transparent;
-            outline: none;
-            box-shadow: none;
-        }
-
-        &[data-hovered] {
-            color: var(--color-text);
-            background: var(--segment-hover-bg);
-        }
-
-        &[data-focus-visible] {
-            background: var(--segment-hover-bg);
-            border-color: transparent;
-            outline: var(--focus-ring);
-            outline-offset: var(--focus-ring-offset);
-        }
-
-        &.active {
-            color: var(--color-text);
-            background: var(--segment-active-bg);
-            border-color: transparent;
-            box-shadow: var(--segment-active-shadow);
-
-            &[data-hovered] {
-                background: var(--segment-active-hover-bg);
-            }
-        }
-
-        & .icon {
-            width: var(--icon-size-sm);
-            height: var(--icon-size-sm);
-        }
-    }
-}
-
-:root[data-theme = 'dark'] .themeControls {
-    /* The light pairing would seat the active pill at the popover's own
-       lightness, reading as a hole rather than a raised segment. Dark keeps the
-       mechanic and swaps the pair: track below the popover, pill well above it. */
-    --segment-track-bg: var(--color-bg);
-    --segment-active-bg: var(--color-surface-raised);
 }
 
 .scriptStatus {
@@ -337,7 +239,7 @@
     opacity: 1;
     transition: opacity var(--duration-slow) var(--ease-standard);
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         border-radius: var(--radius-sm);
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);

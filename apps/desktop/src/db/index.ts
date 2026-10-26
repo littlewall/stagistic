@@ -1,4 +1,5 @@
 import {createPgliteBootstrap} from '@stagistic/db/pglite';
+import {uuidv7} from '@stagistic/shared';
 
 /*
  * Live store lives in IndexedDB (OPFS is unreliable in macOS WKWebView —
@@ -20,6 +21,18 @@ const bootstrap = createPgliteBootstrap({
 });
 
 export const getLocalDb = bootstrap.getLocalDb;
+
+/*
+ * Private in-memory database for viewing a stored draft or version. The unique
+ * worker id keeps other windows from sharing it through leader election.
+ */
+export const createSnapshotViewDb = () => createPgliteBootstrap({
+    dataDir: 'memory://',
+    fsBundleUrl: '',
+    wasmUrl: '',
+    workerId: `stagistic-snapshot-view:${uuidv7()}`,
+    workerFactory: () => new Worker(new URL('./pglite.worker.ts', import.meta.url), {type: 'module'}),
+}).getLocalDb();
 export const syncToFs = bootstrap.syncToFs;
 export const prepareLocalDbWithProgress = bootstrap.prepareLocalDbWithProgress;
 export const dumpDataDir = bootstrap.dumpDataDir;

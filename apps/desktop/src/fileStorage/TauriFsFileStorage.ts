@@ -4,6 +4,7 @@ import {
     BaseDirectory,
     exists,
     mkdir,
+    readDir,
     readFile,
     remove,
     writeFile,
@@ -52,5 +53,13 @@ export class TauriFsFileStorage implements FileStorage {
         if (await exists(pathFor(key), {baseDir: BaseDirectory.AppData})) {
             await remove(pathFor(key), {baseDir: BaseDirectory.AppData});
         }
+    }
+
+    async listKeys(): Promise<string[]> {
+        await this.ensureDir();
+
+        const entries = await readDir(ATTACHMENTS_DIR, {baseDir: BaseDirectory.AppData});
+
+        return entries.filter(entry => entry.isFile).map(entry => entry.name);
     }
 }

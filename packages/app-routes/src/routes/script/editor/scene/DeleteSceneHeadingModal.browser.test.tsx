@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -58,9 +59,10 @@ describe('DeleteSceneHeadingModal', () => {
         await vi.waitFor(() => expect(findButton('Delete heading')).not.toBeNull());
 
         expect(document.body.textContent).toContain('Delete scene heading?');
-        expect(document.body.textContent).toContain(
-            'Its synopsis and places will be removed. Blocks in this scene stay and move under the previous scene.',
-        );
+        expect([...document.querySelectorAll('li')].map(item => item.textContent)).toEqual([
+            'RemovedIts synopsis and places',
+            'KeptBlocks in this scene, moved under the previous scene',
+        ]);
         expect(findButton('Cancel')).not.toBeNull();
     });
 
@@ -72,7 +74,7 @@ describe('DeleteSceneHeadingModal', () => {
 
         await vi.waitFor(() => expect(findButton('Delete heading')).not.toBeNull());
 
-        await userEvent.click(findButton('Delete heading')!);
+        await userEvent.click(requireValue(findButton('Delete heading')));
 
         expect(onConfirm).toHaveBeenCalledOnce();
         expect(onClose).not.toHaveBeenCalled();
@@ -86,7 +88,7 @@ describe('DeleteSceneHeadingModal', () => {
 
         await vi.waitFor(() => expect(findButton('Cancel')).not.toBeNull());
 
-        await userEvent.click(findButton('Cancel')!);
+        await userEvent.click(requireValue(findButton('Cancel')));
 
         expect(onClose).toHaveBeenCalledOnce();
         expect(onConfirm).not.toHaveBeenCalled();

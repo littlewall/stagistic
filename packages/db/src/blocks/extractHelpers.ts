@@ -110,7 +110,7 @@ export const toExtractedImportMetadata = (scriptId: string, sourceDocument: Scri
                 };
             })
             .filter((field): field is ExtractedImportTitlePageField => Boolean(field))
-            .sort((a, b) => a.orderNo - b.orderNo)
+            .toSorted((a, b) => a.orderNo - b.orderNo)
             .map((field, index) => ({
                 ...field,
                 orderNo: index,

@@ -108,18 +108,18 @@
     user-select: none;
     outline: none;
 
-    &:focus-visible .selectionHalo {
-        opacity: 1;
-        fill: transparent;
-        stroke: currentcolor;
-    }
-
     &[data-selected] {
         color: var(--vocal-range-active-note-color);
     }
 
     &[data-dragging] {
         cursor: grabbing;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus .selectionHalo {
+        opacity: 1;
+        fill: transparent;
+        stroke: currentcolor;
     }
 }
 

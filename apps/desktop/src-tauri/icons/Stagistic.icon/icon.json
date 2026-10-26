@@ -1,0 +1,27 @@
+{
+    "fill-specializations": [
+        {"value": {"solid": "srgb:1.00000,1.00000,1.00000,1.00000"}},
+        {"appearance": "dark", "value": {"solid": "srgb:1.00000,1.00000,1.00000,1.00000"}}
+    ],
+    "groups": [
+        {
+            "name": "Stagistic mark",
+            "blur-material": null,
+            "specular": true,
+            "shadow": {"kind": "neutral", "opacity": 0.2},
+            "translucency": {"enabled": true, "value": 0.15},
+            "layers": [
+                {
+                    "name": "Stagistic",
+                    "image-name": "Mark.svg",
+                    "glass": true,
+                    "fill-specializations": [
+                        {"value": {"solid": "srgb:0.23922,0.16471,0.11373,1.00000"}},
+                        {"appearance": "dark", "value": {"solid": "srgb:0.23922,0.16471,0.11373,1.00000"}}
+                    ]
+                }
+            ]
+        }
+    ],
+    "supported-platforms": {"squares": ["macOS"]}
+}

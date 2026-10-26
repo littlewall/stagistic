@@ -51,6 +51,24 @@ const LADDER_RULES = {
 export default {
     overrides: [
         {
+            files: ['**/*.css'],
+            rules: {
+                'selector-pseudo-class-disallowed-list': ['focus-visible'],
+                'selector-disallowed-list': ['/\\[data-focus-visible(?:\\s|=|\\])/'],
+            },
+        },
+        {
+            files: [
+                'apps/marketing/**/*.css',
+                'apps/docs/**/*.css',
+                'docs/**/*.css',
+            ],
+            rules: {
+                'selector-pseudo-class-disallowed-list': null,
+                'selector-disallowed-list': null,
+            },
+        },
+        {
             files: ['packages/ui/**/*.css', 'packages/app-routes/**/*.css'],
             rules: LADDER_RULES,
         },

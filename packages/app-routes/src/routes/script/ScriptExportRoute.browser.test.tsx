@@ -1,3 +1,4 @@
+import type * as MockedModule from '@stagistic/app-core';
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -20,7 +21,7 @@ import {CharacterFilterModule} from './export/modules/CharacterFilterModule';
 import {useExportScriptData} from './export/useExportScriptData';
 
 vi.mock('@stagistic/app-core', async importOriginal => {
-    const original = await importOriginal<typeof import('@stagistic/app-core')>();
+    const original = await importOriginal<typeof MockedModule>();
 
     return {
         ...original,
@@ -105,6 +106,10 @@ vi.mock('./settings/ScriptSettingsModalContext', () => ({
         resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS,
         titlePageDraft: null,
     }),
+}));
+
+vi.mock('../../global-modals/GlobalModalsProvider', () => ({
+    useGlobalModals: () => ({openAppSettings: () => {}}),
 }));
 
 const mountedRoots: Root[] = [];

@@ -3,7 +3,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -13,10 +12,11 @@ import {Button} from '../../atoms/Button/Button';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './CreateCharacterModal.module.css';
 
-export interface CreateCharacterModalProps {
+export interface CreateCharacterModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     existingCharacterNames?: readonly string[],
     onClose: () => void,
@@ -28,25 +28,23 @@ export const CreateCharacterModal = ({
     existingCharacterNames = [],
     onClose,
     onCreate,
+    returnFocus,
+    fallbackFocus,
 }: CreateCharacterModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [isTouched, setIsTouched] = useState(false);
 
-    useEffect(() => {
+    const [wasOpen, setWasOpen] = useState(isOpen);
+
+    if (wasOpen !== isOpen) {
+        setWasOpen(isOpen);
+
         if (!isOpen) {
             setName('');
             setIsTouched(false);
-
-            return;
         }
-
-        const focusTimer = window.setTimeout(() => {
-            inputRef.current?.focus();
-        }, 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen]);
+    }
 
     const existingKeys = useMemo(() => new Set(existingCharacterNames.map(characterName => normalizeCharacterKey(characterName))), [existingCharacterNames]);
     const normalizedName = useMemo(() => normalizeCharacterKey(name), [name]);
@@ -86,6 +84,9 @@ export const CreateCharacterModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Create character"
+            initialFocus={inputRef}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
         >
             <ModalHeader title="Create character" />
             <form

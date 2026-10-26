@@ -72,6 +72,7 @@ export const BasicExportTemplate = ({
 
         return willAddAutomaticBalancingBlank(plan.leadingPages, settings);
     }, [
+        derive,
         script,
         settings,
         stableConfig,

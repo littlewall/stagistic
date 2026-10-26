@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import type * as MockedModule from '@stagistic/app-core';
 import type {ScriptSummary} from '@stagistic/app-core';
 import {createRoot, type Root} from 'react-dom/client';
 import {MemoryRouter} from 'react-router-dom';
@@ -42,7 +43,7 @@ const {
 }));
 
 vi.mock('@stagistic/app-core', async importOriginal => {
-    const original = await importOriginal<typeof import('@stagistic/app-core')>();
+    const original = await importOriginal<typeof MockedModule>();
 
     return {
         ...original,
@@ -208,6 +209,8 @@ describe('HomeRoute', () => {
 
         expect(modalActions.openNewScript).toHaveBeenCalledTimes(1);
         expect(modalActions.openImportScript).toHaveBeenCalledTimes(1);
+        expect(modalActions.openNewScript).toHaveBeenCalledWith(newScript);
+        expect(modalActions.openImportScript).toHaveBeenCalledWith(importScript);
         await expect.poll(() => vi.mocked(createExampleScript).mock.calls).toHaveLength(1);
     });
 

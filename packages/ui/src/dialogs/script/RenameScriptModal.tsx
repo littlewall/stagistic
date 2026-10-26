@@ -2,7 +2,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useRef,
     useState,
 } from 'react';
@@ -10,6 +9,7 @@ import {
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './RenameScriptModal.module.css';
 
@@ -18,7 +18,7 @@ export interface RenameScriptSubmit {
     subtitle: string,
 }
 
-export interface RenameScriptModalProps {
+export interface RenameScriptModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     initialTitle: string,
     initialSubtitle: string,
@@ -34,31 +34,32 @@ export const RenameScriptModal = ({
     isPending = false,
     onClose,
     onSubmit,
+    returnFocus,
+    fallbackFocus,
 }: RenameScriptModalProps) => {
     const titleInputRef = useRef<HTMLInputElement | null>(null);
     const [title, setTitle] = useState(initialTitle);
     const [subtitle, setSubtitle] = useState(initialSubtitle);
     const canSubmit = title.trim().length > 0;
 
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        setTitle(initialTitle);
-        setSubtitle(initialSubtitle);
-
-        const focusTimer = window.setTimeout(() => {
-            titleInputRef.current?.focus();
-            titleInputRef.current?.select();
-        }, 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [
+    const [previous, setPrevious] = useState({
         isOpen,
         initialTitle,
         initialSubtitle,
-    ]);
+    });
+
+    if (previous.isOpen !== isOpen || previous.initialTitle !== initialTitle || previous.initialSubtitle !== initialSubtitle) {
+        setPrevious({
+            isOpen,
+            initialTitle,
+            initialSubtitle,
+        });
+
+        if (isOpen) {
+            setTitle(initialTitle);
+            setSubtitle(initialSubtitle);
+        }
+    }
 
     const handleSubmit = useCallback(
         (event: FormEvent) => {
@@ -90,6 +91,10 @@ export const RenameScriptModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Rename script"
+            initialFocus={titleInputRef}
+            selectInitialFocus
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
         >
             <ModalHeader
                 title="Rename script"

@@ -57,7 +57,7 @@ export const usePointerDragState = ({
         dragPointerYRef.current = null;
         setActiveDrag(null);
         clearDraggedSourceHighlight();
-    }, [clearDraggedSourceHighlight, editor]);
+    }, [clearDraggedSourceHighlight]);
 
     const updateActiveDragState = useCallback((
         pointerId: number,

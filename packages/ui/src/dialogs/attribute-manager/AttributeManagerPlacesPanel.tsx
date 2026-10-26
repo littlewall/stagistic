@@ -1,13 +1,14 @@
 import clsx from 'clsx';
 import {
-    useEffect,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Input} from '../../atoms/Input/Input';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
+import {useItemSelection} from '../../hooks/useItemSelection';
 import {useKeyedFieldDrafts} from '../../hooks/useKeyedFieldDrafts';
 import {PlusIcon, SearchIcon} from '../../icons';
 import {AttributeManagerPlaceDetail} from './AttributeManagerPlaceDetail';
@@ -26,6 +27,8 @@ export interface AttributeManagerPlacesPanelProps {
     onCreatePlace: (name: string) => AttributeManagerPlace | null | Promise<AttributeManagerPlace | null>,
     onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>,
     onDeletePlace: (placeId: string) => void | Promise<unknown>,
+    /** Browse only: no creating, and the detail cannot be edited. */
+    isReadOnly?: boolean,
 }
 
 export const AttributeManagerPlacesPanel = ({
@@ -35,9 +38,11 @@ export const AttributeManagerPlacesPanel = ({
     onCreatePlace,
     onRenamePlace,
     onDeletePlace,
+    isReadOnly = false,
 }: AttributeManagerPlacesPanelProps) => {
-    const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+    const [selectedPlaceId, setSelectedPlaceId] = useItemSelection(places);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const createTriggerRef = useRef<HTMLElement | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const {
         getValue: getNameDraft,
@@ -61,16 +66,6 @@ export const AttributeManagerPlacesPanel = ({
 
         return displayedPlaces.filter(place => place.name.toLocaleLowerCase().includes(normalizedSearchQuery));
     }, [displayedPlaces, normalizedSearchQuery]);
-
-    useEffect(() => {
-        const selectionStillExists = places.some(place => place.id === selectedPlaceId);
-
-        if (selectionStillExists) {
-            return;
-        }
-
-        setSelectedPlaceId(places[0]?.id ?? null);
-    }, [places, selectedPlaceId]);
 
     const handleCreatePlace = async (name: string) => {
         const createdPlace = await onCreatePlace(name);
@@ -101,13 +96,17 @@ export const AttributeManagerPlacesPanel = ({
                             aria-label="Search places"
                         />
                     </div>
-                    <Tooltip label="Create place">
+                    <Tooltip label="Create place" isDisabled={isReadOnly}>
                         <Button
                             className={styles.addButton}
                             variant="ghost"
                             size="sm"
+                            isDisabled={isReadOnly}
                             aria-label="Create place"
-                            onPress={() => setIsCreateOpen(true)}
+                            onPress={event => {
+                                createTriggerRef.current = event.target as HTMLElement;
+                                setIsCreateOpen(true);
+                            }}
                         >
                             <PlusIcon
                                 className={styles.actionIcon}
@@ -138,6 +137,7 @@ export const AttributeManagerPlacesPanel = ({
             <section
                 className={styles.detail}
                 aria-label="Place detail"
+                inert={isReadOnly}
             >
                 {selectedPlace && selectedConfirmedPlace ? (
                     <AttributeManagerPlaceDetail
@@ -155,6 +155,7 @@ export const AttributeManagerPlacesPanel = ({
                 )}
             </section>
             <CreatePlaceModal
+                returnFocus={createTriggerRef}
                 isOpen={isCreateOpen}
                 existingPlaceNames={places.map(place => place.name)}
                 onClose={() => setIsCreateOpen(false)}

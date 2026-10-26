@@ -1,3 +1,4 @@
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {ModalDialog, ProgressCircle} from '@stagistic/ui';
 import {
     useEffect,
@@ -8,7 +9,7 @@ import {
 import {renderPdfToCanvases} from '../export/renderPdfToCanvases';
 import styles from './MusicAttachmentPreviewModal.module.css';
 
-export interface MusicAttachmentPreviewModalProps {
+export interface MusicAttachmentPreviewModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     attachmentName: string,
     storageKey: string | null,
@@ -19,6 +20,8 @@ export interface MusicAttachmentPreviewModalProps {
 type PreviewStatus = 'loading' | 'ready' | 'missing' | 'error';
 
 export const MusicAttachmentPreviewModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     attachmentName,
     storageKey,
@@ -27,6 +30,23 @@ export const MusicAttachmentPreviewModal = ({
 }: MusicAttachmentPreviewModalProps) => {
     const pagesRef = useRef<HTMLDivElement | null>(null);
     const [status, setStatus] = useState<PreviewStatus>('loading');
+    const [previous, setPrevious] = useState({
+        isOpen,
+        storageKey,
+        loadBlob,
+    });
+
+    if (previous.isOpen !== isOpen || previous.storageKey !== storageKey || previous.loadBlob !== loadBlob) {
+        setPrevious({
+            isOpen,
+            storageKey,
+            loadBlob,
+        });
+
+        if (isOpen) {
+            setStatus('loading');
+        }
+    }
 
     useEffect(() => {
         if (!isOpen) {
@@ -36,7 +56,6 @@ export const MusicAttachmentPreviewModal = ({
         let cancelled = false;
 
         pagesRef.current?.replaceChildren();
-        setStatus('loading');
 
         const render = async () => {
             if (!storageKey) {
@@ -94,6 +113,8 @@ export const MusicAttachmentPreviewModal = ({
 
     return (
         <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel={`Preview ${attachmentName}`}

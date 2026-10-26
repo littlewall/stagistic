@@ -1,9 +1,11 @@
 import {PGlite} from '@electric-sql/pglite';
 import {live} from '@electric-sql/pglite/live';
 import {PGliteWorker} from '@electric-sql/pglite/worker';
+import {requireValue} from '@stagistic/shared';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 
 import {dbSchema} from '../schema';
+import {loadPgliteFsBundle, loadPgliteWasmModule} from './assets';
 import {runPgliteMigrations} from './migrations';
 
 export type LocalDb = PgliteDatabase<typeof dbSchema>;
@@ -24,6 +26,11 @@ interface CreatePgliteBootstrapOptions {
     wasmUrl: string,
     dataDir?: string,
     workerFactory?: () => Worker,
+    /*
+     * PGliteWorker elects one leader per id across tabs (default: worker URL +
+     * dataDir). Pass a unique id for a database that must stay private to a tab.
+     */
+    workerId?: string,
 }
 
 interface PgliteBootstrap {
@@ -43,6 +50,7 @@ export const createPgliteBootstrap = ({
     wasmUrl,
     dataDir = DEFAULT_DATA_DIR,
     workerFactory,
+    workerId,
 }: CreatePgliteBootstrapOptions): PgliteBootstrap => {
     if (workerFactory) {
         let dbPromise: Promise<LocalDb> | null = null;
@@ -55,6 +63,7 @@ export const createPgliteBootstrap = ({
                         dataDir,
                         extensions: {live},
                         relaxedDurability: true,
+                        ...workerId ? {id: workerId} : {},
                     });
 
                     workerInstanceRef = workerInstance;
@@ -82,7 +91,7 @@ export const createPgliteBootstrap = ({
                 await getLocalDb();
             }
 
-            return workerInstanceRef!.dumpDataDir(compression);
+            return requireValue(workerInstanceRef).dumpDataDir(compression);
         };
 
         return {
@@ -122,15 +131,7 @@ export const createPgliteBootstrap = ({
 
     const loadFsBundle = async () => {
         if (!fsBundlePromise) {
-            fsBundlePromise = (async () => {
-                const response = await fetch(fsBundleUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load PGlite fs bundle (${response.status})`);
-                }
-
-                return response.blob();
-            })();
+            fsBundlePromise = loadPgliteFsBundle(fsBundleUrl);
         }
 
         return fsBundlePromise;
@@ -138,17 +139,7 @@ export const createPgliteBootstrap = ({
 
     const loadWasmModule = async () => {
         if (!wasmModulePromise) {
-            wasmModulePromise = (async () => {
-                const response = await fetch(wasmUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load PGlite wasm (${response.status})`);
-                }
-
-                const bytes = await response.arrayBuffer();
-
-                return WebAssembly.compile(bytes);
-            })();
+            wasmModulePromise = loadPgliteWasmModule(wasmUrl);
         }
 
         return wasmModulePromise;

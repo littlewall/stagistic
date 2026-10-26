@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import type {ComponentProps, ComponentType} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -192,7 +193,7 @@ describe('AttributeManagerCharactersPanel rename', () => {
         await new Promise(resolve => window.setTimeout(resolve, 20));
         await page
             .elementLocator(
-                Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label="Characters list"] button')).find(button => button.textContent?.includes('BORIS'))!,
+                requireValue(Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label="Characters list"] button')).find(button => button.textContent?.includes('BORIS'))),
             )
             .click();
 
@@ -265,6 +266,6 @@ describe('AttributeManagerCharactersPanel rename', () => {
 
         await page.elementLocator(await waitForElement('[aria-label="Remove ANNA"]')).click();
 
-        expect(document.body.textContent).toContain('ANNA belongs to ALL and ENSEMBLE. Deleting ANNA removes them from these groups.');
+        expect(document.body.textContent).toContain('Removed fromALL and ENSEMBLE');
     });
 });

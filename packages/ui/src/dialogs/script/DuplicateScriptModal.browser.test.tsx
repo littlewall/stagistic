@@ -1,3 +1,4 @@
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -37,15 +38,21 @@ const renderModal = (onSubmit: (values: DuplicateScriptSubmit) => void) => {
 
     const root = createRoot(host);
 
-    root.render(
-        <DuplicateScriptModal
-            isOpen
-            initialTitle="Hamlet - copy"
-            onClose={() => {}}
-            onSubmit={onSubmit}
-        />,
-    );
+    const render = (initialTitle = 'Hamlet - copy') => {
+        root.render(
+            <DuplicateScriptModal
+                isOpen
+                initialTitle={initialTitle}
+                onClose={() => {}}
+                onSubmit={onSubmit}
+            />,
+        );
+    };
+
+    render();
     mountedRoots.push(root);
+
+    return {render};
 };
 
 afterEach(() => {
@@ -55,6 +62,31 @@ afterEach(() => {
 });
 
 describe('DuplicateScriptModal', () => {
+    it('focuses and selects the title when opened', async () => {
+        renderModal(vi.fn());
+
+        const title = await waitForElement<HTMLInputElement>('#duplicate-script-title');
+
+        await expect.poll(() => document.activeElement).toBe(title);
+        await expect.poll(() => [title.selectionStart, title.selectionEnd]).toEqual([0, title.value.length]);
+    });
+
+    it('keeps focus on the open-in-editor checkbox when title metadata refreshes', async () => {
+        const modal = renderModal(vi.fn());
+        const title = await waitForElement<HTMLInputElement>('#duplicate-script-title');
+        const checkbox = await waitForElement<HTMLInputElement>('input[type="checkbox"]:not([role])');
+
+        await expect.poll(() => document.activeElement).toBe(title);
+        checkbox.focus();
+        expect(document.activeElement).toBe(checkbox);
+
+        modal.render('Refreshed - copy');
+        await expect.poll(() => title.value).toBe('Refreshed - copy');
+        await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+
+        expect(document.activeElement).toBe(checkbox);
+    });
+
     it('pre-fills the copy title and defaults every switch off', async () => {
         const onSubmit = vi.fn();
 
@@ -88,7 +120,7 @@ describe('DuplicateScriptModal', () => {
          * intercepts pointer events, so click the wrapping label instead.
          */
         const switchInputs = Array.from(document.querySelectorAll<HTMLInputElement>('[role="switch"]'));
-        const switchLabels = switchInputs.map(input => input.closest('label')!);
+        const switchLabels = switchInputs.map(input => requireValue(input.closest('label')));
 
         await page.elementLocator(switchLabels[0]).click();
         await page.elementLocator(switchLabels[1]).click();

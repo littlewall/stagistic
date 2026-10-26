@@ -301,4 +301,11 @@ export interface EditorProps {
     surfaceCache?: EditorSurfaceCache,
     /** Workspace-owned live projection shared with UI mounted outside the editor shell. */
     liveStore?: EditorSnapshotStore,
+    /**
+     * Shows a stored script state: the text cannot change and every editing
+     * affordance is hidden. Reading, search, selection and copy stay available.
+     */
+    isReadOnly?: boolean,
+    /** Name of the stored state shown in the read-only toolbar notice, e.g. “Draft #3”. */
+    readOnlyLabel?: string | null,
 }

@@ -1,0 +1,11 @@
+/*
+ * Shown when a saved draft or version cannot be opened.
+ */
+.message {
+    display: grid;
+    gap: var(--space-lg);
+    place-content: center;
+    justify-items: center;
+    height: 100%;
+    color: var(--color-text-muted);
+}

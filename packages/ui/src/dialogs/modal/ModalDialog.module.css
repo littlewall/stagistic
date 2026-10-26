@@ -9,9 +9,10 @@
     height: 100%;
     max-height: none;
     margin: 0;
-    padding: var(--space-3xl);
+    padding: var(--modal-dialog-padding, var(--space-3xl));
     background: transparent;
     border: none;
+    outline: none;
 
     &:not([open]) {
         display: none;

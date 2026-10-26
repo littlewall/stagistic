@@ -1,6 +1,7 @@
 import type {ScriptRepository} from '@stagistic/app-core';
 import type {ScriptDocument, TitlePageSettings} from '@stagistic/script';
 import type {NewScriptShape, StepkgPeekResult} from '@stagistic/ui';
+import type {RefObject} from 'react';
 import type {NavigateFunction} from 'react-router-dom';
 
 import type {AppToastPayload} from '../routes/script/workspace/types';
@@ -53,6 +54,11 @@ export interface UseGlobalModalActionsArgs {
 }
 
 export interface GlobalModalActions {
+    newScriptReturnFocus: RefObject<HTMLElement | null>,
+    importScriptReturnFocus: RefObject<HTMLElement | null>,
+    deleteScriptReturnFocus: RefObject<HTMLElement | null>,
+    renameScriptReturnFocus: RefObject<HTMLElement | null>,
+    duplicateScriptReturnFocus: RefObject<HTMLElement | null>,
     isNewScriptOpen: boolean,
     newScriptTransitionPath: string | null,
     isImportOpen: boolean,
@@ -68,16 +74,16 @@ export interface GlobalModalActions {
     scriptToDuplicate: ScriptToDuplicate | null,
     isDuplicateScriptOpen: boolean,
     isDuplicating: boolean,
-    openNewScript: () => void,
+    openNewScript: (returnFocus?: HTMLElement | null) => void,
     closeNewScript: () => void,
     completeNewScriptTransition: () => void,
-    openImportScript: () => void,
+    openImportScript: (returnFocus?: HTMLElement | null) => void,
     closeImportScript: () => void,
-    openDeleteScript: (script: ScriptToDelete) => void,
+    openDeleteScript: (script: ScriptToDelete, returnFocus?: HTMLElement | null) => void,
     closeDeleteScript: () => void,
-    openRenameScript: (script: ScriptToRename) => void,
+    openRenameScript: (script: ScriptToRename, returnFocus?: HTMLElement | null) => void,
     closeRenameScript: () => void,
-    openDuplicateScript: (script: ScriptToDuplicate) => void,
+    openDuplicateScript: (script: ScriptToDuplicate, returnFocus?: HTMLElement | null) => void,
     closeDuplicateScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string, shape: NewScriptShape) => Promise<void>,

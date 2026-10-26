@@ -2,9 +2,9 @@ import {
     type EditorSettingsOverride,
     type ScriptBlockType,
 } from '@stagistic/script';
-import {uuidv7} from '@stagistic/shared';
+import {requireValue, uuidv7} from '@stagistic/shared';
 
-import * as dbQueries from '../../queries';
+import type * as dbQueries from '../../queries';
 import {
     fromMillis,
     toMillis,
@@ -30,7 +30,7 @@ export const hydrateBlockSettings = (
     }
 
     const nextBlockSettings = {
-        ...settings.blocks![blockType],
+        ...requireValue(settings.blocks)[blockType],
     };
     const spacingBeforeEm = fromMillis(row.spacingBeforeMillis);
     const lineHeight = fromMillis(row.lineHeightMillis);
@@ -84,7 +84,7 @@ export const hydrateBlockSettings = (
         return;
     }
 
-    settings.blocks![blockType] = nextBlockSettings;
+    requireValue(settings.blocks)[blockType] = nextBlockSettings;
 };
 
 export const buildConfigRows = (
@@ -101,21 +101,23 @@ export const buildConfigRows = (
             return;
         }
 
+        const block = blockSettings ?? {};
+
         normalizedRows.set(normalizedBlockType, {
             id: uuidv7(),
             scriptId,
             blockType: normalizedBlockType,
-            spacingBeforeMillis: toMillis(blockSettings?.spacingBeforeEm),
-            lineHeightMillis: toMillis(blockSettings?.lineHeight),
-            indentLeftChars: blockSettings?.indentLeftChars ?? null,
-            indentRightChars: blockSettings?.indentRightChars ?? null,
-            shortcut: blockSettings?.shortcut ?? null,
-            nextElement: normalizeSettingsBlockType(blockSettings?.nextElement) ?? null,
-            textAlign: blockSettings?.textAlign ?? null,
-            casing: blockSettings?.casing ?? null,
-            isBold: blockSettings?.isBold ?? null,
-            isItalic: blockSettings?.isItalic ?? null,
-            isUnderline: blockSettings?.isUnderline ?? null,
+            spacingBeforeMillis: toMillis(block.spacingBeforeEm),
+            lineHeightMillis: toMillis(block.lineHeight),
+            indentLeftChars: block.indentLeftChars ?? null,
+            indentRightChars: block.indentRightChars ?? null,
+            shortcut: block.shortcut ?? null,
+            nextElement: normalizeSettingsBlockType(block.nextElement) ?? null,
+            textAlign: block.textAlign ?? null,
+            casing: block.casing ?? null,
+            isBold: block.isBold ?? null,
+            isItalic: block.isItalic ?? null,
+            isUnderline: block.isUnderline ?? null,
             createdAt: now,
             updatedAt: now,
         });

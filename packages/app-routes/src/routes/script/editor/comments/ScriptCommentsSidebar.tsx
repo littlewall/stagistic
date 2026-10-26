@@ -20,6 +20,7 @@ import {
     useRef,
 } from 'react';
 
+import {useScriptReadOnlyState} from '../../workspace/ScriptAccessContext';
 import {CommentsBesideView} from './CommentsBesideView';
 import {CommentsListView} from './CommentsListView';
 import {CommentThreadCard} from './CommentThreadCard';
@@ -42,7 +43,7 @@ const groupMessagesByThread = (messages: readonly ScriptCommentMessage[]) => {
     const grouped = new Map<string, ScriptCommentMessage[]>();
 
     [...messages]
-        .sort((left, right) => left.createdAt - right.createdAt)
+        .toSorted((left, right) => left.createdAt - right.createdAt)
         .forEach(message => grouped.set(message.threadId, [...grouped.get(message.threadId) ?? [], message]));
 
     return grouped;
@@ -60,6 +61,7 @@ export const ScriptCommentsSidebar = ({
     panelState,
 }: ScriptCommentsSidebarProps) => {
     const editorComments = useEditorComments();
+    const {isReadOnly} = useScriptReadOnlyState();
     const {addToast} = useToastController();
     const {
         viewMode,
@@ -72,7 +74,8 @@ export const ScriptCommentsSidebar = ({
         clearPendingActivation,
     } = panelState;
     const anchors = editorComments.state?.anchors ?? NO_ANCHORS;
-    const draft = editorComments.state?.draft ?? null;
+    // A saved draft or version takes no new comments.
+    const draft = isReadOnly ? null : editorComments.state?.draft ?? null;
     const activeThreadId = editorComments.state?.activeThreadId ?? null;
     const hoveredThreadId = editorComments.state?.hoveredThreadId ?? null;
     const hoveredBlockId = editorComments.state?.hoveredBlockId ?? null;
@@ -202,6 +205,7 @@ export const ScriptCommentsSidebar = ({
             onDeleteMessage={messageId => void comments.deleteMessage(messageId)}
             onToggleResolved={() => toggleResolved(thread)}
             onDeleteThread={() => void deleteThread(thread.id)}
+            isReadOnly={isReadOnly}
         />
     );
 
@@ -268,7 +272,7 @@ export const ScriptCommentsSidebar = ({
                 )}
             />
             {isEmpty ? (
-                <p className={styles.empty}>No comments. Select text and press ⌘⌥M.</p>
+                <p className={styles.empty}>{isReadOnly ? 'No comments.' : 'No comments. Select text and press ⌘⌥M.'}</p>
             ) : viewMode === 'beside' ? (
                 <CommentsBesideView
                     threads={visibleThreads}

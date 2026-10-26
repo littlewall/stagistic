@@ -4,6 +4,7 @@ import {
     type CSSProperties,
     type FormEvent,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -18,6 +19,7 @@ import {formControlStyles} from '../../molecules/forms/shared/formControlStyles'
 import {VocalRangeSection} from '../../vocal-range/VocalRangeSection';
 import styles from './AttributeManagerCharactersPanel.module.css';
 import type {AttributeManagerCharacter} from './attributeManagerCharacterTypes';
+import {AttributeNameForm} from './AttributeNameForm';
 import {RemoveCharacterModal} from './RemoveCharacterModal';
 
 interface AttributeManagerCharacterDetailProps {
@@ -54,6 +56,7 @@ export const AttributeManagerCharacterDetail = ({
     onDeleteCharacter,
 }: AttributeManagerCharacterDetailProps) => {
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+    const removeTriggerRef = useRef<HTMLElement | null>(null);
     const editorCharacter = useMemo<EditorSidebarCharacter>(
         () => ({
             id: character.id,
@@ -113,27 +116,7 @@ export const AttributeManagerCharacterDetail = ({
                         characterKey={character.name}
                         className={styles.detailColorControl}
                         swatchClassName={styles.detailColorSwatch}
-                        color={{
-                            state: {
-                                isActionDisabled: isColorActionDisabled,
-                                isPickerOpen: colorPicker.isColorPickerOpen,
-                                currentColorHex: colorPicker.currentCharacterColorHex,
-                                colorDraftHex: colorPicker.colorDraftHex,
-                                pickerColorValue: colorPicker.pickerColorValue,
-                                presetColorHexes: colorPicker.presetColorHexes,
-                                resolvedColorSaturation: colorPicker.resolvedColorSaturation,
-                            },
-                            refs: {
-                                triggerRef: colorPicker.colorTriggerRef,
-                            },
-                            actions: {
-                                togglePicker: colorPicker.toggleColorPicker,
-                                setPickerOpen: colorPicker.setIsColorPickerOpen,
-                                applyColor: colorPicker.applyColor,
-                                resetColor: colorPicker.resetColor,
-                                setDraftHue: colorPicker.setColorDraftHue,
-                            },
-                        }}
+                        color={colorPicker.control}
                     />
                     <div>
                         <h3 className={styles.detailTitle}>{character.name}</h3>
@@ -149,7 +132,10 @@ export const AttributeManagerCharacterDetail = ({
                         size="sm"
                         isDisabled={isDeleting || isRenaming || !onDeleteCharacter}
                         aria-label={`Remove ${character.name}`}
-                        onPress={() => setIsRemoveOpen(true)}
+                        onPress={event => {
+                            removeTriggerRef.current = event.target as HTMLElement;
+                            setIsRemoveOpen(true);
+                        }}
                     >
                         <TrashIcon
                             className={styles.actionIcon}
@@ -159,42 +145,19 @@ export const AttributeManagerCharacterDetail = ({
                 </Tooltip>
             </header>
             <div className={styles.detailBody}>
-                <form
-                    className={styles.nameForm}
+                <AttributeNameForm
+                    fieldId={`character-name-${character.id}`}
+                    name={character.name}
+                    isBusy={isRenaming}
+                    isDisabled={isDeleting || isRenaming || !onRenameCharacter}
+                    isInvalid={isInvalid}
+                    isDuplicate={isDuplicate}
+                    errorId={errorId}
                     onSubmit={handleNameSubmit}
-                    aria-busy={isRenaming}
-                >
-                    <label
-                        className={formControlStyles.label}
-                        htmlFor={`character-name-${character.id}`}
-                    >
-                        Name
-                    </label>
-                    <input
-                        id={`character-name-${character.id}`}
-                        type="text"
-                        className={formControlStyles.input}
-                        value={character.name}
-                        disabled={isDeleting || isRenaming || !onRenameCharacter}
-                        aria-describedby={errorId}
-                        aria-invalid={isInvalid}
-                        onChange={event => onNameDraftChange(event.target.value)}
-                        onBlur={() => void persistName()}
-                        onKeyDown={event => {
-                            if (event.key === 'Escape') {
-                                onResetNameDraft();
-                            }
-                        }}
-                    />
-                    {isInvalid ? (
-                        <p
-                            id={errorId}
-                            className={styles.error}
-                        >
-                            {isDuplicate ? 'A character or group with this name already exists.' : 'Name cannot be empty.'}
-                        </p>
-                    ) : null}
-                </form>
+                    onChange={onNameDraftChange}
+                    onCommit={() => void persistName()}
+                    onReset={onResetNameDraft}
+                />
                 <section
                     className={clsx(styles.outlineSection, formControlStyles.field)}
                     style={{'--character-color': colorPicker.currentCharacterColorHex} as CSSProperties}
@@ -219,6 +182,7 @@ export const AttributeManagerCharacterDetail = ({
                 />
             </div>
             <RemoveCharacterModal
+                returnFocus={removeTriggerRef}
                 isOpen={isRemoveOpen}
                 characterKey={character.name}
                 groupNames={character.groupNames ?? []}

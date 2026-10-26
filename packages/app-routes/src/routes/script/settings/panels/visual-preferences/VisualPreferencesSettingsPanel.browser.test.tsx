@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import {requireValue} from '@stagistic/shared';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -44,7 +45,7 @@ const renderPanel = async (characterDecoration: Parameters<typeof VisualPreferen
 
 const getPreviewParts = (preview: HTMLElement) => {
     const names = [...preview.querySelectorAll<HTMLElement>('span')];
-    const line = [...preview.querySelectorAll<HTMLElement>('p')].at(-1)!;
+    const line = requireValue([...preview.querySelectorAll<HTMLElement>('p')].at(-1));
 
     return {names, line};
 };
@@ -78,7 +79,7 @@ describe('VisualPreferencesSettingsPanel', () => {
     it('sizes the select to fit the longest option', async () => {
         await renderPanel('underline');
 
-        const button = document.querySelector<HTMLButtonElement>('#character-decoration')!;
+        const button = requireValue(document.querySelector<HTMLButtonElement>('#character-decoration'));
         const probe = document.createElement('span');
 
         probe.style.whiteSpace = 'nowrap';

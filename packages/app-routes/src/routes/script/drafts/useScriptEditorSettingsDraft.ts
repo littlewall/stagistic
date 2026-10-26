@@ -3,7 +3,6 @@ import {
     usePersistedDraft,
     useScriptEditorSettingsRecord,
 } from '@stagistic/app-core';
-import {type ScriptBlockNodeType} from '@stagistic/script';
 import {
     type CharacterDecoration,
     DEFAULT_EDITOR_SETTINGS,
@@ -14,6 +13,7 @@ import {
     type InitialPagesSettingsPatch,
     mergeEditorSettings,
     type PageSettings,
+    type ScriptBlockNodeType,
     type StructureSettingsPatch,
 } from '@stagistic/script';
 import {
@@ -59,13 +59,14 @@ export const useScriptEditorSettingsDraft = ({
     repository,
 }: UseScriptEditorSettingsDraftArgs) => {
     const record = useScriptEditorSettingsRecord(currentScriptId, repository);
+    const {save} = record;
     const confirmedSettings = useMemo(
         () => normalizeSettingsOverride(record.record?.settings ?? EMPTY_SETTINGS),
         [record.record?.settings],
     );
     const persist = useCallback((_scriptId: string, value: EditorSettingsOverride) => {
-        return record.save(normalizeSettingsOverride(value));
-    }, [record.save]);
+        return save(normalizeSettingsOverride(value));
+    }, [save]);
     const draft = usePersistedDraft({
         entityKey: currentScriptId,
         confirmedValue: confirmedSettings,
@@ -73,6 +74,7 @@ export const useScriptEditorSettingsDraft = ({
         defaultValue: EMPTY_SETTINGS,
         persist,
     });
+    const {setDraft} = draft;
     const scriptSettingsDraft = draft.draft;
     const resolvedScriptSettings = useMemo<EditorSettings>(
         () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsDraft),
@@ -83,7 +85,7 @@ export const useScriptEditorSettingsDraft = ({
         blockType: ScriptBlockNodeType,
         patch: BlockSettingsPatch,
     ) => {
-        draft.setDraft(previous => ({
+        setDraft(previous => ({
             ...previous,
             blocks: {
                 ...previous.blocks,
@@ -93,10 +95,10 @@ export const useScriptEditorSettingsDraft = ({
                 },
             },
         }));
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     const resetBlockSettings = useCallback((blockType: ScriptBlockNodeType) => {
-        draft.setDraft(previous => {
+        setDraft(previous => {
             const nextBlocks = {...previous.blocks};
 
             delete nextBlocks[blockType];
@@ -106,20 +108,20 @@ export const useScriptEditorSettingsDraft = ({
                 blocks: Object.keys(nextBlocks).length > 0 ? nextBlocks : undefined,
             };
         });
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     const updateCharacterDecoration = useCallback((value: CharacterDecoration) => {
-        draft.setDraft(previous => ({
+        setDraft(previous => ({
             ...previous,
             visual: {
                 ...previous.visual,
                 characterDecoration: value,
             },
         }));
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     const updateStructureSettings = useCallback((patch: StructureSettingsPatch) => {
-        draft.setDraft(previous => ({
+        setDraft(previous => ({
             ...previous,
             structure: {
                 ...previous.structure,
@@ -130,20 +132,20 @@ export const useScriptEditorSettingsDraft = ({
                 },
             },
         }));
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     const updatePageSettings = useCallback((patch: Partial<PageSettings>) => {
-        draft.setDraft(previous => ({
+        setDraft(previous => ({
             ...previous,
             page: {
                 ...previous.page,
                 ...patch,
             },
         }));
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     const updateHeaderFooterSettings = useCallback((patch: HeaderFooterSettingsPatch) => {
-        draft.setDraft(previous => ({
+        setDraft(previous => ({
             ...previous,
             headerFooter: {
                 ...previous.headerFooter,
@@ -152,10 +154,10 @@ export const useScriptEditorSettingsDraft = ({
                 footer: mergeHeaderFooterRow(previous.headerFooter?.footer, patch.footer),
             },
         }));
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     const updateInitialPagesSettings = useCallback((patch: InitialPagesSettingsPatch) => {
-        draft.setDraft(previous => ({
+        setDraft(previous => ({
             ...previous,
             initialPages: {
                 ...previous.initialPages,
@@ -169,7 +171,7 @@ export const useScriptEditorSettingsDraft = ({
                 },
             },
         }));
-    }, [draft.setDraft]);
+    }, [setDraft]);
 
     return {
         scriptSettingsDraft,

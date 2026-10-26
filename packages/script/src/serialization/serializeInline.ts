@@ -69,6 +69,26 @@ const serializeTextNode = (node: ScriptNode) => {
     return applyEmphasisMarks(value, node);
 };
 
+const characterTagContinues = (node: ScriptNode | undefined, identity: string) => {
+    return node !== undefined && typeof node.text === 'string' && getCharacterTagIdentity(node) === identity;
+};
+
+const serializeMusicStart = (node: ScriptNode, state: SerializationState, previousHit: string | null) => {
+    state.musicNumber += 1;
+
+    const number = state.musicNumber;
+    const title = typeof node.attrs?.[MUSIC_TITLE_ATTR] === 'string' ? node.attrs[MUSIC_TITLE_ATTR] : '';
+    const marker = `@@music ${number} ${quoteLiteral(title)}`;
+
+    if (node.attrs?.[MUSIC_MODE_ATTR] === 'hit') {
+        return {marker, hitOut: `@@out ${number}`};
+    }
+
+    state.openMusicNumber = number;
+
+    return {marker, hitOut: previousHit};
+};
+
 export const serializeInlineContent = (
     nodes: ScriptNode[] | undefined,
     state: SerializationState,
@@ -88,19 +108,10 @@ export const serializeInlineContent = (
         const node = content[index];
 
         if (node.type === MUSIC_START_NODE_NAME) {
-            state.musicNumber += 1;
-
-            const number = state.musicNumber;
-            const title = typeof node.attrs?.[MUSIC_TITLE_ATTR] === 'string' ? node.attrs[MUSIC_TITLE_ATTR] : '';
-            const marker = `@@music ${number} ${quoteLiteral(title)}`;
+            const {marker, hitOut: nextHit} = serializeMusicStart(node, state, hitOut);
 
             text = text.trimEnd() ? `${text.trimEnd()} ${marker}` : marker;
-
-            if (node.attrs?.[MUSIC_MODE_ATTR] === 'hit') {
-                hitOut = `@@out ${number}`;
-            } else {
-                state.openMusicNumber = number;
-            }
+            hitOut = nextHit;
 
             continue;
         }
@@ -126,9 +137,7 @@ export const serializeInlineContent = (
                 let taggedText = node.text;
 
                 while (
-                    index + 1 < content.length &&
-                    typeof content[index + 1].text === 'string' &&
-                    getCharacterTagIdentity(content[index + 1]) === tagIdentity
+                    characterTagContinues(content[index + 1], tagIdentity)
                 ) {
                     index += 1;
                     taggedText += content[index].text;

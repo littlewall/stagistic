@@ -14,7 +14,7 @@
 
     &[data-hovered],
     &[data-pressed],
-    &[data-focus-visible] {
+    :global(:root[data-focus-ring-visible]) &:focus {
         color: var(--color-text);
         background: var(--state-hover);
     }

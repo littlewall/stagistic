@@ -6,7 +6,11 @@ import {
 
 import type {ScriptDocument} from '../document';
 import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '../document';
-import {collectCommentAnchorThreadIds, COMMENT_ANCHOR_MARK_NAME} from './commentAnchors';
+import {
+    collectCommentAnchorThreadIds,
+    COMMENT_ANCHOR_MARK_NAME,
+    stripCommentAnchors,
+} from './commentAnchors';
 
 const doc: ScriptDocument = {
     type: 'doc',
@@ -54,11 +58,22 @@ const doc: ScriptDocument = {
 
 describe('collectCommentAnchorThreadIds', () => {
     it('collects unique thread ids across blocks and ignores empty ids and other marks', () => {
-        expect([...collectCommentAnchorThreadIds(doc)].sort()).toEqual(['t1', 't2']);
+        expect([...collectCommentAnchorThreadIds(doc)].toSorted()).toEqual(['t1', 't2']);
     });
 
     it('returns an empty set for a document without anchors', () => {
         expect(collectCommentAnchorThreadIds({type: 'doc', content: []}).size).toBe(0);
+    });
+});
+
+describe('stripCommentAnchors', () => {
+    it('removes anchors of threads that are not kept and leaves other marks', () => {
+        const stripped = stripCommentAnchors(doc, new Set(['t2']));
+
+        expect([...collectCommentAnchorThreadIds(stripped)]).toEqual(['t2']);
+        expect(stripped.content[0]?.content?.[0]).toEqual({type: 'text', text: 'Hello '});
+        expect(stripped.content[0]?.content?.[1]?.marks).toEqual([{type: 'bold'}, {type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId: 't2'}}]);
+        expect(collectCommentAnchorThreadIds(doc).size).toBe(2);
     });
 });
 

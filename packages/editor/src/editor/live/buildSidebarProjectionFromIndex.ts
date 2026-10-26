@@ -14,8 +14,8 @@ import type {
     EditorLiveCharacterSnapshot,
     EditorLiveStructureRow,
     EditorLiveStructureSnapshot,
+    PersistentCharacterRef,
 } from '../contracts';
-import type {PersistentCharacterRef} from '../contracts';
 import {
     EMPTY_CHARACTERS,
     EMPTY_STRUCTURE,

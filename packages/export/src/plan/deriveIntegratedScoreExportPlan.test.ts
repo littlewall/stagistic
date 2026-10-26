@@ -1,4 +1,5 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {requireValue} from '@stagistic/shared';
 import {
     describe,
     expect,
@@ -101,7 +102,7 @@ describe('deriveIntegratedScoreExportPlan', () => {
 
         expect(contents).toBeDefined();
 
-        const pages = buildContentsPages(contents!, DEFAULT_EDITOR_SETTINGS, {
+        const pages = buildContentsPages(requireValue(contents), DEFAULT_EDITOR_SETTINGS, {
             scriptPageNumberByBlockId: new Map([
                 ['overture', 1],
                 ['scene', 3],
@@ -127,7 +128,7 @@ describe('deriveIntegratedScoreExportPlan', () => {
             - DEFAULT_EDITOR_SETTINGS.page.marginRightPx;
 
         expect(scenePage).toBeDefined();
-        expect(scenePage!.x).toBeCloseTo(contentRight - DEFAULT_EDITOR_SETTINGS.typography.fontSizePx * 0.6);
+        expect(requireValue(scenePage).x).toBeCloseTo(contentRight - DEFAULT_EDITOR_SETTINGS.typography.fontSizePx * 0.6);
         expect(runs.some(run => run.text === '7')).toBe(false);
     });
 });
