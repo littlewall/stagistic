@@ -45,7 +45,7 @@ export const PublicPreviewGate = ({children}: PublicPreviewGateProps) => {
                 By continuing, you acknowledge these temporary limitations.
             </p>
             <div className={styles.actions}>
-                <Button autoFocus onPress={acknowledge}>
+                <Button data-modal-initial-focus onPress={acknowledge}>
                     I understand and continue
                 </Button>
             </div>

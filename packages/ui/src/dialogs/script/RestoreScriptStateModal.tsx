@@ -7,12 +7,13 @@ import {
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './ScriptStateModals.module.css';
 
 export type RestoreScriptStateMode = 'restore' | 'restore-as-new';
 
-export interface RestoreScriptStateModalProps {
+export interface RestoreScriptStateModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     mode: RestoreScriptStateMode,
     /** “Draft #3” or the version name. */
@@ -26,6 +27,8 @@ export interface RestoreScriptStateModalProps {
 }
 
 export const RestoreScriptStateModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     mode,
     stateLabel,
@@ -108,6 +111,8 @@ export const RestoreScriptStateModal = ({
 
     return (
         <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={() => {
                 if (!isPending) {
@@ -126,7 +131,6 @@ export const RestoreScriptStateModal = ({
                             className={styles.input}
                             value={title}
                             autoComplete="off"
-                            autoFocus
                             disabled={isPending}
                             onChange={event => setTitle(event.target.value)}
                         />
@@ -136,7 +140,7 @@ export const RestoreScriptStateModal = ({
                     <Button type="submit" isDisabled={!canSubmit} isPending={isPending}>
                         {mode === 'restore' ? 'Restore' : 'Create script'}
                     </Button>
-                    <Button variant="ghost" isDisabled={isPending} onPress={onClose}>
+                    <Button variant="ghost" data-modal-initial-focus={mode === 'restore' ? '' : undefined} isDisabled={isPending} onPress={onClose}>
                         Cancel
                     </Button>
                 </ModalActions>

@@ -18,6 +18,7 @@ import {
     type ReactNode,
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -34,6 +35,7 @@ interface UseScriptStateControlsArgs {
 }
 
 interface SaveRequest {
+    returnFocus?: HTMLElement | null,
     kind: ScriptStateKind,
     submitLabel?: string,
     afterSave?: (snapshot: ScriptSnapshot) => void,
@@ -65,6 +67,9 @@ export const useScriptStateControls = ({
     const [saveRequest, setSaveRequest] = useState<SaveRequest | null>(null);
     const [manager, setManager] = useState<ManagerState | null>(null);
     const [restoreTarget, setRestoreTarget] = useState<{snapshot: ScriptSnapshot, mode: RestoreScriptStateMode} | null>(null);
+    const saveTrigger = useRef<HTMLElement | null>(null);
+    const managerTrigger = useRef<HTMLElement | null>(null);
+    const restoreTrigger = useRef<HTMLElement | null>(null);
     // The kind outlives the request so the closing save dialog keeps its copy.
     const [lastSaveKind, setLastSaveKind] = useState<ScriptStateKind>('draft');
     const shownId = shownSnapshot?.id ?? null;
@@ -95,6 +100,7 @@ export const useScriptStateControls = ({
 
     /** Opens the save dialog; `afterSave` runs once the state is stored (e.g. to download a PDF). */
     const openSave = useCallback((kind: ScriptStateKind, options?: Omit<SaveRequest, 'kind'>) => {
+        saveTrigger.current = options?.returnFocus ?? null;
         setLastSaveKind(kind);
         setSaveRequest({kind, ...options});
     }, []);
@@ -125,7 +131,9 @@ export const useScriptStateControls = ({
         }
     };
 
-    const requestRestore = (snapshotId: string, mode: RestoreScriptStateMode) => {
+    const requestRestore = (snapshotId: string, mode: RestoreScriptStateMode, returnFocus?: HTMLElement | null) => {
+        restoreTrigger.current = returnFocus ?? null;
+
         const snapshot = findSnapshot(snapshotId);
 
         if (snapshot) {
@@ -157,12 +165,15 @@ export const useScriptStateControls = ({
             versions={versions}
             drafts={drafts}
             onSelect={snapshotId => void selectState(snapshotId)}
-            onSaveDraft={isReadOnly ? undefined : () => openSave('draft')}
-            onSaveVersion={isReadOnly ? undefined : () => openSave('version')}
-            onManage={() => setManager({kind: shownSnapshot?.kind ?? 'draft', selectedId: shownId})}
+            onSaveDraft={isReadOnly ? undefined : trigger => openSave('draft', {returnFocus: trigger})}
+            onSaveVersion={isReadOnly ? undefined : trigger => openSave('version', {returnFocus: trigger})}
+            onManage={trigger => {
+                managerTrigger.current = trigger ?? null;
+                setManager({kind: shownSnapshot?.kind ?? 'draft', selectedId: shownId});
+            }}
             restore={shownSnapshot ? {
-                onRestore: () => requestRestore(shownSnapshot.id, 'restore'),
-                onRestoreAsNew: () => requestRestore(shownSnapshot.id, 'restore-as-new'),
+                onRestore: trigger => requestRestore(shownSnapshot.id, 'restore', trigger),
+                onRestoreAsNew: trigger => requestRestore(shownSnapshot.id, 'restore-as-new', trigger),
             } : undefined}
         />
     ) : null;
@@ -170,6 +181,7 @@ export const useScriptStateControls = ({
     const modals: ReactNode = (
         <>
             <ScriptStatesModal
+                returnFocus={managerTrigger}
                 isOpen={manager !== null}
                 activeKind={manager?.kind ?? 'draft'}
                 states={records}
@@ -178,7 +190,7 @@ export const useScriptStateControls = ({
                 isPending={actions.isPending}
                 onClose={() => setManager(null)}
                 onSelectKind={kind => setManager({kind, selectedId: null})}
-                onCreate={isReadOnly ? undefined : kind => openSave(kind)}
+                onCreate={isReadOnly ? undefined : (kind, trigger) => openSave(kind, {returnFocus: trigger})}
                 onUpdate={handleUpdate}
                 onDelete={async snapshotId => {
                     await actions.remove(snapshotId);
@@ -187,10 +199,12 @@ export const useScriptStateControls = ({
                     setManager(null);
                     void selectState(snapshotId);
                 }}
-                onRestore={snapshotId => requestRestore(snapshotId, 'restore')}
-                onRestoreAsNew={snapshotId => requestRestore(snapshotId, 'restore-as-new')}
+                onRestore={(snapshotId, trigger) => requestRestore(snapshotId, 'restore', trigger)}
+                onRestoreAsNew={(snapshotId, trigger) => requestRestore(snapshotId, 'restore-as-new', trigger)}
             />
             <SaveScriptStateModal
+                returnFocus={saveTrigger}
+                fallbackFocus={() => document.querySelector('dialog[aria-label="Drafts and versions"] [aria-selected="true"]')}
                 isOpen={saveRequest !== null}
                 kind={saveRequest?.kind ?? lastSaveKind}
                 submitLabel={saveRequest?.submitLabel}
@@ -199,6 +213,8 @@ export const useScriptStateControls = ({
                 onSubmit={handleSave}
             />
             <RestoreScriptStateModal
+                returnFocus={restoreTrigger}
+                fallbackFocus={() => document.querySelector('dialog[aria-label="Drafts and versions"] [aria-selected="true"]')}
                 isOpen={restoreTarget !== null}
                 mode={restoreTarget?.mode ?? 'restore'}
                 stateLabel={restoreLabel}

@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import {useRef} from 'react';
 import {useFilter} from 'react-aria';
 import {
     Autocomplete,
@@ -40,13 +41,13 @@ export interface ScriptStateMenuProps {
     drafts: readonly ScriptStateMenuItem[],
     onSelect: (snapshotId: string | null) => void,
     /** Saving applies to the current script; omit while a stored state is on screen. */
-    onSaveDraft?: () => void,
-    onSaveVersion?: () => void,
-    onManage?: () => void,
+    onSaveDraft?: (returnFocus?: HTMLElement | null) => void,
+    onSaveVersion?: (returnFocus?: HTMLElement | null) => void,
+    onManage?: (returnFocus?: HTMLElement | null) => void,
     /** Offered in the actions menu while a stored state is on screen. */
     restore?: {
-        onRestore: () => void,
-        onRestoreAsNew: () => void,
+        onRestore: (returnFocus?: HTMLElement | null) => void,
+        onRestoreAsNew: (returnFocus?: HTMLElement | null) => void,
     },
 }
 
@@ -94,6 +95,7 @@ export const ScriptStateMenu = ({
     onManage,
     restore,
 }: ScriptStateMenuProps) => {
+    const actionTrigger = useRef<HTMLButtonElement>(null);
     const {contains} = useFilter({sensitivity: 'base'});
     const hasFilter = versions.length + drafts.length > FILTER_THRESHOLD;
     const isStored = selectedId !== null;
@@ -110,15 +112,15 @@ export const ScriptStateMenu = ({
 
     const handleAction = (key: string) => {
         if (key === 'save-draft') {
-            onSaveDraft?.();
+            onSaveDraft?.(actionTrigger.current);
         } else if (key === 'save-version') {
-            onSaveVersion?.();
+            onSaveVersion?.(actionTrigger.current);
         } else if (key === 'restore') {
-            restore?.onRestore();
+            restore?.onRestore(actionTrigger.current);
         } else if (key === 'restore-as-new') {
-            restore?.onRestoreAsNew();
+            restore?.onRestoreAsNew(actionTrigger.current);
         } else if (key === 'manage') {
-            onManage?.();
+            onManage?.(actionTrigger.current);
         }
     };
 
@@ -180,6 +182,7 @@ export const ScriptStateMenu = ({
                 <MenuTrigger>
                     <Button
                         className={clsx(styles.trigger, styles.actionsTrigger)}
+                        ref={actionTrigger}
                         aria-label="Script state actions"
                     >
                         <ChevronDownIcon className={styles.chevron} aria-hidden="true" />

@@ -1,16 +1,17 @@
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import type {ImportPayload} from './import/model';
 import type {ImportScriptFile, StepkgPeekResult} from './import/types';
 
 export type NewScriptShape = 'multi-act' | 'one-act';
 
-export interface NewScriptModalProps {
+export interface NewScriptModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     isTransitioning?: boolean,
     onClose: () => void,
     onCreate: (name: string, shape: NewScriptShape) => void | Promise<void>,
 }
 
-export interface ImportScriptModalProps {
+export interface ImportScriptModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     onClose: () => void,
     onImportStagistic: (payload: ImportPayload) => void | Promise<void>,

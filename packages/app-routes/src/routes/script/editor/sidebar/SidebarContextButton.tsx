@@ -4,7 +4,7 @@ import {type ReactNode} from 'react';
 interface SidebarContextButtonProps {
     ariaLabel: string,
     tooltipLabel?: string,
-    onClick: () => void,
+    onClick: (returnFocus?: HTMLElement | null) => void,
     children: ReactNode,
 }
 
@@ -20,7 +20,7 @@ export const SidebarContextButton = ({
             aria-label={ariaLabel}
             onMouseDown={event => {
                 event.preventDefault();
-                onClick();
+                onClick(event.currentTarget);
             }}
         >
             {children}

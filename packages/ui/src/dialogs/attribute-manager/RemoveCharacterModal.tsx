@@ -1,7 +1,8 @@
 import type {ChangeSummaryItem} from '../../molecules/ChangeSummary/ChangeSummary';
 import {ConfirmModal} from '../modal/ConfirmModal';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 
-export interface RemoveCharacterModalProps {
+export interface RemoveCharacterModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     characterKey?: string,
     groupNames?: string[],
@@ -11,6 +12,8 @@ export interface RemoveCharacterModalProps {
 }
 
 export const RemoveCharacterModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     characterKey,
     groupNames = [],
@@ -42,6 +45,8 @@ export const RemoveCharacterModal = ({
 
     return (
         <ConfirmModal
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             ariaLabel="Remove character"
             title={(

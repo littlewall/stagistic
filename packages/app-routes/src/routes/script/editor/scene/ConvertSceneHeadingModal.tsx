@@ -1,6 +1,7 @@
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {ConfirmModal} from '@stagistic/ui';
 
-interface ConvertSceneHeadingModalProps {
+interface ConvertSceneHeadingModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     isConverting?: boolean,
     onClose: () => void,
@@ -8,12 +9,16 @@ interface ConvertSceneHeadingModalProps {
 }
 
 export const ConvertSceneHeadingModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     isConverting = false,
     onClose,
     onConfirm,
 }: ConvertSceneHeadingModalProps) => (
     <ConfirmModal
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         ariaLabel="Convert scene heading"
         title="Convert scene heading?"

@@ -30,15 +30,9 @@ import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {ScriptEditorSettingsPanel} from './panels';
 import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
-import {
-    readOnlyScriptSettingsMenu,
-    SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
-    SCRIPT_SETTINGS_PANEL_DANGER_ZONE,
-    SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
-} from './settingsMenu';
+import {readOnlyScriptSettingsMenu} from './settingsMenu';
+import {BLOCK_LABEL_BY_TYPE, getShownSettingsPanelId} from './settingsPanelPresentation';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
-
-const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const));
 
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();
@@ -94,6 +88,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const {
         isSettingsOpen,
+        settingsReturnFocus,
         activePanelId,
         expandedItemIds,
         groups,
@@ -111,6 +106,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const {
         isOpen: isAttributeManagerOpen,
+        returnFocus: attributeManagerReturnFocus,
         activePanelId: activeAttributeManagerPanelId,
         selectedCharacterId: selectedAttributeManagerCharacterId,
         selectedGroupId: selectedAttributeManagerGroupId,
@@ -184,10 +180,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         applyDocumentChange,
     });
 
-    // A saved draft or version has no danger zone; a link to it opens the title page instead.
-    const shownPanelId = isReadOnly && activePanelId === SCRIPT_SETTINGS_PANEL_DANGER_ZONE
-        ? SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO
-        : activePanelId;
+    const shownPanelId = getShownSettingsPanelId(activePanelId, isReadOnly);
     const contextValue = useMemo<ScriptSettingsModalContextValue>(
         () => ({
             resolvedScriptSettings,
@@ -228,6 +221,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
             <ScriptCharactersProvider value={charactersContextValue}>
                 {children}
                 <SettingsModal
+                    returnFocus={settingsReturnFocus}
                     isOpen={isSettingsOpen}
                     title="Script settings"
                     groups={isReadOnly ? readOnlyScriptSettingsMenu : groups}
@@ -272,6 +266,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     />
                 </SettingsModal>
                 <ScriptAttributeManagerModal
+                    returnFocus={attributeManagerReturnFocus}
                     currentScriptId={currentScriptId}
                     isOpen={isAttributeManagerOpen}
                     tabs={attributeManagerTabs}

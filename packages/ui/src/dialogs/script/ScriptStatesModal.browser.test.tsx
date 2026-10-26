@@ -54,7 +54,7 @@ const STATES: ScriptStateRecord[] = [
 
 const settle = () => new Promise(resolve => window.setTimeout(resolve, 20));
 
-const modal = () => document.querySelector('[role="dialog"][aria-label="Drafts and versions"]');
+const modal = () => document.querySelector('dialog[aria-label="Drafts and versions"]');
 
 const button = (label: string, scope: ParentNode = document) => {
     const found = [...scope.querySelectorAll<HTMLButtonElement>('button')]
@@ -145,7 +145,7 @@ describe('ScriptStatesModal', () => {
 
         expect(onDelete).not.toHaveBeenCalled();
 
-        await userEvent.click(button('Delete', requireValue(document.querySelector('dialog[open]'))));
+        await userEvent.click(button('Delete', requireValue(document.querySelector('dialog[aria-label="Delete Draft 2"]'))));
 
         expect(onDelete).toHaveBeenCalledWith('d2');
     });

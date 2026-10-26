@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import {
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -57,6 +58,8 @@ export const AttributeManagerCharactersPanel = ({
     const [selectedGroupId, setSelectedGroupId] = useItemSelection(groups, initialSelectedGroupId, true);
     const [isCreateCharacterOpen, setIsCreateCharacterOpen] = useState(false);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+    const createCharacterTriggerRef = useRef<HTMLElement | null>(null);
+    const createGroupTriggerRef = useRef<HTMLElement | null>(null);
     const {colorizedItems: colorizedCharacters, setColor: handleSetCharacterColor} = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
     const {
         displayedCharacters,
@@ -129,7 +132,17 @@ export const AttributeManagerCharactersPanel = ({
             isLoading={isLoading}
             isCreateDisabled={isReadOnly || (isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup)}
             onSelectItem={isCharactersWorkspace ? setSelectedCharacterId : setSelectedGroupId}
-            onCreate={isCharactersWorkspace ? () => setIsCreateCharacterOpen(true) : () => setIsCreateGroupOpen(true)}
+            onCreate={trigger => {
+                if (isCharactersWorkspace) {
+                    createCharacterTriggerRef.current = trigger ?? null;
+                    setIsCreateCharacterOpen(true);
+
+                    return;
+                }
+
+                createGroupTriggerRef.current = trigger ?? null;
+                setIsCreateGroupOpen(true);
+            }}
         />
     );
 
@@ -218,6 +231,7 @@ export const AttributeManagerCharactersPanel = ({
             </div>
             {onCreateCharacter ? (
                 <CreateCharacterModal
+                    returnFocus={createCharacterTriggerRef}
                     isOpen={isCreateCharacterOpen}
                     existingCharacterNames={allEntityNames.map(entity => entity.name)}
                     onClose={() => setIsCreateCharacterOpen(false)}
@@ -226,6 +240,7 @@ export const AttributeManagerCharactersPanel = ({
             ) : null}
             {onCreateGroup ? (
                 <CreateGroupModal
+                    returnFocus={createGroupTriggerRef}
                     isOpen={isCreateGroupOpen}
                     existingEntityNames={allEntityNames.map(entity => entity.name)}
                     onClose={() => setIsCreateGroupOpen(false)}

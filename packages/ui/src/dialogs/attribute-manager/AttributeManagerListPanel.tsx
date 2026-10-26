@@ -78,7 +78,7 @@ export interface AttributeManagerListPanelProps {
     createAction?: {
         ariaLabel: string,
         tooltipLabel: string,
-        onPress: () => void,
+        onPress: (trigger?: HTMLElement) => void,
     },
     /** When provided, renders custom detail-body content for the selected item instead of the placeholder. */
     renderDetail?: (item: AttributeManagerListItem) => ReactNode,
@@ -176,7 +176,7 @@ export const AttributeManagerListPanel = ({
                                     variant="ghost"
                                     size="sm"
                                     aria-label={createAction.ariaLabel}
-                                    onPress={createAction.onPress}
+                                    onPress={event => createAction.onPress(event.target as HTMLElement)}
                                 >
                                     <PlusIcon
                                         className={styles.actionIcon}

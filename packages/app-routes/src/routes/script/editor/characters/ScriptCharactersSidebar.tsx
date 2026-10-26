@@ -20,6 +20,7 @@ import {
     type ReactNode,
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -50,7 +51,11 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
     const elementSelection = useEditorElementSelection();
     const liveCharacters = useEditorLiveCharacters();
     const [isAddCharacterOpen, setIsAddCharacterOpen] = useState(false);
-    const openAddCharacterModal = useCallback(() => setIsAddCharacterOpen(true), []);
+    const addCharacterTrigger = useRef<HTMLElement | null>(null);
+    const openAddCharacterModal = useCallback((trigger?: HTMLElement | null) => {
+        addCharacterTrigger.current = trigger ?? null;
+        setIsAddCharacterOpen(true);
+    }, []);
     const closeAddCharacterModal = useCallback(() => setIsAddCharacterOpen(false), []);
 
     const {
@@ -167,6 +172,7 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                 }}
             />
             <AddCharacterModal
+                returnFocus={addCharacterTrigger}
                 isOpen={isAddCharacterOpen}
                 occupiedCharacterKeys={occupiedCharacterKeys}
                 onClose={closeAddCharacterModal}

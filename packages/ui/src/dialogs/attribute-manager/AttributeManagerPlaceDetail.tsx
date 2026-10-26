@@ -1,4 +1,8 @@
-import {type FormEvent, useState} from 'react';
+import {
+    type FormEvent,
+    useRef,
+    useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
@@ -30,6 +34,7 @@ export const AttributeManagerPlaceDetail = ({
     const [isRenaming, setIsRenaming] = useState(false);
     const [isRemoving, setIsRemoving] = useState(false);
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+    const removeTriggerRef = useRef<HTMLElement | null>(null);
     const trimmedName = place.name.trim();
     const normalizedName = normalizePlaceName(trimmedName);
     const isDuplicate = places.some(candidate => {
@@ -92,7 +97,10 @@ export const AttributeManagerPlaceDetail = ({
                         size="sm"
                         isDisabled={isRemoving}
                         aria-label={`Remove ${place.name}`}
-                        onPress={() => setIsRemoveOpen(true)}
+                        onPress={event => {
+                            removeTriggerRef.current = event.target as HTMLElement;
+                            setIsRemoveOpen(true);
+                        }}
                     >
                         <TrashIcon
                             className={styles.actionIcon}
@@ -135,6 +143,7 @@ export const AttributeManagerPlaceDetail = ({
                 </form>
             </div>
             <RemovePlaceModal
+                returnFocus={removeTriggerRef}
                 isOpen={isRemoveOpen}
                 placeName={place.name}
                 isRemoving={isRemoving}

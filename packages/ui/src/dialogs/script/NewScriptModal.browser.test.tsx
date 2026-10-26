@@ -73,6 +73,14 @@ afterEach(() => {
 });
 
 describe('NewScriptModal', () => {
+    it('focuses the script name when opened', async () => {
+        renderModal(vi.fn());
+
+        const name = await waitForElement<HTMLInputElement>('#script-name');
+
+        await expect.poll(() => document.activeElement).toBe(name);
+    });
+
     it('submits multi-act as the default shape', async () => {
         const onCreate = vi.fn();
 

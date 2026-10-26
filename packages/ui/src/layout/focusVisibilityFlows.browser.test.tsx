@@ -1,7 +1,11 @@
 import '../../styles/base.css';
 
 import {requireValue} from '@stagistic/shared';
-import {type ReactNode, useState} from 'react';
+import {
+    type ReactNode,
+    useRef,
+    useState,
+} from 'react';
 import {MenuTrigger} from 'react-aria-components';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -43,12 +47,13 @@ const mount = async (children: ReactNode) => {
 const outline = (element: Element) => getComputedStyle(element).outlineStyle;
 const ModalHarness = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const trigger = useRef<HTMLButtonElement>(null);
 
     return (
         <>
             <div contentEditable suppressContentEditableWarning>Scene text</div>
-            <Button variant="ghost" onPress={() => setIsOpen(true)}>Open dialog</Button>
-            <ModalDialog isOpen={isOpen} onClose={() => setIsOpen(false)} ariaLabel="Edit scene">
+            <Button ref={trigger} variant="ghost" onPress={() => setIsOpen(true)}>Open dialog</Button>
+            <ModalDialog returnFocus={trigger} isOpen={isOpen} onClose={() => setIsOpen(false)} ariaLabel="Edit scene">
                 <form
                     onSubmit={event => {
                         event.preventDefault();

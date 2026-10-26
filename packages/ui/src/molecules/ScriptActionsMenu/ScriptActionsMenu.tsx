@@ -1,3 +1,4 @@
+import {useRef} from 'react';
 import type {Key} from 'react-aria-components';
 import {Button, MenuTrigger} from 'react-aria-components';
 
@@ -7,9 +8,9 @@ import styles from './ScriptActionsMenu.module.css';
 
 interface ScriptActionsMenuProps {
     scriptTitle: string,
-    onDelete?: () => void,
-    onRename?: () => void,
-    onDuplicate?: () => void,
+    onDelete?: (returnFocus?: HTMLElement | null) => void,
+    onRename?: (returnFocus?: HTMLElement | null) => void,
+    onDuplicate?: (returnFocus?: HTMLElement | null) => void,
 }
 
 export const ScriptActionsMenu = ({
@@ -18,19 +19,21 @@ export const ScriptActionsMenu = ({
     onRename,
     onDuplicate,
 }: ScriptActionsMenuProps) => {
+    const trigger = useRef<HTMLButtonElement | null>(null);
     const handleAction = (key: Key) => {
-        if (key === 'rename') {
-            onRename?.();
-        } else if (key === 'duplicate') {
-            onDuplicate?.();
-        } else if (key === 'delete') {
-            onDelete?.();
-        }
+        const callbacks: Record<string, typeof onRename> = {
+            rename: onRename,
+            duplicate: onDuplicate,
+            delete: onDelete,
+        };
+
+        callbacks[String(key)]?.(trigger.current);
     };
 
     return (
         <MenuTrigger>
             <Button
+                ref={trigger}
                 className={styles.trigger}
                 aria-label={`Open actions for ${scriptTitle}`}
             >

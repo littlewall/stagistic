@@ -152,7 +152,7 @@ describe('EditorSidebar character rows', () => {
 
         await editButton.click();
 
-        expect(onEditCharacter).toHaveBeenCalledWith('char-1');
+        expect(onEditCharacter).toHaveBeenCalledWith('char-1', document.querySelector('[aria-label="Manage ANNA"]'));
     });
 
     it('persists a confirmed character color through the shared picker', async () => {
@@ -301,7 +301,7 @@ describe('EditorSidebar group rows', () => {
 
         expect(document.querySelector('[aria-label="Focus ALL"]')).toBeNull();
         expect(onFocusCharacter).not.toHaveBeenCalled();
-        expect(onEditGroup).toHaveBeenCalledWith('group-1');
+        expect(onEditGroup).toHaveBeenCalledWith('group-1', document.querySelector('[aria-label="Manage group ALL"]'));
     });
 
     it('persists a group color through the shared picker', async () => {

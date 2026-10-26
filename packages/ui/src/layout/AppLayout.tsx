@@ -24,7 +24,7 @@ export const AppLayout = ({
                 <div className={styles.header}>{header}</div>
             ) : null}
             <div className={clsx(styles.body, sidebar ? null : styles.single)}>
-                <main className={styles.main}>{children}</main>
+                <main className={styles.main} data-modal-focus-fallback>{children}</main>
                 {sidebar ? (
                     <aside className={clsx(styles.sidebar)}>{sidebar}</aside>
                 ) : null}

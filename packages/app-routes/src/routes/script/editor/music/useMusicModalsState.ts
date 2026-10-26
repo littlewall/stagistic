@@ -1,5 +1,9 @@
 import {type EditorMusicCreateRequest, type EditorMusicRemoveRequest} from '@stagistic/editor';
-import {useCallback, useState} from 'react';
+import {
+    useCallback,
+    useRef,
+    useState,
+} from 'react';
 
 import {type useScriptMusicState} from './useScriptMusicState';
 
@@ -10,8 +14,10 @@ type ScriptMusicState = ReturnType<typeof useScriptMusicState>;
 export const useMusicModalsState = ({createMusic, unassignMusic}: Pick<ScriptMusicState, 'createMusic' | 'unassignMusic'>) => {
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
+    const addMusicReturnFocus = useRef<HTMLElement | null>(null);
 
-    const openAddMusicModal = useCallback(() => {
+    const openAddMusicModal = useCallback((returnFocus?: HTMLElement | null) => {
+        addMusicReturnFocus.current = returnFocus ?? null;
         setAddMusicModalState({source: 'sidebar'});
     }, []);
     const closeAddMusicModal = useCallback(() => {
@@ -25,6 +31,7 @@ export const useMusicModalsState = ({createMusic, unassignMusic}: Pick<ScriptMus
         setAddMusicModalState(null);
     }, [addMusicModalState]);
     const handleRequestCreateMusic = useCallback((request: EditorMusicCreateRequest) => {
+        addMusicReturnFocus.current = null;
         setAddMusicModalState({
             source: 'editor',
             request,
@@ -61,6 +68,7 @@ export const useMusicModalsState = ({createMusic, unassignMusic}: Pick<ScriptMus
         addMusic: {
             isOpen: addMusicModalState !== null,
             initialTitle: addMusicModalState?.source === 'editor' ? addMusicModalState.request.title : undefined,
+            returnFocus: addMusicReturnFocus,
             open: openAddMusicModal,
             close: closeAddMusicModal,
             cancel: cancelAddMusicModal,

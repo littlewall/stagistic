@@ -2,7 +2,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useRef,
     useState,
 } from 'react';
@@ -11,6 +10,7 @@ import {Button} from '../../atoms/Button/Button';
 import {Switch} from '../../atoms/Switch/Switch';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './DuplicateScriptModal.module.css';
 
@@ -21,7 +21,7 @@ export interface DuplicateScriptSubmit {
     openInEditor: boolean,
 }
 
-export interface DuplicateScriptModalProps {
+export interface DuplicateScriptModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     initialTitle: string,
     isPending?: boolean,
@@ -35,6 +35,8 @@ export const DuplicateScriptModal = ({
     isPending = false,
     onClose,
     onSubmit,
+    returnFocus,
+    fallbackFocus,
 }: DuplicateScriptModalProps) => {
     const titleInputRef = useRef<HTMLInputElement | null>(null);
     const [title, setTitle] = useState(initialTitle);
@@ -47,6 +49,7 @@ export const DuplicateScriptModal = ({
 
     if (previous.isOpen !== isOpen || previous.initialTitle !== initialTitle) {
         setPrevious({isOpen, initialTitle});
+
         if (isOpen) {
             setTitle(initialTitle);
             setCopySettings(false);
@@ -54,19 +57,6 @@ export const DuplicateScriptModal = ({
             setOpenInEditor(false);
         }
     }
-
-    useEffect(() => {
-        if (!isOpen || titleInputRef.current?.value !== initialTitle) {
-            return;
-        }
-
-        const focusTimer = window.setTimeout(() => {
-            titleInputRef.current?.focus();
-            titleInputRef.current?.select();
-        }, 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen, initialTitle]);
 
     const handleSubmit = useCallback(
         (event: FormEvent) => {
@@ -105,6 +95,10 @@ export const DuplicateScriptModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Duplicate script"
+            initialFocus={titleInputRef}
+            selectInitialFocus
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
         >
             <ModalHeader
                 title="Duplicate script"

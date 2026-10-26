@@ -1,6 +1,7 @@
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {ConfirmModal} from '@stagistic/ui';
 
-interface UnassignMusicModalProps {
+interface UnassignMusicModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     musicTitle?: string,
     onClose: () => void,
@@ -8,12 +9,16 @@ interface UnassignMusicModalProps {
 }
 
 export const UnassignMusicModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     musicTitle,
     onClose,
     onConfirm,
 }: UnassignMusicModalProps) => (
     <ConfirmModal
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         ariaLabel="Unassign music"
         title={(

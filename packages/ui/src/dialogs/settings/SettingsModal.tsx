@@ -12,6 +12,8 @@ export type {
 const NO_EXPANDED_ITEMS: string[] = [];
 
 export const SettingsModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     title = 'Settings',
     size = 'workspace',
@@ -26,15 +28,18 @@ export const SettingsModal = ({
 }: SettingsModalProps) => {
     return (
         <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel={title}
+            initialFocus={dialog => dialog.querySelector('button[aria-current="page"]')}
             panelClassName={clsx(styles.modal, size === 'compact' && styles.compact)}
         >
             <header className={styles.header}>
                 <h2 className={styles.title}>{title}</h2>
                 <button
-                    autoFocus
+                    data-modal-close
                     type="button"
                     className={styles.closeButton}
                     onClick={onClose}

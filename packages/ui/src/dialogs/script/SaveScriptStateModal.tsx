@@ -4,6 +4,7 @@ import {Button} from '../../atoms/Button/Button';
 import type {ChangeSummaryItem} from '../../molecules/ChangeSummary/ChangeSummary';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import {
     isScriptStateDetailsValid,
@@ -13,7 +14,7 @@ import {
 } from './ScriptStateDetailsFields';
 import styles from './ScriptStateModals.module.css';
 
-export interface SaveScriptStateModalProps {
+export interface SaveScriptStateModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     kind: ScriptStateKind,
     /** Overrides the default submit label, e.g. “Save draft and download”. */
@@ -63,6 +64,8 @@ const COPY: Record<ScriptStateKind, {
 };
 
 export const SaveScriptStateModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     kind,
     submitLabel,
@@ -92,14 +95,19 @@ export const SaveScriptStateModal = ({
     };
 
     return (
-        <ModalDialog isOpen={isOpen} onClose={onClose} ariaLabel={copy.title}>
+        <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
+            isOpen={isOpen}
+            onClose={onClose}
+            ariaLabel={copy.title}
+        >
             <ModalHeader title={copy.title} changes={copy.changes} />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <ScriptStateDetailsFields
                     kind={kind}
                     value={details}
                     isDisabled={isPending}
-                    autoFocus
                     onChange={setDetails}
                 />
                 <ModalActions>

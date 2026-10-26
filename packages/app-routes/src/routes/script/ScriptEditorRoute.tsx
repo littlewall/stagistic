@@ -288,6 +288,7 @@ export const ScriptEditorRoute = () => {
                 <AddMusicModal
                     isOpen={musicModals.addMusic.isOpen}
                     initialTitle={musicModals.addMusic.initialTitle}
+                    returnFocus={musicModals.addMusic.returnFocus}
                     onCancel={musicModals.addMusic.cancel}
                     onClose={musicModals.addMusic.close}
                     onCreate={musicModals.addMusic.create}

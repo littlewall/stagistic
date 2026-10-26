@@ -142,6 +142,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
 
         const input = await waitForElement<HTMLInputElement>('#create-group-name');
 
+        await expect.poll(() => document.activeElement).toBe(input);
         await page.elementLocator(input).fill('Chorus');
         await page.elementLocator(findButtonByText('Create group')).click();
         await new Promise(resolve => window.setTimeout(resolve, 0));

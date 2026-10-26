@@ -10,7 +10,7 @@ import type {EditorSidebarGroup} from './types';
 
 interface CharacterGroupRowProps {
     group: EditorSidebarGroup,
-    onEditGroup?: (groupId: string) => void,
+    onEditGroup?: (groupId: string, returnFocus?: HTMLElement | null) => void,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void,
 }
 
@@ -45,12 +45,12 @@ export const CharacterGroupRow = ({
                         className={styles.editIconButton}
                         aria-disabled={isEditDisabled}
                         aria-label={`Manage group ${group.key}`}
-                        onPress={() => {
+                        onPress={event => {
                             if (!group.id) {
                                 return;
                             }
 
-                            onEditGroup(group.id);
+                            onEditGroup(group.id, event.target as HTMLElement);
                         }}
                     >
                         <EditPencilIcon

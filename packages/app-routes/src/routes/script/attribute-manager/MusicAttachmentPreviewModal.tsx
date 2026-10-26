@@ -1,3 +1,4 @@
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {ModalDialog, ProgressCircle} from '@stagistic/ui';
 import {
     useEffect,
@@ -8,7 +9,7 @@ import {
 import {renderPdfToCanvases} from '../export/renderPdfToCanvases';
 import styles from './MusicAttachmentPreviewModal.module.css';
 
-export interface MusicAttachmentPreviewModalProps {
+export interface MusicAttachmentPreviewModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     attachmentName: string,
     storageKey: string | null,
@@ -19,6 +20,8 @@ export interface MusicAttachmentPreviewModalProps {
 type PreviewStatus = 'loading' | 'ready' | 'missing' | 'error';
 
 export const MusicAttachmentPreviewModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     attachmentName,
     storageKey,
@@ -39,6 +42,7 @@ export const MusicAttachmentPreviewModal = ({
             storageKey,
             loadBlob,
         });
+
         if (isOpen) {
             setStatus('loading');
         }
@@ -109,6 +113,8 @@ export const MusicAttachmentPreviewModal = ({
 
     return (
         <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel={`Preview ${attachmentName}`}

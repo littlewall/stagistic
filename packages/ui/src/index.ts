@@ -156,6 +156,7 @@ export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMi
 export {ConfirmModal, type ConfirmModalProps} from './dialogs/modal/ConfirmModal';
 export {ModalActions, type ModalActionsProps} from './dialogs/modal/ModalActions';
 export {ModalDialog} from './dialogs/modal/ModalDialog';
+export type {ModalFocusRestoreOptions, ModalFocusTarget} from './dialogs/modal/modalFocusTypes';
 export {ModalHeader, type ModalHeaderProps} from './dialogs/modal/ModalHeader';
 export {TypeToConfirmAction, type TypeToConfirmActionProps} from './dialogs/modal/TypeToConfirmAction';
 export {

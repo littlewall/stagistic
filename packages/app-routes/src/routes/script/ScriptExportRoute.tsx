@@ -58,15 +58,15 @@ export const ScriptExportRoute = () => {
     useDocumentTitle(currentScript ? `Export · ${fileTitle}` : 'Export');
 
     const handleMenuAction = useCallback(
-        (actionId: string) => {
+        (actionId: string, returnFocus?: HTMLElement | null) => {
             if (actionId === 'settings') {
-                openSettingsModal();
+                openSettingsModal(returnFocus);
 
                 return;
             }
 
             if (actionId === 'attributes') {
-                openAttributeManagerModal();
+                openAttributeManagerModal(returnFocus);
 
                 return;
             }

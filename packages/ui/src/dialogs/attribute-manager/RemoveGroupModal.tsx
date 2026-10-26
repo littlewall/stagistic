@@ -1,7 +1,8 @@
 import type {ChangeSummaryItem} from '../../molecules/ChangeSummary/ChangeSummary';
 import {ConfirmModal} from '../modal/ConfirmModal';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 
-export interface RemoveGroupModalProps {
+export interface RemoveGroupModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     groupName: string,
     usageCount: number,
@@ -11,6 +12,8 @@ export interface RemoveGroupModalProps {
 }
 
 export const RemoveGroupModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     groupName,
     usageCount,
@@ -35,6 +38,8 @@ export const RemoveGroupModal = ({
 
     return (
         <ConfirmModal
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             ariaLabel="Remove group"
             title={<>Remove {groupName}?</>}

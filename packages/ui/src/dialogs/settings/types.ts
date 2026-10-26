@@ -1,5 +1,7 @@
 import type {ReactNode} from 'react';
 
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
+
 export interface SettingsNavSubItem {
     id: string,
     label: string,
@@ -40,7 +42,7 @@ export interface SettingsNavGroup {
     items: SettingsNavItem[],
 }
 
-export interface SettingsModalProps {
+export interface SettingsModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     title?: string,
     /** `compact` suits a handful of short sections; `workspace` fills the window. */

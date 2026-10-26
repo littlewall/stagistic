@@ -1,4 +1,5 @@
 import {
+    type ModalFocusRestoreOptions,
     SettingsModal,
     type SettingsNavGroup,
     useAppThemeMode,
@@ -11,7 +12,7 @@ import type {AppSettingsSection} from './types';
 const APPEARANCE_PANEL_ID = 'appearance';
 const NO_SECTIONS: AppSettingsSection[] = [];
 
-interface AppSettingsModalProps {
+interface AppSettingsModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     onClose: () => void,
     sections?: AppSettingsSection[],
@@ -22,6 +23,8 @@ interface AppSettingsModalProps {
  * following the system theme whether or not the dialog is open.
  */
 export const AppSettingsModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     onClose,
     sections = NO_SECTIONS,
@@ -52,6 +55,8 @@ export const AppSettingsModal = ({
 
     return (
         <SettingsModal
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             title="Settings"
             size="compact"

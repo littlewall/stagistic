@@ -209,6 +209,8 @@ describe('HomeRoute', () => {
 
         expect(modalActions.openNewScript).toHaveBeenCalledTimes(1);
         expect(modalActions.openImportScript).toHaveBeenCalledTimes(1);
+        expect(modalActions.openNewScript).toHaveBeenCalledWith(newScript);
+        expect(modalActions.openImportScript).toHaveBeenCalledWith(importScript);
         await expect.poll(() => vi.mocked(createExampleScript).mock.calls).toHaveLength(1);
     });
 

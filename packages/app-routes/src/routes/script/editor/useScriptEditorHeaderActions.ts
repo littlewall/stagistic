@@ -13,8 +13,8 @@ import type {CurrentScriptItem} from '../workspace/types';
 interface HeaderActionsParams {
     navigate: NavigateFunction,
     currentScript: CurrentScriptItem | null,
-    openSettingsModal: () => void,
-    openAttributeManagerModal: () => void,
+    openSettingsModal: (returnFocus?: HTMLElement | null) => void,
+    openAttributeManagerModal: (returnFocus?: HTMLElement | null) => void,
     getEditorValue: () => ScriptDocument | null,
     titlePage: TitlePageSettings,
     scriptRepository: ScriptRepository,
@@ -33,15 +33,15 @@ export const useScriptEditorHeaderActions = ({
     const [isPreparingPackage, setIsPreparingPackage] = useState(false);
 
     const handleMenuAction = useCallback(
-        (actionId: string) => {
+        (actionId: string, returnFocus?: HTMLElement | null) => {
             if (actionId === 'settings' && currentScript) {
-                openSettingsModal();
+                openSettingsModal(returnFocus);
 
                 return;
             }
 
             if (actionId === 'attributes' && currentScript) {
-                openAttributeManagerModal();
+                openAttributeManagerModal(returnFocus);
 
                 return;
             }

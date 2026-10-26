@@ -13,6 +13,7 @@ import {
     useCallback,
     useContext,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -28,12 +29,12 @@ import {
 import {useNewScriptTransitionCompletion} from './useNewScriptTransitionCompletion';
 
 type GlobalModalsController = {
-    openNewScript: () => void,
-    openImportScript: () => void,
-    openDeleteScript: (script: ScriptToDelete) => void,
-    openRenameScript: (script: ScriptToRename) => void,
-    openDuplicateScript: (script: ScriptToDuplicate) => void,
-    openAppSettings: () => void,
+    openNewScript: (returnFocus?: HTMLElement | null) => void,
+    openImportScript: (returnFocus?: HTMLElement | null) => void,
+    openDeleteScript: (script: ScriptToDelete, returnFocus?: HTMLElement | null) => void,
+    openRenameScript: (script: ScriptToRename, returnFocus?: HTMLElement | null) => void,
+    openDuplicateScript: (script: ScriptToDuplicate, returnFocus?: HTMLElement | null) => void,
+    openAppSettings: (returnFocus?: HTMLElement | null) => void,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -57,7 +58,11 @@ interface GlobalModalsProviderProps {
 export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
     const [isAppSettingsOpen, setIsAppSettingsOpen] = useState(false);
-    const openAppSettings = useCallback(() => setIsAppSettingsOpen(true), []);
+    const appSettingsReturnFocus = useRef<HTMLElement | null>(null);
+    const openAppSettings = useCallback((returnFocus?: HTMLElement | null) => {
+        appSettingsReturnFocus.current = returnFocus ?? null;
+        setIsAppSettingsOpen(true);
+    }, []);
     const closeAppSettings = useCallback(() => setIsAppSettingsOpen(false), []);
     const scriptRepository = useScriptRepository();
     const scriptActions = useScriptActions();
@@ -68,6 +73,11 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
     const {addToast} = useToastController();
 
     const {
+        newScriptReturnFocus,
+        importScriptReturnFocus,
+        deleteScriptReturnFocus,
+        renameScriptReturnFocus,
+        duplicateScriptReturnFocus,
         isNewScriptOpen,
         newScriptTransitionPath,
         isImportOpen,
@@ -142,9 +152,16 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
     return (
         <GlobalModalsContext.Provider value={contextValue}>
             {children}
-            <NewScriptModal isOpen={isNewScriptOpen} isTransitioning={newScriptTransitionPath !== null} onClose={closeNewScript} onCreate={handleCreate} />
+            <NewScriptModal
+                isOpen={isNewScriptOpen}
+                isTransitioning={newScriptTransitionPath !== null}
+                returnFocus={newScriptReturnFocus}
+                onClose={closeNewScript}
+                onCreate={handleCreate}
+            />
             <ImportScriptModal
                 isOpen={isImportOpen}
+                returnFocus={importScriptReturnFocus}
                 onClose={closeImportScript}
                 onImportStagistic={handleImportStagistic}
                 onImportStepkgAsNew={handleImportStepkgAsNew}
@@ -157,6 +174,7 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
             />
             <DeleteScriptModal
                 isOpen={isDeleteScriptOpen}
+                returnFocus={deleteScriptReturnFocus}
                 scriptTitle={scriptToDelete?.title}
                 isDeleting={isDeleting}
                 onClose={closeDeleteScript}
@@ -164,6 +182,7 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
             />
             <RenameScriptModal
                 isOpen={isRenameScriptOpen}
+                returnFocus={renameScriptReturnFocus}
                 initialTitle={scriptToRename?.title ?? ''}
                 initialSubtitle={scriptToRename?.subtitle ?? ''}
                 isPending={isRenaming}
@@ -172,6 +191,7 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
             />
             <DuplicateScriptModal
                 isOpen={isDuplicateScriptOpen}
+                returnFocus={duplicateScriptReturnFocus}
                 initialTitle={scriptToDuplicate ? `${scriptToDuplicate.title} - copy` : ''}
                 isPending={isDuplicating}
                 onClose={closeDuplicateScript}
@@ -179,6 +199,7 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
             />
             <AppSettingsModal
                 isOpen={isAppSettingsOpen}
+                returnFocus={appSettingsReturnFocus}
                 sections={settingsSections}
                 onClose={closeAppSettings}
             />

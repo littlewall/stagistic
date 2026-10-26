@@ -1,6 +1,7 @@
 import {ConfirmModal} from '../modal/ConfirmModal';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 
-export interface RemovePlaceModalProps {
+export interface RemovePlaceModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     placeName: string,
     isRemoving?: boolean,
@@ -9,6 +10,8 @@ export interface RemovePlaceModalProps {
 }
 
 export const RemovePlaceModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     placeName,
     isRemoving = false,
@@ -16,6 +19,8 @@ export const RemovePlaceModal = ({
     onConfirm,
 }: RemovePlaceModalProps) => (
     <ConfirmModal
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         ariaLabel="Remove place"
         title={<>Remove {placeName}?</>}

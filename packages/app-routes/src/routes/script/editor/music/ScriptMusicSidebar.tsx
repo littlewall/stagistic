@@ -6,19 +6,14 @@ import {
 } from '@stagistic/editor';
 import {formatMusicNumber} from '@stagistic/script';
 import {
-    EditPencilIcon,
-    IconButton,
-    LinkSlashIcon,
-    ListRow,
     SidebarActionsGroup,
     SidebarMiniHeader,
-    Tooltip,
 } from '@stagistic/ui';
-import clsx from 'clsx';
 import {
     type ReactNode,
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -27,6 +22,7 @@ import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext'
 import {useScriptReadOnlyState} from '../../workspace/ScriptAccessContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';
+import {MusicRow} from './MusicSidebarRow';
 import styles from './ScriptMusicSidebar.module.css';
 import type {ScriptMusicListItem} from './types';
 import {UnassignMusicModal} from './UnassignMusicModal';
@@ -35,124 +31,9 @@ interface ScriptMusicSidebarProps {
     header?: ReactNode,
     music: readonly ScriptMusicListItem[],
     isLoading?: boolean,
-    onAddMusic: () => void,
+    onAddMusic: (returnFocus?: HTMLElement | null) => void,
     onUnassignMusic: (musicId: string) => void | Promise<void>,
 }
-
-interface RowActionButtonProps {
-    ariaLabel: string,
-    tooltipLabel: string,
-    onPress: () => void,
-    children: ReactNode,
-}
-
-const RowActionButton = ({
-    ariaLabel,
-    tooltipLabel,
-    onPress,
-    children,
-}: RowActionButtonProps) => (
-    <Tooltip
-        label={tooltipLabel}
-        placement="bottom"
-    >
-        <IconButton
-            size="xs"
-            aria-label={ariaLabel}
-            onMouseDown={event => {
-                event.preventDefault();
-            }}
-            onPress={onPress}
-        >
-            {children}
-        </IconButton>
-    </Tooltip>
-);
-
-interface MusicRowProps {
-    music: ScriptMusicListItem,
-    isActive: boolean,
-    number: string | null,
-    startBlockId: string | null,
-    onFocus: (blockId: string) => void,
-    /** Absent for a saved draft or version, where music stays assigned. */
-    onRequestUnassign?: (music: ScriptMusicListItem) => void,
-    /** Absent for a saved draft or version; the header's manager link stays. */
-    onOpenMusicManager?: (musicId: string) => void,
-}
-
-const MusicRow = ({
-    music,
-    isActive,
-    number,
-    startBlockId,
-    onFocus,
-    onRequestUnassign,
-    onOpenMusicManager,
-}: MusicRowProps) => {
-    const isAssigned = Boolean(music.assignmentLabel);
-    const label = (
-        <>
-            {number ? (
-                <>
-                    <span className={styles.number}>{number}</span>{' '}
-                </>
-            ) : null}
-            {music.title}
-        </>
-    );
-
-    return (
-        <ListRow
-            as="li"
-            interactive
-            selected={isActive}
-            /* The navigable label already carries aria-current; the row must not add aria-selected. */
-            announceSelected={false}
-            className={clsx(styles.row, isActive && styles.active, !startBlockId && styles.staticRow)}
-            trailing={(
-                <span className={styles.actions}>
-                    {isAssigned && onRequestUnassign ? (
-                        <RowActionButton
-                            ariaLabel={`Unassign ${music.title}`}
-                            tooltipLabel="Unassign music"
-                            onPress={() => onRequestUnassign(music)}
-                        >
-                            <LinkSlashIcon aria-hidden="true" />
-                        </RowActionButton>
-                    ) : null}
-                    {onOpenMusicManager ? (
-                        <RowActionButton
-                            ariaLabel={`Edit ${music.title}`}
-                            tooltipLabel="Manage music"
-                            onPress={() => onOpenMusicManager(music.id)}
-                        >
-                            <EditPencilIcon aria-hidden="true" />
-                        </RowActionButton>
-                    ) : null}
-                </span>
-            )}
-        >
-            {startBlockId ? (
-                <button
-                    type="button"
-                    className={`${styles.label} ${styles.navigableLabel}`}
-                    data-music-navigation="true"
-                    data-music-id={music.id}
-                    aria-current={isActive ? 'true' : undefined}
-                    onMouseDown={event => {
-                        event.preventDefault();
-                    }}
-                    onClick={() => onFocus(startBlockId)}
-                >
-                    {label}
-                </button>
-            ) : (
-                <span className={styles.label}>{label}</span>
-            )}
-        </ListRow>
-    );
-};
 
 export const ScriptMusicSidebar = ({
     header,
@@ -167,6 +48,7 @@ export const ScriptMusicSidebar = ({
     const documentMusic = useEditorLiveMusic();
     const {openAttributeManagerMusic} = useScriptSettingsModal();
     const {isReadOnly} = useScriptReadOnlyState();
+    const unassignReturnFocus = useRef<HTMLElement | null>(null);
     const [unassignTarget, setUnassignTarget] = useState<ScriptMusicListItem | null>(null);
 
     const musicMetadataById = useMemo(
@@ -241,7 +123,10 @@ export const ScriptMusicSidebar = ({
                     number={musicMetadataById.get(item.id)?.number ?? null}
                     startBlockId={musicMetadataById.get(item.id)?.startBlockId ?? null}
                     onFocus={focusMusic}
-                    onRequestUnassign={isReadOnly ? undefined : setUnassignTarget}
+                    onRequestUnassign={isReadOnly ? undefined : (target, returnFocus) => {
+                        unassignReturnFocus.current = returnFocus;
+                        setUnassignTarget(target);
+                    }}
                     onOpenMusicManager={isReadOnly ? undefined : openAttributeManagerMusic}
                 />
             ))}
@@ -298,6 +183,7 @@ export const ScriptMusicSidebar = ({
             <UnassignMusicModal
                 isOpen={unassignTarget !== null}
                 musicTitle={unassignTarget?.title}
+                returnFocus={unassignReturnFocus}
                 onClose={() => setUnassignTarget(null)}
                 onConfirm={handleConfirmUnassign}
             />

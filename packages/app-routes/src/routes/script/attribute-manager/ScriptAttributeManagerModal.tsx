@@ -9,16 +9,13 @@ import {
     AttributeManagerPlacesPanel,
     AttributeManagerSceneDetail,
     Button,
+    type ModalFocusRestoreOptions,
     ReadOnlyNotice,
     Tooltip,
     TrashIcon,
 } from '@stagistic/ui';
-import {useState} from 'react';
 
-import {AddMusicModal} from '../editor/music/AddMusicModal';
-import {DeleteMusicModal} from '../editor/music/DeleteMusicModal';
 import type {useScriptMusicState} from '../editor/music/useScriptMusicState';
-import {DeleteSceneHeadingModal} from '../editor/scene/DeleteSceneHeadingModal';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import type {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {
@@ -30,11 +27,12 @@ import {
 } from './attributeManagerMenu';
 import {MusicAttachmentsDetail} from './MusicAttachmentsDetail';
 import styles from './ScriptAttributeManagerModal.module.css';
+import {useAttributeManagerActionDialogs} from './useAttributeManagerActionDialogs';
 import type {useAttributeManagerModalState} from './useAttributeManagerModalState';
 import type {useMusicAttachmentsState} from './useMusicAttachmentsState';
 import type {useScriptPlacesState} from './useScriptPlacesState';
 
-interface ScriptAttributeManagerModalProps {
+interface ScriptAttributeManagerModalProps extends ModalFocusRestoreOptions {
     currentScriptId: string | null,
     isOpen: boolean,
     tabs: ReturnType<typeof useAttributeManagerModalState>['tabs'],
@@ -61,6 +59,8 @@ interface ScriptAttributeManagerModalProps {
 }
 
 export const ScriptAttributeManagerModal = ({
+    returnFocus,
+    fallbackFocus,
     currentScriptId,
     isOpen,
     tabs,
@@ -87,16 +87,25 @@ export const ScriptAttributeManagerModal = ({
 }: ScriptAttributeManagerModalProps) => {
     const {isReadOnly, snapshot} = useScriptReadOnlyState();
     const {music: musicCatalog} = musicState;
-    const [isAddMusicOpen, setIsAddMusicOpen] = useState(false);
-    const [createdMusicId, setCreatedMusicId] = useState<string | null>(null);
-    const [deleteTarget, setDeleteTarget] = useState<AttributeManagerListItem | null>(null);
-    const [isDeletingMusic, setIsDeletingMusic] = useState(false);
-    const [sceneDeleteTarget, setSceneDeleteTarget] = useState<AttributeManagerListItem | null>(null);
-    const [isDeletingScene, setIsDeletingScene] = useState(false);
+    const {
+        dialogs,
+        createdMusicId,
+        isDeletingMusic,
+        isDeletingScene,
+        requestCreateMusic,
+        requestDeleteMusic,
+        requestDeleteScene,
+    } = useAttributeManagerActionDialogs({
+        createMusic: musicState.createMusic,
+        onDeleteMusic,
+        onDeleteScene,
+    });
 
     return (
         <>
             <AttributeManagerModal
+                returnFocus={returnFocus}
+                fallbackFocus={fallbackFocus}
                 isOpen={isOpen}
                 tabs={tabs}
                 activeTabId={activePanelId}
@@ -124,7 +133,7 @@ export const ScriptAttributeManagerModal = ({
                                         size="sm"
                                         isDisabled={isDeletingScene}
                                         aria-label="Delete scene heading"
-                                        onPress={() => setSceneDeleteTarget(item)}
+                                        onPress={event => requestDeleteScene(item, event.target as HTMLElement)}
                                     >
                                         <TrashIcon className={styles.actionIcon} aria-hidden="true" />
                                     </Button>
@@ -185,7 +194,7 @@ export const ScriptAttributeManagerModal = ({
                         createAction={isReadOnly ? undefined : {
                             ariaLabel: 'Create music',
                             tooltipLabel: 'Create music',
-                            onPress: () => setIsAddMusicOpen(true),
+                            onPress: requestCreateMusic,
                         }}
                         isReadOnly={isReadOnly}
                         renderDetailAction={item => (isReadOnly ? null : (
@@ -196,7 +205,7 @@ export const ScriptAttributeManagerModal = ({
                                     size="sm"
                                     isDisabled={isDeletingMusic}
                                     aria-label={`Delete ${item.title}`}
-                                    onPress={() => setDeleteTarget(item)}
+                                    onPress={event => requestDeleteMusic(item, event.target as HTMLElement)}
                                 >
                                     <TrashIcon className={styles.actionIcon} aria-hidden="true" />
                                 </Button>
@@ -233,61 +242,7 @@ export const ScriptAttributeManagerModal = ({
                     />
                 ) : null}
             </AttributeManagerModal>
-            <AddMusicModal
-                isOpen={isAddMusicOpen}
-                onCancel={() => setIsAddMusicOpen(false)}
-                onClose={() => setIsAddMusicOpen(false)}
-                onCreate={async input => {
-                    const created = await musicState.createMusic(input);
-
-                    setCreatedMusicId(created?.id ?? null);
-
-                    return created;
-                }}
-            />
-            <DeleteMusicModal
-                isOpen={deleteTarget !== null}
-                isDeleting={isDeletingMusic}
-                musicTitle={deleteTarget?.title}
-                onClose={() => setDeleteTarget(null)}
-                onConfirm={async () => {
-                    if (!deleteTarget) {
-                        return;
-                    }
-
-                    setIsDeletingMusic(true);
-
-                    try {
-                        await onDeleteMusic(deleteTarget.id);
-                        setDeleteTarget(null);
-                    } catch {
-                        // Keep the dialog open; persistence errors are surfaced by the catalog.
-                    } finally {
-                        setIsDeletingMusic(false);
-                    }
-                }}
-            />
-            <DeleteSceneHeadingModal
-                isOpen={sceneDeleteTarget !== null}
-                isDeleting={isDeletingScene}
-                onClose={() => setSceneDeleteTarget(null)}
-                onConfirm={async () => {
-                    if (!sceneDeleteTarget) {
-                        return;
-                    }
-
-                    setIsDeletingScene(true);
-
-                    try {
-                        await onDeleteScene(sceneDeleteTarget.id);
-                        setSceneDeleteTarget(null);
-                    } catch {
-                        // Keep the dialog open; persistence errors are surfaced by the projection.
-                    } finally {
-                        setIsDeletingScene(false);
-                    }
-                }}
-            />
+            {dialogs}
         </>
     );
 };

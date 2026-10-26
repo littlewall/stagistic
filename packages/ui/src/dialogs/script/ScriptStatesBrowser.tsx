@@ -20,12 +20,12 @@ interface ScriptStatesBrowserProps {
     shownStateId: string | null,
     initialSelectedId: string | null,
     isPending: boolean,
-    onCreate?: (kind: ScriptStateKind) => void,
+    onCreate?: (kind: ScriptStateKind, returnFocus?: HTMLElement | null) => void,
     onUpdate: (stateId: string, update: ScriptStateUpdate) => void | Promise<void>,
-    onRequestDelete: (state: ScriptStateRecord) => void,
+    onRequestDelete: (state: ScriptStateRecord, returnFocus?: HTMLElement | null) => void,
     onOpen: (stateId: string) => void,
-    onRestore: (stateId: string) => void,
-    onRestoreAsNew: (stateId: string) => void,
+    onRestore: (stateId: string, returnFocus?: HTMLElement | null) => void,
+    onRestoreAsNew: (stateId: string, returnFocus?: HTMLElement | null) => void,
 }
 
 const COPY: Record<ScriptStateKind, {
@@ -94,7 +94,7 @@ export const ScriptStatesBrowser = ({
                                 variant="ghost"
                                 size="sm"
                                 aria-label={copy.create}
-                                onPress={() => onCreate(kind)}
+                                onPress={event => onCreate(kind, event.target as HTMLElement)}
                             >
                                 <PlusIcon className={styles.actionIcon} aria-hidden="true" />
                             </Button>
@@ -144,7 +144,7 @@ export const ScriptStatesBrowser = ({
                                     size="sm"
                                     isDisabled={isPending}
                                     aria-label={`Delete ${selected.label}`}
-                                    onPress={() => onRequestDelete(selected)}
+                                    onPress={event => onRequestDelete(selected, event.target as HTMLElement)}
                                 >
                                     <TrashIcon className={styles.actionIcon} aria-hidden="true" />
                                 </Button>
@@ -158,8 +158,8 @@ export const ScriptStatesBrowser = ({
                                 isPending={isPending}
                                 onUpdate={update => onUpdate(selected.id, update)}
                                 onOpen={() => onOpen(selected.id)}
-                                onRestore={() => onRestore(selected.id)}
-                                onRestoreAsNew={() => onRestoreAsNew(selected.id)}
+                                onRestore={trigger => onRestore(selected.id, trigger)}
+                                onRestoreAsNew={trigger => onRestoreAsNew(selected.id, trigger)}
                             />
                         </div>
                     </>

@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import type {Ref} from 'react';
 import {
     Button as RACButton,
     type ButtonProps as RACButtonProps,
@@ -13,6 +14,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' | 
 type ButtonSize = 'icon' | 'xs' | 'sm' | 'md';
 
 type ButtonProps = {
+    ref?: Ref<HTMLButtonElement>,
     variant?: ButtonVariant,
     size?: ButtonSize,
     className?: string,

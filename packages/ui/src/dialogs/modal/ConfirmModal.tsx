@@ -3,9 +3,10 @@ import type {ReactNode} from 'react';
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import type {ModalFocusRestoreOptions} from './modalFocusTypes';
 import {ModalHeader, type ModalHeaderProps} from './ModalHeader';
 
-export interface ConfirmModalProps {
+export interface ConfirmModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     ariaLabel: string,
     title: ReactNode,
@@ -22,6 +23,8 @@ export interface ConfirmModalProps {
 }
 
 export const ConfirmModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     ariaLabel,
     title,
@@ -36,6 +39,8 @@ export const ConfirmModal = ({
     onConfirm,
 }: ConfirmModalProps) => (
     <ModalDialog
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         onClose={() => {
             if (!(lockWhilePending && isPending)) {
@@ -62,6 +67,7 @@ export const ConfirmModal = ({
             </Button>
             <Button
                 variant="ghost"
+                data-modal-initial-focus
                 isDisabled={isPending}
                 onPress={onClose}
             >

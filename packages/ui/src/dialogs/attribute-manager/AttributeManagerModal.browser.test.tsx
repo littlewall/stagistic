@@ -29,7 +29,7 @@ const renderModal = async (notice?: boolean) => {
 
     const deadline = Date.now() + 1000;
 
-    while (!host.querySelector('[role="dialog"]') && Date.now() < deadline) {
+    while (!host.querySelector('dialog[open]') && Date.now() < deadline) {
         await new Promise(resolve => window.setTimeout(resolve, 10));
     }
 
@@ -45,7 +45,7 @@ afterEach(() => {
 describe('AttributeManagerModal', () => {
     it('places a read-only notice between the header and the tabs', async () => {
         const host = await renderModal(true);
-        const dialog = host.querySelector('[role="dialog"]');
+        const dialog = host.querySelector('dialog[open] > div');
         const children = [...dialog?.children ?? []].map(element => element.tagName.toLowerCase());
 
         expect(children).toEqual([

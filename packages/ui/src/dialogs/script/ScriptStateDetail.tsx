@@ -17,8 +17,8 @@ interface ScriptStateDetailProps {
     isPending: boolean,
     onUpdate: (update: ScriptStateUpdate) => void | Promise<void>,
     onOpen: () => void,
-    onRestore: () => void,
-    onRestoreAsNew: () => void,
+    onRestore: (returnFocus?: HTMLElement | null) => void,
+    onRestoreAsNew: (returnFocus?: HTMLElement | null) => void,
 }
 
 const toDetails = (state: ScriptStateRecord): ScriptStateDetails => ({name: state.name ?? '', note: state.note ?? ''});
@@ -85,10 +85,10 @@ export const ScriptStateDetail = ({
                 <Button variant="secondary" size="sm" isDisabled={isShown || isPending} onPress={onOpen}>
                     {isShown ? 'On screen' : 'Open'}
                 </Button>
-                <Button variant="ghost" size="sm" isDisabled={isPending} onPress={onRestore}>
+                <Button variant="ghost" size="sm" isDisabled={isPending} onPress={event => onRestore(event.target as HTMLElement)}>
                     Restore
                 </Button>
-                <Button variant="ghost" size="sm" isDisabled={isPending} onPress={onRestoreAsNew}>
+                <Button variant="ghost" size="sm" isDisabled={isPending} onPress={event => onRestoreAsNew(event.target as HTMLElement)}>
                     Restore as new script
                 </Button>
                 {state.kind === 'draft' && !isMarkingAsVersion ? (

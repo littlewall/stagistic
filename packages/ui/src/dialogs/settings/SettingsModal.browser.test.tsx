@@ -1,6 +1,6 @@
-import '../../../styles/tokens.css';
+import '../../../styles/base.css';
 
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -31,16 +31,19 @@ const waitFor = async (predicate: () => boolean) => {
 
 const SettingsHarness = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const trigger = useRef<HTMLButtonElement>(null);
 
     return (
         <>
             <button
+                ref={trigger}
                 type="button"
                 onClick={() => setIsOpen(true)}
             >
                 Open settings
             </button>
             <SettingsModal
+                returnFocus={trigger}
                 isOpen={isOpen}
                 groups={[
                     {
@@ -94,10 +97,9 @@ describe('SettingsModal', () => {
 
         await waitFor(() => dialog?.open === true);
 
-        const closeButton = dialog?.querySelector<HTMLButtonElement>('button[aria-label="Close settings"]');
         const activeNavigationItem = dialog?.querySelector<HTMLButtonElement>('button[aria-current="page"]');
 
-        expect(document.activeElement).toBe(closeButton);
+        expect(document.activeElement).toBe(activeNavigationItem);
         expect(activeNavigationItem?.textContent).toBe('Title page');
 
         for (let index = 0; index < 5; index += 1) {

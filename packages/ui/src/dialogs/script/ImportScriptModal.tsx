@@ -16,6 +16,8 @@ import type {ImportScriptModalProps} from './types';
 const REPLACE_SCRIPT_CONFIRM_PHRASE = 'replace me';
 
 export const ImportScriptModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     onClose,
     onImportStagistic,
@@ -82,6 +84,8 @@ export const ImportScriptModal = ({
 
     return (
         <ModalDialog
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Import script"

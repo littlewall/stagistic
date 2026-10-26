@@ -9,7 +9,7 @@ import type {EditorSidebarCharacter} from './types';
 
 interface CharacterRowConfirmedProps {
     character: EditorSidebarCharacter,
-    onEditCharacter?: (characterId: string) => void,
+    onEditCharacter?: (characterId: string, returnFocus?: HTMLElement | null) => void,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
 }
 
@@ -43,12 +43,12 @@ export const CharacterRowConfirmed = ({
                         className={styles.editIconButton}
                         aria-disabled={isEditDisabled}
                         aria-label={`Manage ${character.key}`}
-                        onPress={() => {
+                        onPress={event => {
                             if (!character.id) {
                                 return;
                             }
 
-                            onEditCharacter(character.id);
+                            onEditCharacter(character.id, event.target as HTMLElement);
                         }}
                     >
                         <EditPencilIcon

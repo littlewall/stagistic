@@ -1,6 +1,7 @@
 import {
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -29,6 +30,11 @@ export const useGlobalModalActions = ({
 }: UseGlobalModalActionsArgs): GlobalModalActions => {
     const {navigate} = navigation;
     const {addToast} = notifications;
+    const newScriptReturnFocus = useRef<HTMLElement | null>(null);
+    const importScriptReturnFocus = useRef<HTMLElement | null>(null);
+    const deleteScriptReturnFocus = useRef<HTMLElement | null>(null);
+    const renameScriptReturnFocus = useRef<HTMLElement | null>(null);
+    const duplicateScriptReturnFocus = useRef<HTMLElement | null>(null);
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [newScriptTransitionPath, setNewScriptTransitionPath] = useState<string | null>(null);
     const [isImportOpen, setIsImportOpen] = useState(false);
@@ -42,18 +48,25 @@ export const useGlobalModalActions = ({
     const [scriptToDuplicate, setScriptToDuplicate] = useState<ScriptToDuplicate | null>(null);
     const [isDuplicating, setIsDuplicating] = useState(false);
 
-    const openNewScript = useCallback(() => setIsNewScriptOpen(true), []);
+    const openNewScript = useCallback((returnFocus?: HTMLElement | null) => {
+        newScriptReturnFocus.current = returnFocus ?? null;
+        setIsNewScriptOpen(true);
+    }, []);
     const closeNewScript = useCallback(() => setIsNewScriptOpen(false), []);
     const completeNewScriptTransition = useCallback(() => {
         setIsNewScriptOpen(false);
         setNewScriptTransitionPath(null);
     }, []);
-    const openImportScript = useCallback(() => setIsImportOpen(true), []);
+    const openImportScript = useCallback((returnFocus?: HTMLElement | null) => {
+        importScriptReturnFocus.current = returnFocus ?? null;
+        setIsImportOpen(true);
+    }, []);
     const closeImportScript = useCallback(() => {
         setIsImportOpen(false);
         setPrefilledImport(null);
     }, []);
-    const openDeleteScript = useCallback((script: ScriptToDelete) => {
+    const openDeleteScript = useCallback((script: ScriptToDelete, returnFocus?: HTMLElement | null) => {
+        deleteScriptReturnFocus.current = returnFocus ?? null;
         setScriptToDelete(script);
     }, []);
     const closeDeleteScript = useCallback(() => {
@@ -61,7 +74,8 @@ export const useGlobalModalActions = ({
             setScriptToDelete(null);
         }
     }, [isDeleting]);
-    const openRenameScript = useCallback((script: ScriptToRename) => {
+    const openRenameScript = useCallback((script: ScriptToRename, returnFocus?: HTMLElement | null) => {
+        renameScriptReturnFocus.current = returnFocus ?? null;
         setScriptToRename(script);
     }, []);
     const closeRenameScript = useCallback(() => {
@@ -69,7 +83,8 @@ export const useGlobalModalActions = ({
             setScriptToRename(null);
         }
     }, [isRenaming]);
-    const openDuplicateScript = useCallback((script: ScriptToDuplicate) => {
+    const openDuplicateScript = useCallback((script: ScriptToDuplicate, returnFocus?: HTMLElement | null) => {
+        duplicateScriptReturnFocus.current = returnFocus ?? null;
         setScriptToDuplicate(script);
     }, []);
     const closeDuplicateScript = useCallback(() => {
@@ -101,6 +116,11 @@ export const useGlobalModalActions = ({
 
     return useMemo(
         () => ({
+            newScriptReturnFocus,
+            importScriptReturnFocus,
+            deleteScriptReturnFocus,
+            renameScriptReturnFocus,
+            duplicateScriptReturnFocus,
             isNewScriptOpen,
             newScriptTransitionPath,
             isImportOpen,

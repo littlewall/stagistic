@@ -1,16 +1,13 @@
 .backdrop {
-    position: fixed;
-    z-index: 15;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: var(--space-3xl);
-    background: var(--color-overlay-scrim);
+    --modal-dialog-padding: var(--space-3xl);
 }
 
 .modal {
+    --modal-panel-gap: 0;
+    --modal-panel-padding: 0;
+    --modal-panel-width: min(1080px, 100%);
+
     composes: modal from '../shared/workspaceModal.module.css';
-    width: min(1080px, 100%);
 
     & .tabs {
         flex: 0 0 auto;
@@ -65,7 +62,7 @@
 
 @media (max-width: 56.25em) {
     .backdrop {
-        padding: var(--space-xl);
+        --modal-dialog-padding: var(--space-xl);
     }
 
     .tabList {

@@ -4,6 +4,7 @@ import {
     type CSSProperties,
     type FormEvent,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -55,6 +56,7 @@ export const AttributeManagerCharacterDetail = ({
     onDeleteCharacter,
 }: AttributeManagerCharacterDetailProps) => {
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+    const removeTriggerRef = useRef<HTMLElement | null>(null);
     const editorCharacter = useMemo<EditorSidebarCharacter>(
         () => ({
             id: character.id,
@@ -130,7 +132,10 @@ export const AttributeManagerCharacterDetail = ({
                         size="sm"
                         isDisabled={isDeleting || isRenaming || !onDeleteCharacter}
                         aria-label={`Remove ${character.name}`}
-                        onPress={() => setIsRemoveOpen(true)}
+                        onPress={event => {
+                            removeTriggerRef.current = event.target as HTMLElement;
+                            setIsRemoveOpen(true);
+                        }}
                     >
                         <TrashIcon
                             className={styles.actionIcon}
@@ -177,6 +182,7 @@ export const AttributeManagerCharacterDetail = ({
                 />
             </div>
             <RemoveCharacterModal
+                returnFocus={removeTriggerRef}
                 isOpen={isRemoveOpen}
                 characterKey={character.name}
                 groupNames={character.groupNames ?? []}

@@ -1,7 +1,8 @@
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 
 import {AttributeManagerModal} from '../attribute-manager/AttributeManagerModal';
 import {ConfirmModal} from '../modal/ConfirmModal';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import type {ScriptStateKind} from './ScriptStateDetailsFields';
 import {ScriptStatesBrowser} from './ScriptStatesBrowser';
 
@@ -26,7 +27,7 @@ export interface ScriptStateUpdate {
     note: string,
 }
 
-export interface ScriptStatesModalProps {
+export interface ScriptStatesModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     activeKind: ScriptStateKind,
     states: readonly ScriptStateRecord[],
@@ -37,12 +38,12 @@ export interface ScriptStatesModalProps {
     onClose: () => void,
     onSelectKind: (kind: ScriptStateKind) => void,
     /** Saves the current script as a new draft or version; absent while a stored state is on screen. */
-    onCreate?: (kind: ScriptStateKind) => void,
+    onCreate?: (kind: ScriptStateKind, returnFocus?: HTMLElement | null) => void,
     onUpdate: (stateId: string, update: ScriptStateUpdate) => void | Promise<void>,
     onDelete: (stateId: string) => void | Promise<void>,
     onOpen: (stateId: string) => void,
-    onRestore: (stateId: string) => void,
-    onRestoreAsNew: (stateId: string) => void,
+    onRestore: (stateId: string, returnFocus?: HTMLElement | null) => void,
+    onRestoreAsNew: (stateId: string, returnFocus?: HTMLElement | null) => void,
 }
 
 const TABS = [{id: 'draft', label: 'Drafts'}, {id: 'version', label: 'Versions'}];
@@ -52,6 +53,8 @@ const TABS = [{id: 'draft', label: 'Drafts'}, {id: 'version', label: 'Versions'}
  * a list per kind and an editable detail for the selected state.
  */
 export const ScriptStatesModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     activeKind,
     states,
@@ -67,11 +70,14 @@ export const ScriptStatesModal = ({
     onRestore,
     onRestoreAsNew,
 }: ScriptStatesModalProps) => {
+    const deleteTrigger = useRef<HTMLElement | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<ScriptStateRecord | null>(null);
 
     return (
         <>
             <AttributeManagerModal
+                returnFocus={returnFocus}
+                fallbackFocus={fallbackFocus}
                 isOpen={isOpen}
                 title="Drafts and versions"
                 tabs={TABS}
@@ -89,13 +95,18 @@ export const ScriptStatesModal = ({
                     isPending={isPending}
                     onCreate={onCreate}
                     onUpdate={onUpdate}
-                    onRequestDelete={setDeleteTarget}
+                    onRequestDelete={(state, trigger) => {
+                        deleteTrigger.current = trigger ?? null;
+                        setDeleteTarget(state);
+                    }}
                     onOpen={onOpen}
                     onRestore={onRestore}
                     onRestoreAsNew={onRestoreAsNew}
                 />
             </AttributeManagerModal>
             <ConfirmModal
+                returnFocus={deleteTrigger}
+                fallbackFocus={() => document.querySelector('dialog[aria-label="Drafts and versions"] [aria-selected="true"]')}
                 isOpen={deleteTarget !== null}
                 ariaLabel={`Delete ${deleteTarget?.label ?? ''}`}
                 title={`Delete ${deleteTarget?.label ?? ''}?`}
