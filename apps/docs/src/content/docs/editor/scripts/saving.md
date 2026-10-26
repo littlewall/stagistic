@@ -23,6 +23,12 @@ Let saving finish before closing the tab or browser. Later, open the same editor
 
 Saved refers to the local save. To keep a separate file you can store outside the browser, [download a script file](/editor/scripts/download/).
 
+## Keep a draft before revising
+
+Automatic saving updates **Current** as you work. To keep the writing at a point you can revisit, use **Save as new draft** or **Save as version** in the state menu beside the script title. You keep writing in Current after saving it.
+
+See [Save drafts and versions](/editor/scripts/drafts-and-versions/) for viewing, restoring and exporting saved states. These states also live in local browser storage; download packages for a backup outside the browser.
+
 ## Use another browser or device
 
 A different browser, browser profile or device has its own local library. Download a `.stepkg` package, transfer the file, then [import it](/editor/scripts/import/) into the other library.

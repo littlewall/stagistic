@@ -1,9 +1,11 @@
 ---
 title: Rename or duplicate a script
-description: Update a title and subtitle, or make a separate draft with the options you need.
+description: Update a title and subtitle, or make a separate working copy with the options you need.
 ---
 
 Rename `The door` when its working title changes. Duplicate it when you want a separate draft for rehearsals.
+
+To keep a numbered draft or named version within the same script, use [Save drafts and versions](/editor/scripts/drafts-and-versions/). Duplication creates another editable script in your library.
 
 ## Rename a script
 

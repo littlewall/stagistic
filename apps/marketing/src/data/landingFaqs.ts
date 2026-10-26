@@ -12,6 +12,10 @@ export const landingFaqs = [
         a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
     },
     {
+        q: 'Can I keep earlier drafts and versions of a play?',
+        a: 'Yes. Save numbered drafts before a rewrite, or name a version for a reading, festival or tour. Revisit the saved writing, export it, restore it to your current script or use it to create a separate editable script. Drafts and versions are saved when you choose; automatic saving keeps your current work up to date.',
+    },
+    {
         q: 'Can I use it for a commercial production?',
         a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic Editor. The editor is free for everyone.',
     },
