@@ -29,6 +29,7 @@ export const documentationSections: DocumentationSection[] = [
                     'editor/scripts/find',
                     'editor/scripts/copies',
                     'editor/scripts/saving',
+                    'editor/scripts/drafts-and-versions',
                     'editor/scripts/download',
                     'editor/scripts/import',
                     'editor/scripts/delete',

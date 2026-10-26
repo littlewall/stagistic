@@ -34,7 +34,9 @@ After deleting a whole comment thread, use **Undo** in the **Comment deleted** n
 
 The edit history belongs to the running editor; it is not saved as a permanent history of versions. Reloading the app starts a new editor history.
 
-To keep a draft for later comparison or recovery, [download a `.stepkg` package](/editor/scripts/download/) or [create a separate working copy](/editor/scripts/copies/). To return to a saved package, use [Import or restore a script](/editor/scripts/import/).
+To keep the writing at a point you can revisit or restore, [save a draft or version](/editor/scripts/drafts-and-versions/). You keep writing in Current, and the saved writing stays fixed.
+
+For a backup outside the browser, [download a `.stepkg` package](/editor/scripts/download/). To develop another script alongside the original, [create a separate working copy](/editor/scripts/copies/) or restore a saved draft as a new script.
 
 ## Related tasks
 

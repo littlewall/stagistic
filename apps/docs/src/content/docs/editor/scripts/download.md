@@ -14,6 +14,8 @@ Download a copy of `The last door` before transferring it to another device or k
 
 Use `.stepkg` for a backup you can [import into the editor](/editor/scripts/import/) with its associated data. The downloaded package is a snapshot; keeping it does not update it when you continue editing.
 
+To download a [saved draft or version](/editor/scripts/drafts-and-versions/), select it in the state menu beside the script title before downloading. The file contains the selected state. A package does not include the script's entire draft and version history; download each state you want to keep separately.
+
 ## Download a package for backup or transfer
 
 1. Open the script in the editor.
