@@ -24,6 +24,8 @@ pub enum ReadOperation {
     GetCharacters(ScriptArgs),
     GetCharacterDialogue(DialogueArgs),
     SearchScript(SearchArgs),
+    GetStageLogistics(ScriptArgs),
+    GetSceneTelemetry(SceneArgs),
 }
 
 macro_rules! args {
@@ -115,6 +117,16 @@ pub fn tool_definitions() -> Vec<Value> {
             "search_script",
             "Search local script text; use returned block or scene IDs to read context.",
             schema_for!(SearchArgs),
+        ),
+        (
+            "get_stage_logistics",
+            "Read scene-by-scene character presence, entrance/exit sequences and quick-change intervals across all scenes.",
+            schema_for!(ScriptArgs),
+        ),
+        (
+            "get_scene_telemetry",
+            "Read detailed dialogue metrics, speech breakdown, pace and attached music cues for a single scene.",
+            schema_for!(SceneArgs),
         ),
     ];
     specs.into_iter().map(|(name, description, schema)| json!({

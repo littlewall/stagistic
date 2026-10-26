@@ -105,7 +105,8 @@ it('reads saved local Stagistic text through the real stdio executable and deskt
 
         expect(hello.result.serverInfo.name).toBe('stagistic');
         bridge.stdin.write('{"jsonrpc":"2.0","method":"notifications/initialized"}\n');
-        expect((await call('tools/list')).result.tools).toHaveLength(7);
+        expect((await call('tools/list')).result.tools).toHaveLength(9);
+        expect((await call('prompts/list')).result.prompts).toHaveLength(6);
 
         const result = await call('tools/call', {name: 'get_script_excerpt', arguments: {script_id: 'local-e2e'}});
 

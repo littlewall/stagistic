@@ -33,6 +33,14 @@ export type ReadOperation =
   | {
       arguments: SearchArgs;
       tool: "search_script";
+    }
+  | {
+      arguments: ScriptArgs;
+      tool: "get_stage_logistics";
+    }
+  | {
+      arguments: SceneArgs;
+      tool: "get_scene_telemetry";
     };
 
 export interface LocalRequest {

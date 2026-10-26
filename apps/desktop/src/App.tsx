@@ -21,6 +21,7 @@ import {
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
 import {McpSettingsPanel} from './mcp/McpSettingsPanel';
+import {useDeepLinkNavigation} from './mcp/useDeepLinkNavigation';
 import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
 
@@ -41,6 +42,7 @@ const settingsSections: AppSettingsSection[] = [
 // Runs inside the router + providers so it can use navigation and modal hooks.
 const AppRoutes = () => {
     useNativeMenuActions();
+    useDeepLinkNavigation();
 
     return (
         <Routes>

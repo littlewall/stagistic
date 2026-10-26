@@ -232,6 +232,40 @@
             "arguments"
           ],
           "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/ScriptArgs"
+            },
+            "tool": {
+              "const": "get_stage_logistics",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "arguments": {
+              "$ref": "#/$defs/SceneArgs"
+            },
+            "tool": {
+              "const": "get_scene_telemetry",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
         }
       ]
     },
