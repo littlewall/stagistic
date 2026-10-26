@@ -37,16 +37,22 @@ const renderModal = (onSubmit: (values: RenameScriptSubmit) => void, onClose = (
 
     const root = createRoot(host);
 
-    root.render(
-        <RenameScriptModal
-            isOpen
-            initialTitle="Old Title"
-            initialSubtitle="Old Subtitle"
-            onClose={onClose}
-            onSubmit={onSubmit}
-        />,
-    );
+    const render = (initialTitle = 'Old Title', initialSubtitle = 'Old Subtitle') => {
+        root.render(
+            <RenameScriptModal
+                isOpen
+                initialTitle={initialTitle}
+                initialSubtitle={initialSubtitle}
+                onClose={onClose}
+                onSubmit={onSubmit}
+            />,
+        );
+    };
+
+    render();
     mountedRoots.push(root);
+
+    return {render};
 };
 
 afterEach(() => {
@@ -56,6 +62,30 @@ afterEach(() => {
 });
 
 describe('RenameScriptModal', () => {
+    it('focuses and selects the title when opened', async () => {
+        renderModal(vi.fn());
+
+        const title = await waitForElement<HTMLInputElement>('#rename-script-title');
+
+        await expect.poll(() => document.activeElement).toBe(title);
+        await expect.poll(() => [title.selectionStart, title.selectionEnd]).toEqual([0, title.value.length]);
+    });
+
+    it('keeps focus in the subtitle when title metadata refreshes', async () => {
+        const modal = renderModal(vi.fn());
+        const title = await waitForElement<HTMLInputElement>('#rename-script-title');
+        const subtitle = await waitForElement<HTMLInputElement>('#rename-script-subtitle');
+
+        await expect.poll(() => document.activeElement).toBe(title);
+        await page.elementLocator(subtitle).click();
+
+        modal.render('Refreshed Title');
+        await expect.poll(() => title.value).toBe('Refreshed Title');
+        await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+
+        expect(document.activeElement).toBe(subtitle);
+    });
+
     it('pre-fills the current title and subtitle', async () => {
         renderModal(vi.fn());
 

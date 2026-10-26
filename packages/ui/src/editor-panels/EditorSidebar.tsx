@@ -25,8 +25,8 @@ interface EditorSidebarData {
 
 interface EditorSidebarActions {
     onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void,
-    onEditCharacter?: (characterId: string) => void,
-    onEditGroup?: (groupId: string) => void,
+    onEditCharacter?: (characterId: string, returnFocus?: HTMLElement | null) => void,
+    onEditGroup?: (groupId: string, returnFocus?: HTMLElement | null) => void,
     onFocusCharacter?: (characterKey: string) => void,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void,

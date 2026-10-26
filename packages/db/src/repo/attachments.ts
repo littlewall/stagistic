@@ -40,10 +40,9 @@ export const createAttachmentHandlers = ({
         const attachmentId = uuidv7();
         const filename = file.name.trim() || 'attachment.pdf';
 
-        let previousStorageKey: string | null;
-
+        // A replaced blob is released by `collectUnreferencedFiles` at the next startup.
         try {
-            previousStorageKey = await db.transaction(async tx => {
+            await db.transaction(async tx => {
                 const previous = await dbQueries.getAttachmentByMusicRole(tx, musicId, role);
 
                 await dbQueries.insertAttachment(tx, {
@@ -65,15 +64,8 @@ export const createAttachmentHandlers = ({
                     createdAt: now,
                 });
 
-                let orphanedStorageKey: string | null = null;
-
-                if (previous) {
-                    const remaining = await dbQueries.countAttachmentLinks(tx, previous.id);
-
-                    if (remaining === 0) {
-                        await dbQueries.deleteAttachment(tx, previous.id);
-                        orphanedStorageKey = previous.storageKey;
-                    }
+                if (previous && await dbQueries.countAttachmentLinks(tx, previous.id) === 0) {
+                    await dbQueries.deleteAttachment(tx, previous.id);
                 }
 
                 await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
@@ -92,8 +84,6 @@ export const createAttachmentHandlers = ({
                         updatedAt: now,
                     }),
                 }, tx);
-
-                return orphanedStorageKey;
             });
         } catch (error) {
             await fileStorage.delete(storageKey).catch(() => {
@@ -104,12 +94,6 @@ export const createAttachmentHandlers = ({
         }
 
         await syncDb();
-
-        if (previousStorageKey) {
-            await fileStorage.delete(previousStorageKey).catch(() => {
-                console.error('[attachments] Failed to clean up a replaced blob.');
-            });
-        }
 
         const attachment = await dbQueries.getAttachmentById(db, attachmentId);
 
@@ -123,18 +107,17 @@ export const createAttachmentHandlers = ({
 
         const db = await getDb();
         const now = Date.now();
-        const removal = await db.transaction(async tx => {
+        // A removed blob is released by `collectUnreferencedFiles` at the next startup.
+        const isRemoved = await db.transaction(async tx => {
             const attachment = await dbQueries.getAttachmentByMusicRole(tx, musicId, role);
 
             if (!attachment) {
-                return null;
+                return false;
             }
 
             await dbQueries.deleteMusicAttachmentLinkByRole(tx, {musicId, role});
 
-            const remaining = await dbQueries.countAttachmentLinks(tx, attachment.id);
-
-            if (remaining === 0) {
+            if (await dbQueries.countAttachmentLinks(tx, attachment.id) === 0) {
                 await dbQueries.deleteAttachment(tx, attachment.id);
             }
 
@@ -153,21 +136,11 @@ export const createAttachmentHandlers = ({
                 }),
             }, tx);
 
-            return {
-                storageKey: remaining === 0 ? attachment.storageKey : null,
-            };
+            return true;
         });
 
-        if (!removal) {
-            return;
-        }
-
-        await syncDb();
-
-        if (removal.storageKey) {
-            await fileStorage.delete(removal.storageKey).catch(() => {
-                console.error('[attachments] Failed to clean up a removed blob.');
-            });
+        if (isRemoved) {
+            await syncDb();
         }
     };
 

@@ -24,14 +24,14 @@
         border-color: color-mix(in oklch, var(--color-text) 28%, var(--color-border));
     }
 
-    &[data-focus-visible] {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 2px;
-    }
-
     &[data-disabled] {
         cursor: not-allowed;
         opacity: .5;
+    }
+
+    :global(:root[data-focus-ring-visible]) &[data-focused] {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
     }
 }
 

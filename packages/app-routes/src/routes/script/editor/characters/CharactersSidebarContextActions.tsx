@@ -3,7 +3,7 @@ import {PlusIcon} from '@stagistic/ui';
 import {SidebarContextButton} from '../sidebar/SidebarContextButton';
 
 interface CharactersSidebarContextActionsProps {
-    onAddCharacter: () => void,
+    onAddCharacter: (returnFocus?: HTMLElement | null) => void,
 }
 
 export const CharactersSidebarContextActions = ({

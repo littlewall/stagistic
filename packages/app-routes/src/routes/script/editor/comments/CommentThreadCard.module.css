@@ -43,7 +43,7 @@
         background: var(--state-hover);
     }
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: calc(var(--focus-ring-offset) * -1);
     }
@@ -87,7 +87,7 @@
         background: color-mix(in oklch, var(--color-text) 4%, transparent);
     }
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: calc(var(--focus-ring-offset) * -1);
     }
@@ -204,13 +204,13 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
 
-    &:focus-visible {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 0;
-    }
-
     &::placeholder {
         color: var(--color-text-placeholder);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 0;
     }
 }
 

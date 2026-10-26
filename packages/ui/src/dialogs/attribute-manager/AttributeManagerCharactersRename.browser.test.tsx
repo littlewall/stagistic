@@ -266,6 +266,6 @@ describe('AttributeManagerCharactersPanel rename', () => {
 
         await page.elementLocator(await waitForElement('[aria-label="Remove ANNA"]')).click();
 
-        expect(document.body.textContent).toContain('ANNA belongs to ALL and ENSEMBLE. Deleting ANNA removes them from these groups.');
+        expect(document.body.textContent).toContain('Removed fromALL and ENSEMBLE');
     });
 });

@@ -14,6 +14,7 @@ import {
     it,
     vi,
 } from 'vite-plus/test';
+import {userEvent} from 'vite-plus/test/browser';
 
 import {ScriptMusicSidebar} from './ScriptMusicSidebar';
 
@@ -332,8 +333,22 @@ describe('ScriptMusicSidebar', () => {
 
         editAction.click();
 
-        expect(openAttributeManagerMusic).toHaveBeenCalledWith('music-1');
+        expect(openAttributeManagerMusic).toHaveBeenCalledWith('music-1', editAction);
         expect(document.querySelector('[aria-label="Delete Overture"]')).toBeNull();
+    });
+
+    it('returns to the row action after cancelling unassignment', async () => {
+        mountSidebar();
+
+        const action = await poll(
+            () => document.querySelector<HTMLButtonElement>('[aria-label="Unassign Overture"]'),
+            'unassign action',
+        );
+
+        await userEvent.click(action);
+        await poll(() => document.querySelector('dialog[open]'), 'unassign dialog');
+        await userEvent.keyboard('{Escape}');
+        await expect.poll(() => document.activeElement).toBe(action);
     });
 
     it('completes document unassignment before publishing the catalog intent', async () => {

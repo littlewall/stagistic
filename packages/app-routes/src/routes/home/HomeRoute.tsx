@@ -79,8 +79,8 @@ export const HomeRoute = () => {
         [navigate],
     );
     const deleteScript = useCallback(
-        (script: {id: string, title: string}) => {
-            openDeleteScript({id: script.id, title: script.title});
+        (script: {id: string, title: string}, returnFocus?: HTMLElement | null) => {
+            openDeleteScript({id: script.id, title: script.title}, returnFocus);
         },
         [openDeleteScript],
     );
@@ -89,18 +89,18 @@ export const HomeRoute = () => {
             id: string,
             title: string,
             subtitle: string | null,
-        }) => {
+        }, returnFocus?: HTMLElement | null) => {
             openRenameScript({
                 id: script.id,
                 title: script.title,
                 subtitle: script.subtitle ?? '',
-            });
+            }, returnFocus);
         },
         [openRenameScript],
     );
     const duplicateScript = useCallback(
-        (script: {id: string, title: string}) => {
-            openDuplicateScript({id: script.id, title: script.title});
+        (script: {id: string, title: string}, returnFocus?: HTMLElement | null) => {
+            openDuplicateScript({id: script.id, title: script.title}, returnFocus);
         },
         [openDuplicateScript],
     );
@@ -162,14 +162,14 @@ export const HomeRoute = () => {
                             icon={<PlusIcon aria-hidden="true" />}
                             title="New script"
                             description="Start with an empty theatre or musical script."
-                            onClick={openNewScript}
+                            onClick={event => openNewScript(event.currentTarget)}
                         />
                         <ActionCard
                             type="button"
                             icon={<UploadIcon aria-hidden="true" />}
                             title="Import script"
                             description="Bring in an existing script file."
-                            onClick={openImportScript}
+                            onClick={event => openImportScript(event.currentTarget)}
                         />
                         {showExampleAction ? (
                             <ActionCard

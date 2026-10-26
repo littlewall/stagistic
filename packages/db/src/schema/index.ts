@@ -20,6 +20,7 @@ import {
     scriptSettingsTitlePage,
     scriptSettingsVisualPreferences,
 } from './settings';
+import {scriptSnapshotAttachmentRefs, scriptSnapshots} from './snapshots';
 import {
     scriptActs,
     scriptLocations,
@@ -49,6 +50,7 @@ export {
     scriptSettingsTitlePage,
     scriptSettingsVisualPreferences,
 } from './settings';
+export {scriptSnapshotAttachmentRefs, scriptSnapshots} from './snapshots';
 export {
     scriptActs,
     scriptLocations,
@@ -80,4 +82,6 @@ export const dbSchema = {
     scriptMusicAttachments,
     scriptCommentThreads,
     scriptCommentMessages,
+    scriptSnapshots,
+    scriptSnapshotAttachmentRefs,
 };

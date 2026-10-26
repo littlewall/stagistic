@@ -7,7 +7,7 @@ import {
     it,
     vi,
 } from 'vite-plus/test';
-import {page} from 'vite-plus/test/browser';
+import {page, userEvent} from 'vite-plus/test/browser';
 
 const STORAGE_KEY = 'stagistic.web.publicPreviewAcknowledgement';
 const mountedRoots: Root[] = [];
@@ -36,6 +36,27 @@ afterEach(async () => {
 });
 
 describe('App', () => {
+    it('shows keyboard focus in the preview dialog before any route layout mounts', async () => {
+        window.localStorage.removeItem(STORAGE_KEY);
+        await page.viewport(1280, 800);
+
+        const {default: App} = await import('./App');
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(<App />);
+        mountedRoots.push(root);
+        await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
+        await userEvent.tab();
+
+        const focused = requireValue(document.activeElement);
+
+        expect(document.querySelector('dialog')?.contains(focused)).toBe(true);
+        expect(getComputedStyle(focused).outlineStyle).toBe('solid');
+        expect(getComputedStyle(focused).outlineWidth).toBe('2px');
+    });
+
     it('starts the database worker only after public preview acknowledgement', async () => {
         const NativeWorker = window.Worker;
         let startedWorkerCount = 0;
@@ -71,3 +92,4 @@ describe('App', () => {
         expect(startedWorkerCount).toBe(1);
     });
 });
+import '@stagistic/ui/styles/base.css';

@@ -30,7 +30,7 @@
         border-color: var(--color-border-strong);
     }
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
     }

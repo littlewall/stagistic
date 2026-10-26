@@ -13,6 +13,7 @@ import {page, userEvent} from 'vite-plus/test/browser';
 
 import {formControlStyles} from '../molecules/forms/shared/formControlStyles';
 import {AppLayout} from './AppLayout';
+import {FocusVisibilityManager} from './FocusVisibilityManager';
 
 const mountedRoots: Root[] = [];
 
@@ -37,7 +38,7 @@ const renderLayout = (children: ReactNode = <div>Script canvas</div>) => {
 
     const root = createRoot(host);
 
-    root.render(<AppLayout>{children}</AppLayout>);
+    root.render(<><FocusVisibilityManager /><AppLayout>{children}</AppLayout></>);
     mountedRoots.push(root);
 };
 

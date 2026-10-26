@@ -2,6 +2,7 @@ import {normalizeCharacterKey} from '@stagistic/script';
 import {
     type FormEvent,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -49,6 +50,7 @@ export const AttributeManagerGroupDetail = ({
     onDeleteGroup,
 }: AttributeManagerGroupDetailProps) => {
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+    const removeTriggerRef = useRef<HTMLElement | null>(null);
     const editorGroup = useMemo<EditorSidebarCharacter>(
         () => ({
             id: group.id,
@@ -125,7 +127,10 @@ export const AttributeManagerGroupDetail = ({
                         size="sm"
                         isDisabled={isDeleting || isRenaming || !onDeleteGroup}
                         aria-label={`Remove ${group.name}`}
-                        onPress={() => setIsRemoveOpen(true)}
+                        onPress={event => {
+                            removeTriggerRef.current = event.target as HTMLElement;
+                            setIsRemoveOpen(true);
+                        }}
                     >
                         <TrashIcon
                             className={styles.actionIcon}
@@ -166,6 +171,7 @@ export const AttributeManagerGroupDetail = ({
                 </div>
             </div>
             <RemoveGroupModal
+                returnFocus={removeTriggerRef}
                 isOpen={isRemoveOpen}
                 groupName={group.name}
                 usageCount={group.usageCount}

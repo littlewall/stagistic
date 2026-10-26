@@ -2,7 +2,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -12,10 +11,11 @@ import {Button} from '../../atoms/Button/Button';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import styles from './CreatePlaceModal.module.css';
 
-export interface CreatePlaceModalProps {
+export interface CreatePlaceModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     existingPlaceNames?: readonly string[],
     onClose: () => void,
@@ -29,6 +29,8 @@ export const CreatePlaceModal = ({
     existingPlaceNames = [],
     onClose,
     onCreate,
+    returnFocus,
+    fallbackFocus,
 }: CreatePlaceModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
@@ -43,21 +45,12 @@ export const CreatePlaceModal = ({
 
     if (wasOpen !== isOpen) {
         setWasOpen(isOpen);
+
         if (!isOpen) {
             setName('');
             setIsCreating(false);
         }
     }
-
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const focusTimer = window.setTimeout(() => inputRef.current?.focus(), 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen]);
 
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -86,6 +79,9 @@ export const CreatePlaceModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Create place"
+            initialFocus={inputRef}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
         >
             <ModalHeader title="Create place" />
             <form

@@ -32,16 +32,16 @@
         border-color: var(--color-border);
     }
 
-    &:has(input[data-focus-visible]) {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
-    }
-
     &[data-expanded] {
         z-index: var(--menu-z-index);
         background: var(--menu-bg);
         border-color: var(--color-border);
         box-shadow: var(--menu-shadow);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:has(input:focus) {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 }
 
@@ -167,7 +167,7 @@
         background: var(--color-surface-raised);
     }
 
-    &[data-focus-visible] {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }
@@ -194,17 +194,17 @@
     outline: none;
 
     &[data-hovered],
-    &[data-focus-visible] {
+    :global(:root[data-focus-ring-visible]) &[data-focused] {
         background: var(--state-hover);
-    }
-
-    &[data-focus-visible] {
-        outline: var(--focus-ring);
-        outline-offset: calc(-1 * var(--focus-ring-width));
     }
 
     &[data-selected] {
         color: var(--color-text);
+    }
+
+    :global(:root[data-focus-ring-visible]) &[data-focused] {
+        outline: var(--focus-ring);
+        outline-offset: calc(-1 * var(--focus-ring-width));
     }
 }
 

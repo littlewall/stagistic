@@ -89,15 +89,15 @@
     width: 10px;
     height: 10px;
 
-    &:focus-visible {
-        border-radius: var(--radius-full);
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: 2px;
-    }
-
     &[aria-disabled = 'true'] {
         cursor: default;
         opacity: .55;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        border-radius: var(--radius-full);
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 2px;
     }
 }
 
@@ -238,14 +238,14 @@
         background: color-mix(in oklch, var(--character-color) 18%, transparent);
     }
 
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: 1px;
-    }
-
     &[aria-disabled = 'true'] {
         cursor: default;
         opacity: .65;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 1px;
     }
 }
 
@@ -270,15 +270,26 @@
         background: color-mix(in oklch, var(--color-text) 8%, transparent);
     }
 
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
         outline-offset: 1px;
     }
 }
 
+/* Quiet until the row is pointed at or focused, like the music row actions. */
+.editIconButton {
+    opacity: .38;
+    transition: opacity var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
+
+    .characterItem:hover &,
+    :global(:root[data-focus-ring-visible]) .characterItem:focus-within & {
+        opacity: 1;
+    }
+}
+
 .editIconButton[aria-disabled = 'true'] {
     cursor: default;
-    opacity: .65;
+    opacity: .38;
 }
 
 .iconGlyph {
@@ -314,10 +325,7 @@
     background: color-mix(in oklch, var(--color-surface) 88%, var(--color-border));
     border: 1px solid color-mix(in oklch, var(--character-color) 26%, var(--color-border));
     border-radius: var(--radius-sm);
-
-    &:focus-visible {
-        outline: none;
-    }
+    outline: none;
 
     &::placeholder {
         color: var(--color-text-muted);

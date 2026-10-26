@@ -1,4 +1,5 @@
 import {normalizeCharacterKey} from '@stagistic/script';
+import type {ModalFocusRestoreOptions} from '@stagistic/ui';
 import {
     Button,
     formControlStyles,
@@ -10,7 +11,6 @@ import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
     useState,
@@ -18,7 +18,7 @@ import {
 
 import styles from './AddCharacterModal.module.css';
 
-interface AddCharacterModalProps {
+interface AddCharacterModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     occupiedCharacterKeys: ReadonlySet<string>,
     onClose: () => void,
@@ -26,6 +26,8 @@ interface AddCharacterModalProps {
 }
 
 export const AddCharacterModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     occupiedCharacterKeys,
     onClose,
@@ -37,22 +39,11 @@ export const AddCharacterModal = ({
 
     if (wasOpen !== isOpen) {
         setWasOpen(isOpen);
+
         if (!isOpen) {
             setName('');
         }
     }
-
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const focusTimer = window.setTimeout(() => {
-            inputRef.current?.focus();
-        }, 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen]);
 
     const normalizedName = useMemo(() => normalizeCharacterKey(name), [name]);
     const isDuplicate = normalizedName.length > 0 && occupiedCharacterKeys.has(normalizedName);
@@ -81,6 +72,9 @@ export const AddCharacterModal = ({
 
     return (
         <ModalDialog
+            initialFocus={inputRef}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Add character"

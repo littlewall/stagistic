@@ -11,9 +11,9 @@ import styles from './HomeRoute.module.css';
 interface ScriptListSectionProps {
     scripts: ScriptSummary[],
     onOpenScript: (scriptId: string) => void,
-    onDeleteScript: (script: ScriptSummary) => void,
-    onRenameScript: (script: ScriptSummary) => void,
-    onDuplicateScript: (script: ScriptSummary) => void,
+    onDeleteScript: (script: ScriptSummary, returnFocus?: HTMLElement | null) => void,
+    onRenameScript: (script: ScriptSummary, returnFocus?: HTMLElement | null) => void,
+    onDuplicateScript: (script: ScriptSummary, returnFocus?: HTMLElement | null) => void,
 }
 
 export const ScriptListSection = ({
@@ -41,9 +41,9 @@ export const ScriptListSection = ({
                         actions={(
                             <ScriptActionsMenu
                                 scriptTitle={script.title}
-                                onRename={() => onRenameScript(script)}
-                                onDuplicate={() => onDuplicateScript(script)}
-                                onDelete={() => onDeleteScript(script)}
+                                onRename={returnFocus => onRenameScript(script, returnFocus)}
+                                onDuplicate={returnFocus => onDuplicateScript(script, returnFocus)}
+                                onDelete={returnFocus => onDeleteScript(script, returnFocus)}
                             />
                         )}
                     />

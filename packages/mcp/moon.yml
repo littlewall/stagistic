@@ -1,0 +1,49 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+tasks:
+  test-e2e:
+    command: 'moon run db:test-mcp-e2e'
+    options:
+      cache: false
+  bundle:
+    command: 'node scripts/build-artifacts.mjs'
+    deps: ['~:contract-check']
+    options:
+      cache: false
+  bundle-dev:
+    command: 'node scripts/build-artifacts.mjs --development'
+    deps: ['~:contract-check']
+    options:
+      cache: false
+  bundle-release:
+    command: 'node scripts/build-artifacts.mjs --release'
+    deps: ['~:contract-check']
+    options:
+      cache: false
+  verify-artifacts:
+    command: 'node scripts/verify-artifacts.mjs'
+    options:
+      cache: false
+  test-rust:
+    command: 'cargo test --workspace --locked'
+    options:
+      cache: false
+  lint-rust:
+    script: 'cargo fmt --all --check && cargo clippy --workspace --all-targets --locked -- -D warnings'
+    options:
+      cache: false
+  format-rust:
+    command: 'cargo fmt --all'
+    options:
+      cache: false
+  contract-generate:
+    command: 'node scripts/contract.mjs'
+    options:
+      cache: false
+  contract-check:
+    command: 'node scripts/contract.mjs --check'
+    options:
+      cache: false
+  build-native:
+    command: 'cargo build --locked -p stagistic-mcp'
+    options:
+      cache: false

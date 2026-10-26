@@ -59,9 +59,10 @@ describe('DeleteSceneHeadingModal', () => {
         await vi.waitFor(() => expect(findButton('Delete heading')).not.toBeNull());
 
         expect(document.body.textContent).toContain('Delete scene heading?');
-        expect(document.body.textContent).toContain(
-            'Its synopsis and places will be removed. Blocks in this scene stay and move under the previous scene.',
-        );
+        expect([...document.querySelectorAll('li')].map(item => item.textContent)).toEqual([
+            'RemovedIts synopsis and places',
+            'KeptBlocks in this scene, moved under the previous scene',
+        ]);
         expect(findButton('Cancel')).not.toBeNull();
     });
 

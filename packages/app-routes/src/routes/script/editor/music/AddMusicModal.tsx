@@ -5,13 +5,13 @@ import {
     type FormSelectOption,
     ModalActions,
     ModalDialog,
+    type ModalFocusRestoreOptions,
     ModalHeader,
 } from '@stagistic/ui';
 import {
     type ChangeEvent,
     type FormEvent,
     useCallback,
-    useEffect,
     useId,
     useMemo,
     useRef,
@@ -26,7 +26,7 @@ import type {
 
 const KIND_OPTIONS: FormSelectOption[] = [{value: 'song', label: 'Song'}, {value: 'instrumental', label: 'Instrumental'}];
 
-interface AddMusicModalProps {
+interface AddMusicModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     initialTitle?: string,
     onCancel: () => void,
@@ -35,6 +35,8 @@ interface AddMusicModalProps {
 }
 
 export const AddMusicModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     initialTitle = '',
     onCancel,
@@ -52,18 +54,6 @@ export const AddMusicModal = ({
         setTitle(isOpen ? initialTitle : '');
         setKind('song');
     }
-
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const focusTimer = window.setTimeout(() => {
-            titleInputRef.current?.focus();
-        }, 0);
-
-        return () => window.clearTimeout(focusTimer);
-    }, [isOpen]);
 
     const canSubmit = useMemo(() => title.trim().length > 0, [title]);
 
@@ -99,6 +89,9 @@ export const AddMusicModal = ({
 
     return (
         <ModalDialog
+            initialFocus={titleInputRef}
+            returnFocus={returnFocus}
+            fallbackFocus={fallbackFocus}
             isOpen={isOpen}
             onClose={onCancel}
             ariaLabel="Add music"

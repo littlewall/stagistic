@@ -76,6 +76,7 @@ export const Composer = ({
 interface MessageProps {
     message: ScriptCommentMessage,
     isEditing: boolean,
+    isReadOnly: boolean,
     onStartEdit: () => void,
     onStopEdit: () => void,
     onEdit: (body: string) => void,
@@ -109,6 +110,7 @@ export const MessageBody = ({
 export const Reply = ({
     message,
     isEditing,
+    isReadOnly,
     onStartEdit,
     onStopEdit,
     onEdit,
@@ -118,18 +120,20 @@ export const Reply = ({
         <span className={styles.railPoint} aria-hidden="true" />
         <div className={styles.replyHead}>
             <time className={styles.time}>{formatCommentTime(message.createdAt)}</time>
-            <MoreActionsMenu
-                aria-label="Reply actions"
-                items={[
-                    {id: 'edit', label: 'Edit'},
-                    {
-                        id: 'delete',
-                        label: 'Delete',
-                        tone: 'danger',
-                    },
-                ]}
-                onAction={id => (id === 'edit' ? onStartEdit() : onDelete())}
-            />
+            {isReadOnly ? null : (
+                <MoreActionsMenu
+                    aria-label="Reply actions"
+                    items={[
+                        {id: 'edit', label: 'Edit'},
+                        {
+                            id: 'delete',
+                            label: 'Delete',
+                            tone: 'danger',
+                        },
+                    ]}
+                    onAction={id => (id === 'edit' ? onStartEdit() : onDelete())}
+                />
+            )}
         </div>
         <MessageBody message={message} isEditing={isEditing} onStopEdit={onStopEdit} onEdit={onEdit} />
     </div>

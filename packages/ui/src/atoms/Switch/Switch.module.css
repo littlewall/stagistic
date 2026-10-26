@@ -11,11 +11,6 @@
         opacity: .5;
     }
 
-    &[data-focus-visible] .track {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 2px;
-    }
-
     &[data-selected] .track {
         background: var(--color-text);
         border-color: var(--color-text);
@@ -23,6 +18,11 @@
 
     &[data-selected] .thumb {
         transform: translateX(100%);
+    }
+
+    :global(:root[data-focus-ring-visible]) &[data-focused] .track {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
     }
 }
 

@@ -58,6 +58,9 @@ interface EditorShellProps {
      * remains measurable and focusable behind it.
      */
     isCanvasReady?: boolean,
+    /** Hides every editing affordance; see EditorProps.isReadOnly. */
+    isReadOnly?: boolean,
+    readOnlyLabel?: string | null,
     layout?: EditorLayoutProps,
     rootRef: RefObject<HTMLDivElement | null>,
     canvasHostRef: RefObject<HTMLDivElement | null>,
@@ -70,6 +73,8 @@ interface EditorShellProps {
 export const EditorShell = ({
     canvas,
     isCanvasReady = true,
+    isReadOnly = false,
+    readOnlyLabel,
     layout,
     rootRef,
     canvasHostRef,
@@ -164,6 +169,7 @@ export const EditorShell = ({
             data-editor-ready={isCanvasReady ? 'true' : 'false'}
             {...{[CHARACTER_HIGHLIGHT_ATTR]: characterDecoration}}
             aria-busy={!isCanvasReady}
+            data-read-only={isReadOnly ? 'true' : undefined}
             ref={rootRef}
             style={rootStyle}
         >
@@ -212,6 +218,8 @@ export const EditorShell = ({
                                 editor={editor}
                                 blockShortcuts={blockShortcuts}
                                 search={search}
+                                isReadOnly={isReadOnly}
+                                readOnlyLabel={readOnlyLabel}
                             />
                         </div>
                         {rightSidebarToggle ? (
@@ -241,6 +249,7 @@ export const EditorShell = ({
                             scriptTitle={scriptTitle}
                             draftDate={draftDate}
                             blockShortcuts={blockShortcuts}
+                            isReadOnly={isReadOnly}
                         />
                     </div>
                 </main>
@@ -257,6 +266,7 @@ export const EditorShell = ({
             <EditorStatusBar
                 editor={editor}
                 blockNextElements={blockNextElements ?? {}}
+                isReadOnly={isReadOnly}
             />
         </div>
     );

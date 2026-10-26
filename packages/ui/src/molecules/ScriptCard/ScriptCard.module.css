@@ -21,7 +21,7 @@
         border-color: var(--color-border-strong);
     }
 
-    &:has(.open[data-focus-visible]) {
+    :global(:root[data-focus-ring-visible]) &:has(.open:focus) {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }

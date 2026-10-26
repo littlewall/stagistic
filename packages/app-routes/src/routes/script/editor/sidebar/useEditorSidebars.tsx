@@ -60,7 +60,6 @@ export const useEditorSidebars = ({
     const rightPanel = panelById.get(layout.rightPanelId);
     const leftNavigation = (
         <SidebarPanelSelect
-            side="left"
             panels={panels}
             selectedPanelId={layout.leftPanelId}
             onSelectPanel={layout.selectLeft}
@@ -69,7 +68,6 @@ export const useEditorSidebars = ({
     );
     const rightNavigation = (
         <SidebarPanelSelect
-            side="right"
             panels={panels}
             selectedPanelId={layout.rightPanelId}
             onSelectPanel={layout.selectRight}

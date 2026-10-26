@@ -12,6 +12,7 @@ import {
 } from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
+import {FocusVisibilityManager} from '../../../layout/FocusVisibilityManager';
 import {MultiComboBox} from './MultiComboBox';
 
 const mountedRoots: Root[] = [];
@@ -87,7 +88,7 @@ const renderComboBox = () => {
 
     host.style.width = '400px';
     document.body.appendChild(host);
-    root.render(<TestCase />);
+    root.render(<><FocusVisibilityManager /><TestCase /></>);
     mountedRoots.push(root);
 
     return onChange;

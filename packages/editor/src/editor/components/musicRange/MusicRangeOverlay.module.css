@@ -33,12 +33,6 @@
     background: transparent;
     border: 0;
 
-    &:focus-visible {
-        border-radius: var(--radius-sm);
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 1px;
-    }
-
     &::before,
     &::after {
         content: '';
@@ -110,6 +104,12 @@
     &[data-music-rail-menu-open = 'true'] {
         background: color-mix(in oklch, var(--music-marker-open-color) 16%, transparent);
         border-radius: var(--radius-sm);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        border-radius: var(--radius-sm);
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 1px;
     }
 }
 
@@ -189,7 +189,7 @@
     border-radius: var(--radius-sm);
 
     &:hover,
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         color: var(--color-text);
         background: var(--state-hover);
         outline: none;
@@ -273,7 +273,7 @@
     border-radius: var(--radius-sm);
 
     &:hover,
-    &:focus-visible {
+    :global(:root[data-focus-ring-visible]) &:focus {
         background: var(--state-hover);
         outline: none;
     }

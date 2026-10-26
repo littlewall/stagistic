@@ -3,7 +3,7 @@ import {PlusIcon} from '@stagistic/ui';
 import {SidebarContextButton} from '../sidebar/SidebarContextButton';
 
 interface MusicSidebarContextActionsProps {
-    onAddMusic: () => void,
+    onAddMusic: (returnFocus?: HTMLElement | null) => void,
 }
 
 export const MusicSidebarContextActions = ({

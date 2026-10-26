@@ -8,7 +8,11 @@ import {
     ScriptWorkspaceRoute,
     useAppBootstrap,
 } from '@stagistic/app-routes';
-import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
+import {
+    FocusVisibilityManager,
+    LoaderOverlay,
+    ToastProvider,
+} from '@stagistic/ui';
 import {
     Navigate,
     Route,
@@ -31,18 +35,27 @@ const BootedApp = () => {
         bootStatus,
     } = useAppBootstrap(bootstrapOptions);
     const scriptRepository = services?.scriptRepository;
+    const snapshotViews = services?.snapshotViews ?? null;
 
     if (!scriptRepository) {
         return <LoaderOverlay label="Starting Stagistic" messages={[bootStatus]} progress={bootProgress} />;
     }
 
     return (
-        <ScriptRepositoryProvider repository={scriptRepository}>
+        <ScriptRepositoryProvider
+            repository={scriptRepository}
+            snapshotViews={snapshotViews}
+        >
             <ToastProvider>
                 <GlobalModalsProvider>
                     <Routes>
                         <Route path="/" element={<HomeRoute />} />
                         <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                            <Route index element={<Navigate to="editor" replace />} />
+                            <Route path="editor" element={<ScriptEditorRoute />} />
+                            <Route path="export" element={<ScriptExportRoute />} />
+                        </Route>
+                        <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                             <Route index element={<Navigate to="editor" replace />} />
                             <Route path="editor" element={<ScriptEditorRoute />} />
                             <Route path="export" element={<ScriptExportRoute />} />
@@ -57,11 +70,14 @@ const BootedApp = () => {
 };
 
 const App = () => (
-    <UnsupportedScreenGate>
-        <PublicPreviewGate>
-            <BootedApp />
-        </PublicPreviewGate>
-    </UnsupportedScreenGate>
+    <>
+        <FocusVisibilityManager />
+        <UnsupportedScreenGate>
+            <PublicPreviewGate>
+                <BootedApp />
+            </PublicPreviewGate>
+        </UnsupportedScreenGate>
+    </>
 );
 
 export default App;

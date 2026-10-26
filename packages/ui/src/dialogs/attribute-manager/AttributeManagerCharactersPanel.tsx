@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import {
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -50,12 +51,15 @@ export const AttributeManagerCharactersPanel = ({
     onDeleteGroup,
     onSetGroupColor,
     onChangeGroupMemberIds,
+    isReadOnly = false,
 }: AttributeManagerCharactersPanelProps) => {
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>(initialWorkspaceId);
     const [selectedCharacterId, setSelectedCharacterId] = useItemSelection(characters, initialSelectedCharacterId);
     const [selectedGroupId, setSelectedGroupId] = useItemSelection(groups, initialSelectedGroupId, true);
     const [isCreateCharacterOpen, setIsCreateCharacterOpen] = useState(false);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+    const createCharacterTriggerRef = useRef<HTMLElement | null>(null);
+    const createGroupTriggerRef = useRef<HTMLElement | null>(null);
     const {colorizedItems: colorizedCharacters, setColor: handleSetCharacterColor} = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
     const {
         displayedCharacters,
@@ -126,9 +130,19 @@ export const AttributeManagerCharactersPanel = ({
             loadingLabel={isCharactersWorkspace ? 'Loading characters…' : 'Loading groups…'}
             noMatchesLabel={isCharactersWorkspace ? 'No characters match your search.' : 'No groups match your search.'}
             isLoading={isLoading}
-            isCreateDisabled={isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup}
+            isCreateDisabled={isReadOnly || (isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup)}
             onSelectItem={isCharactersWorkspace ? setSelectedCharacterId : setSelectedGroupId}
-            onCreate={isCharactersWorkspace ? () => setIsCreateCharacterOpen(true) : () => setIsCreateGroupOpen(true)}
+            onCreate={trigger => {
+                if (isCharactersWorkspace) {
+                    createCharacterTriggerRef.current = trigger ?? null;
+                    setIsCreateCharacterOpen(true);
+
+                    return;
+                }
+
+                createGroupTriggerRef.current = trigger ?? null;
+                setIsCreateGroupOpen(true);
+            }}
         />
     );
 
@@ -136,6 +150,7 @@ export const AttributeManagerCharactersPanel = ({
         <section
             className={styles.detail}
             aria-label={`${activeWorkspace.label} detail`}
+            inert={isReadOnly}
             data-selected-group-id={!isCharactersWorkspace ? selectedGroupId ?? undefined : undefined}
         >
             {isCharactersWorkspace && selectedCharacter && selectedConfirmedCharacter ? (
@@ -216,6 +231,7 @@ export const AttributeManagerCharactersPanel = ({
             </div>
             {onCreateCharacter ? (
                 <CreateCharacterModal
+                    returnFocus={createCharacterTriggerRef}
                     isOpen={isCreateCharacterOpen}
                     existingCharacterNames={allEntityNames.map(entity => entity.name)}
                     onClose={() => setIsCreateCharacterOpen(false)}
@@ -224,6 +240,7 @@ export const AttributeManagerCharactersPanel = ({
             ) : null}
             {onCreateGroup ? (
                 <CreateGroupModal
+                    returnFocus={createGroupTriggerRef}
                     isOpen={isCreateGroupOpen}
                     existingEntityNames={allEntityNames.map(entity => entity.name)}
                     onClose={() => setIsCreateGroupOpen(false)}

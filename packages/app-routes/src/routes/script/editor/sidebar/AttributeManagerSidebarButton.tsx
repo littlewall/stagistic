@@ -32,7 +32,7 @@ export const AttributeManagerSidebarButton = ({
         <SidebarContextButton
             ariaLabel={actionLabel}
             tooltipLabel={actionLabel}
-            onClick={() => openAttributeManagerModalWithPanel(panelId)}
+            onClick={trigger => openAttributeManagerModalWithPanel(panelId, trigger)}
         >
             <AttributeManagerIcon aria-hidden="true" />
         </SidebarContextButton>

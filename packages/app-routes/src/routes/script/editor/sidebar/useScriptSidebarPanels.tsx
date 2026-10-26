@@ -11,7 +11,7 @@ type UseScriptSidebarPanelsArgs = {
     comments: ReturnType<typeof useScriptComments>,
     commentsPanelState: CommentsPanelState,
     musicState: ReturnType<typeof useScriptMusicState>,
-    onAddMusic: () => void,
+    onAddMusic: (returnFocus?: HTMLElement | null) => void,
 };
 
 /** The panels available in the script editor's left and right sidebars. */

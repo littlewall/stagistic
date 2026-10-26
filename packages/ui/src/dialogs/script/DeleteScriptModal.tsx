@@ -1,11 +1,12 @@
 import {Button} from '../../atoms/Button/Button';
 import {ModalDialog} from '../modal/ModalDialog';
+import type {ModalFocusRestoreOptions} from '../modal/modalFocusTypes';
 import {ModalHeader} from '../modal/ModalHeader';
 import {TypeToConfirmAction} from '../modal/TypeToConfirmAction';
 import {DELETE_SCRIPT_CONFIRM_PHRASE} from './deleteScriptConfirmPhrase';
 import styles from './DeleteScriptModal.module.css';
 
-export interface DeleteScriptModalProps {
+export interface DeleteScriptModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     scriptTitle?: string,
     isDeleting?: boolean,
@@ -14,6 +15,8 @@ export interface DeleteScriptModalProps {
 }
 
 export const DeleteScriptModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     scriptTitle,
     isDeleting = false,
@@ -21,6 +24,8 @@ export const DeleteScriptModal = ({
     onConfirm,
 }: DeleteScriptModalProps) => (
     <ModalDialog
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         onClose={onClose}
         ariaLabel="Delete script"

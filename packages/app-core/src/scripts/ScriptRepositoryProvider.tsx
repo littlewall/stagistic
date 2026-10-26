@@ -6,25 +6,32 @@ import {
     useMemo,
 } from 'react';
 
+import type {SnapshotViewRepository} from '../snapshots/createSnapshotViewRepository';
 import {createScriptsStore, type ScriptsStoreState} from './scriptsStore';
 
 type ScriptRepositoryProviderProps = {
     repository: ScriptRepository,
+    /** Opens stored drafts and versions read-only; absent where viewing is unsupported. */
+    snapshotViews?: SnapshotViewRepository | null,
     children: ReactNode,
 };
 
 const ScriptsContext = createContext<ScriptsStoreState | null>(null);
+const SnapshotViewsContext = createContext<SnapshotViewRepository | null>(null);
 
 export const ScriptRepositoryProvider = ({
     repository,
+    snapshotViews = null,
     children,
 }: ScriptRepositoryProviderProps) => {
     const store = useMemo(() => createScriptsStore(repository), [repository]);
 
     return (
-        <ScriptsContext.Provider value={store}>
-            {children}
-        </ScriptsContext.Provider>
+        <SnapshotViewsContext.Provider value={snapshotViews}>
+            <ScriptsContext.Provider value={store}>
+                {children}
+            </ScriptsContext.Provider>
+        </SnapshotViewsContext.Provider>
     );
 };
 
@@ -39,3 +46,5 @@ export const useScriptsContext = () => {
 };
 
 export const useScriptRepository = () => useScriptsContext().repository;
+
+export const useSnapshotViews = () => useContext(SnapshotViewsContext);

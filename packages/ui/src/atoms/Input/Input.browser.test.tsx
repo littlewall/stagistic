@@ -9,6 +9,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {FocusVisibilityManager} from '../../layout/FocusVisibilityManager';
 import {Input} from './Input';
 
 let mountedRoot: Root | null = null;
@@ -77,7 +78,7 @@ describe('Input accessibility styles', () => {
 
         document.body.appendChild(host);
         mountedRoot = createRoot(host);
-        mountedRoot.render(<Input aria-label="Title" />);
+        mountedRoot.render(<><FocusVisibilityManager /><Input aria-label="Title" /></>);
 
         const input = await waitForInput(host);
 
@@ -93,10 +94,12 @@ describe('Input accessibility styles', () => {
         document.body.appendChild(host);
         mountedRoot = createRoot(host);
         mountedRoot.render(
-            <Input
-                aria-label="Title"
-                placeholder="Untitled"
-            />,
+            <><FocusVisibilityManager />
+                <Input
+                    aria-label="Title"
+                    placeholder="Untitled"
+                />
+            </>,
         );
 
         const input = await waitForInput(host);

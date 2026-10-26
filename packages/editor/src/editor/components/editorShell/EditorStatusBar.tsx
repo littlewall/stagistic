@@ -24,6 +24,8 @@ import styles from './EditorStatusBar.module.css';
 interface EditorStatusBarProps {
     editor: TiptapEditor | null,
     blockNextElements: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
+    /** A read-only script takes no keys, so no shortcut hints are shown. */
+    isReadOnly?: boolean,
 }
 
 const CYCLE_TYPES = BLOCKS_WITHOUT_ACT.map(block => block.type);
@@ -110,7 +112,11 @@ export const getEditorStatusBarSegments = (
     return result;
 };
 
-export const EditorStatusBar = ({editor, blockNextElements}: EditorStatusBarProps) => {
+export const EditorStatusBar = ({
+    editor,
+    blockNextElements,
+    isReadOnly = false,
+}: EditorStatusBarProps) => {
     const activeBlockStatus = useEditorState({
         editor,
         selector: ({editor: stateEditor}) => {
@@ -162,7 +168,7 @@ export const EditorStatusBar = ({editor, blockNextElements}: EditorStatusBarProp
         },
     });
 
-    const segments = getEditorStatusBarSegments(activeBlockStatus?.type ?? null, blockNextElements, {
+    const segments = getEditorStatusBarSegments(isReadOnly ? null : activeBlockStatus?.type ?? null, blockNextElements, {
         isEmpty: activeBlockStatus?.isEmpty ?? false,
         hasOnlyNonTextContent: activeBlockStatus?.hasOnlyNonTextContent ?? false,
         isAtStart: activeBlockStatus?.isAtStart ?? false,

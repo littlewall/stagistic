@@ -31,6 +31,7 @@ type ScriptLoaderRepository = {
 export const useScriptLoader = (
     currentScriptId: string | null,
     scriptRepository: ScriptLoaderRepository,
+    {isReadOnly = false}: {isReadOnly?: boolean} = {},
 ): ScriptLoaderResult => {
     const [initialValue, setInitialValue] = useState<ScriptDocument | null | undefined>(undefined);
     const [initialIndexSnapshot, setInitialIndexSnapshot] = useState<ScriptBlockIndexSnapshot | null | undefined>(undefined);
@@ -40,7 +41,12 @@ export const useScriptLoader = (
     const loadRequest = useMemo(() => ({
         scriptId: currentScriptId,
         repository: scriptRepository,
-    }), [currentScriptId, scriptRepository]);
+        readOnly: isReadOnly,
+    }), [
+        currentScriptId,
+        isReadOnly,
+        scriptRepository,
+    ]);
     const [previousRequest, setPreviousRequest] = useState(loadRequest);
 
     if (previousRequest !== loadRequest) {
@@ -51,7 +57,11 @@ export const useScriptLoader = (
     }
 
     useEffect(() => {
-        const {scriptId, repository} = loadRequest;
+        const {
+            scriptId,
+            repository,
+            readOnly,
+        } = loadRequest;
 
         if (!scriptId) {
             return;
@@ -83,7 +93,7 @@ export const useScriptLoader = (
 
                 const coerced = coerceUnknownBlocksToStageDirections(stored);
 
-                if (coerced.changed) {
+                if (coerced.changed && !readOnly) {
                     await repository.saveLatest(scriptId, coerced.value);
                 }
 

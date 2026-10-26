@@ -1,5 +1,6 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
 import {
+    type AppSettingsSection,
     GlobalModalsProvider,
     HomeRoute,
     ScriptEditorRoute,
@@ -19,6 +20,8 @@ import {
 
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
+import {McpSettingsPanel} from './mcp/McpSettingsPanel';
+import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
 
 const bootstrapOptions = {
@@ -26,6 +29,14 @@ const bootstrapOptions = {
     prepareDatabase: prepareLocalDbWithProgress,
     loadRepository: () => import('./repo'),
 };
+
+const settingsSections: AppSettingsSection[] = [
+    {
+        id: 'mcp',
+        label: 'MCP',
+        content: <McpSettingsPanel />,
+    },
+];
 
 // Runs inside the router + providers so it can use navigation and modal hooks.
 const AppRoutes = () => {
@@ -35,6 +46,11 @@ const AppRoutes = () => {
         <Routes>
             <Route path="/" element={<HomeRoute />} />
             <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                <Route index element={<Navigate to="editor" replace />} />
+                <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="export" element={<ScriptExportRoute />} />
+            </Route>
+            <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                 <Route index element={<Navigate to="editor" replace />} />
                 <Route path="editor" element={<ScriptEditorRoute />} />
                 <Route path="export" element={<ScriptExportRoute />} />
@@ -52,6 +68,9 @@ const App = () => {
         bootStatus,
     } = useAppBootstrap(bootstrapOptions);
     const scriptRepository = services?.scriptRepository ?? null;
+    const snapshotViews = services?.snapshotViews ?? null;
+
+    useLocalMcp(Boolean(scriptRepository));
 
     /*
      * Portable backup snapshots into the app data folder: periodic while running,
@@ -80,9 +99,12 @@ const App = () => {
     }
 
     return (
-        <ScriptRepositoryProvider repository={scriptRepository}>
+        <ScriptRepositoryProvider
+            repository={scriptRepository}
+            snapshotViews={snapshotViews}
+        >
             <ToastProvider>
-                <GlobalModalsProvider>
+                <GlobalModalsProvider settingsSections={settingsSections}>
                     <AppRoutes />
                 </GlobalModalsProvider>
             </ToastProvider>

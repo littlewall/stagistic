@@ -20,6 +20,7 @@ export {
     toggleAppTheme,
     toggleAppThemeMode,
 } from './theme/theme';
+export {useAppThemeMode} from './theme/useAppThemeMode';
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 export * from './icons';
@@ -56,8 +57,10 @@ export {
     CardFooter,
     CardHeader,
 } from './molecules/Card/Card';
+export {CodeSnippet} from './molecules/CodeSnippet/CodeSnippet';
 export {ListPanel, type ListPanelProps} from './molecules/ListPanel/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow/ListRow';
+export {ReadOnlyNotice, type ReadOnlyNoticeProps} from './molecules/ReadOnlyNotice/ReadOnlyNotice';
 export {
     ScriptCard,
     ScriptCardGrid,
@@ -140,6 +143,12 @@ export {
     type ScriptView,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
+export {FocusVisibilityManager} from './layout/FocusVisibilityManager';
+export {
+    ScriptStateMenu,
+    type ScriptStateMenuItem,
+    type ScriptStateMenuProps,
+} from './layout/header/ScriptStateMenu';
 export {SidebarActionsGroup} from './layout/SidebarActionsGroup';
 export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMiniHeader';
 
@@ -147,8 +156,21 @@ export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMi
 export {ConfirmModal, type ConfirmModalProps} from './dialogs/modal/ConfirmModal';
 export {ModalActions, type ModalActionsProps} from './dialogs/modal/ModalActions';
 export {ModalDialog} from './dialogs/modal/ModalDialog';
+export type {ModalFocusRestoreOptions, ModalFocusTarget} from './dialogs/modal/modalFocusTypes';
 export {ModalHeader, type ModalHeaderProps} from './dialogs/modal/ModalHeader';
 export {TypeToConfirmAction, type TypeToConfirmActionProps} from './dialogs/modal/TypeToConfirmAction';
+export {
+    SettingsModal,
+    type SettingsNavGroup,
+    type SettingsNavItem,
+    type SettingsNavSubItem,
+} from './dialogs/settings/SettingsModal';
+export {
+    ChangeSummary,
+    type ChangeSummaryItem,
+    type ChangeSummaryProps,
+    type ChangeTone,
+} from './molecules/ChangeSummary/ChangeSummary';
 
 // ─── Dialogs: script ────────────────────────────────────────────────────────
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
@@ -168,11 +190,18 @@ export {
     type RenameScriptSubmit,
 } from './dialogs/script/RenameScriptModal';
 export {
-    ScriptSettingsModal,
-    type SettingsNavGroup,
-    type SettingsNavItem,
-    type SettingsNavSubItem,
-} from './dialogs/script/ScriptSettingsModal';
+    RestoreScriptStateModal,
+    type RestoreScriptStateModalProps,
+    type RestoreScriptStateMode,
+} from './dialogs/script/RestoreScriptStateModal';
+export {SaveScriptStateModal, type SaveScriptStateModalProps} from './dialogs/script/SaveScriptStateModal';
+export type {ScriptStateDetails, ScriptStateKind} from './dialogs/script/ScriptStateDetailsFields';
+export {
+    type ScriptStateRecord,
+    ScriptStatesModal,
+    type ScriptStatesModalProps,
+    type ScriptStateUpdate,
+} from './dialogs/script/ScriptStatesModal';
 export type {NewScriptShape} from './dialogs/script/types';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────

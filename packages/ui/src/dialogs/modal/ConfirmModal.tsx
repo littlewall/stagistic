@@ -3,13 +3,15 @@ import type {ReactNode} from 'react';
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
-import {ModalHeader} from './ModalHeader';
+import type {ModalFocusRestoreOptions} from './modalFocusTypes';
+import {ModalHeader, type ModalHeaderProps} from './ModalHeader';
 
-export interface ConfirmModalProps {
+export interface ConfirmModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     ariaLabel: string,
     title: ReactNode,
     description?: ReactNode,
+    changes?: ModalHeaderProps['changes'],
     notes?: ReactNode[],
     confirmLabel: string,
     cancelLabel?: string,
@@ -21,10 +23,13 @@ export interface ConfirmModalProps {
 }
 
 export const ConfirmModal = ({
+    returnFocus,
+    fallbackFocus,
     isOpen,
     ariaLabel,
     title,
     description,
+    changes,
     notes,
     confirmLabel,
     cancelLabel = 'Cancel',
@@ -34,6 +39,8 @@ export const ConfirmModal = ({
     onConfirm,
 }: ConfirmModalProps) => (
     <ModalDialog
+        returnFocus={returnFocus}
+        fallbackFocus={fallbackFocus}
         isOpen={isOpen}
         onClose={() => {
             if (!(lockWhilePending && isPending)) {
@@ -45,6 +52,7 @@ export const ConfirmModal = ({
         <ModalHeader
             title={title}
             description={description}
+            changes={changes}
             notes={notes}
         />
         <ModalActions spacing="lg">
@@ -59,6 +67,7 @@ export const ConfirmModal = ({
             </Button>
             <Button
                 variant="ghost"
+                data-modal-initial-focus
                 isDisabled={isPending}
                 onPress={onClose}
             >

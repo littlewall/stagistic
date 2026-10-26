@@ -20,11 +20,13 @@ import {
     type ReactNode,
     useCallback,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
 import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attribute-manager/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
+import {useScriptReadOnlyState} from '../../workspace/ScriptAccessContext';
 import {useScriptCharacters} from '../../workspace/ScriptCharactersContext';
 import {useScriptSession} from '../../workspace/ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
@@ -39,6 +41,7 @@ interface ScriptCharactersSidebarProps {
 
 export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) => {
     const {resolvedScriptSettings} = useScriptSession();
+    const {isReadOnly} = useScriptReadOnlyState();
     const {
         openAttributeManagerCharacter,
         openAttributeManagerGroup,
@@ -48,7 +51,11 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
     const elementSelection = useEditorElementSelection();
     const liveCharacters = useEditorLiveCharacters();
     const [isAddCharacterOpen, setIsAddCharacterOpen] = useState(false);
-    const openAddCharacterModal = useCallback(() => setIsAddCharacterOpen(true), []);
+    const addCharacterTrigger = useRef<HTMLElement | null>(null);
+    const openAddCharacterModal = useCallback((trigger?: HTMLElement | null) => {
+        addCharacterTrigger.current = trigger ?? null;
+        setIsAddCharacterOpen(true);
+    }, []);
     const closeAddCharacterModal = useCallback(() => setIsAddCharacterOpen(false), []);
 
     const {
@@ -129,7 +136,7 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
         <div className={styles.content}>
             <SidebarMiniHeader
                 navigation={header}
-                actions={<CharactersSidebarContextActions onAddCharacter={openAddCharacterModal} />}
+                actions={isReadOnly ? undefined : <CharactersSidebarContextActions onAddCharacter={openAddCharacterModal} />}
                 controls={(
                     <SidebarActionsGroup>
                         <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_CHARACTERS} />
@@ -143,14 +150,17 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                     unconfirmedCharacters,
                     isLoading: characters.isCharactersLoading,
                 }}
-                actions={{
-                    onConfirmCharacter: handleConfirmCharacter,
-                    onEditCharacter: openAttributeManagerCharacter,
-                    onEditGroup: openAttributeManagerGroup,
-                    onFocusCharacter: handleFocusCharacter,
-                    onSetCharacterColor: handleSetCharacterColor,
-                    onSetGroupColor: handleSetGroupColor,
-                }}
+                // A saved draft or version keeps only the header's manager link.
+                actions={isReadOnly
+                    ? {onFocusCharacter: handleFocusCharacter}
+                    : {
+                        onConfirmCharacter: handleConfirmCharacter,
+                        onEditCharacter: openAttributeManagerCharacter,
+                        onEditGroup: openAttributeManagerGroup,
+                        onFocusCharacter: handleFocusCharacter,
+                        onSetCharacterColor: handleSetCharacterColor,
+                        onSetGroupColor: handleSetGroupColor,
+                    }}
                 options={{
                     activeCharacterId: elementSelection?.type === 'character'
                         ? elementSelection.characterId
@@ -162,6 +172,7 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                 }}
             />
             <AddCharacterModal
+                returnFocus={addCharacterTrigger}
                 isOpen={isAddCharacterOpen}
                 occupiedCharacterKeys={occupiedCharacterKeys}
                 onClose={closeAddCharacterModal}

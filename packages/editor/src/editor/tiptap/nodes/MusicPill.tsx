@@ -43,6 +43,71 @@ interface MusicStartPillProps extends NodeViewProps {
     persistentMusicRef?: {current: readonly PersistentMusicRef[]},
 }
 
+/** A saved draft or version: the title stays focusable for the menu but takes no typing. */
+const getTitleAccess = (isEditable: boolean) => (isEditable
+    ? {className: styles.titleInput, contentEditable: true}
+    : {
+        className: clsx(styles.titleInput, styles.readOnlyTitle),
+        contentEditable: false,
+        'aria-readonly': true,
+    });
+
+interface MusicStartPillMenuProps {
+    /** False for a saved draft or version: only navigation is offered. */
+    canEdit: boolean,
+    onClose: (isOpen: boolean) => void,
+    onGoToEnd?: () => void,
+    onManage?: () => void,
+    onUnassign: () => void,
+}
+
+const MusicStartPillMenu = ({
+    canEdit,
+    onClose,
+    onGoToEnd,
+    onManage,
+    onUnassign,
+}: MusicStartPillMenuProps) => {
+    const onEditManage = canEdit ? onManage : undefined;
+
+    // A read-only pill with nothing to navigate to opens no empty menu.
+    if (!canEdit && !onGoToEnd) {
+        return null;
+    }
+
+    return (
+        <MusicPillMenuPopover
+            isOpen
+            onOpenChange={onClose}
+        >
+            {onGoToEnd ? (
+                <MusicMenuButton
+                    label="Go to music end"
+                    onClick={onGoToEnd}
+                >
+                    <ArrowRightIcon aria-hidden="true" />
+                </MusicMenuButton>
+            ) : null}
+            {onEditManage ? (
+                <MusicMenuButton
+                    label="Manage music"
+                    onClick={onEditManage}
+                >
+                    <EditPencilIcon aria-hidden="true" />
+                </MusicMenuButton>
+            ) : null}
+            {canEdit ? (
+                <MusicMenuButton
+                    label="Unassign music"
+                    onClick={onUnassign}
+                >
+                    <MusicUnassignIcon />
+                </MusicMenuButton>
+            ) : null}
+        </MusicPillMenuPopover>
+    );
+};
+
 export const MusicStartPill = ({
     node,
     updateAttributes,
@@ -179,7 +244,7 @@ export const MusicStartPill = ({
                 {draftTitle.length > 0 || active ? '\u00A0' : null}
                 <span
                     ref={titleRef}
-                    className={styles.titleInput}
+                    {...getTitleAccess(editor.isEditable)}
                     data-music-title-input="start"
                     data-music-draft={isDraft ? 'true' : undefined}
                     data-music-id={musicId}
@@ -187,12 +252,15 @@ export const MusicStartPill = ({
                     role="textbox"
                     aria-label="Music title"
                     aria-multiline="false"
-                    contentEditable
                     tabIndex={locked ? 0 : -1}
                     suppressContentEditableWarning
                     spellCheck={false}
                     onInput={event => updateTitle(event.currentTarget.textContent ?? '')}
                     onBlur={event => {
+                        if (!editor.isEditable) {
+                            return;
+                        }
+
                         const value = event.currentTarget.textContent ?? '';
 
                         if (isDraft && !value.trim()) {
@@ -209,6 +277,10 @@ export const MusicStartPill = ({
                     }}
                     onKeyDown={event => {
                         event.stopPropagation();
+
+                        if (!editor.isEditable) {
+                            return;
+                        }
 
                         if (event.key === 'Enter') {
                             const currentTitle = event.currentTarget.textContent ?? '';
@@ -240,33 +312,13 @@ export const MusicStartPill = ({
                 />
             </span>
             {active && !locked ? (
-                <MusicPillMenuPopover
-                    isOpen
-                    onOpenChange={setActive}
-                >
-                    {hasEndMusic ? (
-                        <MusicMenuButton
-                            label="Go to music end"
-                            onClick={goToEndMusic}
-                        >
-                            <ArrowRightIcon aria-hidden="true" />
-                        </MusicMenuButton>
-                    ) : null}
-                    {musicId && onOpenMusicManager ? (
-                        <MusicMenuButton
-                            label="Manage music"
-                            onClick={openMusicManager}
-                        >
-                            <EditPencilIcon aria-hidden="true" />
-                        </MusicMenuButton>
-                    ) : null}
-                    <MusicMenuButton
-                        label="Unassign music"
-                        onClick={unassignMusic}
-                    >
-                        <MusicUnassignIcon />
-                    </MusicMenuButton>
-                </MusicPillMenuPopover>
+                <MusicStartPillMenu
+                    canEdit={editor.isEditable}
+                    onClose={setActive}
+                    onGoToEnd={hasEndMusic ? goToEndMusic : undefined}
+                    onManage={musicId && onOpenMusicManager ? openMusicManager : undefined}
+                    onUnassign={unassignMusic}
+                />
             ) : null}{' '}
         </NodeViewWrapper>
     );

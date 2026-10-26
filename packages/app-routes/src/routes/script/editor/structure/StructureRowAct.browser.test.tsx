@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import {requireValue} from '@stagistic/shared';
+import {FocusVisibilityManager} from '@stagistic/ui';
 import {
     useCallback,
     useState,
@@ -105,7 +106,7 @@ const mount = (
     const root = createRoot(host);
 
     mountedRoots.push(root);
-    root.render(<Harness onRename={onRename} onDelete={onDelete} />);
+    root.render(<><FocusVisibilityManager /><Harness onRename={onRename} onDelete={onDelete} /></>);
 };
 
 const typeAtEnd = async (text: string) => {

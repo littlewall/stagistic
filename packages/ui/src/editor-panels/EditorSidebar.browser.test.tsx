@@ -1,4 +1,5 @@
 import {requireValue} from '@stagistic/shared';
+import type {ComponentProps} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -103,6 +104,32 @@ afterEach(() => {
 });
 
 describe('EditorSidebar character rows', () => {
+    it('renders no manage buttons without edit handlers (a saved draft or version)', async () => {
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+
+        const root = createRoot(host);
+
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [confirmedCharacter],
+                    groups: [emptyGroup],
+                    unconfirmedCharacters: [],
+                }}
+                actions={{}}
+            />,
+        );
+        mountedRoots.push(root);
+
+        await waitForElementIn(host, '[aria-current], li');
+
+        expect(host.textContent).toContain('ANNA');
+        expect(host.querySelector('[aria-label="Manage ANNA"]')).toBeNull();
+        expect(host.querySelector('[aria-label="Manage group ALL"]')).toBeNull();
+    });
+
     it('marks the matching character as active', async () => {
         renderSidebar(undefined, 'char-1');
 
@@ -125,7 +152,7 @@ describe('EditorSidebar character rows', () => {
 
         await editButton.click();
 
-        expect(onEditCharacter).toHaveBeenCalledWith('char-1');
+        expect(onEditCharacter).toHaveBeenCalledWith('char-1', document.querySelector('[aria-label="Manage ANNA"]'));
     });
 
     it('persists a confirmed character color through the shared picker', async () => {
@@ -196,7 +223,8 @@ describe('EditorSidebar character rows', () => {
 });
 
 describe('EditorSidebar group rows', () => {
-    const renderGroups = (actions = {}) => {
+    // The editable sidebar: a saved draft or version omits the edit handlers and their buttons.
+    const renderGroups = (actions: ComponentProps<typeof EditorSidebar>['actions'] = {onEditGroup: vi.fn()}) => {
         const host = document.createElement('div');
         const root = createRoot(host);
 
@@ -258,7 +286,7 @@ describe('EditorSidebar group rows', () => {
         );
         mountedRoots.push(root);
 
-        await waitForElementIn(host, '[aria-label="Manage ANNA"]');
+        await waitForElementIn(host, 'li');
 
         expect(Array.from(host.querySelectorAll('h2')).some(heading => heading.textContent === 'Groups')).toBe(false);
     });
@@ -273,7 +301,7 @@ describe('EditorSidebar group rows', () => {
 
         expect(document.querySelector('[aria-label="Focus ALL"]')).toBeNull();
         expect(onFocusCharacter).not.toHaveBeenCalled();
-        expect(onEditGroup).toHaveBeenCalledWith('group-1');
+        expect(onEditGroup).toHaveBeenCalledWith('group-1', document.querySelector('[aria-label="Manage group ALL"]'));
     });
 
     it('persists a group color through the shared picker', async () => {
@@ -314,7 +342,7 @@ describe('EditorSidebar group rows', () => {
         );
         mountedRoots.push(root);
 
-        await waitForElement('[aria-label="Manage group ALL"]');
+        await waitForElement('li');
 
         expect(host.textContent).not.toContain('No characters on stage yet');
     });

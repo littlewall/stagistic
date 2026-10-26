@@ -1,4 +1,8 @@
-import {type ReactNode, useState} from 'react';
+import {
+    type ReactNode,
+    useRef,
+    useState,
+} from 'react';
 
 import {Button} from '../atoms/Button/Button';
 import {ModalDialog} from '../dialogs/modal/ModalDialog';
@@ -14,6 +18,7 @@ type AppFooterProps = {
 
 export const AppFooter = ({children}: AppFooterProps) => {
     const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+    const previewTrigger = useRef<HTMLButtonElement>(null);
 
     return (
         <>
@@ -24,6 +29,7 @@ export const AppFooter = ({children}: AppFooterProps) => {
                         aria-label="What does public preview mean?"
                         className={styles.previewLink}
                         type="button"
+                        ref={previewTrigger}
                         onClick={() => setIsPreviewDialogOpen(true)}
                     >
                         what does it mean?
@@ -43,6 +49,7 @@ export const AppFooter = ({children}: AppFooterProps) => {
             <ModalDialog
                 ariaLabel="About the public preview"
                 isOpen={isPreviewDialogOpen}
+                returnFocus={previewTrigger}
                 onClose={() => setIsPreviewDialogOpen(false)}
             >
                 <PublicPreviewNotice />

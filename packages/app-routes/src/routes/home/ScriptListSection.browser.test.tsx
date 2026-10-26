@@ -105,13 +105,16 @@ describe('ScriptListSection cards', () => {
         ['Delete script', 'onDeleteScript'],
     ] as const)('keeps %s independent from opening the script', async (label, action) => {
         const actions = await mountScripts([script]);
+        const trigger = document.querySelector('[aria-label="Open actions for Stored draft"]') as HTMLButtonElement;
 
-        await userEvent.click(document.querySelector('[aria-label="Open actions for Stored draft"]') as HTMLButtonElement);
+        await userEvent.click(trigger);
         await expect.poll(() => document.querySelector('[role="menu"]')).toBeTruthy();
         await userEvent.click(Array.from(document.querySelectorAll('[role="menuitem"]'))
             .find(item => item.textContent?.includes(label)) as HTMLElement);
 
-        expect(actions[action]).toHaveBeenCalledWith(script);
+        expect(actions[action]).toHaveBeenCalledWith(script, trigger);
+        await expect.poll(() => document.querySelector('[role="menu"]')).toBeNull();
+        expect(trigger.isConnected).toBe(true);
         expect(actions.onOpenScript).not.toHaveBeenCalled();
     });
 

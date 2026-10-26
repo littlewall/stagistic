@@ -66,15 +66,23 @@ export interface ScriptPackageWriteScene {
     locationIds: string[],
 }
 
-export interface ScriptPackageWriteAttachment {
+interface ScriptPackageWriteAttachmentBase {
     id: string,
     filename: string,
     mimeType: string,
     sizeBytes: number,
-    blob: Blob,
     createdAt: number,
     updatedAt: number,
 }
+
+/*
+ * Either carries the blob to store, or reuses a blob already in FileStorage
+ * (snapshot restore), which is shared instead of copied.
+ */
+export type ScriptPackageWriteAttachment = ScriptPackageWriteAttachmentBase & (
+    | {blob: Blob, existingStorageKey?: undefined}
+    | {blob?: undefined, existingStorageKey: string}
+);
 
 export interface ScriptPackageWriteBinding {
     musicId: string,

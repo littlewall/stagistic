@@ -1,8 +1,10 @@
 mod commands;
+use stagistic_editor::mcp::{broker::McpBroker, commands::McpState};
+use std::sync::Arc;
 
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
-    Emitter,
+    Emitter, Manager,
 };
 
 const MENU_EVENT_NAME: &str = "menu-action";
@@ -21,7 +23,11 @@ fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Men
         name: Some(app_name.clone()),
         version: Some(pkg_info.version.to_string()),
         copyright: config.bundle.copyright.clone(),
-        authors: config.bundle.publisher.clone().map(|publisher| vec![publisher]),
+        authors: config
+            .bundle
+            .publisher
+            .clone()
+            .map(|publisher| vec![publisher]),
         ..Default::default()
     };
 
@@ -131,7 +137,45 @@ fn main() {
         // Tauri 3 requires the runtime to be selected explicitly; without this
         // the app fails to start with `RuntimeNotConfigured`.
         .runtime(tauri_runtime_wry::Wry::default())
-        .menu(|app| build_menu(app))
+        .setup(|app| {
+            let handle = app.handle().clone();
+            let broker = McpBroker::new(
+                stagistic_mcp_protocol::endpoint_path(),
+                Arc::new(move |request| {
+                    handle
+                        .emit_to(
+                            tauri::EventTarget::webview("main"),
+                            "stagistic:mcp-request",
+                            request,
+                        )
+                        .map_err(|_| ())
+                }),
+            );
+            let mut data_dir = app.path().app_data_dir()?;
+            if cfg!(debug_assertions) {
+                data_dir.push("development");
+            }
+            let state = Arc::new(McpState::new(broker, data_dir, app.path().resource_dir()?));
+            app.manage(state.clone());
+            if state.data_dir.join("mcp/enabled").exists() {
+                tauri::async_runtime::spawn(async move {
+                    if state.set_enabled(true).await.is_err() {
+                        eprintln!("Local MCP could not start.");
+                    }
+                });
+            }
+            Ok(())
+        })
+        .on_page_load(|webview, payload| {
+            if webview.label() == "main"
+                && matches!(payload.event(), tauri::webview::PageLoadEvent::Started)
+            {
+                if let Some(state) = webview.try_state::<Arc<McpState>>() {
+                    state.broker.invalidate();
+                }
+            }
+        })
+        .menu(build_menu)
         .on_menu_event(|app, event| {
             if event.id() == MENU_ID_OPEN_SCRIPT {
                 if let Err(error) = app.emit(MENU_EVENT_NAME, "open-script") {
@@ -147,9 +191,26 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![commands::ping])
+        .invoke_handler(tauri::generate_handler![
+            commands::ping,
+            stagistic_editor::mcp::commands::mcp_status,
+            stagistic_editor::mcp::commands::mcp_enable,
+            stagistic_editor::mcp::commands::mcp_disable,
+            stagistic_editor::mcp::commands::mcp_attach,
+            stagistic_editor::mcp::commands::mcp_detach,
+            stagistic_editor::mcp::commands::mcp_reply,
+            stagistic_editor::mcp::commands::mcp_prepare_manual,
+            stagistic_editor::mcp::commands::mcp_install_claude,
+        ])
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if matches!(event, tauri::RunEvent::Exit) {
+                if let Some(state) = app.try_state::<Arc<McpState>>() {
+                    tauri::async_runtime::block_on(state.broker.disable());
+                }
+            }
+        });
 }

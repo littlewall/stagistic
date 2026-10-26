@@ -18,7 +18,9 @@ import {createOutboxRecorder} from './outbox';
 import {createImportPackageHandler} from './package/importPackage';
 import {createReadScriptPackageSource} from './package/readScriptPackageSource';
 import {createScriptsHandlers} from './scripts';
+import {createSnapshotHandlers} from './snapshots';
 import type {GetDb} from './types';
+import {createUnreferencedFilesCollector} from './unreferencedFiles';
 
 export interface LocalPgliteRepositoryDeps {
     getLocalDb: () => Promise<LocalDb>,
@@ -48,6 +50,10 @@ export const createLocalPgliteRepository = ({
     const music = createMusicHandlers(mutationDeps);
     const locations = createLocationHandlers(mutationDeps);
     const comments = createCommentHandlers(mutationDeps);
+    const snapshots = createSnapshotHandlers({
+        ...mutationDeps,
+        fileStorage,
+    });
     const attachments = createAttachmentHandlers({
         ...mutationDeps,
         fileStorage,
@@ -60,6 +66,9 @@ export const createLocalPgliteRepository = ({
         return dbQueries.listScriptCharacters(await getDb(), scriptId);
     };
     const getScriptPackageSource = createReadScriptPackageSource({getDb});
+    // Blobs of the deleted script are released by `collectUnreferencedFiles` at the next startup.
+    const deleteScript = (scriptId: string) => scripts.delete(scriptId);
+    const collectUnreferencedFiles = createUnreferencedFilesCollector({getDb, fileStorage});
     const reactiveSources = createLocalPgliteReactiveSources({
         getDb,
         listScripts: () => scripts.list(),
@@ -69,6 +78,7 @@ export const createLocalPgliteRepository = ({
         listMusic: scriptId => music.list(scriptId),
         listCommentThreads: scriptId => comments.listThreads(scriptId),
         listCommentMessages: scriptId => comments.listMessages(scriptId),
+        listSnapshots: scriptId => snapshots.list(scriptId),
         listLocations: scriptId => locations.list(scriptId),
         listSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
@@ -85,6 +95,7 @@ export const createLocalPgliteRepository = ({
         allocateScriptLocationId: uuidv7,
         allocateScriptCommentThreadId: uuidv7,
         allocateScriptCommentMessageId: uuidv7,
+        allocateScriptSnapshotId: uuidv7,
         listScripts: options => scripts.list(options),
         getScriptSummary: scriptId => scripts.getSummary(scriptId),
         getScriptPackageSource,
@@ -104,6 +115,13 @@ export const createLocalPgliteRepository = ({
         moveScriptCommentBlockAnchors: (scriptId, fromBlockId, toBlockId) => comments.moveBlockAnchors(scriptId, fromBlockId, toBlockId),
         deleteScriptCommentThread: (scriptId, threadId) => comments.delete(scriptId, threadId),
         restoreScriptCommentThread: (scriptId, snapshot) => comments.restore(scriptId, snapshot),
+        listScriptSnapshots: scriptId => snapshots.list(scriptId),
+        getScriptSnapshot: (scriptId, snapshotId) => snapshots.get(scriptId, snapshotId),
+        createScriptSnapshot: (scriptId, input) => snapshots.create(scriptId, input),
+        updateScriptSnapshot: (scriptId, snapshotId, input) => snapshots.update(scriptId, snapshotId, input),
+        deleteScriptSnapshot: (scriptId, snapshotId) => snapshots.delete(scriptId, snapshotId),
+        replaceScriptSnapshotPayload: (scriptId, snapshotId, input) => snapshots.replacePayload(scriptId, snapshotId, input),
+        loadScriptSnapshotPayload: (scriptId, snapshotId) => snapshots.loadPayload(scriptId, snapshotId),
         listScriptLocations: scriptId => locations.list(scriptId),
         listScriptSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         createScriptLocation: (scriptId, input) => locations.create(scriptId, input),
@@ -121,7 +139,8 @@ export const createLocalPgliteRepository = ({
         renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),
         duplicateScript: (scriptId, input) => scripts.duplicate(scriptId, input),
         duplicateScriptWithId: (scriptId, input) => scripts.duplicateWithId(scriptId, input),
-        deleteScript: scriptId => scripts.delete(scriptId),
+        deleteScript,
+        collectUnreferencedFiles,
         setActiveBlock: (scriptId, blockId) => scripts.setActiveBlock(scriptId, blockId),
         confirmScriptCharacter: (scriptId, key) => characterHandlers.confirmScriptCharacter(scriptId, key),
         createScriptCharacterGroup: (scriptId, key) => {
