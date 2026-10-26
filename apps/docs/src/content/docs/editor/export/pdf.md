@@ -15,6 +15,20 @@ You want to send `The last door` to the cast. Start with the complete script and
 
 The downloaded file uses the script's title, for example `The last door.pdf`. Open the file in your PDF viewer to share or print it. The app header's **Download script** menu provides editable script files instead; see [Download a script file or package](/editor/scripts/download/).
 
+## Save a draft or version with your PDF
+
+When exporting **Current**, use **More download options** beside **Download PDF** to keep the script state you are sending:
+
+1. Choose **Save as draft and download…** or **Save as version and download…**.
+2. Optionally enter a draft **Reason**, or enter a version **Name** and optional **Note**.
+3. Choose **Save draft and download** or **Save version and download**.
+
+The editor saves the state and downloads the prepared PDF with its label in the filename. You stay in Current. Choosing **Download PDF** directly downloads the PDF without creating a draft or version.
+
+To export an earlier state, select it in the state menu beside the script title, then choose **Export**. The preview uses its saved writing and settings, and the PDF filename includes its draft number or version name. You can adjust its Script settings for printing; those changes are saved to the selected state without changing Current.
+
+See [Save drafts and versions](/editor/scripts/drafts-and-versions/) for revisiting, managing and restoring saved states.
+
 ## Move through the preview
 
 - Scroll through the pages, or use <img class="kb-editor-icon" src="/icons/editor/previous-page.svg" alt="" aria-hidden="true" /> **Previous page** and <img class="kb-editor-icon" src="/icons/editor/next-page.svg" alt="" aria-hidden="true" /> **Next page**.
