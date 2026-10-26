@@ -10,7 +10,9 @@ import type {LocalDb} from '../pglite';
 import {scripts} from '../schema';
 import {paginateReadItems} from './pagination';
 import {readMcpFragments} from './readFragments';
+import {readStageLogistics} from './readLogistics';
 import {readMcpCharacters, readMcpOutline} from './readMetadata';
+import {readSceneTelemetry} from './readSceneTelemetry';
 import {readMcpSnapshot} from './readSnapshot';
 import {searchMcpBlocks} from './search';
 import {fingerprint, type McpReadService} from './types';
@@ -52,8 +54,13 @@ export const createLocalMcpReadService = ({getDb}: {getDb: () => Promise<LocalDb
                 const metadata = {
                     get_script_outline: () => readMcpOutline(snapshot),
                     get_characters: () => readMcpCharacters(snapshot),
+                    get_stage_logistics: () => readStageLogistics(snapshot),
+                    get_scene_telemetry: () => readSceneTelemetry(snapshot, 'scene_id' in operation.arguments ? operation.arguments.scene_id ?? '' : ''),
                 };
-                const isMetadata = operation.tool === 'get_script_outline' || operation.tool === 'get_characters';
+                const isMetadata = operation.tool === 'get_script_outline'
+                    || operation.tool === 'get_characters'
+                    || operation.tool === 'get_stage_logistics'
+                    || operation.tool === 'get_scene_telemetry';
                 const items = operation.tool === 'search_script'
                     ? await searchMcpBlocks(tx, snapshot, operation)
                     : isMetadata ? metadata[operation.tool]() : readMcpFragments(snapshot, operation);

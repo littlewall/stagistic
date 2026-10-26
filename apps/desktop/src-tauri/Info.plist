@@ -4,5 +4,16 @@
 <dict>
     <key>CFBundleIconName</key>
     <string>Stagistic</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.stagistic.editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>stagistic</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

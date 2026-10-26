@@ -206,11 +206,21 @@ fn main() {
         .plugin(tauri_plugin_fs::init())
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|app, event| {
-            if matches!(event, tauri::RunEvent::Exit) {
+        .run(|app, event| match event {
+            tauri::RunEvent::Opened { urls } => {
+                for url in urls {
+                    if url.scheme() == "stagistic" {
+                        if let Err(error) = app.emit("deep-link-open", url.as_str()) {
+                            eprintln!("Failed to emit deep-link event: {error}");
+                        }
+                    }
+                }
+            }
+            tauri::RunEvent::Exit => {
                 if let Some(state) = app.try_state::<Arc<McpState>>() {
                     tauri::async_runtime::block_on(state.broker.disable());
                 }
             }
+            _ => {}
         });
 }

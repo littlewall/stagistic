@@ -308,5 +308,89 @@
       "type": "object"
     },
     "name": "search_script"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Read scene-by-scene character presence, entrance/exit sequences and quick-change intervals across all scenes.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "script_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "script_id"
+      ],
+      "title": "ScriptArgs",
+      "type": "object"
+    },
+    "name": "get_stage_logistics"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Read detailed dialogue metrics, speech breakdown, pace and attached music cues for a single scene.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "maxLength": 8192,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "format": "uint",
+          "maximum": 100,
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "scene_id": {
+          "type": "string"
+        },
+        "script_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "script_id",
+        "scene_id"
+      ],
+      "title": "SceneArgs",
+      "type": "object"
+    },
+    "name": "get_scene_telemetry"
   }
 ]

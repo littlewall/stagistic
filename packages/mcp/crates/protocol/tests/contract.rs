@@ -18,3 +18,9 @@ fn accepts_projection_ids_and_rejects_oversized_frames() {
     assert!(parse_request(br#"{"protocol_version":1,"operation":{"tool":"get_scene","arguments":{"script_id":"s","scene_id":"rw-scene:s:block-1"}}}"#).is_ok());
     assert!(parse_request(&vec![b' '; 16_385]).is_err());
 }
+
+#[test]
+fn accepts_playwriting_analysis_operations() {
+    assert!(parse_request(br#"{"protocol_version":1,"operation":{"tool":"get_stage_logistics","arguments":{"script_id":"s"}}}"#).is_ok());
+    assert!(parse_request(br#"{"protocol_version":1,"operation":{"tool":"get_scene_telemetry","arguments":{"script_id":"s","scene_id":"sc-1"}}}"#).is_ok());
+}

@@ -3,11 +3,15 @@ import {
     useScriptComments,
     useScriptRepository,
 } from '@stagistic/app-core';
-import {ScriptEditor} from '@stagistic/editor';
+import {ScriptEditor, useFocusEditorBlock} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
-import {useCallback, useMemo} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+} from 'react';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
@@ -34,6 +38,32 @@ import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
+
+const ScriptEditorBlockFocusWatcher = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const focusBlock = useFocusEditorBlock();
+    const blockId = searchParams.get('block');
+
+    useEffect(() => {
+        if (!blockId) {
+            return;
+        }
+
+        focusBlock(blockId);
+
+        const next = new URLSearchParams(searchParams);
+
+        next.delete('block');
+        setSearchParams(next, {replace: true});
+    }, [
+        blockId,
+        focusBlock,
+        searchParams,
+        setSearchParams,
+    ]);
+
+    return null;
+};
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -284,6 +314,7 @@ export const ScriptEditorRoute = () => {
                 >
                     <ScriptEditor.LeftSidebar>{leftSidebar}</ScriptEditor.LeftSidebar>
                     <ScriptEditor.RightSidebar>{rightSidebar}</ScriptEditor.RightSidebar>
+                    <ScriptEditorBlockFocusWatcher />
                 </DeferredScriptEditor>
                 <AddMusicModal
                     isOpen={musicModals.addMusic.isOpen}

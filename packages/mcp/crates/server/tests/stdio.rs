@@ -25,7 +25,7 @@ async fn offline_handshake_lists_read_tools_and_calls_report_unavailable() {
     assert_eq!(hello["result"]["serverInfo"]["name"], "stagistic");
     input.write_all(b"{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\n").await.unwrap();
     let listed: Value = serde_json::from_str(&output.next_line().await.unwrap().unwrap()).unwrap();
-    assert_eq!(listed["result"]["tools"].as_array().unwrap().len(), 7);
+    assert_eq!(listed["result"]["tools"].as_array().unwrap().len(), 9);
     assert!(listed["result"]["tools"]
         .as_array()
         .unwrap()
