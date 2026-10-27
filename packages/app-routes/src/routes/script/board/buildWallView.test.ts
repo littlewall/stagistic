@@ -90,6 +90,7 @@ const build = (overrides: Partial<Parameters<typeof buildWallView>[0]> = {}) => 
     displayColorByKey: new Map([['BEN', '#2266cc']]),
     getStartPage: id => (id === 's1' ? 7 : null),
     selectedIds: new Set(),
+    showOnStage: true,
     showMentioned: true,
     ...overrides,
 });
@@ -137,6 +138,14 @@ describe('buildWallView', () => {
         const chips = sceneNamed(build({showMentioned: false}), 's1')?.chips;
 
         expect(chips?.map(chip => chip.id)).toEqual(['c-anna', 'key:DOCTOR']);
+    });
+
+    it('drops on-stage characters from the chips when they are switched off, yet still filters by them', () => {
+        const acts = build({showOnStage: false, selectedIds: new Set(['c-anna'])});
+
+        expect(sceneNamed(acts, 's1')?.chips.map(chip => chip.id)).toEqual(['c-ben']);
+        expect(sceneNamed(acts, 's1')?.isCollapsed).toBe(false);
+        expect(sceneNamed(acts, 's2')?.isCollapsed).toBe(true);
     });
 
     it('shows every scene in full when nothing is filtered', () => {

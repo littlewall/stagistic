@@ -66,7 +66,21 @@ Záznam na dvojici scéna × postava:
 - **Vložení scény**: „+“ mezi kartami a na konci sekce. Otevře prázdnou kartu s polem pro název. Enter s neprázdným názvem vloží scene heading na dané místo, Escape zruší bez zásahu do dokumentu.
 - **Přesun scény**: drag & drop karty v rámci aktu i mezi akty, také z klávesnice (jako structure sidebar). Přesouvá se celý segment scény (`moveSceneSegment`).
 - **Filtr postav** (více postav): scény s vybranou postavou zvýrazní její větu a ostatní postavy ztlumí. Scény bez ní se sbalí do tenkého řádku (číslo a název), mezery v jejím příběhu tak zůstanou vidět.
-- **Hustota karet**: jen název / s outlinem / s postavami.
+- Šířka karty 18rem.
+
+## Lišta Boardu (varianta A)
+
+Mockup: lišta s menu, schválená 2026-10-27.
+
+- Jeden řádek pod hlavičkou aplikace, oddělený hairline. Vlevo záložky pohledů (Wall · Matrix · Arcs · Numbers), aktuální má ink podtržení (navigace, ne výběr). Zobrazují se jen hotové pohledy.
+- Vpravo dvě tlačítka: **filtr postav** a **View**.
+- **Filtr postav**, stavy tlačítka:
+  - nic nevybráno: „Characters ▾“;
+  - jedna postava: barevná tečka + jméno + ▾;
+  - víc postav: překrývající se barevné tečky vybraných postav + počet („3 characters“) + ▾;
+  - při výběru má tlačítko stav výběru (Creamed Corn) a ✕ „Clear character filter“ je uvnitř ovládacího prvku mezi popiskem a šipkou ▾ (vizuálně jeden prvek, v DOM samostatné tlačítko, ne vnořené). Šipka zůstává na pravém okraji, nic na konci lišty neposkakuje.
+- **Popover filtru**: vyhledávací pole „Find character…“, seznam postav (zaškrtávátko, barevná tečka, jméno, „N scenes“), vybrané řádky ve stavu výběru, dole „Clear filter“. Pořadí podle prvního výskytu ve scénáři, postavy bez scén na konci.
+- **Popover View**, nadpis „Show on cards“: nezávislá pozitivní zaškrtávátka, každé něco přidává. Outline (až od kroku 3), „Characters on stage“ (posuny a přítomné), „Mentioned characters“ s vedlejším textem „Named in dialogue or lyrics only“. Bez vnoření a bez neaktivních stavů. Nahrazuje přepínač hustoty. Když „Mentioned characters“ není zaškrtnuté, zmínka se nepočítá ani pro filtr.
 - Počáteční strana pochází ze stránkování editoru (`scenePlacement.startPage`). Číslování se může lišit od exportu. Když stránkování není k dispozici nebo je po změně na boardu zastaralé, karta ukáže „–“.
 
 ## Matrix

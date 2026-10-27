@@ -1,0 +1,29 @@
+.dot {
+    --dot-color: var(--color-text-muted);
+
+    flex: none;
+    box-sizing: border-box;
+    width: .625rem;
+    height: .625rem;
+    background: var(--dot-color);
+    border-radius: var(--radius-full);
+
+    &.neutral {
+        --dot-color: var(--color-border-strong);
+    }
+}
+
+.stack {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+
+    /* A ring in the surface color separates neighbors where they overlap. */
+    & .dot {
+        box-shadow: 0 0 0 1.5px var(--color-surface);
+    }
+
+    & .dot + .dot {
+        margin-left: calc(var(--space-sm) * -.75);
+    }
+}

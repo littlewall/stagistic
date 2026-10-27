@@ -1,0 +1,90 @@
+.group {
+    position: relative;
+    display: inline-flex;
+    box-sizing: border-box;
+    height: var(--control-height-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    /* Chosen state belongs to the whole control; the cross is laid over the room the button keeps. */
+    &.active {
+        background: var(--state-selected);
+        border-color: var(--state-selected-edge);
+    }
+}
+
+/* Singular geometry: sits in the button's trailing slot, left of the caret. */
+.clear {
+    position: absolute;
+    top: 50%;
+    right: calc(var(--space-md) + var(--icon-size-sm) + var(--space-md));
+    transform: translateY(-50%);
+}
+
+.name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    max-height: 18rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-sm);
+
+    &:hover:not(.chosen) {
+        background: var(--state-hover);
+    }
+
+    &.chosen {
+        background: var(--state-selected);
+    }
+}
+
+.check {
+    flex: 1;
+    min-width: 0;
+    min-height: 1.75rem;
+    color: var(--color-text);
+}
+
+.rowLabel {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    min-width: 0;
+}
+
+.count {
+    margin-left: auto;
+    padding-left: var(--space-lg);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.empty {
+    margin: 0;
+    padding: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-subtle);
+}

@@ -25,10 +25,19 @@ export interface WallViewInput {
     getStartPage: (headingBlockId: string) => number | null,
     /** Filtered characters; empty filters nothing. */
     selectedIds: ReadonlySet<string>,
+    /** Whether chips list characters on stage. The filter counts them either way. */
+    showOnStage: boolean,
+    /** Whether chips list characters only mentioned; a mention counts for the filter only then. */
     showMentioned: boolean,
 }
 
 export const DEFAULT_ACT_KEY = '__default-act__';
+
+/** The character's own color, else the one the editor assigned to its key. */
+export const resolveCharacterColor = (
+    record: ScriptCharacterRecord,
+    displayColorByKey: ReadonlyMap<string, string>,
+): string | null => record.colorHex ?? displayColorByKey.get(record.key) ?? null;
 
 /*
  * Shapes the model for the Wall. Filtering never hides a scene: scenes without a selected
@@ -41,6 +50,7 @@ export const buildWallView = ({
     displayColorByKey,
     getStartPage,
     selectedIds,
+    showOnStage,
     showMentioned,
 }: WallViewInput): WallAct[] => {
     const recordById = new Map(characters.map(character => [character.id, character]));
@@ -50,17 +60,18 @@ export const buildWallView = ({
         key: act.actBlockId ?? DEFAULT_ACT_KEY,
         name: act.name,
         scenes: act.scenes.map(scene => {
-            const shown = scene.characters.filter(character => showMentioned || character.level === 'present');
+            const counted = scene.characters.filter(character => showMentioned || character.level === 'present');
+            const matchesFilter = counted.some(character => character.characterId && selectedIds.has(character.characterId));
             const chips = [
-                ...shown.filter(character => character.level === 'present'),
-                ...shown.filter(character => character.level === 'mentioned'),
+                ...showOnStage ? counted.filter(character => character.level === 'present') : [],
+                ...showMentioned ? counted.filter(character => character.level === 'mentioned') : [],
             ].map<BoardCharacterChip>(character => {
                 const record = character.characterId ? recordById.get(character.characterId) : undefined;
 
                 return {
                     id: character.entryId,
                     name: character.key,
-                    color: record ? record.colorHex ?? displayColorByKey.get(record.key) ?? null : null,
+                    color: record ? resolveCharacterColor(record, displayColorByKey) : null,
                     level: character.level,
                     isDimmed: isFiltering && !(character.characterId && selectedIds.has(character.characterId)),
                 };
@@ -71,7 +82,7 @@ export const buildWallView = ({
                 number: scene.number,
                 title: scene.title,
                 page: getStartPage(scene.headingBlockId),
-                isCollapsed: isFiltering && chips.every(chip => chip.isDimmed),
+                isCollapsed: isFiltering && !matchesFilter,
                 chips,
             };
         }),

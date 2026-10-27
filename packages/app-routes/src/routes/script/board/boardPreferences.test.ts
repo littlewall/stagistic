@@ -14,11 +14,11 @@ describe('parseBoardPreferences', () => {
     it('reads a stored value', () => {
         expect(parseBoardPreferences({
             characterIds: ['a', 'b'],
-            density: 'title',
+            showOnStage: false,
             showMentioned: false,
         })).toEqual({
             characterIds: ['a', 'b'],
-            density: 'title',
+            showOnStage: false,
             showMentioned: false,
         });
     });
@@ -26,7 +26,7 @@ describe('parseBoardPreferences', () => {
     it('falls back field by field on stale data', () => {
         expect(parseBoardPreferences({
             characterIds: ['a', 4],
-            density: 'wide',
+            showOnStage: 'no',
             showMentioned: 'yes',
         })).toEqual({
             ...DEFAULT_BOARD_PREFERENCES,

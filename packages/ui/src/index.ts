@@ -122,13 +122,11 @@ export {Section, SectionHeader} from './organisms/Section/Section';
 
 // ─── Board ──────────────────────────────────────────────────────────────────
 export {BoardActSection, type BoardActSectionProps} from './board/BoardActSection';
+export {type BoardFilterCharacter} from './board/BoardCharacterFilter';
 export {BoardEmpty, type BoardEmptyProps} from './board/BoardEmpty';
 export {BoardLayout, type BoardLayoutProps} from './board/BoardLayout';
-export {
-    type BoardDensity,
-    BoardToolbar,
-    type BoardToolbarProps,
-} from './board/BoardToolbar';
+export {type BoardLens} from './board/BoardLensTabs';
+export {BoardToolbar, type BoardToolbarProps} from './board/BoardToolbar';
 export {
     type BoardCharacterChip,
     CharacterChipStack,

@@ -9,6 +9,7 @@ import {
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
+import {DEFAULT_BOARD_LENS_ID, isBoardLensId} from './board/boardLenses';
 import {BoardWall} from './board/BoardWall';
 import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
@@ -17,11 +18,7 @@ import {getScriptBasePath, useScriptAccess} from './workspace/ScriptAccessContex
 import {useScriptCharacters} from './workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
-/** Lenses of the Board; more arrive as they are built. */
-const BOARD_LENSES = ['wall'] as const;
-const DEFAULT_BOARD_LENS = 'wall';
-
-const ScriptBoardPage = () => {
+const ScriptBoardPage = ({lensId}: {lensId: string}) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
     const {
@@ -34,6 +31,7 @@ const ScriptBoardPage = () => {
         isReadOnly,
         snapshot,
         liveScriptTitle,
+        basePath,
     } = useScriptAccess();
     const {
         openSettingsModal,
@@ -49,6 +47,8 @@ const ScriptBoardPage = () => {
 
     useDocumentTitle(currentScript ? `Board · ${fileTitle}` : 'Board');
 
+    const boardPath = `${basePath ?? getScriptBasePath(currentScriptId ?? '')}/board`;
+    const openLens = useCallback((nextLensId: string) => void navigate(`${boardPath}/${nextLensId}`), [boardPath, navigate]);
     const flushScript = useCallback(async () => {
         const editorValue = getEditorValue();
 
@@ -84,7 +84,7 @@ const ScriptBoardPage = () => {
             }
         >
             {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
-            {currentScriptId ? <BoardWall /> : null}
+            {currentScriptId ? <BoardWall activeLensId={lensId} onSelectLens={openLens} /> : null}
             {scriptStateControls.modals}
         </AppLayout>
     );
@@ -96,9 +96,9 @@ export const ScriptBoardRoute = () => {
     const {currentScriptId} = useScriptWorkspace();
     const {basePath} = useScriptAccess();
 
-    if (!BOARD_LENSES.some(known => known === lens)) {
-        return <Navigate to={`${basePath ?? getScriptBasePath(currentScriptId ?? '')}/board/${DEFAULT_BOARD_LENS}`} replace />;
+    if (!isBoardLensId(lens)) {
+        return <Navigate to={`${basePath ?? getScriptBasePath(currentScriptId ?? '')}/board/${DEFAULT_BOARD_LENS_ID}`} replace />;
     }
 
-    return <ScriptBoardPage />;
+    return <ScriptBoardPage lensId={lens} />;
 };

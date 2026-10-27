@@ -1,39 +1,34 @@
 import clsx from 'clsx';
 
-import {MultiComboBox, type MultiComboBoxOption} from '../molecules/forms/MultiComboBox/MultiComboBox';
+import {BoardCharacterFilter, type BoardFilterCharacter} from './BoardCharacterFilter';
 import {
-    ToggleButtonGroup,
-    type ToggleButtonGroupOption,
-} from '../molecules/ToggleButtonGroup/ToggleButtonGroup';
+    BoardLensTabs,
+    type BoardLensTabsProps,
+} from './BoardLensTabs';
 import styles from './BoardToolbar.module.css';
+import {BoardViewMenu} from './BoardViewMenu';
 
-export type BoardDensity = 'title' | 'characters';
-
-export interface BoardToolbarProps {
-    characterOptions: MultiComboBoxOption[],
-    selectedCharacterIds: string[],
+export interface BoardToolbarProps extends BoardLensTabsProps {
+    filterCharacters: readonly BoardFilterCharacter[],
+    selectedCharacterIds: readonly string[],
     onSelectedCharacterIdsChange: (ids: string[]) => void,
-    density: BoardDensity,
-    onDensityChange: (density: BoardDensity) => void,
+    showOnStage: boolean,
+    onShowOnStageChange: (show: boolean) => void,
     showMentioned: boolean,
     onShowMentionedChange: (show: boolean) => void,
     className?: string,
 }
 
-const DENSITY_OPTIONS: readonly ToggleButtonGroupOption<BoardDensity>[] = [
-    {value: 'title', label: 'Title'},
-    {value: 'characters', label: 'Characters'},
-];
-
-const MENTIONED_OPTIONS: readonly ToggleButtonGroupOption<'mentioned'>[] = [{value: 'mentioned', label: 'Mentioned'}];
-
-/** Board controls: a character filter, card density, and whether mere mentions show. */
+/** One row: the Board's views on the left, character filter and card options on the right. */
 export const BoardToolbar = ({
-    characterOptions,
+    lenses,
+    activeLensId,
+    onSelectLens,
+    filterCharacters,
     selectedCharacterIds,
     onSelectedCharacterIdsChange,
-    density,
-    onDensityChange,
+    showOnStage,
+    onShowOnStageChange,
     showMentioned,
     onShowMentionedChange,
     className,
@@ -43,27 +38,23 @@ export const BoardToolbar = ({
         role="group"
         aria-label="Board options"
     >
-        <MultiComboBox
-            className={styles.filter}
-            label="Characters"
-            placeholder="Show scenes with…"
-            options={characterOptions}
-            value={selectedCharacterIds}
-            onChange={onSelectedCharacterIdsChange}
+        <BoardLensTabs
+            lenses={lenses}
+            activeLensId={activeLensId}
+            onSelectLens={onSelectLens}
         />
-        <ToggleButtonGroup
-            ariaLabel="Card density"
-            options={DENSITY_OPTIONS}
-            value={density}
-            onChange={onDensityChange}
-        />
-        <ToggleButtonGroup
-            selectionMode="multiple"
-            ariaLabel="Mentioned characters"
-            options={MENTIONED_OPTIONS}
-            value={showMentioned ? ['mentioned'] : []}
-            isDisabled={density === 'title'}
-            onChange={values => onShowMentionedChange(values.includes('mentioned'))}
-        />
+        <div className={styles.controls}>
+            <BoardCharacterFilter
+                characters={filterCharacters}
+                selectedIds={selectedCharacterIds}
+                onChange={onSelectedCharacterIdsChange}
+            />
+            <BoardViewMenu
+                showOnStage={showOnStage}
+                onShowOnStageChange={onShowOnStageChange}
+                showMentioned={showMentioned}
+                onShowMentionedChange={onShowMentionedChange}
+            />
+        </div>
     </div>
 );

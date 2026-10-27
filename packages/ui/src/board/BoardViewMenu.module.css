@@ -1,0 +1,19 @@
+.title {
+    padding: var(--space-md) var(--space-md) var(--space-sm);
+}
+
+.option {
+    min-height: 1.75rem;
+    padding: var(--space-xs) var(--space-md);
+    color: var(--color-text);
+}
+
+.optionText {
+    display: flex;
+    flex-direction: column;
+}
+
+.hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}

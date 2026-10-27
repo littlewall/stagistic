@@ -58,6 +58,8 @@
     transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
+/* Grows so rows that stretch the checkbox can push trailing content to the far edge. */
 .label {
+    flex: 1 1 auto;
     white-space: nowrap;
 }

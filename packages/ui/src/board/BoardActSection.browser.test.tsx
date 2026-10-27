@@ -49,7 +49,7 @@ afterEach(() => {
 describe('BoardActSection', () => {
     it('names the section by its act and lays cards on fixed-width tracks that wrap', async () => {
         mount(
-            520,
+            640,
             <BoardActSection title="ACT ONE">
                 <SceneCard number={1} title="One" page={1} />
                 <SceneCard number={2} title="Two" page={2} />
@@ -66,15 +66,15 @@ describe('BoardActSection', () => {
         ] = cards;
 
         expect(section.querySelector('h2')?.textContent).toBe('ACT ONE');
-        expect(requireValue(first, 'first').width).toBe(240);
-        expect(requireValue(second, 'second').width).toBe(240);
+        expect(requireValue(first, 'first').width).toBe(288);
+        expect(requireValue(second, 'second').width).toBe(288);
         expect(requireValue(second, 'second').top).toBe(requireValue(first, 'first').top);
         expect(requireValue(third, 'third').top).toBeGreaterThan(requireValue(first, 'first').top);
         expect(requireValue(third, 'third').left).toBe(requireValue(first, 'first').left);
     });
 
     it('says so when an act has no scenes', async () => {
-        mount(520, <BoardActSection title="ACT TWO" />);
+        mount(640, <BoardActSection title="ACT TWO" />);
 
         await waitForElement('section[aria-label="ACT TWO"]');
 

@@ -1,11 +1,13 @@
 .toolbar {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-lg) var(--space-xl);
-    align-items: flex-end;
+    gap: var(--space-xl);
+    align-items: center;
+    justify-content: space-between;
+    height: 2.75rem;
 }
 
-.filter {
-    flex: 1 1 16rem;
-    max-width: 28rem;
+.controls {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
 }

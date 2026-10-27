@@ -40,7 +40,7 @@ const renderCard = (props: Partial<SceneCardProps> = {}, children?: ReactNode) =
     root.render(
         <ul
             style={{
-                width: '15rem',
+                width: '18rem',
                 listStyle: 'none',
                 margin: 0,
                 padding: 0,

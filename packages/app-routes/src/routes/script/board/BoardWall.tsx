@@ -14,7 +14,9 @@ import {useMemo} from 'react';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
+import {BOARD_LENSES} from './boardLenses';
 import {useBoardPreferences} from './boardPreferences';
+import {buildFilterCharacters} from './buildFilterCharacters';
 import {buildWallView, type WallScene} from './buildWallView';
 import {useOpenInEditor} from './useOpenInEditor';
 import {useSceneBoardSource} from './useSceneBoardSource';
@@ -46,7 +48,12 @@ const buildSceneActions = (
 });
 
 /** The Wall lens: acts as sections, scenes as cards with their derived cast. Read-only for now. */
-export const BoardWall = () => {
+interface BoardWallProps {
+    activeLensId: string,
+    onSelectLens: (lensId: string) => void,
+}
+
+export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
     const {currentScriptId} = useScriptWorkspace();
     const {isReadOnly} = useScriptReadOnlyState();
     const {
@@ -79,21 +86,25 @@ export const BoardWall = () => {
         displayColorByKey: source.displayColorByKey,
         getStartPage: source.getStartPage,
         selectedIds: new Set(selectedIds),
+        showOnStage: preferences.showOnStage,
         showMentioned: preferences.showMentioned,
     }), [
         confirmedCharacterRecords,
         model,
         preferences.showMentioned,
+        preferences.showOnStage,
         selectedIds,
         source.displayColorByKey,
         source.getStartPage,
     ]);
 
-    const characterOptions = useMemo(
-        () => confirmedCharacterRecords
-            .map(character => ({id: character.id, label: character.key}))
-            .toSorted((left, right) => left.label.localeCompare(right.label)),
-        [confirmedCharacterRecords],
+    const filterCharacters = useMemo(
+        () => buildFilterCharacters(model, confirmedCharacterRecords, source.displayColorByKey),
+        [
+            confirmedCharacterRecords,
+            model,
+            source.displayColorByKey,
+        ],
     );
 
     if (!model.acts.some(act => act.scenes.length > 0)) {
@@ -110,11 +121,14 @@ export const BoardWall = () => {
         <BoardLayout
             toolbar={(
                 <BoardToolbar
-                    characterOptions={characterOptions}
+                    lenses={BOARD_LENSES}
+                    activeLensId={activeLensId}
+                    onSelectLens={onSelectLens}
+                    filterCharacters={filterCharacters}
                     selectedCharacterIds={selectedIds}
                     onSelectedCharacterIdsChange={characterIds => setPreferences({...preferences, characterIds})}
-                    density={preferences.density}
-                    onDensityChange={density => setPreferences({...preferences, density})}
+                    showOnStage={preferences.showOnStage}
+                    onShowOnStageChange={showOnStage => setPreferences({...preferences, showOnStage})}
                     showMentioned={preferences.showMentioned}
                     onShowMentionedChange={showMentioned => setPreferences({...preferences, showMentioned})}
                 />
@@ -131,7 +145,7 @@ export const BoardWall = () => {
                             variant={scene.isCollapsed ? 'collapsed' : 'full'}
                             actions={buildSceneActions(scene, isReadOnly, openInEditor)}
                         >
-                            {preferences.density === 'characters' ? <CharacterChipStack characters={scene.chips} /> : null}
+                            <CharacterChipStack characters={scene.chips} />
                         </SceneCard>
                     ))}
                 </BoardActSection>

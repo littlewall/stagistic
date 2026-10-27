@@ -1,7 +1,6 @@
 import '../../styles/tokens.css';
 
 import {requireValue} from '@stagistic/shared';
-import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -16,36 +15,53 @@ import {BoardToolbar, type BoardToolbarProps} from './BoardToolbar';
 
 let root: Root | null = null;
 
-const waitForElement = async <T extends Element>(selector: string): Promise<T> => {
-    const deadline = Date.now() + 1000;
+const waitFor = async <T,>(read: () => T | null | undefined | false): Promise<T> => {
+    const deadline = Date.now() + 1500;
 
     while (Date.now() < deadline) {
-        const element = document.querySelector<T>(selector);
+        const value = read();
 
-        if (element) {
-            return element;
+        if (value) {
+            return value;
         }
 
         await new Promise(resolve => window.setTimeout(resolve, 10));
     }
 
-    throw new Error(`Expected element matching ${selector}`);
+    throw new Error('Condition not met in time');
 };
 
-const OPTIONS = [{id: 'anna', label: 'ANNA'}, {id: 'ben', label: 'BEN'}];
+const CHARACTERS = [
+    {
+        id: 'anna',
+        name: 'ANNA',
+        color: '#cc3344',
+        sceneCount: 3,
+    },
+    {
+        id: 'ben',
+        name: 'BEN',
+        color: '#2266cc',
+        sceneCount: 1,
+    },
+];
 
 const renderToolbar = (props: Partial<BoardToolbarProps> = {}) => {
     const host = document.createElement('div');
 
+    host.style.width = '1000px';
     document.body.appendChild(host);
     root = createRoot(host);
     root.render(
         <BoardToolbar
-            characterOptions={OPTIONS}
+            lenses={[{id: 'wall', label: 'Wall'}]}
+            activeLensId="wall"
+            onSelectLens={vi.fn()}
+            filterCharacters={CHARACTERS}
             selectedCharacterIds={[]}
             onSelectedCharacterIdsChange={vi.fn()}
-            density="characters"
-            onDensityChange={vi.fn()}
+            showOnStage
+            onShowOnStageChange={vi.fn()}
             showMentioned
             onShowMentionedChange={vi.fn()}
             {...props}
@@ -59,85 +75,109 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-const button = (name: string) => requireValue(
-    [...document.querySelectorAll<HTMLElement>('button')].find(element => element.getAttribute('aria-label') === name || element.textContent === name),
-    name,
+const button = (name: string) => [...document.querySelectorAll<HTMLElement>('button')].find(
+    element => element.getAttribute('aria-label') === name || element.textContent?.trim() === name,
 );
+const rectOf = (name: string) => requireValue(button(name), name).getBoundingClientRect();
 
 describe('BoardToolbar', () => {
-    it('keeps one name for the Mentioned toggle and reports its pressed state', async () => {
-        const onShowMentionedChange = vi.fn<(show: boolean) => void>();
+    it('keeps the views left and the filter and View buttons right, on one row', async () => {
+        renderToolbar();
+        await waitFor(() => button('Wall'));
 
-        const Harness = () => {
-            const [show, setShow] = useState(true);
+        const [
+            wall,
+            characters,
+            view,
+        ] = [
+            rectOf('Wall'),
+            rectOf('Characters'),
+            rectOf('View'),
+        ];
 
-            return (
-                <BoardToolbar
-                    characterOptions={OPTIONS}
-                    selectedCharacterIds={[]}
-                    onSelectedCharacterIdsChange={vi.fn()}
-                    density="characters"
-                    onDensityChange={vi.fn()}
-                    showMentioned={show}
-                    onShowMentionedChange={next => {
-                        onShowMentionedChange(next);
-                        setShow(next);
-                    }}
-                />
-            );
-        };
-        const host = document.createElement('div');
-
-        document.body.appendChild(host);
-        root = createRoot(host);
-        root.render(<Harness />);
-
-        await waitForElement('button[aria-label="Mentioned"]');
-
-        expect(button('Mentioned').getAttribute('aria-pressed')).toBe('true');
-
-        await userEvent.click(button('Mentioned'));
-
-        expect(onShowMentionedChange).toHaveBeenLastCalledWith(false);
-        expect(button('Mentioned').getAttribute('aria-pressed')).toBe('false');
-        expect(button('Mentioned').getAttribute('aria-label')).toBe('Mentioned');
+        expect(wall.right).toBeLessThan(characters.left);
+        expect(characters.right).toBeLessThan(view.left);
+        expect(Math.abs(wall.top + wall.height / 2 - (characters.top + characters.height / 2))).toBeLessThan(2);
+        expect(document.querySelectorAll('[aria-label="Board options"] button')).toHaveLength(3);
     });
 
-    it('switches card density', async () => {
-        const onDensityChange = vi.fn();
+    it('marks the current view with the ink underline and lists only the views it is given', async () => {
+        const onSelectLens = vi.fn();
 
-        renderToolbar({onDensityChange});
-        await waitForElement('button[aria-label="Title"]');
+        renderToolbar({
+            lenses: [{id: 'wall', label: 'Wall'}, {id: 'matrix', label: 'Matrix'}],
+            onSelectLens,
+        });
 
-        expect(button('Characters').getAttribute('aria-pressed') ?? button('Characters').getAttribute('aria-checked')).not.toBeNull();
+        const wall = await waitFor(() => button('Wall'));
+        const matrix = requireValue(button('Matrix'), 'matrix');
 
-        await userEvent.click(button('Title'));
+        expect(document.querySelector('nav')?.getAttribute('aria-label')).toBe('Board views');
+        expect(wall.getAttribute('aria-current')).toBe('page');
+        expect(matrix.getAttribute('aria-current')).toBeNull();
+        expect(getComputedStyle(wall).borderBottomColor).toBe(getComputedStyle(wall).color);
+        expect(getComputedStyle(matrix).borderBottomColor).toBe('rgba(0, 0, 0, 0)');
+        expect(button('Arcs')).toBeUndefined();
 
-        expect(onDensityChange).toHaveBeenCalledWith('title');
+        await userEvent.click(wall);
+
+        expect(onSelectLens).not.toHaveBeenCalled();
+
+        await userEvent.click(matrix);
+
+        expect(onSelectLens).toHaveBeenCalledWith('matrix');
     });
 
-    it('disables Mentioned while cards show titles only', async () => {
-        renderToolbar({density: 'title'});
-        await waitForElement('button[aria-label="Mentioned"]');
+    it('offers independent positive options in the View panel', async () => {
+        const onShowOnStageChange = vi.fn();
+        const onShowMentionedChange = vi.fn();
 
-        expect(button('Mentioned').hasAttribute('disabled')).toBe(true);
+        renderToolbar({
+            showOnStage: true,
+            showMentioned: false,
+            onShowOnStageChange,
+            onShowMentionedChange,
+        });
+        await userEvent.click(await waitFor(() => button('View')));
+
+        const dialog = await waitFor(() => document.querySelector<HTMLElement>('[role="dialog"]'));
+        const inputs = [...dialog.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
+        const [onStage, mentioned] = inputs.map(input => requireValue(input.closest('label'), 'label'));
+
+        expect(dialog.getAttribute('aria-label')).toBe('Show on cards');
+        expect(dialog.textContent).toContain('Show on cards');
+        expect(inputs.map(input => input.checked)).toEqual([true, false]);
+        expect(inputs.map(input => input.disabled)).toEqual([false, false]);
+        expect(onStage?.textContent).toBe('Characters on stage');
+        expect(mentioned?.textContent).toBe('Mentioned charactersNamed in dialogue or lyrics only');
+        expect(dialog.textContent).not.toContain('Outline');
+
+        const boxLeft = (label: Element) => requireValue(label.querySelector('span'), 'box').getBoundingClientRect().left;
+
+        expect(boxLeft(requireValue(mentioned, 'mentioned'))).toBe(boxLeft(requireValue(onStage, 'on stage')));
+
+        await userEvent.click(requireValue(mentioned, 'mentioned'));
+
+        expect(onShowMentionedChange).toHaveBeenCalledWith(true);
+
+        await userEvent.click(requireValue(onStage, 'on stage'));
+
+        expect(onShowOnStageChange).toHaveBeenCalledWith(false);
     });
 
-    it('lists the selected filter characters', async () => {
-        renderToolbar({selectedCharacterIds: ['ben']});
-        await waitForElement('button[aria-label="Remove BEN"]');
+    it('keeps the filter control and View button on the same right edges when a filter is set', async () => {
+        renderToolbar();
+        await waitFor(() => button('Characters'));
 
-        expect(document.body.textContent).toContain('BEN');
-        expect(document.body.textContent).not.toContain('ANNA');
-        expect(document.querySelector('label')?.textContent).toBe('Characters');
-    });
+        const controlRight = (name: string) => requireValue(button(name)?.parentElement, 'control').getBoundingClientRect().right;
+        const before = {filter: controlRight('Characters'), view: rectOf('View').left};
 
-    it('reports a removed filter character', async () => {
-        const onSelectedCharacterIdsChange = vi.fn();
+        root?.unmount();
+        document.body.innerHTML = '';
+        renderToolbar({selectedCharacterIds: ['anna', 'ben']});
+        await waitFor(() => button('Clear character filter'));
 
-        renderToolbar({selectedCharacterIds: ['ben', 'anna'], onSelectedCharacterIdsChange});
-        await userEvent.click(await waitForElement('button[aria-label="Remove BEN"]'));
-
-        expect(onSelectedCharacterIdsChange).toHaveBeenCalledWith(['anna']);
+        expect(controlRight('Characters: ANNA, BEN')).toBe(before.filter);
+        expect(rectOf('View').left).toBe(before.view);
     });
 });

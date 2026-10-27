@@ -202,6 +202,41 @@ describe('Board view', () => {
     });
 });
 
+describe('Board toolbar', () => {
+    it('filters from the Characters panel, clears with the cross, and hides cast with View', async () => {
+        const {scriptId} = await createScript();
+
+        await mountApp(`/script/${scriptId}/board/wall`);
+        await waitFor(() => sceneHeadings().length === 3);
+
+        const hasChips = (heading: string) => cardOf(heading).querySelector('[aria-label^="Characters"]') !== null;
+
+        expect(findButton('Wall')?.getAttribute('aria-current')).toBe('page');
+
+        await userEvent.click(requireValue(findButton('Characters')));
+        await waitFor(() => document.querySelector('[role="dialog"]'));
+        await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="dialog"] li label')].find(label => label.textContent?.startsWith('BEN'))));
+        await waitFor(() => findButton('Clear character filter'));
+
+        expect(findButton('Characters: BEN')).toBeDefined();
+        expect(hasChips('1. Kitchen, night')).toBe(false);
+        expect(hasChips('2. Garden')).toBe(true);
+
+        await userEvent.keyboard('{Escape}');
+        await waitFor(() => document.querySelector('[role="dialog"]') === null);
+        await userEvent.click(requireValue(findButton('Clear character filter')));
+        await waitFor(() => hasChips('1. Kitchen, night'));
+
+        expect(findButton('Clear character filter')).toBeUndefined();
+
+        await userEvent.click(requireValue(findButton('View')));
+        await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="dialog"] label')].find(label => label.textContent === 'Characters on stage')));
+        await waitFor(() => !hasChips('1. Kitchen, night'));
+
+        expect(hasChips('3. Roof')).toBe(false);
+    });
+});
+
 describe('Board and Editor', () => {
     it('shows a scene and a character typed in the Editor, without waiting for a save', async () => {
         const {scriptId} = await createScript();
