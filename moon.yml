@@ -8,6 +8,12 @@ workspace:
     include: []
 
 tasks:
+  # Agent checks with shared results/logs; full regression always runs afresh.
+  verify:
+    command: 'node scripts/verify.mjs'
+    options:
+      cache: false
+
   lint:
     script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
     options:
