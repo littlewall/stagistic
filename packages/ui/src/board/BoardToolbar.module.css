@@ -1,0 +1,11 @@
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg) var(--space-xl);
+    align-items: flex-end;
+}
+
+.filter {
+    flex: 1 1 16rem;
+    max-width: 28rem;
+}

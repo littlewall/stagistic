@@ -1,0 +1,68 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    min-width: 0;
+    padding: var(--space-md) var(--space-md) var(--space-lg) var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    &.collapsed {
+        padding-block: var(--space-xs);
+        background: transparent;
+        border-color: var(--color-border-subtle);
+    }
+}
+
+.head {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.heading {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding-top: var(--space-sm);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+
+    .collapsed & {
+        overflow: hidden;
+        padding-top: 0;
+        color: var(--color-text-muted);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.number {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.title {
+    font-family: var(--font-family-mono);
+    overflow-wrap: anywhere;
+}
+
+.page {
+    flex: none;
+    padding-top: var(--space-md);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--line-height-none);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.body {
+    min-width: 0;
+    padding-right: var(--space-md);
+}

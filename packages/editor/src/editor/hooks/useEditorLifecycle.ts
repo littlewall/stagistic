@@ -20,6 +20,7 @@ import {
     type UseEditorLifecycleArgs,
     useEditorLifecycleSync,
 } from './editorLifecycleSync';
+import {useEditorIndexPublication} from './useEditorIndexPublication';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
@@ -99,6 +100,8 @@ export const useEditorLifecycle = ({
 
         patchFallbackSnapshot(snapshot, meta);
     });
+
+    useEditorIndexPublication(instance, liveStore);
 
     useEditorStructureRequests({
         editor: instance,

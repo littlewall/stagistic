@@ -5,4 +5,4 @@ export interface ScriptListItem {
 
 export type ScriptSyncState = 'idle' | 'saved' | 'saving' | 'error';
 
-export type ScriptView = 'editor' | 'export';
+export type ScriptView = 'editor' | 'board' | 'export';

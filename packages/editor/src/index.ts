@@ -66,7 +66,11 @@ export {
     useEditorLiveSnapshot,
     useEditorLiveStructure,
 } from './editor/live/hooks';
-export {createEditorSnapshotStore, type EditorSnapshotStore} from './editor/live/store';
+export {
+    createEditorSnapshotStore,
+    type EditorSnapshotStore,
+    EMPTY_INDEX as EMPTY_EDITOR_INDEX,
+} from './editor/live/store';
 export {MiniScriptEditor, type MiniScriptEditorProps} from './editor/mini/MiniScriptEditor';
 export {useEditorSceneNumberFormat} from './editor/sceneNumberFormatContext';
 export {

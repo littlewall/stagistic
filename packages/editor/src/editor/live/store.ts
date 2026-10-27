@@ -15,7 +15,7 @@ type SelectorListener<TSelected> = {
     listener: Listener,
 };
 
-const EMPTY_INDEX: EditorIndexSnapshot = {
+export const EMPTY_INDEX: EditorIndexSnapshot = {
     blocks: [],
     music: [],
     orphanMusicOutBlockIds: [],

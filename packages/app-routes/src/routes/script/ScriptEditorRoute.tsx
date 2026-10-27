@@ -3,20 +3,20 @@ import {
     useScriptComments,
     useScriptRepository,
 } from '@stagistic/app-core';
-import {ScriptEditor, useFocusEditorBlock} from '@stagistic/editor';
+import {ScriptEditor} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
 import {
     useCallback,
-    useEffect,
     useMemo,
 } from 'react';
-import {useNavigate, useSearchParams} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {useCommentsEditorBridge, useCommentsPanelState} from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
+import {EditorFocusRequest} from './editor/EditorFocusRequest';
 import {
     AddMusicModal,
     UnassignMusicModal,
@@ -38,32 +38,6 @@ import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
-
-const ScriptEditorBlockFocusWatcher = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const focusBlock = useFocusEditorBlock();
-    const blockId = searchParams.get('block');
-
-    useEffect(() => {
-        if (!blockId) {
-            return;
-        }
-
-        focusBlock(blockId);
-
-        const next = new URLSearchParams(searchParams);
-
-        next.delete('block');
-        setSearchParams(next, {replace: true});
-    }, [
-        blockId,
-        focusBlock,
-        searchParams,
-        setSearchParams,
-    ]);
-
-    return null;
-};
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -252,13 +226,7 @@ export const ScriptEditorRoute = () => {
                     )
                 }
             >
-                {isPreparingPackage ? (
-                    <LoaderOverlay
-                        variant="scrim"
-                        label="Preparing package"
-                        messages={[]}
-                    />
-                ) : null}
+                {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
                 {storageError ? (
                     <div
                         role="alert"
@@ -312,9 +280,13 @@ export const ScriptEditorRoute = () => {
                         ...commentsBridge.callbacks,
                     }}
                 >
-                    <ScriptEditor.LeftSidebar>{leftSidebar}</ScriptEditor.LeftSidebar>
+                    <ScriptEditor.LeftSidebar>
+                        <>
+                            {leftSidebar}
+                            <EditorFocusRequest />
+                        </>
+                    </ScriptEditor.LeftSidebar>
                     <ScriptEditor.RightSidebar>{rightSidebar}</ScriptEditor.RightSidebar>
-                    <ScriptEditorBlockFocusWatcher />
                 </DeferredScriptEditor>
                 <AddMusicModal
                     isOpen={musicModals.addMusic.isOpen}

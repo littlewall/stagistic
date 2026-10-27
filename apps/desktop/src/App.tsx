@@ -3,6 +3,7 @@ import {
     type AppSettingsSection,
     GlobalModalsProvider,
     HomeRoute,
+    ScriptBoardRoute,
     ScriptEditorRoute,
     ScriptExportRoute,
     ScriptSettingsRoute,
@@ -50,11 +51,19 @@ const AppRoutes = () => {
             <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
                 <Route index element={<Navigate to="editor" replace />} />
                 <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="board">
+                    <Route index element={<Navigate to="wall" replace />} />
+                    <Route path=":lens" element={<ScriptBoardRoute />} />
+                </Route>
                 <Route path="export" element={<ScriptExportRoute />} />
             </Route>
             <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                 <Route index element={<Navigate to="editor" replace />} />
                 <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="board">
+                    <Route index element={<Navigate to="wall" replace />} />
+                    <Route path=":lens" element={<ScriptBoardRoute />} />
+                </Route>
                 <Route path="export" element={<ScriptExportRoute />} />
             </Route>
             <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
