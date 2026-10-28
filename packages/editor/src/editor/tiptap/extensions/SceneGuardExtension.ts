@@ -59,6 +59,11 @@ export const SceneGuardExtension = Extension.create({
                         return true;
                     }
 
+                    // Undo/redo reverses a previously accepted document transaction.
+                    if (transaction.getMeta('history$')) {
+                        return true;
+                    }
+
                     if (transaction.getMeta(SCENE_DELETE_ALLOWED_META_KEY) === true) {
                         return true;
                     }

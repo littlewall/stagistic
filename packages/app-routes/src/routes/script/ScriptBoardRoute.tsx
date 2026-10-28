@@ -24,7 +24,8 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
     const {
         currentScript,
         currentScriptId,
-        handleManualSave,
+        documentSession,
+        saveIndicator,
     } = useScriptWorkspace();
     const {getEditorValue} = useScriptCharacters();
     const {
@@ -43,19 +44,24 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
     const shownTitle = isReadOnly ? liveScriptTitle ?? scriptTitleDraft : scriptTitleDraft;
     // Downloads of a saved draft or version carry its label, as in Export.
     const fileTitle = snapshot ? `${shownTitle} – ${getScriptSnapshotLabel(snapshot)}` : shownTitle;
-    const scriptStateControls = useScriptStateControls({scriptId: currentScript?.id ?? null, view: 'board'});
+    const flushSession = useCallback(async () => {
+        if (!await documentSession.flush()) throw new Error('Could not save the script.');
+    }, [documentSession]);
+    const scriptStateControls = useScriptStateControls({
+        scriptId: currentScript?.id ?? null,
+        view: 'board',
+        flush: flushSession,
+    });
 
     useDocumentTitle(currentScript ? `Board · ${fileTitle}` : 'Board');
 
     const boardPath = `${basePath ?? getScriptBasePath(currentScriptId ?? '')}/board`;
     const openLens = useCallback((nextLensId: string) => void navigate(`${boardPath}/${nextLensId}`), [boardPath, navigate]);
     const flushScript = useCallback(async () => {
-        const editorValue = getEditorValue();
-
-        if (!editorValue || !await handleManualSave(editorValue)) {
+        if (!await documentSession.flush()) {
             throw new Error('Could not flush script before export.');
         }
-    }, [getEditorValue, handleManualSave]);
+    }, [documentSession]);
     const downloadableScript = useMemo(() => currentScript ? {...currentScript, name: fileTitle} : null, [currentScript, fileTitle]);
     const {handleMenuAction, isPreparingPackage} = useScriptEditorHeaderActions({
         navigate,
@@ -75,6 +81,7 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
                 currentScript ? (
                     <ScriptEditorAppHeader
                         currentScript={{...currentScript, name: shownTitle}}
+                        scriptSyncState={isReadOnly ? undefined : saveIndicator}
                         onMenuAction={handleMenuAction}
                         onRenameScript={isReadOnly ? undefined : updateScriptTitle}
                         activeView="board"

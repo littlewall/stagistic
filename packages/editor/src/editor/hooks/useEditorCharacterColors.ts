@@ -31,6 +31,7 @@ interface UseEditorCharacterColorsArgs {
     /** Externally-owned containers (cached editor surface); falls back to per-mount ones. */
     refs?: CharacterColorRefsBundle,
     liveStore?: EditorSnapshotStore,
+    initializeLiveStore?: boolean,
 }
 
 export const useEditorCharacterColors = ({
@@ -38,6 +39,7 @@ export const useEditorCharacterColors = ({
     resolvedInitialValue,
     refs,
     liveStore: providedLiveStore,
+    initializeLiveStore = true,
 }: UseEditorCharacterColorsArgs) => {
     const [localRefs] = useState(createCharacterColorRefsBundle);
 
@@ -137,13 +139,17 @@ export const useEditorCharacterColors = ({
     const initializedLiveStoreRef = useRef<EditorSnapshotStore | null>(null);
 
     useEffect(() => {
-        if (!providedLiveStore || initializedLiveStoreRef.current === providedLiveStore) {
+        if (!initializeLiveStore || !providedLiveStore || initializedLiveStoreRef.current === providedLiveStore) {
             return;
         }
 
         initializedLiveStoreRef.current = providedLiveStore;
         providedLiveStore.setSnapshot(initialLiveSnapshot);
-    }, [initialLiveSnapshot, providedLiveStore]);
+    }, [
+        initialLiveSnapshot,
+        initializeLiveStore,
+        providedLiveStore,
+    ]);
 
     return {
         colorByCharacterIdRef,

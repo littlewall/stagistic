@@ -55,16 +55,17 @@ Záznam na dvojici scéna × postava:
 
 - Akty jsou sekce pod sebou. Uvnitř sekce jsou karty scén v mřížce s pevnou šířkou karty, zalamované zleva doprava. Scény před prvním aktem se řídí výchozím aktem z `buildScriptStructureOutline`.
 - **Hlavička aktu**: název (přejmenování na místě), menu se smazáním aktu. Smazání odstraní jen act heading, scény připadnou předchozímu aktu (stejně jako v editoru).
-- **Nový akt**: z menu karty „Start new act here“ (act heading před scénu) a „Add act“ na konci boardu.
+- **Nový akt**: z menu karty „Start new act here“ (act heading před scénu) a „+ Add act“ na konci boardu. „+ Add act“ je sázené jako název aktu (eyebrow, stejná výška řádku) a stojí tam, kde by stál další název aktu. Scény před prvním aktem (např. po smazání prvního aktu) mají místo názvu totéž tlačítko; přidá act heading před ně.
+- **Přejmenování na místě** (akt i scéna): text se stane editovatelným tam, kde stojí (contenteditable, jen prostý text na jednom řádku), takže se nic neposune. Editaci ukazuje jemné podbarvení a malé tlačítko ⏎ za textem pro potvrzení myší. Enter potvrdí, Escape vrátí původní název, opuštění pole potvrdí. Prázdný název scény se nepřijme.
 - **Karta scény**:
-  - číslo scény, název (text scene headingu, přejmenování na místě), počáteční strana „p. 12“;
+  - číslo scény, název (text scene headingu, přejmenování na místě), počáteční strana „p. 12“ (dokud strana není známá, nezobrazí se nic);
   - outline (= `script_scenes.synopsis`), víceřádková editace na místě;
   - postavy podle modelu výše; klik na čip otevře popover s větou, přepnutím úrovně a odebráním;
   - přidání postavy: výběr z katalogu nebo založení nové postavy (dostane barvu z palety);
   - akce „Open in Editor“ skočí na scene heading v editoru;
   - akce „Delete scene…“ (ikona v menu karty) nic nemaže. Přepne do editoru na scene heading, aby autor viděl celý obsah scény, a smazání provede tam.
-- **Vložení scény**: „+“ mezi kartami a na konci sekce. Otevře prázdnou kartu s polem pro název. Enter s neprázdným názvem vloží scene heading na dané místo, Escape zruší bez zásahu do dokumentu.
-- **Přesun scény**: drag & drop karty v rámci aktu i mezi akty, také z klávesnice (jako structure sidebar). Přesouvá se celý segment scény (`moveSceneSegment`).
+- **Vložení scény**: před každou kartou je v mezeře nenápadný svislý proužek; pod kurzorem nebo při fokusu se přes okraje karet rozšíří do průsvitného proužku s „+“ a tooltipem „Add scene“. Za poslední scénou aktu je čárkovaná karta „+ Add scene“ (v prázdném aktu jediná). Obojí otevře na daném místě kartu s polem pro název, tlačítkem ⏎ a ✕. Enter s neprázdným názvem vloží scene heading, Escape zruší bez zásahu do dokumentu.
+- **Přesun scény**: drag & drop karty v rámci aktu i mezi akty, také z klávesnice (jako structure sidebar). Přesouvá se celý segment scény (`moveSceneSegment`). Úchytem je celá karta (kromě tlačítek a názvu v editaci); název přejde do editace až kliknutím, takže kartu jde táhnout i za něj. Během tažení se ostatní karty průběžně odsouvají (i mezi akty) a čárkovaná kopie tažené karty stojí tam, kam by scéna dopadla; tažená karta má stín. Proužky pro vložení scény jsou během tažení skryté. Zrušení (Escape) vrátí původní pořadí, dokument se mění až po puštění.
 - **Filtr postav** (více postav): scény s vybranou postavou zvýrazní její větu a ostatní postavy ztlumí. Scény bez ní se sbalí do tenkého řádku (číslo a název), mezery v jejím příběhu tak zůstanou vidět.
 - Šířka karty 18rem.
 
@@ -81,7 +82,7 @@ Mockup: lišta s menu, schválená 2026-10-27.
   - při výběru má tlačítko stav výběru (Creamed Corn) a ✕ „Clear character filter“ je uvnitř ovládacího prvku mezi popiskem a šipkou ▾ (vizuálně jeden prvek, v DOM samostatné tlačítko, ne vnořené). Šipka zůstává na pravém okraji, nic na konci lišty neposkakuje.
 - **Popover filtru**: vyhledávací pole „Find character…“, seznam postav (zaškrtávátko, barevná tečka, jméno, „N scenes“), vybrané řádky ve stavu výběru, dole „Clear filter“. Pořadí podle prvního výskytu ve scénáři, postavy bez scén na konci.
 - **Popover View**, nadpis „Show on cards“: nezávislá pozitivní zaškrtávátka, každé něco přidává. Outline (až od kroku 3), „Characters on stage“ (posuny a přítomné), „Mentioned characters“ s vedlejším textem „Named in dialogue or lyrics only“. Bez vnoření a bez neaktivních stavů. Nahrazuje přepínač hustoty. Když „Mentioned characters“ není zaškrtnuté, zmínka se nepočítá ani pro filtr.
-- Počáteční strana pochází ze stránkování editoru (`scenePlacement.startPage`). Číslování se může lišit od exportu. Když stránkování není k dispozici nebo je po změně na boardu zastaralé, karta ukáže „–“.
+- Počáteční strana pochází ze stránkování editoru (`scenePlacement.startPage`). Číslování se může lišit od exportu. Když stránkování není k dispozici nebo je po změně na boardu zastaralé, karta stranu neukazuje.
 
 ## Matrix
 

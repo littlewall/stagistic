@@ -45,6 +45,7 @@ export const ScriptEditorRoute = () => {
     const {
         currentScript,
         currentScriptId,
+        documentSession,
         initialValue,
         initialIndexSnapshot,
         storageError,
@@ -116,12 +117,10 @@ export const ScriptEditorRoute = () => {
     } = useScriptCharacters();
 
     const flushScript = useCallback(async () => {
-        const editorValue = getEditorValue();
-
-        if (!editorValue || !await handleManualSave(editorValue)) {
+        if (!await documentSession.flush()) {
             throw new Error('Could not flush script before export.');
         }
-    }, [getEditorValue, handleManualSave]);
+    }, [documentSession]);
     const {handleMenuAction, isPreparingPackage} = useScriptEditorHeaderActions({
         navigate,
         currentScript: exportedScript,
@@ -136,10 +135,10 @@ export const ScriptEditorRoute = () => {
     const flushScriptQuietly = useCallback(async () => {
         const editorValue = getEditorValue();
 
-        if (!editorValue || !await handleAutoSave(editorValue)) {
+        if (!editorValue || !await documentSession.flush()) {
             throw new Error('Could not save the script.');
         }
-    }, [getEditorValue, handleAutoSave]);
+    }, [documentSession, getEditorValue]);
     const scriptStateControls = useScriptStateControls({
         scriptId: currentScriptId,
         view: 'editor',
@@ -237,6 +236,7 @@ export const ScriptEditorRoute = () => {
                 ) : null}
                 <DeferredScriptEditor
                     key={currentScript?.id ?? 'editor'}
+                    session={documentSession}
                     isReadOnly={isReadOnly}
                     readOnlyLabel={snapshot ? getScriptSnapshotLabel(snapshot) : null}
                     surfaceCache={editorSurfaceCache}

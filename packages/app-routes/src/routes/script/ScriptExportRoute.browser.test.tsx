@@ -53,6 +53,11 @@ vi.mock('./workspace/ScriptWorkspaceContext', () => ({
             ],
         },
         initialValue: {type: 'doc', content: []},
+        documentSession: {
+            subscribe: () => () => {},
+            getSnapshot: () => ({revision: 0}),
+            getDocument: () => ({type: 'doc', content: []}),
+        },
         initialIndexSnapshot: {
             blocks: [
                 {

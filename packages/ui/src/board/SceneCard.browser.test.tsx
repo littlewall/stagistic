@@ -76,11 +76,13 @@ describe('SceneCard', () => {
         expect(document.body.textContent).toContain('p. 12');
     });
 
-    it('shows a dash when the page is not measured', async () => {
+    it('shows no page until it is measured', async () => {
         renderCard({page: null});
-        await waitForElement('h3');
 
-        expect(document.body.textContent).toContain('–');
+        const heading = await waitForElement<HTMLElement>('h3');
+
+        expect(text(heading)).toBe('3. Kitchen, night');
+        expect(document.body.textContent).not.toContain('–');
         expect(document.body.textContent).not.toContain('p. ');
     });
 

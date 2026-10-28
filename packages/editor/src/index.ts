@@ -73,6 +73,8 @@ export {
 } from './editor/live/store';
 export {MiniScriptEditor, type MiniScriptEditorProps} from './editor/mini/MiniScriptEditor';
 export {useEditorSceneNumberFormat} from './editor/sceneNumberFormatContext';
+export {createScriptDocumentSession, type ScriptDocumentSession} from './editor/session/createScriptDocumentSession';
+export {ScriptDocumentRuntime} from './editor/session/ScriptDocumentRuntime';
 export {
     type CharacterColorRefsBundle,
     createCharacterColorRefsBundle,

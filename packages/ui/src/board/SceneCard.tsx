@@ -1,5 +1,9 @@
 import clsx from 'clsx';
-import type {ReactNode} from 'react';
+import type {
+    FocusEventHandler,
+    ReactNode,
+    Ref,
+} from 'react';
 
 import type {DropdownMenuItem} from '../molecules/DropdownMenu/DropdownMenu';
 import {MoreActionsMenu} from '../molecules/MoreActionsMenu/MoreActionsMenu';
@@ -13,9 +17,17 @@ export interface SceneCardActions {
 }
 
 export interface SceneCardProps {
+    ref?: Ref<HTMLLIElement>,
+    sceneId?: string,
+    onBlur?: FocusEventHandler<HTMLLIElement>,
     number: number,
     title: string,
-    /** Start page; null while pagination has not been measured. */
+    titleContent?: ReactNode,
+    /** Sits in the gap before the card, e.g. a control that inserts a scene there. */
+    before?: ReactNode,
+    /** The whole card picks up for dragging; its buttons and the name being edited do not. */
+    isDraggable?: boolean,
+    /** Start page; null while pagination has not been measured, and then not shown. */
     page: number | null,
     /** One line of number and title, for scenes a filter leaves out. */
     variant?: 'full' | 'collapsed',
@@ -26,8 +38,14 @@ export interface SceneCardProps {
 
 /** A scene on the Board. The title is script text and keeps the script's voice; the rest is tool chrome. */
 export const SceneCard = ({
+    ref,
+    sceneId,
+    onBlur,
     number,
     title,
+    titleContent,
+    before,
+    isDraggable = false,
     page,
     variant = 'full',
     actions,
@@ -36,21 +54,22 @@ export const SceneCard = ({
     const isCollapsed = variant === 'collapsed';
 
     return (
-        <li className={clsx(styles.card, isCollapsed && styles.collapsed)}>
+        // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Tracks focus leaving the card; it does not make the list item interactive.
+        <li
+            ref={ref}
+            data-board-card-id={sceneId}
+            data-collapsed={isCollapsed || undefined}
+            onBlur={onBlur}
+            className={clsx(styles.card, isCollapsed && styles.collapsed, isDraggable && styles.draggable)}
+        >
+            {before ? <div className={styles.before}>{before}</div> : null}
             <div className={styles.head}>
                 <h3 className={styles.heading}>
                     <span className={styles.number}>{`${number}.`}</span>
                     {' '}
-                    <span className={styles.title}>{title}</span>
+                    <span className={styles.title}>{titleContent ?? title}</span>
                 </h3>
-                {isCollapsed ? null : (
-                    <span
-                        className={styles.page}
-                        title={page === null ? 'Page not measured yet' : undefined}
-                    >
-                        {page === null ? '–' : `p. ${page}`}
-                    </span>
-                )}
+                {isCollapsed || page === null ? null : <span className={styles.page}>{`p. ${page}`}</span>}
                 {actions ? (
                     <MoreActionsMenu
                         aria-label={actions.label}

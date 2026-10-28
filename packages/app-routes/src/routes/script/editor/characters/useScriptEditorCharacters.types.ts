@@ -1,6 +1,7 @@
 import {type useScriptCharacterCatalog} from '@stagistic/app-core';
 import {
     type EditorValueChangeMeta,
+    type ScriptDocumentSession,
 } from '@stagistic/editor';
 import {
     type EditorSettings,
@@ -15,6 +16,7 @@ import type {
 
 export interface UseScriptEditorCharactersArgs {
     currentScriptId: string | null,
+    documentSession?: ScriptDocumentSession,
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,

@@ -58,6 +58,7 @@ import {type BlockNodeType, SCRIPT_BLOCK_NODE_NAMES} from './tiptap/scriptCore';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
+    runtimeSettingsRef?: {current: EditorSettings},
     editorZoom: number,
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
     rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
@@ -77,6 +78,7 @@ type UseEditorExtensionsArgs = {
 
 export const useEditorExtensions = ({
     resolvedSettings,
+    runtimeSettingsRef,
     editorZoom,
     colorByCharacterIdRef,
     rememberedColorByKeyRef,
@@ -98,22 +100,31 @@ export const useEditorExtensions = ({
     const blockNextElements = useMemo(() => getBlockNextElements(resolvedSettings.blocks), [resolvedSettings.blocks]);
     const blockCasing = useMemo(() => getBlockCasing(resolvedSettings.blocks), [resolvedSettings.blocks]);
     const scriptBehaviorExtension = useMemo(
+        // oxlint-disable-next-line react/refs -- Getters are called by editor events, never while rendering.
         () => ScriptBehaviorExtension.configure({
             blockShortcuts,
             blockNextElements,
             blockCasing,
+            getSettings: runtimeSettingsRef ? () => ({
+                blockShortcuts: getBlockShortcuts(runtimeSettingsRef.current.blocks),
+                blockNextElements: getBlockNextElements(runtimeSettingsRef.current.blocks),
+                blockCasing: getBlockCasing(runtimeSettingsRef.current.blocks),
+            }) : undefined,
         }),
         [
             blockCasing,
             blockNextElements,
             blockShortcuts,
+            runtimeSettingsRef,
         ],
     );
     const emptyEnterChooserExtension = useMemo(
+        // oxlint-disable-next-line react/refs -- The getter is called by an editor command.
         () => EmptyEnterChooserExtension.configure({
             blockNextElements,
+            getBlockNextElements: runtimeSettingsRef ? () => getBlockNextElements(runtimeSettingsRef.current.blocks) : undefined,
         }),
-        [blockNextElements],
+        [blockNextElements, runtimeSettingsRef],
     );
     const editorRuntimeExtension = useMemo(
         () => EditorRuntimeExtension.configure({
@@ -171,7 +182,11 @@ export const useEditorExtensions = ({
         [onRequestDeleteScene, onRequestConvertScene],
     );
     const sceneNumberFormat = resolvedSettings.blocks.scene?.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
-    const sceneNumberingExtension = useMemo(() => SceneNumberingExtension.configure({format: sceneNumberFormat}), [sceneNumberFormat]);
+    // oxlint-disable-next-line react/refs -- The getter is called by the ProseMirror plugin.
+    const sceneNumberingExtension = useMemo(() => SceneNumberingExtension.configure({
+        format: sceneNumberFormat,
+        getFormat: runtimeSettingsRef ? () => runtimeSettingsRef.current.blocks.scene?.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT : undefined,
+    }), [sceneNumberFormat, runtimeSettingsRef]);
     const musicStartNode = useMemo(
         () => MusicStartNode.configure({
             onMusicAssigned,

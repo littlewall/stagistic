@@ -262,6 +262,11 @@ export {RemoveAttachmentModal, type RemoveAttachmentModalProps} from './dialogs/
 export {RemoveGroupModal, type RemoveGroupModalProps} from './dialogs/attribute-manager/RemoveGroupModal';
 
 // ─── Editor panels ──────────────────────────────────────────────────────────
+export {BoardAddActButton} from './board/BoardAddActButton';
+export {BoardAddSceneCard} from './board/BoardAddSceneCard';
+export {BoardInlineHeading} from './board/BoardInlineHeading';
+export {BoardInsertSceneStrip} from './board/BoardInsertSceneStrip';
+export {BoardSceneComposer} from './board/BoardSceneComposer';
 export {
     EditorSidebar,
     type EditorSidebarCharacter,

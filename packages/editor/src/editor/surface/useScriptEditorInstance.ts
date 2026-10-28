@@ -17,6 +17,7 @@ import {
 
 type UseScriptEditorInstanceArgs = {
     surfaceCache?: EditorSurfaceCache,
+    providedEditor?: TiptapEditor,
     signature: string,
     extensions: Extensions,
     content: ScriptDocument,
@@ -40,6 +41,7 @@ type InstanceState = {
  */
 export const useScriptEditorInstance = ({
     surfaceCache,
+    providedEditor,
     signature,
     extensions,
     content,
@@ -47,6 +49,14 @@ export const useScriptEditorInstance = ({
     isReadOnly = false,
 }: UseScriptEditorInstanceArgs): {editor: TiptapEditor} => {
     const createState = (): InstanceState => {
+        if (providedEditor) {
+            return {
+                signature,
+                editor: providedEditor,
+                ownsEditor: false,
+            };
+        }
+
         if (surfaceCache) {
             const cached = surfaceCache.acquire(signature);
 
@@ -94,7 +104,7 @@ export const useScriptEditorInstance = ({
     const [state, setState] = useState(createState);
     let currentState = state;
 
-    if (state.signature !== signature) {
+    if (state.signature !== signature || (providedEditor && state.editor !== providedEditor)) {
         /*
          * Inputs changed while mounted (settings / initial content): rebuild,
          * mirroring the previous useEditor deps-driven rebuild. With a cache,

@@ -26,6 +26,7 @@ import {useTitlePageDraft} from '../drafts/useTitlePageDraft';
 import {useScriptMusicState} from '../editor/music/useScriptMusicState';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {ScriptCharactersProvider} from '../workspace/ScriptCharactersContext';
+import {ScriptDocumentSessionHost} from '../workspace/ScriptDocumentSessionHost';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {ScriptEditorSettingsPanel} from './panels';
@@ -43,6 +44,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {
         currentScript,
         currentScriptId,
+        documentSession,
         characterCatalog,
         musicCatalog,
         initialValue,
@@ -128,6 +130,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         getEditorValue,
     } = useScriptCharactersContextValue({
         currentScriptId,
+        documentSession,
         characterCatalog,
         initialValue,
         resolvedScriptSettings,
@@ -219,7 +222,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     return (
         <ScriptSettingsModalContext.Provider value={contextValue}>
             <ScriptCharactersProvider value={charactersContextValue}>
-                {children}
+                <ScriptDocumentSessionHost>{children}</ScriptDocumentSessionHost>
                 <SettingsModal
                     returnFocus={settingsReturnFocus}
                     isOpen={isSettingsOpen}

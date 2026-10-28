@@ -1,5 +1,6 @@
 .section {
     --board-card-width: 18rem;
+    --board-gap: var(--space-lg);
 
     display: flex;
     flex-direction: column;
@@ -9,9 +10,21 @@
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--board-card-width));
-    gap: var(--space-lg);
+    gap: var(--board-gap);
     align-items: start;
     margin: 0;
     padding: 0;
     list-style: none;
+
+    & > li {
+        position: relative;
+    }
+}
+
+/* As tall as the xs actions button beside a name, so an "Add act" heading lines up with act names. */
+.heading {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    min-height: 22px;
 }
