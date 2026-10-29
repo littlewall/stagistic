@@ -5,6 +5,7 @@ import {
     useContext,
     useMemo,
 } from 'react';
+import {UNSAFE_PortalProvider} from 'react-aria';
 import {
     Button,
     type QueuedToast,
@@ -19,6 +20,7 @@ import {
 
 import {CloseIcon} from '../../icons/ui';
 import styles from './ToastProvider.module.css';
+import {useToastContainer} from './useToastContainer';
 
 export type ToastVariant = 'success' | 'error' | 'info';
 
@@ -89,6 +91,8 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
 };
 
 export const ToastProvider = ({children}: {children: ReactNode}) => {
+    const container = useToastContainer();
+    const getContainer = useCallback(() => container, [container]);
     const addToast = useCallback(
         (content: ToastContent, options?: ToastOptions) => toastQueue.add(content, {
             timeout: 4000,
@@ -103,13 +107,15 @@ export const ToastProvider = ({children}: {children: ReactNode}) => {
     return (
         <ToastContext.Provider value={value}>
             {children}
-            <ToastRegion
-                queue={toastQueue}
-                className={styles.region}
-                aria-label="Notifications"
-            >
-                <ToastList className={styles.list}>{renderToast}</ToastList>
-            </ToastRegion>
+            <UNSAFE_PortalProvider getContainer={getContainer}>
+                <ToastRegion
+                    queue={toastQueue}
+                    className={styles.region}
+                    aria-label="Notifications"
+                >
+                    <ToastList className={styles.list}>{renderToast}</ToastList>
+                </ToastRegion>
+            </UNSAFE_PortalProvider>
         </ToastContext.Provider>
     );
 };

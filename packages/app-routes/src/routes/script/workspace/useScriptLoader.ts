@@ -78,6 +78,7 @@ export const useScriptLoader = (
                 }
 
                 setStorageErrorState(null);
+
                 if (!stored) {
                     const fallback = ensureSceneHeading(null);
                     const normalizedFallback = ensureScriptStructure(fallback);

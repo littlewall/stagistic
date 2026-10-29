@@ -60,6 +60,7 @@ export const useEditorAutosave = (editor: TiptapEditor | null, {
         onDirtyChange: isDirty => {
             dirtyRef.current = isDirty;
             onDirtyChange?.(isDirty);
+
             if (!isDirty) {
                 refreshSummaryMetadata();
             }

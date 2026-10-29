@@ -1,6 +1,7 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {Editor as TiptapEditor, type Extensions} from '@tiptap/core';
 import {
+    useCallback,
     useEffect,
     useRef,
     useState,
@@ -46,7 +47,7 @@ export const useScriptEditorInstance = ({
     characterColorRefs,
     isReadOnly = false,
 }: UseScriptEditorInstanceArgs): {editor: TiptapEditor} => {
-    const createState = (): InstanceState => {
+    const createState = useCallback((): InstanceState => {
         if (surfaceCache) {
             const cached = surfaceCache.acquire(signature);
 
@@ -89,30 +90,47 @@ export const useScriptEditorInstance = ({
             editor,
             ownsEditor: !surfaceCache,
         };
-    };
+    }, [
+        characterColorRefs,
+        content,
+        extensions,
+        isReadOnly,
+        signature,
+        surfaceCache,
+    ]);
 
     const [state, setState] = useState(createState);
-    let currentState = state;
-
-    if (state.signature !== signature) {
-        /*
-         * Inputs changed while mounted (settings / initial content): rebuild,
-         * mirroring the previous useEditor deps-driven rebuild. With a cache,
-         * acquire() inside createState destroys the stale entry.
-         */
-        if (state.ownsEditor && !state.editor.isDestroyed) {
-            state.editor.destroy();
-        }
-
-        currentState = createState();
-        setState(currentState);
-    }
-
-    const stateRef = useRef(currentState);
 
     useEffect(() => {
-        stateRef.current = currentState;
-    }, [currentState]);
+        if (state.signature === signature) {
+            return;
+        }
+
+        /*
+         * Node-view teardown updates React portals and can call flushSync.
+         * Rebuild in a task after the commit, outside render and effects.
+         * Cancel superseded tasks so rapid settings changes use the latest inputs.
+         */
+        const rebuild = window.setTimeout(() => {
+            if (state.ownsEditor && !state.editor.isDestroyed) {
+                state.editor.destroy();
+            }
+
+            setState(createState());
+        }, 0);
+
+        return () => window.clearTimeout(rebuild);
+    }, [
+        createState,
+        signature,
+        state,
+    ]);
+
+    const stateRef = useRef(state);
+
+    useEffect(() => {
+        stateRef.current = state;
+    }, [state]);
 
     const pendingDestroyRef = useRef<number | null>(null);
 
@@ -144,5 +162,5 @@ export const useScriptEditorInstance = ({
         };
     }, []);
 
-    return {editor: currentState.editor};
+    return {editor: state.editor};
 };

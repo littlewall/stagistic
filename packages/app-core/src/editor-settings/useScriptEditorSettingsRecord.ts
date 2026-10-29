@@ -1,5 +1,6 @@
 import type {ScriptRepository} from '@stagistic/db';
-import {useMemo} from 'react';
+import type {EditorSettingsOverride, FormatTemplateId} from '@stagistic/script';
+import {useCallback, useMemo} from 'react';
 
 import {useReactiveRecord} from '../collections';
 import {getScriptEditorSettingsStore} from './scriptEditorSettingsStore';
@@ -12,5 +13,11 @@ export const useScriptEditorSettingsRecord = (
         ? getScriptEditorSettingsStore(repository, scriptId)
         : null, [repository, scriptId]);
 
-    return useReactiveRecord(store);
+    const record = useReactiveRecord(store);
+    const save = useCallback(
+        (settings: EditorSettingsOverride, formatTemplateId?: FormatTemplateId | null) => store?.save(settings, formatTemplateId) ?? Promise.resolve(),
+        [store],
+    );
+
+    return {...record, save};
 };

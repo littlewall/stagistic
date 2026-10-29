@@ -1,7 +1,5 @@
 .stageDirection {
-    padding-top: var(--stage-direction-spacing-before, 0);
-    padding-right: var(--stage-direction-indent-right, 0);
-    padding-left: var(--stage-direction-indent-left, 0);
+    padding: var(--stage-direction-spacing-before, 0) var(--stage-direction-indent-right, 0) var(--stage-direction-spacing-after, 0) calc(var(--stage-direction-indent-left, 0px) + var(--stage-direction-paren-indent, 0px));
     font-weight: var(--stage-direction-font-weight, 400);
     font-style: var(--stage-direction-font-style, normal);
     line-height: var(--stage-direction-line-height, inherit);
@@ -9,4 +7,26 @@
     text-align: var(--stage-direction-align, left);
     text-decoration-line: var(--stage-direction-underline, none);
     text-transform: var(--stage-direction-casing, none);
+}
+
+.stageDirection::before,
+.stageDirection::after {
+    pointer-events: none;
+    user-select: none;
+}
+
+.stageDirection::before {
+    content: var(--stage-direction-paren-open, none);
+    position: absolute;
+    left: var(--stage-direction-indent-left, 0);
+}
+
+.stageDirection::after {
+    content: var(--stage-direction-paren-close, none);
+}
+
+.stageDirection:has(> :global(.ProseMirror-trailingBreak:only-child))::after {
+    position: absolute;
+    top: var(--stage-direction-spacing-before, 0);
+    left: calc(var(--stage-direction-indent-left, 0px) + var(--stage-direction-paren-indent, 0px));
 }

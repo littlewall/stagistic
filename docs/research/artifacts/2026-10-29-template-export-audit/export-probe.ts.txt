@@ -1,0 +1,184 @@
+import {writeFileSync} from 'node:fs';
+
+import {
+    ALL_FORMAT_TEMPLATES,
+    DEFAULT_EDITOR_SETTINGS,
+    mergeEditorSettings,
+    resolveScriptEditorSettings,
+} from '@stagistic/script';
+import {expect, it} from 'vite-plus/test';
+
+import {BASIC_DEFAULTS, type ContentsVariant} from '../model/config';
+import type {PageItem, VisualLine} from '../model/visualLine';
+import {planIntegratedAssembly} from '../pdf/planIntegratedAssembly';
+import {deriveBasicExportPlan} from '../plan/deriveBasicExportPlan';
+import {deriveIntegratedScoreExportPlan} from '../plan/deriveIntegratedScoreExportPlan';
+import {transcribeExportPlan} from '../transcript/transcribeExportPlan';
+import {block} from './testUtils';
+
+const script = {
+    doc: {
+        type: 'doc' as const,
+        content: [
+            block('act', 'act-a', 'First act'),
+            block('scene', 'scene-a', 'First scene'),
+            block('stageDirection', 'intro', 'Lights rise.'),
+            {...block('stageDirection', 'cue', ''), content: [{type: 'musicStart', attrs: {musicId: 'song', mode: 'open', title: 'Opening'}}]},
+            block('lyrics', 'lyric-a', 'THE FIRST LINE'),
+            block('lyrics', 'lyric-b', 'THE SECOND LINE'),
+            {...block('stageDirection', 'out', ''), content: [{type: 'musicOut'}]},
+            block('scene', 'scene-b', 'Second scene'),
+            block('dialogue', 'dialogue-a', 'Good evening.'),
+            block('act', 'act-b', 'Second act'),
+            block('scene', 'scene-c', 'Third scene'),
+            block('dialogue', 'dialogue-b', 'Welcome back.'),
+        ],
+    },
+    characters: [], groups: [], initialCharacters: [], initialPlaces: [], initialVocalRanges: [],
+    scriptTitle: 'Audit', titlePage: null,
+};
+
+const splitPages = (items: PageItem[]) => {
+    const pages: VisualLine[][] = [[]];
+
+    for (const item of items) {
+        if ('type' in item) {
+            if (item.type === '__page_break__') pages.push([]);
+            continue;
+        }
+        pages.at(-1)?.push(item);
+    }
+
+    return pages;
+};
+
+it('records diagnostic template/export combinations without changing production behavior', () => {
+    const matrix = [];
+    const variants: ContentsVariant[] = ['scenes', 'musical-numbers', 'scenes-and-musical-numbers'];
+
+    for (const template of ALL_FORMAT_TEMPLATES) {
+        const settings = resolveScriptEditorSettings({formatTemplateId: template.id, override: {}});
+        const attemptedFooter = resolveScriptEditorSettings({formatTemplateId: template.id, override: {headerFooter: {footer: {center: {text: '{{page_number}}'}}}}});
+
+        for (const integrated of [false, true]) {
+            for (const odd of [false, true]) {
+                for (const variant of variants) {
+                    for (const blankCount of [0, 1]) {
+                        for (const scorePages of integrated ? [0, 1, 2] : [0]) {
+                            const config = structuredClone(BASIC_DEFAULTS);
+
+                            config.pageBreaks = {...config.pageBreaks, ...template.pdfFlow, sceneOnOddPage: odd};
+                            config.initialPages.contents = {enabled: true, variant};
+                            config.blankPages.betweenInitialPagesAndScript = {enabled: blankCount > 0, count: blankCount};
+
+                            const plan = (integrated ? deriveIntegratedScoreExportPlan : deriveBasicExportPlan)(config, script);
+                            const transcript = transcribeExportPlan(plan, settings, {scorePageCounts: {song: scorePages}});
+                            const assembly = planIntegratedAssembly({
+                                scriptPageSourceBlockIds: transcript.scriptPageSourceBlockIds ?? [],
+                                scores: plan.postSteps.map(step => ({...step, pageCount: scorePages})),
+                            });
+                            const pages = splitPages(transcript.items).slice(transcript.leadingPageCount);
+                            const printed = pages.map((page, index) => ({
+                                scriptPage: index + 1,
+                                header: page.filter(line => line.y < settings.page.marginTopPx).flatMap(line => line.runs.map(run => run.text)),
+                                footer: page.filter(line => line.y > settings.page.heightPx - settings.page.marginBottomPx).flatMap(line => line.runs.map(run => run.text)),
+                                sourceIds: transcript.scriptPageSourceBlockIds?.[index] ?? [],
+                            }));
+                            const headerReferenceMismatch = printed.some(page => {
+                                const number = page.header[0]?.match(/(\d+)\.?$/)?.[1];
+                                return page.sourceIds.length > 0 && number !== undefined && Number(number) !== page.scriptPage;
+                            });
+
+                            matrix.push({
+                                template: template.id, integrated, odd, variant, blankCount, scorePages,
+                                lockedSceneNewPage: template.pdfFlow.sceneOnNewPage,
+                                displayedSceneNewPage: config.pageBreaks.sceneOnNewPage || config.pageBreaks.sceneOnOddPage,
+                                hasIntegratedFooter: Boolean(transcript.integratedFooter),
+                                centerFooterOverrideSurvives: attemptedFooter.headerFooter.footer.center.text.includes('{{page_number}}'),
+                                leadingPageCount: transcript.leadingPageCount,
+                                scoreStart: assembly.scoreStartPageByMusicId.get('song') ?? null,
+                                scoreStartsEven: [...assembly.scoreStartPageByMusicId.values()].some(number => number % 2 === 0),
+                                headerReferenceMismatch,
+                                forcedBreaks: plan.pagination.forcedBreaks,
+                                assembly: assembly.steps,
+                                printed,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    const parity = [];
+
+    for (let scriptCount = 2; scriptCount <= 8; scriptCount += 1) {
+        for (const pageCount of [0, 1, 2, 3, 4]) {
+            const sourceIds = Array.from({length: scriptCount}, (_, index) => [`page-${index}`]);
+            const plan = planIntegratedAssembly({scriptPageSourceBlockIds: sourceIds, scores: [{musicId: 'song', startBlockId: 'page-0', afterBlockId: `page-${scriptCount - 2}`, pageCount}]});
+
+            parity.push({scriptCount, scorePages: pageCount, start: plan.scoreStartPageByMusicId.get('song') ?? null, steps: plan.steps});
+        }
+    }
+
+    const spacing = [];
+
+    for (const type of ['lyrics', 'dialogue']) {
+        const settings = mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, {blocks: {[type]: {spacingBeforeEm: 1, spacingAfterEm: 1}}});
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, {...script, doc: {type: 'doc', content: [block(type, 'one', 'FIRST'), block(type, 'two', 'SECOND'), block(type, 'three', 'THIRD')]}});
+        const transcript = transcribeExportPlan(plan, settings);
+        const lines = transcript.items.filter((item): item is VisualLine => !('type' in item) && Boolean(item.sourceBlockId));
+
+        spacing.push({type, lineHeight: 19.2, expectedContinuousLineDelta: 19.2, observedDeltas: lines.slice(1).map((line, index) => Number((line.y - lines[index].y).toFixed(3)))});
+    }
+
+    const summary = {
+        matrixCases: matrix.length,
+        lockedFalseButEffectiveTrue: matrix.filter(row => !row.lockedSceneNewPage && row.displayedSceneNewPage).length,
+        integratedCasesWithoutFooter: matrix.filter(row => row.integrated && !row.hasIntegratedFooter).length,
+        integratedCasesWithScoreAndNoFooter: matrix.filter(row => row.integrated && row.scorePages > 0 && !row.hasIntegratedFooter).length,
+        integratedCasesWithEvenScoreStart: matrix.filter(row => row.integrated && row.scoreStartsEven).length,
+        headerReferenceMismatchCases: matrix.filter(row => row.headerReferenceMismatch).length,
+        isolatedParityCases: parity.length,
+        isolatedEvenScoreStarts: parity.filter(row => row.start !== null && row.start % 2 === 0).length,
+        spacing,
+    };
+
+    writeFileSync('/tmp/stagistic-template-audit/observations.json', JSON.stringify({summary, matrix, parity, spacing}, null, 2));
+    console.log(JSON.stringify(summary, null, 2));
+    expect(matrix).toHaveLength(288);
+});
+
+it('records numbering after a character-filtered scene is removed', () => {
+    const cue = (id: string, musicId: string, title: string) => ({
+        ...block('stageDirection', id, ''),
+        content: [{type: 'musicStart', attrs: {musicId, mode: 'open', title}}],
+    });
+    const filteredScript = {
+        ...script,
+        doc: {type: 'doc' as const, content: [
+            block('scene', 'drop-scene', 'Dropped'),
+            block('character', 'alice', 'ALICE'),
+            cue('first-cue', 'first-song', 'First song'),
+            block('lyrics', 'first-lyrics', 'First lyrics'),
+            {...block('stageDirection', 'first-out', ''), content: [{type: 'musicOut'}]},
+            block('scene', 'keep-scene', 'Retained'),
+            block('character', 'bob', 'BOB'),
+            cue('second-cue', 'second-song', 'Second song'),
+            block('lyrics', 'second-lyrics', 'Second lyrics'),
+            {...block('stageDirection', 'second-out', ''), content: [{type: 'musicOut'}]},
+        ]},
+        characters: [{id: 'alice', key: 'ALICE', displayName: 'Alice'}, {id: 'bob', key: 'BOB', displayName: 'Bob'}],
+    };
+    const observations = [true, false].map(preserveFullScriptPagination => {
+        const config = structuredClone(BASIC_DEFAULTS);
+        config.characterFilter = {mode: 'only', characterIds: ['bob'], preserveFullScriptPagination};
+        const plan = deriveBasicExportPlan(config, filteredScript);
+        const transcript = transcribeExportPlan(plan, DEFAULT_EDITOR_SETTINGS);
+        const scene = plan.leadingPages.initialPages.flatMap(page => page.kind === 'contents' ? page.acts.flatMap(act => act.scenes) : [])[0];
+        const bodyCue = transcript.items.filter((item): item is VisualLine => !('type' in item) && item.sourceBlockId === 'second-cue').flatMap(line => line.runs.map(run => run.text));
+        return {preserveFullScriptPagination, contentsSceneNumber: scene?.sceneNumber, contentsMusicNumber: scene?.music[0]?.number, printedMusicCue: bodyCue};
+    });
+    writeFileSync('/tmp/stagistic-template-audit/filter-observations.json', JSON.stringify(observations, null, 2));
+    console.log('FILTER_AUDIT', JSON.stringify(observations));
+});

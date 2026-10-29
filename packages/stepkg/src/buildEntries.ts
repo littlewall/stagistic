@@ -68,6 +68,7 @@ export const buildStepkgEntries = async ({
             assetIssues.push(assetIssue('asset_read_failed', attachment.id, attachment.filename));
             continue;
         }
+
         if (blob === null) {
             assetIssues.push(assetIssue('asset_blob_missing', attachment.id, attachment.filename));
             continue;

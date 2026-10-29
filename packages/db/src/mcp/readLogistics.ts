@@ -32,6 +32,59 @@ interface QuickChangeItem {
     to_scene_id: string,
 }
 
+interface Speech {
+    character_id: string | null,
+    character_key: string,
+    cue_block_id: string,
+    scene_id: string,
+}
+
+const detectQuickChanges = (sceneLogistics: SceneLogisticsItem[], allSpeeches: Speech[]): QuickChangeItem[] => {
+    // Detect quick changes between consecutive scenes
+    const quickChanges: QuickChangeItem[] = [];
+
+    for (let i = 0; i < sceneLogistics.length - 1; i += 1) {
+        const currentScene = sceneLogistics[i];
+        const nextScene = sceneLogistics[i + 1];
+
+        for (const charInCurrent of currentScene.characters_present) {
+            const charInNext = nextScene.characters_present.find(c => c.character_key === charInCurrent.character_key);
+
+            if (!charInNext) {
+                continue;
+            }
+
+            // Find last speech index of this character in allSpeeches for currentScene
+            const lastSpeechIdx = allSpeeches.findLastIndex(
+                s => s.scene_id === currentScene.scene_id && s.character_key === charInCurrent.character_key,
+            );
+            // Find first speech index of this character in allSpeeches for nextScene
+            const firstNextSpeechIdx = allSpeeches.findIndex(
+                s => s.scene_id === nextScene.scene_id && s.character_key === charInNext.character_key,
+            );
+
+            if (lastSpeechIdx >= 0 && firstNextSpeechIdx > lastSpeechIdx) {
+                const intervening = firstNextSpeechIdx - lastSpeechIdx - 1;
+
+                if (intervening <= 5) {
+                    quickChanges.push({
+                        character_id: charInCurrent.character_id,
+                        character_key: charInCurrent.character_key,
+                        from_scene_id: currentScene.scene_id,
+                        to_scene_id: nextScene.scene_id,
+                        exit_block_id: charInCurrent.last_block_id,
+                        reentry_block_id: charInNext.first_block_id,
+                        intervening_speech_count: intervening,
+                        risk: intervening <= 2 ? 'critical' : 'warning',
+                    });
+                }
+            }
+        }
+    }
+
+    return quickChanges;
+};
+
 export const readStageLogistics = (snapshot: McpSnapshot): McpItem[] => {
     const scopes = resolveMcpScopes(snapshot);
     const {
@@ -46,15 +99,10 @@ export const readStageLogistics = (snapshot: McpSnapshot): McpItem[] => {
         const index = blocks.findIndex(b => b.id === scene.headingBlockId);
 
         return {scene, index: index >= 0 ? index : Number.MAX_SAFE_INTEGER};
-    }).sort((a, b) => a.index - b.index).map(item => item.scene);
+    }).toSorted((a, b) => a.index - b.index).map(item => item.scene);
 
     const sceneLogistics: SceneLogisticsItem[] = [];
-    const allSpeeches: Array<{
-        character_id: string | null,
-        character_key: string,
-        cue_block_id: string,
-        scene_id: string,
-    }> = [];
+    const allSpeeches: Speech[] = [];
 
     for (const scene of sceneOrder) {
         const sceneBlocks = blocks.filter(b => scopes.get(b.id)?.sceneId === scene.id);
@@ -120,47 +168,7 @@ export const readStageLogistics = (snapshot: McpSnapshot): McpItem[] => {
         });
     }
 
-    // Detect quick changes between consecutive scenes
-    const quickChanges: QuickChangeItem[] = [];
-
-    for (let i = 0; i < sceneLogistics.length - 1; i += 1) {
-        const currentScene = sceneLogistics[i];
-        const nextScene = sceneLogistics[i + 1];
-
-        for (const charInCurrent of currentScene.characters_present) {
-            const charInNext = nextScene.characters_present.find(c => c.character_key === charInCurrent.character_key);
-
-            if (!charInNext) {
-                continue;
-            }
-
-            // Find last speech index of this character in allSpeeches for currentScene
-            const lastSpeechIdx = allSpeeches.findLastIndex(
-                s => s.scene_id === currentScene.scene_id && s.character_key === charInCurrent.character_key,
-            );
-            // Find first speech index of this character in allSpeeches for nextScene
-            const firstNextSpeechIdx = allSpeeches.findIndex(
-                s => s.scene_id === nextScene.scene_id && s.character_key === charInNext.character_key,
-            );
-
-            if (lastSpeechIdx >= 0 && firstNextSpeechIdx > lastSpeechIdx) {
-                const intervening = firstNextSpeechIdx - lastSpeechIdx - 1;
-
-                if (intervening <= 5) {
-                    quickChanges.push({
-                        character_id: charInCurrent.character_id,
-                        character_key: charInCurrent.character_key,
-                        from_scene_id: currentScene.scene_id,
-                        to_scene_id: nextScene.scene_id,
-                        exit_block_id: charInCurrent.last_block_id,
-                        reentry_block_id: charInNext.first_block_id,
-                        intervening_speech_count: intervening,
-                        risk: intervening <= 2 ? 'critical' : 'warning',
-                    });
-                }
-            }
-        }
-    }
+    const quickChanges = detectQuickChanges(sceneLogistics, allSpeeches);
 
     return [
         {

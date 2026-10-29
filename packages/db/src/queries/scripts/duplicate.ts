@@ -37,6 +37,10 @@ export interface DuplicateScriptQueryPayload {
  * title page is never copied. All primary keys are regenerated and every
  * cross-reference is remapped to the new ids.
  */
+const copiedTemplateId = (source: Pick<typeof scripts.$inferSelect, 'formatTemplateId'> | undefined, copy: boolean) => {
+    return copy ? source?.formatTemplateId ?? null : null;
+};
+
 export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScriptQueryPayload): Promise<void> => {
     const {
         sourceScriptId,
@@ -64,7 +68,10 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
     const sceneIds = sceneRows.map(row => row.id);
     const sceneLocationRows = sceneIds.length > 0 ? await db.select().from(scriptSceneLocations).where(inArray(scriptSceneLocations.sceneId, sceneIds)) : [];
     const speakingEntities = copyAttributes ? await listScriptSpeakingEntities(db, sourceScriptId) : [];
-    const [sourceScript] = await db.select({summaryMetadata: scripts.summaryMetadata}).from(scripts).where(eq(scripts.id, sourceScriptId));
+    const [sourceScript] = await db
+        .select({summaryMetadata: scripts.summaryMetadata, formatTemplateId: scripts.formatTemplateId})
+        .from(scripts)
+        .where(eq(scripts.id, sourceScriptId));
     const sourceMetadata = sourceScript?.summaryMetadata ?? buildScriptSummaryMetadata({
         type: 'doc',
         content: [...blockRows].toSorted((a, b) => a.blockOrder.localeCompare(b.blockOrder)).map(row => ({type: row.blockType})),
@@ -72,6 +79,7 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
 
     await db.update(scripts).set({
         summaryMetadata: {...sourceMetadata, pageCount: copySettings ? sourceMetadata.pageCount : null},
+        formatTemplateId: copiedTemplateId(sourceScript, copySettings),
     }).where(eq(scripts.id, targetScriptId));
 
     const locationMap = new Map(locationRows.map(row => [row.id, uuidv7()]));

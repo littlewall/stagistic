@@ -25,6 +25,7 @@ import {
 } from './model/blockSettingMaps';
 import {
     BlockFocusFlashExtension,
+    BlockSpacingExtension,
     BlockUiEventsExtension,
     CharacterRefSyncExtension,
     CharacterTagInputExtension,
@@ -219,6 +220,7 @@ export const useEditorExtensions = ({
             musicCommandsExtension,
             musicInputExtension,
             MusicNumberingExtension,
+            BlockSpacingExtension,
             MusicRailExtension,
             PlaceholderExtension,
             SearchExtension,

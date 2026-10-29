@@ -26,7 +26,7 @@ describe('BASIC_DEFAULTS', () => {
             },
             contents: {
                 enabled: true,
-                variant: 'scenes-and-musical-numbers',
+                variant: 'scenes',
             },
             vocalRanges: {
                 enabled: true,
@@ -41,7 +41,10 @@ describe('BASIC_DEFAULTS', () => {
 
 describe('INTEGRATED_SCORE_DEFAULTS', () => {
     it('inherits basic options and preserves full-script pagination by default', () => {
-        expect(INTEGRATED_SCORE_DEFAULTS).toMatchObject(BASIC_DEFAULTS);
+        expect(INTEGRATED_SCORE_DEFAULTS).toMatchObject({
+            ...BASIC_DEFAULTS,
+            initialPages: {...BASIC_DEFAULTS.initialPages, contents: {enabled: true, variant: 'scenes-and-musical-numbers'}},
+        });
         expect(INTEGRATED_SCORE_DEFAULTS.showNotes).toBe(true);
         expect(INTEGRATED_SCORE_DEFAULTS.characterFilter.preserveFullScriptPagination).toBe(true);
     });

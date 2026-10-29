@@ -8,6 +8,7 @@ import {scriptScenes} from '../../schema';
 import type {FileStorage} from '../../storage/fileStorage';
 import type {ScriptPackageWrite} from '../../types/scriptPackageWrite';
 import {writeScriptSettingsTx} from '../config/config';
+import {setScriptFormatTemplateId} from '../config/formatTemplate';
 import {writeTitlePageFieldsTx} from '../config/titlePage';
 import {LEGACY_TO_BLOCKS_TRIGGERS, migrateScriptDocumentToBlocks} from '../document/migration/legacyToBlocks';
 import type {
@@ -161,6 +162,7 @@ const writePackageDomainRowsTx = async (
 
     await writeTitlePageFieldsTx(tx, scriptId, input.titlePage, now);
     await writeScriptSettingsTx(tx, scriptId, input.settings, now);
+    await setScriptFormatTemplateId(tx, scriptId, input.script.formatTemplateId ?? null, now);
 
     for (const attachment of input.attachments) {
         await dbQueries.insertAttachment(tx, {

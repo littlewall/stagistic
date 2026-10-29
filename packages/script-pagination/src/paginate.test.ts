@@ -102,3 +102,10 @@ describe('paginate', () => {
         expect(plan.pageCount).toBe(2);
     });
 });
+
+it('reserves continuation cue height on each resumed page', () => {
+    const plan = paginate([{...prose('speech', 13), continuationHeight: LINE}], metrics());
+
+    expect(plan.breaks.filter(item => item.isInlineBreak).map(item => item.breakPos)).toEqual([5, 9]);
+    expect(plan.pageCount).toBe(3);
+});

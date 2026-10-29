@@ -1,10 +1,5 @@
 import {jsPDF} from 'jspdf';
-import {
-    PDFDocument,
-    type PDFPage,
-    rgb,
-    StandardFonts,
-} from 'pdf-lib';
+import {PDFDocument} from 'pdf-lib';
 
 import type {
     PageItem,
@@ -14,9 +9,11 @@ import type {
     VisualLine,
     VisualRun,
 } from '../model/visualLine';
+import {drawIntegratedPageNumber} from './drawIntegratedPageNumber';
 import {drawStaffRow} from './drawStaffRow';
 import {getPdfMonoFontFamily, registerFonts} from './fonts';
 import {planIntegratedAssembly} from './planIntegratedAssembly';
+import {appendScoreArtwork, embedScoreArtwork} from './scoreArtwork';
 
 const PX_TO_PT = 72 / 96;
 
@@ -56,75 +53,6 @@ const drawLine = (doc: jsPDF, line: VisualLine, monoFontFamily: string) => {
             drawUnderline(doc, run, line.y);
         }
     });
-};
-
-const getFooterFont = (footer: NonNullable<TranscriptResult['integratedFooter']>) => {
-    if (footer.bold && footer.italic) {
-        return StandardFonts.CourierBoldOblique;
-    }
-
-    if (footer.bold) {
-        return StandardFonts.CourierBold;
-    }
-
-    return footer.italic ? StandardFonts.CourierOblique : StandardFonts.Courier;
-};
-
-const resolveFooterX = (transcript: TranscriptResult, footer: NonNullable<TranscriptResult['integratedFooter']>, textWidth: number) => {
-    const contentWidth = transcript.pageWidthPx - transcript.marginLeftPx - transcript.marginRightPx;
-
-    if (footer.alignment === 'center') {
-        return transcript.marginLeftPx + (contentWidth - textWidth) / 2;
-    }
-
-    if (footer.alignment === 'right') {
-        return transcript.pageWidthPx - transcript.marginRightPx - textWidth;
-    }
-
-    return transcript.marginLeftPx;
-};
-
-const drawIntegratedPageNumber = async (document: PDFDocument, page: PDFPage, transcript: TranscriptResult, pageNumber: number) => {
-    const footer = transcript.integratedFooter;
-
-    if (!footer) {
-        return;
-    }
-
-    const font = await document.embedFont(getFooterFont(footer));
-    const text = footer.text.replaceAll('{{page_number}}', `${pageNumber}.`);
-    const fontSizePt = footer.fontSizePx * PX_TO_PT;
-    const textWidthPt = font.widthOfTextAtSize(text, fontSizePt);
-    const textWidthPx = textWidthPt / PX_TO_PT;
-    const {height} = page.getSize();
-    const yTopPt = footer.yPx * PX_TO_PT;
-    const lineHeightPt = fontSizePt * 1.4;
-    const baselineY = height - yTopPt - fontSizePt;
-    const x = resolveFooterX(transcript, footer, textWidthPx) * PX_TO_PT;
-
-    page.drawRectangle({
-        x: 0,
-        y: height - yTopPt - lineHeightPt,
-        width: page.getWidth(),
-        height: lineHeightPt,
-        color: rgb(1, 1, 1),
-    });
-    page.drawText(text, {
-        x,
-        y: baselineY,
-        size: fontSizePt,
-        font,
-        color: rgb(0, 0, 0),
-    });
-
-    if (footer.underline) {
-        page.drawLine({
-            start: {x, y: baselineY - fontSizePt * 0.1},
-            end: {x: x + textWidthPt, y: baselineY - fontSizePt * 0.1},
-            thickness: 0.4,
-            color: rgb(0, 0, 0),
-        });
-    }
 };
 
 export const drawPdf = async (transcript: TranscriptResult): Promise<Blob> => {
@@ -174,7 +102,7 @@ export const drawPdf = async (transcript: TranscriptResult): Promise<Blob> => {
     const result = await PDFDocument.create();
     const generatedPages = await result.copyPages(generated, generated.getPageIndices());
     const leadingPages = transcript.leadingPageCount ?? 0;
-    const scorePagesByMusicId = new Map<string, PDFPage[]>();
+    const scorePagesByMusicId = new Map<string, Awaited<ReturnType<typeof embedScoreArtwork>>>();
     const scorePageCounts = new Map<string, number>();
 
     for (const score of transcript.integratedScores) {
@@ -185,7 +113,7 @@ export const drawPdf = async (transcript: TranscriptResult): Promise<Blob> => {
         }
 
         const scoreDocument = await PDFDocument.load(buffer);
-        const pages = await result.copyPages(scoreDocument, scoreDocument.getPageIndices());
+        const pages = await embedScoreArtwork(result, scoreDocument);
 
         scorePagesByMusicId.set(score.musicId, pages);
         scorePageCounts.set(score.musicId, pages.length);
@@ -193,6 +121,7 @@ export const drawPdf = async (transcript: TranscriptResult): Promise<Blob> => {
 
     const assembly = planIntegratedAssembly({
         scriptPageSourceBlockIds: transcript.scriptPageSourceBlockIds ?? [],
+        oddPageBlockIds: transcript.oddPageBlockIds,
         scores: transcript.integratedScores.map(score => ({
             musicId: score.musicId,
             startBlockId: score.startBlockId,
@@ -207,38 +136,24 @@ export const drawPdf = async (transcript: TranscriptResult): Promise<Blob> => {
 
     const {width, height} = generatedPages[0].getSize();
 
-    assembly.steps.forEach(step => {
+    for (const [index, step] of assembly.steps.entries()) {
         if (step.kind === 'blank') {
-            result.addPage([width, height]);
+            const blank = result.addPage([width, height]);
 
-            return;
+            await drawIntegratedPageNumber(result, blank, transcript, index + 1);
+            continue;
         }
 
         if (step.kind === 'script') {
             result.addPage(generatedPages[leadingPages + (step.scriptPageIndex ?? 0)]);
-
-            return;
-        }
-
-        const pages = scorePagesByMusicId.get(step.musicId ?? '');
-
-        if (pages) {
-            result.addPage(pages[step.scorePageIndex ?? 0]);
-        }
-    });
-
-    const finalPages = result.getPages();
-
-    for (const [index, page] of finalPages.entries()) {
-        /*
-         * Front matter keeps its own roman pagination. The integrated sequence
-         * begins with the first generated script page and includes inserted PDF pages.
-         */
-        if (index < leadingPages) {
             continue;
         }
 
-        await drawIntegratedPageNumber(result, page, transcript, index - leadingPages + 1);
+        const score = scorePagesByMusicId.get(step.musicId ?? '')?.[step.scorePageIndex ?? 0];
+
+        if (!score) continue;
+
+        await appendScoreArtwork(result, score, transcript, index + 1);
     }
 
     const bytes = await result.save();

@@ -25,6 +25,12 @@
     --control-trigger-height: var(--control-height-md);
 }
 
+.sm {
+    --control-trigger-height: var(--control-height-sm);
+    --control-trigger-font-size: var(--font-size-xs);
+    --control-trigger-padding-inline: var(--space-md);
+}
+
 .lg {
     --control-trigger-height: var(--control-height-lg);
 }
@@ -213,6 +219,16 @@
     }
 }
 
+.itemStatic {
+    composes: item from '../shared/menuItem.module.css';
+    font-weight: var(--menu-item-active-font-weight);
+
+    /* Outranks the composed item's pointer: this row is information, not a choice. */
+    &[aria-disabled = 'true'] {
+        cursor: default;
+    }
+}
+
 .itemActive {
     composes: item from '../shared/menuItem.module.css';
     font-weight: var(--menu-item-active-font-weight);
@@ -235,4 +251,10 @@
     min-width: 0;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.divider {
+    height: 1px;
+    margin-block: var(--space-sm);
+    background: var(--color-border);
 }

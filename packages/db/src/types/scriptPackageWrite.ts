@@ -1,5 +1,6 @@
 import type {
     EditorSettingsOverride,
+    FormatTemplateId,
     ScriptDocument,
     TitlePageSettings,
 } from '@stagistic/script';
@@ -120,6 +121,7 @@ export interface ScriptPackageWrite {
         id: string,
         title: string,
         subtitle: string | null,
+        formatTemplateId?: FormatTemplateId | null,
         createdAt: number,
         updatedAt: number,
     },

@@ -90,6 +90,9 @@ export const getEditorCssVars = (settings: EditorSettings, scale = 1, editorZoom
     const blocks = settings.blocks;
     const baseLineHeight = settings.typography.lineHeight;
     const vars: Record<string, string | undefined> = {
+        '--stage-direction-paren-open': blocks.stageDirection?.parenWrap ? '"("' : 'none',
+        '--stage-direction-paren-close': blocks.stageDirection?.parenWrap ? '")"' : 'none',
+        '--stage-direction-paren-indent': blocks.stageDirection?.parenWrap ? '1ch' : '0px',
         '--editor-zoom': String(editorZoom),
         '--editor-font-size': toPxScaled(settings.typography.fontSizePx, scale),
         '--editor-line-height': String(baseLineHeight),

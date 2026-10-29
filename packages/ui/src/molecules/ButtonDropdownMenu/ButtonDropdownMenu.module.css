@@ -1,0 +1,10 @@
+.label {
+    display: inline-flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.chevron {
+    width: 1em;
+    height: 1em;
+}

@@ -76,6 +76,7 @@ describe('importScriptPackageAsNew', () => {
         const result = await importScriptPackageAsNew({repository, bytes});
 
         expect(result.ok).toBe(true);
+
         if (result.ok) {
             expect(result.scriptId).not.toBe('original-id');
             expect(result.title).toBe('Original');
@@ -98,6 +99,7 @@ describe('importScriptPackageAsNew', () => {
         });
 
         expect(overridden.ok).toBe(true);
+
         if (overridden.ok) expect(overridden.title).toBe('My Copy');
 
         const fallback = await importScriptPackageAsNew({
@@ -107,6 +109,7 @@ describe('importScriptPackageAsNew', () => {
         });
 
         expect(fallback.ok).toBe(true);
+
         if (fallback.ok) expect(fallback.title).toBe('Original');
     });
 
@@ -123,6 +126,7 @@ describe('importScriptPackageAsNew', () => {
         const result = await importScriptPackageAsNew({repository, bytes: new TextEncoder().encode('not a zip')});
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
 
         expect(called).toBe(false);
@@ -135,6 +139,7 @@ describe('importScriptPackageAsNew', () => {
         const result = await importScriptPackageAsNew({repository, bytes});
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues).toEqual([{code: 'write_failed', stage: 'write'}]);
     });
 });

@@ -8,6 +8,10 @@ import type {
     PaginatorMetrics,
 } from './types';
 
+const continuationSpace = (pageStartKey: string | null, pageIndex: number, height = 0) => {
+    return pageStartKey === null && pageIndex > 0 ? Math.max(0, height) : 0;
+};
+
 /*
  * Height-agnostic pagination. A faithful port of the editor's original
  * buildPaginationState loop: it never measures or renders — each consumer feeds
@@ -44,6 +48,7 @@ export const paginate = (
     }
 
     let currentHeight = 0;
+    let pageHasContent = false;
     let pageIndex = 0;
     let pageStartKey: string | null = null;
     let pageStartOffset = 0;
@@ -64,6 +69,7 @@ export const paginate = (
         });
         pageIndex += 1;
         currentHeight = 0;
+        pageHasContent = false;
         pageStartKey = null;
     };
 
@@ -134,12 +140,18 @@ export const paginate = (
 
         const placeRemainder = () => {
             currentHeight += blockRemaining;
+            pageHasContent = true;
             offsetCursor += blockRemaining;
             blockRemaining = 0;
             lastBlockEndKey = block.endKey;
         };
 
         while (blockRemaining > 0) {
+            const continuationHeight = continuationSpace(pageStartKey, pageIndex, block.continuationHeight);
+
+            currentHeight += continuationHeight;
+            offsetCursor += continuationHeight;
+
             ensurePageStart(block.key);
 
             const spaceLeft = Math.max(0, contentHeight - currentHeight);
@@ -149,7 +161,7 @@ export const paginate = (
                 break;
             }
 
-            const canPushDown = currentHeight > 0;
+            const canPushDown = pageHasContent;
 
             if (!block.splittable || !block.getLineMap) {
                 if (canPushDown) {
@@ -199,6 +211,7 @@ export const paginate = (
             const leftover = Math.max(0, spaceLeft - fragmentHeight);
 
             currentHeight += fragmentHeight;
+            pageHasContent = true;
             offsetCursor += fragmentHeight;
             breaks.push({
                 kind: 'split',

@@ -221,7 +221,7 @@ export const buildContentsPages = (
     settings: EditorSettings,
     pageNumbers?: ContentsPageNumbers,
 ): VisualPage[] => {
-    const geometry = createContentsGeometry(settings, plan.showScoreColumn);
+    const geometry = createContentsGeometry(settings, plan.showScoreColumn, pageNumbers);
     const heading = HEADINGS[plan.variant];
     const cursor: Cursor = {
         pages: [],

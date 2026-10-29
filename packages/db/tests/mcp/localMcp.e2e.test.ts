@@ -16,6 +16,7 @@ interface RpcResponse {
     result: {
         serverInfo: {name: string},
         tools: unknown[],
+        prompts: unknown[],
         isError: boolean,
         structuredContent?: unknown,
         content: {text: string}[],

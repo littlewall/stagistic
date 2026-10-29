@@ -1,5 +1,6 @@
 import type {
     EditorSettingsOverride,
+    FormatTemplateId,
     ScriptDocument,
     TitlePageSettings,
 } from '@stagistic/script';
@@ -15,6 +16,7 @@ export interface StepkgScriptData {
     id: string,
     title: string,
     subtitle: string | null,
+    formatTemplateId?: FormatTemplateId | null,
     createdAt: string,
     updatedAt: string,
 }

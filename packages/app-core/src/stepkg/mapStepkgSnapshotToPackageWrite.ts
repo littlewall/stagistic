@@ -53,6 +53,7 @@ export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets
         id: snapshot.script.id,
         title: snapshot.script.title,
         subtitle: snapshot.script.subtitle,
+        formatTemplateId: snapshot.script.formatTemplateId ?? null,
         createdAt: toEpoch(snapshot.script.createdAt),
         updatedAt: toEpoch(snapshot.script.updatedAt),
     },

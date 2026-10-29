@@ -18,6 +18,7 @@ import type {
     ScriptSceneLocationAssignment,
     ScriptTitlePageRecord,
 } from '../types/scriptRepository';
+import {readScriptFormatTemplateId} from './config/formatTemplate';
 import type {GetDb} from './types';
 
 interface CreateLocalPgliteReactiveSourcesArgs {
@@ -215,12 +216,21 @@ export const createLocalPgliteReactiveSources = ({
             getDb,
             readRows: async () => {
                 const settings = await loadEditorSettings(scriptId);
+                const formatTemplateId = await readScriptFormatTemplateId(await getDb(), scriptId);
 
-                return settings ? [{scriptId, settings}] : [];
+                return settings || formatTemplateId ? [
+                    {
+                        scriptId,
+                        settings: settings ?? {},
+                        formatTemplateId,
+                    },
+                ] : [];
             },
             watchQuery: `
                 SELECT script_id, source
                 FROM (
+                    SELECT id AS script_id, 'template:' || COALESCE(format_template_id, '') AS source FROM scripts
+                    UNION ALL
                     SELECT script_id, 'page' AS source FROM script_settings_page_layout
                     UNION ALL
                     SELECT script_id, 'visual' AS source FROM script_settings_visual_preferences

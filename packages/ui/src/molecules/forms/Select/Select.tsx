@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import {
+    Fragment,
     type MouseEvent,
     type ReactNode,
     useId,
@@ -16,6 +17,10 @@ export interface SelectOption {
     value: number | string,
     label: string,
     icon?: ReactNode,
+    /** Draws a separator line above this option, e.g. before a trailing action. */
+    dividerBefore?: boolean,
+    /** Shown for information only: not focusable, no hover, cannot be chosen. */
+    isDisabled?: boolean,
 }
 
 interface SelectProps {
@@ -29,7 +34,7 @@ interface SelectProps {
     onIsOpenChange?: (isOpen: boolean) => void,
     width?: 'full' | 'content',
     variant?: 'panel' | 'plain' | 'form',
-    size?: 'md' | 'lg',
+    size?: 'sm' | 'md' | 'lg',
     /** Pin the menu to one edge of the trigger and let it grow. Omit to match the trigger's width exactly. */
     align?: 'end' | 'start',
     /** Name the listbox itself when the trigger's own label is not the right name for it. */
@@ -163,24 +168,43 @@ export const Select = ({
                     aria-label={menuAriaLabel}
                     aria-labelledby={id}
                 >
-                    {options.map(option => (
-                        <button
-                            key={String(option.value)}
-                            type="button"
-                            role="option"
-                            aria-selected={option.value === value}
-                            className={clsx(styles.item, option.value === value && styles.itemActive)}
-                            {...activate(() => {
-                                onChange(option.value);
-                                setIsOpen(false);
-                            })}
-                        >
+                    {options.map(option => {
+                        const content = (
                             <span className={styles.itemValue}>
                                 {option.icon ? <span className={styles.icon}>{option.icon}</span> : null}
                                 <span className={styles.itemLabel}>{option.label}</span>
                             </span>
-                        </button>
-                    ))}
+                        );
+
+                        return (
+                            <Fragment key={String(option.value)}>
+                                {option.dividerBefore ? <div className={styles.divider} aria-hidden="true" /> : null}
+                                {option.isDisabled ? (
+                                    <div
+                                        role="option"
+                                        aria-selected={option.value === value}
+                                        aria-disabled="true"
+                                        className={styles.itemStatic}
+                                    >
+                                        {content}
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        role="option"
+                                        aria-selected={option.value === value}
+                                        className={clsx(styles.item, option.value === value && styles.itemActive)}
+                                        {...activate(() => {
+                                            onChange(option.value);
+                                            setIsOpen(false);
+                                        })}
+                                    >
+                                        {content}
+                                    </button>
+                                )}
+                            </Fragment>
+                        );
+                    })}
                 </div>
             ) : null}
         </div>

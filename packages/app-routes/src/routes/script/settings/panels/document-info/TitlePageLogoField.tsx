@@ -63,6 +63,7 @@ export const TitlePageLogoField = ({logo, onChange}: TitlePageLogoFieldProps) =>
         const file = event.target.files?.[0];
 
         event.target.value = '';
+
         if (!file) {
             return;
         }

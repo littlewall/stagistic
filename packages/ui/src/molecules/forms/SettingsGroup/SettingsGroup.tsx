@@ -7,6 +7,7 @@ const GAP_CLASS = {
     md: styles.gapMd,
     lg: styles.gapLg,
     '2xl': styles.gap2xl,
+    '4xl': styles.gap4xl,
 } as const;
 
 export type SettingsGroupGap = keyof typeof GAP_CLASS;

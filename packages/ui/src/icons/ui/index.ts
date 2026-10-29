@@ -13,6 +13,7 @@ export {EditPencilIcon} from './EditPencilIcon';
 export {EyeIcon} from './EyeIcon';
 export {FilterIcon} from './FilterIcon';
 export {FolderIcon} from './FolderIcon';
+export {HelpCircleIcon} from './HelpCircleIcon';
 export {HomeIcon} from './HomeIcon';
 export {LinkSlashIcon} from './LinkSlashIcon';
 export {LockIcon} from './LockIcon';

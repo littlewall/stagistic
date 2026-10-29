@@ -78,6 +78,7 @@ export const HeaderFooterSettingsPanel = ({
     const draftDate = resolveDraftDate(titlePageSettings);
     const [selection, setSelection] = useState<Selection | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const activeLocked = false;
     const activeCell = selection ? settings[selection.area][selection.alignment] : null;
     const activeFormatting = activeCell ?? {
         isBold: false,
@@ -93,7 +94,7 @@ export const HeaderFooterSettingsPanel = ({
     };
 
     const updateActiveCell = (patch: Partial<HeaderFooterCellSettings>) => {
-        if (!selection || !activeCell) {
+        if (!selection || !activeCell || activeLocked) {
             return;
         }
 
@@ -177,7 +178,7 @@ export const HeaderFooterSettingsPanel = ({
                             <IconButton
                                 variant="filled"
                                 className={clsx(activeFormatting.isBold && styles.activeFormat)}
-                                isDisabled={!activeCell}
+                                isDisabled={!activeCell || activeLocked}
                                 onPress={() => updateActiveCell({isBold: !activeFormatting.isBold})}
                                 aria-label="Bold"
                                 aria-pressed={activeFormatting.isBold}
@@ -187,7 +188,7 @@ export const HeaderFooterSettingsPanel = ({
                             <IconButton
                                 variant="filled"
                                 className={clsx(activeFormatting.isItalic && styles.activeFormat)}
-                                isDisabled={!activeCell}
+                                isDisabled={!activeCell || activeLocked}
                                 onPress={() => updateActiveCell({isItalic: !activeFormatting.isItalic})}
                                 aria-label="Italic"
                                 aria-pressed={activeFormatting.isItalic}
@@ -197,7 +198,7 @@ export const HeaderFooterSettingsPanel = ({
                             <IconButton
                                 variant="filled"
                                 className={clsx(activeFormatting.isUnderline && styles.activeFormat)}
-                                isDisabled={!activeCell}
+                                isDisabled={!activeCell || activeLocked}
                                 onPress={() => updateActiveCell({isUnderline: !activeFormatting.isUnderline})}
                                 aria-label="Underline"
                                 aria-pressed={activeFormatting.isUnderline}
@@ -206,7 +207,7 @@ export const HeaderFooterSettingsPanel = ({
                             </IconButton>
                         </div>
                         <Switch
-                            isDisabled={!activeCell}
+                            isDisabled={!activeCell || activeLocked}
                             isSelected={activeFormatting.isHiddenInEditor}
                             onChange={isHiddenInEditor => updateActiveCell({isHiddenInEditor})}
                         >
@@ -224,7 +225,7 @@ export const HeaderFooterSettingsPanel = ({
                                 ref={inputRef}
                                 type="text"
                                 className={formControlStyles.input}
-                                disabled={!activeCell}
+                                disabled={!activeCell || activeLocked}
                                 value={activeCell?.text ?? ''}
                                 placeholder={selection ? 'Enter text or add a variable' : 'Select a header or footer area'}
                                 onChange={event => updateActiveCell({text: event.target.value})}
@@ -240,7 +241,7 @@ export const HeaderFooterSettingsPanel = ({
                                         variant="outline"
                                         size="sm"
                                         className={styles.variableButton}
-                                        isDisabled={!activeCell}
+                                        isDisabled={!activeCell || activeLocked}
                                         onPress={() => insertVariable(variable.token)}
                                     >
                                         {variable.label}

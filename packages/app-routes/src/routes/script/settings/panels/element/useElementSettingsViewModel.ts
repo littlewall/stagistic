@@ -53,7 +53,7 @@ export const useElementSettingsViewModel = ({
         const defaultContentChars = Math.max(1, previewReferenceChars - defaultLeftIndent - defaultRightIndent);
         const minPreviewContentChars = Math.min(MIN_PREVIEW_CONTENT_CHARS, defaultContentChars);
         const spacingBefore = getClosestStepValue(SPACING_BEFORE_OPTIONS, blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0);
-        const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined;
+        const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined || ['stageDirection', 'lyrics'].includes(blockType);
         const spacingAfterRaw = hasSpacingAfter ? blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0 : undefined;
         const spacingAfter = spacingAfterRaw === undefined ? undefined : getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw);
         const lineHeight = getClosestStepValue(LINE_HEIGHT_OPTIONS, blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight);

@@ -3,15 +3,14 @@ import {
     useScriptComments,
     useScriptRepository,
 } from '@stagistic/app-core';
-import {ScriptEditor, useFocusEditorBlock} from '@stagistic/editor';
+import {ScriptEditor} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
 import {
     useCallback,
-    useEffect,
     useMemo,
 } from 'react';
-import {useNavigate, useSearchParams} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
@@ -26,6 +25,7 @@ import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal'
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
 import {useSceneConversionState} from './editor/scene/useSceneConversionState';
 import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
+import {ScriptEditorBlockFocusWatcher} from './editor/ScriptEditorBlockFocusWatcher';
 import {useSearchPreferences} from './editor/search/useSearchPreferences';
 import {useEditorSidebars, useScriptSidebarPanels} from './editor/sidebar';
 import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
@@ -38,32 +38,6 @@ import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
-
-const ScriptEditorBlockFocusWatcher = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const focusBlock = useFocusEditorBlock();
-    const blockId = searchParams.get('block');
-
-    useEffect(() => {
-        if (!blockId) {
-            return;
-        }
-
-        focusBlock(blockId);
-
-        const next = new URLSearchParams(searchParams);
-
-        next.delete('block');
-        setSearchParams(next, {replace: true});
-    }, [
-        blockId,
-        focusBlock,
-        searchParams,
-        setSearchParams,
-    ]);
-
-    return null;
-};
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();

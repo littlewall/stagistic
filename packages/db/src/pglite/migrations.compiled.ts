@@ -135,5 +135,25 @@ export const compiledMigrations = [
         "id": "0026_script_text_search",
         "checksum": "4cfa6cb40f4be1a964277412fefddfaf44d70e7d2e85bda95990617c7d94d92b",
         "sql": "CREATE INDEX IF NOT EXISTS script_blocks_text_search_idx\nON script_blocks USING gin (to_tsvector('simple', text_content));\n"
+    },
+    {
+        "id": "0027_block_spacing_after_scene_number",
+        "checksum": "cfbb38ca92ffb0e06baf703af399227142de26d014b836e7307e39cfd3349f0f",
+        "sql": "ALTER TABLE \"script_settings_blocks\" ADD COLUMN \"spacing_after_millis\" integer;\nALTER TABLE \"script_settings_blocks\" ADD COLUMN \"scene_number_format\" text;\n"
+    },
+    {
+        "id": "0028_scripts_format_template_id",
+        "checksum": "b51050872b219ba012a92cd56b5542e4b888ade561f5c92ed3ae03cdbad2c4b2",
+        "sql": "ALTER TABLE \"scripts\" ADD COLUMN \"format_template_id\" text;\n"
+    },
+    {
+        "id": "0029_stage_direction_paren_wrap",
+        "checksum": "64467f339bfb2a530f4a8c3d9adc2ed5e2e338b18c99467c71b5439b5a3e84a3",
+        "sql": "ALTER TABLE \"script_settings_blocks\" ADD COLUMN \"paren_wrap\" boolean;\n"
+    },
+    {
+        "id": "0030_pdf_flow_settings",
+        "checksum": "3387b8e0b8f681a6d019adcc1bc949b320a8ba2fd041d20aa84be3900885dbf5",
+        "sql": "ALTER TABLE \"script_settings_page_layout\" ADD COLUMN \"pdf_flow\" jsonb;\n"
     }
 ] as const;

@@ -1,3 +1,4 @@
+import type {PdfFlowPreset} from '../templates/types';
 import type {
     BlockCasing,
     BlockShortcut,
@@ -29,6 +30,7 @@ export interface BlockSpacingSettings {
     isUnderline?: boolean,
     // Scene-only: whether and how the computed scene number is shown.
     sceneNumberFormat?: SceneNumberFormat,
+    parenWrap?: boolean,
 }
 
 export interface PageSettings {
@@ -109,6 +111,7 @@ export interface HeaderFooterSettingsPatch {
 export type BlockSettings = Record<string, BlockSpacingSettings>;
 
 export interface EditorSettings {
+    pdfFlow: PdfFlowPreset,
     page: PageSettings,
     typography: TypographySettings,
     visual: VisualSettings,
@@ -125,6 +128,7 @@ export interface StructureSettingsPatch {
 }
 
 export interface EditorSettingsOverride {
+    pdfFlow?: Partial<PdfFlowPreset>,
     page?: Partial<PageSettings>,
     typography?: Partial<TypographySettings>,
     visual?: Partial<VisualSettings>,

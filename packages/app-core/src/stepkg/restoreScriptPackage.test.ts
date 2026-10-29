@@ -60,6 +60,7 @@ describe('restoreScriptPackage', () => {
         const result = await restoreScriptPackage({repository, bytes: await exportBytes()});
 
         expect(result.ok).toBe(true);
+
         if (result.ok) {
             expect(result.scriptId).toBe('script-1');
             expect(result.title).toBe('Original');
@@ -82,6 +83,7 @@ describe('restoreScriptPackage', () => {
         const result = await restoreScriptPackage({repository, bytes: new TextEncoder().encode('not a zip')});
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
 
         expect(called).toBe(false);
@@ -93,6 +95,7 @@ describe('restoreScriptPackage', () => {
         const result = await restoreScriptPackage({repository, bytes: await exportBytes()});
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues).toEqual([{code: 'write_failed', stage: 'write'}]);
     });
 });
