@@ -95,7 +95,7 @@ describe('Board toolbar', () => {
         expect(findButton('Clear character filter')).toBeUndefined();
 
         await userEvent.click(requireValue(findButton('View')));
-        await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="dialog"] label')].find(label => label.textContent === 'Characters on stage')));
+        await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="dialog"] label')].find(label => label.textContent === 'Characters')));
         await waitFor(() => !hasChips('1. Kitchen, night'));
 
         expect(hasChips('3. Roof')).toBe(false);

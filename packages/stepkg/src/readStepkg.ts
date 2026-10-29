@@ -1,10 +1,9 @@
 import {
-    getScriptBlockId,
     type ScriptDocument,
-    type ScriptNode,
 } from '@stagistic/script';
 import {requireValue} from '@stagistic/shared';
 
+import {collectTopLevelBlockIds} from './blockIds';
 import type {
     StepkgAttachmentSnapshot,
     StepkgManifest,
@@ -12,6 +11,7 @@ import type {
 } from './contracts';
 import type {StepkgImportIssue} from './importContracts';
 import {readStepkgContainer} from './readContainer';
+import {readSceneCharacters} from './sceneCharacters';
 import {sha256Hex} from './sha256';
 
 export interface StepkgPackage {
@@ -20,7 +20,11 @@ export interface StepkgPackage {
     assets: Map<string, Uint8Array>,
 }
 
-export type StepkgReadResult = {ok: true, package: StepkgPackage} | {ok: false, issues: StepkgImportIssue[]};
+export type StepkgReadResult = {
+    ok: true,
+    package: StepkgPackage,
+    issues: StepkgImportIssue[],
+} | {ok: false, issues: StepkgImportIssue[]};
 
 interface StepkgAttachmentsFile {
     items: {
@@ -47,18 +51,6 @@ const REQUIRED_PATHS = [
 ] as const;
 
 const decode = (bytes: Uint8Array): unknown => JSON.parse(new TextDecoder().decode(bytes));
-
-const collectTopLevelBlockIds = (document: ScriptDocument): Set<string> => {
-    const ids = new Set<string>();
-
-    (document.content ?? []).forEach((node: ScriptNode) => {
-        const id = getScriptBlockId(node);
-
-        if (id) ids.add(id);
-    });
-
-    return ids;
-};
 
 export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> => {
     const container = await readStepkgContainer(bytes);
@@ -271,6 +263,10 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         contentKey: item.assetPath,
     }));
 
+    const sceneCharacters = readSceneCharacters(files.get('data/scene-characters.json'), document, characterIds);
+
+    if (!sceneCharacters.ok) return sceneCharacters;
+
     const snapshot: StepkgSnapshot = {
         script,
         document,
@@ -279,6 +275,7 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         characters,
         music,
         scenes,
+        sceneCharacters: {items: sceneCharacters.items},
         attachments,
         attachmentBindings: attachmentsFile.bindings,
         comments,
@@ -286,6 +283,7 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
 
     return {
         ok: true,
+        issues: sceneCharacters.issues,
         package: {
             manifest,
             snapshot,

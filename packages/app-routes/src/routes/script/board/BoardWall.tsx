@@ -134,11 +134,9 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
         getStartPage: source.getStartPage,
         selectedIds: new Set(selectedIds),
         showOnStage: preferences.showOnStage,
-        showMentioned: preferences.showMentioned,
     }), [
         confirmedCharacterRecords,
         model,
-        preferences.showMentioned,
         preferences.showOnStage,
         selectedIds,
         source.displayColorByKey,
@@ -199,8 +197,6 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                     onSelectedCharacterIdsChange={characterIds => setPreferences({...preferences, characterIds})}
                     showOnStage={preferences.showOnStage}
                     onShowOnStageChange={showOnStage => setPreferences({...preferences, showOnStage})}
-                    showMentioned={preferences.showMentioned}
-                    onShowMentionedChange={showMentioned => setPreferences({...preferences, showMentioned})}
                 />
             )}
         >

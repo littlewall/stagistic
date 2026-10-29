@@ -11,15 +11,14 @@ import {
 } from './boardPreferences';
 
 describe('parseBoardPreferences', () => {
-    it('reads a stored value', () => {
+    it('reads legacy preferences and discards the retired mentioned option', () => {
         expect(parseBoardPreferences({
             characterIds: ['a', 'b'],
             showOnStage: false,
-            showMentioned: false,
+            showMentioned: true,
         })).toEqual({
             characterIds: ['a', 'b'],
             showOnStage: false,
-            showMentioned: false,
         });
     });
 

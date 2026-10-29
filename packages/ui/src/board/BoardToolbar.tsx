@@ -14,8 +14,6 @@ export interface BoardToolbarProps extends BoardLensTabsProps {
     onSelectedCharacterIdsChange: (ids: string[]) => void,
     showOnStage: boolean,
     onShowOnStageChange: (show: boolean) => void,
-    showMentioned: boolean,
-    onShowMentionedChange: (show: boolean) => void,
     className?: string,
 }
 
@@ -29,8 +27,6 @@ export const BoardToolbar = ({
     onSelectedCharacterIdsChange,
     showOnStage,
     onShowOnStageChange,
-    showMentioned,
-    onShowMentionedChange,
     className,
 }: BoardToolbarProps) => (
     <div
@@ -52,8 +48,6 @@ export const BoardToolbar = ({
             <BoardViewMenu
                 showOnStage={showOnStage}
                 onShowOnStageChange={onShowOnStageChange}
-                showMentioned={showMentioned}
-                onShowMentionedChange={onShowMentionedChange}
             />
         </div>
     </div>

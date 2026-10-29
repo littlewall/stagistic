@@ -9,6 +9,11 @@ export type {
 } from './characters';
 export {MUSIC_ATTACHMENT_ROLES, type MusicAttachmentRole} from './musicAttachments';
 export type {
+    SceneCharacterInput,
+    ScriptSceneCharacter,
+    ScriptSceneSynopsis,
+} from './sceneMetadata';
+export type {
     CommentAnchorKind,
     CommentThreadStatus,
     Script,

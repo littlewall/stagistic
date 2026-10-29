@@ -62,8 +62,6 @@ const renderToolbar = (props: Partial<BoardToolbarProps> = {}) => {
             onSelectedCharacterIdsChange={vi.fn()}
             showOnStage
             onShowOnStageChange={vi.fn()}
-            showMentioned
-            onShowMentionedChange={vi.fn()}
             {...props}
         />,
     );
@@ -130,35 +128,23 @@ describe('BoardToolbar', () => {
 
     it('offers independent positive options in the View panel', async () => {
         const onShowOnStageChange = vi.fn();
-        const onShowMentionedChange = vi.fn();
 
         renderToolbar({
             showOnStage: true,
-            showMentioned: false,
             onShowOnStageChange,
-            onShowMentionedChange,
         });
         await userEvent.click(await waitFor(() => button('View')));
 
         const dialog = await waitFor(() => document.querySelector<HTMLElement>('[role="dialog"]'));
         const inputs = [...dialog.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
-        const [onStage, mentioned] = inputs.map(input => requireValue(input.closest('label'), 'label'));
+        const [onStage] = inputs.map(input => requireValue(input.closest('label'), 'label'));
 
         expect(dialog.getAttribute('aria-label')).toBe('Show on cards');
         expect(dialog.textContent).toContain('Show on cards');
-        expect(inputs.map(input => input.checked)).toEqual([true, false]);
-        expect(inputs.map(input => input.disabled)).toEqual([false, false]);
-        expect(onStage?.textContent).toBe('Characters on stage');
-        expect(mentioned?.textContent).toBe('Mentioned charactersNamed in dialogue or lyrics only');
+        expect(inputs.map(input => input.checked)).toEqual([true]);
+        expect(inputs.map(input => input.disabled)).toEqual([false]);
+        expect(onStage?.textContent).toBe('Characters');
         expect(dialog.textContent).not.toContain('Outline');
-
-        const boxLeft = (label: Element) => requireValue(label.querySelector('span'), 'box').getBoundingClientRect().left;
-
-        expect(boxLeft(requireValue(mentioned, 'mentioned'))).toBe(boxLeft(requireValue(onStage, 'on stage')));
-
-        await userEvent.click(requireValue(mentioned, 'mentioned'));
-
-        expect(onShowMentionedChange).toHaveBeenCalledWith(true);
 
         await userEvent.click(requireValue(onStage, 'on stage'));
 

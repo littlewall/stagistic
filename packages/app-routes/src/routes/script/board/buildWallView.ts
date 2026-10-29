@@ -27,8 +27,6 @@ export interface WallViewInput {
     selectedIds: ReadonlySet<string>,
     /** Whether chips list characters on stage. The filter counts them either way. */
     showOnStage: boolean,
-    /** Whether chips list characters only mentioned; a mention counts for the filter only then. */
-    showMentioned: boolean,
 }
 
 export const DEFAULT_ACT_KEY = '__default-act__';
@@ -41,8 +39,7 @@ export const resolveCharacterColor = (
 
 /*
  * Shapes the model for the Wall. Filtering never hides a scene: scenes without a selected
- * character collapse, so gaps in a character's story stay visible. Chips list those on
- * stage first, then those only mentioned.
+ * character collapse, so gaps in a character's story stay visible.
  */
 export const buildWallView = ({
     model,
@@ -51,7 +48,6 @@ export const buildWallView = ({
     getStartPage,
     selectedIds,
     showOnStage,
-    showMentioned,
 }: WallViewInput): WallAct[] => {
     const recordById = new Map(characters.map(character => [character.id, character]));
     const isFiltering = selectedIds.size > 0;
@@ -60,12 +56,9 @@ export const buildWallView = ({
         key: act.actBlockId ?? DEFAULT_ACT_KEY,
         name: act.name,
         scenes: act.scenes.map(scene => {
-            const counted = scene.characters.filter(character => showMentioned || character.level === 'present');
+            const counted = scene.characters;
             const matchesFilter = counted.some(character => character.characterId && selectedIds.has(character.characterId));
-            const chips = [
-                ...showOnStage ? counted.filter(character => character.level === 'present') : [],
-                ...showMentioned ? counted.filter(character => character.level === 'mentioned') : [],
-            ].map<BoardCharacterChip>(character => {
+            const chips = (showOnStage ? counted : []).map<BoardCharacterChip>(character => {
                 const record = character.characterId ? recordById.get(character.characterId) : undefined;
 
                 return {

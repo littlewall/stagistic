@@ -68,11 +68,11 @@ describe('CharacterChipStack', () => {
         expect(document.querySelector('[aria-label^="Characters"]')).toBeNull();
     });
 
-    it('fills dots for present characters and rings those only mentioned', async () => {
+    it('fills dots for characters in the script', async () => {
         renderStack([
             chip('anna'),
             chip('ben', {color: '#2266cc'}),
-            chip('clara', {level: 'mentioned', color: '#22aa66'}),
+            chip('clara', {color: '#22aa66'}),
         ]);
         await waitFor(() => dots()[0]);
 
@@ -85,11 +85,11 @@ describe('CharacterChipStack', () => {
         expect(dots().map(dot => dot.dataset.level)).toEqual([
             'present',
             'present',
-            'mentioned',
+            'present',
         ]);
         expect(requireValue(anna, 'anna').backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(requireValue(ben, 'ben').backgroundColor).not.toBe(requireValue(anna, 'anna').backgroundColor);
-        expect(requireValue(clara, 'clara').backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(requireValue(clara, 'clara').backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(requireValue(clara, 'clara').borderTopColor).not.toBe('rgba(0, 0, 0, 0)');
     });
 
@@ -123,12 +123,12 @@ describe('CharacterChipStack', () => {
         renderStack([
             chip('anna'),
             chip('ben'),
-            chip('clara', {level: 'mentioned'}),
+            chip('clara'),
         ]);
 
         const group = await waitFor(() => document.querySelector<HTMLElement>('[aria-label^="Characters"]'));
 
-        expect(group.getAttribute('aria-label')).toBe('Characters: ANNA, BEN. Mentioned: CLARA');
+        expect(group.getAttribute('aria-label')).toBe('Characters: ANNA, BEN, CLARA');
         expect(document.querySelector('[role="tooltip"]')).toBeNull();
 
         await userEvent.tab();
@@ -138,6 +138,6 @@ describe('CharacterChipStack', () => {
 
         const tooltip = await waitFor(() => document.querySelector('[role="tooltip"]'));
 
-        expect(tooltip.textContent).toBe('ANNA, BEN. Mentioned: CLARA');
+        expect(tooltip.textContent).toBe('ANNA, BEN, CLARA');
     });
 });

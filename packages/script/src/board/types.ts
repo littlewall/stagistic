@@ -1,5 +1,5 @@
-/** How strongly a character belongs to a scene: speaking or staged, or only named. */
-export type SceneBoardPresence = 'present' | 'mentioned';
+/** Evidence from a cue or a tag in a stage direction. */
+export type SceneBoardPresence = 'present';
 
 export interface SceneBoardCatalogCharacter {
     id: string,

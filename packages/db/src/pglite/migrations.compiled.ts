@@ -135,5 +135,10 @@ export const compiledMigrations = [
         "id": "0026_script_text_search",
         "checksum": "4cfa6cb40f4be1a964277412fefddfaf44d70e7d2e85bda95990617c7d94d92b",
         "sql": "CREATE INDEX IF NOT EXISTS script_blocks_text_search_idx\nON script_blocks USING gin (to_tsvector('simple', text_content));\n"
+    },
+    {
+        "id": "0027_scene_board_metadata",
+        "checksum": "8d2099ec80e2f87ed01480bb7cb002cae46299b765b829111f8f38266e9e8498",
+        "sql": "CREATE TABLE \"script_scene_characters\" (\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"heading_block_id\" text NOT NULL,\n    \"character_id\" text NOT NULL REFERENCES \"script_characters\"(\"id\") ON DELETE CASCADE,\n    \"note\" text,\n    \"arc_value\" integer CHECK (\"arc_value\" BETWEEN -3 AND 3),\n    \"created_at\" bigint NOT NULL,\n    \"updated_at\" bigint NOT NULL,\n    PRIMARY KEY (\"script_id\", \"heading_block_id\", \"character_id\")\n);\n--> statement-breakpoint\nCREATE INDEX \"script_scene_characters_script_id_idx\" ON \"script_scene_characters\" (\"script_id\");\n--> statement-breakpoint\nCREATE TABLE \"script_detached_scenes\" (\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"heading_block_id\" text NOT NULL,\n    \"synopsis\" text,\n    \"color_hex\" text,\n    \"location_id\" text REFERENCES \"script_locations\"(\"id\") ON DELETE SET NULL,\n    \"location_ids\" jsonb NOT NULL,\n    \"detached_at\" bigint NOT NULL,\n    PRIMARY KEY (\"script_id\", \"heading_block_id\")\n);\n"
     }
 ] as const;

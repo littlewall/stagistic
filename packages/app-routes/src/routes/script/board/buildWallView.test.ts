@@ -33,12 +33,6 @@ const model: SceneBoardModel = {
                     actBlockId: 'a1',
                     characters: [
                         {
-                            entryId: 'c-ben',
-                            characterId: 'c-ben',
-                            key: 'BEN',
-                            level: 'mentioned',
-                        },
-                        {
                             entryId: 'c-anna',
                             characterId: 'c-anna',
                             key: 'ANNA',
@@ -91,7 +85,6 @@ const build = (overrides: Partial<Parameters<typeof buildWallView>[0]> = {}) => 
     getStartPage: id => (id === 's1' ? 7 : null),
     selectedIds: new Set(),
     showOnStage: true,
-    showMentioned: true,
     ...overrides,
 });
 
@@ -106,7 +99,7 @@ describe('buildWallView', () => {
         expect(sceneNamed(acts, 's2')?.page).toBeNull();
     });
 
-    it('lists those on stage before those only mentioned, with confirmed colors', () => {
+    it('lists characters with confirmed colors', () => {
         const chips = sceneNamed(build(), 's1')?.chips;
 
         expect(chips).toEqual([
@@ -124,26 +117,13 @@ describe('buildWallView', () => {
                 level: 'present',
                 isDimmed: false,
             },
-            {
-                id: 'c-ben',
-                name: 'BEN',
-                color: '#2266cc',
-                level: 'mentioned',
-                isDimmed: false,
-            },
         ]);
-    });
-
-    it('drops mentioned characters when they are switched off', () => {
-        const chips = sceneNamed(build({showMentioned: false}), 's1')?.chips;
-
-        expect(chips?.map(chip => chip.id)).toEqual(['c-anna', 'key:DOCTOR']);
     });
 
     it('drops on-stage characters from the chips when they are switched off, yet still filters by them', () => {
         const acts = build({showOnStage: false, selectedIds: new Set(['c-anna'])});
 
-        expect(sceneNamed(acts, 's1')?.chips.map(chip => chip.id)).toEqual(['c-ben']);
+        expect(sceneNamed(acts, 's1')?.chips.map(chip => chip.id)).toEqual([]);
         expect(sceneNamed(acts, 's1')?.isCollapsed).toBe(false);
         expect(sceneNamed(acts, 's2')?.isCollapsed).toBe(true);
     });
@@ -165,12 +145,11 @@ describe('buildWallView', () => {
         expect(sceneNamed(acts, 's1')?.chips.map(chip => [chip.id, chip.isDimmed])).toEqual([
             ['c-anna', false],
             ['key:DOCTOR', true],
-            ['c-ben', true],
         ]);
     });
 
-    it('does not count a hidden mention as the selected character being in the scene', () => {
-        const acts = build({selectedIds: new Set(['c-ben']), showMentioned: false});
+    it('collapses a scene without valid evidence for the selected character', () => {
+        const acts = build({selectedIds: new Set(['c-ben'])});
 
         expect(sceneNamed(acts, 's1')?.isCollapsed).toBe(true);
         expect(sceneNamed(acts, 's2')?.isCollapsed).toBe(false);

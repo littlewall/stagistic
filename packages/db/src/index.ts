@@ -1,3 +1,8 @@
+export type {
+    SceneCharacterInput,
+    ScriptSceneCharacter,
+    ScriptSceneSynopsis,
+} from './types/sceneMetadata';
 // ─── Types & repository contracts ──────────────────────────────────────────────
 export {createLocalMcpReadService} from './mcp/createLocalMcpReadService';
 export type {McpReadService} from './mcp/types';

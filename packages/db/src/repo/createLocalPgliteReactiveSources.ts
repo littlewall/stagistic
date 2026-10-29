@@ -1,5 +1,5 @@
 import * as dbQueries from '../queries';
-import {createPgliteReactiveQuerySource, type ReactiveQuerySource} from '../reactive';
+import {createPgliteReactiveQuerySource} from '../reactive';
 import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
@@ -18,6 +18,8 @@ import type {
     ScriptSceneLocationAssignment,
     ScriptTitlePageRecord,
 } from '../types/scriptRepository';
+import {createScriptSourceRegistry} from './createScriptSourceRegistry';
+import {createSceneMetadataSources} from './sceneMetadataSources';
 import type {GetDb} from './types';
 
 interface CreateLocalPgliteReactiveSourcesArgs {
@@ -35,24 +37,6 @@ interface CreateLocalPgliteReactiveSourcesArgs {
     loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>,
     loadEditorSettings: (scriptId: string) => Promise<ScriptEditorSettingsRecord['settings'] | null>,
 }
-
-const createScriptSourceRegistry = <T>(createSource: (scriptId: string) => ReactiveQuerySource<T>) => {
-    const sources = new Map<string, ReactiveQuerySource<T>>();
-
-    return (scriptId: string) => {
-        const existing = sources.get(scriptId);
-
-        if (existing) {
-            return existing;
-        }
-
-        const source = createSource(scriptId);
-
-        sources.set(scriptId, source);
-
-        return source;
-    };
-};
 
 export const createLocalPgliteReactiveSources = ({
     getDb,
@@ -279,6 +263,7 @@ export const createLocalPgliteReactiveSources = ({
     });
 
     return {
+        ...createSceneMetadataSources(getDb),
         scriptSummaries,
         getScriptCharactersSource,
         getScriptCharacterGroupsSource,

@@ -12,17 +12,10 @@ import type {
 
 const UNTITLED_SCENE = 'Untitled scene';
 
-/*
- * What a block's character references prove. A cue or a tag in a stage direction or
- * aside puts the character on stage; a tag in spoken or sung text only names them.
- * Notes are the author's own and prove nothing.
- */
+/** Only cues and tags in stage directions prove presence. */
 const PRESENCE_BY_BLOCK_TYPE: Readonly<Record<string, SceneBoardPresence>> = {
     character: 'present',
     stageDirection: 'present',
-    aside: 'present',
-    dialogue: 'mentioned',
-    lyrics: 'mentioned',
 };
 
 const createAct = (actBlockId: string | null, name: string): SceneBoardAct => ({

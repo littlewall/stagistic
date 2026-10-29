@@ -220,7 +220,7 @@ describe('buildSceneBoardModel characters', () => {
         ], CATALOG)).toEqual([['c-anna:present']]);
     });
 
-    it('treats a tag in an aside as present and a tag in dialogue or lyrics as mentioned', () => {
+    it('ignores tags outside stage directions', () => {
         const index = indexOf([
             ['scene', 's1'],
             [
@@ -240,14 +240,10 @@ describe('buildSceneBoardModel characters', () => {
             ],
         ]);
 
-        expect(levelsOf(index)).toEqual([
-            'c-anna:present',
-            'c-ben:mentioned',
-            'c-clara:mentioned',
-        ]);
+        expect(levelsOf(index)).toEqual([]);
     });
 
-    it('lets present override mentioned and keeps the first position', () => {
+    it('orders characters by their first valid evidence', () => {
         const index = indexOf([
             ['scene', 's1'],
             [
@@ -262,7 +258,7 @@ describe('buildSceneBoardModel characters', () => {
             ],
         ]);
 
-        expect(levelsOf(index)).toEqual(['c-ben:present', 'c-anna:present']);
+        expect(levelsOf(index)).toEqual(['c-anna:present', 'c-ben:present']);
     });
 
     it('lists a character once when both a cue and a tag name them', () => {

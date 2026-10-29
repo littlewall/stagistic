@@ -44,13 +44,6 @@
         --chip-color: var(--color-border-strong);
     }
 
-    /* Mentioned: a ring in the character's color; the surface shows through. */
-    &.mentioned {
-        margin-left: var(--space-xs);
-        background: transparent;
-        border-color: var(--chip-color);
-    }
-
     &.dimmed {
         opacity: .3;
     }

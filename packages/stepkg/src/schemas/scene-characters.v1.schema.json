@@ -1,0 +1,63 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:scene-characters:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "items"
+    ],
+    "properties": {
+        "items": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/record"
+            }
+        }
+    },
+    "$defs": {
+        "record": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "headingBlockId",
+                "characterId",
+                "note",
+                "arcValue",
+                "createdAt",
+                "updatedAt"
+            ],
+            "properties": {
+                "headingBlockId": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "characterId": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "note": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "arcValue": {
+                    "type": [
+                        "integer",
+                        "null"
+                    ],
+                    "minimum": -3,
+                    "maximum": 3
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            }
+        }
+    }
+}

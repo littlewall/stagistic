@@ -5,6 +5,7 @@ import {
 } from 'drizzle-orm';
 
 import * as dbQueries from '../../queries';
+import {listSceneCharacters} from '../../queries/scripts/sceneCharacters';
 import {
     scriptAttachments,
     scriptCharacterGenders,
@@ -129,6 +130,7 @@ export const createReadScriptPackageSource =
                 locations,
                 scenes,
                 sceneLocations: locationsByScene,
+                sceneCharacters: await listSceneCharacters(tx, scriptId),
                 attachments,
                 musicAttachmentBindings: attachmentsByMusic,
                 comments: {threads: commentThreads, messages: commentMessages},

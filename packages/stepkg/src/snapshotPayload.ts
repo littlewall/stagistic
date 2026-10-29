@@ -89,7 +89,7 @@ export const decodeStepkgSnapshotPayload = (bytes: Uint8Array): StepkgSnapshotPa
 
     return {
         ok: true,
-        snapshot: snapshot as unknown as StepkgSnapshot,
+        snapshot: {...snapshot, sceneCharacters: snapshot.sceneCharacters ?? {items: []}} as unknown as StepkgSnapshot,
         documentSchemaVersion,
     };
 };

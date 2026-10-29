@@ -72,6 +72,7 @@ export const remapStepkgBlockIds = (snapshot: StepkgSnapshot, newId: () => strin
             ...snapshot.scenes,
             scenes: snapshot.scenes.scenes.map(scene => ({...scene, headingBlockId: remapNullable(scene.headingBlockId, map)})),
         },
+        sceneCharacters: {items: snapshot.sceneCharacters.items.map(row => ({...row, headingBlockId: map.get(row.headingBlockId) ?? row.headingBlockId}))},
         comments: {
             ...snapshot.comments,
             threads: snapshot.comments.threads.map(thread => ({...thread, anchorBlockId: remapNullable(thread.anchorBlockId, map)})),

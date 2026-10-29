@@ -5,6 +5,7 @@ import type {
 } from '@stagistic/script';
 
 import type {MusicAttachmentRole} from './';
+import type {ScriptSceneCharacter} from './sceneMetadata';
 
 export interface ScriptPackageWriteCharacter {
     id: string,
@@ -132,6 +133,7 @@ export interface ScriptPackageWrite {
     music: ScriptPackageWriteMusic[],
     locations: ScriptPackageWriteLocation[],
     scenes: ScriptPackageWriteScene[],
+    sceneCharacters: Omit<ScriptSceneCharacter, 'scriptId'>[],
     attachments: ScriptPackageWriteAttachment[],
     bindings: ScriptPackageWriteBinding[],
     comments: {threads: ScriptPackageWriteCommentThread[], messages: ScriptPackageWriteCommentMessage[]},

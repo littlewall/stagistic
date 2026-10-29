@@ -20,47 +20,58 @@ Nový pohled skriptu vedle Editoru a Exportu. Digitální obdoba autorovy zdi: s
 
 ## Model postav ve scéně
 
-### Automatické doklady (ze scénáře)
+### Doklad ve scénáři
 
-Pro každou dvojici scéna × postava se ze scénáře odvodí:
+Postava je ve scéně podle scénáře, když v ní má:
 
-| Doklad | Zdroj | Výsledná úroveň |
-|---|---|---|
-| replika | cue v bloku `character` | přítomná |
-| označení v režijní poznámce | character tag v `stageDirection` nebo `aside` | přítomná |
-| označení v textu | character tag v `dialogue` nebo `lyrics` | zmíněná |
+- repliku (cue v bloku `character`), nebo
+- character tag v režijní poznámce (`stageDirection`; jinam tag napojit nejde).
 
-Bloky `note` se nepočítají (ověřit v plánu, k čemu `note` v praxi slouží). Scéna sahá od svého scene headingu po další scene heading nebo act heading.
+Jiné bloky (`note`, `dialogue`, `lyrics`, `aside`) se nepočítají. Úroveň „zmíněná“ se ruší. Scéna sahá od svého scene headingu po další scene heading nebo act heading. Doklad pro skupinu (`kind = group`) platí pro každého jejího člena.
 
-### Uživatelská data (DB)
+### Záznam na kartě (DB)
 
-Záznam na dvojici scéna × postava:
+Záznam na dvojici scene heading × postava existuje, když uživatel postavu na kartu přidal nebo jí napsal větu:
 
-- `note`: jedna věta (posun postavy ve scéně), nebo prázdné;
-- `presence`: `auto` | `present` | `hidden`;
-- `arcValue`: celé číslo −3 až +3, nebo prázdné.
+- `note`: jedna věta (posun nebo motivace postavy ve scéně), nebo prázdné;
+- `arcValue`: celé číslo −3 až +3, nebo prázdné (pro Arcs).
+
+Existence záznamu znamená „postava je na kartě“. Záznam nezávisí na scénáři: když uživatel postavu ze scény ve scénáři smaže, záznam i věta zůstanou. Udržovat je aktuální je na uživateli; Board jen ukáže rozdíl.
 
 ### Výsledné zobrazení
 
-- **Posun**: `note` není prázdná. Barevný proužek, jméno a věta.
-- **Přítomná**: doklad „přítomná“ nebo `presence = present`. Ve stacku barev.
-- **Zmíněná**: jen doklad „zmíněná“. Prázdné kolečko. Na Wall je lze skrýt přepínačem.
-- **Plánovaná** (modifikátor): postava je na kartě ručně, ale ve scéně pro ni není žádný doklad. Čárkovaný okraj. Jakmile se postava ve scéně objeví, okraj se zplní sám.
-- `hidden` skryje jen zmíněnou postavu. Postavu s replikou nebo označením v režijní poznámce skrýt nejde.
+| Stav | Zobrazení |
+|---|---|
+| Ve scénáři, bez záznamu | plné kolečko |
+| Ve scénáři, se záznamem | plné kolečko a věta |
+| Jen záznam, bez dokladu ve scénáři (přidaná ručně nebo ze scénáře smazaná) | prázdné kolečko, případně věta |
+
+- Postavu s dokladem ve scénáři z karty odebrat nejde; jde jen smazat její věta (a oblouk). Postavu bez dokladu jde z karty odebrat (smaže záznam).
 - Nepotvrzené postavy (klíč bez záznamu v katalogu) se zobrazí neutrálně, bez editace. Potvrdit je jde přímo z čipu.
-- Board pracuje jen s jednotlivými postavami. Skupiny (`kind = group`) se nezobrazují na Wall, v Matrix, v Arcs ani v Numbers. Doklad pro skupinu (replika nebo označení) platí se stejnou úrovní pro každého jejího člena.
-- Pořadí na kartě: posuny podle první repliky ve scéně (plánované bez repliky na konec), pak stack přítomných, pak zmínění.
+- Board pracuje jen s jednotlivými postavami; skupiny se nezobrazují na Wall, v Matrix, v Arcs ani v Numbers.
+- Pořadí na kartě: postavy s větou podle první repliky ve scéně (bez repliky na konec), pak stack ostatních ve scénáři, pak ostatní jen na kartě.
+- Filtr postav počítá i postavy jen na kartě.
+
+### Identita scény
+
+Záznamy (věty, outline, barva, místa) visí na ID scene headingu:
+
+1. **Rozdělení scény** (nový heading uprostřed): nová scéna nemá nic, původní si nechá vše. Postavy, jejichž repliky odešly do nové scény, mají v původní prázdné kolečko.
+2. **Smazání headingu** (scéna splyne s předchozí): metadata se smažou; modaly pro smazání a převod headingu to řeknou.
+3. **Undo smazání**: heading se vrátí se stejným ID a s ním i metadata. Smazání je proto jen deaktivace; definitivně se metadata neaktivních scén mažou až při vytvoření draftu nebo verze.
+4. **Kopie scény** (copy/paste): vložený heading dostane nové ID a metadata se nekopírují.
+5. **Přesun scény** ID zachová, metadata jdou s ní.
 
 ## Wall
 
 - Akty jsou sekce pod sebou. Uvnitř sekce jsou karty scén v mřížce s pevnou šířkou karty, zalamované zleva doprava. Scény před prvním aktem se řídí výchozím aktem z `buildScriptStructureOutline`.
 - **Hlavička aktu**: název (přejmenování na místě), menu se smazáním aktu. Smazání odstraní jen act heading, scény připadnou předchozímu aktu (stejně jako v editoru).
 - **Nový akt**: z menu karty „Start new act here“ (act heading před scénu) a „+ Add act“ na konci boardu. „+ Add act“ je sázené jako název aktu (eyebrow, stejná výška řádku) a stojí tam, kde by stál další název aktu. Scény před prvním aktem (např. po smazání prvního aktu) mají místo názvu totéž tlačítko; přidá act heading před ně.
-- **Přejmenování na místě** (akt i scéna): text se stane editovatelným tam, kde stojí (contenteditable, jen prostý text na jednom řádku), takže se nic neposune. Editaci ukazuje jemné podbarvení a malé tlačítko ⏎ za textem pro potvrzení myší. Enter potvrdí, Escape vrátí původní název, opuštění pole potvrdí. Prázdný název scény se nepřijme.
+- **Přejmenování na místě** (akt i scéna): text se stane editovatelným tam, kde stojí (contenteditable, jen prostý text na jednom řádku), takže se nic neposune. Editaci ukazuje jemné podbarvení. Enter i opuštění pole uloží, Escape vrátí původní název. Mezera na začátku ani dvojitá mezera se nenapíše. Prázdný název scény se nepřijme.
 - **Karta scény**:
   - číslo scény, název (text scene headingu, přejmenování na místě), počáteční strana „p. 12“ (dokud strana není známá, nezobrazí se nic);
-  - outline (= `script_scenes.synopsis`), víceřádková editace na místě;
-  - postavy podle modelu výše; klik na čip otevře popover s větou, přepnutím úrovně a odebráním;
+  - outline (= `script_scenes.synopsis`), víceřádková editace na místě (Enter = nový řádek, uloží opuštění pole nebo Cmd/Ctrl+Enter, Escape zruší);
+  - postavy podle modelu výše; klik na čip otevře popover s větou a odebráním z karty (jen pro postavu bez dokladu ve scénáři);
   - přidání postavy: výběr z katalogu nebo založení nové postavy (dostane barvu z palety);
   - akce „Open in Editor“ skočí na scene heading v editoru;
   - akce „Delete scene…“ (ikona v menu karty) nic nemaže. Přepne do editoru na scene heading, aby autor viděl celý obsah scény, a smazání provede tam.
@@ -81,13 +92,13 @@ Mockup: lišta s menu, schválená 2026-10-27.
   - víc postav: překrývající se barevné tečky vybraných postav + počet („3 characters“) + ▾;
   - při výběru má tlačítko stav výběru (Creamed Corn) a ✕ „Clear character filter“ je uvnitř ovládacího prvku mezi popiskem a šipkou ▾ (vizuálně jeden prvek, v DOM samostatné tlačítko, ne vnořené). Šipka zůstává na pravém okraji, nic na konci lišty neposkakuje.
 - **Popover filtru**: vyhledávací pole „Find character…“, seznam postav (zaškrtávátko, barevná tečka, jméno, „N scenes“), vybrané řádky ve stavu výběru, dole „Clear filter“. Pořadí podle prvního výskytu ve scénáři, postavy bez scén na konci.
-- **Popover View**, nadpis „Show on cards“: nezávislá pozitivní zaškrtávátka, každé něco přidává. Outline (až od kroku 3), „Characters on stage“ (posuny a přítomné), „Mentioned characters“ s vedlejším textem „Named in dialogue or lyrics only“. Bez vnoření a bez neaktivních stavů. Nahrazuje přepínač hustoty. Když „Mentioned characters“ není zaškrtnuté, zmínka se nepočítá ani pro filtr.
+- **Popover View**, nadpis „Show on cards“: nezávislá pozitivní zaškrtávátka, každé něco přidává. Outline (od kroku 3) a „Characters“ (postavy na kartě). Bez vnoření a bez neaktivních stavů. Nahrazuje přepínač hustoty. Volba „Mentioned characters“ s krokem 3 zmizí spolu s úrovní „zmíněná“.
 - Počáteční strana pochází ze stránkování editoru (`scenePlacement.startPage`). Číslování se může lišit od exportu. Když stránkování není k dispozici nebo je po změně na boardu zastaralé, karta stranu neukazuje.
 
 ## Matrix
 
 - Řádky jsou postavy (pořadí podle prvního výskytu), sloupce scény s nenápadným oddělením aktů.
-- Buňka: ■ posun (plná barva), ● přítomná, ○ zmíněná, čárkovaný okraj = plánovaná, prázdná buňka = postava ve scéně není.
+- Buňka: ■ s větou (plná barva), ● ve scénáři, ○ jen na kartě (bez dokladu ve scénáři), prázdná buňka = postava ve scéně není.
 - Hover ukáže větu. Klik otevře stejný popover jako čip na Wall.
 - V hlavičce řádku je jméno, barva a počet scén.
 
@@ -137,16 +148,18 @@ Návrh, který plán ověří:
 
 ### Data
 
-- Outline scény: existující `script_scenes.synopsis`. Přibude zápisové API v repository (podle vzoru `replaceSceneAssignments`, klíč `sceneHeadingBlockId`) a store/hook v `app-core`.
-- Nová tabulka `script_scene_characters`: `scene_id` (FK `script_scenes`, cascade), `character_id` (FK `script_characters`, cascade), `note`, `presence` (default `auto`), `arc_value`, `created_at`, `updated_at`; PK (`scene_id`, `character_id`). Po změně schématu spustit `moon run db:db-compile-migrations`.
-- Projekce, která přepisuje `script_scenes`, musí zachovat řádky nové tabulky pro přeživší scény, stejně jako dnes zachovává `synopsis`.
-- Stepkg: nová sekce (např. `sceneCharacters.v1`), zahrnutá do snapshotů, draftů a verzí. Import starších balíčků bez sekce musí fungovat.
-- Modaly pro převod a smazání scene headingu, které dnes upozorňují na ztrátu synopse, upozorní i na ztrátu vět a oblouků postav.
+- **Outline**: existující `script_scenes.synopsis`. Přibude zápisové API v repository (podle vzoru `replaceSceneAssignments`, klíč `sceneHeadingBlockId`) a reaktivní zdroj + hook v `app-core`.
+- **Záznamy postav**: nová tabulka `script_scene_characters`: `script_id` (FK `scripts`, cascade), `heading_block_id`, `character_id` (FK `script_characters`, cascade), `note`, `arc_value`, `created_at`, `updated_at`; PK (`script_id`, `heading_block_id`, `character_id`). Bez FK na `script_scenes`, aby smazání headingu záznamy hned nezničilo. Aktivní jsou záznamy, jejichž heading je v dokumentu.
+- **Deaktivovaná metadata scén**: projekce dnes řádky zmizelých scén maže i se synopsí, barvou a místy. Nová tabulka `script_detached_scenes` (`script_id`, `heading_block_id`, `synopsis`, `color_hex`, `location_ids`, `detached_at`) je při zmizení scény převezme a při návratu headingu se stejným ID vrátí.
+- **Úklid**: vytvoření draftu nebo verze (včetně záložního draftu při obnovení) smaže neaktivní záznamy postav i řádky `script_detached_scenes` daného skriptu. Snapshot obsahuje jen aktivní data.
+- Po změně schématu spustit `moon run db:db-compile-migrations`.
+- **Stepkg**: nová volitelná sekce `data/scene-characters.json` (`sceneCharacters.v1`), jen aktivní záznamy. Import starších balíčků bez sekce funguje. Remap ID bloků a postav ji zahrnuje. Duplikace skriptu ji kopíruje.
+- **Undo**: změny metadat (outline, věty) nejsou v historii dokumentu; v poli platí Escape a vlastní undo prohlížeče.
 
 ## Rizika
 
 - **Úpravy bez namountovaného editoru** (undo, autosave, instance bez DOM). Plán musí nejdřív ověřit tuto cestu, před jakoukoli editací na boardu.
-- **Identita scény**: metadata visí na `headingBlockId`. Je třeba ověřit, že přesun, rozdělení a kopírování scény zachová nebo vědomě zahodí metadata.
+- **Identita scény**: metadata visí na `headingBlockId`; pravidla viz „Identita scény“. Copy/paste musí headingu přidělit nové ID (ověřit v plánu).
 - **Stránkování** se počítá jen v namountovaném editoru. Po změně struktury na boardu jsou strany do návratu do editoru zastaralé, případně se stránkování spustí na pozadí.
 - **Výkon**: model se přepočítává při každé změně dokumentu. Přepočet má být inkrementální nebo debounce, aby velké skripty nezpomalily editor.
 
@@ -156,7 +169,9 @@ Každý krok lze samostatně mergnout.
 
 1. **Wall jen pro čtení**: route, přepínač v hlavičce, `buildSceneBoardModel`, sekce aktů, karty s názvem, stranou a automatickými postavami, filtr, hustota, Open in Editor a Delete scene… (obojí jen navigace). Outline přijde až s metadaty v kroku 3, protože pro `synopsis` zatím neexistuje čtecí ani zápisové API.
 2. **Script session a editace struktury**: přejmenování a vložení scény, přesun scény, nový, přejmenovaný a smazaný akt, undo.
-3. **Metadata scén a postav**: editace outlinu, tabulka `script_scene_characters`, stepkg, věty, ruční a plánované postavy, skrytí zmíněných, přidání a založení postavy.
+3. **Metadata scén a postav**, ve dvou mergnutelných částech:
+   - **3a data**: tabulky, API, deaktivace a úklid, stepkg, modaly, zrušení úrovně „zmíněná“;
+   - **3b karta**: outline, věty, přidání a odebrání postavy, založení nové postavy, volba Outline.
 4. **Matrix.**
 5. **Arcs.**
 6. **Numbers.**
