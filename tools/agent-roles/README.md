@@ -36,7 +36,7 @@ No user-level layer: generated agent files are committed, so they must not depen
 
 - `roles.<role>`: only `provider`, `model`, `effort`, and for OpenCode optionally `models` instead of `model`; `kind`/`tools` are fixed.
 - `models` (OpenCode only): same-tier Go candidates in preference order, each supporting the role effort. `ask` lists live models with `opencode models` on every call and runs the first one offered; changing the list needs no sync.
-- `tiers.<provider>`: model → `low` | `mid` | `high`. Exactly one Claude model per tier; it is the fallback for external models of that tier.
+- `tiers.<provider>`: model → `low` | `mid` | `high`. OpenCode Go tiers follow the official per-token output price (https://opencode.ai/docs/go/): `low` ≤ $0.60/M or free, `mid` $0.87–4.40/M, `high` ≥ $6/M. Exactly one Claude model per tier; it is the fallback for external models of that tier.
 - `efforts.<provider>`: valid effort values (replaced, not merged).
 - `effortToClaude.<provider>`: external effort → Claude effort for the fallback.
 - `modelEfforts.opencode.<model>`: variants supported by that exact Go model. Go model ids must start with `opencode-go/`. `default` omits the CLI variant; use it for models without reasoning variants. Add models/variants in these tables, not in adapter code.
