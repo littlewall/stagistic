@@ -1,0 +1,37 @@
+{
+    "roles": {
+        "scout": {"kind": "read", "provider": "claude", "model": "haiku", "effort": "low", "tools": ["Read", "Grep", "Glob", "Bash"]},
+        "implementer": {"kind": "write", "provider": "claude", "model": "sonnet", "effort": "medium", "tools": ["Read", "Grep", "Glob", "Bash", "Edit", "Write"]},
+        "verifier": {"kind": "execute", "provider": "claude", "model": "haiku", "effort": "low", "tools": ["Read", "Bash"]},
+        "reviewer": {"kind": "read", "provider": "claude", "model": "opus", "effort": "high", "tools": ["Read", "Grep", "Glob", "Bash"]},
+        "researcher": {"kind": "read", "provider": "claude", "model": "sonnet", "effort": "medium", "tools": ["Read", "Grep", "Glob", "WebSearch", "WebFetch"]}
+    },
+    "tiers": {
+        "claude": {"haiku": "low", "sonnet": "mid", "opus": "high"},
+        "codex": {
+            "gpt-6.1-sol": "high",
+            "gpt-6-sol": "high",
+            "gpt-6-astra": "high",
+            "gpt-6.1-terra": "mid",
+            "gpt-6-luna": "low"
+        },
+        "agy": {
+            "claude-opus-4-6-thinking": "high",
+            "claude-sonnet-4-6": "mid",
+            "gemini-3.8-flash-high": "mid",
+            "gemini-3.8-flash-medium": "low",
+            "gemini-3.8-flash-low": "low",
+            "gpt-oss-120b-medium": "low"
+        }
+    },
+    "efforts": {
+        "claude": ["low", "medium", "high", "xhigh", "max"],
+        "codex": ["low", "medium", "high", "xhigh", "max", "ultra"],
+        "agy": ["low", "medium", "high", "xhigh", "max"]
+    },
+    "effortToClaude": {
+        "codex": {"low": "low", "medium": "medium", "high": "high", "xhigh": "xhigh", "max": "max", "ultra": "max"},
+        "agy": {"low": "low", "medium": "medium", "high": "high", "xhigh": "xhigh", "max": "max"}
+    },
+    "timeoutSeconds": 600
+}
