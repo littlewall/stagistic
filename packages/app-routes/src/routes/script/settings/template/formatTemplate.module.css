@@ -1,0 +1,233 @@
+/* Route layout: format-lock actions and the scaled manuscript sample page. */
+.lockedSection {
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.lockedBar {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-surface-raised);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.partial .lockedBar {
+    border-bottom: 0;
+}
+
+.inlineSection {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.inlineBar {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    min-width: 0;
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-surface-raised);
+    border-radius: var(--radius-sm);
+}
+
+.inlineIcon {
+    flex: none;
+    width: .75rem;
+    height: .75rem;
+    color: var(--color-text-muted);
+}
+
+.inlineTitle {
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lockedIcon {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-text-muted);
+}
+
+.lockedTitle {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+
+    & strong {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text);
+    }
+}
+
+.sample {
+    overflow: hidden;
+    width: 100%;
+    margin: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+}
+
+/* The top of a manuscript page, zoomed to the preview width; half margins above and below keep it short. */
+.samplePage {
+    box-sizing: border-box;
+    width: var(--sample-width, 816px);
+    font-family: var(--font-family-mono);
+}
+
+.lockOptionEnd {
+    align-self: center;
+    margin-left: auto;
+}
+
+.lockOption {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.helpButton {
+    cursor: help;
+    display: inline-flex;
+    padding: 0;
+    color: var(--color-text-muted);
+    background: none;
+    border: 0;
+
+    & svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+.pickerDialog {
+    --modal-panel-width: min(960px, 100%);
+}
+
+/* Template list beside the selected template's changes and sample page. */
+.pickerLayout {
+    display: grid;
+    grid-template-columns: minmax(12rem, 20rem) minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+}
+
+/* Our detail tabs, turned vertical: the indicator moves to the left edge. */
+.templateTabs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    border-left: 1px solid var(--color-border);
+}
+
+.templateTab {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: calc((var(--space-xs) + var(--space-md)) / 2);
+    padding: var(--space-lg);
+    font-family: inherit;
+    color: var(--color-text-muted);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    transition: color var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--menu-item-hover-bg);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: calc(var(--space-px) * -1);
+        width: 2px;
+        background: transparent;
+    }
+
+    &.active {
+        color: var(--color-text);
+
+        &::after {
+            background: var(--color-text);
+        }
+    }
+}
+
+.templateName {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.templateDescription {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+}
+
+.templateDetail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-width: 0;
+}
+
+.noChanges {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.samplePage p {
+    margin: 0;
+}
+
+.formatFields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.formatFields:disabled {
+    opacity: .65;
+}
+
+/* Compact bordered trigger sized to the chosen template; long names truncate. */
+.picker {
+    --control-trigger-height: var(--control-height-xs);
+    --control-trigger-font-size: var(--font-size-xs);
+    --control-trigger-padding-inline: var(--space-sm);
+    --control-trigger-border-color: var(--color-border);
+
+    width: auto;
+}
+
+/* Faint hatching marks the framed controls as read-only; the controls fade, the frame does not. */
+.formatFields.lockedBody {
+    padding: var(--space-xl) var(--space-lg);
+    opacity: 1;
+    background: repeating-linear-gradient(135deg, transparent 0 9px, color-mix(in oklch, var(--color-border) 35%, transparent) 9px 10px);
+
+    & > * {
+        opacity: .5;
+    }
+}

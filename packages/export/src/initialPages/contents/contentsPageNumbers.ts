@@ -3,6 +3,6 @@
  * willAddAutomaticBalancingBlank renders initial pages from the plan alone.
  */
 export interface ContentsPageNumbers {
-    scriptPageNumberByBlockId: Map<string, number>,
+    scriptPageNumberByBlockId: Map<string, number | string>,
     scoreStartPageByMusicId: Map<string, number>,
 }

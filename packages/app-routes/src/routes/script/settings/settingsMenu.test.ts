@@ -20,3 +20,21 @@ describe('readOnlyScriptSettingsMenu', () => {
         );
     });
 });
+
+it('groups Script before Format and exposes Page format', () => {
+    expect(scriptSettingsMenu.map(group => group.id)).toEqual([
+        'script',
+        'format',
+        'danger',
+    ]);
+    expect(scriptSettingsMenu[0].items.filter(item => item.kind === 'item').map(item => item.label)).toEqual([
+        'Title page',
+        'Initial pages',
+        'Visual preferences',
+        'Page format',
+        'Header and footer',
+    ]);
+    expect(scriptSettingsMenu[1].items.filter(item => item.kind !== 'separator').map(item => item.label)).toEqual(['Block settings']);
+    expect(scriptSettingsMenu.at(-1)?.items.filter(item => item.kind === 'item').map(item => item.label)).toEqual(['Danger zone']);
+    expect(scriptSettingsMenu.at(-1)?.label).toBeUndefined();
+});

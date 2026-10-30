@@ -1,3 +1,5 @@
+import type {ContinuationMark} from '@stagistic/script';
+
 export interface CharacterFilterValue {
     mode: 'all' | 'only',
     characterIds: string[],
@@ -6,6 +8,9 @@ export interface CharacterFilterValue {
 }
 
 export interface PageBreakValue {
+    actOnNewPage?: boolean,
+    repeatCharacterOnBreak?: boolean,
+    continuationMark?: ContinuationMark,
     sceneOnNewPage: boolean,
     sceneOnOddPage: boolean,
 }
@@ -67,6 +72,9 @@ export const BASIC_DEFAULTS: BasicExportConfig = {
         preserveFullScriptPagination: true,
     },
     pageBreaks: {
+        actOnNewPage: true,
+        repeatCharacterOnBreak: false,
+        continuationMark: 'none',
         sceneOnNewPage: true,
         sceneOnOddPage: false,
     },
@@ -81,7 +89,7 @@ export const BASIC_DEFAULTS: BasicExportConfig = {
         },
         contents: {
             enabled: true,
-            variant: 'scenes-and-musical-numbers',
+            variant: 'scenes',
         },
         vocalRanges: {
             enabled: true,
@@ -95,7 +103,7 @@ export const BASIC_DEFAULTS: BasicExportConfig = {
     },
 };
 
-/** Integrated Score deliberately shares every user configurable option with Basic. */
+/** Shared setting shape; music contents variants are available only in Integrated score. */
 export type IntegratedScoreExportConfig = BasicExportConfig;
 
 export const INTEGRATED_SCORE_DEFAULTS: IntegratedScoreExportConfig = {
@@ -105,7 +113,7 @@ export const INTEGRATED_SCORE_DEFAULTS: IntegratedScoreExportConfig = {
     initialPages: {
         ...BASIC_DEFAULTS.initialPages,
         charactersAndPlaces: {...BASIC_DEFAULTS.initialPages.charactersAndPlaces},
-        contents: {...BASIC_DEFAULTS.initialPages.contents},
+        contents: {...BASIC_DEFAULTS.initialPages.contents, variant: 'scenes-and-musical-numbers'},
         vocalRanges: {...BASIC_DEFAULTS.initialPages.vocalRanges},
     },
     blankPages: {

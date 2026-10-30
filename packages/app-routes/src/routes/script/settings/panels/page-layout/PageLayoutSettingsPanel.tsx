@@ -129,141 +129,143 @@ export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSet
         >
             <PanelHeader
                 level={3}
-                title="Page layout"
+                title="Page format"
             />
-            <div className={formControlStyles.previewCard}>
-                <div className={clsx(formControlStyles.flatGrid, styles.threeColumn)}>
-                    <div className={formControlStyles.field}>
-                        <span className={formControlStyles.label}>Page size</span>
-                        <FormSelect
-                            id="settings-page-size"
-                            ariaLabel="Select page size"
-                            value={pageSizePresetId}
-                            options={pageSizeOptions}
-                            onChange={nextValue => {
-                                const preset = PAGE_SIZE_PRESETS.find(candidate => candidate.id === nextValue);
+            <SettingsGroup gap="lg">
+                <div className={formControlStyles.previewCard}>
+                    <div className={clsx(formControlStyles.flatGrid, styles.threeColumn)}>
+                        <div className={formControlStyles.field}>
+                            <span className={formControlStyles.label}>Page size</span>
+                            <FormSelect
+                                id="settings-page-size"
+                                ariaLabel="Select page size"
+                                value={pageSizePresetId}
+                                options={pageSizeOptions}
+                                onChange={nextValue => {
+                                    const preset = PAGE_SIZE_PRESETS.find(candidate => candidate.id === nextValue);
 
-                                if (!preset) {
-                                    return;
-                                }
+                                    if (!preset) {
+                                        return;
+                                    }
+
+                                    onUpdatePageSettings({
+                                        widthPx: preset.widthPx,
+                                        heightPx: preset.heightPx,
+                                    });
+                                }}
+                            />
+                        </div>
+                        <div className={formControlStyles.field}>
+                            <span className={formControlStyles.label}>Top margin</span>
+                            <FormSelect
+                                id="settings-margin-top"
+                                ariaLabel="Select top margin rows"
+                                value={localTopMarginRows}
+                                options={marginRowOptions}
+                                onChange={nextValue => {
+                                    setLocalTopMarginRows(Number(nextValue));
+                                    startTransition(() => {
+                                        onUpdatePageSettings({marginTopPx: Number(nextValue) * fontSizePx});
+                                    });
+                                }}
+                            />
+                        </div>
+                        <div className={formControlStyles.field}>
+                            <span className={formControlStyles.label}>Bottom margin</span>
+                            <FormSelect
+                                id="settings-margin-bottom"
+                                ariaLabel="Select bottom margin rows"
+                                value={localBottomMarginRows}
+                                options={marginRowOptions}
+                                onChange={nextValue => {
+                                    setLocalBottomMarginRows(Number(nextValue));
+                                    startTransition(() => {
+                                        onUpdatePageSettings({marginBottomPx: Number(nextValue) * fontSizePx});
+                                    });
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div
+                        className={styles.pageSchematic}
+                        style={{...pagePreviewStyle, ...localSchematicOverride}}
+                    >
+                        <div className={styles.pageSchematicMarginTop} />
+                        <div className={styles.pageSchematicMiddle}>
+                            <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginLeft)} />
+                            <div className={styles.pageSchematicCenter}>
+                                <div className={styles.pageSchematicZone}>{`Header: ${headerRows} row${headerRows === 1 ? '' : 's'}`}</div>
+                                <div className={styles.pageSchematicContent}>{`~${contentRows} rows`}</div>
+                                <div className={styles.pageSchematicZone}>{`Footer: ${footerRows} row${footerRows === 1 ? '' : 's'}`}</div>
+                            </div>
+                            <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginRight)} />
+                        </div>
+                        <div className={styles.pageSchematicMarginBottom} />
+                    </div>
+                    <IndentRangeSlider
+                        style={{...sliderStyle, ...localSliderStyleOverride}}
+                        start={{
+                            value: localSliderStart,
+                            min: 0,
+                            max: previewReferenceTotal,
+                            step: marginSliderStep,
+                            ariaLabel: 'Left page margin',
+                            onChange: event => {
+                                const rawStart = Number.parseFloat(event.target.value);
+                                const maxStart = clamp(latestEnd.current - MIN_PAGE_CONTENT_WIDTH_PX, minSliderStart, previewReferenceTotal);
+                                const next = clamp(rawStart, minSliderStart, maxStart);
+
+                                latestStart.current = next;
+                                setLocalSliderStart(next);
+                            },
+                            onCommit: () => {
+                                const nextRightPx = previewReferenceTotal - latestEnd.current;
+
+                                onUpdatePageSettings({marginLeftPx: latestStart.current, marginRightPx: nextRightPx});
+                            },
+                        }}
+                        end={{
+                            value: localSliderEnd,
+                            min: 0,
+                            max: previewReferenceTotal,
+                            step: marginSliderStep,
+                            ariaLabel: 'Right page margin',
+                            onChange: event => {
+                                const rawEnd = Number.parseFloat(event.target.value);
+                                const minEnd = clamp(latestStart.current + MIN_PAGE_CONTENT_WIDTH_PX, 0, maxSliderEnd);
+                                const next = clamp(rawEnd, minEnd, maxSliderEnd);
+
+                                latestEnd.current = next;
+                                setLocalSliderEnd(next);
+                            },
+                            onCommit: () => {
+                                const nextRightPx = previewReferenceTotal - latestEnd.current;
 
                                 onUpdatePageSettings({
-                                    widthPx: preset.widthPx,
-                                    heightPx: preset.heightPx,
+                                    marginLeftPx: latestStart.current,
+                                    marginRightPx: clamp(nextRightPx, MIN_PAGE_MARGIN_HORIZONTAL_PX, previewReferenceTotal),
                                 });
-                            }}
-                        />
-                    </div>
-                    <div className={formControlStyles.field}>
-                        <span className={formControlStyles.label}>Top margin</span>
-                        <FormSelect
-                            id="settings-margin-top"
-                            ariaLabel="Select top margin rows"
-                            value={localTopMarginRows}
-                            options={marginRowOptions}
-                            onChange={nextValue => {
-                                setLocalTopMarginRows(Number(nextValue));
-                                startTransition(() => {
-                                    onUpdatePageSettings({marginTopPx: Number(nextValue) * fontSizePx});
-                                });
-                            }}
-                        />
-                    </div>
-                    <div className={formControlStyles.field}>
-                        <span className={formControlStyles.label}>Bottom margin</span>
-                        <FormSelect
-                            id="settings-margin-bottom"
-                            ariaLabel="Select bottom margin rows"
-                            value={localBottomMarginRows}
-                            options={marginRowOptions}
-                            onChange={nextValue => {
-                                setLocalBottomMarginRows(Number(nextValue));
-                                startTransition(() => {
-                                    onUpdatePageSettings({marginBottomPx: Number(nextValue) * fontSizePx});
-                                });
-                            }}
-                        />
-                    </div>
+                            },
+                        }}
+                        labels={(
+                            <>
+                                <span>
+                                    {'Left: '}
+                                    {localLeftMarginInches}
+                                </span>
+                                <span>
+                                    {localContentWidthInches}
+                                    {' wide'}
+                                </span>
+                                <span>
+                                    {'Right: '}
+                                    {localRightMarginInches}
+                                </span>
+                            </>
+                        )}
+                    />
                 </div>
-                <div
-                    className={styles.pageSchematic}
-                    style={{...pagePreviewStyle, ...localSchematicOverride}}
-                >
-                    <div className={styles.pageSchematicMarginTop} />
-                    <div className={styles.pageSchematicMiddle}>
-                        <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginLeft)} />
-                        <div className={styles.pageSchematicCenter}>
-                            <div className={styles.pageSchematicZone}>{`Header: ${headerRows} row${headerRows === 1 ? '' : 's'}`}</div>
-                            <div className={styles.pageSchematicContent}>{`~${contentRows} rows`}</div>
-                            <div className={styles.pageSchematicZone}>{`Footer: ${footerRows} row${footerRows === 1 ? '' : 's'}`}</div>
-                        </div>
-                        <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginRight)} />
-                    </div>
-                    <div className={styles.pageSchematicMarginBottom} />
-                </div>
-                <IndentRangeSlider
-                    style={{...sliderStyle, ...localSliderStyleOverride}}
-                    start={{
-                        value: localSliderStart,
-                        min: 0,
-                        max: previewReferenceTotal,
-                        step: marginSliderStep,
-                        ariaLabel: 'Left page margin',
-                        onChange: event => {
-                            const rawStart = Number.parseFloat(event.target.value);
-                            const maxStart = clamp(latestEnd.current - MIN_PAGE_CONTENT_WIDTH_PX, minSliderStart, previewReferenceTotal);
-                            const next = clamp(rawStart, minSliderStart, maxStart);
-
-                            latestStart.current = next;
-                            setLocalSliderStart(next);
-                        },
-                        onCommit: () => {
-                            const nextRightPx = previewReferenceTotal - latestEnd.current;
-
-                            onUpdatePageSettings({marginLeftPx: latestStart.current, marginRightPx: nextRightPx});
-                        },
-                    }}
-                    end={{
-                        value: localSliderEnd,
-                        min: 0,
-                        max: previewReferenceTotal,
-                        step: marginSliderStep,
-                        ariaLabel: 'Right page margin',
-                        onChange: event => {
-                            const rawEnd = Number.parseFloat(event.target.value);
-                            const minEnd = clamp(latestStart.current + MIN_PAGE_CONTENT_WIDTH_PX, 0, maxSliderEnd);
-                            const next = clamp(rawEnd, minEnd, maxSliderEnd);
-
-                            latestEnd.current = next;
-                            setLocalSliderEnd(next);
-                        },
-                        onCommit: () => {
-                            const nextRightPx = previewReferenceTotal - latestEnd.current;
-
-                            onUpdatePageSettings({
-                                marginLeftPx: latestStart.current,
-                                marginRightPx: clamp(nextRightPx, MIN_PAGE_MARGIN_HORIZONTAL_PX, previewReferenceTotal),
-                            });
-                        },
-                    }}
-                    labels={(
-                        <>
-                            <span>
-                                {'Left: '}
-                                {localLeftMarginInches}
-                            </span>
-                            <span>
-                                {localContentWidthInches}
-                                {' wide'}
-                            </span>
-                            <span>
-                                {'Right: '}
-                                {localRightMarginInches}
-                            </span>
-                        </>
-                    )}
-                />
-            </div>
+            </SettingsGroup>
         </SettingsGroup>
     );
 };

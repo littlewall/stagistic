@@ -1,6 +1,14 @@
 import type {ScriptRepository} from '@stagistic/app-core';
-import type {ScriptDocument, TitlePageSettings} from '@stagistic/script';
-import type {NewScriptShape, StepkgPeekResult} from '@stagistic/ui';
+import type {
+    ScriptDocument,
+    ScriptFormatSelection,
+    TitlePageSettings,
+} from '@stagistic/script';
+import type {
+    NewScriptFormatSelection,
+    NewScriptShape,
+    StepkgPeekResult,
+} from '@stagistic/ui';
 import type {RefObject} from 'react';
 import type {NavigateFunction} from 'react-router-dom';
 
@@ -28,7 +36,7 @@ export interface ScriptToDuplicate {
 }
 
 export interface ScriptActionsAdapter {
-    createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
+    createScript: (name: string, initialContent?: ScriptDocument, format?: ScriptFormatSelection) => Promise<string>,
     renameScript: (scriptId: string, input: {title: string, subtitle: string | null}) => Promise<void>,
     duplicateScript: (
         sourceScriptId: string,
@@ -86,7 +94,7 @@ export interface GlobalModalActions {
     openDuplicateScript: (script: ScriptToDuplicate, returnFocus?: HTMLElement | null) => void,
     closeDuplicateScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
-    handleCreate: (name: string, shape: NewScriptShape) => Promise<void>,
+    handleCreate: (name: string, shape: NewScriptShape, format?: NewScriptFormatSelection) => Promise<void>,
     handleImportStagistic: (payload: ScriptImportFile & {name: string}) => Promise<void>,
     handlePeekStepkg: (bytes: Uint8Array) => Promise<StepkgPeekResult>,
     handleImportStepkgAsNew: (payload: {

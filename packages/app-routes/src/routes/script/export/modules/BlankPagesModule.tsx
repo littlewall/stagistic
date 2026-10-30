@@ -37,7 +37,7 @@ export const BlankPagesModule = ({
     return (
         <ExportSettingsGroup>
             <div className={styles.countField}>
-                <label htmlFor="blank-page-count">Blank pages</label>
+                <label htmlFor="blank-page-count">Blank pages after last initial page</label>
                 <span>
                     {spec.enabled && hasAutomaticBalancingBlank ? (
                         <InlineTooltip

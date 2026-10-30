@@ -120,6 +120,7 @@ export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, set
             addRow(fieldKey, value);
         }
     });
+
     if (settings.logo) {
         addRow(LOGO_FIELD, JSON.stringify(settings.logo));
     }

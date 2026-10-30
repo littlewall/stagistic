@@ -50,6 +50,7 @@ export {createPaginationExtension} from './PaginationExtension';
 
 // ─── Runtime indexes ─────────────────────────────────────────────────────────
 
+export {BlockSpacingExtension} from './BlockSpacingExtension';
 export {BlockUiEventsExtension, getBlockUiEventsFromState} from './BlockUiEventsExtension';
 export {CharacterRefSyncExtension} from './CharacterRefSyncExtension';
 export {EditorRuntimeExtension, getEditorRuntimeFromState} from './EditorRuntimeExtension';

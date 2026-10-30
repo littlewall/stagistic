@@ -81,6 +81,7 @@ export {
 } from './molecules/ToggleButtonGroup/ToggleButtonGroup';
 
 // Menus & popovers
+export {ButtonDropdownMenu, type ButtonDropdownMenuProps} from './molecules/ButtonDropdownMenu/ButtonDropdownMenu';
 export {
     DropdownMenu,
     type DropdownMenuItem,
@@ -220,7 +221,7 @@ export {
     type ScriptStatesModalProps,
     type ScriptStateUpdate,
 } from './dialogs/script/ScriptStatesModal';
-export type {NewScriptShape} from './dialogs/script/types';
+export type {NewScriptFormatSelection, NewScriptShape} from './dialogs/script/types';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────
 export {AttributeManagerCharactersPanel} from './dialogs/attribute-manager/AttributeManagerCharactersPanel';

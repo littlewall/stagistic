@@ -84,7 +84,6 @@ export interface ElementSettingsPanelProps {
     blockType: ScriptBlockNodeType,
     blockLabel: string,
     resolvedScriptSettings: EditorSettings,
-    canReset: boolean,
     shortcutPrefix: string,
     onResetBlockSettings: ElementResetHandlers['onResetBlockSettings'],
     onUpdateBlockSettings: UpdateBlockSettings,

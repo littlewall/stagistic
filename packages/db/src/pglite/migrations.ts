@@ -20,7 +20,11 @@ const LEGACY_CHECKSUMS: Readonly<Record<string, readonly string[]>> = {
  * checksum: databases that applied the old id are relabelled, not re-migrated.
  */
 export const RENAMED_MIGRATIONS: Readonly<Record<string, string>> = {
+    '0027_block_spacing_after_scene_number': '20261029155537_block_spacing_after_scene_number',
     '0027_scene_board_metadata': '20261029074607_scene_board_metadata',
+    '0028_scripts_format_template_id': '20261029155538_scripts_format_template_id',
+    '0029_stage_direction_paren_wrap': '20261029155539_stage_direction_paren_wrap',
+    '0030_pdf_flow_settings': '20261029155540_pdf_flow_settings',
 };
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query'>;

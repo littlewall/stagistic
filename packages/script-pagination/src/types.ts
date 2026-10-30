@@ -22,6 +22,8 @@ export interface PaginatorBlock {
      * needed, `getLineMap().cleanHeight` takes over — mirroring the editor exactly.
      */
     height: number,
+    /** Space for a repeated cue when this block starts/resumes on a later page. */
+    continuationHeight?: number,
     splittable: boolean,
     orphanCandidate: boolean,
     forcedBreak?: 'new-page' | 'odd-page',

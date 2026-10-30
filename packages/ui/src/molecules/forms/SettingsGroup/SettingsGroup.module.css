@@ -15,6 +15,10 @@
     --settings-group-gap: var(--space-2xl);
 }
 
+.gap4xl {
+    --settings-group-gap: var(--space-4xl);
+}
+
 .row {
     display: flex;
     align-items: center;

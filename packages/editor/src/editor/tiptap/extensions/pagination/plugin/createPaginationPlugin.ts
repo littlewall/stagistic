@@ -288,6 +288,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                 destroy: () => {
                     destroyed = true;
                     clearPendingRecalc();
+
                     if (storage.flushRecalc === flushRecalc) {
                         delete storage.flushRecalc;
                     }

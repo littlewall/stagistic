@@ -192,6 +192,11 @@ const MusicRangeOverlay = ({
         let rebuildCount = musicRailPluginKey.getState(editor.state)?.rebuildCount ?? 0;
         const refresh = () => {
             frame = null;
+
+            if (editor.isDestroyed) {
+                return;
+            }
+
             setActiveRailLeft(resolveMusicRailLeft(canvas));
 
             const state = musicRailPluginKey.getState(editor.state);

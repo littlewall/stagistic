@@ -1,5 +1,7 @@
 import {
     type EditorSettingsOverride,
+    isSceneNumberFormat,
+    resolveScriptBlockNodeType,
     type ScriptBlockType,
 } from '@stagistic/script';
 import {requireValue, uuidv7} from '@stagistic/shared';
@@ -23,7 +25,7 @@ export const hydrateBlockSettings = (
     settings: EditorSettingsOverride,
     row: ScriptConfigBlockRow,
 ) => {
-    const blockType = normalizeSettingsBlockType(row.blockType);
+    const blockType = resolveScriptBlockNodeType(row.blockType);
 
     if (!blockType) {
         return;
@@ -33,8 +35,9 @@ export const hydrateBlockSettings = (
         ...requireValue(settings.blocks)[blockType],
     };
     const spacingBeforeEm = fromMillis(row.spacingBeforeMillis);
+    const spacingAfterEm = fromMillis(row.spacingAfterMillis);
     const lineHeight = fromMillis(row.lineHeightMillis);
-    const nextElement = normalizeSettingsBlockType(row.nextElement);
+    const nextElement = resolveScriptBlockNodeType(row.nextElement);
 
     if (spacingBeforeEm !== undefined) {
         nextBlockSettings.spacingBeforeEm = spacingBeforeEm;
@@ -42,6 +45,14 @@ export const hydrateBlockSettings = (
 
     if (lineHeight !== undefined) {
         nextBlockSettings.lineHeight = lineHeight;
+    }
+
+    if (spacingAfterEm !== undefined) {
+        nextBlockSettings.spacingAfterEm = spacingAfterEm;
+    }
+
+    if (isSceneNumberFormat(row.sceneNumberFormat)) {
+        nextBlockSettings.sceneNumberFormat = row.sceneNumberFormat;
     }
 
     if (row.indentLeftChars !== null && row.indentLeftChars !== undefined) {
@@ -66,6 +77,10 @@ export const hydrateBlockSettings = (
 
     if (isBlockCasing(row.casing)) {
         nextBlockSettings.casing = row.casing;
+    }
+
+    if (typeof row.parenWrap === 'boolean') {
+        nextBlockSettings.parenWrap = row.parenWrap;
     }
 
     if (typeof row.isBold === 'boolean') {
@@ -108,7 +123,10 @@ export const buildConfigRows = (
             scriptId,
             blockType: normalizedBlockType,
             spacingBeforeMillis: toMillis(block.spacingBeforeEm),
+            spacingAfterMillis: toMillis(block.spacingAfterEm),
             lineHeightMillis: toMillis(block.lineHeight),
+            sceneNumberFormat: block.sceneNumberFormat ?? null,
+            parenWrap: block.parenWrap ?? null,
             indentLeftChars: block.indentLeftChars ?? null,
             indentRightChars: block.indentRightChars ?? null,
             shortcut: block.shortcut ?? null,

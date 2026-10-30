@@ -1,8 +1,6 @@
 .note {
     position: relative;
-    padding-top: var(--note-spacing-before, 0);
-    padding-right: var(--note-indent-right, 0);
-    padding-left: calc(var(--note-indent-left, 0px) + 2ch);
+    padding: var(--note-spacing-before, 0) var(--note-indent-right, 0) var(--note-spacing-after, 0) calc(var(--note-indent-left, 0px) + 2ch);
     font-weight: var(--note-font-weight, 400);
     font-style: var(--note-font-style, italic);
     line-height: var(--note-line-height, inherit);

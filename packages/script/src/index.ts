@@ -11,6 +11,7 @@ export * from './serialization';
 export * from './settings';
 export * from './structure';
 export * from './syntax';
+export * from './templates';
 export * from './titlePage';
 export {
     clampNumber,

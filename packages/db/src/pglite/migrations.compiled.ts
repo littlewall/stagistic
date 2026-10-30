@@ -140,5 +140,25 @@ export const compiledMigrations = [
         "id": "20261029074607_scene_board_metadata",
         "checksum": "8d2099ec80e2f87ed01480bb7cb002cae46299b765b829111f8f38266e9e8498",
         "sql": "CREATE TABLE \"script_scene_characters\" (\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"heading_block_id\" text NOT NULL,\n    \"character_id\" text NOT NULL REFERENCES \"script_characters\"(\"id\") ON DELETE CASCADE,\n    \"note\" text,\n    \"arc_value\" integer CHECK (\"arc_value\" BETWEEN -3 AND 3),\n    \"created_at\" bigint NOT NULL,\n    \"updated_at\" bigint NOT NULL,\n    PRIMARY KEY (\"script_id\", \"heading_block_id\", \"character_id\")\n);\n--> statement-breakpoint\nCREATE INDEX \"script_scene_characters_script_id_idx\" ON \"script_scene_characters\" (\"script_id\");\n--> statement-breakpoint\nCREATE TABLE \"script_detached_scenes\" (\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"heading_block_id\" text NOT NULL,\n    \"synopsis\" text,\n    \"color_hex\" text,\n    \"location_id\" text REFERENCES \"script_locations\"(\"id\") ON DELETE SET NULL,\n    \"location_ids\" jsonb NOT NULL,\n    \"detached_at\" bigint NOT NULL,\n    PRIMARY KEY (\"script_id\", \"heading_block_id\")\n);\n"
+    },
+    {
+        "id": "20261029155537_block_spacing_after_scene_number",
+        "checksum": "cfbb38ca92ffb0e06baf703af399227142de26d014b836e7307e39cfd3349f0f",
+        "sql": "ALTER TABLE \"script_settings_blocks\" ADD COLUMN \"spacing_after_millis\" integer;\nALTER TABLE \"script_settings_blocks\" ADD COLUMN \"scene_number_format\" text;\n"
+    },
+    {
+        "id": "20261029155538_scripts_format_template_id",
+        "checksum": "b51050872b219ba012a92cd56b5542e4b888ade561f5c92ed3ae03cdbad2c4b2",
+        "sql": "ALTER TABLE \"scripts\" ADD COLUMN \"format_template_id\" text;\n"
+    },
+    {
+        "id": "20261029155539_stage_direction_paren_wrap",
+        "checksum": "64467f339bfb2a530f4a8c3d9adc2ed5e2e338b18c99467c71b5439b5a3e84a3",
+        "sql": "ALTER TABLE \"script_settings_blocks\" ADD COLUMN \"paren_wrap\" boolean;\n"
+    },
+    {
+        "id": "20261029155540_pdf_flow_settings",
+        "checksum": "3387b8e0b8f681a6d019adcc1bc949b320a8ba2fd041d20aa84be3900885dbf5",
+        "sql": "ALTER TABLE \"script_settings_page_layout\" ADD COLUMN \"pdf_flow\" jsonb;\n"
     }
 ] as const;

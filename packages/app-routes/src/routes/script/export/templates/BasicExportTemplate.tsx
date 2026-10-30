@@ -10,6 +10,7 @@ import {
     useState,
 } from 'react';
 
+import {useFormatTemplate} from '../../settings/template/FormatTemplateContext';
 import {useExportContext} from '../ExportProvider';
 import {CharacterFilterModule} from '../modules/CharacterFilterModule';
 import {ContentModule} from '../modules/ContentModule';
@@ -49,14 +50,25 @@ export const BasicExportTemplate = ({
     config: externalConfig,
     onConfigChange,
     derive = deriveBasicExportPlan,
+    allowMusicContents = false,
 }: {
     config?: BasicExportConfig,
     onConfigChange?: (config: BasicExportConfig) => void,
     derive?: typeof deriveBasicExportPlan,
+    allowMusicContents?: boolean,
 }) => {
     const {script, settings} = useExportContext();
     const [localConfig, setLocalConfig] = useState<BasicExportConfig>(cloneDefaults);
-    const config = externalConfig ?? localConfig;
+    const {updatePdfFlow} = useFormatTemplate();
+    const rawConfig = externalConfig ?? localConfig;
+    const config = useMemo(() => ({
+        ...rawConfig,
+        pageBreaks: {...rawConfig.pageBreaks, ...updatePdfFlow ? settings.pdfFlow : {}},
+    }), [
+        rawConfig,
+        settings.pdfFlow,
+        updatePdfFlow,
+    ]);
     const setConfig = (update: BasicExportConfig | ((previous: BasicExportConfig) => BasicExportConfig)) => {
         const next = typeof update === 'function' ? update(config) : update;
 
@@ -106,6 +118,7 @@ export const BasicExportTemplate = ({
             </ExportPanel.Section>
             <ExportPanel.Section title="Opening pages">
                 <InitialPagesModule
+                    allowMusicContents={allowMusicContents}
                     value={config.initialPages}
                     blankPages={config.blankPages}
                     hasAutomaticBalancingBlank={hasAutomaticBalancingBlank}
@@ -122,10 +135,16 @@ export const BasicExportTemplate = ({
             <ExportPanel.Section title="Page flow">
                 <PageBreakModule
                     value={config.pageBreaks}
-                    onChange={pageBreaks => setConfig(previous => ({
-                        ...previous,
-                        pageBreaks,
-                    }))}
+                    onChange={pageBreaks => {
+                        setConfig(previous => ({...previous, pageBreaks}));
+
+                        updatePdfFlow?.({
+                            actOnNewPage: pageBreaks.actOnNewPage,
+                            sceneOnNewPage: pageBreaks.sceneOnNewPage,
+                            repeatCharacterOnBreak: pageBreaks.repeatCharacterOnBreak,
+                            continuationMark: pageBreaks.continuationMark,
+                        });
+                    }}
                 />
             </ExportPanel.Section>
         </>

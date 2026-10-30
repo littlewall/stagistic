@@ -25,6 +25,7 @@ const scriptSummarySelection = {
     createdAt: scripts.createdAt,
     updatedAt: scripts.updatedAt,
     activeBlockId: scripts.activeBlockId,
+    formatTemplateId: scripts.formatTemplateId,
     summaryMetadata: scripts.summaryMetadata,
 };
 
@@ -50,6 +51,7 @@ export const listScripts = async (
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
+        formatTemplateId: row.formatTemplateId,
         summaryMetadata: row.summaryMetadata,
     }));
 };
@@ -80,6 +82,7 @@ export const getScriptSummary = async (
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
+        formatTemplateId: row.formatTemplateId,
         summaryMetadata: row.summaryMetadata,
     };
 };

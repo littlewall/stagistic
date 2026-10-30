@@ -14,6 +14,7 @@ import type {
     VisualLine,
     VisualRun,
 } from '../model/visualLine';
+import {getIntegratedFooter, hasContinuousPageNumber} from './integratedNumbering';
 import {
     CHAR_WIDTH_EM,
     HEADER_FOOTER_ALIGNMENTS,
@@ -126,7 +127,7 @@ const buildHeaderFooterLine = ({
     return runs.length > 0 ? {y, runs} : null;
 };
 
-export const withHeaderFooter = (pages: ScriptPage[], plan: ExportPlan, settings: EditorSettings): PageItem[] => {
+export const withHeaderFooter = (pages: ScriptPage[], plan: ExportPlan, settings: EditorSettings, integratedPageNumbers?: Map<number, number>): PageItem[] => {
     const fontSizePx = settings.typography.fontSizePx;
     const lineHeightPx = fontSizePx * settings.typography.lineHeight;
     const headerY = Math.max(0, (settings.page.marginTopPx - lineHeightPx) / 2);
@@ -134,8 +135,11 @@ export const withHeaderFooter = (pages: ScriptPage[], plan: ExportPlan, settings
     const draftDate = plan.titlePage ? resolveDraftDate(plan.titlePage) : '';
     let pageMarkNumber = 0;
 
+    const integratedFooter = getIntegratedFooter(plan, settings);
+    const hasContinuousNumber = hasContinuousPageNumber(settings);
+
     return pages.flatMap((page, index) => {
-        const pageNumber = page.referencePageNumber ?? index + 1;
+        const pageNumber = integratedPageNumbers?.get(index) ?? page.referencePageNumber ?? index + 1;
 
         if (!page.isInsertedBlank) {
             pageMarkNumber += 1;
@@ -167,38 +171,22 @@ export const withHeaderFooter = (pages: ScriptPage[], plan: ExportPlan, settings
             ...header ? [header] : [],
             ...page.items,
             ...footer ? [footer] : [],
+            ...integratedFooter && !hasContinuousNumber ? [
+                {
+                    y: integratedFooter.yPx,
+                    runs: [
+                        makeHeaderFooterRun(`${pageNumber}.`, (settings.page.widthPx - fontSizePx * CHAR_WIDTH_EM * `${pageNumber}.`.length) / 2, {
+                            text: '',
+                            isBold: false,
+                            isItalic: false,
+                            isUnderline: false,
+                            isHiddenInEditor: false,
+                        }, fontSizePx),
+                    ],
+                },
+            ] : [],
         ];
 
         return index === pages.length - 1 ? pageItems : [...pageItems, PAGE_BREAK_ITEM];
     });
-};
-
-export const getIntegratedFooter = (plan: ExportPlan, settings: EditorSettings) => {
-    if (plan.postSteps.length === 0) {
-        return undefined;
-    }
-
-    const fontSizePx = settings.typography.fontSizePx;
-    const lineHeightPx = fontSizePx * settings.typography.lineHeight;
-    const yPx = settings.page.heightPx - settings.page.marginBottomPx + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
-
-    return HEADER_FOOTER_ALIGNMENTS.flatMap(alignment => {
-        const cell = settings.headerFooter.footer[alignment];
-
-        if (!cell.text.includes('{{page_number}}')) {
-            return [];
-        }
-
-        return [
-            {
-                alignment,
-                text: cell.text,
-                yPx,
-                fontSizePx,
-                bold: cell.isBold,
-                italic: cell.isItalic,
-                underline: cell.isUnderline,
-            },
-        ];
-    })[0];
 };

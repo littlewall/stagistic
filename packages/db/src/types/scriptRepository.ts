@@ -1,6 +1,8 @@
 import type {
     EditorSettingsOverride,
+    FormatTemplateId,
     ScriptDocument,
+    ScriptFormatSelection,
     ScriptSummaryMetadata,
     TitlePageSettings,
 } from '@stagistic/script';
@@ -61,6 +63,7 @@ export interface DuplicateScriptInput {
 }
 
 export interface CreateScriptWithIdInput {
+    format?: ScriptFormatSelection,
     id: string,
     title: string,
     initialContent?: ScriptDocument,
@@ -191,6 +194,7 @@ export interface ScriptTitlePageRecord {
 }
 
 export interface ScriptEditorSettingsRecord {
+    formatTemplateId?: FormatTemplateId | null,
     scriptId: string,
     settings: EditorSettingsOverride,
 }
@@ -257,7 +261,7 @@ export interface ScriptRepository extends ScriptSceneMetadataRepository {
     setMusicAttachment(scriptId: string, musicId: string, role: MusicAttachmentRole, file: MusicAttachmentUpload): Promise<ScriptMusicAttachment | null>,
     removeMusicAttachment(scriptId: string, musicId: string, role: MusicAttachmentRole): Promise<void>,
     getAttachmentBlob(storageKey: string): Promise<Blob | null>,
-    createScript(title: string, initialContent?: ScriptDocument): Promise<string>,
+    createScript(title: string, initialContent?: ScriptDocument, format?: ScriptFormatSelection): Promise<string>,
     createScriptWithId(input: CreateScriptWithIdInput): Promise<void>,
     createScriptFromPackage(input: ScriptPackageWrite): Promise<void>,
     restoreScriptFromPackage(input: ScriptPackageWrite): Promise<void>,
@@ -313,7 +317,7 @@ export interface ScriptRepository extends ScriptSceneMetadataRepository {
         expectedSettings?: EditorSettingsOverride | null,
     ): Promise<boolean>,
     loadScriptSettings(scriptId: string): Promise<EditorSettingsOverride | null>,
-    saveScriptSettings(scriptId: string, settings: EditorSettingsOverride): Promise<void>,
+    saveScriptSettings(scriptId: string, settings: EditorSettingsOverride, formatTemplateId?: FormatTemplateId | null): Promise<void>,
     deleteScriptSettings(scriptId: string): Promise<void>,
     loadTitlePage(scriptId: string): Promise<TitlePageSettings | null>,
     saveTitlePage(scriptId: string, settings: TitlePageSettings): Promise<void>,

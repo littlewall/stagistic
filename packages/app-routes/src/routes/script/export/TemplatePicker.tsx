@@ -20,7 +20,7 @@ export const TemplatePicker = ({
         id={id}
         value={value}
         options={options}
-        ariaLabel="Export template"
+        ariaLabel="Export type"
         onChange={next => onChange(String(next))}
     />
 );

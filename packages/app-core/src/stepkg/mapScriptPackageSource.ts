@@ -29,6 +29,7 @@ export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): Ste
             id: source.script.id,
             title: source.script.title,
             subtitle: source.script.subtitle,
+            formatTemplateId: source.script.formatTemplateId ?? null,
             createdAt: toIso(source.script.createdAt),
             updatedAt: toIso(source.script.updatedAt),
         },

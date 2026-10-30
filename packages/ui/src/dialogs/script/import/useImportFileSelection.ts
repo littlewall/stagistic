@@ -40,6 +40,7 @@ export const useImportFileSelection = ({
 
     if (previousSelection.isOpen !== isOpen || previousSelection.preselectedFile !== preselectedFile) {
         setPreviousSelection({isOpen, preselectedFile});
+
         if (!isOpen) {
             setName('');
             setSelectedFile(null);

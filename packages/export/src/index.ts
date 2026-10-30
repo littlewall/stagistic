@@ -5,7 +5,7 @@ export * from './model/scriptData';
 export * from './model/visualLine';
 
 // ─── Plan derivation ────────────────────────────────────────────────────────
-export * from './plan/deriveBasicExportPlan';
+export {deriveBasicExportPlan} from './plan/deriveBasicExportPlan';
 export * from './plan/deriveIntegratedScoreExportPlan';
 export * from './plan/filterByCharacter';
 export * from './plan/scenes';

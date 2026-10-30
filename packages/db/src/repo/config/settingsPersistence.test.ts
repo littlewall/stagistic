@@ -56,6 +56,40 @@ describe('settings persistence', () => {
         expect(stored?.blocks?.dialogue?.isItalic).toBe(true);
     });
 
+    it('round-trips block spacingAfter and sceneNumberFormat', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 'script-block-format');
+
+        const handlers = createSettingsHandlers({
+            getDb: () => Promise.resolve(db),
+            recordOutbox: () => Promise.resolve(),
+            syncDb: () => Promise.resolve(),
+        });
+
+        await handlers.saveScriptSettings('script-block-format', {
+            pdfFlow: {
+                actOnNewPage: true,
+                sceneOnNewPage: false,
+                repeatCharacterOnBreak: true,
+                continuationMark: 'cont',
+            },
+            blocks: {
+                stageDirection: {spacingAfterEm: 1.5, parenWrap: true},
+                scene: {sceneNumberFormat: 'paren', nextElement: 'stageDirection'},
+            },
+        });
+
+        const stored = await handlers.loadScriptSettings('script-block-format');
+
+        expect(stored?.pdfFlow?.continuationMark).toBe('cont');
+        expect(stored?.blocks?.stageDirection?.spacingAfterEm).toBe(1.5);
+        expect(stored?.blocks?.stageDirection?.parenWrap).toBe(true);
+        expect(stored?.blocks?.scene?.sceneNumberFormat).toBe('paren');
+        // Must read back the editor's node type, or the settings store never confirms the save.
+        expect(stored?.blocks?.scene?.nextElement).toBe('stageDirection');
+    });
+
     it('round-trips title page fields and credits', async () => {
         const {db} = await createTestDb();
 

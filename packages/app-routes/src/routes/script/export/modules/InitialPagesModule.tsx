@@ -46,12 +46,14 @@ const CONTENTS_VARIANTS = new Set(CONTENTS_VARIANT_OPTIONS.map(option => option.
 
 export const InitialPagesModule = ({
     value,
+    allowMusicContents = false,
     blankPages,
     hasAutomaticBalancingBlank,
     onChange,
     onBlankPagesChange,
 }: {
     value: InitialPagesValue,
+    allowMusicContents?: boolean,
     blankPages: BlankPagesValue,
     hasAutomaticBalancingBlank: boolean,
     onChange: (value: InitialPagesValue) => void,
@@ -68,6 +70,7 @@ export const InitialPagesModule = ({
         },
     });
     const contents = value.contents;
+    const contentsOptions = allowMusicContents ? CONTENTS_VARIANT_OPTIONS : CONTENTS_VARIANT_OPTIONS.filter(option => option.value === 'scenes');
     const updateContents = (
         patch: Partial<InitialPagesValue['contents']>,
     ) => onChange({
@@ -180,10 +183,10 @@ export const InitialPagesModule = ({
                                 ariaLabel="Show contents as"
                                 size="md"
                                 width="content"
-                                options={CONTENTS_VARIANT_OPTIONS}
-                                value={contents.variant}
+                                options={contentsOptions}
+                                value={allowMusicContents ? contents.variant : 'scenes'}
                                 onChange={variant => {
-                                    if (CONTENTS_VARIANTS.has(variant)) {
+                                    if (CONTENTS_VARIANTS.has(variant) && (allowMusicContents || variant === 'scenes')) {
                                         updateContents({variant: variant as ContentsVariant});
                                     }
                                 }}

@@ -64,6 +64,7 @@ export interface TranscriptResult {
     /** Source ownership for generated script pages; leading pages come first. */
     leadingPageCount?: number,
     scriptPageSourceBlockIds?: string[][],
+    oddPageBlockIds?: string[],
     integratedScores?: Array<{
         musicId: string,
         title: string,
@@ -72,6 +73,9 @@ export interface TranscriptResult {
     }>,
     scorePdfs?: Record<string, ArrayBuffer>,
     integratedFooter?: {
+        /** Zero insets center the independent fallback number on the paper. */
+        marginLeftPx?: number,
+        marginRightPx?: number,
         alignment: 'left' | 'center' | 'right',
         text: string,
         yPx: number,

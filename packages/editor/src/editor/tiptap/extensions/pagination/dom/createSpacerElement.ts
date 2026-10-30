@@ -11,6 +11,7 @@ export const createSpacerElement = (
     const spacer = document.createElement(isInlineBreak ? 'span' : 'div');
 
     spacer.dataset.paginationSpacer = 'true';
+
     if (isInlineBreak) {
         spacer.dataset.paginationInlineBreak = 'true';
     }

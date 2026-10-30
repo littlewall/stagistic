@@ -52,6 +52,7 @@ describe('readStepkgContainer', () => {
         const result = await readStepkgContainer(encoder.encode('not a zip'));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
     });
 
@@ -59,6 +60,7 @@ describe('readStepkgContainer', () => {
         const result = await readStepkgContainer(zipWith({'document.json': '{}'}));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('manifest_invalid');
     });
 
@@ -70,6 +72,7 @@ describe('readStepkgContainer', () => {
         const result = await readStepkgContainer(zipWith({'manifest.json': JSON.stringify(manifest)}));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('unsupported_format_version');
     });
 
@@ -81,6 +84,7 @@ describe('readStepkgContainer', () => {
         const result = await readStepkgContainer(zipWith({'manifest.json': JSON.stringify(manifest)}));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('unsupported_document_schema_version');
     });
 
@@ -88,6 +92,7 @@ describe('readStepkgContainer', () => {
         const result = await readStepkgContainer(zipWith({'manifest.json': validManifest(), 'document.json': '{}'}));
 
         expect(result.ok).toBe(true);
+
         if (result.ok) {
             expect(result.manifest.script.id).toBe('s1');
             expect(result.files.has('document.json')).toBe(true);
