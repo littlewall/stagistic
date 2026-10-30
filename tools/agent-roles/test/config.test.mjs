@@ -100,13 +100,13 @@ describe('validateConfig', () => {
     it('rejects external provider for write role', () => {
         const errors = validateConfig(load({roles: {implementer: {provider: 'codex', model: 'gpt-6.1-sol'}}}));
 
-        assert.ok(errors.includes('implementer: write roles must use provider claude'), errors.join('\n'));
+        assert.ok(errors.includes('implementer: write roles must use provider claude or opencode'), errors.join('\n'));
     });
 
     it('rejects external provider for execute role', () => {
         const errors = validateConfig(load({roles: {verifier: {provider: 'agy', model: 'gemini-3.8-flash-low'}}}));
 
-        assert.ok(errors.includes('verifier: execute roles must use provider claude'), errors.join('\n'));
+        assert.ok(errors.includes('verifier: execute roles must use provider claude or opencode'), errors.join('\n'));
     });
 
     it('rejects unknown provider', () => {

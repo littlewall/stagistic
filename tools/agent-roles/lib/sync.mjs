@@ -12,7 +12,7 @@ import {
     toolRoot,
     validateConfig,
 } from './config.mjs';
-import {renderAgent} from './render.mjs';
+import {renderAgent, renderOpenCodeAgent} from './render.mjs';
 
 /** Writes `.claude/agents/<role>.md` for every role; with `check`, only reports drift. */
 export const syncAgents = ({
@@ -31,17 +31,21 @@ export const syncAgents = ({
     }
 
     const agentsDir = path.join(cwd, '.claude', 'agents');
-    const files = Object.keys(config.roles).map(role => {
+    const files = Object.keys(config.roles).flatMap(role => {
         const promptFile = path.join(toolRoot, 'prompts', `${role}.md`);
-        const content = renderAgent(resolveRole(config, role), readFileSync(promptFile, 'utf8'), path.relative(cwd, promptFile));
-        const file = path.join(agentsDir, `${role}.md`);
-        const current = existsSync(file) ? readFileSync(file, 'utf8') : null;
+        const resolved = resolveRole(config, role);
+        const prompt = readFileSync(promptFile, 'utf8');
+        const definitions = [{file: path.join(agentsDir, `${role}.md`), content: renderAgent(resolved, prompt, path.relative(cwd, promptFile))}];
 
-        return {
+        if (resolved.provider === 'opencode') {
+            definitions.push({file: path.join(cwd, '.opencode', 'agents', `roles-${role}.md`), content: renderOpenCodeAgent(resolved, prompt)});
+        }
+
+        return definitions.map(({file, content}) => ({
             file,
             content,
-            changed: current !== content,
-        };
+            changed: !existsSync(file) || readFileSync(file, 'utf8') !== content,
+        }));
     });
     const changed = files.filter(({changed: isChanged}) => isChanged).map(({file}) => file);
 
@@ -61,6 +65,7 @@ export const syncAgents = ({
         changed: isChanged,
     } of files) {
         if (isChanged) {
+            mkdirSync(path.dirname(file), {recursive: true});
             writeFileSync(file, content);
         }
     }

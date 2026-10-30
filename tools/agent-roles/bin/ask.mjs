@@ -4,7 +4,7 @@ import {parseArgs} from 'node:util';
 
 import {EXIT, runAsk} from '../lib/run.mjs';
 
-const USAGE = 'Usage: ask.mjs --role <role> [--cwd <dir>] [--provider p] [--model m] [--effort e] [--timeout s] (<prompt> | -)';
+const USAGE = 'Usage: ask.mjs --role <role> [--task key] [--cwd dir] [--provider p] [--model m] [--effort e] [--timeout s] (<prompt> | -)';
 
 const parse = () => {
     try {
@@ -17,6 +17,7 @@ const parse = () => {
                 model: {type: 'string'},
                 effort: {type: 'string'},
                 timeout: {type: 'string'},
+                task: {type: 'string'},
             },
         });
     } catch (error) {
@@ -48,6 +49,7 @@ const result = await runAsk({
     prompt,
     cwd: values.cwd ?? process.cwd(),
     overrides,
+    task: values.task,
     timeoutSeconds: values.timeout === undefined ? undefined : Number(values.timeout),
 });
 
@@ -58,5 +60,7 @@ if (result.output) {
 if (result.message) {
     process.stderr.write(`${result.message}\n`);
 }
+
+if (result.logDir && !result.message) process.stderr.write(`Logs: ${result.logDir}\n`);
 
 process.exitCode = result.exitCode;

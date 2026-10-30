@@ -9,7 +9,10 @@ import {
     loadConfig,
     resolveRole,
     validateConfig,
+    withModelFields,
 } from './config.mjs';
+import {listGoModels} from './opencode/models.mjs';
+import {runOpenCode} from './opencode/run.mjs';
 
 export const EXIT = {
     ok: 0,
@@ -39,7 +42,7 @@ const resolveForAsk = ({
     const stored = resolveRole(config, role);
     const subagent = stored.fallback ?? {model: stored.model, effort: stored.effort};
 
-    config.roles[role] = {...config.roles[role], ...overrides};
+    config.roles[role] = withModelFields(config.roles[role], overrides);
 
     const errors = validateConfig(config);
 
@@ -47,9 +50,16 @@ const resolveForAsk = ({
         throw new ConfigError(errors.join('\n'));
     }
 
+    const resolved = resolveRole(config, role);
+
+    // A one-off Go model must not change the role's price tier.
+    if (stored.provider === 'opencode' && resolved.provider === 'opencode' && resolved.tier !== stored.tier) {
+        throw new ConfigError(`${role}: model ${resolved.model} is tier ${resolved.tier}; the role requires tier ${stored.tier}`);
+    }
+
     return {
         config,
-        resolved: resolveRole(config, role),
+        resolved,
         subagent,
     };
 };
@@ -114,6 +124,34 @@ const unavailable = ({
         + `Fallback: ${subagent.model}/${subagent.effort} (subagent ${resolved.role})`,
 });
 
+/** First role candidate that OpenCode Go offers now; otherwise an unavailable result before anything starts. */
+const selectGoModel = ({
+    resolved,
+    subagent,
+    cwd,
+    env,
+}) => {
+    const live = listGoModels({cwd, env});
+
+    if (live.error) {
+        return {result: unavailable({
+            resolved,
+            subagent,
+            cause: live.error,
+            fix: live.spawnError?.code === 'ENOENT' ? 'install OpenCode' : 'check `opencode models` and the OpenCode Go login',
+        })};
+    }
+
+    const model = resolved.models.find(candidate => live.models.includes(candidate));
+
+    return model ? {model} : {result: unavailable({
+        resolved,
+        subagent,
+        cause: `none of ${resolved.models.join(', ')} is offered by OpenCode Go`,
+        fix: 'run `moon run root:agents-models` and update the role candidates',
+    })};
+};
+
 const failed = (resolved, cause) => ({
     exitCode: EXIT.failed,
     output: '',
@@ -127,6 +165,7 @@ export const runAsk = async ({
     overrides = {},
     env = {},
     timeoutSeconds,
+    task,
 }) => {
     let config;
     let resolved;
@@ -148,6 +187,27 @@ export const runAsk = async ({
         }
 
         throw error;
+    }
+
+    if (resolved.provider === 'opencode') {
+        const selected = selectGoModel({
+            resolved,
+            subagent,
+            cwd,
+            env,
+        });
+
+        if (selected.result) return selected.result;
+
+        return runOpenCode({
+            resolved: {...resolved, model: selected.model},
+            subagent,
+            prompt,
+            task,
+            cwd,
+            env,
+            seconds: timeoutSeconds ?? config.timeoutSeconds,
+        });
     }
 
     if (resolved.kind !== 'read') {

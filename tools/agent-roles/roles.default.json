@@ -1,13 +1,73 @@
 {
     "roles": {
-        "scout": {"kind": "read", "provider": "claude", "model": "haiku", "effort": "low", "tools": ["Read", "Grep", "Glob", "Bash"]},
-        "implementer": {"kind": "write", "provider": "claude", "model": "sonnet", "effort": "medium", "tools": ["Read", "Grep", "Glob", "Bash", "Edit", "Write"]},
-        "verifier": {"kind": "execute", "provider": "claude", "model": "haiku", "effort": "low", "tools": ["Read", "Bash"]},
-        "reviewer": {"kind": "read", "provider": "claude", "model": "opus", "effort": "high", "tools": ["Read", "Grep", "Glob", "Bash"]},
-        "researcher": {"kind": "read", "provider": "claude", "model": "sonnet", "effort": "medium", "tools": ["Read", "Grep", "Glob", "WebSearch", "WebFetch"]}
+        "scout": {
+            "kind": "read",
+            "provider": "claude",
+            "model": "haiku",
+            "effort": "low",
+            "tools": [
+                "Read",
+                "Grep",
+                "Glob",
+                "Bash"
+            ]
+        },
+        "implementer": {
+            "kind": "write",
+            "provider": "claude",
+            "model": "sonnet",
+            "effort": "medium",
+            "tools": [
+                "Read",
+                "Grep",
+                "Glob",
+                "Bash",
+                "Edit",
+                "Write"
+            ]
+        },
+        "verifier": {
+            "kind": "execute",
+            "provider": "claude",
+            "model": "haiku",
+            "effort": "low",
+            "tools": [
+                "Read",
+                "Bash"
+            ]
+        },
+        "reviewer": {
+            "kind": "read",
+            "provider": "claude",
+            "model": "opus",
+            "effort": "high",
+            "tools": [
+                "Read",
+                "Grep",
+                "Glob",
+                "Bash"
+            ]
+        },
+        "researcher": {
+            "kind": "read",
+            "provider": "claude",
+            "model": "sonnet",
+            "effort": "medium",
+            "tools": [
+                "Read",
+                "Grep",
+                "Glob",
+                "WebSearch",
+                "WebFetch"
+            ]
+        }
     },
     "tiers": {
-        "claude": {"haiku": "low", "sonnet": "mid", "opus": "high"},
+        "claude": {
+            "haiku": "low",
+            "sonnet": "mid",
+            "opus": "high"
+        },
         "codex": {
             "gpt-6.1-sol": "high",
             "gpt-6-sol": "high",
@@ -22,16 +82,87 @@
             "gemini-3.8-flash-medium": "low",
             "gemini-3.8-flash-low": "low",
             "gpt-oss-120b-medium": "low"
+        },
+        "opencode": {
+            "opencode-go/glm-5.2": "mid",
+            "opencode-go/glm-5.3-flash": "low",
+            "opencode-go/kimi-k2.7-code": "mid",
+            "opencode-go/glm-5.3": "mid"
         }
     },
     "efforts": {
-        "claude": ["low", "medium", "high", "xhigh", "max"],
-        "codex": ["low", "medium", "high", "xhigh", "max", "ultra"],
-        "agy": ["low", "medium", "high", "xhigh", "max"]
+        "claude": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+        ],
+        "codex": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max",
+            "ultra"
+        ],
+        "agy": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+        ],
+        "opencode": [
+            "low",
+            "high",
+            "max",
+            "default"
+        ]
     },
     "effortToClaude": {
-        "codex": {"low": "low", "medium": "medium", "high": "high", "xhigh": "xhigh", "max": "max", "ultra": "max"},
-        "agy": {"low": "low", "medium": "medium", "high": "high", "xhigh": "xhigh", "max": "max"}
+        "codex": {
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max",
+            "ultra": "max"
+        },
+        "agy": {
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+        },
+        "opencode": {
+            "low": "low",
+            "high": "high",
+            "max": "max",
+            "default": "medium"
+        }
     },
-    "timeoutSeconds": 600
+    "timeoutSeconds": 600,
+    "modelEfforts": {
+        "opencode": {
+            "opencode-go/glm-5.2": [
+                "high",
+                "max"
+            ],
+            "opencode-go/glm-5.3-flash": [
+                "low",
+                "high",
+                "max"
+            ],
+            "opencode-go/kimi-k2.7-code": [
+                "default"
+            ],
+            "opencode-go/glm-5.3": [
+                "low",
+                "high",
+                "max"
+            ]
+        }
+    }
 }

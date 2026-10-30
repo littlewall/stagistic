@@ -9,9 +9,14 @@ const PROVIDERS = [
     'claude',
     'codex',
     'agy',
+    'opencode',
 ];
 const FIXED_ROLE_FIELDS = ['kind', 'tools'];
-const MERGED_MAPS = ['tiers', 'effortToClaude'];
+const MERGED_MAPS = [
+    'tiers',
+    'effortToClaude',
+    'modelEfforts',
+];
 
 export class ConfigError extends Error {
     name = 'ConfigError';
@@ -39,6 +44,17 @@ const readLayer = file => {
     }
 };
 
+/** `model` and the OpenCode candidate list `models` replace each other across layers and overrides. */
+export const withModelFields = (role, fields) => {
+    const merged = {...role, ...fields};
+
+    if ('models' in fields && !('model' in fields)) delete merged.model;
+
+    if ('model' in fields && !('models' in fields)) delete merged.models;
+
+    return merged;
+};
+
 const mergeLayer = (config, layer, file) => {
     for (const [role, fields] of Object.entries(layer.roles ?? {})) {
         if (!config.roles[role]) {
@@ -53,10 +69,11 @@ const mergeLayer = (config, layer, file) => {
             throw new ConfigError(`${file}: ${role}: kind/tools are fixed by agent-roles`);
         }
 
-        config.roles[role] = {...config.roles[role], ...fields};
+        config.roles[role] = withModelFields(config.roles[role], fields);
     }
 
     for (const key of MERGED_MAPS) {
+        config[key] ??= {};
         for (const [provider, map] of Object.entries(layer[key] ?? {})) {
             config[key][provider] = {...config[key][provider], ...map};
         }
@@ -91,20 +108,53 @@ const claudeModelForTier = (config, tier) => Object.entries(config.tiers.claude 
     .filter(([, modelTier]) => modelTier === tier)
     .map(([model]) => model);
 
-const validateRole = (config, role, {
-    kind,
+/** OpenCode roles may list same-tier candidates in preference order; others have one model. */
+export const roleModels = ({model, models}) => models ?? [model];
+
+/** Go-only checks for every candidate: namespace, model variant, tier table and a shared tier. */
+const validateGoModels = (config, role, {
     provider,
-    model,
+    models,
     effort,
-}) => {
+}, candidates) => {
+    if (provider !== 'opencode') return models === undefined ? [] : [`${role}: models list is only for opencode roles`];
+
+    const errors = candidates.flatMap((model, index) => {
+        if (typeof model !== 'string' || !model.startsWith('opencode-go/')) return [`${role}: opencode roles must use an opencode-go/ model`];
+
+        // The first candidate's tier is reported by validateRole.
+        if (index > 0 && !config.tiers.opencode?.[model]) return [`${role}: model ${model} not in tiers.opencode`];
+
+        return config.modelEfforts?.opencode?.[model]?.includes(effort) ? [] : [`${role}: effort ${effort} not valid for ${model}`];
+    });
+    const tiers = new Set(candidates.map(model => config.tiers.opencode?.[model]).filter(Boolean));
+
+    if (tiers.size > 1) errors.push(`${role}: models must share the same tier (${[...tiers].join(', ')})`);
+
+    return errors;
+};
+
+const validateRole = (config, role, fields) => {
+    const {
+        kind,
+        provider,
+        effort,
+    } = fields;
+
     if (!PROVIDERS.includes(provider)) {
         return [`${role}: unknown provider ${provider}`];
     }
 
-    const errors = [];
+    if (fields.models !== undefined && (!Array.isArray(fields.models) || fields.models.length === 0)) {
+        return [`${role}: models must be a nonempty array`];
+    }
 
-    if (kind !== 'read' && provider !== 'claude') {
-        errors.push(`${role}: ${kind} roles must use provider claude`);
+    const candidates = roleModels(fields);
+    const [model] = candidates;
+    const errors = validateGoModels(config, role, fields, candidates);
+
+    if (kind !== 'read' && !['claude', 'opencode'].includes(provider)) {
+        errors.push(`${role}: ${kind} roles must use provider claude or opencode`);
     }
 
     const tier = config.tiers[provider]?.[model];
@@ -159,10 +209,11 @@ export const resolveRole = (config, role) => {
     const {
         kind,
         provider,
-        model,
         effort,
         tools,
     } = fields;
+    const models = roleModels(fields);
+    const [model] = models;
     const tier = config.tiers[provider]?.[model] ?? null;
     const fallback = provider === 'claude'
         ? null
@@ -173,6 +224,7 @@ export const resolveRole = (config, role) => {
         kind,
         provider,
         model,
+        models,
         effort,
         tier,
         tools,
