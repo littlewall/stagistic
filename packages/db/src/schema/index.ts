@@ -10,6 +10,7 @@ import {
     scriptMusic,
     scriptMusicAttachments,
 } from './music';
+import {scriptDetachedScenes, scriptSceneCharacters} from './sceneCharacters';
 import {scripts, syncOutbox} from './scripts';
 import {
     scriptSettingsBlocks,
@@ -40,6 +41,7 @@ export {
     scriptMusic,
     scriptMusicAttachments,
 } from './music';
+export {scriptDetachedScenes, scriptSceneCharacters} from './sceneCharacters';
 export {scripts, syncOutbox} from './scripts';
 export {
     scriptSettingsBlocks,
@@ -59,6 +61,8 @@ export {
 } from './structure';
 
 export const dbSchema = {
+    scriptDetachedScenes,
+    scriptSceneCharacters,
     scripts,
     syncOutbox,
     scriptSettingsPageLayout,

@@ -1,4 +1,5 @@
 export * from './blocks';
+export * from './board';
 export * from './characters';
 export * from './comments';
 export * from './document';

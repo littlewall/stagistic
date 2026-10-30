@@ -94,6 +94,7 @@ const baseWrite = (): ScriptPackageWrite => ({
             createdAt: 1_000,
         },
     ],
+    sceneCharacters: [],
     comments: {
         threads: [
             {
@@ -171,6 +172,7 @@ describe('restoreScriptFromPackage', () => {
             locations: [],
             attachments: [],
             bindings: [],
+            sceneCharacters: [],
             comments: {threads: [], messages: []},
         };
 

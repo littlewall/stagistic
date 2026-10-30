@@ -1,0 +1,30 @@
+.key {
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 1.125rem;
+    height: 1.125rem;
+    padding: 0;
+    color: var(--color-text-muted);
+    vertical-align: middle;
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    &:hover {
+        color: var(--color-text);
+        border-color: var(--color-border-strong);
+    }
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    & svg {
+        width: .75rem;
+        height: .75rem;
+    }
+}

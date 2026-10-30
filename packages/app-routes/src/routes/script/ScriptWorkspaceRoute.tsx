@@ -12,6 +12,7 @@ import {
 import {
     createEditorSnapshotStore,
     createEditorSurfaceCache,
+    createScriptDocumentSession,
     EditorSnapshotStoreProvider,
 } from '@stagistic/editor';
 import {
@@ -39,6 +40,7 @@ import {
     getScriptBasePath,
     type ScriptAccess,
     ScriptAccessProvider,
+    useScriptAccess,
 } from './workspace/ScriptAccessContext';
 import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './workspace/ScriptWorkspaceContext';
 import {useScriptWorkspaceReloadKey} from './workspace/scriptWorkspaceReload';
@@ -53,6 +55,18 @@ const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
     } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
     const {store: editorSnapshotStore} = useMemo(() => ({scriptId, store: createEditorSnapshotStore()}), [scriptId]);
+    const {isReadOnly} = useScriptAccess();
+    const documentSession = useMemo(() => initialValue
+        ? createScriptDocumentSession({
+            initialValue,
+            isReadOnly,
+            liveStore: editorSnapshotStore,
+        })
+        : null, [
+        initialValue,
+        isReadOnly,
+        editorSnapshotStore,
+    ]);
     const pendingCacheDestroyRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -71,24 +85,27 @@ const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
             pendingCacheDestroyRef.current = window.setTimeout(() => {
                 pendingCacheDestroyRef.current = null;
                 editorSurfaceCache.destroy();
+                documentSession?.dispose();
             }, 0);
         };
-    }, [editorSurfaceCache]);
+    }, [documentSession, editorSurfaceCache]);
 
-    const workspaceValue = useMemo<ScriptWorkspaceValue>(
-        () => ({
+    const workspaceValue = useMemo<ScriptWorkspaceValue | null>(
+        () => documentSession ? {
             ...controller,
             editorSnapshotStore,
             editorSurfaceCache,
-        }),
+            documentSession,
+        } : null,
         [
             controller,
+            documentSession,
             editorSnapshotStore,
             editorSurfaceCache,
         ],
     );
 
-    if (editorLoadState.isLoading || !initialValue) {
+    if (editorLoadState.isLoading || !initialValue || !workspaceValue) {
         return (
             <LoaderOverlay
                 label="Preparing editor"

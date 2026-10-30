@@ -120,6 +120,24 @@ export {PageContainer} from './organisms/PageContainer/PageContainer';
 export {PageHeader} from './organisms/PageHeader/PageHeader';
 export {Section, SectionHeader} from './organisms/Section/Section';
 
+// ─── Board ──────────────────────────────────────────────────────────────────
+export {BoardActSection, type BoardActSectionProps} from './board/BoardActSection';
+export {type BoardFilterCharacter} from './board/BoardCharacterFilter';
+export {BoardEmpty, type BoardEmptyProps} from './board/BoardEmpty';
+export {BoardLayout, type BoardLayoutProps} from './board/BoardLayout';
+export {type BoardLens} from './board/BoardLensTabs';
+export {BoardToolbar, type BoardToolbarProps} from './board/BoardToolbar';
+export {
+    type BoardCharacterChip,
+    CharacterChipStack,
+    type CharacterChipStackProps,
+} from './board/CharacterChipStack';
+export {
+    SceneCard,
+    type SceneCardActions,
+    type SceneCardProps,
+} from './board/SceneCard';
+
 // ─── Feedback ───────────────────────────────────────────────────────────────
 export {LoaderOverlay} from './feedback/LoaderOverlay/LoaderOverlay';
 export {Notice} from './feedback/Notice/Notice';
@@ -244,6 +262,11 @@ export {RemoveAttachmentModal, type RemoveAttachmentModalProps} from './dialogs/
 export {RemoveGroupModal, type RemoveGroupModalProps} from './dialogs/attribute-manager/RemoveGroupModal';
 
 // ─── Editor panels ──────────────────────────────────────────────────────────
+export {BoardAddActButton} from './board/BoardAddActButton';
+export {BoardAddSceneCard} from './board/BoardAddSceneCard';
+export {BoardInlineHeading} from './board/BoardInlineHeading';
+export {BoardInsertSceneStrip} from './board/BoardInsertSceneStrip';
+export {BoardSceneComposer} from './board/BoardSceneComposer';
 export {
     EditorSidebar,
     type EditorSidebarCharacter,

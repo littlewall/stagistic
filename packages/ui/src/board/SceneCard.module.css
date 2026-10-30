@@ -1,0 +1,112 @@
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    min-width: 0;
+    padding: var(--space-md) var(--space-md) var(--space-lg) var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    &.collapsed {
+        padding-block: var(--space-xs);
+        background: transparent;
+        border-color: var(--color-border-subtle);
+    }
+}
+
+.head {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.heading {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding-top: var(--space-sm);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+
+    .collapsed & {
+        overflow: hidden;
+        padding-top: 0;
+        color: var(--color-text-muted);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.number {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.title {
+    font-family: var(--font-family-mono);
+
+    /* The script's scene casing (a setting), as the Editor shows it; the text itself stays as typed. */
+    text-transform: var(--board-scene-casing, uppercase);
+    overflow-wrap: anywhere;
+}
+
+.page {
+    flex: none;
+    padding-top: var(--space-md);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--line-height-none);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.body {
+    min-width: 0;
+    padding-right: var(--space-md);
+}
+
+/* The gap left of the card, plus the card's own border. */
+.before {
+    position: absolute;
+    right: 100%;
+    inset-block: 0;
+    width: calc(var(--board-gap, var(--space-lg)) + 1px);
+}
+
+/* The card itself is the drag handle; dnd-kit makes it focusable for the keyboard. */
+.draggable {
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+}
+
+/* While a card is dragged, its placeholder marks where it would land, and the card itself lifts. */
+.card[data-dnd-placeholder] {
+    background: transparent;
+    border-color: var(--color-border-strong);
+    border-style: dashed;
+
+    & > * {
+        opacity: .35;
+    }
+}
+
+.card[data-dnd-dragging] {
+    box-shadow: var(--shadow-card);
+
+    & .before {
+        display: none;
+    }
+}

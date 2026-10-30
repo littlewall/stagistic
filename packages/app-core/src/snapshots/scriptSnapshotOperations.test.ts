@@ -135,6 +135,7 @@ const packageWrite = (overrides: Partial<ScriptPackageWrite> = {}): ScriptPackag
             createdAt: 1_000,
         },
     ],
+    sceneCharacters: [],
     comments: {
         threads: [thread('range-kept', 'range', null), thread('range-deleted', 'range', null)],
         messages: [message('range-kept'), message('range-deleted')],
@@ -196,6 +197,7 @@ const editAfterDraftOne = async (repository: Awaited<ReturnType<typeof setup>>['
         music: [],
         attachments: [],
         bindings: [],
+        sceneCharacters: [],
         comments: {
             threads: [
                 thread('range-kept', 'range', null),

@@ -31,6 +31,7 @@ const baseSnapshot = (): StepkgSnapshot => ({
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
+    sceneCharacters: {items: []},
     comments: {threads: [], messages: []},
     attachmentBindings: [],
 });
@@ -76,6 +77,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(await exportBytes(snapshot));
 
         expect(result.ok).toBe(true);
+
         if (result.ok) expect(result.package.snapshot.comments).toEqual(snapshot.comments);
     });
 
@@ -90,6 +92,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(true);
+
         if (result.ok) expect(result.package.snapshot.comments).toEqual({threads: [], messages: []});
     });
 
@@ -104,6 +107,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues).toContainEqual(expect.objectContaining({code: 'broken_reference', entity: {type: 'comment', id: 'm1'}}));
     });
 
@@ -124,6 +128,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(await exportBytes(snapshot));
 
         expect(result.ok).toBe(true);
+
         if (result.ok) {
             expect(result.package.snapshot.script.id).toBe('s1');
             expect(result.package.manifest.script.id).toBe('s1');
@@ -140,6 +145,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues.some(issue => issue.code === 'checksum_mismatch')).toBe(true);
     });
 
@@ -152,6 +158,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues.some(issue => issue.code === 'file_missing')).toBe(true);
     });
 
@@ -209,6 +216,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues.some(issue => issue.code === 'broken_reference')).toBe(true);
     });
 
@@ -270,6 +278,7 @@ describe('readStepkg', () => {
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues.some(issue => issue.code === 'asset_missing')).toBe(true);
     });
 });

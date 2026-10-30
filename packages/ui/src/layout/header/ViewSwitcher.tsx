@@ -9,7 +9,11 @@ export type ViewSwitcherItem = {
     label: string,
 };
 
-export const VIEW_SWITCHER_ITEMS: readonly ViewSwitcherItem[] = [{view: 'editor', label: 'Editor'}, {view: 'export', label: 'Export'}];
+export const VIEW_SWITCHER_ITEMS: readonly ViewSwitcherItem[] = [
+    {view: 'editor', label: 'Editor'},
+    {view: 'board', label: 'Board'},
+    {view: 'export', label: 'Export'},
+];
 
 type ViewSwitcherProps = {
     activeView: ScriptView,

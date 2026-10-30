@@ -8,8 +8,12 @@ import {
 import {VIEW_SWITCHER_ITEMS, ViewSwitcher} from './ViewSwitcher';
 
 describe('VIEW_SWITCHER_ITEMS', () => {
-    it('lists editor then export', () => {
-        expect(VIEW_SWITCHER_ITEMS.map(item => item.view)).toEqual(['editor', 'export']);
+    it('lists editor, board, then export', () => {
+        expect(VIEW_SWITCHER_ITEMS.map(item => item.view)).toEqual([
+            'editor',
+            'board',
+            'export',
+        ]);
     });
 });
 
@@ -20,6 +24,7 @@ describe('ViewSwitcher', () => {
         );
 
         expect(markup).toContain('Editor');
+        expect(markup).toContain('Board');
         expect(markup).toContain('Export');
         expect(markup).toContain('aria-current="page"');
     });

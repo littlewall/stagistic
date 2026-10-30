@@ -23,6 +23,7 @@ import type {
     ScriptSnapshot,
     ScriptSummary,
 } from './';
+import type {ScriptSceneMetadataRepository} from './sceneMetadata';
 import type {ScriptPackageSource} from './scriptPackageSource';
 import type {ScriptPackageWrite} from './scriptPackageWrite';
 import type {
@@ -194,7 +195,7 @@ export interface ScriptEditorSettingsRecord {
     settings: EditorSettingsOverride,
 }
 
-export interface ScriptRepository {
+export interface ScriptRepository extends ScriptSceneMetadataRepository {
     scriptSummaries: ReactiveQuerySource<ScriptSummary>,
     allocateScriptId(): string,
     allocateScriptCharacterId(): string,

@@ -8,6 +8,11 @@ import {
     bulkUpsertScriptScenes,
     type DbClient,
 } from '../../../queries';
+import {
+    detachSceneMetadata,
+    readDetachedScenes,
+    restoreDetachedSceneLocations,
+} from '../../../queries/scripts/detachedScenes';
 import {scriptActs, scriptScenes} from '../../../schema';
 
 /**
@@ -44,10 +49,16 @@ export const reconcileActsAndScenes = async (
     const existingSceneByHeading = new Map(existingScenes.filter(scene => scene.headingBlockId).map(scene => [scene.headingBlockId as string, scene] as const));
     const nextSceneIds = new Set(scenes.map(scene => scene.id));
 
+    const removedScenes = existingScenes.filter(scene => !nextSceneIds.has(scene.id));
+
+    await detachSceneMetadata(tx, removedScenes, now);
+
+    const detached = await readDetachedScenes(tx, scriptId);
+
     await bulkUpsertScriptScenes(
         tx,
         scenes.map(scene => {
-            const prev = existingSceneByHeading.get(scene.headingBlockId) ?? null;
+            const prev = existingSceneByHeading.get(scene.headingBlockId) ?? detached.get(scene.headingBlockId) ?? null;
 
             return {
                 id: scene.id,
@@ -57,7 +68,7 @@ export const reconcileActsAndScenes = async (
                 colorHex: prev?.colorHex ?? null,
                 synopsis: prev?.synopsis ?? null,
                 locationId: prev?.locationId ?? null,
-                createdAt: prev?.createdAt ?? now,
+                createdAt: prev && 'createdAt' in prev ? prev.createdAt : now,
                 updatedAt: now,
             };
         }),
@@ -65,6 +76,7 @@ export const reconcileActsAndScenes = async (
 
     await bulkDeleteScriptScenes(
         tx,
-        existingScenes.filter(scene => !nextSceneIds.has(scene.id)).map(scene => scene.id),
+        removedScenes.map(scene => scene.id),
     );
+    await restoreDetachedSceneLocations(tx, scriptId, scenes.map(scene => scene.headingBlockId));
 };

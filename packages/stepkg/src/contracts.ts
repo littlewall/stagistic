@@ -159,6 +159,15 @@ export interface StepkgCommentsData {
     messages: StepkgCommentMessage[],
 }
 
+export interface StepkgSceneCharacter {
+    headingBlockId: string,
+    characterId: string,
+    note: string | null,
+    arcValue: number | null,
+    createdAt: string,
+    updatedAt: string,
+}
+
 export interface StepkgSnapshot {
     script: StepkgScriptData,
     document: ScriptDocument,
@@ -167,6 +176,7 @@ export interface StepkgSnapshot {
     characters: StepkgCharactersData,
     music: StepkgMusicData,
     scenes: StepkgScenesData,
+    sceneCharacters: {items: StepkgSceneCharacter[]},
     attachments: StepkgAttachmentSnapshot[],
     attachmentBindings: StepkgAttachmentBinding[],
     comments: StepkgCommentsData,

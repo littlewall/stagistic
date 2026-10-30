@@ -10,6 +10,7 @@ export {CloseIcon} from './CloseIcon';
 export {CommentIcon} from './CommentIcon';
 export {DownloadIcon} from './DownloadIcon';
 export {EditPencilIcon} from './EditPencilIcon';
+export {EnterKeyIcon} from './EnterKeyIcon';
 export {EyeIcon} from './EyeIcon';
 export {FilterIcon} from './FilterIcon';
 export {FolderIcon} from './FolderIcon';

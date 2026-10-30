@@ -1,5 +1,5 @@
 import type {useScriptCharacterCatalog} from '@stagistic/app-core';
-import type {EditorValueChangeMeta} from '@stagistic/editor';
+import type {EditorValueChangeMeta, ScriptDocumentSession} from '@stagistic/editor';
 import type {ScriptDocument} from '@stagistic/script';
 import {
     type Dispatch,
@@ -12,6 +12,7 @@ import {
 
 interface UseCharacterStateArgs {
     currentScriptId: string | null,
+    documentSession?: ScriptDocumentSession,
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
 }
@@ -31,6 +32,7 @@ interface CharacterState {
 
 export const useCharacterState = ({
     currentScriptId,
+    documentSession,
     characterCatalog,
     initialValue,
 }: UseCharacterStateArgs): CharacterState => {
@@ -59,7 +61,7 @@ export const useCharacterState = ({
     const setEditorValue = useCallback((value: ScriptDocument | null) => {
         editorValueRef.current = value;
     }, []);
-    const getEditorValue = useCallback(() => editorValueRef.current, []);
+    const getEditorValue = useCallback(() => documentSession?.getDocument() ?? editorValueRef.current, [documentSession]);
     const handleEditorValueChange = useCallback((value: ScriptDocument) => {
         editorValueRef.current = value;
     }, []);

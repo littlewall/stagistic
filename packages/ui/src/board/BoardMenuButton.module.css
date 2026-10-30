@@ -1,0 +1,76 @@
+.button {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    box-sizing: border-box;
+    max-width: 16rem;
+    height: var(--control-height-sm);
+    padding: 0 var(--space-md) 0 var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+    white-space: nowrap;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    &[data-hovered] {
+        background: var(--state-hover);
+    }
+
+    &[data-pressed] {
+        background: var(--state-hover);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    &.active {
+        background: var(--state-selected);
+        border-color: var(--state-selected-edge);
+    }
+
+    &.grouped {
+        height: 100%;
+        background: transparent;
+        border-color: transparent;
+        border-radius: inherit;
+
+        :global(:root[data-focus-ring-visible]) &:focus {
+            outline-offset: calc(var(--focus-ring-offset) * -1);
+        }
+    }
+}
+
+/* Where a sibling control, such as a clear button, is laid over the button. */
+.slot {
+    flex: none;
+    width: 1.375rem;
+}
+
+.caret {
+    flex: none;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* Floating, so it may carry a shadow. */
+.popover {
+    min-width: 16rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+}
+
+.dialog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    outline: none;
+}

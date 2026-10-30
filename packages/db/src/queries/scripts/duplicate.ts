@@ -17,6 +17,7 @@ import {
 } from '../../schema';
 import type {DbClient} from '../types';
 import {listScriptSpeakingEntities} from './characters';
+import {duplicateSceneCharacters} from './duplicate/duplicateSceneCharacters';
 import {duplicateSettings} from './duplicate/duplicateSettings';
 import {remapCharacterTagIds, remapNullable} from './duplicate/remapIds';
 
@@ -226,6 +227,16 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
                 })),
             );
         }
+    }
+
+    if (copyAttributes) {
+        await duplicateSceneCharacters(db, {
+            sourceScriptId,
+            targetScriptId,
+            blockMap,
+            entityIdMap,
+            now,
+        });
     }
 
     if (copySettings) {

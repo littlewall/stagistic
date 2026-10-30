@@ -25,7 +25,7 @@ import {useScriptAccess} from './workspace/ScriptAccessContext';
 import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
 export const ScriptExportRoute = () => {
-    const {currentScript} = useScriptWorkspace();
+    const {currentScript, documentSession} = useScriptWorkspace();
     const repository = useScriptRepository();
     const [isPreparingPackage, setIsPreparingPackage] = useState(false);
     const {
@@ -46,7 +46,14 @@ export const ScriptExportRoute = () => {
     const shownTitle = isReadOnly ? liveScriptTitle ?? scriptTitleDraft : scriptTitleDraft;
     // Files of a saved draft or version carry its label, e.g. “The door – Draft #3”.
     const fileTitle = snapshotLabel ? `${shownTitle} – ${snapshotLabel}` : shownTitle;
-    const scriptStateControls = useScriptStateControls({scriptId: currentScript?.id ?? null, view: 'export'});
+    const flushSession = useCallback(async () => {
+        if (!await documentSession.flush()) throw new Error('Could not save the script.');
+    }, [documentSession]);
+    const scriptStateControls = useScriptStateControls({
+        scriptId: currentScript?.id ?? null,
+        view: 'export',
+        flush: flushSession,
+    });
     const {openSave} = scriptStateControls;
     const saveAndDownload = useMemo(() => isReadOnly ? null : (kind: SaveScriptStateKind, download: (stateLabel: string) => void) => {
         openSave(kind, {
@@ -85,6 +92,7 @@ export const ScriptExportRoute = () => {
             if (actionId === 'export-stepkg' && currentScript) {
                 setIsPreparingPackage(true);
                 void new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+                    .then(flushSession)
                     .then(() => exportScriptPackage({
                         repository,
                         scriptId: currentScript.id,
@@ -102,6 +110,7 @@ export const ScriptExportRoute = () => {
         [
             openAttributeManagerModal,
             openSettingsModal,
+            flushSession,
             script,
             scriptTitleDraft,
             currentScript,

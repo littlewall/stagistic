@@ -2,6 +2,7 @@ import type {ScriptRepository} from '@stagistic/db';
 import {trimOrFallback} from '@stagistic/script';
 import {
     readStepkg,
+    remapStepkgBlockIds,
     remapStepkgIds,
     type StepkgImportIssue,
 } from '@stagistic/stepkg';
@@ -12,6 +13,7 @@ export type StepkgImportResult = {
     ok: true,
     scriptId: string,
     title: string,
+    issues?: StepkgImportIssue[],
 } | {ok: false, issues: StepkgImportIssue[]};
 
 export interface ImportScriptPackageAsNewArgs {
@@ -29,7 +31,7 @@ export const importScriptPackageAsNew = async ({
 
     if (!read.ok) return {ok: false, issues: read.issues};
 
-    const {snapshot} = remapStepkgIds(read.package.snapshot);
+    const {snapshot} = remapStepkgIds(remapStepkgBlockIds(read.package.snapshot));
     const finalTitle = trimOrFallback(title ?? '', snapshot.script.title);
     const write = mapStepkgSnapshotToPackageWrite(snapshot, read.package.assets);
 
@@ -45,5 +47,6 @@ export const importScriptPackageAsNew = async ({
         ok: true,
         scriptId: write.script.id,
         title: finalTitle,
+        ...read.issues.length ? {issues: read.issues} : {},
     };
 };

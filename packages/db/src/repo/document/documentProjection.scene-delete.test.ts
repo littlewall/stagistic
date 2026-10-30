@@ -124,7 +124,7 @@ describe('documentProjection scene-heading deletion', () => {
         expect(sceneLocations).toEqual([]);
     });
 
-    it('re-adding the same heading block id yields a fresh scene with empty metadata (undo limitation)', async () => {
+    it('re-adding the same heading restores its metadata', async () => {
         const {db} = await createTestDb();
 
         await seedScript(db, 's1');
@@ -153,14 +153,10 @@ describe('documentProjection scene-heading deletion', () => {
             .from(scriptScenes)
             .where(eq(scriptScenes.id, sceneId));
 
-        /*
-         * The identity row returns (same deterministic id), but v1 does not
-         * restore the user-authored metadata that was pruned on deletion.
-         */
         expect(scenes).toHaveLength(1);
         expect(scenes[0]).toMatchObject({
             headingBlockId: 'h2',
-            synopsis: null,
+            synopsis: 'A downpour',
             colorHex: null,
             locationId: null,
         });
@@ -170,6 +166,6 @@ describe('documentProjection scene-heading deletion', () => {
             .from(scriptSceneLocations)
             .where(eq(scriptSceneLocations.sceneId, sceneId));
 
-        expect(sceneLocations).toEqual([]);
+        expect(sceneLocations).toEqual([{sceneId, locationId: 'loc1'}]);
     });
 });

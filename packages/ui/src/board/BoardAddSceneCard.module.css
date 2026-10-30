@@ -1,0 +1,36 @@
+/* No taller than a card with a title only. */
+.slot {
+    min-width: 0;
+}
+
+.card {
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    transition: color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--state-hover);
+        border-color: var(--color-border-strong);
+    }
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    & svg {
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
+    }
+}

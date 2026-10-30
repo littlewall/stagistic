@@ -16,6 +16,7 @@ export interface UseEditorLifecycleArgs {
     editor: {
         instance: TiptapEditor | null,
         autoFocus?: boolean,
+        sessionOwned?: boolean,
     },
     liveStore: EditorSnapshotStore,
     document: {

@@ -113,6 +113,11 @@ export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets
         synopsis: scene.synopsis,
         locationIds: scene.locationIds,
     })),
+    sceneCharacters: snapshot.sceneCharacters.items.map(row => ({
+        ...row,
+        createdAt: toEpoch(row.createdAt),
+        updatedAt: toEpoch(row.updatedAt),
+    })),
     attachments: snapshot.attachments.map(attachment => mapAttachment(attachment, assets)),
     bindings: snapshot.attachmentBindings.map(binding => ({
         musicId: binding.target.id,

@@ -19,7 +19,9 @@ const LEGACY_CHECKSUMS: Readonly<Record<string, readonly string[]>> = {
  * sequential or clashing prefix replaced by a fresh timestamp. Same SQL, same
  * checksum: databases that applied the old id are relabelled, not re-migrated.
  */
-export const RENAMED_MIGRATIONS: Readonly<Record<string, string>> = {};
+export const RENAMED_MIGRATIONS: Readonly<Record<string, string>> = {
+    '0027_scene_board_metadata': '20261029074607_scene_board_metadata',
+};
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query'>;
 

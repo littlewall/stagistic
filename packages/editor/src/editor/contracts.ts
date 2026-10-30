@@ -26,6 +26,7 @@ import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
 import type {EditorSnapshotStore} from './live/store';
+import type {ScriptDocumentSession} from './session/createScriptDocumentSession';
 import type {EditorSurfaceCache} from './surface/editorSurfaceCache';
 import type {CommentBlockMerge, EditorCommentThreadRef} from './tiptap/extensions/comments';
 import type {BlockNodeType} from './tiptap/scriptCore';
@@ -284,6 +285,7 @@ export interface EditorSearchProps {
 
 export interface EditorProps {
     document: EditorDocumentProps,
+    session?: ScriptDocumentSession,
     settings?: EditorSettingsProps,
     save?: EditorSaveProps,
     layout?: EditorLayoutProps,

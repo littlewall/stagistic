@@ -85,7 +85,11 @@ export const useScriptStateControls = ({
         }
 
         if (!isReadOnly) {
-            await flush?.().catch(() => undefined);
+            try {
+                await flush?.();
+            } catch {
+                return;
+            }
         }
 
         void navigate(`${getScriptBasePath(scriptId, snapshotId)}/${view}`);

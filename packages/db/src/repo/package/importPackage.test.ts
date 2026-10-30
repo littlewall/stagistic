@@ -40,6 +40,7 @@ const write = (): ScriptPackageWrite => ({
     scenes: [],
     attachments: [],
     bindings: [],
+    sceneCharacters: [],
     comments: {threads: [], messages: []},
 });
 

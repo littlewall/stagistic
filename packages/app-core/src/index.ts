@@ -6,6 +6,7 @@ export * from './editor-settings';
 export * from './music';
 export * from './pacing';
 export * from './places';
+export * from './sceneMetadata';
 export * from './scripts';
 export * from './snapshots';
 export * from './stepkg';

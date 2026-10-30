@@ -1,4 +1,5 @@
 import * as dbQueries from '../queries';
+import {purgeInactiveSceneMetadata} from '../queries/scripts/sceneCharacters';
 import type {FileStorage} from '../storage/fileStorage';
 import {LOCAL_COMMENT_AUTHOR_ID, type ScriptSnapshot} from '../types';
 import type {ScriptSnapshotsRepository} from '../types/scriptRepository';
@@ -80,6 +81,7 @@ export const createSnapshotHandlers = ({
                     throw new InvalidScriptSnapshotError(`Script ${scriptId} does not exist.`);
                 }
 
+                await purgeInactiveSceneMetadata(tx, scriptId);
                 await dbQueries.insertScriptSnapshot(tx, {
                     id: input.id,
                     scriptId,

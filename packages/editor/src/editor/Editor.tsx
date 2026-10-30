@@ -9,11 +9,10 @@ import {
     useRef,
 } from 'react';
 
-import {EditorActCommandsProvider} from './actCommands/context';
 import {buildEditorRootStyle} from './buildRootStyle';
 import {EditorShell} from './components/editorShell/EditorShell';
-import {EditorInstanceProvider} from './context';
 import type {EditorProps} from './contracts';
+import {EditorProviders} from './EditorProviders';
 import {
     getEditorCssVars,
     resolveEditorSettings,
@@ -22,7 +21,6 @@ import {
 } from './editorSettings';
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
-import {EditorElementSelectionProvider} from './elementSelection/context';
 import {serializeDocumentForSave} from './hooks/useAutosaveController';
 import {useCommentCallbacksRef} from './hooks/useCommentCallbacksRef';
 import {useEditorAutosave} from './hooks/useEditorAutosave';
@@ -34,9 +32,13 @@ import {useInitialEditorContent} from './hooks/useInitialEditorContent';
 import {useInitialCanvasReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
-import {EditorSnapshotStoreProvider} from './live/context';
 import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
-import {EditorSceneNumberFormatContext} from './sceneNumberFormatContext';
+import {
+    getSessionManualSave,
+    getSessionSaveOptions,
+    getSessionSurfaceOptions,
+    useSessionDirty,
+} from './session/editorSessionOptions';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
 import {useSurfaceCharacterRefs} from './surface/useSurfaceCharacterRefs';
 import {useEditorExtensions} from './useEditorExtensions';
@@ -45,6 +47,7 @@ import {useEditorExtensions} from './useEditorExtensions';
 
 const Editor = ({
     document,
+    session,
     settings: settingsProps,
     save,
     layout,
@@ -68,6 +71,7 @@ const Editor = ({
     } = document;
     const {settings: globalSettings, scriptSettings} = settingsProps ?? {};
     const {onManualSave} = save ?? {};
+    const sessionDirty = useSessionDirty(session);
     const {
         autoFocus,
         leftSidebarToggle,
@@ -91,6 +95,8 @@ const Editor = ({
         onCommentAnchorClick,
         onCommentBlocksMerged,
     } = callbacks ?? {};
+
+    useEffect(() => session?.bindCallbacks(callbacks ?? {}), [session, callbacks]);
 
     const resolvedInitialValue = useMemo(() => coerceUnknownBlocksToStageDirections(initialValue).value, [initialValue]);
     const initialSerialized = useMemo(() => serializeDocumentForSave(resolvedInitialValue), [resolvedInitialValue]);
@@ -124,7 +130,8 @@ const Editor = ({
      * restored cached surface must keep using the bundle its extensions hold.
      * Resolved once per mount, before extensions are built.
      */
-    const surfaceRefs = useSurfaceCharacterRefs(surfaceCache, surfaceSignature);
+    const sessionSurface = getSessionSurfaceOptions(session, surfaceCache, surfaceSignature);
+    const surfaceRefs = useSurfaceCharacterRefs(sessionSurface.surfaceCache, sessionSurface.signature);
 
     const commentCallbacksRef = useCommentCallbacksRef({
         onRequestReveal: onRequestRevealComments,
@@ -150,6 +157,7 @@ const Editor = ({
         resolvedInitialValue,
         refs: surfaceRefs,
         liveStore: providedLiveStore,
+        initializeLiveStore: !session,
     });
 
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
@@ -193,8 +201,7 @@ const Editor = ({
     });
     const initialDoc = useInitialEditorContent(initialContentSignature, resolvedInitialValue);
     const {editor} = useScriptEditorInstance({
-        surfaceCache,
-        signature: surfaceSignature,
+        ...sessionSurface,
         extensions,
         content: initialDoc,
         characterColorRefs: surfaceRefs,
@@ -207,7 +214,7 @@ const Editor = ({
         }
     }, [commentThreads, editor]);
 
-    useEditorCharacterSync(editor, persistentCharacters);
+    useEditorCharacterSync(session ? null : editor, persistentCharacters);
 
     const {
         scheduleAutosave,
@@ -215,7 +222,8 @@ const Editor = ({
         setLatestValue,
         syncInitialValue,
     } = useEditorAutosave(editor, {
-        ...save,
+        ...getSessionSaveOptions(session, save),
+        externalDirty: session ? sessionDirty : undefined,
         onValueChange,
         scriptSettings,
     });
@@ -251,6 +259,7 @@ const Editor = ({
         editor: {
             instance: editor,
             autoFocus,
+            sessionOwned: Boolean(session),
         },
         liveStore,
         document: {
@@ -262,7 +271,7 @@ const Editor = ({
         },
         save: {
             onManualSave,
-            handleManualSave,
+            handleManualSave: getSessionManualSave(session, onManualSave, handleManualSave, scriptSettings),
         },
         callbacks: {
             onValueChange,
@@ -279,44 +288,36 @@ const Editor = ({
     });
 
     return (
-        <EditorSnapshotStoreProvider store={liveStore}>
-            <EditorInstanceProvider editor={editor}>
-                <EditorElementSelectionProvider editor={editor} rootRef={rootRef}>
-                    <EditorSceneNumberFormatContext.Provider value={sceneNumberFormat}>
-                        <EditorActCommandsProvider value={actCommands}>
-                            <EditorShell
-                                isCanvasReady={isInitialCanvasReady}
-                                isReadOnly={isReadOnly}
-                                readOnlyLabel={readOnlyLabel}
-                                canvas={{
-                                    autoFocus,
-                                    editor,
-                                    persistentCharacters,
-                                    persistentMusic,
-                                    onMusicAssigned,
-                                    onOpenMusicManager,
-                                    onRequestRemoveMusic,
-                                    headerFooter: resolvedSettings.headerFooter,
-                                    characterDecoration: resolvedSettings.visual.characterDecoration,
-                                    scriptTitle,
-                                    draftDate,
-                                    blockShortcuts,
-                                    blockNextElements,
-                                    search,
-                                }}
-                                layout={resolvedLayout}
-                                rootRef={rootRef}
-                                canvasHostRef={canvasHostRef}
-                                rootStyle={rootStyle}
-                                confirmedCharacterColorsById={confirmedCharacterColorsById}
-                                onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
-                                onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
-                            />
-                        </EditorActCommandsProvider>
-                    </EditorSceneNumberFormatContext.Provider>
-                </EditorElementSelectionProvider>
-            </EditorInstanceProvider>
-        </EditorSnapshotStoreProvider>
+        <EditorProviders editor={editor} rootRef={rootRef} liveStore={liveStore} sceneNumberFormat={sceneNumberFormat} actCommands={actCommands}>
+            <EditorShell
+                isCanvasReady={isInitialCanvasReady}
+                isReadOnly={isReadOnly}
+                readOnlyLabel={readOnlyLabel}
+                canvas={{
+                    autoFocus,
+                    editor,
+                    persistentCharacters,
+                    persistentMusic,
+                    onMusicAssigned,
+                    onOpenMusicManager,
+                    onRequestRemoveMusic,
+                    headerFooter: resolvedSettings.headerFooter,
+                    characterDecoration: resolvedSettings.visual.characterDecoration,
+                    scriptTitle,
+                    draftDate,
+                    blockShortcuts,
+                    blockNextElements,
+                    search,
+                }}
+                layout={resolvedLayout}
+                rootRef={rootRef}
+                canvasHostRef={canvasHostRef}
+                rootStyle={rootStyle}
+                confirmedCharacterColorsById={confirmedCharacterColorsById}
+                onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+                onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+            />
+        </EditorProviders>
     );
 };
 

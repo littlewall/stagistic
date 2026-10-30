@@ -26,5 +26,6 @@ export const restoreScriptPackage = async ({repository, bytes}: RestoreScriptPac
         ok: true,
         scriptId: write.script.id,
         title: write.script.title,
+        ...read.issues.length ? {issues: read.issues} : {},
     };
 };
