@@ -16,6 +16,13 @@ tasks:
     options:
       cache: false
 
+  # Usage: moon run db:db-new-migration -- <snake_name>
+  db-new-migration:
+    command: 'node ./scripts/new-migration.mjs'
+    options:
+      cache: false
+      runInCI: false
+
   db-check:
     command: 'drizzle-kit check'
     options:

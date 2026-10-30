@@ -14,6 +14,13 @@ const LEGACY_CHECKSUMS: Readonly<Record<string, readonly string[]>> = {
     '0014_add_script_attachments': ['d7d194c2771be944c1b2e78e631a7fea0ea836be13a8aedf4bc538ff53315a80'],
 };
 
+/*
+ * Branch-only migrations renamed while merging (old id -> new id), usually a
+ * sequential or clashing prefix replaced by a fresh timestamp. Same SQL, same
+ * checksum: databases that applied the old id are relabelled, not re-migrated.
+ */
+export const RENAMED_MIGRATIONS: Readonly<Record<string, string>> = {};
+
 type MigrationClient = Pick<PGlite, 'exec' | 'query'>;
 
 interface AppliedMigration {
@@ -82,6 +89,14 @@ const assertMigrationHistory = (appliedMigrations: AppliedMigration[]) => {
 const prepareMigrationHistory = async (client: PGlite) => {
     await client.transaction(async tx => {
         await tx.exec(MIGRATIONS_LOCK);
+
+        for (const [oldId, newId] of Object.entries(RENAMED_MIGRATIONS)) {
+            await tx.query(
+                `UPDATE ${MIGRATIONS_TABLE} SET id = $2 WHERE id = $1`
+                + ` AND NOT EXISTS (SELECT 1 FROM ${MIGRATIONS_TABLE} WHERE id = $2)`,
+                [oldId, newId],
+            );
+        }
 
         const appliedMigrations = await getAppliedMigrations(tx);
 

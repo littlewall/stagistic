@@ -6,6 +6,8 @@ import {
 } from 'node:fs/promises';
 import path from 'node:path';
 
+import {assertMigrationIds} from '../src/pglite/migrationIds.ts';
+
 const migrationsDir = path.resolve(process.cwd(), 'drizzle');
 const outputPath = path.resolve(process.cwd(), 'src', 'pglite', 'migrations.compiled.ts');
 const checkOnly = process.argv.includes('--check');
@@ -30,6 +32,9 @@ const readMigrations = async () => {
         .filter(entry => entry.isFile() && entry.name.endsWith('.sql'))
         .map(entry => entry.name)
         .toSorted();
+
+    // Lexicographic order is apply order; the naming rules keep it stable across branches.
+    assertMigrationIds(sqlFiles.map(filename => filename.replace(/\.sql$/u, '')));
 
     const compiled = [];
 

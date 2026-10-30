@@ -6,7 +6,7 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {runPgliteMigrations} from './migrations';
+import {RENAMED_MIGRATIONS, runPgliteMigrations} from './migrations';
 import {compiledMigrations} from './migrations.compiled';
 
 const clients: PGlite[] = [];
@@ -120,6 +120,26 @@ describe('runPgliteMigrations', {timeout: 20_000}, () => {
         );
 
         await expect(runPgliteMigrations(client)).rejects.toThrow('newer than this app');
+    });
+
+    it('relabels databases that applied a migration under its pre-merge id', async () => {
+        const client = await createClient();
+        const renames = Object.entries(RENAMED_MIGRATIONS);
+        const compiledIds = compiledMigrations.map(migration => migration.id);
+
+        await runPgliteMigrations(client);
+
+        for (const [oldId, newId] of renames) {
+            expect(compiledIds).toContain(newId);
+            expect(compiledIds).not.toContain(oldId);
+            await client.query('UPDATE __stagistic_migrations SET id = $1 WHERE id = $2', [oldId, newId]);
+        }
+
+        await runPgliteMigrations(client);
+
+        const result = await client.query<{id: string}>('SELECT id FROM __stagistic_migrations ORDER BY id');
+
+        expect(result.rows.map(row => row.id)).toEqual(compiledIds);
     });
 
     it('repairs the integer sort_order left by the old 0014 migration', async () => {

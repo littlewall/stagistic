@@ -5,9 +5,9 @@
 - Never commit code by yourself, even if other skills tell you to. Only prepare commit and message, then ask me to review and commit. I will do the final commit to ensure consistency in style, message, and branch management.
 
 ## DB schema changes
-After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
-`moon run db:db-compile-migrations`
-(`db:generate` does this automatically; manual SQL edits do not.)
+- Migration files are `packages/db/drizzle/<YYYYMMDDHHMMSS>_<snake_name>.sql` (UTC timestamp). Create one with `moon run db:db-new-migration -- <snake_name>` or `moon run db:db-generate`. Never add a sequential `NNNN_` prefix; `0000`–`0026` are frozen legacy ids.
+- Never rename or edit a migration that reached `rewrite`/`main`. When merging branches, keep both migrations; if two share a prefix, rename the branch-only one to a new timestamp and add its old id to `RENAMED_MIGRATIONS` in `packages/db/src/pglite/migrations.ts`.
+- After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run `moon run db:db-compile-migrations` (`db-generate` does this automatically; manual SQL edits do not). It rejects bad names and duplicate prefixes.
 
 ## Document schema version
 `SCRIPT_DOCUMENT_SCHEMA_VERSION` changes only when the stored `ScriptDocument`

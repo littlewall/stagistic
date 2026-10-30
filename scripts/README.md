@@ -5,7 +5,8 @@ This directory contains utility scripts for development, deployment, and mainten
 ## Planned Scripts
 
 - `setup.sh` - Initial project setup
-- `db-migrate.sh` - Database migration helper
 - `docker-cleanup.sh` - Clean up Docker resources
 - `generate-ssl.sh` - Generate SSL certificates for local development
 - `deploy.sh` - Production deployment script
+
+Database migrations live in `packages/db`; see [its README](../packages/db/README.md#migrations).
