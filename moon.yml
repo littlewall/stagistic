@@ -14,8 +14,24 @@ tasks:
     options:
       cache: false
 
+  # Agent roles (tools/agent-roles): regenerate .claude/agents from .agents/roles.json.
+  agents-sync:
+    command: 'node tools/agent-roles/bin/sync.mjs'
+    options:
+      cache: false
+
+  agents-check:
+    command: 'node tools/agent-roles/bin/sync.mjs --check'
+    options:
+      cache: false
+
+  agents-test:
+    command: 'node --test tools/agent-roles/test/*.test.mjs'
+    options:
+      cache: false
+
   lint:
-    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
+    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs && node tools/agent-roles/bin/sync.mjs --check'
     options:
       cache: false
 

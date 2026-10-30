@@ -54,6 +54,26 @@ Reuse requires identical repository contents (tracked and untracked), Git change
 - Fix failures caused by this work. For a clearly pre-existing failure, record the exact check/test and evidence; do not broaden the task or dispatch repair agents automatically. A small, clearly understood local fix can be included when it fits the current task.
 - Never update golden snapshots, loosen assertions, change viewports or accept a duplication baseline merely to get green. Flag unresolved failures explicitly.
 
+## Delegation
+The main thread talks with the user, decides, does small edits and visual checks. Delegate to role subagents (`tools/agent-roles`); dispatch them per the `external-agents` skill.
+
+Triggers:
+- Search across more than 3 files → `scout`.
+- Plan with ≥2 tasks → `implementer`.
+- Full suites or broad check sets → `verifier`, in the background.
+- Second opinion on a spec, plan or diff → `reviewer` (before the final review at minimum).
+- Web/documentation research → `researcher`.
+- UI changes → visual check in the main thread (browser), never delegated.
+
+Rules:
+- One writer: only `implementer` (or the main thread) edits files; never two writers at once.
+- Checks only at checkpoints, per "Agent verification workflow"; reuse results across agents.
+- At most one browser suite and one moon run at a time.
+- Approval points with the user: design, plan, final review before commit. Nobody commits (golden rule).
+- External providers (Codex, Antigravity) are read-only; write/execute roles are always Claude.
+
+Models: role provider/model/effort live in `.agents/roles.json` (defaults `tools/agent-roles/roles.default.json`). Change them there, run `moon run root:agents-sync`; new agent files load in the next session. `root:lint` fails when generated agents are out of date.
+
 ## Design context
 See [PRODUCT.md](PRODUCT.md) before any UI work.
 
