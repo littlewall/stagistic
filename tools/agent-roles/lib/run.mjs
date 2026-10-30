@@ -35,6 +35,10 @@ const resolveForAsk = ({
         throw new ConfigError(`unknown role ${role}`);
     }
 
+    // The fallback subagent runs from the generated agent file, i.e. the stored config without overrides.
+    const stored = resolveRole(config, role);
+    const subagent = stored.fallback ?? {model: stored.model, effort: stored.effort};
+
     config.roles[role] = {...config.roles[role], ...overrides};
 
     const errors = validateConfig(config);
@@ -43,7 +47,11 @@ const resolveForAsk = ({
         throw new ConfigError(errors.join('\n'));
     }
 
-    return {config, resolved: resolveRole(config, role)};
+    return {
+        config,
+        resolved: resolveRole(config, role),
+        subagent,
+    };
 };
 
 /** Spawns the CLI; resolves with its output or the reason it stopped early. */
@@ -96,12 +104,20 @@ const execute = ({
 
 const unavailable = ({
     resolved,
+    subagent,
     cause,
     fix,
 }) => ({
     exitCode: EXIT.unavailable,
     output: '',
-    message: `agent-roles: ${resolved.provider} unavailable (${cause}). Fix: ${fix}. Fallback: ${resolved.fallback.model}/${resolved.fallback.effort}`,
+    message: `agent-roles: ${resolved.provider} unavailable (${cause}). Fix: ${fix}. `
+        + `Fallback: ${subagent.model}/${subagent.effort} (subagent ${resolved.role})`,
+});
+
+const failed = (resolved, cause) => ({
+    exitCode: EXIT.failed,
+    output: '',
+    message: `agent-roles: ${resolved.provider} failed: ${cause}`,
 });
 
 export const runAsk = async ({
@@ -114,9 +130,14 @@ export const runAsk = async ({
 }) => {
     let config;
     let resolved;
+    let subagent;
 
     try {
-        ({config, resolved} = resolveForAsk({
+        ({
+            config,
+            resolved,
+            subagent,
+        } = resolveForAsk({
             role,
             cwd,
             overrides,
@@ -159,7 +180,11 @@ export const runAsk = async ({
         });
 
         if (result.unavailableCause) {
-            return unavailable({resolved, ...adapter.classifyFailure({stderr: result.unavailableCause})});
+            return unavailable({
+                resolved,
+                subagent,
+                ...adapter.classifyFailure({stderr: result.unavailableCause}),
+            });
         }
 
         if (result.timedOut) {
@@ -173,13 +198,24 @@ export const runAsk = async ({
         if (result.spawnError || result.code !== 0) {
             const failure = adapter.classifyFailure(result);
 
-            return failure.kind === 'unavailable'
-                ? unavailable({resolved, ...failure})
-                : {
-                    exitCode: EXIT.failed,
-                    output: '',
-                    message: `agent-roles: ${resolved.provider} failed: ${failure.cause}`,
-                };
+            return failure.kind === 'unavailable' ? unavailable({
+                resolved,
+                subagent,
+                ...failure,
+            }) : failed(resolved, failure.cause);
+        }
+
+        // Some CLIs report errors or empty answers with exit code 0.
+        const outputFailure = adapter.outputFailure({stdout: result.stdout, outFile});
+
+        if (outputFailure) {
+            const failure = adapter.classifyFailure(result);
+
+            return failure.kind === 'unavailable' ? unavailable({
+                resolved,
+                subagent,
+                ...failure,
+            }) : failed(resolved, outputFailure);
         }
 
         return {exitCode: EXIT.ok, output: adapter.parseOutput({stdout: result.stdout, outFile})};

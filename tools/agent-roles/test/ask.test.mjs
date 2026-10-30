@@ -59,7 +59,7 @@ describe('runAsk', () => {
         const result = await ask({env: {FAKE_MODE: 'logged-out'}});
 
         assert.equal(result.exitCode, 3);
-        assert.match(result.message, /codex unavailable \(not logged in\)\. Fix: run `codex login`\. Fallback: opus\/high/);
+        assert.match(result.message, /codex unavailable \(not logged in\)\. Fix: run `codex login`\. Fallback: opus\/high \(subagent reviewer\)/);
     });
 
     it('exits 3 quickly when agy waits for authentication', async () => {
@@ -134,5 +134,69 @@ describe('runAsk', () => {
 
         assert.equal(result.exitCode, 0);
         assert.ok(JSON.parse(result.output).includes('gemini-3.8-flash-low'));
+    });
+
+    const agyReviewer = () => repoWith({reviewer: {
+        provider: 'agy',
+        model: 'claude-opus-4-6-thinking',
+        effort: 'high',
+    }});
+
+    it('exits 1 when agy exits 0 with an empty answer and denied actions', async () => {
+        const result = await ask({cwd: agyReviewer(), env: {FAKE_MODE: 'denied'}});
+
+        assert.equal(result.exitCode, 1);
+        assert.match(result.message, /agy failed: denied actions: write_file/);
+    });
+
+    it('exits 1 when agy exits 0 with status ERROR', async () => {
+        const result = await ask({cwd: agyReviewer(), env: {FAKE_MODE: 'error-exit0'}});
+
+        assert.equal(result.exitCode, 1);
+        assert.match(result.message, /agy failed: model exploded/);
+    });
+
+    it('exits 3 when agy exits 0 with an authentication error', async () => {
+        const result = await ask({cwd: agyReviewer(), env: {FAKE_MODE: 'auth-exit0'}});
+
+        assert.equal(result.exitCode, 3);
+    });
+
+    it('exits 1 when codex exits 0 without a final message', async () => {
+        const result = await ask({env: {FAKE_MODE: 'no-output'}});
+
+        assert.equal(result.exitCode, 1);
+        assert.match(result.message, /codex failed: no final message/);
+    });
+
+    it('names the stored role fallback when a one-off override is unavailable', async () => {
+        const fromExternal = await ask({
+            overrides: {
+                provider: 'agy',
+                model: 'gemini-3.8-flash-low',
+                effort: 'low',
+            },
+            env: {FAKE_MODE: 'logged-out'},
+        });
+
+        assert.equal(fromExternal.exitCode, 3);
+        assert.match(fromExternal.message, /Fallback: opus\/high \(subagent reviewer\)/);
+
+        const fromClaude = await ask({
+            cwd: repoWith({reviewer: {
+                provider: 'claude',
+                model: 'sonnet',
+                effort: 'medium',
+            }}),
+            overrides: {
+                provider: 'codex',
+                model: 'gpt-6.1-sol',
+                effort: 'high',
+            },
+            env: {FAKE_MODE: 'logged-out'},
+        });
+
+        assert.equal(fromClaude.exitCode, 3);
+        assert.match(fromClaude.message, /Fallback: sonnet\/medium \(subagent reviewer\)/);
     });
 });

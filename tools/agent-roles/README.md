@@ -51,11 +51,11 @@ node --test 'tools/agent-roles/test/*.test.mjs'
 
 `sync` writes `.claude/agents/<role>.md` (only changed files; never deletes others). `--check` exits 1 on drift. External roles get their Claude fallback model plus an `<!-- external: provider/model/effort -->` marker.
 
-`ask` exit codes: `0` answer on stdout, `1` task failure/timeout, `2` usage/config error or non-read/Claude role, `3` provider unavailable (not installed, not logged in, quota) with `Fix:` and `Fallback:` on stderr.
+`ask` exit codes: `0` answer on stdout, `1` task failure/timeout (also an empty answer or a CLI error reported with exit 0), `2` usage/config error or non-read/Claude role, `3` provider unavailable (not installed, not logged in, quota; detected from the CLI's error text) with `Fix:` and `Fallback: <model>/<effort> (subagent <role>)` on stderr. The fallback is always the generated agent's model, also for one-off `--provider/--model` calls.
 
 Providers always run read-only:
 - codex: `codex exec -s read-only` with live web search, prompt on stdin, answer from `-o`.
-- agy: headless print mode with `--sandbox` (writes are auto-denied; `--mode plan` is not used because it writes a plan instead of answering).
+- agy: headless print mode with `--sandbox` (writes are auto-denied; `--mode plan` is not used because it writes a plan instead of answering). No `--effort`: agy model ids carry the effort; the configured agy effort only maps the Claude fallback.
 
 ## Adopt in another repository
 

@@ -75,12 +75,24 @@ Stagistic wiring is limited to: `.agents/roles.json`, a `root:agents-sync` moon 
     "claude": { "haiku": "low", "sonnet": "mid", "opus": "high" },
     "codex":  { "<id>": "mid", "<id>": "high" },
     "agy":    { "<id>": "high" }
-  }
+  },
+  "efforts": {
+    "claude": ["low", "medium", "high", "xhigh", "max"],
+    "codex":  ["low", "medium", "high", "xhigh", "max", "ultra"],
+    "agy":    ["low", "medium", "high", "xhigh", "max"]
+  },
+  "effortToClaude": {
+    "codex": { "ultra": "max", "…": "…" },
+    "agy":   { "high": "high", "…": "…" }
+  },
+  "timeoutSeconds": 600
 }
 ```
 
-- `effort` is written in the provider's own vocabulary; adapters pass it through.
-- Exact model ids, effort values and tier assignments are verified at build time (`agy models`, Codex config/`codex exec --help`, Claude Code agent docs).
+- `effort` is written in the provider's own vocabulary. codex receives it (`model_reasoning_effort`); agy does not (its model ids carry the effort and it rejects `--effort`), so for agy it only selects the Claude fallback effort.
+- `efforts.<provider>` lists valid values (replaced per layer); `effortToClaude.<provider>` maps an external effort to the fallback's Claude effort (merged per key).
+- `kind` and `tools` per role are fixed by the tool defaults; overrides may set only `provider`, `model`, `effort`.
+- Exact model ids, effort values and tier assignments: see Spike findings.
 
 ## sync
 
@@ -94,9 +106,14 @@ Stagistic wiring is limited to: `.agents/roles.json`, a `root:agents-sync` moon 
 
 - `ask.mjs --role <role> [--cwd <dir>] <prompt|-->` resolves provider/model/effort from the merged config. `--provider/--model/--effort` override for one call.
 - Adapters, always read-only:
-  - codex: `codex exec -s read-only -m <model> -C <cwd> -o <file>` (+ effort via config flag; verify).
-  - agy: `agy -p … --mode plan --sandbox --model <m> --effort <e> --output-format json`.
-- Prints only the final answer. Exit codes distinguish: success, provider unavailable (not installed / not logged in / quota), task failure. Unavailable message names the cause and the fix (e.g. "run `codex login`").
+  - codex: `codex exec --skip-git-repo-check -s read-only -m <model> -c model_reasoning_effort="<e>" -c web_search="live" -C <cwd> -o <file> -`, prompt on stdin, answer read from `<file>`.
+  - agy: `agy --print=<prompt> --sandbox --model <m> --output-format json` (default headless mode, which auto-denies writes; not `--mode plan`, which writes a plan instead of answering; no `--effort`). Answer from JSON `.response`.
+- Prints only the final answer. Exit codes: `0` success, `1` task failure/timeout, `2` usage/config error, `3` provider unavailable. The exit-3 message names the cause, the fix (e.g. "run `codex login`") and the fallback subagent's model: the stored config's fallback, also when `--provider/--model/--effort` overrode the call, because the fallback subagent runs from the generated agent file.
+- "Provider unavailable" is detected from CLI output text, not exit codes (both CLIs exit 1 for everything):
+  - not installed: spawn fails with `ENOENT`;
+  - not logged in / quota: error text matches `not logged in|authenticat|unauthori[sz]ed|401|login required` or `quota|rate limit|429|usage limit`. For codex only stderr lines starting with `ERROR:` count (its stderr also echoes the prompt); for agy the JSON `.error` field, else stderr;
+  - agy waiting for interactive authentication ("Waiting for authentication" on stderr) is killed immediately.
+- Exit code 0 is not trusted alone: codex without a non-empty answer file, or agy with `status` ≠ `SUCCESS` or an empty `.response` (e.g. `denied_actions`), is a task failure (or unavailable when the error text matches).
 - Timeout per call; configurable.
 
 ## Dispatch and fallback (my call: no dispatcher subagent)

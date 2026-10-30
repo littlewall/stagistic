@@ -1,4 +1,4 @@
-import {readFileSync} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 
 import {classify} from './common.mjs';
 
@@ -45,6 +45,7 @@ export const codex = {
         stdin: prompt,
     }),
     parseOutput: ({outFile}) => readFileSync(outFile, 'utf8'),
+    outputFailure: ({outFile}) => (existsSync(outFile) && readFileSync(outFile, 'utf8').trim() ? null : 'no final message'),
     detectUnavailable: () => null,
     classifyFailure: ({spawnError, stderr}) => classify({
         spawnError,

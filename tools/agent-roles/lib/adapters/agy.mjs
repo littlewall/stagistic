@@ -32,6 +32,25 @@ export const agy = {
         ],
     }),
     parseOutput: ({stdout}) => parseJson(stdout)?.response ?? '',
+    outputFailure: ({stdout}) => {
+        const json = parseJson(stdout);
+
+        if (!json) {
+            return 'unparseable output';
+        }
+
+        if (json.status !== 'SUCCESS') {
+            return json.error ?? `status ${json.status}`;
+        }
+
+        if (!json.response?.trim()) {
+            return json.denied_actions?.length
+                ? `denied actions: ${json.denied_actions.map(({action}) => action).join(', ')}`
+                : 'empty response';
+        }
+
+        return null;
+    },
     // Logged out, agy blocks on an interactive authentication prompt.
     detectUnavailable: stderr => ((/Waiting for authentication/i).test(stderr) ? 'not logged in' : null),
     classifyFailure: ({

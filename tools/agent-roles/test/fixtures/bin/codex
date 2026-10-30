@@ -29,6 +29,8 @@ switch (process.env.FAKE_MODE) {
     case 'slow':
         await setTimeout(10_000);
         break;
+    case 'no-output':
+        break;
     case 'args':
         writeFileSync(outFile, JSON.stringify(args));
         break;
