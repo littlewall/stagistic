@@ -1,0 +1,7 @@
+{
+    "roles": {
+        "scout": {"provider": "opencode", "models": ["opencode-go/glm-5.3-flash"], "effort": "low"},
+        "implementer": {"provider": "opencode", "models": ["opencode-go/glm-5.2", "opencode-go/glm-5.3"], "effort": "high"},
+        "verifier": {"provider": "opencode", "models": ["opencode-go/glm-5.3-flash"], "effort": "low"}
+    }
+}

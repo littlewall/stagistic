@@ -14,8 +14,35 @@ tasks:
     options:
       cache: false
 
+  # Agent roles (tools/agent-roles): regenerate .claude/agents from .agents/roles.json.
+  agents-sync:
+    command: 'node tools/agent-roles/bin/sync.mjs'
+    options:
+      cache: false
+
+  agents-check:
+    command: 'node tools/agent-roles/bin/sync.mjs --check'
+    options:
+      cache: false
+
+  # Live OpenCode Go models vs. role candidates and the tier table.
+  agents-models:
+    command: 'node tools/agent-roles/bin/models.mjs'
+    options:
+      cache: false
+
+  agents-test:
+    command: 'node --test tools/agent-roles/test/*.test.mjs'
+    options:
+      cache: false
+
+  upstream-check:
+    command: 'node tools/agent-flows/bin/upstream.mjs check'
+    options:
+      cache: false
+
   lint:
-    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
+    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs && node tools/agent-roles/bin/sync.mjs --check'
     options:
       cache: false
 
@@ -83,6 +110,8 @@ tasks:
     command: 'echo "All test suites passed."'
     deps:
       - 'root:test'
+      - 'agent-flows:test'
+      - 'agent-roles:test'
       - 'app-core:test-browser'
       - 'app-routes:test-browser'
       - 'editor:test-browser'

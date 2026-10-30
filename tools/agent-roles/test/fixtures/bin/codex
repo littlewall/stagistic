@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+// Fake codex CLI for tests; behavior driven by FAKE_MODE.
+import {writeFileSync} from 'node:fs';
+import {setTimeout} from 'node:timers/promises';
+
+const args = process.argv.slice(2);
+const outFile = args[args.indexOf('-o') + 1];
+const chunks = [];
+
+for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+}
+
+const prompt = Buffer.concat(chunks).toString();
+
+switch (process.env.FAKE_MODE) {
+    case 'logged-out':
+        process.stderr.write('ERROR: unexpected status 401 Unauthorized: Missing bearer\n');
+        process.exit(1);
+    case 'quota':
+        process.stderr.write('ERROR: You have hit your usage limit.\n');
+        process.exit(1);
+    case 'fail-echo':
+        process.stderr.write(`user\n${prompt}\n401 tokens used\nERROR: model gpt-x not found\n`);
+        process.exit(1);
+    case 'fail':
+        process.stderr.write('ERROR: model crashed\n');
+        process.exit(1);
+    case 'slow':
+        await setTimeout(10_000);
+        break;
+    case 'no-output':
+        break;
+    case 'args':
+        writeFileSync(outFile, JSON.stringify(args));
+        break;
+    default:
+        writeFileSync(outFile, prompt);
+}

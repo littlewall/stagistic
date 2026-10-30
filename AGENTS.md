@@ -54,6 +54,46 @@ Reuse requires identical repository contents (tracked and untracked), Git change
 - Fix failures caused by this work. For a clearly pre-existing failure, record the exact check/test and evidence; do not broaden the task or dispatch repair agents automatically. A small, clearly understood local fix can be included when it fits the current task.
 - Never update golden snapshots, loosen assertions, change viewports or accept a duplication baseline merely to get green. Flag unresolved failures explicitly.
 
+## Delegation
+The main thread talks with the user, decides, does small edits and visual checks. Delegate to role subagents (`tools/agent-roles`); dispatch them per the `external-agents` skill.
+
+Triggers:
+- Search across more than 3 files → `scout`.
+- Plan with ≥2 tasks → `implementer`.
+- Full suites or broad check sets → `verifier`, in the background.
+- Second opinion on a spec, plan or diff → `reviewer` (before the final review at minimum).
+- Web/documentation research → `researcher`.
+- UI changes → visual check in the main thread (browser), never delegated.
+
+Rules:
+- One writer: only `implementer` (or the main thread) edits files; never two writers at once.
+- Checks only at checkpoints, per "Agent verification workflow"; reuse results across agents.
+- At most one browser suite and one moon run at a time.
+- Approval points with the user: design, plan, final review before commit. Nobody commits (golden rule).
+- Codex and Antigravity are read-only. Write/execute roles may use Claude or OpenCode Go through the direct CLI adapter. The configured `implementer` is the only worker that edits files; never run two writers at once.
+
+Models: role provider/model/effort live in `.agents/roles.json` (defaults `tools/agent-roles/roles.default.json`). Change them there, run `moon run root:agents-sync`; new agent files load in the next session. `root:lint` fails when generated agents are out of date.
+
+OpenCode roles run through `node tools/agent-roles/bin/ask.mjs --role <role> --task <flow-key> -`, not new Synara threads. Record one stable ASCII flow key in the feature/fix-cycle state and reuse it for follow-ups. Sessions and full run logs live in `.scratch/agent-roles/<flow-key>/<role>/`. Use provider `opencode` with model prefix `opencode-go/`; the model-specific effort becomes its CLI variant (`default` omits the variant). Generated `.opencode/agents/roles-*.md` files enforce role permissions. A started write/execute worker never automatically falls back after failure: inspect its diff, untracked files and logs before retrying or handing off. Locks remain when termination cannot be confirmed; inspect the recorded run/process before removing a stale lock. Test with `moon run root:verify -- agent-roles:test`.
+
+## Session routing
+
+At the first user message, an explicit skill/slash command takes precedence. A continuation or compacted session keeps its current flow and state; do not route it again.
+
+Before starting a new effort, look for unfinished `.scratch/<feature>/state.md` (`Phase` other than `done`) and `.scratch/fix-cycle/*.md` (`Phase` other than `closed`). Offer to continue the matching effort; ask once if several match or the intent is unclear. A fix cycle continues its latest open file across dates. If the user explicitly starts a different effort, follow that intent.
+
+- New feature ("budeme vyvíjet novou feature", "přidáme funkci", "build a new feature") → Read and follow `.claude/skills/feature-flow/SKILL.md` automatically.
+- Iterative fixes from manual app testing ("budeme opravovat chyby", "při testování jsem našel", "let's fix bugs as I test") → Read and follow `.claude/skills/fix-cycle/SKILL.md` automatically. Subsequent bug batches extend that cycle.
+- Otherwise work normally. Do not route questions, research or unrelated edits into a development flow. An ambiguous development request gets one clarifying question.
+
+No slash command is required. Both entry skills read live `mattpocock-skills` instructions under local overrides: local Markdown tracking, configured roles, one writer, no agent commits/branches/worktrees/PRs, commit message only on request. They replace the project's superpowers workflow. The only retained superpowers skill is `.claude/skills/verification-before-completion/SKILL.md`; repository verification scope and valid shared-result reuse take precedence.
+
+`moon run root:upstream-check` compares installed upstream skills and references against the reviewed lock. SessionStart warns without blocking unrelated work; entry flows pause upstream execution on drift. Only the user runs `node tools/agent-flows/bin/upstream.mjs accept` after review, including the first baseline. Test the tooling with `moon run root:verify -- agent-flows:test`.
+
+## Agent skills
+
+Issues/specs use local Markdown: [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md). Status vocabulary: [docs/agents/triage-labels.md](docs/agents/triage-labels.md). Domain documentation: [docs/agents/domain.md](docs/agents/domain.md). Read these before following upstream engineering skills; do not run `/setup-matt-pocock-skills`.
+
 ## Design context
 See [PRODUCT.md](PRODUCT.md) before any UI work.
 
