@@ -30,6 +30,7 @@ export type ScriptEditorController = {
     storageError: string | null,
     shouldAutoFocus: boolean,
     saveIndicator: ScriptSyncState,
+    trackSave: <T>(save: () => Promise<T>) => Promise<T>,
     editorLoadState: EditorLoadState,
     handleAutoSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
     handleManualSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,

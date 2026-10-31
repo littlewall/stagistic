@@ -30,8 +30,8 @@
 
     flex: none;
     box-sizing: border-box;
-    width: var(--chip-size);
-    height: var(--chip-size);
+    width: var(--chip-size, .875rem);
+    height: var(--chip-size, .875rem);
     background: var(--chip-color);
     border: 2px solid var(--color-surface);
     border-radius: var(--radius-full);
@@ -44,6 +44,13 @@
         --chip-color: var(--color-border-strong);
     }
 
+    /* On the card only: the color rings an empty dot. */
+    &.hollow {
+        background: var(--color-surface);
+        border-color: var(--chip-color);
+        box-shadow: 0 0 0 1px var(--color-surface);
+    }
+
     &.dimmed {
         opacity: .3;
     }
@@ -54,4 +61,35 @@
     font-size: var(--font-size-xs);
     font-variant-numeric: tabular-nums;
     color: var(--color-text-muted);
+}
+
+/* Editable: every dot is its own button, so they sit apart instead of overlapping. */
+.open {
+    gap: var(--space-xs);
+}
+
+.chipButton {
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    width: calc(var(--chip-size) + var(--space-sm));
+    height: calc(var(--chip-size) + var(--space-sm));
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-full);
+
+    &[data-hovered],
+    &[data-pressed] {
+        background: var(--state-hover);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: 0;
+    }
+
+    & .dot + .dot {
+        margin-left: 0;
+    }
 }

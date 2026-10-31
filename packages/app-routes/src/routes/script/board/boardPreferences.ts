@@ -6,11 +6,14 @@ export interface BoardPreferences {
     characterIds: string[],
     /** Whether cards list the characters on stage. */
     showOnStage: boolean,
+    /** Whether cards show the scene outline. */
+    showOutline: boolean,
 }
 
 export const DEFAULT_BOARD_PREFERENCES: BoardPreferences = {
     characterIds: [],
     showOnStage: true,
+    showOutline: true,
 };
 
 export const parseBoardPreferences = (value: unknown): BoardPreferences | undefined => {
@@ -22,6 +25,7 @@ export const parseBoardPreferences = (value: unknown): BoardPreferences | undefi
     const {
         characterIds,
         showOnStage,
+        showOutline,
     } = candidate;
 
     return {
@@ -29,6 +33,7 @@ export const parseBoardPreferences = (value: unknown): BoardPreferences | undefi
             ? characterIds.filter((id): id is string => typeof id === 'string')
             : DEFAULT_BOARD_PREFERENCES.characterIds,
         showOnStage: typeof showOnStage === 'boolean' ? showOnStage : DEFAULT_BOARD_PREFERENCES.showOnStage,
+        showOutline: typeof showOutline === 'boolean' ? showOutline : DEFAULT_BOARD_PREFERENCES.showOutline,
     };
 };
 

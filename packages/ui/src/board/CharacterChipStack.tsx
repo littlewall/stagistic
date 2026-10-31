@@ -1,48 +1,65 @@
 import clsx from 'clsx';
-import type {CSSProperties} from 'react';
+import type {ReactNode} from 'react';
+import {Button as RACButton} from 'react-aria-components';
 
 import {Tooltip} from '../atoms/Tooltip/Tooltip';
+import {
+    type BoardCharacterChip,
+    CharacterDot,
+    describeCharacterChip,
+} from './BoardCharacterDot';
+import {type BoardCharacterActions, BoardCharacterPopover} from './BoardCharacterPopover';
 import styles from './CharacterChipStack.module.css';
 
-export interface BoardCharacterChip {
-    id: string,
-    name: string,
-    /** Character color; null for a character the script has not confirmed. */
-    color: string | null,
-    level: 'present',
-    /** Muted while a character filter highlights other characters. */
-    isDimmed?: boolean,
-}
+export type {BoardCharacterChip} from './BoardCharacterDot';
 
 export interface CharacterChipStackProps {
     characters: readonly BoardCharacterChip[],
+    /** Makes each dot open its character; omitted on a read-only Board. */
+    actions?: BoardCharacterActions,
+    /** Sits after the dots, e.g. the control that adds a character. */
+    trailing?: ReactNode,
 }
 
-const MAX_VISIBLE_PER_LEVEL = 8;
-
-const Dot = ({chip}: {chip: BoardCharacterChip}) => (
-    <span
-        aria-hidden="true"
-        data-level={chip.level}
-        data-confirmed={chip.color !== null}
-        className={clsx(
-            styles.dot,
-            chip.color === null && styles.unconfirmed,
-            chip.isDimmed && styles.dimmed,
-        )}
-        style={chip.color === null ? undefined : {'--chip-color': chip.color} as CSSProperties}
-    />
-);
+const MAX_VISIBLE = 8;
 
 const Overflow = ({count}: {count: number}) => count > 0 ? <span aria-hidden="true" className={styles.overflow}>{`+${count}`}</span> : null;
 
-/** Character colors in first-appearance order; names appear on hover or focus. */
-export const CharacterChipStack = ({characters}: CharacterChipStackProps) => {
-    if (characters.length === 0) {
+/*
+ * Character colors in card order; names appear on hover or focus. With actions, every dot
+ * is its own button that opens the character; read-only, the stack is one button naming all.
+ */
+export const CharacterChipStack = ({
+    characters,
+    actions,
+    trailing,
+}: CharacterChipStackProps) => {
+    if (characters.length === 0 && !trailing) {
         return null;
     }
 
     const label = characters.map(chip => chip.name).join(', ');
+
+    if (actions) {
+        return (
+            <div
+                role="group"
+                aria-label={characters.length > 0 ? `Characters: ${label}` : undefined}
+                className={clsx(styles.stack, styles.open)}
+            >
+                {characters.map(chip => (
+                    <BoardCharacterPopover key={chip.id} chip={chip} actions={actions}>
+                        <Tooltip label={describeCharacterChip(chip)} placement="bottom" delay={200}>
+                            <RACButton className={styles.chipButton} aria-label={describeCharacterChip(chip)}>
+                                <CharacterDot chip={chip} />
+                            </RACButton>
+                        </Tooltip>
+                    </BoardCharacterPopover>
+                ))}
+                {trailing}
+            </div>
+        );
+    }
 
     return (
         <Tooltip label={label} placement="bottom" delay={200}>
@@ -52,8 +69,8 @@ export const CharacterChipStack = ({characters}: CharacterChipStackProps) => {
                 aria-label={`Characters: ${label}`}
             >
                 <span className={styles.group}>
-                    {characters.slice(0, MAX_VISIBLE_PER_LEVEL).map(chip => <Dot key={chip.id} chip={chip} />)}
-                    <Overflow count={characters.length - MAX_VISIBLE_PER_LEVEL} />
+                    {characters.slice(0, MAX_VISIBLE).map(chip => <CharacterDot key={chip.id} chip={chip} />)}
+                    <Overflow count={characters.length - MAX_VISIBLE} />
                 </span>
             </button>
         </Tooltip>

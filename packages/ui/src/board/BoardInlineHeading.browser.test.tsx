@@ -153,3 +153,84 @@ describe('BoardInlineHeading', () => {
         expect(window.getSelection()?.toString()).toBe('ACT 3');
     });
 });
+
+describe('BoardInlineHeading outline', () => {
+    const mountOutline = (value = '') => mount({
+        kind: 'outline',
+        value,
+        label: 'Outline of scene 2',
+        placeholder: 'Add outline',
+    });
+
+    it('breaks lines on Enter and saves on Cmd/Ctrl+Enter', async () => {
+        const commit = mountOutline();
+
+        await userEvent.click(await waitFor('[role="button"]'));
+
+        const field = await waitFor<HTMLElement>('[role="textbox"]');
+
+        expect(field.getAttribute('aria-multiline')).toBe('true');
+        await userEvent.keyboard('Storm gathers.{Enter}Anna  waits.');
+        expect(commit).not.toHaveBeenCalled();
+        await userEvent.keyboard('{Control>}{Enter}{/Control}');
+        expect(commit).toHaveBeenCalledExactlyOnceWith('Storm gathers.\nAnna  waits.');
+    });
+
+    it('drops the edit on Escape and saves an emptied outline on blur', async () => {
+        const commit = mountOutline('They meet.');
+
+        await userEvent.click(await waitFor('[role="button"]'));
+        await userEvent.keyboard('{Control>}a{/Control}Gone');
+        await userEvent.keyboard('{Escape}');
+        expect(commit).not.toHaveBeenCalled();
+        expect((await waitFor('[role="button"]')).textContent).toBe('They meet.');
+
+        await userEvent.click(await waitFor('[role="button"]'));
+        await userEvent.clear(await waitFor<HTMLElement>('[role="textbox"]'));
+        requireValue(document.querySelector<HTMLElement>('[role="textbox"]')).blur();
+        expect(commit).toHaveBeenCalledExactlyOnceWith('');
+    });
+
+    it('pastes plain text keeping its lines', async () => {
+        const commit = mountOutline();
+
+        await userEvent.click(await waitFor('[role="button"]'));
+
+        const field = await waitFor<HTMLElement>('[role="textbox"]');
+        const clipboardData = new DataTransfer();
+
+        clipboardData.setData('text/plain', 'One\r\nTwo');
+        field.dispatchEvent(new ClipboardEvent('paste', {
+            clipboardData,
+            bubbles: true,
+            cancelable: true,
+        }));
+        await userEvent.keyboard('{Control>}{Enter}{/Control}');
+        expect(commit).toHaveBeenCalledExactlyOnceWith('One\nTwo');
+    });
+
+    it('names an empty outline only on focus', async () => {
+        mountOutline();
+
+        const field = await waitFor<HTMLElement>('[role="button"]');
+        const placeholderOpacity = () => getComputedStyle(field, '::before').opacity;
+
+        expect(getComputedStyle(field, '::before').content).toBe('"Add outline"');
+        expect(placeholderOpacity()).toBe('0');
+        field.focus();
+        await expect.poll(placeholderOpacity).toBe('1');
+    });
+
+    it('shows a read-only outline as text', async () => {
+        mount({
+            kind: 'outline',
+            value: 'One\nTwo',
+            label: 'Outline',
+            isReadOnly: true,
+        });
+
+        await waitFor('span');
+        expect(document.querySelector('[role="button"], [role="textbox"]')).toBeNull();
+        expect(document.querySelector('h3')?.textContent).toBe('2. One\nTwo');
+    });
+});

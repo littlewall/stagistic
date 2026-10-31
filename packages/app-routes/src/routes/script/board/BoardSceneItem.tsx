@@ -2,7 +2,6 @@ import {useDroppable} from '@dnd-kit/react';
 import {useSortable} from '@dnd-kit/react/sortable';
 import {
     BoardAddSceneCard,
-    CharacterChipStack,
     SceneCard,
     type SceneCardActions,
 } from '@stagistic/ui';
@@ -21,6 +20,8 @@ interface BoardSceneItemProps {
     before?: ReactNode,
     titleContent?: ReactNode,
     actions: SceneCardActions,
+    /** Outline and characters, under the name of a full card. */
+    body?: ReactNode,
     onBlur?: FocusEventHandler<HTMLLIElement>,
 }
 
@@ -31,6 +32,7 @@ const SortableBoardSceneItem = ({
     before,
     titleContent,
     actions,
+    body,
     onBlur,
 }: BoardSceneItemProps) => {
     const {ref} = useSortable({
@@ -56,7 +58,7 @@ const SortableBoardSceneItem = ({
             variant={scene.isCollapsed ? 'collapsed' : 'full'}
             actions={actions}
         >
-            {scene.chips.length > 0 ? <CharacterChipStack characters={scene.chips} /> : null}
+            {body}
         </SceneCard>
     );
 };
@@ -72,7 +74,7 @@ export const BoardSceneItem = (props: BoardSceneItemProps) => {
             variant={props.scene.isCollapsed ? 'collapsed' : 'full'}
             actions={props.actions}
         >
-            {props.scene.chips.length > 0 ? <CharacterChipStack characters={props.scene.chips} /> : null}
+            {props.body}
         </SceneCard>
     );
 };

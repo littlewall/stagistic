@@ -6,12 +6,16 @@ import styles from './BoardViewMenu.module.css';
 export interface BoardViewMenuProps {
     showOnStage: boolean,
     onShowOnStageChange: (show: boolean) => void,
+    showOutline: boolean,
+    onShowOutlineChange: (show: boolean) => void,
 }
 
 /** "View": what scene cards show. Each option adds something and stands alone. */
 export const BoardViewMenu = ({
     showOnStage,
     onShowOnStageChange,
+    showOutline,
+    onShowOutlineChange,
 }: BoardViewMenuProps) => (
     <BoardMenuButton
         panelLabel="Show on cards"
@@ -25,6 +29,13 @@ export const BoardViewMenu = ({
                 >
                     Show on cards
                 </Text>
+                <Checkbox
+                    className={styles.option}
+                    isSelected={showOutline}
+                    onChange={onShowOutlineChange}
+                >
+                    Outline
+                </Checkbox>
                 <Checkbox
                     className={styles.option}
                     isSelected={showOnStage}

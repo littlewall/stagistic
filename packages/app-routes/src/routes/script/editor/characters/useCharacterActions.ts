@@ -29,7 +29,8 @@ interface UseCharacterActionsArgs {
 }
 
 export interface CharacterActions {
-    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    /** Resolves to the new character, or null when nothing was confirmed. */
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => Promise<{id: string} | null>,
     handleDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     handleRenameCharacterPreview: (
         characterId: string,
@@ -65,25 +66,25 @@ export const useCharacterActions = ({
         const normalizedKey = normalizeCharacterKey(characterKey);
 
         if (!normalizedKey || confirmedCharacterSet.has(normalizedKey)) {
-            return;
+            return Promise.resolve(null);
         }
 
-        void catalog.confirmCharacter(
+        return catalog.confirmCharacter(
             normalizedKey,
             normalizeCharacterColorHex(colorHex),
         ).then(async character => {
             if (!character) {
-                return;
+                return null;
             }
 
             if (editorCallbacks) {
                 editorCallbacks.onLinkRef(normalizedKey, character.id);
-
-                return;
+            } else {
+                await documentActions.linkCharacter(normalizedKey, character.id);
             }
 
-            await documentActions.linkCharacter(normalizedKey, character.id);
-        }).catch(() => undefined);
+            return character;
+        }).catch(() => null);
     }, [
         catalog,
         confirmedCharacterSet,

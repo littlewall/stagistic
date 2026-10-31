@@ -13,6 +13,9 @@ import styles from './BoardInlineHeading.module.css';
 /* Names are one line with single spaces: line breaks and the browser's non-breaking spaces count as spaces too. */
 const toPlainName = (text: string) => text.replaceAll(/\s+/g, ' ');
 
+/* An outline keeps its lines; only the browser's non-breaking spaces and carriage returns are normalized. */
+const toPlainLines = (text: string) => text.replaceAll('\u00A0', ' ').replaceAll(/\r\n?/g, '\n');
+
 const selectContents = (element: HTMLElement) => {
     const range = document.createRange();
 
@@ -61,19 +64,23 @@ const insertPlainText = (text: string) => {
  * A Board name edited where it stands: the text itself becomes editable, so the layout
  * never shifts, and a tint marks the edit. React never renders the text as children; the
  * browser owns it while editing and it is written back from `value` otherwise. Enter or
- * leaving the field saves, Escape cancels.
+ * leaving the field saves, Escape cancels. An outline has several lines: Enter breaks the
+ * line and Cmd/Ctrl+Enter saves.
  */
 export const BoardInlineHeading = ({
     value,
     label,
     kind,
     onCommit,
+    placeholder,
     isReadOnly = false,
     startEditing = false,
 }: {
     value: string,
     label: string,
-    kind: 'scene' | 'act',
+    kind: 'scene' | 'act' | 'outline',
+    /** Shown in an empty field while the card is pointed at or focused. */
+    placeholder?: string,
     startEditing?: boolean,
     onCommit: (value: string) => boolean,
     isReadOnly?: boolean,
@@ -83,6 +90,8 @@ export const BoardInlineHeading = ({
     // Only the first render may start editing; later renders keep whatever the user did.
     const [startsEditing] = useState(startEditing && !isReadOnly);
     const [isEditing, setEditing] = useState(startsEditing);
+    const isMultiline = kind === 'outline';
+    const toPlain = isMultiline ? toPlainLines : toPlainName;
 
     useLayoutEffect(() => {
         const element = field.current;
@@ -94,7 +103,7 @@ export const BoardInlineHeading = ({
     useEffect(() => {
         const element = field.current;
 
-        if (!isEditing || !element) return;
+        if (!isEditing || !element || isMultiline) return;
 
         const onBeforeInput = (event: InputEvent) => {
             const selection = window.getSelection();
@@ -116,7 +125,7 @@ export const BoardInlineHeading = ({
         element.addEventListener('beforeinput', onBeforeInput);
 
         return () => element.removeEventListener('beforeinput', onBeforeInput);
-    }, [isEditing]);
+    }, [isEditing, isMultiline]);
 
     useEffect(() => {
         const element = field.current;
@@ -127,9 +136,9 @@ export const BoardInlineHeading = ({
         selectContents(element);
     }, [startsEditing]);
 
-    if (isReadOnly) return <span>{value}</span>;
+    if (isReadOnly) return <span className={clsx(isMultiline && styles.lines)}>{value}</span>;
 
-    const draft = () => toPlainName(field.current?.textContent ?? '').trim();
+    const draft = () => toPlain(field.current?.textContent ?? '').trim();
 
     const finish = (commit: boolean) => {
         const element = field.current;
@@ -137,7 +146,7 @@ export const BoardInlineHeading = ({
         if (!element) return;
 
         const next = draft();
-        const accepted = commit && next !== value && (kind === 'act' || next !== '') && onCommit(next);
+        const accepted = commit && next !== value && (kind !== 'scene' || next !== '') && onCommit(next);
 
         if (!accepted) element.textContent = value;
 
@@ -163,10 +172,12 @@ export const BoardInlineHeading = ({
             return;
         }
 
+        if (event.key === 'Enter' && isMultiline && !(event.metaKey || event.ctrlKey)) return;
+
         if (event.key === 'Enter') {
             event.preventDefault();
 
-            if (kind === 'act' || draft()) finish(true);
+            if (kind !== 'scene' || draft()) finish(true);
         } else if (event.key === 'Escape') {
             event.preventDefault();
             finish(false);
@@ -182,8 +193,10 @@ export const BoardInlineHeading = ({
             aria-label={label}
             contentEditable={isEditing ? 'plaintext-only' : undefined}
             spellCheck={false}
+            aria-multiline={isMultiline || undefined}
             data-board-name={kind}
-            className={clsx(styles.field, isEditing && styles.editing)}
+            data-placeholder={placeholder}
+            className={clsx(styles.field, isMultiline && styles.multiline, isEditing && styles.editing)}
             // Editing starts on a click, not a press: pressing and moving drags the card instead.
             onPointerDown={event => {
                 pressedAt.current = isEditing ? null : {x: event.clientX, y: event.clientY};
@@ -209,7 +222,7 @@ export const BoardInlineHeading = ({
             }}
             onPaste={event => {
                 event.preventDefault();
-                insertPlainText(toPlainName(event.clipboardData.getData('text/plain')));
+                insertPlainText(toPlain(event.clipboardData.getData('text/plain')));
             }}
         />
     );

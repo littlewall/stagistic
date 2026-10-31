@@ -1,0 +1,67 @@
+.cast {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-width: 0;
+}
+
+.notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* A color rule in the margin, the character's name, then the note: a line in a prompt book. */
+.row {
+    --chip-color: var(--color-border-strong);
+
+    display: block;
+    padding-left: var(--space-md);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    text-align: left;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+    border-left: 3px solid var(--chip-color);
+
+    &.hollow {
+        border-left-style: dashed;
+    }
+
+    &.dimmed {
+        opacity: .4;
+    }
+}
+
+.name {
+    margin-right: var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.rowButton {
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    padding: var(--space-xs) 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    &[data-hovered] {
+        background: var(--state-hover);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+}

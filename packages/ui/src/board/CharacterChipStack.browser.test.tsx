@@ -47,9 +47,11 @@ const renderStack = (characters: BoardCharacterChip[]) => {
 
 const chip = (id: string, overrides: Partial<BoardCharacterChip> = {}): BoardCharacterChip => ({
     id,
+    characterId: id,
     name: id.toUpperCase(),
     color: '#cc3344',
-    level: 'present',
+    source: 'script',
+    note: null,
     ...overrides,
 });
 
@@ -59,7 +61,7 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-const dots = () => [...document.querySelectorAll<HTMLElement>('[data-level]')];
+const dots = () => [...document.querySelectorAll<HTMLElement>('[data-source]')];
 
 describe('CharacterChipStack', () => {
     it('renders nothing for a scene without characters', () => {
@@ -82,10 +84,10 @@ describe('CharacterChipStack', () => {
             clara,
         ] = dots().map(dot => getComputedStyle(dot));
 
-        expect(dots().map(dot => dot.dataset.level)).toEqual([
-            'present',
-            'present',
-            'present',
+        expect(dots().map(dot => dot.dataset.source)).toEqual([
+            'script',
+            'script',
+            'script',
         ]);
         expect(requireValue(anna, 'anna').backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(requireValue(ben, 'ben').backgroundColor).not.toBe(requireValue(anna, 'anna').backgroundColor);
@@ -94,7 +96,7 @@ describe('CharacterChipStack', () => {
     });
 
     it('draws an unconfirmed character in a neutral color', async () => {
-        renderStack([chip('anna'), chip('doctor', {color: null})]);
+        renderStack([chip('anna'), chip('doctor', {color: null, characterId: null})]);
         await waitFor(() => dots()[1]);
 
         const [anna, doctor] = dots().map(dot => getComputedStyle(dot).backgroundColor);

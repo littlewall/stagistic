@@ -46,6 +46,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         saveIndicator,
         startSaveIndicator,
         finishSaveIndicator,
+        trackSave,
     } = useSaveIndicator();
     const {addToast} = useToastController();
 
@@ -165,6 +166,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         storageError,
         shouldAutoFocus,
         saveIndicator,
+        trackSave,
         editorLoadState,
         ...saveHandlers,
     };

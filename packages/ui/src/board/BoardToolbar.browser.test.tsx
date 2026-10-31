@@ -62,6 +62,8 @@ const renderToolbar = (props: Partial<BoardToolbarProps> = {}) => {
             onSelectedCharacterIdsChange={vi.fn()}
             showOnStage
             onShowOnStageChange={vi.fn()}
+            showOutline
+            onShowOutlineChange={vi.fn()}
             {...props}
         />,
     );
@@ -128,27 +130,32 @@ describe('BoardToolbar', () => {
 
     it('offers independent positive options in the View panel', async () => {
         const onShowOnStageChange = vi.fn();
+        const onShowOutlineChange = vi.fn();
 
         renderToolbar({
             showOnStage: true,
             onShowOnStageChange,
+            showOutline: false,
+            onShowOutlineChange,
         });
         await userEvent.click(await waitFor(() => button('View')));
 
         const dialog = await waitFor(() => document.querySelector<HTMLElement>('[role="dialog"]'));
         const inputs = [...dialog.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
-        const [onStage] = inputs.map(input => requireValue(input.closest('label'), 'label'));
+        const [outline, onStage] = inputs.map(input => requireValue(input.closest('label'), 'label'));
 
         expect(dialog.getAttribute('aria-label')).toBe('Show on cards');
         expect(dialog.textContent).toContain('Show on cards');
-        expect(inputs.map(input => input.checked)).toEqual([true]);
-        expect(inputs.map(input => input.disabled)).toEqual([false]);
+        expect(inputs.map(input => input.checked)).toEqual([false, true]);
+        expect(inputs.map(input => input.disabled)).toEqual([false, false]);
+        expect(outline?.textContent).toBe('Outline');
         expect(onStage?.textContent).toBe('Characters');
-        expect(dialog.textContent).not.toContain('Outline');
 
         await userEvent.click(requireValue(onStage, 'on stage'));
+        await userEvent.click(requireValue(outline, 'outline'));
 
         expect(onShowOnStageChange).toHaveBeenCalledWith(false);
+        expect(onShowOutlineChange).toHaveBeenCalledWith(true);
     });
 
     it('keeps the filter control and View button on the same right edges when a filter is set', async () => {

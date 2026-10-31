@@ -25,6 +25,8 @@ export interface SceneBoardCharacter {
     characterId: string | null,
     key: string,
     level: SceneBoardPresence,
+    /** Rank of the character's first cue in the scene (0 = speaks first); null without a cue. */
+    firstCue: number | null,
 }
 
 export interface SceneBoardScene {

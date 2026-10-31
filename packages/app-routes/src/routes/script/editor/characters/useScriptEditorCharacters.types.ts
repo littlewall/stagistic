@@ -49,7 +49,7 @@ export interface UseScriptEditorCharactersResult {
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
     normalizeCharacterNameForInlineInput: (name: string) => string,
-    handleConfirmCharacter: (characterKey: string, colorHex?: string | null) => void,
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null) => Promise<{id: string} | null>,
     handleDeleteCharacter: (characterId: string) => void,
     handleRenameCharacterPreview: (
         characterId: string,

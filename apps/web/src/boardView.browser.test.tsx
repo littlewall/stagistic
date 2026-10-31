@@ -143,11 +143,7 @@ describe('Board and Editor', () => {
         await waitFor(() => sceneHeadings().length === 3);
         await openSceneMenu(3);
 
-        expect(menuLabels()).toEqual([
-            'Open in Editor',
-            'Start new act here',
-            'Delete scene…',
-        ]);
+        expect(menuLabels()).toEqual(['Open in Editor']);
 
         await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(item => item.textContent === 'Open in Editor')));
         await waitFor(() => locationText().startsWith(`/script/${scriptId}/editor|`));

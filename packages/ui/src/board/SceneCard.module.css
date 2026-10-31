@@ -67,6 +67,9 @@
 }
 
 .body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
     min-width: 0;
     padding-right: var(--space-md);
 }

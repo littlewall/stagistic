@@ -1,11 +1,16 @@
-import type {SceneBoardModel} from '@stagistic/script';
+import type {SceneBoardCharacter, SceneBoardModel} from '@stagistic/script';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
 
-import {buildWallView, DEFAULT_ACT_KEY} from './buildWallView';
+import {
+    buildWallView,
+    DEFAULT_ACT_KEY,
+    type WallSceneRecord,
+    type WallViewInput,
+} from './buildWallView';
 
 const model: SceneBoardModel = {
     acts: [
@@ -37,12 +42,14 @@ const model: SceneBoardModel = {
                             characterId: 'c-anna',
                             key: 'ANNA',
                             level: 'present',
+                            firstCue: 0,
                         },
                         {
                             entryId: 'key:DOCTOR',
                             characterId: null,
                             key: 'DOCTOR',
                             level: 'present',
+                            firstCue: 0,
                         },
                     ],
                 },
@@ -57,6 +64,7 @@ const model: SceneBoardModel = {
                             characterId: 'c-ben',
                             key: 'BEN',
                             level: 'present',
+                            firstCue: 0,
                         },
                     ],
                 },
@@ -78,14 +86,47 @@ const characters = [
     },
 ];
 
-const build = (overrides: Partial<Parameters<typeof buildWallView>[0]> = {}) => buildWallView({
+const baseInput: WallViewInput = {
     model,
     characters,
     displayColorByKey: new Map([['BEN', '#2266cc']]),
     getStartPage: id => (id === 's1' ? 7 : null),
     selectedIds: new Set(),
     showOnStage: true,
-    ...overrides,
+};
+
+const build = (overrides: Partial<WallViewInput> = {}) => buildWallView({...baseInput, ...overrides});
+
+const record = (headingBlockId: string, characterId: string, note: string | null): WallSceneRecord => ({
+    headingBlockId,
+    characterId,
+    note,
+});
+
+const evidence = (id: string, key: string, firstCue: number | null): SceneBoardCharacter => ({
+    entryId: id,
+    characterId: id,
+    key,
+    level: 'present',
+    firstCue,
+});
+
+const sceneModel = (sceneCharacters: SceneBoardCharacter[]): SceneBoardModel => ({
+    acts: [
+        {
+            actBlockId: null,
+            name: 'ACT 1',
+            scenes: [
+                {
+                    headingBlockId: 'x',
+                    number: 1,
+                    title: 'X',
+                    actBlockId: null,
+                    characters: sceneCharacters,
+                },
+            ],
+        },
+    ],
 });
 
 const sceneNamed = (acts: ReturnType<typeof build>, id: string) => acts.flatMap(act => act.scenes).find(scene => scene.headingBlockId === id);
@@ -99,29 +140,144 @@ describe('buildWallView', () => {
         expect(sceneNamed(acts, 's2')?.page).toBeNull();
     });
 
-    it('lists characters with confirmed colors', () => {
+    it('lists characters from the script with colors, an unconfirmed one neutral', () => {
         const chips = sceneNamed(build(), 's1')?.chips;
 
         expect(chips).toEqual([
             {
                 id: 'c-anna',
+                characterId: 'c-anna',
                 name: 'ANNA',
                 color: '#cc3344',
-                level: 'present',
+                source: 'script',
+                note: null,
                 isDimmed: false,
             },
             {
                 id: 'key:DOCTOR',
+                characterId: null,
                 name: 'DOCTOR',
                 color: null,
-                level: 'present',
+                source: 'script',
+                note: null,
                 isDimmed: false,
             },
         ]);
     });
 
-    it('drops on-stage characters from the chips when they are switched off, yet still filters by them', () => {
-        const acts = build({showOnStage: false, selectedIds: new Set(['c-anna'])});
+    it('gives a confirmed character without any color the editor palette color', () => {
+        const color = sceneNamed(build({displayColorByKey: new Map()}), 's2')?.chips[0]?.color;
+
+        expect(color).toMatch(/^#[0-9A-F]{6}$/);
+    });
+
+    it('joins card records: a note on a script character, a hollow character only on the card', () => {
+        const chips = sceneNamed(build({
+            records: [
+                record('s1', 'c-anna', 'Waits for the letter'),
+                record('s1', 'c-ben', null),
+            ],
+        }), 's1')?.chips;
+
+        expect(chips?.map(chip => [
+            chip.id,
+            chip.source,
+            chip.note,
+        ])).toEqual([
+            [
+                'c-anna',
+                'script',
+                'Waits for the letter',
+            ],
+            [
+                'key:DOCTOR',
+                'script',
+                null,
+            ],
+            [
+                'c-ben',
+                'card',
+                null,
+            ],
+        ]);
+    });
+
+    it('orders noted characters by first cue, a noted one without a cue last among them', () => {
+        const ordered = buildWallView({
+            ...baseInput,
+            model: sceneModel([
+                evidence('c-ben', 'BEN', 1),
+                evidence('c-anna', 'ANNA', null),
+                evidence('c-cy', 'CY', 0),
+                evidence('c-dee', 'DEE', 2),
+            ]),
+            characters: [
+                ...characters,
+                {
+                    id: 'c-cy',
+                    key: 'CY',
+                    colorHex: null,
+                },
+                {
+                    id: 'c-dee',
+                    key: 'DEE',
+                    colorHex: null,
+                },
+                {
+                    id: 'c-eve',
+                    key: 'EVE',
+                    colorHex: null,
+                },
+            ],
+            records: [
+                record('x', 'c-eve', 'Only here'),
+                record('x', 'c-anna', 'Watches'),
+                record('x', 'c-ben', 'Leaves'),
+                record('x', 'c-cy', 'Speaks first'),
+            ],
+        })[0]?.scenes[0]?.chips;
+
+        expect(ordered?.map(chip => [chip.name, chip.note !== null])).toEqual([
+            ['CY', true],
+            ['BEN', true],
+            ['ANNA', true],
+            ['EVE', true],
+            ['DEE', false],
+        ]);
+    });
+
+    it('ignores records of characters that left the catalog', () => {
+        const chips = sceneNamed(build({records: [record('s2', 'c-gone', 'Lost')]}), 's2')?.chips;
+
+        expect(chips?.map(chip => chip.id)).toEqual(['c-ben']);
+    });
+
+    it('carries the outline of each scene', () => {
+        const acts = build({synopsisByScene: new Map([['s1', 'They meet.']])});
+
+        expect(sceneNamed(acts, 's1')?.synopsis).toBe('They meet.');
+        expect(sceneNamed(acts, 's2')?.synopsis).toBeNull();
+    });
+
+    it('filters by a character only on the card', () => {
+        const acts = build({
+            records: [record('s2', 'c-anna', null)],
+            selectedIds: new Set(['c-anna']),
+        });
+
+        expect(sceneNamed(acts, 's2')?.isCollapsed).toBe(false);
+        expect(sceneNamed(acts, 's2')?.chips.map(chip => [chip.id, chip.isDimmed])).toEqual([
+            ['c-ben', true],
+            ['c-anna', false],
+        ]);
+    });
+
+    it('drops characters from the cards when they are switched off, yet still filters by them', () => {
+        const acts = build({
+            showOnStage: false,
+            selectedIds: new Set(['c-anna']),
+            records: [record('s1', 'c-ben', 'Hidden')],
+        });
 
         expect(sceneNamed(acts, 's1')?.chips.map(chip => chip.id)).toEqual([]);
         expect(sceneNamed(acts, 's1')?.isCollapsed).toBe(false);

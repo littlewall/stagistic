@@ -105,22 +105,22 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
     }, [editor]);
 
     const handleConfirmCharacter = useCallback((characterKey: string, colorHex?: string | null) => {
-        characters.handleConfirmCharacter(characterKey, colorHex, {
+        void characters.handleConfirmCharacter(characterKey, colorHex, {
             onLinkRef: (key, id) => {
                 if (editor) {
                     linkCharacterRef(editor, key, id);
                 }
             },
-        });
+        }).catch(() => undefined);
     }, [characters, editor]);
     const handleAddCharacter = useCallback((characterKey: string) => {
-        characters.handleConfirmCharacter(characterKey, undefined, {
+        void characters.handleConfirmCharacter(characterKey, undefined, {
             onLinkRef: (key, id) => {
                 if (editor) {
                     linkCharacterRef(editor, key, id);
                 }
             },
-        });
+        }).catch(() => undefined);
     }, [characters, editor]);
     const occupiedCharacterKeys = useMemo(() => {
         return new Set([...characters.confirmedCharacterRecords, ...characters.confirmedGroupRecords].map(entity => normalizeCharacterKey(entity.key)));
