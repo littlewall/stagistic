@@ -11,7 +11,7 @@ import {useMemo} from 'react';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
-import {resolveCharacterColor} from './buildWallView';
+import {resolveCharacterColor} from './buildSceneChips';
 
 export interface WallSceneMetadata {
     /** Outline edits; null clears it. */

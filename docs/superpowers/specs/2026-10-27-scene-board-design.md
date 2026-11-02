@@ -97,10 +97,19 @@ Mockup: lišta s menu, schválená 2026-10-27.
 
 ## Matrix
 
-- Řádky jsou postavy (pořadí podle prvního výskytu), sloupce scény s nenápadným oddělením aktů.
-- Buňka: ■ s větou (plná barva), ● ve scénáři, ○ jen na kartě (bez dokladu ve scénáři), prázdná buňka = postava ve scéně není.
-- Hover ukáže větu. Klik otevře stejný popover jako čip na Wall.
-- V hlavičce řádku je jméno, barva a počet scén.
+- Řádky jsou postavy (pořadí podle prvního výskytu jako ve filtru), sloupce scény s nenápadným oddělením aktů. Potvrzené postavy bez scény jsou na konci jako prázdné řádky; nepotvrzené postavy jsou šedé řádky, jejich buňka nabízí jen „Confirm character“.
+- Buňka: ■ s větou (plná barva), ● ve scénáři, ○ jen na kartě (bez dokladu ve scénáři, obrys v barvě postavy), prázdná buňka = postava ve scéně není.
+- Hover ukáže větu, u buňky bez věty jméno postavy a název scény. Klik na obsazenou buňku otevře stejný popover jako čip na Wall. Klik na prázdnou buňku postavu hned přidá na kartu (○) a otevře popover; zavření bez věty ji na kartě nechá.
+- V hlavičce řádku je jméno, barva a počet scén. Hlavička sloupce ukáže číslo scény, název a strana jsou v tooltipu; klik na ni nic nedělá. Nad sloupci jsou názvy aktů, mezi akty hairline.
+- Sloupce mají stejnou úzkou šířku, při mnoha scénách se matice posouvá vodorovně; hlavička řádků zůstává vlevo, hlavička sloupců nahoře.
+- Filtr postav (společný s Wall) ukáže jen vybrané řádky, sloupce zůstanou všechny. Tlačítko View na Matrixu není; případné nastavení Matrixu bude na stejném místě.
+- Klávesnice: ARIA grid s jedním tab stopem, šipky mezi buňkami, Enter/mezerník otevře popover (u prázdné buňky přidá postavu), Escape vrátí fokus na buňku.
+- Read-only Board: buňky a tooltipy ano, kliknutí nic nedělá, prázdné buňky nejsou aktivní.
+- Prázdné stavy: bez scén jako Wall (akce pro vložení první scény), se scénami bez postav tichá věta „No characters yet.“.
+- Název aktu je vždy celý vidět; když je širší než jeho sloupce, za poslední scénou aktu vznikne mezera. Vlevo je jen barva a jméno postavy, počet scén je v posledním sloupci za scénami.
+- Tooltip buňky neopakuje jméno postavy: věta (je-li) a „Scene: “ s číslem scény podle nastavení a názvem scény. Otevírá se vpravo od buňky (případně vlevo), nikdy nahoru přes hlavičku.
+- Hover nebo fokus buňky podbarví jméno postavy, název aktu a číslo scény, bez posunu layoutu.
+- (Upřesněno 2. 11. 2026.)
 
 ## Arcs
 

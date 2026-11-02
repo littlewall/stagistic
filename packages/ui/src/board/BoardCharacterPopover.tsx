@@ -124,14 +124,19 @@ const NoteField = ({
 export const BoardCharacterPopover = ({
     chip,
     actions,
+    isOpen,
+    onOpenChange,
     children,
 }: {
     chip: BoardCharacterChip,
     actions: BoardCharacterActions,
+    /** Controlled open state, e.g. to open the popover of a cell the route just filled. */
+    isOpen?: boolean,
+    onOpenChange?: (open: boolean) => void,
     /** The pressable trigger. */
     children: ReactElement,
 }) => (
-    <DialogTrigger>
+    <DialogTrigger isOpen={isOpen} onOpenChange={onOpenChange}>
         {children}
         <Popover className={styles.popover} placement="bottom start" offset={6}>
             <Dialog className={styles.dialog} aria-label={chip.name}>

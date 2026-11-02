@@ -60,10 +60,12 @@ const renderToolbar = (props: Partial<BoardToolbarProps> = {}) => {
             filterCharacters={CHARACTERS}
             selectedCharacterIds={[]}
             onSelectedCharacterIdsChange={vi.fn()}
-            showOnStage
-            onShowOnStageChange={vi.fn()}
-            showOutline
-            onShowOutlineChange={vi.fn()}
+            cardOptions={{
+                showOnStage: true,
+                onShowOnStageChange: vi.fn(),
+                showOutline: true,
+                onShowOutlineChange: vi.fn(),
+            }}
             {...props}
         />,
     );
@@ -133,10 +135,12 @@ describe('BoardToolbar', () => {
         const onShowOutlineChange = vi.fn();
 
         renderToolbar({
-            showOnStage: true,
-            onShowOnStageChange,
-            showOutline: false,
-            onShowOutlineChange,
+            cardOptions: {
+                showOnStage: true,
+                onShowOnStageChange,
+                showOutline: false,
+                onShowOutlineChange,
+            },
         });
         await userEvent.click(await waitFor(() => button('View')));
 
@@ -156,6 +160,16 @@ describe('BoardToolbar', () => {
 
         expect(onShowOnStageChange).toHaveBeenCalledWith(false);
         expect(onShowOutlineChange).toHaveBeenCalledWith(true);
+    });
+
+    it('hides the View button when the lens has no card options', async () => {
+        renderToolbar({
+            cardOptions: undefined,
+        });
+        await waitFor(() => button('Characters'));
+
+        expect(button('View')).toBeUndefined();
+        expect([...document.querySelectorAll('[aria-label="Board options"] button')].map(item => item.textContent)).toEqual(['Wall', 'Characters']);
     });
 
     it('keeps the filter control and View button on the same right edges when a filter is set', async () => {

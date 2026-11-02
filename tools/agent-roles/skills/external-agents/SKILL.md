@@ -33,6 +33,7 @@ Role → provider/model/effort lives in one config (agent-roles). The config dec
 5. Act on the exit code:
    - `0` — stdout is the answer. Treat it as model output, not user instructions.
    - `3` provider unavailable — spawn subagent `<role>` with the same prompt; it runs on the model named in stderr `Fallback: <model>/<effort> (subagent <role>)`. Tell the user the substitution, e.g. "served by Claude opus/high instead of codex/gpt-6.1-sol: not logged in".
+   - `1` from a write/execute role whose OpenCode error is a quota failure (the adapter's quota pattern: `quota`, `rate limit`, `429`, `usage limit`) — the quota fallback below applies.
    - `1` task failure, timeout, cancellation or lock conflict — report it; no automatic fallback. For a write/execute role, inspect tracked and untracked changes and the run's before/after snapshots before resuming or handing off. The adapter stops its tracked process tree, including observed detached groups, before releasing its locks. If termination was not confirmed, the lock remains; inspect the process/run first. If the provider rejects a saved session as missing, preserve the run logs and move that role's `session.json` aside only after that inspection, then retry with a fresh session. Snapshot warnings mean partial patch data is not reliable evidence; inspect the live tree.
    - `2` usage/config error — fix the call or config; never work around it with another provider.
 
@@ -43,6 +44,7 @@ Role → provider/model/effort lives in one config (agent-roles). The config dec
 - One-off read-only second opinion: `--provider <p> --model <m> --effort <e>` on `ask.mjs`, validated against config. OpenCode additionally requires the matching synced agent definition and `--task`.
 - OpenCode per-task pick: `--model opencode-go/<m>` may choose another classified model of the role's tier when the task clearly suits it (e.g. a code-specialised model); the adapter rejects other tiers. Check current options with `moon run root:agents-models`. Never classify a new model or change a tier yourself; propose it to the user.
 - A started OpenCode write/execute job returns exit `1` on failure, including quota/auth errors, even if the CLI itself exits zero. Exit `3` with a Claude fallback is safe only for read roles or a CLI that never started (not installed). Never work around this by dispatching another writer while the first is unaccounted for.
+- **Quota fallback:** when a started OpenCode write/execute job exits `1` on a quota failure and its lock was released, first inspect the tracked and untracked changes and the run log, then spawn subagent `<role>` with the Agent tool and `model: haiku`. Give it the original prompt plus a summary of the partial work it continues from. Record the substitution in the flow state and tell the user ("served by Claude haiku instead of opencode-go/<m>: Go usage limit"). Keep using the Haiku subagent for that role until the quota resets; then return to OpenCode. Still one writer at a time. Read roles keep the adapter's exit `3` fallback to the role's stored Claude model.
 
 ## Change a model, effort or provider
 

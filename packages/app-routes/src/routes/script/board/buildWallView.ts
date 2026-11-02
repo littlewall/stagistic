@@ -1,10 +1,17 @@
-import {getConfirmedCharacterColor} from '@stagistic/editor';
 import type {
     SceneBoardCharacter,
     SceneBoardModel,
     ScriptCharacterRecord,
 } from '@stagistic/script';
 import type {BoardCharacterChip} from '@stagistic/ui';
+
+import {
+    buildCharacterChip,
+    buildSceneChipIndex,
+    DEFAULT_ACT_KEY,
+    groupSceneRecords,
+    type SceneCardRecord,
+} from './buildSceneChips';
 
 export interface WallScene {
     headingBlockId: string,
@@ -26,42 +33,19 @@ export interface WallAct {
     scenes: WallScene[],
 }
 
-/** What the user put on a card: a character, optionally with a note. */
-export interface WallSceneRecord {
-    headingBlockId: string,
-    characterId: string,
-    note: string | null,
-}
-
 export interface WallViewInput {
     model: SceneBoardModel,
     characters: readonly ScriptCharacterRecord[],
     displayColorByKey: ReadonlyMap<string, string>,
     getStartPage: (headingBlockId: string) => number | null,
     /** Card records in the order they were added. */
-    records?: readonly WallSceneRecord[],
+    records?: readonly SceneCardRecord[],
     synopsisByScene?: ReadonlyMap<string, string | null>,
     /** Filtered characters; empty filters nothing. */
     selectedIds: ReadonlySet<string>,
     /** Whether cards list characters. The filter counts them either way. */
     showOnStage: boolean,
 }
-
-export const DEFAULT_ACT_KEY = '__default-act__';
-
-/** The character's own color, else the one the editor shows for it. */
-export const resolveCharacterColor = (
-    record: ScriptCharacterRecord,
-    displayColorByKey: ReadonlyMap<string, string>,
-): string => record.colorHex ?? displayColorByKey.get(record.key) ?? getConfirmedCharacterColor(record.id, null);
-
-const groupRecordsByScene = (records: readonly WallSceneRecord[]) => {
-    const byScene = new Map<string, WallSceneRecord[]>();
-
-    records.forEach(record => byScene.set(record.headingBlockId, [...byScene.get(record.headingBlockId) ?? [], record]));
-
-    return byScene;
-};
 
 /* Notes in the order the characters first speak; one who never speaks goes after those who do. */
 const byFirstCue = (
@@ -85,7 +69,7 @@ export const buildWallView = ({
     showOnStage,
 }: WallViewInput): WallAct[] => {
     const recordById = new Map(characters.map(character => [character.id, character]));
-    const recordsByScene = groupRecordsByScene(records.filter(record => recordById.has(record.characterId)));
+    const recordsByScene = groupSceneRecords(records.filter(record => recordById.has(record.characterId)));
     const isFiltering = selectedIds.size > 0;
     const isSelected = (characterId: string | null) => characterId !== null && selectedIds.has(characterId);
 
@@ -94,21 +78,16 @@ export const buildWallView = ({
         name: act.name,
         scenes: act.scenes.map(scene => {
             const sceneRecords = recordsByScene.get(scene.headingBlockId) ?? [];
-            const noteById = new Map(sceneRecords.map(record => [record.characterId, record.note]));
-            const evidenceById = new Map(scene.characters.flatMap(character => (character.characterId ? [[character.characterId, character]] : [])));
-            const toChip = (id: string, characterId: string | null, key: string, source: BoardCharacterChip['source']): BoardCharacterChip => {
-                const record = characterId ? recordById.get(characterId) : undefined;
-
-                return {
-                    id,
-                    characterId,
-                    name: record?.key ?? key,
-                    color: record ? resolveCharacterColor(record, displayColorByKey) : null,
-                    source,
-                    note: (characterId && noteById.get(characterId)) || null,
-                    isDimmed: isFiltering && !isSelected(characterId),
-                };
-            };
+            const {noteById, evidenceById} = buildSceneChipIndex(scene, sceneRecords);
+            const toChip = (id: string, characterId: string | null, key: string, source: BoardCharacterChip['source']): BoardCharacterChip => buildCharacterChip({
+                id,
+                characterId,
+                key,
+                record: characterId ? recordById.get(characterId) : undefined,
+                note: (characterId && noteById.get(characterId)) || null,
+                source,
+                isDimmed: isFiltering && !isSelected(characterId),
+            }, displayColorByKey);
             const fromScript = scene.characters.map(character => toChip(character.entryId, character.characterId, character.key, 'script'));
             const onlyOnCard = sceneRecords
                 .filter(record => !evidenceById.has(record.characterId))

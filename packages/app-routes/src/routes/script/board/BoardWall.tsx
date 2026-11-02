@@ -1,5 +1,4 @@
 import {DragDropProvider} from '@dnd-kit/react';
-import {buildSceneBoardModel} from '@stagistic/script';
 import {
     BoardActSection,
     BoardAddActButton,
@@ -23,26 +22,19 @@ import {
 import {configuredKeyboardSensor, configuredPointerSensor} from '../editor/structure/structureDndConfig';
 import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
-import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {resolveBoardInsertionTarget} from './boardInsertionTargets';
 import {BOARD_LENSES} from './boardLenses';
-import {useBoardPreferences} from './boardPreferences';
 import {buildSceneActions} from './boardSceneActions';
 import {BoardSceneBody} from './BoardSceneBody';
 import {getSceneTextTransform} from './boardSceneCasing';
 import {BoardSceneEndTarget, BoardSceneItem} from './BoardSceneItem';
-import {buildFilterCharacters} from './buildFilterCharacters';
-import {
-    buildWallView,
-    DEFAULT_ACT_KEY,
-} from './buildWallView';
+import {DEFAULT_ACT_KEY} from './buildSceneChips';
+import {buildWallView} from './buildWallView';
 import {useBoardDeleteAct} from './useBoardDeleteAct';
-import {useBoardHistoryShortcuts} from './useBoardHistoryShortcuts';
+import {useBoardLensData} from './useBoardLensData';
 import {useBoardSceneDnd} from './useBoardSceneDnd';
 import {useOpenInEditor} from './useOpenInEditor';
-import {useSceneBoardSource} from './useSceneBoardSource';
-import {useWallMetadata} from './useWallMetadata';
 
 /** The Wall lens: acts as sections, scenes as cards with their derived cast. */
 interface BoardWallProps {
@@ -51,28 +43,31 @@ interface BoardWallProps {
 }
 
 export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
-    const {currentScriptId, documentSession} = useScriptWorkspace();
+    const {documentSession} = useScriptWorkspace();
     const {isReadOnly} = useScriptReadOnlyState();
     const {effectiveScriptSettingsDraft} = useScriptSettingsModal();
-    const {
-        confirmedCharacterRecords,
-        confirmedGroupRecords,
-    } = useScriptCharacters();
     const openInEditor = useOpenInEditor();
-    const source = useSceneBoardSource();
     const {
+        source,
+        model,
         records,
+        metadata,
+        selectedIds,
+        setSelectedIds,
+        filterCharacters,
+        hasScenes,
+        preferences,
+        setPreferences,
         synopsisByScene,
         castOptions,
-        metadata,
-    } = useWallMetadata(source.displayColorByKey);
+        confirmedCharacterRecords,
+    } = useBoardLensData(isReadOnly);
+
     const [forcedSceneId, setForcedSceneId] = useState<string | null>(null);
     const [editingActId, setEditingActId] = useState<string | null>(null);
     // A label, not an element: the control that opened the form may re-render while it is open.
     const composerReturnLabel = useRef<string | null>(null);
     const [composer, setComposer] = useState<{actBlockId: string | null, beforeSceneId: string | null} | null>(null);
-
-    useBoardHistoryShortcuts(documentSession, isReadOnly);
 
     const openComposer = (actBlockId: string | null, beforeSceneId: string | null, label: string) => {
         composerReturnLabel.current = label;
@@ -85,24 +80,8 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
         });
     };
     const insertAct = (beforeBlockId: string | null) => setEditingActId(documentSession.commands.insertAct(beforeBlockId));
-    const [preferences, setPreferences] = useBoardPreferences(currentScriptId ?? 'new-script');
 
-    const model = useMemo(() => buildSceneBoardModel(source.index, {
-        characters: confirmedCharacterRecords,
-        groups: confirmedGroupRecords,
-    }), [
-        confirmedCharacterRecords,
-        confirmedGroupRecords,
-        source.index,
-    ]);
     const {requestDeleteAct, modal: deleteActModal} = useBoardDeleteAct(model.acts, documentSession.commands.deleteAct);
-
-    // A character deleted since the filter was saved drops out silently.
-    const selectedIds = useMemo(() => {
-        const knownIds = new Set(confirmedCharacterRecords.map(character => character.id));
-
-        return preferences.characterIds.filter(id => knownIds.has(id));
-    }, [confirmedCharacterRecords, preferences.characterIds]);
 
     const acts = useMemo(() => buildWallView({
         model,
@@ -136,17 +115,6 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
         moveScene: documentSession.commands.moveScene,
     });
 
-    const filterCharacters = useMemo(
-        () => buildFilterCharacters(model, confirmedCharacterRecords, source.displayColorByKey, records),
-        [
-            confirmedCharacterRecords,
-            model,
-            records,
-            source.displayColorByKey,
-        ],
-    );
-
-    const hasScenes = model.acts.some(act => act.scenes.length > 0);
     const hasActs = model.acts.some(act => act.actBlockId !== null);
     const shownActs = draggedActs.length ? draggedActs : [
         {
@@ -176,11 +144,13 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                     onSelectLens={onSelectLens}
                     filterCharacters={filterCharacters}
                     selectedCharacterIds={selectedIds}
-                    onSelectedCharacterIdsChange={characterIds => setPreferences({...preferences, characterIds})}
-                    showOnStage={preferences.showOnStage}
-                    onShowOnStageChange={showOnStage => setPreferences({...preferences, showOnStage})}
-                    showOutline={preferences.showOutline}
-                    onShowOutlineChange={showOutline => setPreferences({...preferences, showOutline})}
+                    onSelectedCharacterIdsChange={characterIds => setSelectedIds(characterIds)}
+                    cardOptions={{
+                        showOnStage: preferences.showOnStage,
+                        onShowOnStageChange: showOnStage => setPreferences({...preferences, showOnStage}),
+                        showOutline: preferences.showOutline,
+                        onShowOutlineChange: showOutline => setPreferences({...preferences, showOutline}),
+                    }}
                 />
             )}
         >

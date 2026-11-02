@@ -6,9 +6,11 @@ import {
 } from 'vite-plus/test';
 
 import {
-    buildWallView,
     DEFAULT_ACT_KEY,
-    type WallSceneRecord,
+    type SceneCardRecord,
+} from './buildSceneChips';
+import {
+    buildWallView,
     type WallViewInput,
 } from './buildWallView';
 
@@ -97,7 +99,7 @@ const baseInput: WallViewInput = {
 
 const build = (overrides: Partial<WallViewInput> = {}) => buildWallView({...baseInput, ...overrides});
 
-const record = (headingBlockId: string, characterId: string, note: string | null): WallSceneRecord => ({
+const record = (headingBlockId: string, characterId: string, note: string | null): SceneCardRecord => ({
     headingBlockId,
     characterId,
     note,

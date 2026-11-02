@@ -133,8 +133,21 @@ export {type BoardCharacterActions} from './board/BoardCharacterPopover';
 export {BoardEmpty, type BoardEmptyProps} from './board/BoardEmpty';
 export {BoardLayout, type BoardLayoutProps} from './board/BoardLayout';
 export {type BoardLens} from './board/BoardLensTabs';
+export {
+    BoardMatrix,
+    type BoardMatrixAct,
+    type BoardMatrixCell,
+    type BoardMatrixCellKind,
+    type BoardMatrixProps,
+    type BoardMatrixRow,
+    type BoardMatrixSceneColumn,
+} from './board/BoardMatrix';
 export {BoardSceneCast, type BoardSceneCastProps} from './board/BoardSceneCast';
-export {BoardToolbar, type BoardToolbarProps} from './board/BoardToolbar';
+export {
+    BoardToolbar,
+    type BoardToolbarCardOptions,
+    type BoardToolbarProps,
+} from './board/BoardToolbar';
 export {
     type BoardCharacterChip,
     CharacterChipStack,
@@ -162,6 +175,7 @@ export {AppFooter} from './layout/AppFooter';
 export {
     AppHeader,
     type AppHeaderProps,
+    type AppHeaderWidth,
     ScriptEditorAppHeader,
     type ScriptEditorAppHeaderProps,
     type ScriptListItem,

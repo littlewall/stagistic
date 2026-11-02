@@ -15,7 +15,8 @@ import {
     toBoardOrder,
 } from './boardDragOrder';
 import {resolveBoardInsertionTarget} from './boardInsertionTargets';
-import {DEFAULT_ACT_KEY, type WallAct} from './buildWallView';
+import {DEFAULT_ACT_KEY} from './buildSceneChips';
+import {type WallAct} from './buildWallView';
 
 /*
  * While a scene is dragged, the Wall reorders its cards in React state, so the others make

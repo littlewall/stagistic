@@ -1,7 +1,7 @@
 import type {SceneBoardModel, ScriptCharacterRecord} from '@stagistic/script';
 import type {BoardFilterCharacter} from '@stagistic/ui';
 
-import {resolveCharacterColor, type WallSceneRecord} from './buildWallView';
+import {resolveCharacterColor, type SceneCardRecord} from './buildSceneChips';
 
 /*
  * Characters the filter offers: every confirmed character, in order of first appearance on
@@ -12,7 +12,7 @@ export const buildFilterCharacters = (
     model: SceneBoardModel,
     characters: readonly ScriptCharacterRecord[],
     displayColorByKey: ReadonlyMap<string, string>,
-    records: readonly WallSceneRecord[] = [],
+    records: readonly SceneCardRecord[] = [],
 ): BoardFilterCharacter[] => {
     const sceneCountById = new Map<string, number>();
 

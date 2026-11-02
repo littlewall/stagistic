@@ -11,7 +11,7 @@ import {
 } from '../../icons/ui';
 import {DropdownMenu} from '../../molecules/DropdownMenu/DropdownMenu';
 import styles from '../AppHeader.module.css';
-import {AppHeader} from './AppHeaderShell';
+import {AppHeader, type AppHeaderWidth} from './AppHeaderShell';
 import {ScriptTitle} from './ScriptTitle';
 import {SyncIndicator} from './SyncIndicator';
 import type {
@@ -30,7 +30,8 @@ export type ScriptEditorAppHeaderProps = {
     onOpenSettings?: (returnFocus?: HTMLElement | null) => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
-    isFullWidth?: boolean,
+    /** The width of the header's content; the Editor keeps the full width by default. */
+    width?: AppHeaderWidth,
     activeView: ScriptView,
     onSelectView: (view: ScriptView) => void,
     /** Chooses the shown script state (current, draft or version); sits after the title. */
@@ -46,7 +47,7 @@ export const ScriptEditorAppHeader = ({
     onOpenSettings,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
-    isFullWidth = true,
+    width = 'full',
     activeView,
     onSelectView,
     scriptState,
@@ -55,7 +56,7 @@ export const ScriptEditorAppHeader = ({
         <AppHeader
             onHome={onHome}
             onOpenSettings={onOpenSettings}
-            isFullWidth={isFullWidth}
+            width={width}
             scriptControls={(
                 <ViewSwitcher
                     activeView={activeView}
