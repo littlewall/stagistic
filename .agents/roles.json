@@ -1,7 +1,7 @@
 {
     "roles": {
-        "scout": {"provider": "opencode", "models": ["opencode-go/glm-5.3-flash"], "effort": "low"},
-        "implementer": {"provider": "opencode", "models": ["opencode-go/glm-5.2", "opencode-go/glm-5.3"], "effort": "high"},
-        "verifier": {"provider": "opencode", "models": ["opencode-go/glm-5.3-flash"], "effort": "low"}
+        "scout": {"provider": "opencode", "models": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"], "effort": "low"},
+        "implementer": {"provider": "opencode", "models": ["opencode-go/deepseek-v4-pro", "opencode-go/glm-5.2", "opencode-go/glm-5.3"], "effort": "high"},
+        "verifier": {"provider": "opencode", "models": ["opencode-go/deepseek-v4.1-flash", "opencode-go/glm-5.3-flash"], "effort": "low"}
     }
 }
