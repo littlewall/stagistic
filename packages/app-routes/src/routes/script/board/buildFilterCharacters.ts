@@ -6,7 +6,7 @@ import {resolveCharacterColor, type SceneCardRecord} from './buildSceneChips';
 /*
  * Characters the filter offers: every confirmed character, in order of first appearance on
  * the cards (the script first, then card records), with the number of scenes they are on.
- * Those without a scene come last.
+ * Those without a scene come last. `records` are the ones the cards show.
  */
 export const buildFilterCharacters = (
     model: SceneBoardModel,

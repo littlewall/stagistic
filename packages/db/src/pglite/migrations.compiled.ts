@@ -160,5 +160,10 @@ export const compiledMigrations = [
         "id": "20261029155540_pdf_flow_settings",
         "checksum": "3387b8e0b8f681a6d019adcc1bc949b320a8ba2fd041d20aa84be3900885dbf5",
         "sql": "ALTER TABLE \"script_settings_page_layout\" ADD COLUMN \"pdf_flow\" jsonb;\n"
+    },
+    {
+        "id": "20261103094608_scene_arc_range_on_card",
+        "checksum": "e9b3001fb8ec00c9ba8cd6a2515a325602443d16684597ce3d7a17de7fa9bf06",
+        "sql": "ALTER TABLE \"script_scene_characters\" DROP CONSTRAINT IF EXISTS \"script_scene_characters_arc_value_check\";\n--> statement-breakpoint\nALTER TABLE \"script_scene_characters\" DROP CONSTRAINT IF EXISTS \"script_scene_characters_arc_range\";\n--> statement-breakpoint\nUPDATE \"script_scene_characters\" SET \"arc_value\" = \"arc_value\" * 33 WHERE \"arc_value\" IS NOT NULL;\n--> statement-breakpoint\nALTER TABLE \"script_scene_characters\" ADD CONSTRAINT \"script_scene_characters_arc_range\" CHECK (\"arc_value\" BETWEEN -100 AND 100);\n--> statement-breakpoint\nALTER TABLE \"script_scene_characters\" ADD COLUMN \"on_card\" boolean NOT NULL DEFAULT true;\n"
     }
 ] as const;

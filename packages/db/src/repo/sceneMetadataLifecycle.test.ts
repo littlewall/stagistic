@@ -154,6 +154,42 @@ describe('scene metadata identity', () => {
 
         expect(await repository.listSceneCharacters(withoutAttributes)).toEqual([]);
     });
+    it('deactivates, restores, purges and duplicates records that are off the card', async () => {
+        const {db, repository} = await setup();
+
+        await repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: 40, onCard: false});
+        await repository.saveLatest('s1', document(['h2']));
+        expect(await repository.listSceneCharacters('s1')).toEqual([expect.objectContaining({headingBlockId: 'h2'})]);
+        await repository.saveLatest('s1', document(['h1', 'h2']));
+        expect(await repository.listSceneCharacters('s1')).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                headingBlockId: 'h1',
+                arcValue: 40,
+                onCard: false,
+            }),
+        ]));
+
+        const copyId = await repository.duplicateScript('s1', {
+            title: 'Copy',
+            copyAttributes: true,
+            copySettings: true,
+        });
+
+        const copied = (await repository.getScriptPackageSource(copyId))?.sceneCharacters;
+
+        expect(copied).toEqual(expect.arrayContaining([expect.objectContaining({arcValue: 40, onCard: false})]));
+        await repository.saveLatest('s1', document(['h2']));
+        await repository.createScriptSnapshot('s1', {
+            id: 'snapshot',
+            kind: 'version',
+            name: 'First',
+            payload: new Blob(['snapshot']),
+            documentSchemaVersion: 4,
+            summaryMetadata: null,
+            attachmentStorageKeys: [],
+        });
+        expect((await db.select().from(scriptSceneCharacters)).filter(row => row.scriptId === 's1')).toEqual([expect.objectContaining({headingBlockId: 'h2'})]);
+    });
     it('keeps the card record when all script evidence leaves a surviving scene', async () => {
         const {repository} = await setup();
         const withCue: ScriptDocument = {

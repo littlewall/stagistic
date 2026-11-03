@@ -333,4 +333,46 @@ describe('runPgliteMigrations', {timeout: 20_000}, () => {
         expect(outbox.rows[0]?.payloadJson).toContain('"musicId":"music-1"');
         expect(oldTables.rows).toEqual([{cues: null, attachments: null}]);
     });
+
+    it('scales arc values to the continuous range and keeps existing records on the card', async () => {
+        const client = await createClient();
+
+        await applyMigrationsBefore(client, '20261103094608_scene_arc_range_on_card');
+        await client.exec('SET session_replication_role = replica');
+        await client.exec(
+            `INSERT INTO script_scene_characters (script_id, heading_block_id, character_id, note, arc_value, created_at, updated_at)
+             VALUES ('s', 'h', 'a', NULL, -3, 1, 1), ('s', 'h', 'b', NULL, 2, 1, 1), ('s', 'h', 'c', NULL, NULL, 1, 1)`,
+        );
+        await runPgliteMigrations(client);
+
+        const result = await client.query<{
+            character_id: string,
+            arc_value: number | null,
+            on_card: boolean,
+        }>(
+            'SELECT character_id, arc_value, on_card FROM script_scene_characters ORDER BY character_id',
+        );
+
+        expect(result.rows).toEqual([
+            {
+                character_id: 'a',
+                arc_value: -99,
+                on_card: true,
+            },
+            {
+                character_id: 'b',
+                arc_value: 66,
+                on_card: true,
+            },
+            {
+                character_id: 'c',
+                arc_value: null,
+                on_card: true,
+            },
+        ]);
+        await expect(client.exec(
+            `INSERT INTO script_scene_characters (script_id, heading_block_id, character_id, arc_value, created_at, updated_at)
+             VALUES ('s', 'h', 'd', 101, 1, 1)`,
+        )).rejects.toThrow();
+    });
 });

@@ -128,6 +128,14 @@ export {
     type BoardAddCharacterOption,
     type BoardAddCharacterProps,
 } from './board/BoardAddCharacter';
+export {
+    BoardArcs,
+    type BoardArcsAct,
+    type BoardArcsArc,
+    type BoardArcsPoint,
+    type BoardArcsProps,
+    type BoardArcsScene,
+} from './board/BoardArcs';
 export {type BoardFilterCharacter} from './board/BoardCharacterFilter';
 export {type BoardCharacterActions} from './board/BoardCharacterPopover';
 export {BoardEmpty, type BoardEmptyProps} from './board/BoardEmpty';

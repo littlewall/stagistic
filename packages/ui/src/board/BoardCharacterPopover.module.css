@@ -39,6 +39,11 @@
     white-space: nowrap;
 }
 
+.scene {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
 /* One keydown surface for the note and the footer, so Escape is caught anywhere inside. */
 .body {
     display: flex;

@@ -48,7 +48,11 @@ describe('scene metadata actions', () => {
             note: 'Waits',
         });
         await expect.poll(() => harness.store.characters.collection.get(characterKey('h1', 'c1'))?.createdAt).toBe(1_001);
-        expect(harness.repository.putSceneCharacter).toHaveBeenCalledWith('s1', 'h1', 'c1', {note: 'Waits', arcValue: null});
+        expect(harness.repository.putSceneCharacter).toHaveBeenCalledWith('s1', 'h1', 'c1', {
+            note: 'Waits',
+            arcValue: null,
+            onCard: true,
+        });
     });
 
     it('rolls a rejected note back to the last durable value', async () => {

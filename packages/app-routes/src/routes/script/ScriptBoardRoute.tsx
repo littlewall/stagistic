@@ -9,6 +9,7 @@ import {
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
+import {BoardArcsLens} from './board/BoardArcsLens';
 import {DEFAULT_BOARD_LENS_ID, isBoardLensId} from './board/boardLenses';
 import {BoardMatrixLens} from './board/BoardMatrixLens';
 import {BoardWall} from './board/BoardWall';
@@ -22,6 +23,7 @@ import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 const LENS_COMPONENTS: Record<string, React.ComponentType<{activeLensId: string, onSelectLens: (id: string) => void}>> = {
     wall: BoardWall,
     matrix: BoardMatrixLens,
+    arcs: BoardArcsLens,
 };
 
 const ScriptBoardPage = ({lensId}: {lensId: string}) => {

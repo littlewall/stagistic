@@ -68,6 +68,7 @@ export const createHarness = ({headings = ['h1']}: {headings?: string[]} = {}) =
                 characterId,
                 note: existing && input.note === undefined ? existing.note : input.note?.trim() || null,
                 arcValue: existing && input.arcValue === undefined ? existing.arcValue : input.arcValue ?? null,
+                onCard: input.onCard ?? existing?.onCard ?? true,
                 createdAt: existing?.createdAt ?? ++clock,
                 updatedAt: ++clock,
             };
@@ -104,6 +105,8 @@ export const createHarness = ({headings = ['h1']}: {headings?: string[]} = {}) =
         writeGate,
         store: getSceneMetadataStore(repository as unknown as ScriptRepository, 's1'),
         charactersSource,
+        /** Publishes a durable card record without going through the repository. */
+        seedCharacter: publishCharacter,
         synopsesSource,
         durableCharacters: () => characterRows,
     };

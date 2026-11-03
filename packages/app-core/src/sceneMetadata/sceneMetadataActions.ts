@@ -5,6 +5,7 @@ import {
     type ScriptSceneCharacter,
 } from '@stagistic/db';
 import {normalizeCharacterKey} from '@stagistic/script';
+import {ARC_VALUE_RANGE_MESSAGE, isArcValue} from '@stagistic/shared';
 
 import {getScriptCharactersStore} from '../characters/scriptCharactersStoreRegistry';
 import {getSceneMetadataStore} from './sceneMetadataStore';
@@ -20,10 +21,15 @@ export const createSceneMetadataActions = (repository: ScriptRepository, scriptI
     };
 
     return {
-        putSceneCharacter: async (headingBlockId: string, characterId: string, input: SceneCharacterInput): Promise<ScriptSceneCharacter | null> => {
+        putSceneCharacter: async (
+            headingBlockId: string,
+            characterId: string,
+            input: SceneCharacterInput,
+            hasEvidence = false,
+        ): Promise<ScriptSceneCharacter | null> => {
             guard();
 
-            return getSceneMetadataStore(repository, scriptId).putSceneCharacter(headingBlockId, characterId, input);
+            return getSceneMetadataStore(repository, scriptId).putSceneCharacter(headingBlockId, characterId, input, hasEvidence);
         },
         createSceneCharacter: async (headingBlockId: string, name: string) => {
             guard();
@@ -45,6 +51,18 @@ export const createSceneMetadataActions = (repository: ScriptRepository, scriptI
             guard();
 
             return getSceneMetadataStore(repository, scriptId).removeSceneCharacter(headingBlockId, characterId);
+        },
+        setArcPoint: async (headingBlockId: string, characterId: string, value: number): Promise<ScriptSceneCharacter | null> => {
+            guard();
+
+            if (!isArcValue(value)) throw new RangeError(ARC_VALUE_RANGE_MESSAGE);
+
+            return getSceneMetadataStore(repository, scriptId).setArcPoint(headingBlockId, characterId, value);
+        },
+        removeArcPoint: async (headingBlockId: string, characterId: string): Promise<void> => {
+            guard();
+
+            return getSceneMetadataStore(repository, scriptId).removeArcPoint(headingBlockId, characterId);
         },
         updateSceneSynopsis: async (headingBlockId: string, synopsis: string | null): Promise<boolean> => {
             guard();

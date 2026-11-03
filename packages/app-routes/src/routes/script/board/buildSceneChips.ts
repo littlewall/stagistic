@@ -9,12 +9,19 @@ import type {BoardCharacterChip} from '@stagistic/ui';
 /** Unique key for scenes before any act. */
 export const DEFAULT_ACT_KEY = '__default-act__';
 
-/** What the user put on a card: a character, optionally with a note. */
+/** What the user put on a card: a character, optionally with a note and an arc point. */
 export interface SceneCardRecord {
     headingBlockId: string,
     characterId: string,
     note: string | null,
+    /** The arc point's stored value; null when the record carries no point. */
+    arcValue?: number | null,
+    /** False for a record that only carries an arc point; absent means on the card. */
+    onCard?: boolean,
 }
+
+/** Records the card shows; those carrying only an arc point stay off Wall, Matrix and counts. */
+export const onCardRecords = (records: readonly SceneCardRecord[]) => records.filter(record => record.onCard !== false);
 
 /** The character's own color, else the one the editor shows for it. */
 export const resolveCharacterColor = (

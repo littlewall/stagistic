@@ -88,6 +88,20 @@ describe('snapshot payload', () => {
         expect(decoded.ok ? null : decoded.issues[0]?.code).toBe('unsupported_document_schema_version');
     });
 
+    it('rejects a scene character list of an unknown version, accepts a missing or v2 one', () => {
+        const withCharacters = (sceneCharacters: unknown) => decodeStepkgSnapshotPayload(encodeEnvelope({
+            format: 'stagistic-snapshot',
+            formatVersion: 1,
+            documentSchemaVersion: SCRIPT_DOCUMENT_SCHEMA_VERSION,
+            snapshot: {...snapshot, sceneCharacters},
+        }));
+
+        expect(withCharacters({version: 3, items: []}).ok).toBe(false);
+        expect(withCharacters({version: 1, items: []}).ok).toBe(false);
+        expect(withCharacters({items: []}).ok).toBe(true);
+        expect(withCharacters({version: 2, items: []}).ok).toBe(true);
+    });
+
     it('rejects bytes that are not a snapshot payload', () => {
         expect(decodeStepkgSnapshotPayload(new Uint8Array([
             1,

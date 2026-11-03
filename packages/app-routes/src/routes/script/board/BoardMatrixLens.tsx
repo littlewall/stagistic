@@ -3,7 +3,6 @@ import {
     BoardLayout,
     BoardMatrix,
     BoardSceneComposer,
-    BoardToolbar,
     Button,
 } from '@stagistic/ui';
 import {
@@ -16,7 +15,7 @@ import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {resolveBoardInsertionTarget} from './boardInsertionTargets';
-import {BOARD_LENSES} from './boardLenses';
+import {BoardLensToolbar} from './BoardLensToolbar';
 import {getSceneNumberFormat} from './boardSceneNumberFormat';
 import {buildMatrixView} from './buildMatrixView';
 import {useBoardLensData} from './useBoardLensData';
@@ -36,7 +35,7 @@ export const BoardMatrixLens = ({activeLensId, onSelectLens}: BoardMatrixLensPro
     const {
         source,
         model,
-        records,
+        cardRecords,
         metadata,
         selectedIds,
         setSelectedIds,
@@ -60,14 +59,14 @@ export const BoardMatrixLens = ({activeLensId, onSelectLens}: BoardMatrixLensPro
         characters: confirmedCharacterRecords,
         displayColorByKey: source.displayColorByKey,
         getStartPage: source.getStartPage,
-        records,
+        records: cardRecords,
         filterCharacters,
         selectedIds: new Set(selectedIds),
     }), [
         confirmedCharacterRecords,
         filterCharacters,
         model,
-        records,
+        cardRecords,
         selectedIds,
         source.displayColorByKey,
         source.getStartPage,
@@ -76,8 +75,7 @@ export const BoardMatrixLens = ({activeLensId, onSelectLens}: BoardMatrixLensPro
     return (
         <BoardLayout
             toolbar={(
-                <BoardToolbar
-                    lenses={BOARD_LENSES}
+                <BoardLensToolbar
                     activeLensId={activeLensId}
                     onSelectLens={onSelectLens}
                     filterCharacters={filterCharacters}

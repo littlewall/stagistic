@@ -41,12 +41,12 @@ it('keeps an optimistic outline until the source confirms a successful write', a
     expect(harness.store.synopses.collection.get('h1')?.synopsis).toBe('New');
 });
 
-it('restores a deleted card record and its arc when deletion fails', async () => {
+it('restores a deleted card record when deletion fails', async () => {
     const harness = createHarness();
 
     await prepare(harness);
     harness.writeGate.resolve();
-    await harness.actions.putSceneCharacter('h1', 'c1', {note: 'Durable', arcValue: 2});
+    await harness.actions.putSceneCharacter('h1', 'c1', {note: 'Durable'});
 
     const gate = deferred();
 
@@ -57,7 +57,7 @@ it('restores a deleted card record and its arc when deletion fails', async () =>
     expect(harness.store.characters.collection.size).toBe(0);
     gate.reject(new Error('delete failed'));
     await expect(removed).rejects.toThrow('delete failed');
-    expect(harness.store.characters.collection.get(characterKey('h1', 'c1'))).toMatchObject({note: 'Durable', arcValue: 2});
+    expect(harness.store.characters.collection.get(characterKey('h1', 'c1'))).toMatchObject({note: 'Durable'});
 });
 
 it('shows clearing an outline immediately and restores the durable text on failure', async () => {

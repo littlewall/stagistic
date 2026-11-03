@@ -1,6 +1,7 @@
 import {sql} from 'drizzle-orm';
 import {
     bigint,
+    boolean,
     check,
     index,
     integer,
@@ -20,6 +21,8 @@ export const scriptSceneCharacters = pgTable('script_scene_characters', {
     characterId: text('character_id').notNull().references(() => scriptCharacters.id, {onDelete: 'cascade'}),
     note: text('note'),
     arcValue: integer('arc_value'),
+    /** False when the record only carries an arc point and the card does not show the character. */
+    onCard: boolean('on_card').notNull().default(true),
     createdAt: bigint('created_at', {mode: 'number'}).notNull(),
     updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
 }, table => ({
@@ -29,7 +32,7 @@ export const scriptSceneCharacters = pgTable('script_scene_characters', {
         table.characterId,
     ]}),
     scriptIdIdx: index('script_scene_characters_script_id_idx').on(table.scriptId),
-    arcRange: check('script_scene_characters_arc_range', sql`${table.arcValue} BETWEEN -3 AND 3`),
+    arcRange: check('script_scene_characters_arc_range', sql`${table.arcValue} BETWEEN -100 AND 100`),
 }));
 
 /** Metadata held aside until the heading returns or a new state is saved. */

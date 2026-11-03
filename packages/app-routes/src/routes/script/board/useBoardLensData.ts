@@ -15,7 +15,10 @@ import {useWallMetadata, type WallSceneMetadata} from './useWallMetadata';
 interface UseBoardLensDataReturn {
     source: SceneBoardSource,
     model: ReturnType<typeof buildSceneBoardModel>,
+    /** Every card record, including those that only carry an arc point (Arcs). */
     records: readonly SceneCardRecord[],
+    /** The records the cards show: Wall, Matrix and the filter counts. */
+    cardRecords: readonly SceneCardRecord[],
     metadata: WallSceneMetadata | null,
     selectedIds: readonly string[],
     setSelectedIds: (ids: readonly string[]) => void,
@@ -67,12 +70,20 @@ export const useBoardLensData = (isReadOnly: boolean): UseBoardLensDataReturn =>
         return preferences.characterIds.filter(id => knownIds.has(id));
     }, [confirmedCharacterRecords, preferences.characterIds]);
 
+    const cardRecords = useMemo(() => {
+        const visibleKeys = new Set(model.acts.flatMap(act => act.scenes.flatMap(scene => {
+            return scene.characters.map(character => `${scene.headingBlockId}:${character.characterId}`);
+        })));
+
+        return records.filter(record => record.onCard !== false || visibleKeys.has(`${record.headingBlockId}:${record.characterId}`));
+    }, [records, model]);
+
     const filterCharacters = useMemo(
-        () => buildFilterCharacters(model, confirmedCharacterRecords, source.displayColorByKey, records),
+        () => buildFilterCharacters(model, confirmedCharacterRecords, source.displayColorByKey, cardRecords),
         [
+            cardRecords,
             confirmedCharacterRecords,
             model,
-            records,
             source.displayColorByKey,
         ],
     );
@@ -83,6 +94,7 @@ export const useBoardLensData = (isReadOnly: boolean): UseBoardLensDataReturn =>
         source,
         model,
         records,
+        cardRecords,
         metadata,
         selectedIds,
         setSelectedIds: (ids: readonly string[]) => setPreferences({...preferences, characterIds: [...ids]}),

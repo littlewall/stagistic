@@ -1,0 +1,207 @@
+/* The whole lens: act band, scene numbers, the chart and the legend, one column. */
+.arcs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+}
+
+/* Each act takes a share of the width proportional to its scene count, so its name centres
+ * over its own scenes. Names wrap by word instead of clipping; the band grows to fit the
+ * tallest act. */
+.chartArea {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.actBand {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    margin-bottom: var(--space-sm);
+}
+
+.act {
+    position: relative;
+    flex-basis: 0;
+    flex-grow: 1;
+    min-width: 0;
+    text-align: center;
+    overflow-wrap: break-word;
+}
+
+/* The inset sits on the text, so the act's own share is exactly its scenes' width and its
+ * edge lines up with the chart's act divider. */
+.actName {
+    display: block;
+    padding: 0 var(--space-sm);
+}
+
+/* One hairline between acts, on the act's edge. */
+.actDivider {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-border-subtle);
+}
+
+/* The scene numbers sit centred on their scenes, thinned to the labels that fit. */
+.sceneNumbers {
+    position: relative;
+    height: 1.25rem;
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.sceneNumber {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* The chart is bounded so it never takes the page; its baseline is the vertical centre. */
+.plot {
+    position: relative;
+    width: 100%;
+    height: clamp(240px, 50vh, 480px);
+}
+
+.svg {
+    display: block;
+}
+
+.baseline {
+    pointer-events: none;
+    stroke: var(--color-border-subtle);
+    stroke-width: 1px;
+}
+
+/* The legend: confirmed characters as buttons, color and name. */
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-xl);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.legendButton {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-sm);
+    align-items: center;
+    padding: var(--space-xs) var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+}
+
+.legendButton:hover,
+.legendButton[aria-checked = 'true'] {
+    background: var(--state-hover);
+}
+
+:global(:root[data-focus-ring-visible]) .legendButton:focus {
+    outline: var(--focus-ring);
+    outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* A compact floating card: identity and scene above the event sentence. */
+.tooltip {
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+    width: max-content;
+    max-width: min(22rem, calc(50% - var(--space-md)));
+    font-size: var(--font-size-sm);
+    overflow-wrap: anywhere;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-popover);
+}
+
+.tooltipHeader {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.tooltipCharacter {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+
+    & strong {
+        font-weight: var(--font-weight-semibold);
+    }
+}
+
+.tooltipScene {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.tooltipNote {
+    margin: 0;
+    padding: var(--space-sm) var(--space-md);
+    white-space: pre-wrap;
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+/* Baseline hit areas add points; the scene stops retain keyboard editing. */
+.column {
+    cursor: crosshair;
+    outline: none;
+    fill: transparent;
+}
+
+/* The keyboard ring marks the focused stop's point, or its spot on the baseline, not the column. */
+.stopRing {
+    pointer-events: none;
+    fill: none;
+    stroke: transparent;
+    stroke-width: var(--focus-ring-width);
+}
+
+:global(:root[data-focus-ring-visible]) .column:focus + .stopRing {
+    stroke: var(--color-focus-ring);
+}
+
+.editablePoint {
+    touch-action: none;
+    cursor: ns-resize;
+}
+
+.ghost {
+    pointer-events: none;
+}
+
+.ghostLabel {
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-xs);
+    dominant-baseline: middle;
+    fill: var(--color-text-muted);
+}
+
+/* An invisible anchor the point's popover opens from. */
+.popoverAnchor {
+    pointer-events: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    opacity: 0;
+}

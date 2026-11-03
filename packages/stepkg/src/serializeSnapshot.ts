@@ -2,6 +2,7 @@ import {serializeStagistic} from '@stagistic/script';
 
 import {STEPKG_DOCUMENT_PATH, STEPKG_TEXT_PATH} from './constants';
 import type {StepkgEntry, StepkgSnapshot} from './contracts';
+import {serializeSceneCharacters} from './sceneCharacters';
 import {stableJsonBytes} from './stableJson';
 
 const jsonEntry = (path: string, value: unknown): StepkgEntry => ({
@@ -34,5 +35,5 @@ export const serializeStepkgContent = (snapshot: StepkgSnapshot): StepkgEntry[] 
     jsonEntry('data/music.json', snapshot.music),
     jsonEntry('data/scenes.json', snapshot.scenes),
     jsonEntry('data/comments.json', snapshot.comments),
-    jsonEntry('data/scene-characters.json', snapshot.sceneCharacters),
+    jsonEntry('data/scene-characters.json', serializeSceneCharacters(snapshot.sceneCharacters.items)),
 ];

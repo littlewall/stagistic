@@ -44,11 +44,16 @@ const createSceneMetadataStore = (repository: ScriptRepository, scriptId: string
         getKey: row => sceneCharacterKey(row.headingBlockId, row.characterId),
         handlers: {
             // The durable row returns with server timestamps; it is what confirmation compares against.
-            insert: record => saveCharacter(record.headingBlockId, record.characterId, {note: record.note, arcValue: record.arcValue}),
+            insert: record => saveCharacter(record.headingBlockId, record.characterId, {
+                note: record.note,
+                arcValue: record.arcValue,
+                onCard: record.onCard,
+            }),
             update: async (_original, modified, changes) => {
                 await saveCharacter(modified.headingBlockId, modified.characterId, {
                     ...changes.note !== undefined ? {note: modified.note} : {},
                     ...changes.arcValue !== undefined ? {arcValue: modified.arcValue} : {},
+                    ...changes.onCard !== undefined ? {onCard: modified.onCard} : {},
                 });
             },
             delete: record => repository.removeSceneCharacter(scriptId, record.headingBlockId, record.characterId),
@@ -70,52 +75,114 @@ const createSceneMetadataStore = (repository: ScriptRepository, scriptId: string
 
         return durable ? toDomainCollectionValue(durable) : null;
     };
-    const putSceneCharacter = async (headingBlockId: string, characterId: string, input: SceneCharacterInput) => {
-        const key = sceneCharacterKey(headingBlockId, characterId);
-        const existing = characters.collection.get(key);
-        const note = input.note === undefined ? undefined : normalizeNote(input.note);
+    /*
+     * The record rules live here, not in the UI. A record is a card entry (`onCard`), an arc
+     * point, or both; a record with neither a point nor a note on the card is deleted.
+     */
+    const insertRecord = async (
+        key: string,
+        record: Pick<ScriptSceneCharacter, 'headingBlockId' | 'characterId' | 'note' | 'arcValue' | 'onCard'>,
+    ) => {
+        const now = Date.now();
 
-        if (!existing) {
-            const now = Date.now();
-
-            const transaction = characters.collection.insert({
-                scriptId,
-                headingBlockId,
-                characterId,
-                note: note ?? null,
-                arcValue: input.arcValue ?? null,
-                // Placeholders until the durable row returns: confirmation compares that row, not these.
-                createdAt: now,
-                updatedAt: now,
-            });
-
-            await transaction.isPersisted.promise;
-
-            return durableCharacter(key);
-        }
-
-        if (note === undefined && input.arcValue === undefined) {
-            return Promise.resolve(toDomainCollectionValue(existing));
-        }
-
-        const transaction = characters.collection.update(key, draft => {
-            if (note !== undefined) draft.note = note;
-
-            if (input.arcValue !== undefined) draft.arcValue = input.arcValue;
+        const transaction = characters.collection.insert({
+            scriptId,
+            ...record,
+            // Placeholders until the durable row returns: confirmation compares that row, not these.
+            createdAt: now,
+            updatedAt: now,
         });
 
         await transaction.isPersisted.promise;
 
         return durableCharacter(key);
     };
-    const removeSceneCharacter = async (headingBlockId: string, characterId: string) => {
-        const key = sceneCharacterKey(headingBlockId, characterId);
+    const updateRecord = async (key: string, change: Partial<Pick<ScriptSceneCharacter, 'note' | 'arcValue' | 'onCard'>>) => {
+        const transaction = characters.collection.update(key, draft => {
+            Object.assign(draft, change);
+        });
 
-        if (!characters.collection.has(key)) return Promise.resolve();
+        await transaction.isPersisted.promise;
 
+        return durableCharacter(key);
+    };
+    const deleteRecord = async (key: string) => {
         const transaction = characters.collection.delete(key);
 
         await transaction.isPersisted.promise;
+    };
+    /** Explicit additions join the card; notes join it only without script evidence. */
+    const putSceneCharacter = async (headingBlockId: string, characterId: string, input: SceneCharacterInput, hasEvidence = false) => {
+        const key = sceneCharacterKey(headingBlockId, characterId);
+        const existing = characters.collection.get(key);
+        const note = input.note === undefined ? undefined : normalizeNote(input.note);
+        const onCard = note !== undefined && hasEvidence ? existing?.onCard ?? false : true;
+
+        if (!existing) {
+            return insertRecord(key, {
+                headingBlockId,
+                characterId,
+                note: note ?? null,
+                arcValue: input.arcValue ?? null,
+                onCard,
+            });
+        }
+
+        if (note === undefined && input.arcValue === undefined && existing.onCard) {
+            return Promise.resolve(toDomainCollectionValue(existing));
+        }
+
+        return updateRecord(key, {
+            onCard,
+            ...note !== undefined ? {note} : {},
+            ...input.arcValue !== undefined ? {arcValue: input.arcValue} : {},
+        });
+    };
+    /** "Remove from card": a point survives off the card without its note; a record without a point is deleted. */
+    const removeSceneCharacter = async (headingBlockId: string, characterId: string) => {
+        const key = sceneCharacterKey(headingBlockId, characterId);
+        const existing = characters.collection.get(key);
+
+        if (!existing) return Promise.resolve();
+
+        if (existing.arcValue !== null) {
+            await updateRecord(key, {onCard: false, note: null});
+
+            return;
+        }
+
+        await deleteRecord(key);
+    };
+    /** A point without a record creates one off the card; an existing record keeps its card state. */
+    const setArcPoint = async (headingBlockId: string, characterId: string, value: number) => {
+        const key = sceneCharacterKey(headingBlockId, characterId);
+
+        if (!characters.collection.has(key)) {
+            return insertRecord(key, {
+                headingBlockId,
+                characterId,
+                note: null,
+                arcValue: value,
+                onCard: false,
+            });
+        }
+
+        return updateRecord(key, {arcValue: value});
+    };
+    /** A record that is off the card and has no note has nothing left to say and is deleted. */
+    const removeArcPoint = async (headingBlockId: string, characterId: string) => {
+        const key = sceneCharacterKey(headingBlockId, characterId);
+        const existing = characters.collection.get(key);
+
+        if (!existing) return;
+
+        if (!existing.onCard && !existing.note) {
+            await deleteRecord(key);
+
+            return;
+        }
+
+        await updateRecord(key, {arcValue: null});
     };
     const updateSceneSynopsis = async (headingBlockId: string, synopsis: string | null) => {
         const value = normalizeSynopsis(synopsis);
@@ -135,6 +202,8 @@ const createSceneMetadataStore = (repository: ScriptRepository, scriptId: string
         synopses,
         putSceneCharacter,
         removeSceneCharacter,
+        setArcPoint,
+        removeArcPoint,
         updateSceneSynopsis,
     };
 };

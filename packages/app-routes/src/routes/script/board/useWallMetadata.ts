@@ -21,6 +21,9 @@ export interface WallSceneMetadata {
     /** Whether a typed name is free to become a new character. */
     canCreateCharacter: (name: string) => boolean,
     createCharacter: (headingBlockId: string, name: string) => void,
+    /** Arcs: puts the character's point in the scene at a whole value from -100 to 100. */
+    setArcPoint: (headingBlockId: string, characterId: string, value: number) => void,
+    removeArcPoint: (headingBlockId: string, characterId: string) => void,
 }
 
 const ignore = (promise: Promise<unknown>) => {
@@ -67,8 +70,8 @@ export const useWallMetadata = (displayColorByKey: ReadonlyMap<string, string>) 
         };
         const arcOf = (headingBlockId: string, characterId: string) => sceneCharacters
             .find(row => row.headingBlockId === headingBlockId && row.characterId === characterId)?.arcValue ?? null;
-        const put = (headingBlockId: string, characterId: string, note?: string | null) => save(
-            () => actions.putSceneCharacter(headingBlockId, characterId, note === undefined ? {} : {note}),
+        const put = (headingBlockId: string, characterId: string, note?: string | null, hasEvidence = false) => save(
+            () => actions.putSceneCharacter(headingBlockId, characterId, note === undefined ? {} : {note}, hasEvidence),
         );
 
         return {
@@ -83,7 +86,7 @@ export const useWallMetadata = (displayColorByKey: ReadonlyMap<string, string>) 
 
                         save(() => actions.removeSceneCharacter(headingBlockId, characterId));
                     } else {
-                        put(headingBlockId, chip.characterId, note);
+                        put(headingBlockId, chip.characterId, note, chip.source === 'script');
                     }
                 },
                 onRemove: chip => {
@@ -93,6 +96,8 @@ export const useWallMetadata = (displayColorByKey: ReadonlyMap<string, string>) 
                 },
                 onConfirm: chip => save(() => confirm(chip.name)),
             }),
+            setArcPoint: (headingBlockId, characterId, value) => save(() => actions.setArcPoint(headingBlockId, characterId, value)),
+            removeArcPoint: (headingBlockId, characterId) => save(() => actions.removeArcPoint(headingBlockId, characterId)),
             addCharacter: (headingBlockId, characterId) => put(headingBlockId, characterId),
             canCreateCharacter: name => {
                 const key = normalizeCharacterKey(name);

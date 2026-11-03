@@ -34,9 +34,10 @@ Jiné bloky (`note`, `dialogue`, `lyrics`, `aside`) se nepočítají. Úroveň �
 Záznam na dvojici scene heading × postava existuje, když uživatel postavu na kartu přidal nebo jí napsal větu:
 
 - `note`: jedna věta (posun nebo motivace postavy ve scéně), nebo prázdné;
-- `arcValue`: celé číslo −3 až +3, nebo prázdné (pro Arcs).
+- `arcValue`: celé číslo −100 až +100, nebo prázdné (pro Arcs);
+- `onCard`: zda je postava na kartě. Záznam s `onCard = false` nese jen bod oblouku; napsání věty nebo přidání postavy na kartu ho nastaví na `true`, „Remove from card“ u postavy s bodem ho vrátí na `false` (věta se smaže), smazání bodu záznam bez karty a věty odstraní. (Upřesněno 3. 11. 2026.)
 
-Existence záznamu znamená „postava je na kartě“. Záznam nezávisí na scénáři: když uživatel postavu ze scény ve scénáři smaže, záznam i věta zůstanou. Udržovat je aktuální je na uživateli; Board jen ukáže rozdíl.
+Záznam s `onCard = true` znamená „postava je na kartě“. Záznam nezávisí na scénáři: když uživatel postavu ze scény ve scénáři smaže, záznam i věta zůstanou. Udržovat je aktuální je na uživateli; Board jen ukáže rozdíl.
 
 ### Výsledné zobrazení
 
@@ -113,17 +114,20 @@ Mockup: lišta s menu, schválená 2026-10-27.
 
 ## Arcs
 
-- Osa X jsou scény se stejnými rozestupy a nenápadnými svislými předěly mezi akty. Osa Y je obecné „lépe ↑ / hůře ↓“ se 7 úrovněmi (−3 až +3), na které se body přichytávají.
-- Jedna čára na postavu v její barvě. Čára spojuje sousední body postavy přes scény bez bodu.
-- **Aktivní postava**: vždy právě jedna, vybraná v legendě.
-  - Aktivní čára je plná a silnější, ostatní ztlumené a needitovatelné.
-  - Při najetí do grafu se ukáže „duch“ bodu v barvě aktivní postavy se jménem u kurzoru, přichycený na úroveň.
-  - Klik do sloupce scény přidá bod, tah ho posune, smazat ho jde z popoveru nebo klávesou Delete.
-  - Klik na ztlumenou čáru nebo bod přepne aktivní postavu.
-- Bod ve scéně, kde postava není přítomná, je dutý (změna mimo scénu).
-- Hover ukáže postavu, scénu, hodnotu a větu ze Wall.
-- Klávesnice: šipky nahoru/dolů mění hodnotu, doleva/doprava přesouvají fokus mezi scénami, výběr aktivní postavy jde přes legendu.
-- Legenda zároveň slouží jako filtr zobrazených postav.
+- Osa X má vždy stejnou šířku (bez vodorovného posunu), scény jsou na ní rozložené rovnoměrně a mezi akty jsou nenápadné svislé předěly. Názvy aktů jsou vycentrované nad svými scénami a nikdy se neořízne (zalomí se po slovech). Čísla scén se při velké hustotě řídnou, aby se nepřekrývala.
+- Osa Y má jen základní linku (baseline): nad ní je postavě lépe, pod ní hůře. Hodnota je plynulá (−100 až +100, symetricky), bez kroků a bez čísel v UI. Výška grafu `clamp(240px, 50vh, 480px)`.
+- Jen potvrzené postavy. Jedna křivka na postavu v její barvě, monotónní (nepřestřelí sousední body), spojuje sousední body přes scény bez bodu.
+- **Přehled a aktivní postava**: Arcs se vždy otevře jako přehled bez aktivní postavy. Klik na položku legendy, křivku nebo bod postavu aktivuje; nový klik na aktivní položku nebo Escape vrátí přehled.
+  - Aktivní křivka je plná a silnější, ostatní ztlumené a needitovatelné.
+  - Při najetí do grafu se ukáže „duch“ bodu v barvě aktivní postavy se jménem u kurzoru.
+  - Klik do sloupce scény přidá bod (nebo existující přesune), tah ho posune, Escape tah zruší. Klik na bod otevře popover Wall s „Remove point“; smazat jde i klávesou Delete.
+- Arc každé postavy vede od první do poslední scény; na začátku a konci je výchozí kotva na baseline (0), kterou bod uživatele nahradí (tah kotvy bod vytvoří). Postava bez bodů je rovná čára na baseline.
+- Body přidává jen uživatel, v kterékoli scéně, i když v ní postava není (může ji zasáhnout dění jiných postav). Bod ve scéně s dokladem ve scénáři je ●, bez dokladu ◇. Ve scéně s dokladem bez bodu je na křivce drobná tečka. Bod postavu na kartu nepřidá; napsání věty ano, jen postavě bez dokladu ve scénáři. Popover bodu u postavy mimo scénu říká „Not in this scene“.
+- Hover ukáže postavu, „Scene: N. Title“ a větu ze Wall. Čtečka čte hodnotu slovně („slightly/clearly/much better/worse“, „neutral“).
+- Klávesnice: graf je jeden tab stop; doleva/doprava mezi scénami, nahoru/dolů ±10 (Shift ±1, ve scéně bez bodu založí bod na baseline), Enter popover, Delete smaže. Aktivní postava se vybírá v legendě.
+- Legenda ukáže postavy vybrané společným filtrem v pořadí řádků Matrixu; filtr zůstává v liště.
+- Body nejsou v undo historii dokumentu. Board snapshotu nebo verze: jen zvýraznění postavy.
+- (Upřesněno 3. 11. 2026.)
 
 ## Numbers
 
@@ -164,7 +168,7 @@ Návrh, který plán ověří:
 - **Deaktivovaná metadata scén**: projekce dnes řádky zmizelých scén maže i se synopsí, barvou a místy. Nová tabulka `script_detached_scenes` (`script_id`, `heading_block_id`, `synopsis`, `color_hex`, `location_ids`, `detached_at`) je při zmizení scény převezme a při návratu headingu se stejným ID vrátí.
 - **Úklid**: vytvoření draftu nebo verze (včetně záložního draftu při obnovení) smaže neaktivní záznamy postav i řádky `script_detached_scenes` daného skriptu. Snapshot obsahuje jen aktivní data.
 - Po změně schématu spustit `moon run db:db-compile-migrations`.
-- **Stepkg**: nová volitelná sekce `data/scene-characters.json` (`sceneCharacters.v1`), jen aktivní záznamy. Import starších balíčků bez sekce funguje. Remap ID bloků a postav ji zahrnuje. Duplikace skriptu ji kopíruje.
+- **Stepkg**: nová volitelná sekce `data/scene-characters.json` (`sceneCharacters.v2`; import čte i v1: `arcValue ×33`, `onCard = true`), jen aktivní záznamy. Import starších balíčků bez sekce funguje. Remap ID bloků a postav ji zahrnuje. Duplikace skriptu ji kopíruje.
 - **Undo**: změny metadat (outline, věty) nejsou v historii dokumentu; v poli platí Escape a vlastní undo prohlížeče.
 
 ## Rizika

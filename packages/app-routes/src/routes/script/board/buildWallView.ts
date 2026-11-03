@@ -38,7 +38,7 @@ export interface WallViewInput {
     characters: readonly ScriptCharacterRecord[],
     displayColorByKey: ReadonlyMap<string, string>,
     getStartPage: (headingBlockId: string) => number | null,
-    /** Card records in the order they were added. */
+    /** Card records (already limited to those on the card) in the order they were added. */
     records?: readonly SceneCardRecord[],
     synopsisByScene?: ReadonlyMap<string, string | null>,
     /** Filtered characters; empty filters nothing. */
