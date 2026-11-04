@@ -26,12 +26,9 @@ export interface BoardCharacterActions {
 }
 
 const STATE_LABEL: Record<BoardCharacterChip['source'], string> = {
-    script: 'In the scene',
-    card: 'Only on this card',
+    script: 'In scene',
+    card: 'Not in scene',
 };
-
-/** A point the character has without being on the card: writing a sentence puts them there. */
-const OFF_CARD_LABEL = 'Not in this scene';
 
 const toNote = (text: string) => text.trim() || null;
 
@@ -43,12 +40,10 @@ const NoteField = ({
     chip,
     actions,
     close,
-    isOffCard,
 }: {
     chip: BoardCharacterChip,
     actions: BoardCharacterActions,
     close: () => void,
-    isOffCard: boolean,
 }) => {
     const [draft, setDraft] = useState(chip.note ?? '');
     const latest = useRef({
@@ -112,7 +107,7 @@ const NoteField = ({
                 onKeyDown={onKeyDown}
             />
             <div className={styles.footer}>
-                {chip.source === 'card' && !isOffCard && actions.onRemove ? (
+                {chip.source === 'card' && actions.onRemove ? (
                     <Button variant="ghost" size="xs" onPress={() => settle(() => actions.onRemove?.(chip))}>
                         Remove from card
                     </Button>
@@ -122,7 +117,7 @@ const NoteField = ({
                         Remove point
                     </Button>
                 ) : null}
-                {chip.source === 'script' && chip.note ? (
+                {chip.note ? (
                     <Button variant="ghost" size="xs" onPress={() => settle(() => actions.onNoteCommit(chip, null))}>
                         Clear note
                     </Button>
@@ -138,7 +133,6 @@ export const BoardCharacterPopover = ({
     actions,
     isOpen,
     onOpenChange,
-    isOffCard = false,
     sceneLabel,
     children,
 }: {
@@ -147,8 +141,6 @@ export const BoardCharacterPopover = ({
     /** Controlled open state, e.g. to open the popover of a cell the route just filled. */
     isOpen?: boolean,
     onOpenChange?: (open: boolean) => void,
-    /** Arcs: the character has a point here but is not on the card. */
-    isOffCard?: boolean,
     /** Arcs: names the scene, which the Wall and Matrix already show around the popover. */
     sceneLabel?: string,
     /** The pressable trigger. */
@@ -163,10 +155,10 @@ export const BoardCharacterPopover = ({
                         <div className={styles.header}>
                             <CharacterDot chip={{...chip, isDimmed: false}} />
                             <span className={styles.name}>{chip.name}</span>
-                            <span className={styles.state}>{chip.characterId ? isOffCard ? OFF_CARD_LABEL : STATE_LABEL[chip.source] : 'Not confirmed'}</span>
+                            <span className={styles.state}>{chip.characterId ? STATE_LABEL[chip.source] : 'Not confirmed'}</span>
                         </div>
                         {sceneLabel ? <span className={styles.scene}>{sceneLabel}</span> : null}
-                        {chip.characterId ? <NoteField chip={chip} actions={actions} close={close} isOffCard={isOffCard} /> : (
+                        {chip.characterId ? <NoteField chip={chip} actions={actions} close={close} /> : (
                             <div className={styles.footer}>
                                 <Button
                                     variant="secondary"

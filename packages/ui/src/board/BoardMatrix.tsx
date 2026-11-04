@@ -13,7 +13,7 @@ import {
 } from 'react';
 
 import {Text} from '../primitives/Text/Text';
-import {type BoardCharacterChip} from './BoardCharacterDot';
+import {type BoardCharacterChip, SCENE_STATE_TEXT} from './BoardCharacterDot';
 import {type BoardCharacterActions} from './BoardCharacterPopover';
 import styles from './BoardMatrix.module.css';
 import {ColorDot} from './ColorDot';
@@ -27,7 +27,7 @@ export type BoardMatrixCellKind = 'note' | 'script' | 'card' | 'empty';
 
 export interface BoardMatrixCell {
     kind: BoardMatrixCellKind,
-    /** Null when the character is not in the scene; otherwise it feeds the shared popover. */
+    /** Null when the character is not on the scene's card; otherwise it feeds the shared popover. */
     chip: BoardCharacterChip | null,
 }
 
@@ -76,10 +76,10 @@ export interface BoardMatrixProps {
 }
 
 const CELL_STATE: Record<BoardMatrixCellKind, (cell: BoardMatrixCell) => string> = {
-    note: cell => `note: ${cell.chip?.note ?? ''}`,
-    script: () => 'in the scene',
-    card: () => 'only on the card',
-    empty: () => 'not in the scene',
+    note: cell => `note: ${cell.chip?.note ?? ''}${cell.chip ? ` (${SCENE_STATE_TEXT[cell.chip.source]})` : ''}`,
+    script: () => SCENE_STATE_TEXT.script,
+    card: () => SCENE_STATE_TEXT.card,
+    empty: () => 'not on the card',
 };
 
 const sceneCountText = (count: number) => `${count} ${count === 1 ? 'scene' : 'scenes'}`;
@@ -233,14 +233,14 @@ export const BoardMatrix = ({
         return `${row.name}, ${column.title}: ${CELL_STATE[cell.kind](cell)}${unconfirmedSuffix}`;
     };
 
-    /* The tooltip names the scene (with the script's own numbering), never the character. */
+    /* The tooltip gives the cell's state and names the scene (with the script's own numbering), never the character. */
     const cellTooltip = (cell: BoardMatrixCell, column: BoardMatrixSceneColumn) => {
         const number = formatSceneNumber(column.number, sceneNumberFormat);
         const sceneLine = `Scene: ${number === '' ? '' : `${number} `}${column.title}`;
 
         return (
             <>
-                {cell.kind === 'note' && cell.chip?.note ? <span className={styles.tooltipLine}>{cell.chip.note}</span> : null}
+                <span className={styles.tooltipLine}>{CELL_STATE[cell.kind](cell)}</span>
                 <span className={styles.tooltipLine}>{sceneLine}</span>
             </>
         );

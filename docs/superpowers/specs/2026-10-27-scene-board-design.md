@@ -5,7 +5,7 @@ Nový pohled skriptu vedle Editoru a Exportu. Digitální obdoba autorovy zdi: s
 ## Cíl a hranice
 
 - Přepínač pohledů v hlavičce: **Editor · Board · Export**. Cesta `/script/:scriptId/board/:lens`, výchozí lens `wall`. Totéž pod `/snapshots/:snapshotId` jen pro čtení.
-- Board má čtyři pohledy (lens): **Wall · Matrix · Arcs · Numbers**.
+- Board má čtyři pohledy (lens): **Wall · Matrix · Arcs · Rundown**.
 - Akty a scény se vždy odvozují ze scénáře (`buildScriptStructureOutline`). Board nemá vlastní seznam scén. Přidat scénu na boardu = vložit scene heading do scénáře.
 - Uživatelská metadata (outline scény, věty postav, ruční přítomnost, hodnoty oblouků) jsou v DB a navázaná na identitu scény. `SCRIPT_DOCUMENT_SCHEMA_VERSION` se nemění.
 - Mimo rozsah: French scenes, samotné mazání scén na boardu (board jen přenese do editoru), přesun aktů, oblouky dějových linií (jen postavy), skupiny postav jako samostatné položky, tisk a export boardu.
@@ -31,11 +31,11 @@ Jiné bloky (`note`, `dialogue`, `lyrics`, `aside`) se nepočítají. Úroveň �
 
 ### Záznam na kartě (DB)
 
-Záznam na dvojici scene heading × postava existuje, když uživatel postavu na kartu přidal nebo jí napsal větu:
+Záznam na dvojici scene heading × postava existuje, když uživatel postavu na kartu přidal, nastavil jí bod oblouku nebo jí napsal větu:
 
 - `note`: jedna věta (posun nebo motivace postavy ve scéně), nebo prázdné;
 - `arcValue`: celé číslo −100 až +100, nebo prázdné (pro Arcs);
-- `onCard`: zda je postava na kartě. Záznam s `onCard = false` nese jen bod oblouku; napsání věty nebo přidání postavy na kartu ho nastaví na `true`, „Remove from card“ u postavy s bodem ho vrátí na `false` (věta se smaže), smazání bodu záznam bez karty a věty odstraní. (Upřesněno 3. 11. 2026.)
+- `onCard`: zda je postava na kartě. Bod oblouku postavu vždy dá na kartu: `setArcPoint` nastaví `true`. Věta bez uložené hodnoty je v Arcs bod na baseline. „Remove from card“ smaže celý záznam včetně bodu a věty, smazání bodu smaže záznam bez věty a u záznamu s větou smaže jen hodnotu. `onCard = false` se zapíše také u první věty postavě, která má doklad ve scénáři; záznam se pak čte jako na kartě, dokud má větu nebo bod. Když doklad zmizí, věta tak zůstane na kartě a kolečko je prázdné. Starší záznamy s `onCard = false` a bodem se počítají jako na kartě. (Upřesněno 4. 11. 2026.)
 
 Záznam s `onCard = true` znamená „postava je na kartě“. Záznam nezávisí na scénáři: když uživatel postavu ze scény ve scénáři smaže, záznam i věta zůstanou. Udržovat je aktuální je na uživateli; Board jen ukáže rozdíl.
 
@@ -49,7 +49,7 @@ Záznam s `onCard = true` znamená „postava je na kartě“. Záznam nezávis�
 
 - Postavu s dokladem ve scénáři z karty odebrat nejde; jde jen smazat její věta (a oblouk). Postavu bez dokladu jde z karty odebrat (smaže záznam).
 - Nepotvrzené postavy (klíč bez záznamu v katalogu) se zobrazí neutrálně, bez editace. Potvrdit je jde přímo z čipu.
-- Board pracuje jen s jednotlivými postavami; skupiny se nezobrazují na Wall, v Matrix, v Arcs ani v Numbers.
+- Board pracuje jen s jednotlivými postavami; skupiny se nezobrazují na Wall, v Matrix, v Arcs ani v Rundown.
 - Pořadí na kartě: postavy s větou podle první repliky ve scéně (bez repliky na konec), pak stack ostatních ve scénáři, pak ostatní jen na kartě.
 - Filtr postav počítá i postavy jen na kartě.
 
@@ -71,8 +71,8 @@ Záznamy (věty, outline, barva, místa) visí na ID scene headingu:
 - **Přejmenování na místě** (akt i scéna): text se stane editovatelným tam, kde stojí (contenteditable, jen prostý text na jednom řádku), takže se nic neposune. Editaci ukazuje jemné podbarvení. Enter i opuštění pole uloží, Escape vrátí původní název. Mezera na začátku ani dvojitá mezera se nenapíše. Prázdný název scény se nepřijme.
 - **Karta scény**:
   - číslo scény, název (text scene headingu, přejmenování na místě), počáteční strana „p. 12“ (dokud strana není známá, nezobrazí se nic);
-  - outline (= `script_scenes.synopsis`), víceřádková editace na místě (Enter = nový řádek, uloží opuštění pole nebo Cmd/Ctrl+Enter, Escape zruší). Prázdný outline drží jeden řádek a „Add scene outline“ ukáže jen při hoveru nebo fokusu karty;
-  - postavy podle modelu výše: postavy s větou jako řádky (barevná linka vlevo, jméno, věta; u postavy jen na kartě čárkovaná linka), ostatní jako kolečka (plné ve scénáři, prázdné jen na kartě). Na editovatelném Boardu je každé kolečko samostatné tlačítko, kolečka se proto nepřekrývají; read-only Board má jedno tlačítko se jmény. Klik na kolečko nebo řádek otevře popover: věta (uloží se zavřením popoveru i kliknutím mimo nebo Cmd/Ctrl+Enter, Escape zahodí), „Remove from card“ jen pro postavu bez dokladu, „Clear note“ pro postavu ve scénáři s větou (bez oblouku se záznam smaže celý), u nepotvrzené postavy jen „Confirm character“;
+  - outline (= `script_scenes.synopsis`), víceřádková editace na místě (Enter = nový řádek, uloží opuštění pole nebo Cmd/Ctrl+Enter, Escape zruší). Prázdný outline drží jeden řádek a výzva „Add scene outline“ je vidět vždy, světlou barvou;
+  - postavy podle modelu výše: postavy s větou jako řádky (hlavička s kolečkem postavy, jménem a stavem „in scene“ / „not in scene“, vpravo tlačítko × „Clear note“; pod ní věta, kterou jde upravit přímo na místě), ostatní jako kolečka (plné ve scénáři, prázdné jen na kartě). Na editovatelném Boardu je každé kolečko samostatné tlačítko, kolečka se proto nepřekrývají; read-only Board má jedno tlačítko se jmény. Klik na kolečko nebo řádek otevře popover: věta (uloží se zavřením popoveru i kliknutím mimo nebo Cmd/Ctrl+Enter, Escape zahodí), „Remove from card“ jen pro postavu bez dokladu, „Clear note“ pro každou postavu s větou, u nepotvrzené postavy jen „Confirm character“;
   - přidání postavy: nenápadné „+“ za kolečky (viditelné při hoveru nebo fokusu karty) otevře hledání s potvrzenými postavami, které na kartě nejsou; psaní zaměří první shodu. Neznámé jméno nabídne „Create “NAME”“; jméno, které už má postava nebo skupina, ne. Nová postava nemá uloženou barvu, dostane barvu z palety editoru odvozenou z ID (stejně jako každá potvrzená postava bez barvy);
   - akce „Open in Editor“ skočí na scene heading v editoru;
   - menu karty nic nemaže ani nezakládá: smazání scény se děje v editoru, kde autor vidí celý obsah scény, akty mají vlastní tlačítka a menu. („Start new act here“ i „Delete scene…“ z menu karty odebrány na přání uživatele 30. 10. 2026; dříve „Delete scene…“ jen přepínala do editoru.)
@@ -85,7 +85,7 @@ Záznamy (věty, outline, barva, místa) visí na ID scene headingu:
 
 Mockup: lišta s menu, schválená 2026-10-27.
 
-- Jeden řádek pod hlavičkou aplikace, oddělený hairline. Vlevo záložky pohledů (Wall · Matrix · Arcs · Numbers), aktuální má ink podtržení (navigace, ne výběr). Zobrazují se jen hotové pohledy.
+- Jeden řádek pod hlavičkou aplikace, oddělený hairline. Vlevo záložky pohledů (Wall · Matrix · Arcs · Rundown), aktuální má ink podtržení (navigace, ne výběr). Zobrazují se jen hotové pohledy.
 - Vpravo dvě tlačítka: **filtr postav** a **View**.
 - **Filtr postav**, stavy tlačítka:
   - nic nevybráno: „Characters ▾“;
@@ -99,7 +99,7 @@ Mockup: lišta s menu, schválená 2026-10-27.
 ## Matrix
 
 - Řádky jsou postavy (pořadí podle prvního výskytu jako ve filtru), sloupce scény s nenápadným oddělením aktů. Potvrzené postavy bez scény jsou na konci jako prázdné řádky; nepotvrzené postavy jsou šedé řádky, jejich buňka nabízí jen „Confirm character“.
-- Buňka: ■ s větou (plná barva), ● ve scénáři, ○ jen na kartě (bez dokladu ve scénáři, obrys v barvě postavy), prázdná buňka = postava ve scéně není.
+- Buňka: ■ s větou (plná barva), ● ve scénáři, ○ jen na kartě (bez dokladu ve scénáři, obrys v barvě postavy), prázdná buňka = postava není na kartě („not on the card“). Tooltip i název buňky říkají stav slovy („in scene“, „not in scene“, „not on the card“); u buňky s větou „note: text (in scene)“.
 - Hover ukáže větu, u buňky bez věty jméno postavy a název scény. Klik na obsazenou buňku otevře stejný popover jako čip na Wall. Klik na prázdnou buňku postavu hned přidá na kartu (○) a otevře popover; zavření bez věty ji na kartě nechá.
 - V hlavičce řádku je jméno, barva a počet scén. Hlavička sloupce ukáže číslo scény, název a strana jsou v tooltipu; klik na ni nic nedělá. Nad sloupci jsou názvy aktů, mezi akty hairline.
 - Sloupce mají stejnou úzkou šířku, při mnoha scénách se matice posouvá vodorovně; hlavička řádků zůstává vlevo, hlavička sloupců nahoře.
@@ -120,23 +120,26 @@ Mockup: lišta s menu, schválená 2026-10-27.
 - **Přehled a aktivní postava**: Arcs se vždy otevře jako přehled bez aktivní postavy. Klik na položku legendy, křivku nebo bod postavu aktivuje; nový klik na aktivní položku nebo Escape vrátí přehled.
   - Aktivní křivka je plná a silnější, ostatní ztlumené a needitovatelné.
   - Při najetí do grafu se ukáže „duch“ bodu v barvě aktivní postavy se jménem u kurzoru.
-  - Klik do sloupce scény přidá bod (nebo existující přesune), tah ho posune, Escape tah zruší. Klik na bod otevře popover Wall s „Remove point“; smazat jde i klávesou Delete.
+  - Klik do sloupce scény přidá bod (nebo existující přesune), tah ho posune, Escape tah zruší. Klik na bod otevře popover Wall s „Remove point“; smazat jde i klávesou Delete. Obojí jen u uloženého bodu, ne u bodu na baseline odvozeného z věty.
 - Arc každé postavy vede od první do poslední scény; na začátku a konci je výchozí kotva na baseline (0), kterou bod uživatele nahradí (tah kotvy bod vytvoří). Postava bez bodů je rovná čára na baseline.
-- Body přidává jen uživatel, v kterékoli scéně, i když v ní postava není (může ji zasáhnout dění jiných postav). Bod ve scéně s dokladem ve scénáři je ●, bez dokladu ◇. Ve scéně s dokladem bez bodu je na křivce drobná tečka. Bod postavu na kartu nepřidá; napsání věty ano, jen postavě bez dokladu ve scénáři. Popover bodu u postavy mimo scénu říká „Not in this scene“.
+- Body přidává uživatel, v kterékoli scéně, i když v ní postava není (může ji zasáhnout dění jiných postav); postava se tím dostane na kartu scény. Věta z Wall je bod na baseline. Bod ve scéně s dokladem ve scénáři je ●, bez dokladu ◇. Ve scéně s dokladem bez bodu je na křivce drobná tečka. Napsání věty postavu na kartu přidá, jen postavě bez dokladu ve scénáři.
 - Hover ukáže postavu, „Scene: N. Title“ a větu ze Wall. Čtečka čte hodnotu slovně („slightly/clearly/much better/worse“, „neutral“).
 - Klávesnice: graf je jeden tab stop; doleva/doprava mezi scénami, nahoru/dolů ±10 (Shift ±1, ve scéně bez bodu založí bod na baseline), Enter popover, Delete smaže. Aktivní postava se vybírá v legendě.
 - Legenda ukáže postavy vybrané společným filtrem v pořadí řádků Matrixu; filtr zůstává v liště.
 - Body nejsou v undo historii dokumentu. Board snapshotu nebo verze: jen zvýraznění postavy.
 - (Upřesněno 3. 11. 2026.)
 
-## Numbers
+## Rundown
 
-- Seznam hudebních čísel s názvem, aktem, scénou, počáteční stranou a zpívajícími (postavy s cue v blocích `lyrics` čísla).
-- Klik skočí na číslo v editoru. Ve v1 jen pro čtení.
+_Upřesněno 3. 11. 2026 (dříve „Numbers“); detail v `.scratch/scene-board-numbers/spec.md`._
+
+- Hierarchický přehled jen pro čtení: hlavička aktu se souhrnem „N scenes · M songs“ a délkou, pod ní všechny scény (číslo, název, délka, postavy jako na kartě Wall) a pod každou scénou odsazené songy (označení, název, štítek Song/Instrumental/Hit, délka, zpívající). Hudba před první scénou nahoře. Délky jsou v půlstranách („½ p.“, „1½ pp.“), nejméně půl strany; délka aktu je součet délek zobrazených scén, zaokrouhlený jednou. Délky se ukážou až po stránkování v Editoru a u scény nebo songu, jejichž blok je v Editoru sbalený, chybí.
+- Zpívající: postavy s cue u bloků `lyrics` v rozsahu songu (od music start po jeho konec), skupiny rozložené na členy, pořadí podle první repliky.
+- Společný filtr: scény s vybranou postavou, pod nimi jen songy, kde zpívá. Klik nebo Enter otevře Editor na scéně nebo na music start. Jeden tab stop, šipky mezi řádky.
 
 ## Sdílené chování
 
-- Výběr postav ve filtru je společný pro Wall, Matrix a Arcs a pamatuje si se lokálně pro každý skript.
+- Výběr postav ve filtru je společný pro Wall, Matrix, Arcs a Rundown a pamatuje si se lokálně pro každý skript.
 - Board uložené verze nebo snapshotu je jen pro čtení, bez editačních ovládacích prvků.
 - Prázdný stav: tichá věta a akce pro vložení první scény, žádná uvítací grafika.
 - Typografie, barvy a plochy podle PRODUCT.md a structure sidebaru. Barvy postav z `script_characters.color_hex`.
@@ -159,7 +162,7 @@ Návrh, který plán ověří:
 
 ### Čistý model
 
-`buildSceneBoardModel(document, characterCatalog, sceneMetadata)` v `packages/script` vrátí akty, scény, doklady postav a výsledné úrovně. Je bez Reactu a DOM a testuje se jednotkově. Wall, Matrix, Arcs i Numbers čtou stejný model.
+`buildSceneBoardModel(document, characterCatalog, sceneMetadata)` v `packages/script` vrátí akty, scény, doklady postav a výsledné úrovně. Je bez Reactu a DOM a testuje se jednotkově. Wall, Matrix, Arcs i Rundown čtou stejný model.
 
 ### Data
 
@@ -189,14 +192,14 @@ Každý krok lze samostatně mergnout.
    - **3b karta**: outline, věty, přidání a odebrání postavy, založení nové postavy, volba Outline.
 4. **Matrix.**
 5. **Arcs.**
-6. **Numbers.**
+6. **Rundown** (dříve Numbers).
 
 ## Akceptační kritéria
 
 - Změna ve scénáři (nová replika, přejmenovaný scene heading, nový akt) se po návratu na Board projeví bez reloadu.
 - Přesun karty na boardu přesune celý segment scény ve scénáři. Cmd+Z ho vrátí.
 - Scéna vložená na boardu je v editoru normální scene heading na správném místě.
-- Postava s replikou je na kartě vždy. Ručně přidaná postava bez dokladu má čárkovaný okraj, který zmizí po napsání její repliky.
+- Postava s replikou je na kartě vždy. Ručně přidaná postava bez dokladu má prázdné kolečko („not in scene“), které se po napsání její repliky vyplní.
 - Věty, outline a oblouky přežijí přesun scény, reload, snapshot a obnovení verze.
 - V Arcs je vždy jasné, které postavě patří přidávaný nebo posouvaný bod.
 - Board uložené verze nejde editovat.

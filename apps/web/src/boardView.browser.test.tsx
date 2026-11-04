@@ -42,6 +42,7 @@ describe('Board view', () => {
         expect(cardOf('3. Roof').querySelector('[aria-label^="Characters"]')?.getAttribute('aria-label')).toBe('Characters: ANNA, DOCTOR');
         expect(findButton('Board')?.getAttribute('aria-pressed')).toBe('true');
         expect(document.querySelector('[data-editor-ready]')).toBeNull();
+        expect(document.querySelector('footer')?.textContent).toContain('Feedback & bug reports');
     });
 
     it('falls back to the Wall for an unknown lens', async () => {

@@ -7,7 +7,7 @@ import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {type BoardPreferences, useBoardPreferences} from './boardPreferences';
 import {buildFilterCharacters} from './buildFilterCharacters';
-import {type SceneCardRecord} from './buildSceneChips';
+import {type SceneCardRecord, selectCardRecords} from './buildSceneChips';
 import {useBoardHistoryShortcuts} from './useBoardHistoryShortcuts';
 import {type SceneBoardSource, useSceneBoardSource} from './useSceneBoardSource';
 import {useWallMetadata, type WallSceneMetadata} from './useWallMetadata';
@@ -15,9 +15,7 @@ import {useWallMetadata, type WallSceneMetadata} from './useWallMetadata';
 interface UseBoardLensDataReturn {
     source: SceneBoardSource,
     model: ReturnType<typeof buildSceneBoardModel>,
-    /** Every card record, including those that only carry an arc point (Arcs). */
-    records: readonly SceneCardRecord[],
-    /** The records the cards show: Wall, Matrix and the filter counts. */
+    /** The records every lens reads: Wall, Matrix, Rundown, Arcs and the filter counts. */
     cardRecords: readonly SceneCardRecord[],
     metadata: WallSceneMetadata | null,
     selectedIds: readonly string[],
@@ -75,7 +73,7 @@ export const useBoardLensData = (isReadOnly: boolean): UseBoardLensDataReturn =>
             return scene.characters.map(character => `${scene.headingBlockId}:${character.characterId}`);
         })));
 
-        return records.filter(record => record.onCard !== false || visibleKeys.has(`${record.headingBlockId}:${record.characterId}`));
+        return selectCardRecords(records, visibleKeys);
     }, [records, model]);
 
     const filterCharacters = useMemo(
@@ -93,7 +91,6 @@ export const useBoardLensData = (isReadOnly: boolean): UseBoardLensDataReturn =>
     return {
         source,
         model,
-        records,
         cardRecords,
         metadata,
         selectedIds,

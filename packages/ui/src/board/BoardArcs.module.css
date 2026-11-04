@@ -66,6 +66,12 @@
     white-space: nowrap;
 }
 
+.numberTooltip {
+    top: auto;
+    bottom: calc(100% + var(--space-xs));
+    padding: var(--space-sm) var(--space-md);
+}
+
 /* The chart is bounded so it never takes the page; its baseline is the vertical centre. */
 .plot {
     position: relative;

@@ -113,7 +113,7 @@
     border-radius: var(--radius-sm);
 }
 
-/* The lines of a cell tooltip: the note first, then the scene it belongs to. */
+/* The lines of a cell tooltip: the cell's state first, then the scene it belongs to. */
 .tooltipLine {
     display: block;
 }

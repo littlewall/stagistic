@@ -47,22 +47,22 @@ describe('Board matrix editing', () => {
 
         expect(locationText()).toContain(`/script/${scriptId}/board/matrix`);
 
-        await userEvent.click(requireValue(findButton('ANNA, Garden: not in the scene')));
+        await userEvent.click(requireValue(findButton('ANNA, Garden: not on the card')));
         await waitFor(() => document.querySelector('textarea[aria-label="Note for ANNA"]'));
 
         /* Closing the popover without a note keeps the character on the card. */
         await userEvent.keyboard('{Escape}');
         await waitFor(() => !document.querySelector('[role="dialog"]'));
-        await waitFor(() => findButton('ANNA, Garden: only on the card'));
+        await waitFor(() => findButton('ANNA, Garden: not in scene'));
         await until(async () => (await sceneCharactersOf(scriptId)).length === 1);
 
-        await userEvent.click(requireValue(findButton('ANNA, Garden: only on the card')));
+        await userEvent.click(requireValue(findButton('ANNA, Garden: not in scene')));
 
         await waitFor(() => document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Note for ANNA"]'));
 
         await userEvent.keyboard('Wants to be found');
         await userEvent.keyboard('{Control>}{Enter}{/Control}');
-        await waitFor(() => findButton('ANNA, Garden: note: Wants to be found'));
+        await waitFor(() => findButton('ANNA, Garden: note: Wants to be found (not in scene)'));
         await until(async () => (await sceneCharactersOf(scriptId))[0]?.note === 'Wants to be found');
 
         await userEvent.click(requireValue(findButton('Wall')));
@@ -91,8 +91,8 @@ describe('Board matrix editing', () => {
             '2',
             '3',
         ]);
-        expect(findButton('ANNA, Garden: not in the scene')).toBeDefined();
-        expect(findButton('BEN, Garden: in the scene')).toBeUndefined();
+        expect(findButton('ANNA, Garden: not on the card')).toBeDefined();
+        expect(findButton('BEN, Garden: in scene')).toBeUndefined();
     });
 
     it('offers "Add scene" on an empty Matrix for an editable Board and inserts a scene heading', async () => {
@@ -129,18 +129,18 @@ describe('Board matrix editing', () => {
         await waitFor(() => document.querySelector('[role="grid"]'));
 
         /* Find and click an empty cell for ANNA in Garden (which will add her optimistically) */
-        await userEvent.click(requireValue(findButton('ANNA, Garden: not in the scene')));
+        await userEvent.click(requireValue(findButton('ANNA, Garden: not on the card')));
         await waitFor(() => document.querySelector('textarea[aria-label="Note for ANNA"]'));
 
         /* Close without adding a note - she stays on the card */
         await userEvent.keyboard('{Escape}');
         await waitFor(() => !document.querySelector('[role="dialog"]'));
 
-        /* Verify the cell is now "only on the card" */
-        await waitFor(() => findButton('ANNA, Garden: only on the card'));
+        /* Verify the cell now reads "not in scene" (on the card, no script evidence) */
+        await waitFor(() => findButton('ANNA, Garden: not in scene'));
 
         /* Click the card-only cell and open the popover */
-        await userEvent.click(requireValue(findButton('ANNA, Garden: only on the card')));
+        await userEvent.click(requireValue(findButton('ANNA, Garden: not in scene')));
         await waitFor(() => document.querySelector('[role="dialog"]'));
 
         /* Click Remove from card */
@@ -148,7 +148,7 @@ describe('Board matrix editing', () => {
         await waitFor(() => !document.querySelector('[role="dialog"]'));
 
         /* Wait for the cell to become empty */
-        await waitFor(() => findButton('ANNA, Garden: not in the scene'));
+        await waitFor(() => findButton('ANNA, Garden: not on the card'));
         await until(async () => (await sceneCharactersOf(scriptId)).length === 0);
     });
 
@@ -157,9 +157,9 @@ describe('Board matrix editing', () => {
 
         await repository.putSceneCharacter(scriptId, 's1', annaId, {note: 'Hides the letter'});
         await mountApp(`/script/${scriptId}/board/matrix`);
-        await userEvent.click(await waitFor(() => findButton('ANNA, Kitchen, night: note: Hides the letter')));
+        await userEvent.click(await waitFor(() => findButton('ANNA, Kitchen, night: note: Hides the letter (in scene)')));
         await userEvent.click(requireValue(findButton('Clear note')));
-        await waitFor(() => findButton('ANNA, Kitchen, night: in the scene'));
+        await waitFor(() => findButton('ANNA, Kitchen, night: in scene'));
         await until(async () => (await sceneCharactersOf(scriptId)).length === 0);
     });
 
@@ -179,7 +179,8 @@ describe('Board matrix editing', () => {
         /* Three characters across three scenes: the glyphs are still there to read. */
         expect(document.querySelectorAll('[data-cell]')).toHaveLength(9);
 
-        await userEvent.hover(requireValue(document.querySelector<HTMLElement>('[data-cell][aria-label="ANNA, Kitchen, night: in the scene"]')));
+        await userEvent.hover(requireValue(document.querySelector<HTMLElement>('[data-cell][aria-label="ANNA, Kitchen, night: in scene"]')));
         await waitFor(() => document.querySelector('[role="tooltip"]')?.textContent?.includes('Scene: 1. Kitchen, night'));
+        expect(document.querySelector('[role="tooltip"]')?.textContent).toContain('in scene');
     });
 });

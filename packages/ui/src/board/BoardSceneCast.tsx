@@ -1,9 +1,15 @@
 import clsx from 'clsx';
-import type {CSSProperties, ReactNode} from 'react';
-import {Button as RACButton} from 'react-aria-components';
+import type {ReactNode} from 'react';
 
-import {type BoardCharacterChip, describeCharacterChip} from './BoardCharacterDot';
-import {type BoardCharacterActions, BoardCharacterPopover} from './BoardCharacterPopover';
+import {IconButton} from '../atoms/IconButton/IconButton';
+import {CloseIcon} from '../icons/ui';
+import {
+    type BoardCharacterChip,
+    CharacterDot,
+    SCENE_STATE_TEXT,
+} from './BoardCharacterDot';
+import type {BoardCharacterActions} from './BoardCharacterPopover';
+import {BoardInlineHeading} from './BoardInlineHeading';
 import styles from './BoardSceneCast.module.css';
 import {CharacterChipStack} from './CharacterChipStack';
 
@@ -16,14 +22,39 @@ export interface BoardSceneCastProps {
     addControl?: ReactNode,
 }
 
-const NoteRow = ({chip}: {chip: BoardCharacterChip}) => (
+const NoteRow = ({chip, actions}: {chip: BoardCharacterChip, actions?: BoardCharacterActions}) => (
     <span
         data-source={chip.source}
-        className={clsx(styles.row, chip.source === 'card' && styles.hollow, chip.isDimmed && styles.dimmed)}
-        style={chip.color === null ? undefined : {'--chip-color': chip.color} as CSSProperties}
+        className={clsx(styles.row, chip.isDimmed && styles.dimmed)}
     >
-        <span className={styles.name}>{chip.name}</span>
-        <span>{chip.note}</span>
+        <span className={styles.header}>
+            <CharacterDot chip={{...chip, isDimmed: false}} />
+            <span data-name="" className={styles.name}>{chip.name}</span>
+            <span data-scene-state="" className={styles.state}>{`(${SCENE_STATE_TEXT[chip.source]})`}</span>
+            {actions ? (
+                <IconButton
+                    size="xs"
+                    className={styles.clear}
+                    aria-label={`Clear note for ${chip.name}`}
+                    onPress={() => actions.onNoteCommit(chip, null)}
+                >
+                    <CloseIcon aria-hidden="true" />
+                </IconButton>
+            ) : null}
+        </span>
+        <span data-note="" className={styles.note}>
+            <BoardInlineHeading
+                kind="outline"
+                value={chip.note ?? ''}
+                label={`Note for ${chip.name}`}
+                isReadOnly={!actions}
+                onCommit={next => {
+                    actions?.onNoteCommit(chip, next || null);
+
+                    return true;
+                }}
+            />
+        </span>
     </span>
 );
 
@@ -44,13 +75,7 @@ export const BoardSceneCast = ({
                 <ul className={styles.notes} aria-label="Character notes">
                     {noted.map(chip => (
                         <li key={chip.id}>
-                            {actions ? (
-                                <BoardCharacterPopover chip={chip} actions={actions}>
-                                    <RACButton className={styles.rowButton} aria-label={`${describeCharacterChip(chip)}: ${chip.note}`}>
-                                        <NoteRow chip={chip} />
-                                    </RACButton>
-                                </BoardCharacterPopover>
-                            ) : <NoteRow chip={chip} />}
+                            <NoteRow chip={chip} actions={actions} />
                         </li>
                     ))}
                 </ul>

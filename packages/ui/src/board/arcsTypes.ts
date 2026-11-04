@@ -20,12 +20,12 @@ export interface BoardArcsPoint {
     headingBlockId: string,
     /** Index among all scene columns across every act. */
     sceneIndex: number,
-    /** Stored arc value; a point only exists with one. */
+    /** Stored arc value, or 0 (the baseline) for a note without one. */
     value: number,
+    /** False for a note that has no arc value yet, shown at the baseline. */
+    hasStoredValue: boolean,
     /** Script evidence (a cue or tag) places the character in the scene. */
     evidence: boolean,
-    /** The character is on the scene card; false for a point that exists on its own. */
-    onCard: boolean,
     /** The scene card note, if any. */
     note: string | null,
 }

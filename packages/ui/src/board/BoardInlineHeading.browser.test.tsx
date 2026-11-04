@@ -209,16 +209,20 @@ describe('BoardInlineHeading outline', () => {
         expect(commit).toHaveBeenCalledExactlyOnceWith('One\nTwo');
     });
 
-    it('names an empty outline only on focus', async () => {
+    it('names an empty outline at all times, in the placeholder colour, until text exists', async () => {
         mountOutline();
 
         const field = await waitFor<HTMLElement>('[role="button"]');
-        const placeholderOpacity = () => getComputedStyle(field, '::before').opacity;
+        const placeholder = () => getComputedStyle(field, '::before');
 
-        expect(getComputedStyle(field, '::before').content).toBe('"Add outline"');
-        expect(placeholderOpacity()).toBe('0');
+        expect(placeholder().content).toBe('"Add outline"');
+        // No pointer on a card and no focus.
+        expect(placeholder().opacity).toBe('1');
+        expect(placeholder().color).not.toBe(getComputedStyle(field).color);
+
         field.focus();
-        await expect.poll(placeholderOpacity).toBe('1');
+        await userEvent.keyboard('{Enter}x');
+        await expect.poll(() => placeholder().content).not.toBe('"Add outline"');
     });
 
     it('shows a read-only outline as text', async () => {

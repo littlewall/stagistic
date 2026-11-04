@@ -71,8 +71,8 @@ const ARCS: BoardArcsArc[] = [
                 headingBlockId: 's1',
                 sceneIndex: 1,
                 value: 40,
+                hasStoredValue: true,
                 evidence: true,
-                onCard: true,
                 note: 'Waits for the letter',
             },
         ],
@@ -107,8 +107,8 @@ const StatefulArcs = ({initial}: {initial: BoardArcsArc[]}) => {
                         headingBlockId,
                         sceneIndex: ACTS[0].scenes.findIndex(scene => scene.headingBlockId === headingBlockId),
                         value,
+                        hasStoredValue: true,
                         evidence: false,
-                        onCard: false,
                         note: null,
                     },
                 ],
@@ -254,8 +254,8 @@ describe('BoardArcs editing', () => {
                 headingBlockId: `s${sceneIndex}`,
                 sceneIndex,
                 value,
+                hasStoredValue: true,
                 evidence: true,
-                onCard: false,
                 note: null,
             })),
         });
@@ -381,6 +381,36 @@ describe('BoardArcs editing', () => {
         await waitFor(() => !dialog());
     });
 
+    it('offers no point removal for a point that has no stored value', async () => {
+        setup(true, [
+            {
+                ...ARCS[0],
+                points: [
+                    {
+                        headingBlockId: 's1',
+                        sceneIndex: 1,
+                        value: 0,
+                        hasStoredValue: false,
+                        evidence: true,
+                        note: 'Wall note',
+                    },
+                ],
+            },
+            ARCS[1],
+        ]);
+        await activate('c-anna');
+
+        const circle = requireValue(point('c-anna', 1), 'note point');
+
+        pointer(circle, 'pointerdown', at(1, 0));
+        pointer(circle, 'pointerup', at(1, 0));
+
+        const open = await waitFor(dialog);
+
+        expect(open.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe('Wall note');
+        expect(buttonNamed('Remove point')).toBeUndefined();
+    });
+
     it('offers only point removal for a character manually present on the card', async () => {
         const {onRemovePoint} = setup(true, [
             {
@@ -389,7 +419,6 @@ describe('BoardArcs editing', () => {
                     {
                         ...ARCS[0].points[0],
                         evidence: false,
-                        onCard: true,
                     },
                 ],
             },
@@ -604,47 +633,5 @@ describe('BoardArcs editing', () => {
         await userEvent.keyboard(' ');
         await waitFor(dialog);
         await waitFor(() => point('c-anna', 2));
-    });
-
-    it('says "Not in this scene" for a point off the card without script evidence, not for one with', async () => {
-        const arcs: BoardArcsArc[] = [
-            {
-                ...ARCS[0],
-                points: [
-                    {
-                        headingBlockId: 's1',
-                        sceneIndex: 1,
-                        value: 40,
-                        evidence: true,
-                        onCard: false,
-                        note: null,
-                    },
-                    {
-                        headingBlockId: 's2',
-                        sceneIndex: 2,
-                        value: -20,
-                        evidence: false,
-                        onCard: false,
-                        note: null,
-                    },
-                ],
-            },
-            ARCS[1],
-        ];
-
-        setup(true, arcs);
-        await activate('c-anna');
-
-        requireValue(stop(1), 'kitchen column').focus();
-        await userEvent.keyboard('{Enter}');
-        await waitFor(dialog);
-        expect(dialog()?.textContent).not.toContain('Not in this scene');
-        await userEvent.keyboard('{Escape}');
-        await waitFor(() => !dialog());
-
-        requireValue(stop(2), 'garden column').focus();
-        await userEvent.keyboard('{Enter}');
-        await waitFor(dialog);
-        expect(dialog()?.textContent).toContain('Not in this scene');
     });
 });

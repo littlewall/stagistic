@@ -52,17 +52,10 @@
         display: block;
     }
 
-    /* Empty, it keeps its line and names itself only where the pointer or focus is. */
+    /* Empty, it keeps its line and always names itself, faintly, until text exists. */
     &:empty::before {
         content: attr(data-placeholder);
-        color: var(--color-text-muted);
-        opacity: 0;
-        transition: opacity var(--duration-fast) var(--ease-standard);
-    }
-
-    :global([data-board-card-id]:hover) &:empty::before,
-    &:focus:empty::before {
-        opacity: 1;
+        color: var(--color-text-placeholder);
     }
 
     &.editing:empty::before {

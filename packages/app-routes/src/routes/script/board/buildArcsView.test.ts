@@ -284,35 +284,49 @@ describe('buildArcsView', () => {
         expect(arcs.some(arc => arc.points.length > 0)).toBe(false);
     });
 
-    it('skips records without a value while still using their note elsewhere', () => {
+    it('shows a note without a value as a baseline point and skips an empty one', () => {
         const {arcs} = build({
             records: [
                 record('s1', 'c-anna', 'Only a note', null),
-                record('s2', 'c-anna', null, 15),
+                record('s2', 'c-anna', '', null),
             ],
         });
+
+        expect(arcById(arcs, 'c-anna')?.points).toEqual([
+            {
+                headingBlockId: 's1',
+                sceneIndex: 1,
+                value: 0,
+                hasStoredValue: false,
+                evidence: true,
+                note: 'Only a note',
+            },
+        ]);
+    });
+
+    it('keeps the stored value of a record that has a note too', () => {
+        const {arcs} = build({records: [record('s2', 'c-anna', 'Both', 15)]});
 
         expect(arcById(arcs, 'c-anna')?.points).toEqual([
             {
                 headingBlockId: 's2',
                 sceneIndex: 2,
                 value: 15,
+                hasStoredValue: true,
                 evidence: false,
-                onCard: true,
-                note: null,
+                note: 'Both',
             },
         ]);
     });
 
-    it('includes records off the card as points without evidence', () => {
-        const {arcs} = build({records: [{...record('s2', 'c-dee', 'ignored', 60), onCard: false}]});
+    it('includes a card-only record as a point without evidence', () => {
+        const {arcs} = build({records: [record('s2', 'c-dee', 'ignored', 60)]});
 
         expect(arcById(arcs, 'c-dee')?.points).toEqual([
             expect.objectContaining({
                 headingBlockId: 's2',
                 value: 60,
                 evidence: false,
-                onCard: false,
             }),
         ]);
     });

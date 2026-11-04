@@ -12,6 +12,7 @@ import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {BoardArcsLens} from './board/BoardArcsLens';
 import {DEFAULT_BOARD_LENS_ID, isBoardLensId} from './board/boardLenses';
 import {BoardMatrixLens} from './board/BoardMatrixLens';
+import {BoardRundownLens} from './board/BoardRundownLens';
 import {BoardWall} from './board/BoardWall';
 import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
@@ -24,6 +25,7 @@ const LENS_COMPONENTS: Record<string, React.ComponentType<{activeLensId: string,
     wall: BoardWall,
     matrix: BoardMatrixLens,
     arcs: BoardArcsLens,
+    rundown: BoardRundownLens,
 };
 
 const ScriptBoardPage = ({lensId}: {lensId: string}) => {
@@ -86,7 +88,6 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
 
     return (
         <AppLayout
-            footer={null}
             header={
                 currentScript ? (
                     <ScriptEditorAppHeader

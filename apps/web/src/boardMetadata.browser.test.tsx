@@ -53,7 +53,7 @@ describe('Board scene metadata', () => {
         await userEvent.click(requireValue(findButton('Outline of scene 2')));
         await userEvent.keyboard('Ben hides.{Enter}Night falls.');
         await userEvent.keyboard('{Control>}{Enter}{/Control}');
-        await userEvent.click(requireValue(findButton('BEN')));
+        await userEvent.click(requireValue(findButton('BEN (in scene)')));
         await waitFor(() => document.querySelector('textarea'));
         await userEvent.keyboard('Wants to be found');
         await userEvent.keyboard('{Control>}{Enter}{/Control}');
@@ -63,7 +63,7 @@ describe('Board scene metadata', () => {
         const garden = await waitFor(() => cardOf('2. Garden').textContent?.includes('Wants to be found') && cardOf('2. Garden'));
 
         expect(garden.textContent).toContain('Ben hides.\nNight falls.');
-        expect(findButton('BEN: Wants to be found')).toBeDefined();
+        expect(findButton('Note for BEN')?.textContent).toBe('Wants to be found');
     });
 
     it('keeps a character the script dropped from the scene hollow on the card, with its note', async () => {
@@ -74,13 +74,17 @@ describe('Board scene metadata', () => {
         await repository.saveLatest(scriptId, {...latest, content: latest.content.filter(node => !['c2', 'd2'].includes(String(node.attrs?.id)))});
         await mountApp(`/script/${scriptId}/board/wall`);
 
-        const row = await waitFor(() => findButton('BEN, only on the card: Leaves'));
+        await waitFor(() => findButton('Note for BEN'));
+        await userEvent.click(await waitFor(() => findButton('Clear note for BEN')));
 
-        await userEvent.click(row);
+        // The cleared note leaves a hollow dot, whose panel still removes the character.
+        const hollow = await waitFor(() => findButton('BEN (not in scene)'));
+
+        await userEvent.click(hollow);
         await waitFor(() => document.querySelector('[role="dialog"]'));
         await userEvent.click(requireValue(findButton('Remove from card')));
         await until(async () => (await notesOf(scriptId)).length === 0);
-        await waitFor(() => !findButton('BEN, only on the card: Leaves'));
+        await waitFor(() => !findButton('BEN (not in scene)'));
     });
 
     it('adds a new character to a card, colored from the palette', async () => {
@@ -92,7 +96,7 @@ describe('Board scene metadata', () => {
         await waitFor(() => document.querySelector('input[type="search"]'));
         await userEvent.keyboard('Harbor master{Enter}');
 
-        const added = await waitFor(() => findButton('HARBOR MASTER, only on the card'));
+        const added = await waitFor(() => findButton('HARBOR MASTER (not in scene)'));
 
         expect(getComputedStyle(requireValue(added.querySelector('[data-source="card"]'))).borderTopColor).not.toBe('rgba(0, 0, 0, 0)');
         expect((await repository.listScriptCharacters(scriptId)).map(character => character.key)).toContain('HARBOR MASTER');
@@ -143,7 +147,7 @@ describe('Board scene metadata', () => {
 
         await waitFor(() => garden.textContent?.includes('In the garden'));
         expect(findButton('Outline of scene 2')).toBeUndefined();
-        expect(findButton('BEN: Waits')).toBeUndefined();
+        expect(findButton('Note for BEN')).toBeUndefined();
         expect(findButton('Add character to scene 2')).toBeUndefined();
     });
 });

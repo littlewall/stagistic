@@ -22,7 +22,7 @@ export interface ArcsViewInput {
     model: SceneBoardModel,
     characters: readonly ScriptCharacterRecord[],
     displayColorByKey: ReadonlyMap<string, string>,
-    /** Card records in the order they were added; a point needs a stored `arcValue`. */
+    /** Card records (see selectCardRecords) in the order they were added; a point needs a stored `arcValue` or a note. */
     records?: readonly SceneCardRecord[],
     /** Pre-built filter characters list, in Matrix row order. */
     filterCharacters: readonly BoardFilterCharacter[],
@@ -62,7 +62,7 @@ export const buildArcsView = ({
 
             const points = scenes.flatMap((scene, sceneIndex) => {
                 const arcRecord = (recordsByScene.get(scene.headingBlockId) ?? [])
-                    .find(item => item.characterId === character.id && (item.arcValue ?? null) !== null);
+                    .find(item => item.characterId === character.id && ((item.arcValue ?? null) !== null || (item.note ?? '') !== ''));
 
                 if (!arcRecord) return [];
 
@@ -71,7 +71,7 @@ export const buildArcsView = ({
     headingBlockId: scene.headingBlockId,
     sceneIndex,
     value: arcRecord.arcValue ?? 0,
-    onCard: arcRecord.onCard !== false,
+    hasStoredValue: (arcRecord.arcValue ?? null) !== null,
     evidence: scene.characters.some(sceneCharacter => sceneCharacter.characterId === character.id),
     note: arcRecord.note ?? null,
 } satisfies BoardArcsPoint,

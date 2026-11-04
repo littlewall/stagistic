@@ -129,10 +129,10 @@ export const ArcsChart = ({
                 headingBlockId: drag.headingBlockId,
                 sceneIndex: drag.sceneIndex,
                 evidence: arc.points.find(point => point.sceneIndex === drag.sceneIndex)?.evidence ?? arc.presence?.includes(drag.sceneIndex) ?? false,
-                onCard: false,
                 note: null,
                 ...arc.points.find(point => point.sceneIndex === drag.sceneIndex),
                 value: layout.valueAt(drag.y),
+                hasStoredValue: true,
             },
         ].toSorted((left, right) => left.sceneIndex - right.sceneIndex);
     };

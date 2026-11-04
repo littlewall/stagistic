@@ -2,12 +2,17 @@ import {MenuTrigger} from 'react-aria-components';
 
 import {IconButton} from '../../atoms/IconButton/IconButton';
 import {MoreIcon} from '../../icons';
-import {DropdownMenu, type DropdownMenuItem} from '../DropdownMenu/DropdownMenu';
+import {
+    DropdownMenu,
+    type DropdownMenuItem,
+    type DropdownMenuProps,
+} from '../DropdownMenu/DropdownMenu';
 
 export interface MoreActionsMenuProps {
     'aria-label': string,
     items: readonly DropdownMenuItem[],
     onAction: (id: string) => void,
+    placement?: DropdownMenuProps['placement'],
 }
 
 /** Compact "⋯" trigger opening a DropdownMenu; for row- and card-level actions. */
@@ -15,6 +20,7 @@ export const MoreActionsMenu = ({
     'aria-label': ariaLabel,
     items,
     onAction,
+    placement,
 }: MoreActionsMenuProps) => (
     <MenuTrigger>
         <IconButton
@@ -26,6 +32,7 @@ export const MoreActionsMenu = ({
         <DropdownMenu
             aria-label={ariaLabel}
             items={items}
+            placement={placement}
             onAction={key => onAction(String(key))}
         />
     </MenuTrigger>

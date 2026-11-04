@@ -8,7 +8,7 @@ import type {BoardArcsArc} from './arcsTypes';
  * The active character's scenes as one roving tab stop: left/right move across every scene,
  * up/down move the point by 10 (1 with Shift) and a scene without one starts at the baseline,
  * Enter or Space opens the popover (on a scene without a point it first creates one at the
- * baseline), Delete or Backspace removes the point. Escape is handled by the chart as a whole.
+ * baseline), Delete or Backspace removes a stored point (a note's baseline point has nothing to remove). Escape is handled by the chart as a whole.
  */
 export const useArcsStops = ({
     plotRef,
@@ -65,7 +65,7 @@ export const useArcsStops = ({
             }
             case 'Delete':
             case 'Backspace': {
-                if (point) {
+                if (point?.hasStoredValue) {
                     event.preventDefault();
                     onRemovePoint?.(headingBlockId, arc.id);
                 }

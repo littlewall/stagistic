@@ -35,6 +35,24 @@ const confirmDeleteAct = async () => {
 const undoChord = () => (isApplePlatform() ? '{Meta>}z{/Meta}' : '{Control>}z{/Control}');
 
 describe('Board act deletion', () => {
+    it('opens the act menu below the trigger, extending right', async () => {
+        const {scriptId} = await createScript();
+
+        await mountApp(`/script/${scriptId}/board/wall`);
+        await waitFor(() => sceneHeadings().length === 3);
+
+        const trigger = requireValue(findButton('Act ACT ONE actions'));
+
+        await userEvent.click(trigger);
+
+        const popover = requireValue(await waitFor(() => document.querySelector<HTMLElement>('[role="menu"]')?.closest<HTMLElement>('[data-trigger="MenuTrigger"]') ?? document.querySelector<HTMLElement>('[role="menu"]')));
+        const menu = popover.getBoundingClientRect();
+        const anchor = trigger.getBoundingClientRect();
+
+        expect(menu.top).toBeGreaterThanOrEqual(anchor.bottom - 1);
+        expect(Math.abs(menu.left - anchor.left)).toBeLessThanOrEqual(2);
+    });
+
     it('describes the first act, and Cancel and Escape leave the document unchanged', async () => {
         const {scriptId} = await createScript();
 

@@ -73,16 +73,16 @@ const ARCS: BoardArcsArc[] = [
                 headingBlockId: 's1',
                 sceneIndex: 1,
                 value: 40,
+                hasStoredValue: true,
                 evidence: true,
-                onCard: true,
                 note: 'Waits for the letter',
             },
             {
                 headingBlockId: 's2',
                 sceneIndex: 2,
                 value: -20,
+                hasStoredValue: true,
                 evidence: false,
-                onCard: true,
                 note: null,
             },
         ],
@@ -96,8 +96,8 @@ const ARCS: BoardArcsArc[] = [
                 headingBlockId: 's0',
                 sceneIndex: 0,
                 value: 10,
+                hasStoredValue: true,
                 evidence: true,
-                onCard: true,
                 note: null,
             },
         ],
@@ -111,16 +111,16 @@ const ARCS: BoardArcsArc[] = [
                 headingBlockId: 's0',
                 sceneIndex: 0,
                 value: 10,
+                hasStoredValue: true,
                 evidence: true,
-                onCard: true,
                 note: null,
             },
             {
                 headingBlockId: 's1',
                 sceneIndex: 1,
                 value: 5,
+                hasStoredValue: true,
                 evidence: false,
-                onCard: true,
                 note: null,
             },
         ],
@@ -366,6 +366,21 @@ describe('BoardArcs', () => {
 
         expect(withoutNote.querySelector('strong')?.textContent).toBe('BEN');
         expect(withoutNote.querySelector('p')).toBeNull();
+    });
+
+    it('shows the scene title when hovering an axis number and removes it on leave', async () => {
+        renderArcs();
+
+        const number = await waitFor(() => document.querySelector<HTMLElement>('[data-scene-number="2."]'));
+
+        await userEvent.hover(number);
+
+        const tooltip = await waitFor(() => document.querySelector<HTMLElement>('[role="tooltip"]'));
+
+        expect(tooltip.textContent).toBe('2. Kitchen');
+
+        await userEvent.unhover(number);
+        await waitFor(() => document.querySelector('[role="tooltip"]') === null);
     });
 
     it('lines the act band up with the chart: proportional shares, dividers on the chart dividers', async () => {

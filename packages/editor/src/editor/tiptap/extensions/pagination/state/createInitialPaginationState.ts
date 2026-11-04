@@ -7,6 +7,7 @@ export const createInitialPaginationState = (options: PaginationOptions): Pagina
     return {
         pageCount: 1,
         pages: [],
+        blockOffsets: [],
         pageHeight: options.pageHeight,
         contentHeight: Math.max(
             0,

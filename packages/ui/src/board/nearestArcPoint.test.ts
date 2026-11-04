@@ -17,8 +17,8 @@ const arc = (id: string, value: number): BoardArcsArc => ({
         headingBlockId: `s${sceneIndex}`,
         sceneIndex,
         value,
+        hasStoredValue: true,
         evidence: true,
-        onCard: false,
         note: null,
     })),
 });

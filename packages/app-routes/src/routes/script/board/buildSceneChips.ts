@@ -16,12 +16,23 @@ export interface SceneCardRecord {
     note: string | null,
     /** The arc point's stored value; null when the record carries no point. */
     arcValue?: number | null,
-    /** False for a record that only carries an arc point; absent means on the card. */
+    /**
+     * False marks a record the user did not put on the card: a first note on a character the
+     * script already places, or an older off-card record. An arc point or a note keeps it anyway.
+     */
     onCard?: boolean,
 }
 
-/** Records the card shows; those carrying only an arc point stay off Wall, Matrix and counts. */
-export const onCardRecords = (records: readonly SceneCardRecord[]) => records.filter(record => record.onCard !== false);
+/**
+ * Records every lens reads. An `onCard: false` record stays when it carries an arc value or a
+ * note, or the script places the character (`visibleKeys` holds `headingBlockId:characterId`).
+ */
+export const selectCardRecords = (records: readonly SceneCardRecord[], visibleKeys: ReadonlySet<string>) => records.filter(
+    record => record.onCard !== false
+        || (record.arcValue ?? null) !== null
+        || (record.note ?? '') !== ''
+        || visibleKeys.has(`${record.headingBlockId}:${record.characterId}`),
+);
 
 /** The character's own color, else the one the editor shows for it. */
 export const resolveCharacterColor = (

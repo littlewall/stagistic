@@ -1,4 +1,6 @@
 export {buildSceneBoardModel} from './buildSceneBoardModel';
+export type {BoardCharacterResolver, ResolvedBoardCharacter} from './resolveBoardCharacters';
+export {createBoardCharacterResolver} from './resolveBoardCharacters';
 export type {
     SceneBoardAct,
     SceneBoardCatalog,

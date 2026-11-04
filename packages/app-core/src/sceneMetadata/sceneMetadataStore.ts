@@ -76,8 +76,9 @@ const createSceneMetadataStore = (repository: ScriptRepository, scriptId: string
         return durable ? toDomainCollectionValue(durable) : null;
     };
     /*
-     * The record rules live here, not in the UI. A record is a card entry (`onCard`), an arc
-     * point, or both; a record with neither a point nor a note on the card is deleted.
+     * The record rules live here, not in the UI. A record holds a note, an arc point and an
+     * `onCard` flag: true when the user put the character on the card (or set an arc point),
+     * false for a first note on a character the script already places.
      */
     const insertRecord = async (
         key: string,
@@ -138,22 +139,15 @@ const createSceneMetadataStore = (repository: ScriptRepository, scriptId: string
             ...input.arcValue !== undefined ? {arcValue: input.arcValue} : {},
         });
     };
-    /** "Remove from card": a point survives off the card without its note; a record without a point is deleted. */
+    /** "Remove from card": always deletes the record, arc value included, so no point survives off the card. */
     const removeSceneCharacter = async (headingBlockId: string, characterId: string) => {
         const key = sceneCharacterKey(headingBlockId, characterId);
-        const existing = characters.collection.get(key);
 
-        if (!existing) return Promise.resolve();
-
-        if (existing.arcValue !== null) {
-            await updateRecord(key, {onCard: false, note: null});
-
-            return;
-        }
+        if (!characters.collection.has(key)) return Promise.resolve();
 
         await deleteRecord(key);
     };
-    /** A point without a record creates one off the card; an existing record keeps its card state. */
+    /** An arc point puts the character on the card: a new record is created on it, an existing one is moved onto it. */
     const setArcPoint = async (headingBlockId: string, characterId: string, value: number) => {
         const key = sceneCharacterKey(headingBlockId, characterId);
 
@@ -163,26 +157,29 @@ const createSceneMetadataStore = (repository: ScriptRepository, scriptId: string
                 characterId,
                 note: null,
                 arcValue: value,
-                onCard: false,
+                onCard: true,
             });
         }
 
-        return updateRecord(key, {arcValue: value});
+        return updateRecord(key, {arcValue: value, onCard: true});
     };
-    /** A record that is off the card and has no note has nothing left to say and is deleted. */
+    /**
+     * Removes the point. A record with a note keeps the note and stays on the card (the note is
+     * a baseline point); one without a note is deleted, so a hand-added character also leaves the card.
+     */
     const removeArcPoint = async (headingBlockId: string, characterId: string) => {
         const key = sceneCharacterKey(headingBlockId, characterId);
         const existing = characters.collection.get(key);
 
         if (!existing) return;
 
-        if (!existing.onCard && !existing.note) {
+        if (!existing.note) {
             await deleteRecord(key);
 
             return;
         }
 
-        await updateRecord(key, {arcValue: null});
+        await updateRecord(key, {arcValue: null, onCard: true});
     };
     const updateSceneSynopsis = async (headingBlockId: string, synopsis: string | null) => {
         const value = normalizeSynopsis(synopsis);

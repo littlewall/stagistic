@@ -10,7 +10,11 @@ import type {Transaction} from '@tiptap/pm/state';
 import type {EditorLifecycleCallbacks} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFromIndex';
-import {type EditorSnapshotStore, EMPTY_SCENE_PLACEMENT} from '../live/store';
+import {
+    type EditorSnapshotStore,
+    EMPTY_BLOCK_PAGES,
+    EMPTY_SCENE_PLACEMENT,
+} from '../live/store';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {createStructureCommands} from './structureTransactions';
 
@@ -112,6 +116,7 @@ export const createScriptDocumentSession = ({
                 structure: buildSidebarProjectionFromIndex(index).structure,
                 music: index.music,
                 scenePlacement: EMPTY_SCENE_PLACEMENT,
+                blockPages: EMPTY_BLOCK_PAGES,
             });
         }
 

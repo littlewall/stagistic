@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import {
     useCallback,
     useMemo,
@@ -8,6 +9,7 @@ import {
 import {Text} from '../primitives/Text/Text';
 import {ArcsChart} from './ArcsChart';
 import {createArcsLayout} from './arcsGeometry';
+import {sceneLabel} from './arcsLabels';
 import {ArcsLegend} from './ArcsLegend';
 import type {BoardArcsProps} from './arcsTypes';
 import styles from './BoardArcs.module.css';
@@ -40,6 +42,7 @@ export const BoardArcs = ({
     const legendRef = useRef<HTMLUListElement>(null);
     const [size, setSize] = useState({width: 0, height: 0});
     const numbersRef = useRef<HTMLDivElement>(null);
+    const [hoveredSceneIndex, setHoveredSceneIndex] = useState<number | null>(null);
     const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(() => new Set());
     const visibleArcs = arcs.filter(arc => !hiddenIds.has(arc.id));
     const [selectedCharacterId, setActiveCharacterId] = useState<string | null>(null);
@@ -82,6 +85,11 @@ export const BoardArcs = ({
         ],
     );
     const numberIndices = useSceneNumbers(numbersRef, scenes, size.width, arcs.length > 0);
+
+    /* The tooltip belongs to a number that is still drawn: when it unmounts, mouseleave never fires. */
+    const hoveredIndex = hoveredSceneIndex !== null && numberIndices.includes(hoveredSceneIndex) ? hoveredSceneIndex : null;
+    const hoveredScene = hoveredIndex === null ? undefined : scenes[hoveredIndex];
+    const hoveredTitle = hoveredScene && hoveredScene.title !== '' ? sceneLabel(hoveredScene) : '';
 
     if (arcs.length === 0) {
         return <Text as="p" variant="muted" size="sm">No characters yet.</Text>;
@@ -133,10 +141,23 @@ export const BoardArcs = ({
                             data-scene-number={scenes[index].number}
                             className={styles.sceneNumber}
                             style={{left: layout.sceneX(index)}}
+                            onMouseEnter={() => setHoveredSceneIndex(index)}
+                            onMouseLeave={() => setHoveredSceneIndex(null)}
                         >
                             {scenes[index].number}
                         </span>
                     ))}
+                    {hoveredTitle && hoveredIndex !== null ? (
+                        <div
+                            className={clsx(styles.tooltip, styles.numberTooltip)}
+                            style={layout.sceneX(hoveredIndex) > size.width / 2
+                                ? {right: size.width - layout.sceneX(hoveredIndex)}
+                                : {left: layout.sceneX(hoveredIndex)}}
+                            role="tooltip"
+                        >
+                            {hoveredTitle}
+                        </div>
+                    ) : null}
                 </div>
                 <ArcsChart
                     plotRef={plotRef}

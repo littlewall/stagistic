@@ -79,7 +79,7 @@ export const BoardInlineHeading = ({
     value: string,
     label: string,
     kind: 'scene' | 'act' | 'outline',
-    /** Shown in an empty field while the card is pointed at or focused. */
+    /** Shown, in the placeholder colour, in an empty editable outline field until text exists. */
     placeholder?: string,
     startEditing?: boolean,
     onCommit: (value: string) => boolean,

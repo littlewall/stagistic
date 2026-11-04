@@ -1,10 +1,11 @@
 import type {BoardLens} from '@stagistic/ui';
 
-/** Only built lenses are listed; Numbers joins as it arrives. */
+/** Only built lenses are listed. */
 export const BOARD_LENSES: readonly BoardLens[] = [
     {id: 'wall', label: 'Wall'},
     {id: 'matrix', label: 'Matrix'},
     {id: 'arcs', label: 'Arcs'},
+    {id: 'rundown', label: 'Rundown'},
 ];
 
 export const DEFAULT_BOARD_LENS_ID = 'wall';

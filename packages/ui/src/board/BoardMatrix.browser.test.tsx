@@ -255,27 +255,27 @@ describe('BoardMatrix', () => {
     it('is an ARIA grid whose cells name the character, the scene and the state', async () => {
         renderMatrix();
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
 
-        expect(cell('ANNA, Kitchen: note: Waits for the letter')).not.toBeNull();
-        expect(cell('ANNA, Garden: only on the card')).not.toBeNull();
-        expect(cell('DOCTOR, Prologue: in the scene, not confirmed')).not.toBeNull();
+        expect(cell('ANNA, Kitchen: note: Waits for the letter (in scene)')).not.toBeNull();
+        expect(cell('ANNA, Garden: not in scene')).not.toBeNull();
+        expect(cell('DOCTOR, Prologue: in scene, not confirmed')).not.toBeNull();
         expect(document.querySelector('[role="grid"]')?.getAttribute('aria-label')).toBe('Characters by scene');
     });
 
     it('draws ■ in the character’s color for a note, ● for the script, ○ for the card only', async () => {
         renderMatrix();
 
-        const note = await waitFor(() => glyph('ANNA, Kitchen: note: Waits for the letter'));
-        const script = requireValue(glyph('DOCTOR, Prologue: in the scene, not confirmed'), 'script glyph');
-        const card = requireValue(glyph('ANNA, Garden: only on the card'), 'card glyph');
+        const note = await waitFor(() => glyph('ANNA, Kitchen: note: Waits for the letter (in scene)'));
+        const script = requireValue(glyph('DOCTOR, Prologue: in scene, not confirmed'), 'script glyph');
+        const card = requireValue(glyph('ANNA, Garden: not in scene'), 'card glyph');
 
         expect(getComputedStyle(requireValue(note, 'note glyph'))).toMatchObject({backgroundColor: 'rgb(204, 51, 68)', borderRadius: '0px'});
         expect(script.dataset.confirmed).toBe('false');
         expect(getComputedStyle(script).borderRadius).not.toBe('0px');
         expect(card.dataset.source).toBe('card');
-        expect(getComputedStyle(card).borderTopColor).toBe('rgb(204, 51, 68)');
-        expect(cell('ANNA, Prologue: not in the scene')?.firstElementChild).toBeNull();
+        expect(getComputedStyle(card).boxShadow).toContain('rgb(204, 51, 68)');
+        expect(cell('ANNA, Prologue: not on the card')?.firstElementChild).toBeNull();
     });
 
     it('heads rows with the color dot and name; the scene count sits in a last column', async () => {
@@ -339,28 +339,39 @@ describe('BoardMatrix', () => {
         const tooltipLines = () => [...requireValue(document.querySelector('[role="tooltip"]'), 'tooltip').querySelectorAll('span')]
             .map(span => span.textContent);
 
-        const noted = await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter'));
+        const noted = await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter (in scene)'));
 
         await warmPointerModality(noted);
         await userEvent.hover(noted);
 
-        expect(tooltipLines()).toEqual(['Waits for the letter', 'Scene: 2. Kitchen']);
+        expect(tooltipLines()).toEqual(['note: Waits for the letter (in scene)', 'Scene: 2. Kitchen']);
 
         await userEvent.unhover(noted);
-        await userEvent.hover(requireValue(cell('DOCTOR, Prologue: in the scene, not confirmed'), 'doctor cell'));
+        await userEvent.hover(requireValue(cell('DOCTOR, Prologue: in scene, not confirmed'), 'doctor cell'));
 
-        expect(tooltipLines()).toEqual(['Scene: 1. Prologue']);
+        expect(tooltipLines()).toEqual(['in scene', 'Scene: 1. Prologue']);
+
+        await userEvent.unhover(requireValue(cell('DOCTOR, Prologue: in scene, not confirmed'), 'doctor cell'));
+        await userEvent.hover(requireValue(cell('ANNA, Garden: not in scene'), 'card cell'));
+
+        expect(tooltipLines()).toEqual(['not in scene', 'Scene: 3. Garden']);
+
+        await userEvent.unhover(requireValue(cell('ANNA, Garden: not in scene'), 'card cell'));
+        await userEvent.hover(requireValue(cell('ANNA, Prologue: not on the card'), 'empty cell'));
+
+        expect(tooltipLines()).toEqual(['not on the card', 'Scene: 1. Prologue']);
     });
 
     it('omits the scene number from the tooltip when the script numbers scenes with “none”', async () => {
         renderMatrix(ACTS, ROWS, undefined, 'none');
 
-        const doctorCell = await waitFor(() => cell('DOCTOR, Prologue: in the scene, not confirmed'));
+        const doctorCell = await waitFor(() => cell('DOCTOR, Prologue: in scene, not confirmed'));
 
         await warmPointerModality(doctorCell);
         await userEvent.hover(doctorCell);
 
-        expect(requireValue(document.querySelector('[role="tooltip"]'), 'tooltip').textContent).toBe('Scene: Prologue');
+        expect([...requireValue(document.querySelector('[role="tooltip"]'), 'tooltip').querySelectorAll('span')]
+            .map(span => span.textContent)).toEqual(['in scene', 'Scene: Prologue']);
 
         await userEvent.unhover(doctorCell);
     });
@@ -368,59 +379,59 @@ describe('BoardMatrix', () => {
     it('is one tab stop: the editable grid has exactly one tabbable cell at any time', async () => {
         renderMatrix();
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
 
         /* Initially, the first cell is tabbable. */
         expect([...document.querySelectorAll<HTMLElement>('[data-cell]')].filter(el => el.tabIndex >= 0)).toHaveLength(1);
 
         await userEvent.tab();
-        expect(document.activeElement).toBe(cell('ANNA, Prologue: not in the scene'));
+        expect(document.activeElement).toBe(cell('ANNA, Prologue: not on the card'));
 
         await userEvent.keyboard('{ArrowRight}');
 
-        expect(document.activeElement).toBe(cell('ANNA, Kitchen: note: Waits for the letter'));
+        expect(document.activeElement).toBe(cell('ANNA, Kitchen: note: Waits for the letter (in scene)'));
 
         /* Still one tabbable cell after arrow key. */
         expect([...document.querySelectorAll<HTMLElement>('[data-cell]')].filter(el => el.tabIndex >= 0)).toHaveLength(1);
 
         await userEvent.keyboard('{ArrowDown}');
 
-        expect(document.activeElement).toBe(cell('DOCTOR, Kitchen: not in the scene, not confirmed'));
+        expect(document.activeElement).toBe(cell('DOCTOR, Kitchen: not on the card, not confirmed'));
 
         await userEvent.keyboard('{ArrowUp}');
         await userEvent.keyboard('{ArrowLeft}');
 
-        expect(document.activeElement).toBe(cell('ANNA, Prologue: not in the scene'));
+        expect(document.activeElement).toBe(cell('ANNA, Prologue: not on the card'));
 
         /* Tab from a cell eventually leaves the grid. */
         for (let i = 0; i < 10; i++) {
             await userEvent.tab();
         }
 
-        expect(document.activeElement).not.toBe(cell('ANNA, Prologue: not in the scene'));
-        expect(document.activeElement).not.toBe(cell('ANNA, Kitchen: note: Waits for the letter'));
+        expect(document.activeElement).not.toBe(cell('ANNA, Prologue: not on the card'));
+        expect(document.activeElement).not.toBe(cell('ANNA, Kitchen: note: Waits for the letter (in scene)'));
     });
 
     it('offers nothing to click: read-only cells are not buttons', async () => {
         renderMatrix();
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
 
         expect(document.querySelector('[role="grid"]')?.querySelectorAll('button')).toHaveLength(0);
-        expect(cell('ANNA, Kitchen: note: Waits for the letter')?.tagName).toBe('TD');
+        expect(cell('ANNA, Kitchen: note: Waits for the letter (in scene)')?.tagName).toBe('TD');
     });
 
     it('renders each glyph as a box with size, not as the border of an inline box', async () => {
         renderMatrix();
 
-        await waitFor(() => glyph('ANNA, Kitchen: note: Waits for the letter'));
+        await waitFor(() => glyph('ANNA, Kitchen: note: Waits for the letter (in scene)'));
 
         const glyphBox = (label: string) => requireValue(glyph(label), label).getBoundingClientRect();
 
         [
-            glyphBox('ANNA, Kitchen: note: Waits for the letter'),
-            glyphBox('DOCTOR, Prologue: in the scene, not confirmed'),
-            glyphBox('ANNA, Garden: only on the card'),
+            glyphBox('ANNA, Kitchen: note: Waits for the letter (in scene)'),
+            glyphBox('DOCTOR, Prologue: in scene, not confirmed'),
+            glyphBox('ANNA, Garden: not in scene'),
         ].forEach(box => {
             expect(box.width).toBeGreaterThanOrEqual(8);
             expect(box.height).toBeGreaterThanOrEqual(8);
@@ -458,7 +469,7 @@ describe('BoardMatrix', () => {
         const onAdd = vi.fn<(characterId: string, column: BoardMatrixSceneColumn) => void>();
         const {paint} = renderEditableMatrix({onAdd});
 
-        await userEvent.click(await waitFor(() => cell('ANNA, Prologue: not in the scene')));
+        await userEvent.click(await waitFor(() => cell('ANNA, Prologue: not on the card')));
 
         expect(onAdd).toHaveBeenCalledExactlyOnceWith('c-anna', ACTS[0].scenes[0]);
 
@@ -473,8 +484,8 @@ describe('BoardMatrix', () => {
         await waitFor(() => !document.querySelector('[role="dialog"]'));
 
         /* Closing without a note leaves the added character on the card, focus back on its cell. */
-        expect(cell('ANNA, Prologue: only on the card')).not.toBeNull();
-        await expect.poll(() => document.activeElement).toBe(cell('ANNA, Prologue: only on the card'));
+        expect(cell('ANNA, Prologue: not in scene')).not.toBeNull();
+        await expect.poll(() => document.activeElement).toBe(cell('ANNA, Prologue: not in scene'));
     });
 
     it('adds from the keyboard: Enter on a focused empty cell', async () => {
@@ -482,10 +493,10 @@ describe('BoardMatrix', () => {
 
         renderEditableMatrix({onAdd});
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
         await userEvent.tab();
 
-        expect(document.activeElement).toBe(cell('ANNA, Prologue: not in the scene'));
+        expect(document.activeElement).toBe(cell('ANNA, Prologue: not on the card'));
 
         await userEvent.keyboard('{Enter}');
 
@@ -500,10 +511,10 @@ describe('BoardMatrix', () => {
 
         renderEditableMatrix({onAdd});
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
         await userEvent.tab();
 
-        expect(document.activeElement).toBe(cell('ANNA, Prologue: not in the scene'));
+        expect(document.activeElement).toBe(cell('ANNA, Prologue: not on the card'));
 
         await userEvent.keyboard(' ');
 
@@ -524,7 +535,7 @@ describe('BoardMatrix', () => {
             await waitFor(() => document.querySelector('[role="tooltip"]') === null);
         };
 
-        await userEvent.click(await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter')));
+        await userEvent.click(await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter (in scene)')));
 
         const dialog = await waitFor(() => document.querySelector('[role="dialog"]'));
 
@@ -532,21 +543,21 @@ describe('BoardMatrix', () => {
         expect(button('Clear note')).toBeDefined();
         expect(button('Remove from card')).toBeUndefined();
 
-        await leave('ANNA, Kitchen: note: Waits for the letter');
-        await userEvent.click(requireValue(cell('ANNA, Garden: only on the card'), 'card cell'));
+        await leave('ANNA, Kitchen: note: Waits for the letter (in scene)');
+        await userEvent.click(requireValue(cell('ANNA, Garden: not in scene'), 'card cell'));
         await waitFor(() => document.querySelector('[role="dialog"]'));
         expect(button('Remove from card')).toBeDefined();
 
-        await leave('ANNA, Garden: only on the card');
-        await userEvent.click(requireValue(cell('DOCTOR, Prologue: in the scene, not confirmed'), 'unconfirmed cell'));
+        await leave('ANNA, Garden: not in scene');
+        await userEvent.click(requireValue(cell('DOCTOR, Prologue: in scene, not confirmed'), 'unconfirmed cell'));
         await waitFor(() => document.querySelector('[role="dialog"]'));
         expect(document.querySelector('textarea')).toBeNull();
         expect(button('Confirm character')).toBeDefined();
         expect(button('Remove from card')).toBeUndefined();
 
         /* The note the panel writes goes through the same actions as on the Wall. */
-        await leave('DOCTOR, Prologue: in the scene, not confirmed');
-        await userEvent.click(requireValue(cell('ANNA, Kitchen: note: Waits for the letter'), 'note cell'));
+        await leave('DOCTOR, Prologue: in scene, not confirmed');
+        await userEvent.click(requireValue(cell('ANNA, Kitchen: note: Waits for the letter (in scene)'), 'note cell'));
 
         const field = await waitFor(() => document.querySelector<HTMLTextAreaElement>('textarea'));
 
@@ -560,7 +571,7 @@ describe('BoardMatrix', () => {
     it('leaves the empty cells of unconfirmed characters inert, even while editing', async () => {
         renderEditableMatrix();
 
-        const empty = await waitFor(() => document.querySelector<HTMLElement>('[aria-label="DOCTOR, Kitchen: not in the scene, not confirmed"]'));
+        const empty = await waitFor(() => document.querySelector<HTMLElement>('[aria-label="DOCTOR, Kitchen: not on the card, not confirmed"]'));
 
         expect(empty.tagName).toBe('TD');
         expect(empty.closest('button')).toBeNull();
@@ -569,7 +580,7 @@ describe('BoardMatrix', () => {
     it('returns focus to an occupied cell after closing its popover with Escape', async () => {
         renderEditableMatrix();
 
-        const notedCell = await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter'));
+        const notedCell = await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter (in scene)'));
 
         await userEvent.click(requireValue(notedCell, 'noted cell'));
         await waitFor(() => document.querySelector('[role="dialog"]'));
@@ -626,7 +637,7 @@ describe('BoardMatrix', () => {
     it('highlights the character name, act name and scene number of the hovered cell, with zero layout shift', async () => {
         renderMatrix();
 
-        const annaCell = await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter'));
+        const annaCell = await waitFor(() => cell('ANNA, Kitchen: note: Waits for the letter (in scene)'));
         const rowName = requireValue(document.querySelector<HTMLElement>('th[scope="row"] [class*="rowName"]'), 'row name');
         const label = requireValue(actLabel('ACT ONE'), 'act label');
         const sceneNumber = requireValue(sceneNumberLabel('2'), 'scene number');
@@ -664,7 +675,7 @@ describe('BoardMatrix', () => {
     it('highlights the same trio for the keyboard-focused cell and moves it with the arrows', async () => {
         renderMatrix();
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
         await userEvent.tab();
 
         const rowName = requireValue(document.querySelector<HTMLElement>('th[scope="row"] [class*="rowName"]'), 'row name');
@@ -686,7 +697,7 @@ describe('BoardMatrix', () => {
     it('opens a cell tooltip to the right of the cell, never above the header', async () => {
         renderMatrix();
 
-        const doctorCell = await waitFor(() => cell('DOCTOR, Prologue: in the scene, not confirmed'));
+        const doctorCell = await waitFor(() => cell('DOCTOR, Prologue: in scene, not confirmed'));
 
         await warmPointerModality(doctorCell);
         await userEvent.hover(doctorCell);
@@ -705,7 +716,7 @@ describe('BoardMatrix', () => {
     it('keeps sticky headers at scroll edges: act band top, row header left', async () => {
         renderMatrix(ACTS, ROWS, 400);
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
 
         const grid = requireValue(document.querySelector<HTMLElement>('[role="grid"]'), 'grid');
         const container = requireValue(grid.parentElement, 'scroll container');
@@ -755,7 +766,7 @@ describe('BoardMatrix', () => {
             </>,
         );
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
 
         const canvas = requireValue(document.querySelector<HTMLElement>('[style*="overflow: auto"]'), 'canvas');
         const actHeader = requireValue(document.querySelector<HTMLElement>('th[data-act]'), 'act header');
@@ -780,7 +791,7 @@ describe('BoardMatrix', () => {
         const onAdd = vi.fn<(characterId: string, column: BoardMatrixSceneColumn) => void>();
         const {paint} = renderEditableMatrix({onAdd});
 
-        await userEvent.click(await waitFor(() => cell('ANNA, Prologue: not in the scene')));
+        await userEvent.click(await waitFor(() => cell('ANNA, Prologue: not on the card')));
 
         expect(onAdd).toHaveBeenCalledExactlyOnceWith('c-anna', ACTS[0].scenes[0]);
 
@@ -799,7 +810,7 @@ describe('BoardMatrix', () => {
     it('mutes unconfirmed character names and adds "not confirmed" to accessible labels', async () => {
         renderMatrix();
 
-        await waitFor(() => cell('ANNA, Prologue: not in the scene'));
+        await waitFor(() => cell('ANNA, Prologue: not on the card'));
 
         const doctorRow = [...document.querySelectorAll<HTMLElement>('th[scope="row"]')].find(
             row => row.textContent?.includes('DOCTOR'),
@@ -815,6 +826,6 @@ describe('BoardMatrix', () => {
         }
 
         // Check that the cell label includes "not confirmed"
-        expect(cell('DOCTOR, Prologue: in the scene, not confirmed')).not.toBeNull();
+        expect(cell('DOCTOR, Prologue: in scene, not confirmed')).not.toBeNull();
     });
 });

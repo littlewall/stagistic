@@ -34,8 +34,14 @@ export const CharacterDot = ({chip}: {chip: BoardCharacterChip}) => (
     />
 );
 
+/** Says in words what the dot's fill says. */
+export const SCENE_STATE_TEXT: Record<BoardCharacterChip['source'], string> = {
+    script: 'in scene',
+    card: 'not in scene',
+};
+
 export const describeCharacterChip = (chip: BoardCharacterChip) => {
     if (chip.characterId === null) return `${chip.name}, not confirmed`;
 
-    return chip.source === 'card' ? `${chip.name}, only on the card` : chip.name;
+    return `${chip.name} (${SCENE_STATE_TEXT[chip.source]})`;
 };

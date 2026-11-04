@@ -150,6 +150,13 @@ export {
     type BoardMatrixRow,
     type BoardMatrixSceneColumn,
 } from './board/BoardMatrix';
+export {
+    BoardRundown,
+    type BoardRundownAct,
+    type BoardRundownProps,
+    type BoardRundownScene,
+    type BoardRundownSong,
+} from './board/BoardRundown';
 export {BoardSceneCast, type BoardSceneCastProps} from './board/BoardSceneCast';
 export {
     BoardToolbar,

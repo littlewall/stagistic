@@ -62,7 +62,11 @@ export const CharacterChipStack = ({
     }
 
     return (
-        <Tooltip label={label} placement="bottom" delay={200}>
+        <Tooltip
+            label={characters.map(chip => <span key={chip.id} className={styles.tooltipLine}>{describeCharacterChip(chip)}</span>)}
+            placement="bottom"
+            delay={200}
+        >
             <button
                 type="button"
                 className={styles.stack}

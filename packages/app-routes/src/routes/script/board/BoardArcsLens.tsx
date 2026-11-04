@@ -27,7 +27,7 @@ export const BoardArcsLens = ({activeLensId, onSelectLens}: BoardArcsLensProps) 
     const {
         source,
         model,
-        records,
+        cardRecords,
         metadata,
         selectedIds,
         setSelectedIds,
@@ -40,16 +40,16 @@ export const BoardArcsLens = ({activeLensId, onSelectLens}: BoardArcsLensProps) 
         model,
         characters: confirmedCharacterRecords,
         displayColorByKey: source.displayColorByKey,
-        records,
+        records: cardRecords,
         filterCharacters,
         selectedIds: new Set(selectedIds),
         sceneNumberFormat: getSceneNumberFormat(effectiveScriptSettingsDraft),
     }), [
+        cardRecords,
         confirmedCharacterRecords,
         effectiveScriptSettingsDraft,
         filterCharacters,
         model,
-        records,
         selectedIds,
         source.displayColorByKey,
     ]);

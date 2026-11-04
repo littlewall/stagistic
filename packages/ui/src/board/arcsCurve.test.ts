@@ -19,8 +19,8 @@ describe('whole-play curve', () => {
                 headingBlockId: 's0',
                 sceneIndex: 0,
                 value: 50,
+                hasStoredValue: true,
                 evidence: true,
-                onCard: false,
                 note: null,
             },
         ], 3, layout);

@@ -209,6 +209,7 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                                             tone: 'danger',
                                         },
                                     ]}
+                                    placement="bottom start"
                                     onAction={() => requestDeleteAct(actBlockId, act.name)}
                                 />
                             ) : undefined}

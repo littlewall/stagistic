@@ -48,9 +48,8 @@ export const ArcsPointPopover = ({
             actions={{
                 ...characterActions(scene.headingBlockId),
                 onRemove: undefined,
-                onRemovePoint: () => onRemovePoint(scene.headingBlockId, arc.id),
+                onRemovePoint: point.hasStoredValue ? () => onRemovePoint(scene.headingBlockId, arc.id) : undefined,
             }}
-            isOffCard={!point.onCard && !point.evidence}
             sceneLabel={sceneLabel(scene)}
             isOpen
             onOpenChange={open => {
