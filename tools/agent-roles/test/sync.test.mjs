@@ -148,7 +148,7 @@ describe('syncAgents', () => {
         const cwd = repo({implementer: {provider: 'codex', model: 'gpt-6.1-sol'}});
         const result = sync(cwd);
 
-        assert.ok(result.errors.includes('implementer: write roles must use provider claude'));
+        assert.ok(result.errors.includes('implementer: write roles must use provider claude or opencode'));
         assert.deepEqual(result.written, []);
         assert.equal(existsSync(path.join(cwd, '.claude')), false);
     });

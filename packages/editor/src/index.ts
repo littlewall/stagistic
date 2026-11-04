@@ -13,6 +13,7 @@ export {EditorCanvas} from './editor/components/EditorCanvas';
 export {default as EditorToolbar} from './editor/components/EditorToolbar';
 export {EditorInstanceProvider, useEditorInstance} from './editor/context';
 export type {
+    BlockPages,
     ConvertSceneRequest,
     DeleteActRequest,
     DeleteSceneRequest,
@@ -23,6 +24,7 @@ export type {
     EditorLayoutProps,
     EditorLifecycleCallbacks,
     EditorLiveActiveBlockInfo,
+    EditorLiveBlockPagesSnapshot,
     EditorLiveCharacterSnapshot,
     EditorLiveMusicSnapshot,
     EditorLiveScenePlacementSnapshot,
@@ -59,6 +61,7 @@ export {EditorSnapshotStoreProvider} from './editor/live/context';
 export {
     useEditorLiveActiveBlock,
     useEditorLiveActiveBlockInfo,
+    useEditorLiveBlockPages,
     useEditorLiveCharacters,
     useEditorLiveMusic,
     useEditorLiveScenePlacement,

@@ -8,6 +8,11 @@
     background: var(--dot-color);
     border-radius: var(--radius-full);
 
+    &.hollow {
+        background: transparent;
+        border: 1px solid var(--dot-color);
+    }
+
     &.neutral {
         --dot-color: var(--color-border-strong);
     }

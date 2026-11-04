@@ -6,13 +6,14 @@ import styles from './ColorDot.module.css';
 export interface ColorDotProps {
     /** Character color; null draws the neutral dot of an unassigned color. */
     color: string | null,
+    isFilled?: boolean,
 }
 
 /** A character's color as a small dot. Decorative: the name always sits beside it. */
-export const ColorDot = ({color}: ColorDotProps) => (
+export const ColorDot = ({color, isFilled = true}: ColorDotProps) => (
     <span
         aria-hidden="true"
-        className={clsx(styles.dot, color === null && styles.neutral)}
+        className={clsx(styles.dot, color === null && styles.neutral, !isFilled && styles.hollow)}
         style={color === null ? undefined : {'--dot-color': color} as CSSProperties}
     />
 );

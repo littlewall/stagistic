@@ -1,24 +1,20 @@
 import type {ScriptDocument} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {useCallback, useRef} from 'react';
+import {useCallback} from 'react';
 
 import type {
     EditorIndexSnapshot,
-    EditorLiveScenePlacementSnapshot,
     EditorLiveSnapshot,
     EditorValueChangeMeta,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildSidebarProjectionFromIndex, type SidebarProjectionColorContext} from '../live/buildSidebarProjectionFromIndex';
-import {type EditorSnapshotStore, EMPTY_SCENE_PLACEMENT} from '../live/store';
+import type {EditorSnapshotStore} from '../live/store';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
-import {buildScenePlacements} from '../runtime/buildScenePlacements';
 import {
     getBlockUiEventsFromState,
     getEditorRuntimeFromState,
-    getPaginationPluginState,
 } from '../tiptap/extensions';
-import type {PaginationState} from '../tiptap/extensions/pagination/types';
 import {
     ensureScriptBlockId,
     isScriptBlockNodeName,
@@ -26,6 +22,7 @@ import {
 } from '../tiptap/scriptCore';
 import type {UseEditorLifecycleArgs} from './editorLifecycleTypes';
 import type {useLatestRef} from './useLatestRef';
+import {usePaginationSnapshots} from './usePaginationSnapshots';
 
 export type {UseEditorLifecycleArgs};
 
@@ -135,37 +132,7 @@ export const useEditorLifecycleSync = ({
         rememberedColorByKeyRef,
         persistentCharactersRef,
     } = characters ?? {};
-    /*
-     * Scene placement is derived from the last measured pagination pass. Recomputing
-     * walks the doc + reads laid-out geometry, so we rebuild only when the pagination
-     * object identity changes (i.e. a real recalc) and keep the same snapshot ref
-     * otherwise so the live store skips a redundant emit.
-     */
-    const lastPaginationRef = useRef<PaginationState | null>(null);
-    const scenePlacementRef = useRef<EditorLiveScenePlacementSnapshot>(EMPTY_SCENE_PLACEMENT);
-    const scenePlacementFingerprintRef = useRef<string>('');
-
-    const resolveScenePlacement = useCallback((targetEditor: TiptapEditor): EditorLiveScenePlacementSnapshot => {
-        const paginationPlugin = getPaginationPluginState(targetEditor.state);
-        const pagination = paginationPlugin?.pagination ?? null;
-
-        if (!pagination || !paginationPlugin?.hasComputed || pagination === lastPaginationRef.current) {
-            return scenePlacementRef.current;
-        }
-
-        lastPaginationRef.current = pagination;
-
-        const {byBlockId, fingerprint} = buildScenePlacements(targetEditor.view, pagination);
-
-        if (fingerprint === scenePlacementFingerprintRef.current && scenePlacementRef.current.hasComputed) {
-            return scenePlacementRef.current;
-        }
-
-        scenePlacementFingerprintRef.current = fingerprint;
-        scenePlacementRef.current = {byBlockId, hasComputed: true};
-
-        return scenePlacementRef.current;
-    }, []);
+    const resolvePaginationSnapshots = usePaginationSnapshots();
 
     const syncValueFromEditor = useCallback(
         (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => {
@@ -243,7 +210,7 @@ export const useEditorLifecycleSync = ({
                 activeBlockId: runtime.activeBlockId,
                 activeBlockType: runtime.activeBlockType,
                 structure: nextStructure,
-                scenePlacement: resolveScenePlacement(targetEditor),
+                ...resolvePaginationSnapshots(targetEditor),
                 characters: nextCharacters,
                 music: runtime.music,
                 ...snapshot ? {index: snapshot} : {},
@@ -261,7 +228,7 @@ export const useEditorLifecycleSync = ({
             lastEmittedActiveBlockIdRef,
             liveStore,
             onActiveBlockChangeRef,
-            resolveScenePlacement,
+            resolvePaginationSnapshots,
         ],
     );
 

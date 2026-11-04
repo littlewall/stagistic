@@ -186,6 +186,8 @@
     --sidebar-width: 16rem; /* 256px */
     --sidebar-max-width: 22rem; /* 352px */
     --sidebar-head-height: var(--control-height-md);
+    /* The Board's centered column: wider than the homepage's 1400px, narrower than the Editor's full width. */
+    --layout-board-max-width: 1680px;
 
     /* ── Interaction states ────────────────────────────────────────
        One mechanic per state. Two states never differ only in the alpha

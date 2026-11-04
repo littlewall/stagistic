@@ -50,7 +50,8 @@ const commitDocument = (
     };
 
     editor.commands.setContent(nextDocument, {emitUpdate: false});
-    editor.view.dispatch(editor.state.tr.setDocAttribute('settings', currentDocAttrs?.settings ?? null).setMeta('preventUpdate', true));
+    // Restoring the settings is part of the change above; as its own step it would make the first undo invisible.
+    editor.view.dispatch(editor.state.tr.setDocAttribute('settings', currentDocAttrs?.settings ?? null).setMeta('preventUpdate', true).setMeta('addToHistory', false));
 
     editor.view.dispatch(editor.state.tr.setMeta('preventUpdate', true).setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}));
 
@@ -148,7 +149,8 @@ export const tryCommitSceneReorder = (
     };
 
     editor.commands.setContent(nextDocument, {emitUpdate: false});
-    editor.view.dispatch(editor.state.tr.setDocAttribute('settings', currentDocAttrs?.settings ?? null).setMeta('preventUpdate', true));
+    // Restoring the settings is part of the change above; as its own step it would make the first undo invisible.
+    editor.view.dispatch(editor.state.tr.setDocAttribute('settings', currentDocAttrs?.settings ?? null).setMeta('preventUpdate', true).setMeta('addToHistory', false));
 
     setLatestValue(savedValue, revision);
     onValueChangeRef.current?.(savedValue, {

@@ -33,6 +33,7 @@ export const buildEmptyPaginationStateResult = ({
         pagination: {
             pageCount: 1,
             pages: [],
+            blockOffsets: [],
             pageHeight: options.pageHeight,
             contentHeight,
             lineHeightPx: fallbackHeight,
@@ -51,12 +52,14 @@ interface BuildFinalPaginationStateResultArgs extends SharedResultArgs {
     view: EditorView,
     decorations: Decoration[],
     pages: PaginationState['pages'],
+    blockOffsets: PaginationState['blockOffsets'],
 }
 
 export const buildFinalPaginationStateResult = ({
     view,
     decorations,
     pages,
+    blockOffsets,
     options,
     contentHeight,
     fallbackHeight,
@@ -69,6 +72,7 @@ export const buildFinalPaginationStateResult = ({
         pagination: {
             pageCount: pages.length,
             pages,
+            blockOffsets,
             pageHeight: options.pageHeight,
             contentHeight,
             lineHeightPx: fallbackHeight,

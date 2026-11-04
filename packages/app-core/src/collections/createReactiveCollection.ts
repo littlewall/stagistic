@@ -7,7 +7,11 @@ import {createReactiveSourceStore} from './createReactiveSourceStore';
 import {createReactiveCollectionStatusStore} from './reactiveCollectionStatus';
 
 export interface ReactiveCollectionMutationHandlers<T extends object> {
-    insert?: (value: T) => Promise<void>,
+    /**
+     * May resolve with the durable record: the server assigns values the optimistic copy
+     * cannot know (timestamps), so confirmation compares the returned record instead.
+     */
+    insert?: (value: T) => Promise<T | void>,
     update?: (original: T, modified: T, changes: Partial<T>) => Promise<void>,
     delete?: (value: T) => Promise<void>,
 }
@@ -60,6 +64,7 @@ const isConfirmed = <T extends object, TKey extends string | number>(
     rows: readonly T[],
     mutation: ReactivePendingMutation<T, TKey>,
     getKey: (value: T) => TKey,
+    durableInsert?: T,
 ) => {
     const row = rows.find(value => getKey(value) === mutation.key);
 
@@ -71,7 +76,7 @@ const isConfirmed = <T extends object, TKey extends string | number>(
         return false;
     }
 
-    const expectedValues = mutation.type === 'insert' ? toDomainCollectionValue(mutation.modified) : mutation.changes;
+    const expectedValues = mutation.type === 'insert' ? toDomainCollectionValue(durableInsert ?? mutation.modified) : mutation.changes;
 
     return Object.entries(expectedValues).every(([key, value]) => {
         return structuralValueEquals(row[key as keyof T], value);
@@ -83,10 +88,11 @@ const waitForConfirmation = async <T extends object, TKey extends string | numbe
     mutation: ReactivePendingMutation<T, TKey>,
     getKey: (value: T) => TKey,
     timeoutMs: number,
+    durableInsert?: T,
 ) => {
     await source.refresh();
 
-    if (isConfirmed(await source.read(), mutation, getKey)) {
+    if (isConfirmed(await source.read(), mutation, getKey, durableInsert)) {
         return;
     }
 
@@ -99,7 +105,7 @@ const waitForConfirmation = async <T extends object, TKey extends string | numbe
     try {
         unsubscribe = await source.subscribe(
             rows => {
-                if (!isConfirmed(rows, mutation, getKey)) {
+                if (!isConfirmed(rows, mutation, getKey, durableInsert)) {
                     return;
                 }
 
@@ -142,8 +148,10 @@ export const createReactiveCollection = <T extends object, TKey extends string |
                 throw new Error(`Missing ${action} handler for collection ${id}`);
             }
 
-            await command();
-            await waitForConfirmation(source, mutation, getKey, confirmationTimeoutMs);
+            const result = await command();
+            const durableInsert = action === 'insert' && result ? result : undefined;
+
+            await waitForConfirmation(source, mutation, getKey, confirmationTimeoutMs, durableInsert);
             status.finishMutation(mutation.key, action);
         } catch (error) {
             const normalizedError = error instanceof Error ? error : new Error(String(error));
@@ -165,20 +173,39 @@ export const createReactiveCollection = <T extends object, TKey extends string |
                 write,
                 commit,
                 markReady,
-                truncate,
             }) => {
                 let active = true;
                 let unsubscribe: (() => void) | undefined;
+                let previousRows = new Map<TKey, T>();
 
                 const applySnapshot = (rows: readonly T[]) => {
                     if (!active) {
                         return;
                     }
 
-                    begin({immediate: true});
-                    truncate();
-                    rows.forEach(value => write({type: 'insert', value}));
+                    const nextRows = new Map(rows.map(value => [getKey(value), value]));
+
+                    /*
+                     * Let TanStack apply the confirming snapshot after pending writes settle.
+                     * An immediate truncate would restore the client copy over server values.
+                     */
+                    begin();
+                    previousRows.forEach((value, key) => {
+                        if (!nextRows.has(key)) write({type: 'delete', value});
+                    });
+                    nextRows.forEach((value, key) => {
+                        const previous = previousRows.get(key);
+
+                        if (!previous) {
+                            write({type: 'insert', value});
+
+                            return;
+                        }
+
+                        if (!structuralValueEquals(previous, value)) write({type: 'update', value});
+                    });
                     commit();
+                    previousRows = nextRows;
                     confirmed.setRows(rows);
 
                     if (!status.getSnapshot().isReady) {

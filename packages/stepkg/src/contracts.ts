@@ -165,7 +165,10 @@ export interface StepkgSceneCharacter {
     headingBlockId: string,
     characterId: string,
     note: string | null,
+    /** −100…100 on the continuous arc scale. */
     arcValue: number | null,
+    /** False when the record only carries an arc point; the card does not show the character. */
+    onCard: boolean,
     createdAt: string,
     updatedAt: string,
 }

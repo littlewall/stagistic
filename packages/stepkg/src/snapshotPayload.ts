@@ -3,6 +3,7 @@ import {deflateSync, inflateSync} from 'fflate';
 
 import type {StepkgSnapshot} from './contracts';
 import type {StepkgImportIssue} from './importContracts';
+import {serializeSceneCharacters, upgradeSceneCharactersPayload} from './sceneCharacters';
 import {stableJsonBytes} from './stableJson';
 
 /*
@@ -34,7 +35,7 @@ export const encodeStepkgSnapshotPayload = (snapshot: StepkgSnapshot): Uint8Arra
         format: STEPKG_SNAPSHOT_PAYLOAD_FORMAT,
         formatVersion: STEPKG_SNAPSHOT_PAYLOAD_VERSION,
         documentSchemaVersion: SCRIPT_DOCUMENT_SCHEMA_VERSION,
-        snapshot,
+        snapshot: {...snapshot, sceneCharacters: serializeSceneCharacters(snapshot.sceneCharacters.items)},
     };
 
     return deflateSync(stableJsonBytes(envelope));
@@ -87,9 +88,13 @@ export const decodeStepkgSnapshotPayload = (bytes: Uint8Array): StepkgSnapshotPa
         return {ok: false, issues: [{code: 'schema_invalid', stage: 'schema'}]};
     }
 
+    const sceneCharacters = upgradeSceneCharactersPayload(snapshot.sceneCharacters);
+
+    if (!sceneCharacters) return {ok: false, issues: [{code: 'schema_invalid', stage: 'schema'}]};
+
     return {
         ok: true,
-        snapshot: {...snapshot, sceneCharacters: snapshot.sceneCharacters ?? {items: []}} as unknown as StepkgSnapshot,
+        snapshot: {...snapshot, sceneCharacters} as unknown as StepkgSnapshot,
         documentSchemaVersion,
     };
 };

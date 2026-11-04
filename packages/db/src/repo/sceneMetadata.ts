@@ -1,3 +1,4 @@
+import {ARC_VALUE_RANGE_MESSAGE, isArcValue} from '@stagistic/shared';
 import {and, eq} from 'drizzle-orm';
 
 import type {DbClient} from '../queries';
@@ -64,9 +65,7 @@ export const createSceneMetadataHandlers = ({
     const putSceneCharacter: SceneMetadataRepository['putSceneCharacter'] = async (scriptId, headingBlockId, characterId, input) => {
         const arc = input.arcValue;
 
-        if (arc !== undefined && arc !== null && (!Number.isInteger(arc) || arc < -3 || arc > 3)) {
-            throw new RangeError('Arc value must be an integer from -3 to 3.');
-        }
+        if (arc !== undefined && arc !== null && !isArcValue(arc)) throw new RangeError(ARC_VALUE_RANGE_MESSAGE);
 
         return mutate(scriptId, headingBlockId, 'scene.character.put', {characterId, ...input}, async (tx, now) => {
             const [scene] = await tx.select({id: scriptScenes.id}).from(scriptScenes).where(and(
@@ -88,6 +87,7 @@ export const createSceneMetadataHandlers = ({
                 characterId,
                 note,
                 arcValue: arc ?? null,
+                onCard: input.onCard ?? true,
                 createdAt: now,
                 updatedAt: now,
             })
@@ -100,6 +100,7 @@ export const createSceneMetadataHandlers = ({
                     set: {
                         ...input.note !== undefined ? {note} : {},
                         ...arc !== undefined ? {arcValue: arc} : {},
+                        ...input.onCard !== undefined ? {onCard: input.onCard} : {},
                         updatedAt: now,
                     },
                 })

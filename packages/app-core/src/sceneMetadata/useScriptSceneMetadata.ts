@@ -26,7 +26,7 @@ export const useScriptSceneCharacters = (scriptId: string | null, repository: Sc
     return {
         sceneCharacters: query.data ?? [],
         isLoading: Boolean(store) && (!status.isReady || query.isLoading),
-        error: status.sourceError,
+        error: status.sourceError ?? status.mutations.find(mutation => mutation.status === 'failed')?.error ?? null,
     };
 };
 
@@ -38,6 +38,6 @@ export const useScriptSceneSynopses = (scriptId: string | null, repository: Scri
     return {
         sceneSynopses: query.data ?? [],
         isLoading: Boolean(store) && (!status.isReady || query.isLoading),
-        error: status.sourceError,
+        error: status.sourceError ?? status.mutations.find(mutation => mutation.status === 'failed')?.error ?? null,
     };
 };

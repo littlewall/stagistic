@@ -57,7 +57,8 @@ const snapshot = (): StepkgSnapshot => ({
             headingBlockId: 'h1',
             characterId: 'c1',
             note: 'Leaves',
-            arcValue: -2,
+            arcValue: -66,
+            onCard: false,
             createdAt: timestamp,
             updatedAt: timestamp,
         },
@@ -115,6 +116,57 @@ describe('scene character packages', () => {
 
         if (decoded.ok) expect(decoded.snapshot.sceneCharacters).toEqual(snapshot().sceneCharacters);
     });
+    it('writes sceneCharacters.v2 with a version marker and onCard', async () => {
+        const entries = unzipSync(await exportBytes());
+        const file = JSON.parse(new TextDecoder().decode(entries['data/scene-characters.json'])) as {version: number, items: unknown[]};
+
+        expect(file.version).toBe(2);
+        expect(file.items).toEqual([expect.objectContaining({arcValue: -66, onCard: false})]);
+    });
+    it('reads v1 files with arc x33 and every record on the card', async () => {
+        const record = snapshot().sceneCharacters.items[0];
+        const {onCard: _onCard, ...v1Record} = record;
+        const result = await readStepkg(await rewrite({items: [{...v1Record, arcValue: -2}]}));
+
+        expect(result.ok).toBe(true);
+
+        if (result.ok) expect(result.package.snapshot.sceneCharacters.items).toEqual([
+            {
+                ...record,
+                arcValue: -66,
+                onCard: true,
+            },
+        ]);
+
+        expect((await readStepkg(await rewrite({items: [{...v1Record, arcValue: 4}]}))).ok).toBe(false);
+    });
+    it('rejects v2 records without onCard and unknown versions', async () => {
+        const record = snapshot().sceneCharacters.items[0];
+        const {onCard: _onCard, ...noFlag} = record;
+
+        expect((await readStepkg(await rewrite({version: 2, items: [noFlag]}))).ok).toBe(false);
+        expect((await readStepkg(await rewrite({version: 3, items: [record]}))).ok).toBe(false);
+    });
+    it('upgrades stored snapshot payloads written before v2', () => {
+        const record = snapshot().sceneCharacters.items[0];
+        const {onCard: _onCard, ...v1Record} = record;
+        const decoded = decodeStepkgSnapshotPayload(deflateSync(new TextEncoder().encode(JSON.stringify({
+            format: 'stagistic-snapshot',
+            formatVersion: 1,
+            documentSchemaVersion: 4,
+            snapshot: {...snapshot(), sceneCharacters: {items: [{...v1Record, arcValue: 3}]}},
+        }))));
+
+        expect(decoded.ok).toBe(true);
+
+        if (decoded.ok) expect(decoded.snapshot.sceneCharacters.items).toEqual([
+            {
+                ...record,
+                arcValue: 99,
+                onCard: true,
+            },
+        ]);
+    });
     it('defaults older packages and snapshot payloads to no records', async () => {
         const result = await readStepkg(await rewrite(undefined));
 
@@ -142,17 +194,21 @@ describe('scene character packages', () => {
                 headingBlockId: 'new-heading',
                 characterId: 'new-id',
                 note: 'Leaves',
-                arcValue: -2,
+                arcValue: -66,
+                onCard: false,
             }),
         ]);
     });
     it('drops unknown headings and characters with warnings', async () => {
         const record = snapshot().sceneCharacters.items[0];
-        const result = await readStepkg(await rewrite({items: [
-            record,
-            {...record, headingBlockId: 'missing'},
-            {...record, characterId: 'missing'},
-        ]}));
+        const result = await readStepkg(await rewrite({
+            version: 2,
+            items: [
+                record,
+                {...record, headingBlockId: 'missing'},
+                {...record, characterId: 'missing'},
+            ],
+        }));
 
         expect(result.ok).toBe(true);
 
@@ -163,8 +219,8 @@ describe('scene character packages', () => {
         }
     });
     it.each([
-        4,
-        -4,
+        101,
+        -101,
         1.5,
     ])('rejects arc %s on export and import', async arcValue => {
         const source = snapshot();
@@ -172,7 +228,7 @@ describe('scene character packages', () => {
         source.sceneCharacters.items[0].arcValue = arcValue;
         expect(validateStepkgSnapshot(source)).toEqual(expect.arrayContaining([expect.objectContaining({code: 'invalid_snapshot'})]));
 
-        const result = await readStepkg(await rewrite(source.sceneCharacters));
+        const result = await readStepkg(await rewrite({version: 2, items: source.sceneCharacters.items}));
 
         expect(result.ok).toBe(false);
     });

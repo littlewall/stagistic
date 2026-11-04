@@ -7,6 +7,7 @@ import {
     describe,
     expect,
     it,
+    vi,
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
@@ -47,9 +48,11 @@ const renderStack = (characters: BoardCharacterChip[]) => {
 
 const chip = (id: string, overrides: Partial<BoardCharacterChip> = {}): BoardCharacterChip => ({
     id,
+    characterId: id,
     name: id.toUpperCase(),
     color: '#cc3344',
-    level: 'present',
+    source: 'script',
+    note: null,
     ...overrides,
 });
 
@@ -59,7 +62,7 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-const dots = () => [...document.querySelectorAll<HTMLElement>('[data-level]')];
+const dots = () => [...document.querySelectorAll<HTMLElement>('[data-source]')];
 
 describe('CharacterChipStack', () => {
     it('renders nothing for a scene without characters', () => {
@@ -82,10 +85,10 @@ describe('CharacterChipStack', () => {
             clara,
         ] = dots().map(dot => getComputedStyle(dot));
 
-        expect(dots().map(dot => dot.dataset.level)).toEqual([
-            'present',
-            'present',
-            'present',
+        expect(dots().map(dot => dot.dataset.source)).toEqual([
+            'script',
+            'script',
+            'script',
         ]);
         expect(requireValue(anna, 'anna').backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(requireValue(ben, 'ben').backgroundColor).not.toBe(requireValue(anna, 'anna').backgroundColor);
@@ -94,7 +97,7 @@ describe('CharacterChipStack', () => {
     });
 
     it('draws an unconfirmed character in a neutral color', async () => {
-        renderStack([chip('anna'), chip('doctor', {color: null})]);
+        renderStack([chip('anna'), chip('doctor', {color: null, characterId: null})]);
         await waitFor(() => dots()[1]);
 
         const [anna, doctor] = dots().map(dot => getComputedStyle(dot).backgroundColor);
@@ -119,6 +122,51 @@ describe('CharacterChipStack', () => {
         expect(document.body.textContent).toContain('+3');
     });
 
+    it('lists each character with its state in a read-only stack tooltip', async () => {
+        renderStack([
+            chip('anna'),
+            chip('ben', {source: 'card'}),
+            chip('clara', {characterId: null}),
+        ]);
+
+        const group = await waitFor(() => document.querySelector<HTMLElement>('[aria-label^="Characters"]'));
+
+        await userEvent.tab();
+        await userEvent.tab();
+
+        expect(document.activeElement).toBe(group);
+
+        const tooltip = await waitFor(() => document.querySelector('[role="tooltip"]'));
+
+        expect([...tooltip.querySelectorAll('span')].map(line => line.textContent)).toEqual([
+            'ANNA (in scene)',
+            'BEN (not in scene)',
+            'CLARA, not confirmed',
+        ]);
+    });
+
+    it('offers Clear note for a noted character whatever its source', async () => {
+        const onNoteCommit = vi.fn();
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+        root = createRoot(host);
+        root.render(
+            <CharacterChipStack
+                characters={[chip('ben', {source: 'card', note: 'Hides'})]}
+                actions={{onNoteCommit, onConfirm: vi.fn()}}
+            />,
+        );
+
+        await userEvent.click(await waitFor(() => document.querySelector<HTMLElement>('[aria-label="BEN (not in scene)"]')));
+
+        const clear = await waitFor(() => [...document.querySelectorAll('button')].find(item => item.textContent === 'Clear note'));
+
+        await userEvent.click(clear);
+
+        expect(onNoteCommit).toHaveBeenCalledWith(expect.objectContaining({id: 'ben'}), null);
+    });
+
     it('names the characters for assistive tech and reveals them on keyboard focus', async () => {
         renderStack([
             chip('anna'),
@@ -138,6 +186,10 @@ describe('CharacterChipStack', () => {
 
         const tooltip = await waitFor(() => document.querySelector('[role="tooltip"]'));
 
-        expect(tooltip.textContent).toBe('ANNA, BEN, CLARA');
+        expect([...tooltip.querySelectorAll('span')].map(line => line.textContent)).toEqual([
+            'ANNA (in scene)',
+            'BEN (in scene)',
+            'CLARA (in scene)',
+        ]);
     });
 });

@@ -80,13 +80,25 @@ describe('scene metadata repository', () => {
     it('rejects invalid arcs, missing headings and characters from another script', async () => {
         const {repository} = await setup();
 
-        await expect(repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: 4})).rejects.toThrow();
+        await expect(repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: 101})).rejects.toThrow();
         await expect(repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: 1.5})).rejects.toThrow();
         expect(await repository.updateSceneSynopsis('s1', 'missing', 'No')).toBe(false);
         expect(await repository.putSceneCharacter('s1', 'missing', 'c1', {})).toBeNull();
         await repository.createScriptWithId({id: 's2', title: 'Other'});
         await repository.confirmScriptCharacterWithId('s2', {id: 'c2', key: 'BEN'});
         expect(await repository.putSceneCharacter('s1', 'h1', 'c2', {})).toBeNull();
+    });
+
+    it('stores the continuous arc range and the on-card flag with its default', async () => {
+        const {repository} = await setup();
+
+        await repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: -100});
+        expect(await repository.listSceneCharacters('s1')).toEqual([expect.objectContaining({arcValue: -100, onCard: true})]);
+        await repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: 100, onCard: false});
+        expect(await repository.listSceneCharacters('s1')).toEqual([expect.objectContaining({arcValue: 100, onCard: false})]);
+        await repository.putSceneCharacter('s1', 'h1', 'c1', {note: 'Back'});
+        expect(await repository.listSceneCharacters('s1')).toEqual([expect.objectContaining({note: 'Back', onCard: false})]);
+        await expect(repository.putSceneCharacter('s1', 'h1', 'c1', {arcValue: -101})).rejects.toThrow();
     });
 
     it('cascades character and script deletion and rejects read-only mutations', async () => {

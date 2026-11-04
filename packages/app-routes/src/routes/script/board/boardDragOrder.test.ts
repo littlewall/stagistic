@@ -17,6 +17,7 @@ const scene = (id: string): WallScene => ({
     number: 0,
     title: id,
     page: null,
+    synopsis: null,
     isCollapsed: false,
     chips: [],
 });

@@ -25,8 +25,19 @@ tasks:
     options:
       cache: false
 
+  # Live OpenCode Go models vs. role candidates and the tier table.
+  agents-models:
+    command: 'node tools/agent-roles/bin/models.mjs'
+    options:
+      cache: false
+
   agents-test:
     command: 'node --test tools/agent-roles/test/*.test.mjs'
+    options:
+      cache: false
+
+  upstream-check:
+    command: 'node tools/agent-flows/bin/upstream.mjs check'
     options:
       cache: false
 
@@ -99,6 +110,8 @@ tasks:
     command: 'echo "All test suites passed."'
     deps:
       - 'root:test'
+      - 'agent-flows:test'
+      - 'agent-roles:test'
       - 'app-core:test-browser'
       - 'app-routes:test-browser'
       - 'editor:test-browser'

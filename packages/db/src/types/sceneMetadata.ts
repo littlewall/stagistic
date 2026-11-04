@@ -8,6 +8,8 @@ export type ScriptSceneCharacter = InferSelectModel<typeof scriptSceneCharacters
 export interface SceneCharacterInput {
     note?: string | null,
     arcValue?: number | null,
+    /** Omitted: a new record is on the card and an existing one keeps its state. */
+    onCard?: boolean,
 }
 
 export interface ScriptSceneSynopsis {

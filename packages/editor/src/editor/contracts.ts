@@ -138,6 +138,25 @@ export interface ScenePlacement {
     startPage: number,
 }
 
+export interface BlockPages {
+    /** 1-based page the block starts on. */
+    startPage: number,
+    /** 1-based page holding the block's last position; equals `startPage` unless it crosses a page break. */
+    endPage: number,
+    /** Where the block starts, as a page position: `pageIndex0 + fraction of the page's height`. */
+    startAt: number,
+    /** Where the block ends, as a page position (same scale as `startAt`). */
+    endAt: number,
+    /** True when the block takes no height (a collapsed scene's body): its position says nothing about length. */
+    isHidden: boolean,
+}
+
+export interface EditorLiveBlockPagesSnapshot {
+    byBlockId: ReadonlyMap<string, BlockPages>,
+    /** True once pagination has produced at least one measured layout. */
+    hasComputed: boolean,
+}
+
 export interface EditorLiveScenePlacementSnapshot {
     byBlockId: ReadonlyMap<string, ScenePlacement>,
     /** True once pagination has produced at least one measured layout. */
@@ -165,6 +184,8 @@ export interface EditorLiveSnapshot {
     index: EditorIndexSnapshot,
     structure: EditorLiveStructureSnapshot,
     scenePlacement: EditorLiveScenePlacementSnapshot,
+    /** Per-block page ranges; changes on any block's page move, so only Rundown subscribes. */
+    blockPages: EditorLiveBlockPagesSnapshot,
     characters: EditorLiveCharacterSnapshot,
     music: EditorLiveMusicSnapshot,
     activeBlockId: string | null,

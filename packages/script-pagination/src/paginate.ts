@@ -1,6 +1,7 @@
 import {selectSplitPoint} from './selectSplitPoint';
 import type {
     BlockLineMap,
+    BlockOffsets,
     PageBreak,
     PageInfo,
     PaginationPlan,
@@ -37,6 +38,7 @@ export const paginate = (
 
     const breaks: PageBreak[] = [];
     const pages: PageInfo[] = [];
+    const blockOffsets: BlockOffsets[] = [];
 
     if (contentHeight <= 0) {
         return {
@@ -44,6 +46,7 @@ export const paginate = (
             pages: [],
             breaks: [],
             endSpacer: null,
+            blockOffsets: [],
         };
     }
 
@@ -54,6 +57,8 @@ export const paginate = (
     let pageStartOffset = 0;
     let offsetCursor = 0;
     let lastBlockEndKey: string | null = null;
+    let pageContinuesBlock = false;
+    let nextPageContinues = false;
 
     const closePage = (endKeyOverride?: string) => {
         if (pageStartKey === null) {
@@ -66,6 +71,7 @@ export const paginate = (
             endKey: endKeyOverride ?? lastBlockEndKey ?? pageStartKey,
             startOffset: pageStartOffset,
             endOffset: offsetCursor,
+            continuesBlock: pageContinuesBlock,
         });
         pageIndex += 1;
         currentHeight = 0;
@@ -77,6 +83,8 @@ export const paginate = (
         if (pageStartKey === null) {
             pageStartKey = key;
             pageStartOffset = offsetCursor;
+            pageContinuesBlock = nextPageContinues;
+            nextPageContinues = false;
         }
     };
 
@@ -117,6 +125,7 @@ export const paginate = (
                     endKey: block.key,
                     startOffset: offsetCursor,
                     endOffset: offsetCursor,
+                    continuesBlock: false,
                 });
                 pageIndex += 1;
             }
@@ -137,8 +146,20 @@ export const paginate = (
         // --- Place the block, splitting only if splittable. ---
         let blockRemaining = block.height;
         let lineMap: BlockLineMap | null = null;
+        let startOffset: number | null = null;
+        const markStart = () => {
+            startOffset ??= offsetCursor;
+        };
+        const recordOffsets = () => {
+            blockOffsets.push({
+                key: block.key,
+                startOffset: startOffset ?? offsetCursor,
+                endOffset: offsetCursor,
+            });
+        };
 
         const placeRemainder = () => {
+            markStart();
             currentHeight += blockRemaining;
             pageHasContent = true;
             offsetCursor += blockRemaining;
@@ -210,6 +231,7 @@ export const paginate = (
             const {breakPos, fragmentHeight} = decision;
             const leftover = Math.max(0, spaceLeft - fragmentHeight);
 
+            markStart();
             currentHeight += fragmentHeight;
             pageHasContent = true;
             offsetCursor += fragmentHeight;
@@ -224,8 +246,11 @@ export const paginate = (
             });
             offsetCursor += leftover + bottomSpacing + topSpacing;
             blockRemaining = Math.max(0, blockRemaining - fragmentHeight);
+            nextPageContinues = true;
             closePage(block.key);
         }
+
+        recordOffsets();
     });
 
     const remaining = Math.max(0, contentHeight - currentHeight);
@@ -238,6 +263,7 @@ export const paginate = (
          */
         pageStartKey = '';
         pageStartOffset = 0;
+        pageContinuesBlock = false;
     }
 
     offsetCursor += endSpacerHeight;
@@ -247,6 +273,7 @@ export const paginate = (
         endKey: lastBlockEndKey ?? pageStartKey,
         startOffset: pageStartOffset,
         endOffset: offsetCursor,
+        continuesBlock: pageContinuesBlock,
     });
 
     return {
@@ -254,5 +281,6 @@ export const paginate = (
         pages,
         breaks,
         endSpacer: {afterBlockKey: lastBlockEndKey, height: endSpacerHeight},
+        blockOffsets,
     };
 };

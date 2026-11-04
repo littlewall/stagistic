@@ -363,13 +363,36 @@ describe('buildSceneBoardModel characters', () => {
                 characterId: null,
                 key: 'DOCTOR',
                 level: 'present',
+                firstCue: 0,
             },
             {
                 entryId: 'c-anna',
                 characterId: 'c-anna',
                 key: 'ANNA',
                 level: 'present',
+                firstCue: 0,
             },
+        ]);
+    });
+
+    it('ranks first cues per scene and leaves a tag-only character without one', () => {
+        const model = buildModel([
+            block('scene', 's1', 'A'),
+            tagged('t1', 'CLARA', 'c-clara'),
+            block('character', 'c1', 'BEN'),
+            block('character', 'c2', 'ANNA'),
+            block('character', 'c3', 'BEN'),
+            block('scene', 's2', 'B'),
+            block('character', 'c4', 'ANNA'),
+        ], CATALOG);
+
+        expect(model.acts[0].scenes.map(scene => scene.characters.map(({key, firstCue}) => [key, firstCue]))).toEqual([
+            [
+                ['CLARA', null],
+                ['BEN', 0],
+                ['ANNA', 1],
+            ],
+            [['ANNA', 0]],
         ]);
     });
 

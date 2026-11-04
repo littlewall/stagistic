@@ -48,6 +48,7 @@ it('refreshes both hooks when a different writer publishes metadata, and switche
             characterId: 'c1',
             note: 'Leaves',
             arcValue: null,
+            onCard: true,
             createdAt: 1,
             updatedAt: 1,
         },

@@ -12,6 +12,7 @@ const entry = (id: string | null, key: string) => ({
     characterId: id,
     key,
     level: 'present' as const,
+    firstCue: null,
 });
 
 const model: SceneBoardModel = {
@@ -94,6 +95,28 @@ describe('buildFilterCharacters', () => {
             ['ANNA', 2],
             ['CY', 0],
             ['ZED', 0],
+        ]);
+    });
+
+    it('counts characters only on a card, once per scene', () => {
+        const result = buildFilterCharacters(model, characters, new Map(), [
+            {
+                headingBlockId: 's1',
+                characterId: 'c-anna',
+                note: 'Already there',
+            },
+            {
+                headingBlockId: 's2',
+                characterId: 'c-zed',
+                note: null,
+            },
+        ]);
+
+        expect(result.map(character => [character.name, character.sceneCount])).toEqual([
+            ['BEN', 1],
+            ['ANNA', 2],
+            ['ZED', 1],
+            ['CY', 0],
         ]);
     });
 });

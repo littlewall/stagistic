@@ -42,6 +42,7 @@ describe('Board view', () => {
         expect(cardOf('3. Roof').querySelector('[aria-label^="Characters"]')?.getAttribute('aria-label')).toBe('Characters: ANNA, DOCTOR');
         expect(findButton('Board')?.getAttribute('aria-pressed')).toBe('true');
         expect(document.querySelector('[data-editor-ready]')).toBeNull();
+        expect(document.querySelector('footer')?.textContent).toContain('Feedback & bug reports');
     });
 
     it('falls back to the Wall for an unknown lens', async () => {
@@ -143,11 +144,7 @@ describe('Board and Editor', () => {
         await waitFor(() => sceneHeadings().length === 3);
         await openSceneMenu(3);
 
-        expect(menuLabels()).toEqual([
-            'Open in Editor',
-            'Start new act here',
-            'Delete scene…',
-        ]);
+        expect(menuLabels()).toEqual(['Open in Editor']);
 
         await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(item => item.textContent === 'Open in Editor')));
         await waitFor(() => locationText().startsWith(`/script/${scriptId}/editor|`));

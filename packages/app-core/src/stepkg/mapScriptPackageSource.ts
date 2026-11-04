@@ -109,6 +109,7 @@ export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): Ste
             characterId: row.characterId,
             note: row.note,
             arcValue: row.arcValue,
+            onCard: row.onCard,
             createdAt: toIso(row.createdAt),
             updatedAt: toIso(row.updatedAt),
         }))},

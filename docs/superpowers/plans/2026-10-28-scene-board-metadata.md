@@ -120,38 +120,38 @@
 
 ### Úloha 8: View model karty
 
-- [ ] `buildWallView` spojí doklady (model) a záznamy (úloha 6): čip má stav `script` (plné kolečko) nebo `card` (prázdné kolečko), `note` a `isConfirmed`.
-- [ ] Pořadí: postavy s větou podle první repliky (bez repliky na konec), pak ostatní ve scénáři, pak ostatní jen na kartě.
-- [ ] Filtr počítá i postavy jen na kartě. Skupiny se nezobrazují.
-- [ ] Unit testy všech kombinací stavu, pořadí a filtru.
+- [x] `buildWallView` spojí doklady (model) a záznamy (úloha 6): čip má stav `script` (plné kolečko) nebo `card` (prázdné kolečko), `note` a `isConfirmed`.
+- [x] Pořadí: postavy s větou podle první repliky (bez repliky na konec), pak ostatní ve scénáři, pak ostatní jen na kartě.
+- [x] Filtr počítá i postavy jen na kartě. Skupiny se nezobrazují.
+- [x] Unit testy všech kombinací stavu, pořadí a filtru.
 
 ### Úloha 9: Outline na kartě
 
-- [ ] V `ui` víceřádkové pole na místě (stejný jazyk jako `BoardInlineHeading`: podbarvení, bez inputu, `break-spaces`). Enter = nový řádek, Cmd/Ctrl+Enter nebo opuštění pole uloží, Escape zruší. Prázdný outline ukáže na kartě jen nenápadné „Add outline“ při hoveru/fokusu.
-- [ ] Volba „Outline“ ve View menu (preference `showOutline`, výchozí zapnuto). Sbalená karta outline neukazuje.
-- [ ] Na snapshotu jen čtení.
-- [ ] Browser testy komponenty: uložení, zrušení, více řádků, vložení textu.
+- [x] V `ui` víceřádkové pole na místě (stejný jazyk jako `BoardInlineHeading`: podbarvení, bez inputu, `break-spaces`). Enter = nový řádek, Cmd/Ctrl+Enter nebo opuštění pole uloží, Escape zruší. Prázdný outline ukáže na kartě jen nenápadné „Add outline“ při hoveru/fokusu.
+- [x] Volba „Outline“ ve View menu (preference `showOutline`, výchozí zapnuto). Sbalená karta outline neukazuje.
+- [x] Na snapshotu jen čtení.
+- [x] Browser testy komponenty: uložení, zrušení, více řádků, vložení textu.
 
 ### Úloha 10: Postavy s větou a popover
 
-- [ ] Řádek postavy s větou: barevný proužek, jméno, věta. Ostatní postavy ve stacku; `card` stav jako prázdné kolečko (i v řádku s větou).
-- [ ] Klik na čip nebo řádek otevře popover: věta (víceřádková, uloží opuštění pole / Cmd+Enter), „Remove from card“ jen pro postavu bez dokladu (smaže záznam), u postavy s dokladem „Clear note“. Nepotvrzená postava: jen „Confirm character“.
-- [ ] Klik na čip nesmí spustit drag karty (tlačítka už sensor ignoruje; ověřit).
-- [ ] Browser testy v `ui` a `app-routes`.
+- [x] Řádek postavy s větou: barevný proužek, jméno, věta. Ostatní postavy ve stacku; `card` stav jako prázdné kolečko (i v řádku s větou).
+- [x] Klik na čip nebo řádek otevře popover: věta (víceřádková, uloží opuštění pole / Cmd+Enter), „Remove from card“ jen pro postavu bez dokladu (smaže záznam), u postavy s dokladem „Clear note“. Nepotvrzená postava: jen „Confirm character“.
+- [x] Klik na čip nesmí spustit drag karty (tlačítka už sensor ignoruje; ověřit).
+- [x] Browser testy v `ui` a `app-routes`.
 
 ### Úloha 11: Přidání a založení postavy
 
-- [ ] Na kartě nenápadné „+“ za stackem otevře combobox (React Aria) s potvrzenými postavami, které na kartě ještě nejsou; volba vytvoří záznam.
-- [ ] Neznámé jméno nabídne „Create “NAME”“: založí potvrzenou postavu (barva z palety, stávající API `confirmScriptCharacter`) a přidá záznam.
-- [ ] Testy: výběr, založení, klávesnice, Escape, read-only.
+- [x] Na kartě nenápadné „+“ za stackem otevře combobox (React Aria) s potvrzenými postavami, které na kartě ještě nejsou; volba vytvoří záznam.
+- [x] Neznámé jméno nabídne „Create “NAME”“: založí potvrzenou postavu (barva z palety, stávající API `confirmScriptCharacter`) a přidá záznam.
+- [x] Testy: výběr, založení, klávesnice, Escape, read-only.
 
 ### Úloha 12: Integrační ověření a předání
 
-- [ ] Web integrační testy: věta přežije reload; postava smazaná ze scény ve scénáři zůstane s prázdným kolečkem; smazání headingu v Editoru + undo vrátí outline i věty; nový draft je uklidí; Board draftu ukáže metadata jen pro čtení.
-- [ ] Spec: doplnit vše, co se při implementaci rozhodlo jinak.
-- [ ] Finální sada: dotčené node a browser testy, `db`, `stepkg`, `app-core`, `app-routes`, `ui`, `web` typecheck a lint, format-check, stylelint, duplicity. `moon run root:verify -- --fresh root:test-all` před mergem.
-- [ ] `graphify update .`
-- [ ] Návrh commit message pro 3b.
+- [x] Web integrační testy: věta přežije reload; postava smazaná ze scény ve scénáři zůstane s prázdným kolečkem; smazání headingu v Editoru + undo vrátí outline i věty; nový draft je uklidí; Board draftu ukáže metadata jen pro čtení.
+- [x] Spec: doplnit vše, co se při implementaci rozhodlo jinak.
+- [x] Finální sada: dotčené node a browser testy, `db`, `stepkg`, `app-core`, `app-routes`, `ui`, `web` typecheck a lint, format-check, stylelint, duplicity — provedeno, viz „Ověření a předání 3b“. `moon run root:verify -- --fresh root:test-all` zůstává povinné před mergem, dosud nespuštěno.
+- [x] `graphify update .` (spustil implementér 30. 10. 2026 po fixerech)
+- [x] Návrh commit message pro 3b.
 
 ## Kontrola plánu před implementací
 
@@ -180,4 +180,60 @@ Preserve scene metadata through heading deletion and undo, clean up inactive
 records when saving drafts or versions, and carry active records through
 packages, snapshots and duplication. Add reactive metadata APIs and count
 characters only from cues and stage-direction tags.
+```
+
+## Poznámky implementace 3b
+
+- Společný save indikátor (31. 10. 2026): `useSaveIndicator.trackSave` obaluje skutečné Promise zápisů Boardu a je dostupný přes workspace controller. Hlavička i vizuální stavy zůstávají stejné jako v Editoru (spinner po 600 ms, krátká zelená tečka po úspěchu, červená při chybě). Souběžné zápisy sdílejí první timer a chyba skupiny se neztratí, když později uspěje jiný zápis. Nová postava sleduje i navazující propojení dokumentu. Testy pokrývají souběh s dokumentem, chybu a retry, skutečné metadata UI i přepnutí Editor/Board během ukládání.
+
+- Dodatečná optimistická odezva (30. 10. 2026): `sceneMetadataStore` zapisuje přes TanStack kolekce, stejně jako katalog v Editoru; lokální změna je okamžitá, neúspěšný zápis se rollbackne. Zdrojové snapshoty se synchronizují rozdílem klíčů bez okamžitého truncate, aby po potvrzení nepřekryla uložená data původní klientská kopie. Insert handler může vrátit uložený řádek pro potvrzení serverových timestampů. Založení postavy a přiřazení na kartu začnou současně optimisticky; `scriptCharacterPersistence` sdílí čekání na úspěšné založení podle repository, skriptu a ID postavy, včetně opakovaného potvrzení a přidání na další kartu. Metadata zůstávají mimo historii dokumentu. Ověření zahrnuje pozdržené zápisy, rollback, pořadí úprav, přidání/odebrání během zakládání a regresi sdílených kolekcí.
+
+- Model dostal `firstCue` (pořadí první repliky ve scéně) kvůli řazení postav s větou; dokument ani `SCRIPT_DOCUMENT_SCHEMA_VERSION` se nemění.
+- `BoardCharacterChip` nese `characterId`, `source` (`script` / `card`) a `note`; úroveň `level` zmizela.
+- Potvrzená postava bez barvy (i nově založená z Boardu) má barvu z palety přes `getConfirmedCharacterColor`; barva se neukládá.
+- `handleConfirmCharacter` vrací založenou postavu (`Promise<{id} | null>`), aby ji Board mohl rovnou přidat na kartu.
+- Outline používá `BoardInlineHeading` s `kind="outline"`, ne novou komponentu: sdílí editaci na místě a start editace kliknutím (táhnutí karty dál funguje i za outline).
+- „Clear note“ u postavy ve scénáři smaže celý záznam, pokud nemá oblouk; jinak jen větu.
+- Focus ring na nových boardových ovládacích prvcích používá schválený vzor `:global(:root[data-focus-ring-visible]) &:focus`; selektory `[data-focus-visible]` stylelint zakazuje.
+- Popover s větou: uložení věty žije v efektu s prázdnými deps a čte aktuální chip/actions přes ref, takže rerender Wallu s čerstvými (ekvivalentními) objekty z `buildWallView`/`characterActions` draft neuloží; ukládá až odmontování panelu, jednou. Escape se řeší capture handlerem na těle panelu (`.body`), takže zahodí edit i z tlačítka v patičce; Cmd/Ctrl+Enter, klik ven i remove/clear zůstávají. Regresní testy v `BoardSceneCast.browser.test.tsx` (rerender, jednorázové uložení, Escape z patičky).
+- `handleConfirmCharacter` v sidebaru nyní vrací Promise (Board z něj přidává postavu); callbacky v `ScriptCharactersSidebar` ho řeší úpravou `void ….catch(() => undefined)` jako ostatní akce.
+- Kompaktní search input nad menu je sdílený: `.searchinput` v `DropdownMenu.module.css` (malá písmena — stylelint-fix lowercases hodnoty v `composes`, takže deklarace musí být taky lowercase), `ScriptStateMenu.filterInput` i `BoardAddCharacter.input` na něj jen `composes` (vzhled beze změny, duplicita pryč).
+- Oprava mimo Board: strukturální příkazy editoru (smazání a převod headingu, akty) zapisovaly obnovení atributu `settings` jako samostatný krok historie, takže první Cmd+Z nic viditelného neudělal. Krok je teď mimo historii; web test smazání headingu + undo to hlídá.
+- Dodatečné zúžení menu karty na přání uživatele (30. 10. 2026): „Start new act here" i „Delete scene…" z menu scény zmizely, zůstává jen „Open in Editor" (`boardSceneActions` zjednodušeno, dead callback plumbing odstraněno); akty se zakládají/mažou přes vlastní tlačítka a menu aktů, mazání scény zůstává v editoru. Placeholder outline je „Add scene outline". Zákaz mazání postav z karty (první návrh) uživatel výslovně stáhl — chování popoveru se nemění. Web test aktu přepsán na skutečné ovládání aktů (Add act at the end + přesun scény + Delete act), aserce menu a placeholder aktualizovány.
+- Mazání aktu z Boardu se od 30. 10. 2026 nejprve zeptá (`BoardDeleteActModal` přes generický `ConfirmModal`, Cancel má počáteční fokus): popis podle pozice — první skutečný akt (bez výchozí sekce) „Its scenes will become unassigned.", pozdější „Its scenes will move to "<předchozí akt>"; vždy „No scenes will be deleted.". Orchestrace v `useBoardDeleteAct` (target je block ID aktu, popis se počítá z živého modelu, ne z filtrovaného Wallu; zmizelý akt žádost trvale zahodí — adjust-state-during-render, žádné vzkříšení po undo). Fokus: Cancel vrací na trigger aktu, po potvrzení padá na „Add act at the end" (rAF, jako cancelComposer). `useBoardHistoryShortcuts` navíc blokuje Undo/Redo uvnitř nativního `<dialog>` (dříve jen `[role="dialog"]`), takže Cmd/Ctrl+Z za otevřeným potvrzením nezmění dokument. Testy: `apps/web/src/boardActDeletion.browser.test.tsx` (popisy, Cancel/Escape, potvrzení + undo, první skutečný akt s nepřiřazenými scénami před ním, Undo za dialogu), hook test `useBoardDeleteAct.browser.test.tsx`, potvrzení doplněno do stávajících web testů aktů.
+
+### Ověření a předání 3b
+
+Průběžné opravy po review viz výše (popover, Promise, sdílený search input, zastaralá aserce v `boardStructureEditing`). Finální fáze: dvě selhání z celkového web běhu, první opraveno, druhé klasifikováno; poté hlavní vlákno vyhodnotilo výsledky přímo z log.
+
+**Selhání 1 — `boardStructureEditing.browser.test.tsx` „inserts and renames a scene…“:** zastaralá integrační aserce z doby před 3b čekala, že nová scéna nemá vůbec žádné tělo karty. V 3b karta záměrně ukazuje outline i přidání postavy i bez obsazení. Aserce přepsána na smysluplné očekávání (žádné čipy ani postavy s větou, ale „Add outline“ i „Add character to scene 2“ přítomné); red → green přes `root:verify`.
+
+**Selhání 2 — `boardView.browser.test.tsx` „shows a scene and a character typed in the Editor, without waiting for a save“:** jeden celkový web běh hlásil `Characters: ANNA, DO, BENCTOR` — psané ` / BEN` dopadlo doprostřed `DOCTOR`, kurzovka nebyla na konci cue, když psaní začalo. Zaměřený běh nezměněného testu přes `root:verify -t` prošel (1 passed | 6 skipped, log `87255ea9…b1cb`) a závěrečný třísouborový web běh prošel 23/23. Návaznost na 3b nebyla prokázána: metadata hooky (`useWallMetadata`/`BoardSceneBody`) se mountují jen na Board route (`ScriptBoardRoute`), ne v Editoru; Promise v `handleConfirmCharacter` mění jen návratovou hodnotu pro Board (test postavu nepotvrzuje); `addToHistory: false` v `structureRequestMutations` běží až po napsání cue a selection nešahá. Podobná nestabilita kurzovky se v konverzaci před 3b už objevila, ale přesná příčina ani baseline srovnání tohoto konkrétního selhání nejsou doloženy (poznámka v `2026-10-27-scene-board-wall-readonly.md` se baselinou přes `git stash -u` se týká ArrowLeft sceneDeletion testu, ne rychlého psaní do cue). Klasifikace: intermittently failing, pozorovaná limitace; nevyřešeno, bez sleeps a oslabování asercí; při další reprodukci shromáždit čerstvý důkaz.
+
+**Finální výsledky (ověřeno hlavním vláknem přímo v logech):**
+
+- 147 cílených testů prošlo: `script:test -- src/board/` 25; `app-routes:test -- src/routes/script/board/` 29; `ui:test-browser -- src/board/` + `src/layout/header/ScriptStateMenu.browser.test.tsx` 65; `editor:test-browser -- src/editor/session/structureTransactions.browser.test.ts` 3; `app-routes:test-browser -- ScriptCharactersSidebar.browser.test.tsx` 2; závěrečný `web:test-browser` (boardMetadata, boardStructureEditing, boardView) 23/23 čerstvě (log `.git/agent-verification/540e3dd7fc236b02c57b054c5ce354cb03e9635e2e21c85fb512de42c8fadf26-d3bca944-79cd-4f2a-b083-8b1815c61169.log`).
+- 8 typechecků PASS: `db`, `stepkg`, `app-core`, `script`, `editor`, `ui`, `app-routes`, `web`. Sedm výsledků platných z předchozích běhů; `web:typecheck` po změně web testu čerstvě (runner výstup PASS, 1393 ms, nikoli REUSED). Žádný výsledek nebyl označen REUSED.
+- 5 projektových lintů PASS (`script`, `editor`, `ui`, `app-routes`, `web`; projektový `vp lint` nespouští stylelint ani duplicity); `root:format-check` 37 JS/TS souborů PASS; `root:duplicates-changed` PASS. CSS vstupy prošly `root:stylelint-fix` před finálními kontrolami (včetně lowercase sdílené třídy); pozdější CSS úpravy nenastaly.
+- `root:lint` zůstává FAIL: 13 nezměněných souborů v `apps/docs`, `apps/marketing`, `tools/agent-roles/test`, `tools/agent-flows/test`; hlavní vlákno porovnalo všechny chybové soubory, konfigurace, lockfile i root tsconfig+Vite s HEAD — totožné. Jde o Astro error-typed content a node:test floating promises, mimo rozsah 3b. Root lint se zkratuje před stylelint/duplikacemi; toto pokrytí proběhlo samostatně (viz výše). Opravy mimo úlohu neprováděny.
+- Vizuální kontrola hlavního vlákna v živém prohlížeči: character picker, popover s větou, header state filter; oba složené inputy mají identické metriky (padding 4px 8px, 1px border, 12px font, 8px radius), dotaz „Draft3“ v header filtru vyfiltroval Draft3. Snímky: `/tmp/board-3b-character-picker.png`, `/tmp/board-3b-note-popover.png`, `/tmp/board-3b-state-filter.png`.
+- Poslední běh verifikátoru: `.scratch/agent-roles/board-metadata-3b/verifier/runs/614f4b35-1234-470f-a668-1d433bf31879`.
+
+`moon run root:verify -- --fresh root:test-all` zůstává výslovně povinný před mergem; dosud nespuštěno.
+
+Implementátor během vývoje spouštěl jen fixery na změněných souborech (`root:lint-js-fix`, `root:format`, `root:stylelint-fix` přes `node_modules/.bin/moon`, všechny prošly), `graphify update .` a zaměřené kontroly přes `root:verify`: `ui:test-browser -- src/board/BoardSceneCast.browser.test.tsx` (red → green, 9 testů), `app-routes:lint`, `root:duplicates-changed`, `web:test-browser -- src/boardStructureEditing.browser.test.tsx` (red → green, 11 testů) a `web:test-browser -- src/boardView.browser.test.tsx -t …` (průkaz intermitence).
+
+Finální rozsah 3b: node suity `script:test` (model Boardu, `firstCue`), `app-routes:test` (Board view model, preference, filtr), browser testy `ui` (Board toolbar, čipy, outline, cast, popover, přidání postavy) a `app-routes` (Board a modaly), `web:test-browser` (metadata: reload, smazání headingu + undo, nový draft, read-only Board) a strukturální příkazy editoru (`structureRequestMutations`, undo). Dále typecheck, lint, format-check, stylelint a duplicity dotčených balíků (`script`, `app-routes`, `ui`, `web`, `editor`; `db`, `stepkg`, `app-core` kvůli sdíleným kontraktům z 3a). Vše přes `root:verify`; `moon run root:verify -- --fresh root:test-all` až před mergem.
+
+Návrh commit message:
+
+```text
+feat(board): write scene outlines and character notes on cards
+
+Merge script evidence with user records in the Wall view model: characters
+with notes sort by their first cue, card-only characters get a hollow dot
+and survive removal from the script. Add the outline field with its view
+preference, the character popover and creating confirmed characters from a
+card. Keep board metadata read-only on snapshots and stop editor structural
+commands from writing an invisible first undo step.
 ```

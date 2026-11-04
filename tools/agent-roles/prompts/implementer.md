@@ -14,4 +14,4 @@ Output:
 - Changed files (one line each, what changed).
 - Checks run: command → result.
 - Open issues, rulings you made, and anything left unverified.
-- A proposed commit message.
+- A proposed commit message only when requested.

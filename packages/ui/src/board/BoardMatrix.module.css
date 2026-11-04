@@ -1,0 +1,185 @@
+/* Scroll container: table scrolls inside, headers stick at edges with no inner padding.
+ * The container expands to fill the canvas height and becomes the scroll element;
+ * the canvas padding stays outside the scroller. */
+.container {
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
+    /* The sticky headers stick at the container's edges, not at an offset. */
+}
+
+/* One pixel of separation inside one layer: hairlines between acts, none inside them. */
+.grid {
+    /* The scene numbers pin one act-band height below the top edge. */
+    --matrix-act-band-height: 2.125rem;
+
+    border-spacing: 0;
+    border-collapse: separate;
+    /* The scene columns keep their fixed width instead of sharing the canvas's stretch. */
+    width: max-content;
+    font-size: var(--font-size-sm);
+}
+
+/* The act band and the scene numbers stay above the scrolling rows. The band carries no
+ * padding of its own: its name must not widen the scene columns under it. */
+.actHeader {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+    overflow: hidden;
+    height: var(--matrix-act-band-height);
+    padding: 0;
+    text-align: left;
+    vertical-align: bottom;
+    background: var(--color-bg);
+}
+
+/* An act name rides above its columns without taking part in their sizing; a measured
+ * gap after the act's last scene column makes room when the name is the wider one. */
+.actName {
+    position: absolute;
+    /* Air between an act's name and its scene numbers. */
+    bottom: var(--space-lg);
+    inset-inline-start: 0;
+    padding: 0 var(--space-sm);
+    white-space: nowrap;
+}
+
+.sceneHeader {
+    position: sticky;
+    z-index: 2;
+    top: var(--matrix-act-band-height);
+    width: 2rem;
+    /* The numbers sit at the top; the rest of the row is air above the character rows. */
+    height: 1.75rem;
+    padding: 0;
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    vertical-align: top;
+    background: var(--color-bg);
+}
+
+/* The row header stays left of the scrolling columns, over the cells it covers. */
+.rowHeader {
+    position: sticky;
+    z-index: 1;
+    left: 0;
+    padding: 0 var(--space-lg) 0 0;
+    font-weight: var(--font-weight-normal);
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: middle;
+    background: var(--color-bg);
+    border-right: 1px solid var(--color-border-subtle);
+}
+
+/* The shared dots size themselves with width/height, which an inline box ignores; the
+ * flex stacks of the Wall blockify them, a table cell does not. */
+.rowColor {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.sceneNumber {
+    display: inline-block;
+    min-width: 100%;
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.rowName {
+    margin-left: var(--space-sm);
+    color: var(--color-text);
+}
+
+/* The scene count of a row, in the column after the last scene. */
+.countCell {
+    padding: 0 0 0 var(--space-lg);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: middle;
+    background: var(--color-bg);
+}
+
+/* The row name, act name or scene number of the hovered or focused cell, in the hovered
+ * cell's own tint, not the selection tint: none of them is editable here. Background
+ * only: the highlight never moves a box by a pixel. */
+.highlight {
+    background: var(--state-hover);
+    border-radius: var(--radius-sm);
+}
+
+/* The lines of a cell tooltip: the cell's state first, then the scene it belongs to. */
+.tooltipLine {
+    display: block;
+}
+
+.cell {
+    --chip-size: .75rem;
+
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    background: var(--color-bg);
+
+    /* A glyph is a block of its own size, centered by the cell, never an inline sliver. */
+    & > span {
+        display: block;
+        margin-inline: auto;
+    }
+}
+
+.cell,
+.cellButton {
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: calc(var(--focus-ring-offset) * -1);
+    }
+}
+
+/* A hairline where a new act begins; the act band, its first column header and the cells under it share it. */
+.actStart {
+    border-left: 1px solid var(--color-border-subtle);
+}
+
+/* The pressable cell of an editable Board: it fills its td, so the td stays the gridcell. */
+.cellButton {
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    font: inherit;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    &[data-hovered],
+    &[data-pressed] {
+        background: var(--state-hover);
+    }
+}
+
+.noteGlyph {
+    --chip-color: var(--color-text-muted);
+
+    display: inline-block;
+    width: .625rem;
+    height: .625rem;
+    background: var(--chip-color);
+}
+
+/* The corner where the pinned headers meet sits above both of them; its row supplies the top offset. */
+.corner {
+    position: sticky;
+    z-index: 3;
+    left: 0;
+    background: var(--color-bg);
+}

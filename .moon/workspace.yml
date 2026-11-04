@@ -9,6 +9,8 @@ projects:
     - 'packages/*'
   sources:
     root: '.'
+    agent-flows: 'tools/agent-flows'
+    agent-roles: 'tools/agent-roles'
 
 vcs:
   defaultBranch: 'main'

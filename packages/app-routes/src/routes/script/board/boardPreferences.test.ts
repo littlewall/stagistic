@@ -19,13 +19,19 @@ describe('parseBoardPreferences', () => {
         })).toEqual({
             characterIds: ['a', 'b'],
             showOnStage: false,
+            showOutline: true,
         });
+    });
+
+    it('keeps a hidden outline', () => {
+        expect(parseBoardPreferences({showOutline: false})?.showOutline).toBe(false);
     });
 
     it('falls back field by field on stale data', () => {
         expect(parseBoardPreferences({
             characterIds: ['a', 4],
             showOnStage: 'no',
+            showOutline: 1,
             showMentioned: 'yes',
         })).toEqual({
             ...DEFAULT_BOARD_PREFERENCES,

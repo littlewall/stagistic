@@ -1,5 +1,4 @@
 import {DragDropProvider} from '@dnd-kit/react';
-import {buildSceneBoardModel} from '@stagistic/script';
 import {
     BoardActSection,
     BoardAddActButton,
@@ -11,7 +10,6 @@ import {
     BoardToolbar,
     Button,
     MoreActionsMenu,
-    type SceneCardActions,
 } from '@stagistic/ui';
 import {
     type CSSProperties,
@@ -24,55 +22,19 @@ import {
 import {configuredKeyboardSensor, configuredPointerSensor} from '../editor/structure/structureDndConfig';
 import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
-import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {resolveBoardInsertionTarget} from './boardInsertionTargets';
 import {BOARD_LENSES} from './boardLenses';
-import {useBoardPreferences} from './boardPreferences';
+import {buildSceneActions} from './boardSceneActions';
+import {BoardSceneBody} from './BoardSceneBody';
 import {getSceneTextTransform} from './boardSceneCasing';
 import {BoardSceneEndTarget, BoardSceneItem} from './BoardSceneItem';
-import {buildFilterCharacters} from './buildFilterCharacters';
-import {
-    buildWallView,
-    DEFAULT_ACT_KEY,
-    type WallScene,
-} from './buildWallView';
-import {useBoardHistoryShortcuts} from './useBoardHistoryShortcuts';
+import {DEFAULT_ACT_KEY} from './buildSceneChips';
+import {buildWallView} from './buildWallView';
+import {useBoardDeleteAct} from './useBoardDeleteAct';
+import {useBoardLensData} from './useBoardLensData';
 import {useBoardSceneDnd} from './useBoardSceneDnd';
 import {useOpenInEditor} from './useOpenInEditor';
-import {useSceneBoardSource} from './useSceneBoardSource';
-
-const SCENE_ACTION_IDS = {
-    open: 'open-in-editor',
-    delete: 'delete-scene',
-    startAct: 'start-act',
-} as const;
-
-/* Deleting happens in the Editor, where the whole scene is visible; the Board only takes you there. */
-const buildSceneActions = (
-    scene: WallScene,
-    isReadOnly: boolean,
-    openInEditor: (blockId: string) => void,
-    startAct: (blockId: string) => void,
-): SceneCardActions => ({
-    label: `Scene ${scene.number} actions`,
-    items: [
-        {id: SCENE_ACTION_IDS.open, label: 'Open in Editor'},
-        ...isReadOnly ? [] : [
-            {id: SCENE_ACTION_IDS.startAct, label: 'Start new act here'},
-            {
-                id: SCENE_ACTION_IDS.delete,
-                label: 'Delete scene…',
-                tone: 'danger' as const,
-                dividerBefore: true,
-            },
-        ],
-    ],
-    onAction: id => {
-        if (id === SCENE_ACTION_IDS.startAct) startAct(scene.headingBlockId);
-        else openInEditor(scene.headingBlockId);
-    },
-});
 
 /** The Wall lens: acts as sections, scenes as cards with their derived cast. */
 interface BoardWallProps {
@@ -81,22 +43,31 @@ interface BoardWallProps {
 }
 
 export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
-    const {currentScriptId, documentSession} = useScriptWorkspace();
+    const {documentSession} = useScriptWorkspace();
     const {isReadOnly} = useScriptReadOnlyState();
     const {effectiveScriptSettingsDraft} = useScriptSettingsModal();
-    const {
-        confirmedCharacterRecords,
-        confirmedGroupRecords,
-    } = useScriptCharacters();
     const openInEditor = useOpenInEditor();
-    const source = useSceneBoardSource();
+    const {
+        source,
+        model,
+        cardRecords,
+        metadata,
+        selectedIds,
+        setSelectedIds,
+        filterCharacters,
+        hasScenes,
+        preferences,
+        setPreferences,
+        synopsisByScene,
+        castOptions,
+        confirmedCharacterRecords,
+    } = useBoardLensData(isReadOnly);
+
     const [forcedSceneId, setForcedSceneId] = useState<string | null>(null);
     const [editingActId, setEditingActId] = useState<string | null>(null);
     // A label, not an element: the control that opened the form may re-render while it is open.
     const composerReturnLabel = useRef<string | null>(null);
     const [composer, setComposer] = useState<{actBlockId: string | null, beforeSceneId: string | null} | null>(null);
-
-    useBoardHistoryShortcuts(documentSession, isReadOnly);
 
     const openComposer = (actBlockId: string | null, beforeSceneId: string | null, label: string) => {
         composerReturnLabel.current = label;
@@ -109,38 +80,27 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
         });
     };
     const insertAct = (beforeBlockId: string | null) => setEditingActId(documentSession.commands.insertAct(beforeBlockId));
-    const [preferences, setPreferences] = useBoardPreferences(currentScriptId ?? 'new-script');
 
-    const model = useMemo(() => buildSceneBoardModel(source.index, {
-        characters: confirmedCharacterRecords,
-        groups: confirmedGroupRecords,
-    }), [
-        confirmedCharacterRecords,
-        confirmedGroupRecords,
-        source.index,
-    ]);
-
-    // A character deleted since the filter was saved drops out silently.
-    const selectedIds = useMemo(() => {
-        const knownIds = new Set(confirmedCharacterRecords.map(character => character.id));
-
-        return preferences.characterIds.filter(id => knownIds.has(id));
-    }, [confirmedCharacterRecords, preferences.characterIds]);
+    const {requestDeleteAct, modal: deleteActModal} = useBoardDeleteAct(model.acts, documentSession.commands.deleteAct);
 
     const acts = useMemo(() => buildWallView({
         model,
         characters: confirmedCharacterRecords,
         displayColorByKey: source.displayColorByKey,
         getStartPage: source.getStartPage,
+        records: cardRecords,
+        synopsisByScene,
         selectedIds: new Set(selectedIds),
         showOnStage: preferences.showOnStage,
     }), [
         confirmedCharacterRecords,
         model,
         preferences.showOnStage,
+        cardRecords,
         selectedIds,
         source.displayColorByKey,
         source.getStartPage,
+        synopsisByScene,
     ]);
 
     const {
@@ -155,16 +115,6 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
         moveScene: documentSession.commands.moveScene,
     });
 
-    const filterCharacters = useMemo(
-        () => buildFilterCharacters(model, confirmedCharacterRecords, source.displayColorByKey),
-        [
-            confirmedCharacterRecords,
-            model,
-            source.displayColorByKey,
-        ],
-    );
-
-    const hasScenes = model.acts.some(act => act.scenes.length > 0);
     const hasActs = model.acts.some(act => act.actBlockId !== null);
     const shownActs = draggedActs.length ? draggedActs : [
         {
@@ -194,9 +144,13 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                     onSelectLens={onSelectLens}
                     filterCharacters={filterCharacters}
                     selectedCharacterIds={selectedIds}
-                    onSelectedCharacterIdsChange={characterIds => setPreferences({...preferences, characterIds})}
-                    showOnStage={preferences.showOnStage}
-                    onShowOnStageChange={showOnStage => setPreferences({...preferences, showOnStage})}
+                    onSelectedCharacterIdsChange={characterIds => setSelectedIds(characterIds)}
+                    cardOptions={{
+                        showOnStage: preferences.showOnStage,
+                        onShowOnStageChange: showOnStage => setPreferences({...preferences, showOnStage}),
+                        showOutline: preferences.showOutline,
+                        onShowOutlineChange: showOutline => setPreferences({...preferences, showOutline}),
+                    }}
                 />
             )}
         >
@@ -255,7 +209,8 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                                             tone: 'danger',
                                         },
                                     ]}
-                                    onAction={() => documentSession.commands.deleteAct(actBlockId)}
+                                    placement="bottom start"
+                                    onAction={() => requestDeleteAct(actBlockId, act.name)}
                                 />
                             ) : undefined}
                             titleContent={!isReadOnly && actBlockId ? <BoardInlineHeading kind="act" startEditing={editingActId === actBlockId} value={act.name} label={`Rename ${act.name}`} onCommit={title => documentSession.commands.renameAct(actBlockId, title)} /> : undefined}
@@ -282,7 +237,16 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                                                     onPress={() => openComposer(actBlockId, scene.headingBlockId, `Add scene before scene ${scene.number}`)}
                                                 />
                                             ) : undefined}
-                                            actions={buildSceneActions(scene, isReadOnly, openInEditor, insertAct)}
+                                            actions={buildSceneActions(scene, openInEditor)}
+                                            body={(
+                                                <BoardSceneBody
+                                                    scene={scene}
+                                                    showOutline={preferences.showOutline}
+                                                    showCharacters={preferences.showOnStage}
+                                                    castOptions={castOptions}
+                                                    metadata={metadata}
+                                                />
+                                            )}
                                         />
                                     </Fragment>
                                 );
@@ -300,6 +264,7 @@ export const BoardWall = ({activeLensId, onSelectLens}: BoardWallProps) => {
                     );
                 })}
             </DragDropProvider>
+            {deleteActModal}
             {!isReadOnly && (hasActs || hasScenes) ? <BoardAddActButton label="Add act at the end" onPress={() => insertAct(null)} /> : null}
         </BoardLayout>
     );

@@ -11,6 +11,7 @@ import {
     toDomainCollectionValue,
 } from '../collections';
 import {type CharacterField, persistCharacterFieldChanges} from './persistCharacterFieldChanges';
+import {trackCharacterCreation, waitForCharacterCreation} from './scriptCharacterPersistence';
 
 const normalizeGenderLabel = (label: string) => label.trim().replace(/\s+/g, ' ');
 
@@ -87,7 +88,11 @@ export const createScriptCharactersStore = (repository: ScriptRepository, script
         });
 
         if (existing) {
-            return existing;
+            await waitForCharacterCreation(repository, scriptId, existing.id);
+
+            const current = characters.collection.get(existing.id);
+
+            return current ? toDomainCollectionValue(current) : null;
         }
 
         const id = repository.allocateScriptCharacterId();
@@ -105,13 +110,17 @@ export const createScriptCharactersStore = (repository: ScriptRepository, script
             vocalRangeHigh: null,
         });
 
-        return runAction(normalizedKey, 'confirm', async () => {
+        const confirmation = runAction(normalizedKey, 'confirm', async () => {
             await transaction.isPersisted.promise;
 
             const character = characters.collection.get(id);
 
             return character ? toDomainCollectionValue(character) : null;
         });
+
+        trackCharacterCreation(repository, scriptId, id, confirmation);
+
+        return confirmation;
     };
 
     const updateField = async (characterId: string, field: CharacterField, value: string | null) => {

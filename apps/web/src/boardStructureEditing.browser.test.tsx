@@ -14,11 +14,12 @@ import {
     findButton,
     mountApp,
     mountedRoots,
-    openSceneMenu,
     repository,
     sceneHeadings,
     waitFor,
 } from './boardTestFixtures';
+
+const dialogButton = (label: string) => [...document.querySelectorAll<HTMLButtonElement>('dialog[open] button')].find(button => button.textContent?.trim() === label);
 
 describe('Board structure editing', () => {
     it('cancels a new scene and returns focus to its insertion point', async () => {
@@ -150,6 +151,7 @@ describe('Board structure editing', () => {
 
         await userEvent.click(requireValue(findButton('Act ACT ONE actions')));
         await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(item => item.textContent === 'Delete act')));
+        await userEvent.click(await waitFor(() => dialogButton('Delete act')));
 
         const addAct = await waitFor(() => findButton('Add act at the start'));
 
@@ -177,23 +179,24 @@ describe('Board structure editing', () => {
         expect(findButton('Add scene before scene 2')).toBeDefined();
     });
 
-    it('starts an act at a scene and removes only its heading', async () => {
+    it('deletes an act with its menu and the scene in it lands in the previous act', async () => {
         const {scriptId} = await createScript();
 
         await mountApp(`/script/${scriptId}/board/wall`);
         await waitFor(() => sceneHeadings().length === 3);
-        await openSceneMenu(2);
+        await userEvent.click(requireValue(findButton('Add act at the end')));
+        await waitFor(() => document.querySelector('section[aria-label="ACT 3"]'));
+        cardOf('3. Roof').focus();
+        await userEvent.keyboard('{Space}{ArrowDown}{Space}');
+        await waitFor(() => document.querySelector('section[aria-label="ACT 3"]')?.textContent?.includes('Roof'), 4000);
 
-        const action = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(item => item.textContent === 'Start new act here');
-
-        expect(action).toBeDefined();
-        await userEvent.click(requireValue(action));
-        await waitFor(() => document.querySelectorAll('section').length === 3);
-        expect(sceneHeadings()).toHaveLength(3);
+        // Deleting the act removes only its heading: the scene stays, in the previous act.
         await userEvent.click(requireValue(findButton('Act ACT 3 actions')));
         await userEvent.click(requireValue([...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(item => item.textContent === 'Delete act')));
+        await userEvent.click(await waitFor(() => dialogButton('Delete act')));
         await waitFor(() => document.querySelectorAll('section').length === 2);
         expect(sceneHeadings()).toHaveLength(3);
+        expect(document.querySelector('section[aria-label="ACT TWO"]')?.textContent).toContain('Roof');
     });
 
     it('keeps a newly inserted scene expanded and focused while a character filter is active', async () => {
@@ -228,9 +231,15 @@ describe('Board structure editing', () => {
         await userEvent.type(input, 'New scene{Enter}');
         await waitFor(() => sceneHeadings().length === 4);
         expect(sceneHeadings()[1]).toContain('New scene');
-        // Shown in the script's scene casing (uppercase by default) while stored as typed, and with no room left for cast it does not have.
+        // Shown in the script's scene casing (uppercase by default) while stored as typed. No cast yet, but the card offers its outline and adding a character.
         expect(getComputedStyle(requireValue(cardOf('2. New scene').querySelector('[data-board-name]'))).textTransform).toBe('uppercase');
-        expect(cardOf('2. New scene').querySelector('[class*="body"]')).toBeNull();
+
+        const body = requireValue(cardOf('2. New scene').querySelector('[class*="body"]'));
+
+        expect(body.querySelector('[aria-label^="Characters"]')).toBeNull();
+        expect(body.querySelector('[aria-label="Character notes"]')).toBeNull();
+        expect(body.querySelector('[aria-label="Outline of scene 2"]')?.getAttribute('data-placeholder')).toBe('Add scene outline');
+        expect(body.querySelector('[aria-label="Add character to scene 2"]')).not.toBeNull();
         await userEvent.click(requireValue(findButton('Rename scene 2')));
 
         const heading = await waitFor(() => document.querySelector<HTMLElement>('[role="textbox"][aria-label="Rename scene 2"]'));

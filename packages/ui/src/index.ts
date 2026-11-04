@@ -123,11 +123,46 @@ export {Section, SectionHeader} from './organisms/Section/Section';
 
 // ─── Board ──────────────────────────────────────────────────────────────────
 export {BoardActSection, type BoardActSectionProps} from './board/BoardActSection';
+export {
+    BoardAddCharacter,
+    type BoardAddCharacterOption,
+    type BoardAddCharacterProps,
+} from './board/BoardAddCharacter';
+export {
+    BoardArcs,
+    type BoardArcsAct,
+    type BoardArcsArc,
+    type BoardArcsPoint,
+    type BoardArcsProps,
+    type BoardArcsScene,
+} from './board/BoardArcs';
 export {type BoardFilterCharacter} from './board/BoardCharacterFilter';
+export {type BoardCharacterActions} from './board/BoardCharacterPopover';
 export {BoardEmpty, type BoardEmptyProps} from './board/BoardEmpty';
 export {BoardLayout, type BoardLayoutProps} from './board/BoardLayout';
 export {type BoardLens} from './board/BoardLensTabs';
-export {BoardToolbar, type BoardToolbarProps} from './board/BoardToolbar';
+export {
+    BoardMatrix,
+    type BoardMatrixAct,
+    type BoardMatrixCell,
+    type BoardMatrixCellKind,
+    type BoardMatrixProps,
+    type BoardMatrixRow,
+    type BoardMatrixSceneColumn,
+} from './board/BoardMatrix';
+export {
+    BoardRundown,
+    type BoardRundownAct,
+    type BoardRundownProps,
+    type BoardRundownScene,
+    type BoardRundownSong,
+} from './board/BoardRundown';
+export {BoardSceneCast, type BoardSceneCastProps} from './board/BoardSceneCast';
+export {
+    BoardToolbar,
+    type BoardToolbarCardOptions,
+    type BoardToolbarProps,
+} from './board/BoardToolbar';
 export {
     type BoardCharacterChip,
     CharacterChipStack,
@@ -155,6 +190,7 @@ export {AppFooter} from './layout/AppFooter';
 export {
     AppHeader,
     type AppHeaderProps,
+    type AppHeaderWidth,
     ScriptEditorAppHeader,
     type ScriptEditorAppHeaderProps,
     type ScriptListItem,

@@ -45,7 +45,8 @@ export interface ScriptCharactersContextValue {
 
     // Sidebar actions (optional editorCallbacks — sidebar adds them using useEditorInstance)
     normalizeCharacterNameForInlineInput: (name: string) => string,
-    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    /** Resolves to the new character, or null when nothing was confirmed. */
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => Promise<{id: string} | null>,
     handleDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     handleRenameCharacterPreview: (
         characterId: string,

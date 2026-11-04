@@ -11,8 +11,9 @@ export const useBoardHistoryShortcuts = (history: History, isReadOnly: boolean) 
         const onKeyDown = (event: KeyboardEvent) => {
             const target = event.target;
 
+            // `dialog` covers native confirmations (no role attribute), the attribute selector RAC popovers.
             if (isReadOnly || !(event.metaKey || event.ctrlKey) || !(target instanceof HTMLElement) || target.isContentEditable
-                || target.closest('input, textarea, [role="dialog"], [role="menu"]')) return;
+                || target.closest('input, textarea, dialog, [role="dialog"], [role="menu"]')) return;
 
             if (event.key.toLowerCase() === 'z') {
                 event.preventDefault();

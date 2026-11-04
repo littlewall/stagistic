@@ -44,6 +44,7 @@ export const buildSceneBoardModel = (
     const resolve = createBoardCharacterResolver(catalog);
     const acts: SceneBoardAct[] = [createAct(null, getDefaultActName(1))];
     const charactersByScene = new Map<string, Map<string, SceneBoardCharacter>>();
+    let cueCount = 0;
     let currentAct = acts[0];
     let currentScene: SceneBoardScene | null = null;
     let actCounter = 0;
@@ -81,6 +82,7 @@ export const buildSceneBoardModel = (
             };
             currentAct.scenes.push(currentScene);
             charactersByScene.set(block.blockId, new Map());
+            cueCount = 0;
 
             return;
         }
@@ -92,17 +94,21 @@ export const buildSceneBoardModel = (
             return;
         }
 
+        const cue = block.blockType === 'character' ? cueCount : null;
+
+        if (cue !== null) cueCount += 1;
+
         block.characterRefs.flatMap(resolve).forEach(resolved => {
             const existing = entries.get(resolved.entryId);
 
             if (!existing) {
-                entries.set(resolved.entryId, {...resolved, level});
-
-                return;
-            }
-
-            if (level === 'present') {
-                existing.level = 'present';
+                entries.set(resolved.entryId, {
+                    ...resolved,
+                    level,
+                    firstCue: cue,
+                });
+            } else if (existing.firstCue === null) {
+                existing.firstCue = cue;
             }
         });
     });

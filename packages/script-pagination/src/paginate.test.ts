@@ -92,6 +92,23 @@ describe('paginate', () => {
         expect(plan.pageCount).toBe(2);
     });
 
+    it('marks a page that resumes a split block as a continuation', () => {
+        const plan = paginate([prose('a', 2), prose('big', 14)], metrics());
+
+        expect(plan.pages.map(page => page.continuesBlock)).toEqual([
+            false,
+            true,
+            true,
+            true,
+        ]);
+        expect(plan.pages.map(page => page.startKey)).toEqual([
+            'a',
+            'big',
+            'big',
+            'big',
+        ]);
+    });
+
     it('starts a block on a fresh page for a forced new-page break', () => {
         const plan = paginate(
             [prose('a', 1), {...heading('b'), forcedBreak: 'new-page'}],
@@ -100,6 +117,66 @@ describe('paginate', () => {
 
         expect(plan.breaks.some(item => item.kind === 'forced' && item.atBlockKey === 'b')).toBe(true);
         expect(plan.pageCount).toBe(2);
+    });
+});
+
+describe('paginate blockOffsets', () => {
+    it('gives a plain block the span it occupies', () => {
+        const plan = paginate([heading('h1'), prose('d1', 2)], metrics());
+
+        expect(plan.blockOffsets).toEqual([
+            {
+                key: 'h1',
+                startOffset: 0,
+                endOffset: LINE,
+            },
+            {
+                key: 'd1',
+                startOffset: LINE,
+                endOffset: 3 * LINE,
+            },
+        ]);
+    });
+
+    it('starts a pushed-down block after the spacer, where it really lands', () => {
+        const plan = paginate([prose('fill', 4), heading('h2')], metrics({contentHeight: 90}));
+
+        // fill 80, leftover 10 + bottom 10 + top 10 = 30 of spacer, then h2.
+        expect(plan.blockOffsets).toEqual([
+            {
+                key: 'fill',
+                startOffset: 0,
+                endOffset: 80,
+            },
+            {
+                key: 'h2',
+                startOffset: 110,
+                endOffset: 130,
+            },
+        ]);
+    });
+
+    it('spans a split block from its first fragment to its last, spacer included', () => {
+        const plan = paginate([prose('big', 10)], metrics());
+
+        // 100 on page one, 20 of spacer, 100 on page two.
+        expect(plan.blockOffsets).toEqual([
+            {
+                key: 'big',
+                startOffset: 0,
+                endOffset: 220,
+            },
+        ]);
+    });
+
+    it('gives a zero-height block equal start and end', () => {
+        const plan = paginate([heading('h1'), {...heading('z'), height: 0}], metrics());
+
+        expect(plan.blockOffsets[1]).toEqual({
+            key: 'z',
+            startOffset: LINE,
+            endOffset: LINE,
+        });
     });
 });
 

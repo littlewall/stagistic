@@ -32,3 +32,33 @@
         --name-tint: var(--state-selected);
     }
 }
+
+/* An outline is a block of lines under the scene name. */
+.lines {
+    display: block;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.multiline {
+    composes: lines;
+    min-height: 1lh;
+    white-space: break-spaces;
+
+    &:empty {
+        display: block;
+    }
+
+    /* Empty, it keeps its line and always names itself, faintly, until text exists. */
+    &:empty::before {
+        content: attr(data-placeholder);
+        color: var(--color-text-placeholder);
+    }
+
+    &.editing:empty::before {
+        content: none;
+    }
+}

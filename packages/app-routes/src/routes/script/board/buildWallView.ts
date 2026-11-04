@@ -1,13 +1,28 @@
-import type {SceneBoardModel, ScriptCharacterRecord} from '@stagistic/script';
+import type {
+    SceneBoardCharacter,
+    SceneBoardModel,
+    ScriptCharacterRecord,
+} from '@stagistic/script';
 import type {BoardCharacterChip} from '@stagistic/ui';
+
+import {
+    buildCharacterChip,
+    buildSceneChipIndex,
+    DEFAULT_ACT_KEY,
+    groupSceneRecords,
+    type SceneCardRecord,
+} from './buildSceneChips';
 
 export interface WallScene {
     headingBlockId: string,
     number: number,
     title: string,
     page: number | null,
+    /** The scene's outline; null when it has none. */
+    synopsis: string | null,
     /** The filter leaves this scene out: it shrinks to one line. */
     isCollapsed: boolean,
+    /** Characters with a note first (by first cue), then the rest from the script, then the rest only on the card. */
     chips: BoardCharacterChip[],
 }
 
@@ -23,60 +38,73 @@ export interface WallViewInput {
     characters: readonly ScriptCharacterRecord[],
     displayColorByKey: ReadonlyMap<string, string>,
     getStartPage: (headingBlockId: string) => number | null,
+    /** Card records (already limited to those on the card) in the order they were added. */
+    records?: readonly SceneCardRecord[],
+    synopsisByScene?: ReadonlyMap<string, string | null>,
     /** Filtered characters; empty filters nothing. */
     selectedIds: ReadonlySet<string>,
-    /** Whether chips list characters on stage. The filter counts them either way. */
+    /** Whether cards list characters. The filter counts them either way. */
     showOnStage: boolean,
 }
 
-export const DEFAULT_ACT_KEY = '__default-act__';
-
-/** The character's own color, else the one the editor assigned to its key. */
-export const resolveCharacterColor = (
-    record: ScriptCharacterRecord,
-    displayColorByKey: ReadonlyMap<string, string>,
-): string | null => record.colorHex ?? displayColorByKey.get(record.key) ?? null;
+/* Notes in the order the characters first speak; one who never speaks goes after those who do. */
+const byFirstCue = (
+    left: SceneBoardCharacter | undefined,
+    right: SceneBoardCharacter | undefined,
+) => (left?.firstCue ?? Infinity) - (right?.firstCue ?? Infinity);
 
 /*
- * Shapes the model for the Wall. Filtering never hides a scene: scenes without a selected
- * character collapse, so gaps in a character's story stay visible.
+ * Shapes the model for the Wall. A character is on a card through the script (a cue or a
+ * tag) or through a card record; a record without evidence shows hollow. Filtering never
+ * hides a scene: scenes without a selected character collapse, so gaps stay visible.
  */
 export const buildWallView = ({
     model,
     characters,
     displayColorByKey,
     getStartPage,
+    records = [],
+    synopsisByScene = new Map(),
     selectedIds,
     showOnStage,
 }: WallViewInput): WallAct[] => {
     const recordById = new Map(characters.map(character => [character.id, character]));
+    const recordsByScene = groupSceneRecords(records.filter(record => recordById.has(record.characterId)));
     const isFiltering = selectedIds.size > 0;
+    const isSelected = (characterId: string | null) => characterId !== null && selectedIds.has(characterId);
 
     return model.acts.map(act => ({
         key: act.actBlockId ?? DEFAULT_ACT_KEY,
         name: act.name,
         scenes: act.scenes.map(scene => {
-            const counted = scene.characters;
-            const matchesFilter = counted.some(character => character.characterId && selectedIds.has(character.characterId));
-            const chips = (showOnStage ? counted : []).map<BoardCharacterChip>(character => {
-                const record = character.characterId ? recordById.get(character.characterId) : undefined;
-
-                return {
-                    id: character.entryId,
-                    name: character.key,
-                    color: record ? resolveCharacterColor(record, displayColorByKey) : null,
-                    level: character.level,
-                    isDimmed: isFiltering && !(character.characterId && selectedIds.has(character.characterId)),
-                };
-            });
+            const sceneRecords = recordsByScene.get(scene.headingBlockId) ?? [];
+            const {noteById, evidenceById} = buildSceneChipIndex(scene, sceneRecords);
+            const toChip = (id: string, characterId: string | null, key: string, source: BoardCharacterChip['source']): BoardCharacterChip => buildCharacterChip({
+                id,
+                characterId,
+                key,
+                record: characterId ? recordById.get(characterId) : undefined,
+                note: (characterId && noteById.get(characterId)) || null,
+                source,
+                isDimmed: isFiltering && !isSelected(characterId),
+            }, displayColorByKey);
+            const fromScript = scene.characters.map(character => toChip(character.entryId, character.characterId, character.key, 'script'));
+            const onlyOnCard = sceneRecords
+                .filter(record => !evidenceById.has(record.characterId))
+                .map(record => toChip(record.characterId, record.characterId, '', 'card'));
+            const all = [...fromScript, ...onlyOnCard];
+            const withNote = all
+                .filter(chip => chip.note)
+                .toSorted((left, right) => byFirstCue(evidenceById.get(left.characterId ?? ''), evidenceById.get(right.characterId ?? '')));
 
             return {
                 headingBlockId: scene.headingBlockId,
                 number: scene.number,
                 title: scene.title,
                 page: getStartPage(scene.headingBlockId),
-                isCollapsed: isFiltering && !matchesFilter,
-                chips,
+                synopsis: synopsisByScene.get(scene.headingBlockId) ?? null,
+                isCollapsed: isFiltering && !all.some(chip => isSelected(chip.characterId)),
+                chips: showOnStage ? [...withNote, ...all.filter(chip => !chip.note)] : [],
             };
         }),
     }));

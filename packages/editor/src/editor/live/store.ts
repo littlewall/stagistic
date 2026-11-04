@@ -1,5 +1,6 @@
 import type {
     EditorIndexSnapshot,
+    EditorLiveBlockPagesSnapshot,
     EditorLiveCharacterSnapshot,
     EditorLiveScenePlacementSnapshot,
     EditorLiveSnapshot,
@@ -33,6 +34,11 @@ export const EMPTY_SCENE_PLACEMENT: EditorLiveScenePlacementSnapshot = {
     hasComputed: false,
 };
 
+export const EMPTY_BLOCK_PAGES: EditorLiveBlockPagesSnapshot = {
+    byBlockId: new Map<string, never>(),
+    hasComputed: false,
+};
+
 export const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
@@ -46,6 +52,7 @@ const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
         index: EMPTY_INDEX,
         structure: EMPTY_STRUCTURE,
         scenePlacement: EMPTY_SCENE_PLACEMENT,
+        blockPages: EMPTY_BLOCK_PAGES,
         characters: EMPTY_CHARACTERS,
         music: [],
         activeBlockId: null,
@@ -111,6 +118,7 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
             !Object.is(snapshot.index, nextSnapshot.index) ||
             !Object.is(snapshot.structure, nextSnapshot.structure) ||
             !Object.is(snapshot.scenePlacement, nextSnapshot.scenePlacement) ||
+            !Object.is(snapshot.blockPages, nextSnapshot.blockPages) ||
             !Object.is(snapshot.characters, nextSnapshot.characters) ||
             !Object.is(snapshot.music, nextSnapshot.music) ||
             !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId) ||

@@ -9,7 +9,10 @@ import {
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
+import {BoardArcsLens} from './board/BoardArcsLens';
 import {DEFAULT_BOARD_LENS_ID, isBoardLensId} from './board/boardLenses';
+import {BoardMatrixLens} from './board/BoardMatrixLens';
+import {BoardRundownLens} from './board/BoardRundownLens';
 import {BoardWall} from './board/BoardWall';
 import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
@@ -17,6 +20,13 @@ import {useScriptStateControls} from './states/useScriptStateControls';
 import {getScriptBasePath, useScriptAccess} from './workspace/ScriptAccessContext';
 import {useScriptCharacters} from './workspace/ScriptCharactersContext';
 import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
+
+const LENS_COMPONENTS: Record<string, React.ComponentType<{activeLensId: string, onSelectLens: (id: string) => void}>> = {
+    wall: BoardWall,
+    matrix: BoardMatrixLens,
+    arcs: BoardArcsLens,
+    rundown: BoardRundownLens,
+};
 
 const ScriptBoardPage = ({lensId}: {lensId: string}) => {
     const navigate = useNavigate();
@@ -74,9 +84,10 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
         flushScript,
     });
 
+    const LensComponent = LENS_COMPONENTS[lensId] ?? BoardWall;
+
     return (
         <AppLayout
-            footer={null}
             header={
                 currentScript ? (
                     <ScriptEditorAppHeader
@@ -85,13 +96,14 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
                         onMenuAction={handleMenuAction}
                         onRenameScript={isReadOnly ? undefined : updateScriptTitle}
                         activeView="board"
+                        width="board"
                         scriptState={scriptStateControls.stateMenu}
                     />
                 ) : null
             }
         >
             {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
-            {currentScriptId ? <BoardWall activeLensId={lensId} onSelectLens={openLens} /> : null}
+            {currentScriptId ? <LensComponent activeLensId={lensId} onSelectLens={openLens} /> : null}
             {scriptStateControls.modals}
         </AppLayout>
     );
