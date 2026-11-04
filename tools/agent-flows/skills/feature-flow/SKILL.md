@@ -7,6 +7,8 @@ description: Use when starting or continuing development of a new feature, such 
 
 Read `tools/agent-flows/skills/flow-rules.md`, then follow live upstream skills under those overrides. Keep one feature in this thread; ask about ambiguous scope before creating a second effort. On resume, continue the first unfinished phase and preserve approvals already recorded.
 
+When a feature adds a locally persisted script entity or changes a script-data mutation or reactive read, also read `.claude/skills/data-layer/SKILL.md` before designing or implementing that part.
+
 1. Resume the selected unfinished `.scratch/<feature>/state.md`, or choose a short feature slug and create it. Record `Start HEAD` from `git rev-parse HEAD`, `Phase`, baseline WIP and `Touched files` (initially empty). Update phase and touched files as work proceeds. Changes outside this flow keep their existing ownership.
 2. Resolve and Read `grill-with-docs`, `grilling` and `domain-modeling`. Work the decision tree in rounds, with a recommendation for each question. Find codebase facts through `scout`; ask the user for decisions. Challenge fuzzy requirements with concrete edge cases. Capture resolved terms and worthwhile ADRs as upstream describes, leaving files uncommitted. Wait for confirmation of shared understanding.
 3. Follow `to-spec` into `.scratch/<feature>/spec.md`, including testing decisions and observable acceptance criteria. Present the spec for user approval. Do not make implementation changes before approval.

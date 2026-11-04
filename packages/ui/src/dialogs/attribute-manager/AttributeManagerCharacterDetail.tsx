@@ -79,7 +79,9 @@ export const AttributeManagerCharacterDetail = ({
     const colorPicker = useCharacterColorPickerState({
         character: editorCharacter,
         isColorActionDisabled,
-        onSetCharacterColor,
+        onSetCharacterColor: (id, color) => {
+            void Promise.resolve(onSetCharacterColor?.(id, color)).catch(() => undefined);
+        },
     });
 
     const handleConfirmDelete = () => {

@@ -297,6 +297,45 @@ describe('script characters store', () => {
         expect((await characters.read())[0]?.outline).toBe('Newest');
     });
 
+    it.each(['resolve', 'reject'] as const)('keeps the newest color when an older write %ss', async outcome => {
+        const {repository, characters} = createRepository();
+        const gates = [deferred(), deferred()];
+        let callIndex = 0;
+        const originalUpdate = repository.setScriptCharacterColor.bind(repository);
+
+        repository.setScriptCharacterColor = async (...args) => {
+            const gate = gates[callIndex++];
+
+            await gate.promise;
+
+            return originalUpdate(...args);
+        };
+
+        const store = createScriptCharactersStore(repository, 'script-1');
+
+        await Promise.all([store.charactersCollection.preload(), store.gendersCollection.preload()]);
+
+        const first = store.setCharacterColor('character-1', '#112233');
+        const second = store.setCharacterColor('character-1', '#aabbcc');
+        const firstOutcome = outcome === 'reject'
+            ? expect(first).rejects.toThrow('older write failed')
+            : expect(first).resolves.toMatchObject({colorHex: '#aabbcc'});
+
+        expect(store.charactersCollection.get('character-1')?.colorHex).toBe('#aabbcc');
+
+        if (outcome === 'reject') gates[0].reject(new Error('older write failed'));
+
+        if (outcome === 'resolve') gates[0].resolve();
+
+        await firstOutcome;
+        expect(store.charactersCollection.get('character-1')?.colorHex).toBe('#aabbcc');
+        expect((await characters.read())[0]?.colorHex).toBe(outcome === 'reject' ? null : '#112233');
+
+        gates[1].resolve();
+        await second;
+        expect((await characters.read())[0]?.colorHex).toBe('#aabbcc');
+    });
+
     it('creates a normalized gender with a stable ID and reuses an existing key', async () => {
         const {repository, genders} = createRepository();
         const store = createScriptCharactersStore(repository, 'script-1');

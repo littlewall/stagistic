@@ -2,6 +2,20 @@
 
 A writing app for theatre scripts. The script document is the source of truth; the Board is a live view of its acts, scenes and characters.
 
+## Data layer
+
+**Store**:
+An app-core owner of an entity's reactive collections, actions and persistence status, scoped to a repository and usually a script.
+
+**Confirmed state**:
+Values read from the repository's reactive source, without pending optimistic mutations. Used as the durable baseline for draft reconciliation.
+
+**Optimistic state**:
+Collection values including pending local mutations. A rejected mutation removes its optimistic effect; newer pending changes can still remain visible.
+
+**Draft**:
+An editing value that has not yet been submitted or confirmed. A draft can retain unsaved changes after an error; it is distinct from a pending collection mutation.
+
 ## Board
 
 **Lens**:

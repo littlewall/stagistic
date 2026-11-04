@@ -21,6 +21,27 @@ export default defineConfig({
     },
     overrides: [
         {
+            files: ['packages/{ui,editor}/**/*.{ts,tsx,js,jsx,mjs,cjs,mts}'],
+            rules: {
+                'eslint/no-restricted-imports': [
+                    'error',
+                    {
+                        patterns: [
+                            {
+                                group: [
+                                    '@stagistic/db',
+                                    '@stagistic/db/**',
+                                    '@tanstack/react-db',
+                                    '@tanstack/react-db/**',
+                                ],
+                                message: 'Keep persistence and reactive collections in app-core; pass domain values and actions into UI/editor.',
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+        {
             // Tests hold long scenario tables; the generated migrations bundle is emitted as one file.
             files: ['**/*.test.{ts,tsx}', 'packages/db/src/pglite/migrations.compiled.ts'],
             rules: {

@@ -9,6 +9,15 @@
 - Never rename or edit a migration that reached `rewrite`/`main`. When merging branches, keep both migrations; if two share a prefix, rename the branch-only one to a new timestamp and add its old id to `RENAMED_MIGRATIONS` in `packages/db/src/pglite/migrations.ts`.
 - After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run `moon run db:db-compile-migrations` (`db-generate` does this automatically; manual SQL edits do not). It rejects bad names and duplicate prefixes.
 
+## Data layer
+
+- Persistent script-data writes go through `ScriptRepository`.
+- Optimistic entity state belongs in app-core stores; UI/editor receive domain values and actions. Unsubmitted drafts and document sessions keep their editing contracts.
+- Simple entity mutations use `createReactiveCollection` persistence handlers. Composed optimistic commands may use `createOptimisticAction`, even for one collection; preserve ordering, confirmation and partial-success behavior. Optimistic transactions do not guarantee database atomicity.
+- Preserve documented repository-command and confirmed-read exceptions; see [docs/data-layer.md](docs/data-layer.md). Do not force every write or read into one pattern.
+- Do not use TanStack Query for locally stored script data. Reserve it for remote-only data such as account/billing if needed.
+- For a new local entity, mutation or changed reactive read, read [.claude/skills/data-layer/SKILL.md](.claude/skills/data-layer/SKILL.md).
+
 ## Document schema version
 `SCRIPT_DOCUMENT_SCHEMA_VERSION` changes only when the stored `ScriptDocument`
 shape or meaning changes: node/mark types, attrs, cue/character-tag representation,

@@ -42,7 +42,11 @@ export const createSceneMetadataActions = (repository: ScriptRepository, scriptI
 
             const attachment = getSceneMetadataStore(repository, scriptId).putSceneCharacter(headingBlockId, character.id, {});
 
-            // Both are optimistic now; record persistence waits for catalog confirmation.
+            /*
+             * Separate collection transactions are intentional: the foreign key must be saved
+             * before the scene record. If attachment fails, keep the created catalog character.
+             * A single optimistic action must not roll back a successfully persisted character.
+             */
             const [confirmed] = await Promise.all([confirmation, attachment]);
 
             return confirmed;

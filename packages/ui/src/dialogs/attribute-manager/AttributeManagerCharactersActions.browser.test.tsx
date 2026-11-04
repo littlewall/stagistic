@@ -47,55 +47,26 @@ describe('AttributeManagerCharactersPanel character actions', () => {
         expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', expect.any(String));
     });
 
-    it('keeps the newest color visible while older persistence is still pending', async () => {
-        const resolvers: Array<() => void> = [];
-        const onSetCharacterColor = vi.fn<(characterId: string, colorHex: string | null) => Promise<void>>(
-            () => new Promise<void>(resolve => {
-                resolvers.push(resolve);
-            }),
-        );
-
-        renderPanel(undefined, onSetCharacterColor);
-
-        const chooseColor = async (action: 'Apply' | 'Reset') => {
-            await page.elementLocator(await waitForElement('[aria-label="Choose color for ANNA"]')).click();
-            await waitForVisibleElement('[aria-label="Color picker for ANNA"]');
-            await page.elementLocator(findVisibleButtonByText(action)).click();
-        };
-
-        await chooseColor('Reset');
-        await chooseColor('Apply');
-
-        const newestColor = onSetCharacterColor.mock.calls[1]?.[1];
-        const listColor = findButtonByText('ANNA').querySelector<HTMLElement>('span');
-        const expected = document.createElement('span');
-
-        expected.style.backgroundColor = newestColor ?? '';
-        resolvers[0]?.();
-        await new Promise(resolve => window.setTimeout(resolve, 0));
-        expect(listColor?.style.backgroundColor).toBe(expected.style.backgroundColor);
-        resolvers[1]?.();
-    });
-
-    it('shows a null color reset while persistence is pending', async () => {
-        let resolvePersistence: () => void = () => undefined;
-        const onSetCharacterColor = vi.fn(
-            () => new Promise<void>(resolve => {
-                resolvePersistence = resolve;
-            }),
-        );
-
-        renderPanel(undefined, onSetCharacterColor);
+    it('renders incoming colors during a pending action and after rejection', async () => {
+        let rejectPersistence: (error: Error) => void = () => undefined;
+        const onSetCharacterColor = vi.fn(() => new Promise<void>((_resolve, reject) => {
+            rejectPersistence = reject;
+        }));
+        const {rerenderCharacters} = renderPanel(undefined, onSetCharacterColor);
+        const listColor = () => findButtonByText('ANNA').querySelector<HTMLElement>('span')?.style.backgroundColor;
 
         await page.elementLocator(await waitForElement('[aria-label="Choose color for ANNA"]')).click();
         await waitForVisibleElement('[aria-label="Color picker for ANNA"]');
         await page.elementLocator(findVisibleButtonByText('Reset')).click();
-
-        const listColor = findButtonByText('ANNA').querySelector<HTMLElement>('span');
-
         expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', null);
-        expect(listColor?.style.backgroundColor).toBe('');
-        resolvePersistence();
+
+        // The parent supplies the store's latest value, even while the action is pending.
+        rerenderCharacters(CHARACTERS.map(item => ({...item, color: '#112233'})));
+        await expect.poll(listColor).toBe('rgb(17, 34, 51)');
+
+        rejectPersistence(new Error('write failed'));
+        rerenderCharacters(CHARACTERS);
+        await expect.poll(listColor).toBe('rgb(136, 153, 170)');
     });
 
     it('deletes only after confirming in the modal', async () => {
