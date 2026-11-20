@@ -53,6 +53,7 @@ export const ScriptExportRoute = () => {
         scriptId: currentScript?.id ?? null,
         view: 'export',
         flush: flushSession,
+        stopEditing: () => documentSession.stopEditing(),
     });
     const {openSave} = scriptStateControls;
     const saveAndDownload = useMemo(() => isReadOnly ? null : (kind: SaveScriptStateKind, download: (stateLabel: string) => void) => {

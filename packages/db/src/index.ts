@@ -107,6 +107,7 @@ export {
     type ScriptDocumentProjectionWriter,
     type ScriptDocumentSource,
 } from './repo/document/documentProjection';
+export {ScriptRevisionConflictError} from './repo/document/scriptRevisionConflict';
 export {
     createReadOnlyScriptRepository,
     createReadThroughFileStorage,

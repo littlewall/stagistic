@@ -16,6 +16,30 @@ Collection values including pending local mutations. A rejected mutation removes
 **Draft**:
 An editing value that has not yet been submitted or confirmed. A draft can retain unsaved changes after an error; it is distinct from a pending collection mutation.
 
+## Scripts
+
+**Script Draft**:
+A numbered, saved copy of a script, kept while the writer moves on to a rewrite. Distinct from a data-layer Draft.
+_Avoid_: Snapshot, draft (alone, in product copy)
+
+**Script Version**:
+A named, saved copy of a script, marking a state such as a reading, festival or tour.
+_Avoid_: Snapshot, revision
+
+## Releases
+
+**Release**:
+A numbered update of the Stagistic app, shared by every surface.
+_Avoid_: Version (alone, in product copy), build, deploy
+
+**Release Note**:
+A hand-reviewed, user-facing description of one change in a Release.
+_Avoid_: Commit message, patch note
+
+**Highlight**:
+A Release Note important enough to be announced in the app.
+_Avoid_: Headline, featured note
+
 ## Board
 
 **Lens**:

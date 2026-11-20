@@ -46,7 +46,7 @@ export interface CharacterActions {
     ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
-    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void | Promise<void>,
     handleSetCharacterVoiceType: (characterId: string, voiceType: string | null) => void,
     handleSetCharacterVocalRange: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
@@ -183,7 +183,7 @@ export const useCharacterActions = ({
         void catalog.setCharacterGender(id, gender).catch(() => undefined);
     }, [catalog]);
     const handleSetCharacterOutline = useCallback((id: string, outline: string | null) => {
-        void catalog.setCharacterOutline(id, outline).catch(() => undefined);
+        return catalog.setCharacterOutline(id, outline).then(() => undefined);
     }, [catalog]);
     const handleSetCharacterVoiceType = useCallback((id: string, voiceType: string | null) => {
         void catalog.setCharacterVoiceType(id, voiceType).catch(() => undefined);

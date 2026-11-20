@@ -1,0 +1,77 @@
+.screen {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2xl);
+    background: var(--color-bg);
+}
+
+.card {
+    max-width: 34rem;
+    text-align: center;
+}
+
+.wordmark {
+    margin: 0 0 var(--space-xl);
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-lg);
+}
+
+.title {
+    margin: 0 0 var(--space-md);
+    font-size: var(--font-size-4xl);
+    line-height: 1.1;
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+.body {
+    margin: 0;
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-top: var(--space-xl);
+}
+
+.details {
+    margin-top: var(--space-xl);
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    text-align: left;
+
+    & > summary {
+        cursor: pointer;
+        text-align: center;
+    }
+}
+
+.detailText {
+    overflow: auto;
+    margin: var(--space-sm) 0 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.status {
+    margin: var(--space-lg) 0 0;
+    color: var(--color-text);
+}
+
+.progress {
+    inline-size: 100%;
+    margin-top: var(--space-sm);
+    accent-color: var(--color-accent);
+}

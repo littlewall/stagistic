@@ -1,6 +1,5 @@
 import '../../styles/base.css';
 
-import {requireValue} from '@stagistic/shared';
 import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -88,42 +87,15 @@ describe('AppLayout', () => {
         expect(window.getComputedStyle(input as HTMLInputElement).outlineStyle).toBe('solid');
     });
 
-    it('keeps public preview information and feedback reachable from every app screen', async () => {
+    it('keeps feedback reachable from every app screen and says nothing about a preview', async () => {
         renderLayout();
 
         await waitFor(() => document.querySelector('footer') !== null);
 
-        expect(document.body.textContent).toContain('💛 Stagistic Editor • Public preview');
-
         const feedback = document.querySelector<HTMLAnchorElement>('a[href="https://feedback.stagistic.com"]');
-        const explainPreview = document.querySelector<HTMLButtonElement>('button[aria-label="What does public preview mean?"]');
 
         expect(feedback?.textContent).toBe('Feedback & bug reports');
         expect(feedback?.target).toBe('_blank');
-        expect(explainPreview?.textContent).toBe('what does it mean?');
-        expect(explainPreview?.parentElement?.textContent).toBe('💛 Stagistic Editor • Public preview (what does it mean?)');
-
-        await page.elementLocator(requireValue(explainPreview)).click();
-        await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
-
-        const dialog = requireValue(document.querySelector<HTMLDialogElement>('dialog'));
-        const dialogText = dialog.textContent;
-
-        expect(dialogText).toContain('Public preview notice');
-        expect(dialogText).toContain('Stagistic Editor is in public preview.');
-        expect(dialogText).toContain('Use it at your own risk.');
-        expect(dialogText).toContain('stored only in this browser');
-        expect(dialogText).not.toContain('Sync');
-        expect(dialogText).toContain('Nothing you create is sent from your device to external servers.');
-        expect(dialogText).toContain('including theme, layout or filters');
-        expect(dialogText).toContain('Back up your work regularly.');
-        expect(dialogText).toContain('may permanently remove it');
-
-        const closeButton = Array.from(dialog.querySelectorAll('button')).find(button => button.textContent === 'Close');
-
-        expect(closeButton).toBeDefined();
-
-        await page.elementLocator(requireValue(closeButton)).click();
-        await waitFor(() => document.querySelector<HTMLDialogElement>('dialog') === null);
+        expect(document.querySelector('footer')?.textContent?.toLowerCase()).not.toContain('preview');
     });
 });

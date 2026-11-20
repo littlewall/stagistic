@@ -143,6 +143,7 @@ export const ScriptEditorRoute = () => {
         scriptId: currentScriptId,
         view: 'editor',
         flush: flushScriptQuietly,
+        stopEditing: () => documentSession.stopEditing(),
     });
     const musicModals = useMusicModalsState(musicState);
 

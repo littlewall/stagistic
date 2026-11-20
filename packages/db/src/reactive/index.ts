@@ -6,3 +6,4 @@ export type {
     ReactiveQueryListener,
     ReactiveQuerySource,
 } from './types';
+export {unsubscribeOfFailedSubscribe} from './types';

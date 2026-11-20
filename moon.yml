@@ -36,6 +36,21 @@ tasks:
     options:
       cache: false
 
+  # Merges releases/next/*.md into releases/<release>.md and sets every Release number.
+  # Never commits or tags. Usage: moon run root:release-prepare [-- --date YYYY-MM-DD]
+  release-prepare:
+    command: 'tsx packages/release-notes/src/cli.ts'
+    options:
+      cache: false
+
+  # Undoes release-prepare back to a Release: splits every releases/<n>.md newer than it into
+  # releases/next/ fragments, deletes those files and sets every Release number to it.
+  # Never commits or tags. Usage: moon run root:release-revert -- 0.1.0
+  release-revert:
+    command: 'tsx packages/release-notes/src/cli.ts revert'
+    options:
+      cache: false
+
   upstream-check:
     command: 'node tools/agent-flows/bin/upstream.mjs check'
     options:

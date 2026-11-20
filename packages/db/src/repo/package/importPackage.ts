@@ -117,6 +117,8 @@ export const createImportPackageHandler = ({
                     subtitle: input.script.subtitle,
                     updatedAt: now,
                 });
+                // Tabs that loaded the old text must not save over the restored one.
+                await dbQueries.bumpScriptRevision(tx, scriptId);
 
                 await tx.delete(scriptDetachedScenes).where(eq(scriptDetachedScenes.scriptId, scriptId));
                 await tx.delete(scriptSceneCharacters).where(eq(scriptSceneCharacters.scriptId, scriptId));

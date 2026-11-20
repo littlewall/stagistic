@@ -34,7 +34,7 @@ const waitFor = async (predicate: () => boolean) => {
 };
 
 describe('PGlite reactive query source', () => {
-    it('removes a failed subscriber before a later restart', async () => {
+    it('keeps a failed subscriber so a later refresh re-emits to it', async () => {
         let shouldFail = true;
         const unsubscribeLiveQuery = vi.fn(() => Promise.resolve());
         const db = {
@@ -61,19 +61,204 @@ describe('PGlite reactive query source', () => {
         const failedListener = vi.fn();
 
         await expect(source.subscribe(failedListener)).rejects.toThrow('initial read failed');
-        expect(unsubscribeLiveQuery).toHaveBeenCalledTimes(1);
 
         shouldFail = false;
 
         const activeListener = vi.fn();
         const unsubscribe = await source.subscribe(activeListener);
 
+        expect(failedListener).toHaveBeenCalledTimes(1);
         expect(activeListener).toHaveBeenCalledTimes(1);
 
         await source.refresh();
 
-        expect(failedListener).not.toHaveBeenCalled();
+        expect(failedListener).toHaveBeenCalledTimes(2);
         expect(activeListener).toHaveBeenCalledTimes(2);
+        unsubscribe();
+    });
+
+    const mockDb = (live: unknown) => ({$client: live}) as unknown as LocalDb;
+
+    it('unsubscribes a live query that answers after the subscribe timed out', async () => {
+        const unsubscribe = vi.fn(() => Promise.resolve());
+        let answerLate: (handle: {unsubscribe: () => Promise<void>}) => void = () => {};
+        const query = vi.fn(() => new Promise(resolve => {
+            answerLate = resolve;
+        }));
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows: () => Promise.resolve([]),
+            watchQuery: 'SELECT 1',
+            subscribeTimeoutMs: 20,
+        });
+
+        const failure = await source.subscribe(vi.fn()).then(() => null, (error: unknown) => error);
+
+        expect((failure as Error).message).toContain('did not answer in time');
+        // The caller went away: nobody needs the late handle.
+        (failure as {unsubscribe: () => void}).unsubscribe();
+        answerLate({unsubscribe});
+        await waitFor(() => unsubscribe.mock.calls.length === 1);
+    });
+
+    it('gives a failed subscribe a cleanup that releases the listener and the live query', async () => {
+        const unsubscribeLiveQuery = vi.fn(() => Promise.resolve());
+        const query = vi.fn(() => Promise.resolve({unsubscribe: unsubscribeLiveQuery}));
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows: () => Promise.reject(new Error('read failed')),
+            watchQuery: 'SELECT 1',
+        });
+        const listener = vi.fn();
+        const error = await source.subscribe(listener).then(() => null, (failure: unknown) => failure);
+
+        expect(error).toBeInstanceOf(Error);
+
+        const release = (error as {unsubscribe?: () => void}).unsubscribe;
+
+        expect(release).toBeTypeOf('function');
+        release?.();
+        await waitFor(() => unsubscribeLiveQuery.mock.calls.length === 1);
+    });
+
+    it('ends refresh and read in a failure when the leader never answers a read', async () => {
+        const query = vi.fn(() => Promise.resolve({unsubscribe: () => Promise.resolve()}));
+        let hang = false;
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows: () => (hang ? new Promise<never[]>(() => {}) : Promise.resolve([])),
+            watchQuery: 'SELECT 1',
+            subscribeTimeoutMs: 30,
+        });
+
+        const unsubscribe = await source.subscribe(vi.fn());
+
+        hang = true;
+        await expect(source.refresh()).rejects.toThrow('did not answer in time');
+        await expect(source.read()).rejects.toThrow('did not answer in time');
+        unsubscribe();
+    });
+
+    it('gives each concurrent failing subscriber its own cleanup', async () => {
+        const unsubscribeLiveQuery = vi.fn(() => Promise.resolve());
+        const query = vi.fn(() => Promise.resolve({unsubscribe: unsubscribeLiveQuery}));
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows: () => Promise.reject(new Error('read failed')),
+            watchQuery: 'SELECT 1',
+        });
+        const failures = await Promise.all([
+            source.subscribe(vi.fn()).then(() => null, (failure: unknown) => failure),
+            source.subscribe(vi.fn()).then(() => null, (failure: unknown) => failure),
+        ]) as {unsubscribe?: () => void}[];
+
+        expect(failures[0]).not.toBe(failures[1]);
+        expect(failures[0]?.unsubscribe).not.toBe(failures[1]?.unsubscribe);
+
+        failures[0]?.unsubscribe?.();
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(unsubscribeLiveQuery).not.toHaveBeenCalled();
+        failures[1]?.unsubscribe?.();
+        await waitFor(() => unsubscribeLiveQuery.mock.calls.length === 1);
+    });
+
+    it('keeps a late live query and refills the list from it', async () => {
+        const unsubscribe = vi.fn(() => Promise.resolve());
+        let answerLate: (handle: {unsubscribe: () => Promise<void>}) => void = () => {};
+        const query = vi.fn(() => new Promise(resolve => {
+            answerLate = resolve;
+        }));
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows: () => Promise.resolve([{id: 'a'}]),
+            watchQuery: 'SELECT 1',
+            subscribeTimeoutMs: 20,
+        });
+        const listener = vi.fn();
+        const failure = await source.subscribe(listener).then(() => null, (error: unknown) => error);
+
+        expect(failure).toBeInstanceOf(Error);
+        answerLate({unsubscribe});
+        await waitFor(() => listener.mock.calls.length === 1);
+        expect(listener).toHaveBeenCalledWith([{id: 'a'}]);
+        expect(unsubscribe).not.toHaveBeenCalled();
+    });
+
+    it('emits a late read result when no newer read was queued', async () => {
+        const query = vi.fn(() => Promise.resolve({unsubscribe: () => Promise.resolve()}));
+        let hang = false;
+        let answerLate: (rows: {id: string}[]) => void = () => {};
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows: () => (hang
+                ? new Promise<{id: string}[]>(resolve => {
+                    answerLate = resolve;
+                })
+                : Promise.resolve([{id: 'old'}])),
+            watchQuery: 'SELECT 1',
+            subscribeTimeoutMs: 20,
+        });
+        const listener = vi.fn();
+        const unsubscribe = await source.subscribe(listener);
+
+        hang = true;
+        await expect(source.refresh()).rejects.toThrow('did not answer in time');
+        answerLate([{id: 'late'}]);
+        await waitFor(() => listener.mock.calls.length === 2);
+        expect(listener).toHaveBeenLastCalledWith([{id: 'late'}]);
+        unsubscribe();
+    });
+
+    it('reads once per live query change', async () => {
+        let notify: () => void = () => {};
+        const query = vi.fn((options: {callback: () => void}) => {
+            notify = options.callback;
+
+            return Promise.resolve({unsubscribe: () => Promise.resolve()});
+        });
+        const readRows = vi.fn(() => Promise.resolve([{id: 'a'}]));
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({live: {query}})),
+            readRows,
+            watchQuery: 'SELECT 1',
+        });
+        const unsubscribe = await source.subscribe(vi.fn());
+
+        expect(readRows).toHaveBeenCalledTimes(1);
+        notify();
+        await waitFor(() => readRows.mock.calls.length === 2);
+        await new Promise(resolve => setTimeout(resolve, 30));
+        expect(readRows).toHaveBeenCalledTimes(2);
+        unsubscribe();
+    });
+
+    it('makes refresh and subscribe wait for a pending re-establish after a leader change', async () => {
+        let leaderChanged: () => void = () => {};
+        const query = vi.fn(() => Promise.resolve({unsubscribe: () => Promise.resolve()}));
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(mockDb({
+                live: {query},
+                onLeaderChange: (callback: () => void) => {
+                    leaderChanged = callback;
+
+                    return () => {};
+                },
+            })),
+            readRows: () => Promise.resolve([{id: 'a'}]),
+            watchQuery: 'SELECT 1',
+        });
+        const unsubscribe = await source.subscribe(vi.fn());
+
+        expect(query).toHaveBeenCalledTimes(1);
+        leaderChanged();
+
+        const refreshed = source.refresh();
+
+        await new Promise(resolve => setTimeout(resolve, 20));
+        expect(query).toHaveBeenCalledTimes(1);
+
+        await refreshed;
+        expect(query).toHaveBeenCalledTimes(2);
         unsubscribe();
     });
 

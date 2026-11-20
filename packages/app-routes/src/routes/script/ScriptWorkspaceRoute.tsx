@@ -4,6 +4,7 @@ import {
     type ScriptRepository,
     ScriptRepositoryProvider,
     type ScriptSnapshot,
+    useDatabaseHandoverParticipant,
     useScriptRepository,
     useScriptSnapshots,
     useScriptSummary,
@@ -36,12 +37,14 @@ import {AppHeader} from '../../layout/AppHeader';
 import styles from './ScriptWorkspaceRoute.module.css';
 import {ScriptSettingsModalProvider} from './settings/ScriptSettingsModalProvider';
 import {useSnapshotSettingsSaver} from './states/useSnapshotSettingsSaver';
+import {LiveScriptEditing, useEditingParticipant} from './workspace/LiveScriptEditing';
 import {
     getScriptBasePath,
     type ScriptAccess,
     ScriptAccessProvider,
     useScriptAccess,
 } from './workspace/ScriptAccessContext';
+import {ScriptLoadFailure} from './workspace/ScriptLoadFailure';
 import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './workspace/ScriptWorkspaceContext';
 import {useScriptWorkspaceReloadKey} from './workspace/scriptWorkspaceReload';
 import {useScriptEditorController} from './workspace/useScriptEditorController';
@@ -52,6 +55,7 @@ const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
         editorLoadState,
         initialValue,
         storageError,
+        retryLoad,
     } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
     const {store: editorSnapshotStore} = useMemo(() => ({scriptId, store: createEditorSnapshotStore()}), [scriptId]);
@@ -68,6 +72,10 @@ const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
         editorSnapshotStore,
     ]);
     const pendingCacheDestroyRef = useRef<number | null>(null);
+
+    useDatabaseHandoverParticipant(documentSession);
+
+    useEditingParticipant(documentSession, isReadOnly);
 
     useEffect(() => {
         /*
@@ -105,6 +113,14 @@ const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
         ],
     );
 
+    if (!editorLoadState.isLoading && !initialValue && storageError) {
+        return (
+            <AppLayout header={<AppHeader />} footer={null}>
+                <ScriptLoadFailure onRetry={retryLoad} />
+            </AppLayout>
+        );
+    }
+
     if (editorLoadState.isLoading || !initialValue || !workspaceValue) {
         return (
             <LoaderOverlay
@@ -130,27 +146,11 @@ const ScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
     );
 };
 
-const LiveScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => {
-    const repository = useScriptRepository();
-    const {script} = useScriptSummary(scriptId);
-    const access = useMemo<ScriptAccess>(() => ({
-        isReadOnly: false,
-        snapshot: null,
-        liveRepository: repository,
-        liveScriptTitle: script?.name ?? null,
-        basePath: scriptId ? getScriptBasePath(scriptId) : null,
-    }), [
-        repository,
-        script?.name,
-        scriptId,
-    ]);
-
-    return (
-        <ScriptAccessProvider value={access}>
-            <ScriptWorkspace scriptId={scriptId} />
-        </ScriptAccessProvider>
-    );
-};
+const LiveScriptWorkspace = ({scriptId}: {scriptId: string | undefined}) => (
+    <LiveScriptEditing scriptId={scriptId}>
+        {loadEpoch => <ScriptWorkspace key={loadEpoch} scriptId={scriptId} />}
+    </LiveScriptEditing>
+);
 
 type SnapshotViewState =
     | {status: 'loading'}
@@ -159,7 +159,7 @@ type SnapshotViewState =
 
 const describeSnapshotError = (code: string | undefined) => {
     if (code === 'unsupported_document_schema_version' || code === 'unsupported_format_version') {
-        return 'This state was saved by a newer version of Stagistic.';
+        return 'This state was saved by a newer Release of Stagistic.';
     }
 
     return 'This state could not be opened.';

@@ -1,3 +1,4 @@
+import {reportDynamicImportFailure} from '@stagistic/app-core';
 import * as pdfjs from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
@@ -29,7 +30,11 @@ const renderPage = async (page: pdfjs.PDFPageProxy, scale: number): Promise<HTML
 };
 
 export const renderPdfToCanvases = async (data: ArrayBuffer, scale: number): Promise<HTMLCanvasElement[]> => {
-    const pdf = await pdfjs.getDocument({data}).promise;
+    const pdf = await pdfjs.getDocument({data}).promise.catch((error: unknown) => {
+        // The pdfjs worker may be gone after a deploy.
+        reportDynamicImportFailure(error, 'The PDF preview could not be prepared.');
+        throw error;
+    });
     const canvases: HTMLCanvasElement[] = [];
 
     try {

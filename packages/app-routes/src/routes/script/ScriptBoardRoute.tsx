@@ -61,6 +61,7 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
         scriptId: currentScript?.id ?? null,
         view: 'board',
         flush: flushSession,
+        stopEditing: () => documentSession.stopEditing(),
     });
 
     useDocumentTitle(currentScript ? `Board · ${fileTitle}` : 'Board');

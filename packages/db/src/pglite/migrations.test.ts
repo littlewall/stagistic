@@ -1,9 +1,11 @@
 import {PGlite} from '@electric-sql/pglite';
+import {StartFailureError} from '@stagistic/shared';
 import {
     afterEach,
     describe,
     expect,
     it,
+    vi,
 } from 'vite-plus/test';
 
 import {RENAMED_MIGRATIONS, runPgliteMigrations} from './migrations';
@@ -120,6 +122,39 @@ describe('runPgliteMigrations', {timeout: 20_000}, () => {
         );
 
         await expect(runPgliteMigrations(client)).rejects.toThrow('newer than this app');
+        await expect(runPgliteMigrations(client)).rejects.toMatchObject({
+            kind: 'database-newer-than-app',
+            migrationId: '9999_future_migration',
+        });
+    });
+
+    it('reports the migration that failed as a typed failure', async () => {
+        const client = await createClient();
+        const [first] = compiledMigrations;
+
+        // An unrelated object under the name the first migration creates makes it fail.
+        await client.exec('CREATE TABLE script_acts (id integer);');
+
+        const failure: unknown = await runPgliteMigrations(client).catch((error: unknown) => error);
+
+        expect(failure).toBeInstanceOf(StartFailureError);
+        expect(failure).toMatchObject({kind: 'migration-failed', migrationId: first?.id});
+    });
+
+    it('reports a changed historical migration as a failed migration', async () => {
+        const client = await createClient();
+        const migration = compiledMigrations.at(-1);
+
+        await runPgliteMigrations(client);
+        await client.query(
+            'UPDATE __stagistic_migrations SET checksum = $1 WHERE id = $2',
+            ['modified', migration?.id],
+        );
+
+        await expect(runPgliteMigrations(client)).rejects.toMatchObject({
+            kind: 'migration-failed',
+            migrationId: migration?.id,
+        });
     });
 
     it('relabels databases that applied a migration under its pre-merge id', async () => {
@@ -374,5 +409,71 @@ describe('runPgliteMigrations', {timeout: 20_000}, () => {
             `INSERT INTO script_scene_characters (script_id, heading_block_id, character_id, arc_value, created_at, updated_at)
              VALUES ('s', 'h', 'd', 101, 1, 1)`,
         )).rejects.toThrow();
+    });
+
+    describe('before pending migrations', () => {
+        const LAST = compiledMigrations.at(-1);
+        const LAST_ID = LAST?.id ?? '';
+
+        it('hands over the pending ids while the database is still untouched', async () => {
+            const client = await createClient();
+            const seen: {pending: readonly string[], applied: string[]}[] = [];
+
+            await applyMigrationsBefore(client, LAST_ID);
+            await client.exec('CREATE TABLE writer_marker (id text); INSERT INTO writer_marker VALUES (\'kept\');');
+            await runPgliteMigrations(client, {
+                beforePending: async pending => {
+                    const ledger = await client.query<{id: string}>('SELECT id FROM __stagistic_migrations');
+
+                    seen.push({pending, applied: ledger.rows.map(row => row.id)});
+                },
+            });
+
+            expect(seen).toHaveLength(1);
+            expect(seen[0]?.pending).toEqual([LAST_ID]);
+            expect(seen[0]?.applied).not.toContain(LAST_ID);
+
+            const ledger = await client.query<{id: string}>('SELECT id FROM __stagistic_migrations WHERE id = $1', [LAST_ID]);
+
+            expect(ledger.rows).toHaveLength(1);
+        });
+
+        it('is not called on a fresh database, which has nothing to back up', async () => {
+            const client = await createClient();
+            const beforePending = vi.fn(() => Promise.resolve());
+
+            await runPgliteMigrations(client, {beforePending});
+
+            expect(beforePending).not.toHaveBeenCalled();
+        });
+
+        it('is not called when no migration is pending', async () => {
+            const client = await createClient();
+            const beforePending = vi.fn(() => Promise.resolve());
+
+            await runPgliteMigrations(client);
+            await runPgliteMigrations(client, {beforePending});
+
+            expect(beforePending).not.toHaveBeenCalled();
+        });
+
+        it('leaves the backup available when a migration then fails', async () => {
+            const client = await createClient();
+            const stored: string[] = [];
+
+            await applyMigrationsBefore(client, LAST_ID);
+            // Applying the additive last migration twice makes the second run fail.
+            await client.exec(LAST?.sql ?? '');
+
+            const failure: unknown = await runPgliteMigrations(client, {
+                beforePending: async pending => {
+                    await Promise.resolve();
+                    stored.push(...pending);
+                },
+            }).catch((error: unknown) => error);
+
+            expect(failure).toMatchObject({kind: 'migration-failed', migrationId: LAST_ID});
+            expect(stored).toEqual([LAST_ID]);
+        });
     });
 });

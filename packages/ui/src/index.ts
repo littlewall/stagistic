@@ -199,6 +199,7 @@ export {
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
 export {FocusVisibilityManager} from './layout/FocusVisibilityManager';
+export {type FooterRelease, FooterReleaseProvider} from './layout/footerRelease';
 export {
     ScriptStateMenu,
     type ScriptStateMenuItem,
@@ -228,6 +229,7 @@ export {
 } from './molecules/ChangeSummary/ChangeSummary';
 
 // ─── Dialogs: script ────────────────────────────────────────────────────────
+export {BrowserDataNotice} from './dialogs/script/BrowserDataNotice';
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
 export {DeleteScriptModal} from './dialogs/script/DeleteScriptModal';
 export {
@@ -238,7 +240,6 @@ export {
 export type {StepkgPeekResult} from './dialogs/script/import/types';
 export {ImportScriptModal} from './dialogs/script/ImportScriptModal';
 export {NewScriptModal} from './dialogs/script/NewScriptModal';
-export {PublicPreviewNotice} from './dialogs/script/PublicPreviewNotice';
 export {
     RenameScriptModal,
     type RenameScriptModalProps,
@@ -258,6 +259,17 @@ export {
     type ScriptStateUpdate,
 } from './dialogs/script/ScriptStatesModal';
 export type {NewScriptFormatSelection, NewScriptShape} from './dialogs/script/types';
+export {
+    ReleaseHighlightsDialog,
+    type ReleaseHighlightsDialogProps,
+} from './dialogs/whats-new/ReleaseHighlightsDialog';
+export {
+    WhatsNewDialog,
+    type WhatsNewDialogProps,
+    type WhatsNewNote,
+    type WhatsNewNoteType,
+    type WhatsNewRelease,
+} from './dialogs/whats-new/WhatsNewDialog';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────
 export {AttributeManagerCharactersPanel} from './dialogs/attribute-manager/AttributeManagerCharactersPanel';

@@ -63,7 +63,7 @@ export interface UseScriptEditorCharactersResult {
     ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
-    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void | Promise<void>,
     handleSetCharacterVoiceType: (characterId: string, voiceType: string | null) => void,
     handleSetCharacterVocalRange: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,

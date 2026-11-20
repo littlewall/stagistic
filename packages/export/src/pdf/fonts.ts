@@ -1,5 +1,7 @@
 import type {jsPDF} from 'jspdf';
 
+import {PdfFileLoadError} from './pdfFileLoadError';
+
 const COURIER_PRIME_FAMILY = 'CourierPrime';
 
 const FONT_DEFINITIONS = [
@@ -50,7 +52,12 @@ const loadFontData = async (): Promise<LoadedFont[]> => Promise.all(
         const response = await fetch(font.url);
 
         if (!response.ok) {
-            throw new Error(`Failed to load export font ${font.fileName}`);
+            throw new PdfFileLoadError(`Failed to load export font ${font.fileName}`);
+        }
+
+        // A removed build answers a missing asset with an HTML page; base64-ing HTML as a font fails later.
+        if ((response.headers.get('content-type') ?? '').includes('text/html')) {
+            throw new PdfFileLoadError(`The export font ${font.fileName} is no longer available.`);
         }
 
         return {

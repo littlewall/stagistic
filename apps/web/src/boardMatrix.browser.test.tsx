@@ -13,6 +13,7 @@ import {
     BOARD_PREFERENCES_KEY,
     cardOf,
     createScript,
+    createTrackedScript,
     findButton,
     locationText,
     mountApp,
@@ -106,7 +107,7 @@ describe('Board matrix editing', () => {
                 },
             ],
         };
-        const scriptId = await repository.createScript('Empty board', emptyDocument);
+        const scriptId = await createTrackedScript('Empty board', emptyDocument);
 
         // Saved like the shared fixture does, so the workspace knows the script before it mounts.
         await repository.saveLatest(scriptId, emptyDocument);

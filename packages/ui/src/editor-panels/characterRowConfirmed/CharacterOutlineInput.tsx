@@ -1,3 +1,4 @@
+import {addUnsavedWorkParticipant, createUnsavedWorkMark} from '@stagistic/shared';
 import clsx from 'clsx';
 import {
     useCallback,
@@ -18,7 +19,7 @@ interface CharacterOutlineInputProps {
     multiline?: boolean,
     className?: string,
     containerClassName?: string,
-    onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
+    onSetCharacterOutline?: (characterId: string, outline: string | null) => void | Promise<void>,
 }
 
 export const CharacterOutlineInput = ({
@@ -35,6 +36,11 @@ export const CharacterOutlineInput = ({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef(persistedOutline);
+    const [markUnsavedWork] = useState(createUnsavedWorkMark);
+    const isOutlineDirty = outlineDraft !== persistedOutline;
+
+    useEffect(() => markUnsavedWork(isOutlineDirty), [isOutlineDirty, markUnsavedWork]);
+    useEffect(() => () => markUnsavedWork(false), [markUnsavedWork]);
 
     useEffect(() => {
         if (persistedOutline !== lastSavedRef.current) {
@@ -60,14 +66,71 @@ export const CharacterOutlineInput = ({
         }
     });
 
-    const commitOutline = useCallback((value: string) => {
+    // Resolves true once the write is persisted (or nothing needed writing); false when it failed.
+    const commitOutline = useCallback(async (value: string) => {
         if (!characterId || !onSetCharacterOutline || value === lastSavedRef.current) {
-            return;
+            return true;
         }
 
+        const previous = lastSavedRef.current;
+
         lastSavedRef.current = value;
-        onSetCharacterOutline(characterId, value.length > 0 ? value : null);
+
+        try {
+            await onSetCharacterOutline(characterId, value.length > 0 ? value : null);
+
+            return true;
+        } catch {
+            if (lastSavedRef.current === value) {
+                lastSavedRef.current = previous;
+            }
+
+            return false;
+        }
     }, [characterId, onSetCharacterOutline]);
+
+    // A handover to a newer version must not lose the outline still waiting for its debounce.
+    const latestRef = useRef({
+        outlineDraft,
+        isOutlineDirty,
+        key: character.key,
+        commitOutline,
+    });
+
+    useLayoutEffect(() => {
+        latestRef.current = {
+            outlineDraft,
+            isOutlineDirty,
+            key: character.key,
+            commitOutline,
+        };
+    });
+
+    useEffect(() => addUnsavedWorkParticipant({
+        flush: () => {
+            if (saveTimerRef.current) {
+                clearTimeout(saveTimerRef.current);
+                saveTimerRef.current = null;
+            }
+
+            return latestRef.current.commitOutline(latestRef.current.outlineDraft);
+        },
+        stopEditing: () => {
+            if (saveTimerRef.current) {
+                clearTimeout(saveTimerRef.current);
+                saveTimerRef.current = null;
+            }
+        },
+        getText: () => {
+            const {
+                isOutlineDirty: isDirty,
+                outlineDraft: text,
+                key,
+            } = latestRef.current;
+
+            return isDirty ? `Outline for ${key}: ${text}` : '';
+        },
+    }), []);
 
     const handleChange = useCallback((value: string) => {
         setOutlineDraft(value);
@@ -78,7 +141,7 @@ export const CharacterOutlineInput = ({
 
         saveTimerRef.current = setTimeout(() => {
             saveTimerRef.current = null;
-            commitOutline(value);
+            void commitOutline(value);
         }, OUTLINE_SAVE_DEBOUNCE_MS);
     }, [commitOutline]);
 
@@ -88,7 +151,7 @@ export const CharacterOutlineInput = ({
             saveTimerRef.current = null;
         }
 
-        commitOutline(outlineDraft);
+        void commitOutline(outlineDraft);
     }, [commitOutline, outlineDraft]);
 
     useEffect(() => () => {

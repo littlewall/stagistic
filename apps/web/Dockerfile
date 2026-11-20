@@ -8,7 +8,9 @@ WORKDIR /app
 
 # Copy workspace files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY patches ./patches
 COPY moon.yml ./
+COPY releases ./releases
 COPY .moon ./.moon
 COPY apps/web/package.json ./apps/web/
 COPY packages ./packages

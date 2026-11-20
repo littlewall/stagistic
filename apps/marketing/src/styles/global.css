@@ -31,6 +31,8 @@
     --color-action-hover: oklch(from var(--color-palette-primrose-yellow) .8 c h);
     --color-on-action: oklch(from var(--color-palette-steel-wool) .18 c h);
     --color-selection: var(--color-palette-creamed-corn);
+    /* The app's danger status colour (--color-status-danger in packages/ui tokens), light theme. */
+    --color-status-danger: oklch(.54 .1273 14.8);
     --color-focus-ring: oklch(from var(--color-palette-creamed-corn) .58 c h);
 
     /* Dark stage sections */

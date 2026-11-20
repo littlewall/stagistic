@@ -21,6 +21,7 @@ const bootstrap = createPgliteBootstrap({
 });
 
 export const getLocalDb = bootstrap.getLocalDb;
+export const databaseHandover = bootstrap.handover;
 
 /*
  * Private in-memory database for viewing a stored draft or version. The unique

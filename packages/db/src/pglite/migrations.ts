@@ -1,4 +1,5 @@
 import type {PGlite} from '@electric-sql/pglite';
+import {StartFailureError} from '@stagistic/shared';
 
 import {compiledMigrations} from './migrations.compiled';
 
@@ -73,8 +74,10 @@ const assertMigrationHistory = (appliedMigrations: AppliedMigration[]) => {
         const compiledMigration = compiledById.get(appliedMigration.id);
 
         if (!compiledMigration) {
-            throw new Error(
+            throw new StartFailureError(
+                'database-newer-than-app',
                 `Database migration ${appliedMigration.id} is newer than this app. Update the app before opening this database.`,
+                {migrationId: appliedMigration.id},
             );
         }
 
@@ -86,8 +89,10 @@ const assertMigrationHistory = (appliedMigrations: AppliedMigration[]) => {
             continue;
         }
 
-        throw new Error(
+        throw new StartFailureError(
+            'migration-failed',
             `Migration ${appliedMigration.id} checksum mismatch. Historical migrations are immutable; add a new migration instead.`,
+            {migrationId: appliedMigration.id},
         );
     }
 };
@@ -159,16 +164,52 @@ const applyMigration = async (client: PGlite, migration: typeof compiledMigratio
     });
 };
 
-export const runPgliteMigrations = async (client: PGlite) => {
+export interface RunMigrationsOptions {
+    /*
+     * Called once, before the first pending migration runs, with the pending
+     * ids. Skipped when nothing is pending and on a database with no applied
+     * migration: that is a new install with nothing to back up.
+     */
+    beforePending?: (pendingIds: readonly string[]) => Promise<void>,
+}
+
+const findPendingIds = async (client: PGlite) => {
+    const applied = await getAppliedMigrations(client);
+    const appliedIds = new Set(applied.map(migration => migration.id));
+
+    return {
+        hasData: applied.length > 0,
+        pendingIds: compiledMigrations.map(migration => migration.id).filter(id => !appliedIds.has(id)),
+    };
+};
+
+export const runPgliteMigrations = async (client: PGlite, {beforePending}: RunMigrationsOptions = {}) => {
     await ensureMigrationsTable(client);
     await prepareMigrationHistory(client);
+
+    if (beforePending) {
+        const {hasData, pendingIds} = await findPendingIds(client);
+
+        if (hasData && pendingIds.length > 0) {
+            await beforePending(pendingIds);
+        }
+    }
 
     for (const migration of compiledMigrations) {
         try {
             await applyMigration(client, migration);
         } catch (error) {
             console.error(`[db] Migration ${migration.id} failed.`);
-            throw error;
+
+            if (error instanceof StartFailureError) {
+                throw error;
+            }
+
+            throw new StartFailureError(
+                'migration-failed',
+                `Migration ${migration.id} failed: ${error instanceof Error ? error.message : String(error)}`,
+                {migrationId: migration.id, cause: error},
+            );
         }
     }
 };

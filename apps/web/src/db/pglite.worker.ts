@@ -7,7 +7,9 @@ void worker({
     init: options => createPgliteWorkerDb({
         dataDir: options.dataDir,
         relaxedDurability: options.relaxedDurability,
+        premigrationBackup: true,
         fsBundleUrl: pgliteDataUrl,
         wasmUrl: pgliteWasmUrl,
+        report: message => postMessage(message),
     }),
 });

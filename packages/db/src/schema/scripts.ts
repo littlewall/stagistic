@@ -18,6 +18,8 @@ export const scripts = pgTable('scripts', {
     summaryMetadata: jsonb('summary_metadata').$type<ScriptSummaryMetadata>(),
     // Draft numbers are never reused, so the counter outlives deleted snapshots.
     lastDraftNumber: integer('last_draft_number').notNull().default(0),
+    // Counts script text changes; a save that started from an older revision is refused.
+    revision: integer('revision').notNull().default(0),
 });
 
 /*

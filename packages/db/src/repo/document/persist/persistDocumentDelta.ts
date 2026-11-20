@@ -49,6 +49,7 @@ export const createDocumentPersister = (scriptId: string) => {
         db: DbClient,
         document: RewriteScriptDocument,
         afterPersist?: (tx: DbClient, documentChanged: boolean) => Promise<void>,
+        beforePersist?: (tx: DbClient) => Promise<void>,
     ): Promise<void> => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
@@ -67,6 +68,7 @@ export const createDocumentPersister = (scriptId: string) => {
         if (diff.inserted.length === 0 && diff.updated.length === 0 && diff.deletedIds.length === 0) {
             if (afterPersist || musicSignature !== lastSavedMusicSignature) {
                 await db.transaction(async tx => {
+                    // Nothing of the text is written here, so a stale revision is no harm.
                     await reconcileMusic(tx);
 
                     if (afterPersist) {
@@ -225,6 +227,7 @@ export const createDocumentPersister = (scriptId: string) => {
         };
 
         await db.transaction(async tx => {
+            await beforePersist?.(tx);
             await writeDelta(tx);
             await reconcileMusic(tx);
 
@@ -241,8 +244,9 @@ export const createDocumentPersister = (scriptId: string) => {
         db: DbClient,
         document: RewriteScriptDocument,
         afterPersist?: (tx: DbClient, documentChanged: boolean) => Promise<void>,
+        beforePersist?: (tx: DbClient) => Promise<void>,
     ): Promise<void> => {
-        const result = queue.then(() => persistImpl(db, document, afterPersist));
+        const result = queue.then(() => persistImpl(db, document, afterPersist, beforePersist));
 
         /*
          * Keep the chain alive even if persistImpl rejects — the next call

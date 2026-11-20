@@ -12,6 +12,7 @@ export const ScriptDocumentSessionHost = ({children}: {children: ReactNode}) => 
         documentSession,
         initialValue,
         handleAutoSave,
+        handleSaveTimedOut,
         handleManualSave,
         handleSummaryMetadataChange,
     } = useScriptWorkspace();
@@ -41,6 +42,7 @@ export const ScriptDocumentSessionHost = ({children}: {children: ReactNode}) => 
                 settings={{scriptSettings: effectiveScriptSettingsDraft}}
                 save={{
                     onAutoSave: handleAutoSave,
+                    onSaveTimedOut: handleSaveTimedOut,
                     onManualSave: handleManualSave,
                     onSummaryMetadataChange: handleSummaryMetadataChange,
                 }}

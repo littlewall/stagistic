@@ -1,0 +1,60 @@
+---
+import {BREAKING_NOTE_LABEL, type ChangelogRelease} from '../../data/changelog';
+import styles from './ChangelogList.module.css';
+
+interface Props {
+    releases: ChangelogRelease[];
+}
+
+const {releases} = Astro.props;
+---
+
+<main class={styles.changelogPage}>
+    <div class={styles.changelogInner}>
+        <header class={styles.intro}>
+            <h1 class={styles.title}>Changelog</h1>
+            <p>What is new, improved and fixed in each Release of Stagistic Editor. <a href="/changelog.xml" class={styles.feedLink}>RSS feed</a></p>
+        </header>
+
+        {releases.length > 0 ? (
+            <ol class={styles.releaseList}>
+                {releases.map(release => (
+                    <li>
+                        <section class={styles.release} id={release.anchor} aria-labelledby={`${release.anchor}-title`}>
+                            <header class={styles.releaseHeader}>
+                                <h2 class={styles.releaseNumber} id={`${release.anchor}-title`}>
+                                    <a href={`#${release.anchor}`} class={styles.releaseLink}>Release {release.release}</a>
+                                </h2>
+                                <time class={styles.releaseDate} datetime={release.date}>{release.dateLabel}</time>
+                            </header>
+                            <ul class={styles.notes}>
+                                {release.notes.map(note => (
+                                    <li class={styles.note} data-breaking={note.breaking ? '' : undefined}>
+                                        <h3 class={styles.noteTitle}>
+                                            {note.breaking && <span class={styles.breakingLabel}>{BREAKING_NOTE_LABEL}</span>}
+                                            <span>{note.title}</span>
+                                            <span class={styles.typeLabel} data-note-type={note.type} data-note-weight={note.weight}>{note.label}</span>
+                                        </h3>
+                                        {note.image && <img class={styles.image} src={note.image} alt="" loading="lazy" />}
+                                        <div class={styles.description} set:html={note.descriptionHtml} />
+                                        {(note.docsUrl || note.articleUrl) && (
+                                            <p class={styles.links}>
+                                                {note.docsUrl && <a href={note.docsUrl}>Read the guide</a>}
+                                                {note.articleUrl && <a href={note.articleUrl}>Read the article</a>}
+                                            </p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    </li>
+                ))}
+            </ol>
+        ) : (
+            <section class={styles.emptyState} aria-labelledby="changelog-empty">
+                <h2 class={styles.emptyTitle} id="changelog-empty">The first Release is on its way.</h2>
+                <p>Each Release will be listed here with what is new, improved and fixed.</p>
+            </section>
+        )}
+    </div>
+</main>

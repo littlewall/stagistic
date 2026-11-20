@@ -78,3 +78,50 @@ export const createMigrationId = (name: string, date = new Date()) => {
 
     return `${formatMigrationTimestamp(date)}_${name}`;
 };
+
+/*
+ * Migrations stay forward-only and only add; removal happens at least one
+ * Release later. A migration that drops or renames must be recorded here with
+ * its reason, or the compile step rejects it.
+ */
+export const EXEMPT_MIGRATIONS: Record<string, string> = {
+    /*
+     * Its `script_scene_characters` table is created in the same upgrade and is
+     * empty on the upgrade from `main`, so the dropped constraints and the
+     * arc_value rewrite touch no existing rows.
+     */
+    20261103094608: 'The script_scene_characters table is created and empty on the upgrade from main.',
+};
+
+// Strings, quoted identifiers and comments are scanned left to right so one never hides another.
+const NOT_CODE = /'(?:[^']|'')*'|"(?:[^"]|"")*"|--[^\n]*|\/\*[\s\S]*?\*\//g;
+
+/*
+ * Breaking for a running older version: removing, renaming or retyping something it reads,
+ * tightening a column, or deleting rows. `DROP NOT NULL` and `DROP DEFAULT` only loosen.
+ */
+const BREAKING = new RegExp([
+    String.raw`\bDROP\b(?!\s+(?:NOT\s+NULL|DEFAULT)\b)`,
+    String.raw`\bRENAME\b`,
+    String.raw`\bALTER\s+COLUMN\b[^;]*?\bTYPE\b`,
+    String.raw`\bSET\s+NOT\s+NULL\b`,
+    String.raw`\bTRUNCATE\b`,
+    String.raw`\bDELETE\s+FROM\b`,
+].join('|'), 'i');
+
+// Legacy sequential ids (`0000`–`0026`) predate the forward-only rule; only timestamp ids are checked.
+const timestampPrefixOf = (id: string) => (/^\d{14}/).exec(id)?.[0] ?? null;
+
+/** Throws when a new migration drops, renames, retypes, tightens a column or deletes rows without an entry in `EXEMPT_MIGRATIONS`. */
+export const assertOnlyAdditiveMigrations = (migrations: readonly {id: string, sql: string}[]) => {
+    for (const {id, sql} of migrations) {
+        const prefix = timestampPrefixOf(id);
+
+        if (prefix && BREAKING.test(sql.replace(NOT_CODE, ' ')) && !(prefix in EXEMPT_MIGRATIONS)) {
+            throw new Error(
+                `Migration ${id} drops, renames, retypes, tightens or deletes, which breaks the forward-only rule. `
+                + 'Add it to EXEMPT_MIGRATIONS in migrationIds.ts with the reason, or move the removal to a later Release.',
+            );
+        }
+    }
+};

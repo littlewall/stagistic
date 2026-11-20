@@ -1,6 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
-import {APP_THEME_STORAGE_KEY} from '@stagistic/ui';
+import {APP_THEME_STORAGE_KEY, BrowserDataNotice} from '@stagistic/ui';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -76,6 +76,38 @@ describe('AppSettingsModal', () => {
 
         await expect.poll(() => window.localStorage.getItem(APP_THEME_STORAGE_KEY)).toBe('dark');
         await expect.poll(() => document.documentElement.getAttribute('data-theme-mode')).toBe('dark');
+    });
+
+    it('shows the browser data notice as a Storage panel, not a modal', async () => {
+        mount([
+            {
+                id: 'storage',
+                label: 'Storage',
+                content: <BrowserDataNotice />,
+            },
+        ]);
+
+        await waitForElement('dialog[aria-label="Settings"]');
+
+        expect([...document.querySelectorAll('aside button')].map(item => item.textContent)).toEqual(['Appearance', 'Storage']);
+
+        await userEvent.click(findNavButton('Storage'));
+
+        await waitForElement('h2');
+
+        const points = [...document.querySelectorAll<HTMLUListElement>('dialog ul')].at(-1);
+
+        expect(points?.querySelectorAll('li')).toHaveLength(3);
+        expect(points?.textContent).toContain('Clearing browser data removes them.');
+        expect(document.querySelectorAll('dialog')).toHaveLength(1);
+    });
+
+    it('has no Storage tab without platform sections (desktop)', async () => {
+        mount();
+
+        await waitForElement('dialog[aria-label="Settings"]');
+
+        expect([...document.querySelectorAll('aside button')].map(item => item.textContent)).toEqual(['Appearance']);
     });
 
     it('lists platform sections after Appearance and shows their content', async () => {

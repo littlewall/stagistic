@@ -1,0 +1,17 @@
+.banner {
+    position: fixed;
+    z-index: 5;
+    /* Clear the app footer (AppFooter min-height 28px = --space-4xl). */
+    inset: auto 0 calc(var(--space-4xl) + var(--space-lg));
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-inline: auto;
+    padding: var(--space-sm) var(--space-lg);
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}

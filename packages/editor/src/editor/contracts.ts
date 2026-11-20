@@ -262,6 +262,8 @@ export interface EditorSaveCallbacks {
     onManualSave?: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
     onSummaryMetadataChange?: (value: ScriptDocument, metadata: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => SaveResult,
     onDirtyChange?: (isDirty: boolean) => void,
+    /** A save ran out of time without reporting back; show it as failed. */
+    onSaveTimedOut?: () => void,
 }
 
 export interface EditorSaveProps extends EditorSaveCallbacks {

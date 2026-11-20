@@ -11,6 +11,7 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/editor": "workspace:*",
         "@stagistic/export": "workspace:*",
+        "@stagistic/release-notes": "workspace:*",
         "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",

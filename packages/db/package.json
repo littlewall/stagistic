@@ -7,6 +7,7 @@
     "exports": {
         ".": "./src/index.ts",
         "./pglite": "./src/pglite/index.ts",
+        "./db-generation": "./src/pglite/dbGeneration.ts",
         "./testing": "./src/testing/createTestDb.ts"
     },
     "dependencies": {

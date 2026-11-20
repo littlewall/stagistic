@@ -1,0 +1,24 @@
+{
+    "name": "@stagistic/release-notes",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./bundled": "./src/bundled.ts",
+        "./node": "./src/node.ts",
+        "./validate-plugin": "./src/validateReleasesPlugin.ts"
+    },
+    "dependencies": {
+        "yaml": "2.8.1",
+        "zod": "4.6.5"
+    },
+    "devDependencies": {
+        "@stagistic/db": "workspace:*",
+        "@stagistic/vite-config": "workspace:*",
+        "@types/node": "^24.13.1",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.2"
+    }
+}

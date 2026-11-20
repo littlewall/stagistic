@@ -1,5 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
+import {storeLastSeenRelease} from '@stagistic/app-routes';
+import {currentReleaseNumber} from '@stagistic/release-notes/bundled';
 import {requireValue} from '@stagistic/shared';
 import {StrictMode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -11,7 +13,7 @@ import {
 } from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
-import {storeCurrentPublicPreviewAcknowledgement} from './publicPreview/publicPreviewAcknowledgement';
+import {storeCurrentBrowserNoticeAcknowledgement} from './browserNotice/browserNoticeAcknowledgement';
 import type {ScriptRepository} from './repo';
 
 export const BOARD_PREFERENCES_KEY = 'stagistic.board.preferences';
@@ -21,7 +23,7 @@ const createdScriptIds: string[] = [];
 
 export let repository: ScriptRepository;
 
-type ScriptDocument = NonNullable<Parameters<ScriptRepository['createScript']>[1]>;
+export type ScriptDocument = NonNullable<Parameters<ScriptRepository['createScript']>[1]>;
 type ScriptNode = ScriptDocument['content'][number];
 
 const block = (type: string, id: string, text: string, attrs: Record<string, unknown> = {}): ScriptNode => ({
@@ -35,6 +37,19 @@ interface CreatedScript {
     annaId: string,
     benId: string,
 }
+
+/*
+ * Every script a test creates goes through here, so it is deleted after the test.
+ * Block ids are unique across scripts and these fixtures reuse short ones: a script
+ * left behind would take over the blocks of the next script with the same ids.
+ */
+export const createTrackedScript = async (title: string, document: ScriptDocument) => {
+    const scriptId = await repository.createScript(title, document);
+
+    createdScriptIds.push(scriptId);
+
+    return scriptId;
+};
 
 /* Two acts, three scenes. ANNA and BEN are confirmed characters; DOCTOR is not. */
 export const createScript = async (): Promise<CreatedScript> => {
@@ -56,9 +71,8 @@ export const createScript = async (): Promise<CreatedScript> => {
             block('dialogue', 'd3', 'Mind the edge.'),
         ],
     };
-    const scriptId = await repository.createScript('Board test', {type: 'doc', content: document.content.map(({attrs, ...node}) => ({...node, attrs: {id: attrs?.id}}))});
+    const scriptId = await createTrackedScript('Board test', {type: 'doc', content: document.content.map(({attrs, ...node}) => ({...node, attrs: {id: attrs?.id}}))});
 
-    createdScriptIds.push(scriptId);
     await repository.confirmScriptCharacterWithId(scriptId, {
         id: annaId,
         key: 'ANNA',
@@ -137,7 +151,9 @@ export const openSceneMenu = async (sceneNumber: number) => {
 export const menuLabels = () => [...document.querySelectorAll('[role="menuitem"]')].map(item => item.textContent);
 
 beforeEach(async () => {
-    storeCurrentPublicPreviewAcknowledgement();
+    storeCurrentBrowserNoticeAcknowledgement();
+    // A Release announcement would open over the script list; these tests are not about it.
+    storeLastSeenRelease(currentReleaseNumber);
     await page.viewport(1280, 800);
     ({scriptRepository: repository} = await import('./repo'));
 });
@@ -147,6 +163,7 @@ afterEach(async () => {
     mountedRoots.length = 0;
     document.body.innerHTML = '';
     window.localStorage.removeItem(BOARD_PREFERENCES_KEY);
+    window.localStorage.removeItem('stagistic.lastSeenRelease');
 
     for (const scriptId of createdScriptIds.splice(0)) {
         window.localStorage.removeItem(`${BOARD_PREFERENCES_KEY}:script:${scriptId}`);

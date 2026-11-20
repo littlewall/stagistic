@@ -28,6 +28,7 @@ import {
     type BlockSettingsPatch,
     normalizeSettingsOverride,
 } from '../settings/panels';
+import {settingsRescueText} from './draftRescueText';
 
 type HeaderFooterRowPatch = NonNullable<HeaderFooterSettingsPatch['header']>;
 
@@ -76,6 +77,7 @@ export const useScriptEditorSettingsDraft = ({
         isHydrated: !record.isLoading,
         defaultValue: EMPTY_SETTINGS,
         persist,
+        toText: settingsRescueText,
     });
     const {setDraft} = draft;
     const scriptSettingsDraft = draft.draft;

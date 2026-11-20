@@ -8,6 +8,7 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
+        "@stagistic/release-notes": "workspace:*",
         "@stagistic/mcp-contract": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",

@@ -1,4 +1,5 @@
 import type {ReactiveQuerySource} from '@stagistic/db';
+import {unsubscribeOfFailedSubscribe} from '@stagistic/db';
 import {structuralValueEquals} from '@stagistic/shared';
 import {createCollection, type PendingMutation} from '@tanstack/react-db';
 
@@ -90,33 +91,67 @@ const waitForConfirmation = async <T extends object, TKey extends string | numbe
     timeoutMs: number,
     durableInsert?: T,
 ) => {
-    await source.refresh();
-
-    if (isConfirmed(await source.read(), mutation, getKey, durableInsert)) {
-        return;
-    }
-
     const confirmation = createConfirmation();
-    const timeout = setTimeout(() => {
-        confirmation.reject(new Error(`Timed out confirming ${mutation.type} for entity ${String(mutation.key)}`));
-    }, timeoutMs);
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     let unsubscribe: (() => void) | undefined;
+    let finished = false;
+
+    const confirm = async () => {
+        // refresh and read wait for locks and leader changes under the source's own deadline.
+        await source.refresh();
+
+        if (isConfirmed(await source.read(), mutation, getKey, durableInsert)) {
+            confirmation.resolve();
+
+            return;
+        }
+
+        if (finished) {
+            return;
+        }
+
+        timeout = setTimeout(() => {
+            confirmation.reject(new Error(`Timed out confirming ${mutation.type} for entity ${String(mutation.key)}`));
+        }, timeoutMs);
+
+        try {
+            const cleanup = await source.subscribe(
+                rows => {
+                    if (!isConfirmed(rows, mutation, getKey, durableInsert)) {
+                        return;
+                    }
+
+                    confirmation.resolve();
+                },
+                error => {
+                    confirmation.reject(error);
+                },
+            );
+
+            if (finished) {
+                cleanup();
+            } else {
+                unsubscribe = cleanup;
+            }
+        } catch (error) {
+            const cleanup = unsubscribeOfFailedSubscribe(error);
+
+            if (finished) {
+                cleanup?.();
+            } else {
+                unsubscribe = cleanup;
+            }
+
+            throw error;
+        }
+    };
+
+    confirm().catch((error: unknown) => confirmation.reject(error instanceof Error ? error : new Error(String(error))));
 
     try {
-        unsubscribe = await source.subscribe(
-            rows => {
-                if (!isConfirmed(rows, mutation, getKey, durableInsert)) {
-                    return;
-                }
-
-                confirmation.resolve();
-            },
-            error => {
-                confirmation.reject(error);
-            },
-        );
         await confirmation.promise;
     } finally {
+        finished = true;
         clearTimeout(timeout);
         unsubscribe?.();
     }
@@ -231,9 +266,16 @@ export const createReactiveCollection = <T extends object, TKey extends string |
                         unsubscribe = cleanup;
                     })
                     .catch(error => {
+                        // The failed subscribe keeps its listener so "Try again" recovers; release it with the collection.
+                        const cleanup = unsubscribeOfFailedSubscribe(error);
+
                         if (!active) {
+                            cleanup?.();
+
                             return;
                         }
+
+                        unsubscribe = cleanup;
 
                         const normalizedError = error instanceof Error ? error : new Error(String(error));
 

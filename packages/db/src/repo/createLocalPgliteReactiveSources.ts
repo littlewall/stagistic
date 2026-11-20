@@ -58,7 +58,7 @@ export const createLocalPgliteReactiveSources = ({
         getDb,
         readRows: listScripts,
         watchQuery: `
-            SELECT id, title, subtitle, created_at, updated_at, active_block_id, summary_metadata
+            SELECT id, title, subtitle, created_at, updated_at, active_block_id, summary_metadata, revision
             FROM scripts
         `,
     });

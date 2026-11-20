@@ -1,4 +1,8 @@
-import type {ScriptDocument} from '@stagistic/script';
+import {
+    type ScriptDocument,
+    serializeStagisticFragment,
+    serializeStagisticUnits,
+} from '@stagistic/script';
 import type {Editor} from '@tiptap/core';
 import {
     closeHistory,
@@ -17,6 +21,21 @@ import {
 } from '../live/store';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {createStructureCommands} from './structureTransactions';
+import {createUnloadWarning} from './unloadWarning';
+
+/** Quiet time after the last edit before the script is saved. */
+export const AUTOSAVE_DEBOUNCE_MS = 1500;
+/** Longest an edit may stay unsaved while the writer keeps typing. */
+export const AUTOSAVE_MAX_WAIT_MS = 10_000;
+/*
+ * Longest a save may run before it counts as failed. Measured on real workers:
+ * an edit saves in 35 ms, the first save of a 3,000-block script in 232 ms, and
+ * a save held while a follower takes over as leader waits 423 ms at most, so
+ * about 0.7 s in the worst legitimate case. 15 s still leaves room on a machine
+ * ten times slower. Too short costs a false warning and a repeated save, which
+ * writes the same document; too long leaves a writer typing with nothing saved.
+ */
+export const SAVE_DEADLINE_MS = 15_000;
 
 type SessionSnapshot = {
     revision: number,
@@ -25,16 +44,22 @@ type SessionSnapshot = {
     canUndo: boolean,
     canRedo: boolean,
 };
-type SessionBinding = {onAutoSave?: (value: ScriptDocument) => Promise<boolean>};
+type SessionBinding = {
+    onAutoSave?: (value: ScriptDocument) => Promise<boolean>,
+    /** A save ran out of time. It never reported back, so the app has not shown it as failed. */
+    onSaveTimedOut?: () => void,
+};
 
 export const createScriptDocumentSession = ({
     initialValue,
     isReadOnly,
     liveStore,
+    saveDeadlineMs = SAVE_DEADLINE_MS,
 }: {
     initialValue: ScriptDocument,
     isReadOnly: boolean,
     liveStore: EditorSnapshotStore,
+    saveDeadlineMs?: number,
 }) => {
     let editor: Editor | null = null;
     let detachedValue = initialValue;
@@ -49,18 +74,41 @@ export const createScriptDocumentSession = ({
     };
     let savedRevision = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let maxWaitTimer: ReturnType<typeof setTimeout> | undefined;
+    const unloadWarning = createUnloadWarning();
     let pendingSave: Promise<boolean> | null = null;
+    let isEditingStopped = false;
     const listeners = new Set<() => void>();
 
     const publish = (next: SessionSnapshot) => {
         snapshot = next;
+        unloadWarning.set(next.isDirty);
         listeners.forEach(listener => listener());
     };
     const getDocument = (): ScriptDocument => editor && !editor.isDestroyed
         ? stripScriptSettings(editor.getJSON() as ScriptDocument)
         : detachedValue;
+    /*
+     * Every later save waits for the one running, so one that never returns would
+     * silently end all saving. Giving up does not stop it: should it still land,
+     * the repository keeps saves of a script in order and the document stays dirty
+     * here, so the next save writes the newest text over it.
+     */
+    const withinDeadline = (saving: Promise<boolean>) => new Promise<boolean>(resolve => {
+        const deadline = setTimeout(() => {
+            binding.onSaveTimedOut?.();
+            resolve(false);
+        }, saveDeadlineMs);
+
+        void saving.then(result => {
+            clearTimeout(deadline);
+            resolve(result);
+        });
+    });
     const runSave = async (manualSave?: (value: ScriptDocument) => Promise<boolean>): Promise<boolean> => {
         clearTimeout(timer);
+        clearTimeout(maxWaitTimer);
+        maxWaitTimer = undefined;
 
         if (isReadOnly || (!manualSave && snapshot.revision <= savedRevision)) {
             return true;
@@ -79,7 +127,7 @@ export const createScriptDocumentSession = ({
         const revision = snapshot.revision;
         const value = getDocument();
 
-        pendingSave = Promise.resolve().then(() => save(value)).catch(() => false);
+        pendingSave = withinDeadline(Promise.resolve().then(() => save(value)).catch(() => false));
 
         const success = await pendingSave;
 
@@ -121,7 +169,8 @@ export const createScriptDocumentSession = ({
         }
 
         clearTimeout(timer);
-        timer = setTimeout(() => void flush(), 1500);
+        timer = setTimeout(() => void flush(), AUTOSAVE_DEBOUNCE_MS);
+        maxWaitTimer ??= setTimeout(() => void flush(), AUTOSAVE_MAX_WAIT_MS);
     };
     const detach = () => {
         detachedValue = getDocument();
@@ -132,7 +181,7 @@ export const createScriptDocumentSession = ({
 
     return {
         liveStore,
-        commands: createStructureCommands(() => editor, isReadOnly),
+        commands: createStructureCommands(() => isEditingStopped ? null : editor, isReadOnly),
         getDocument,
         getEditor: () => editor,
         getCallbacks: () => callbacks,
@@ -156,6 +205,10 @@ export const createScriptDocumentSession = ({
                 editor.on('transaction', onUpdate);
             }
 
+            if (isEditingStopped) {
+                instance.setEditable(false, false);
+            }
+
             binding = nextBinding;
             publish({...snapshot, isReady: true});
         },
@@ -166,7 +219,7 @@ export const createScriptDocumentSession = ({
             void flush();
         },
         applyDocumentChange: (value: ScriptDocument) => {
-            if (isReadOnly || !editor || editor.isDestroyed) {
+            if (isReadOnly || isEditingStopped || !editor || editor.isDestroyed) {
                 return false;
             }
 
@@ -182,14 +235,22 @@ export const createScriptDocumentSession = ({
 
             return true;
         },
-        undo: () => !isReadOnly && !!editor && editor.commands.undo(),
-        redo: () => !isReadOnly && !!editor && editor.commands.redo(),
+        undo: () => !isReadOnly && !isEditingStopped && !!editor && editor.commands.undo(),
+        redo: () => !isReadOnly && !isEditingStopped && !!editor && editor.commands.redo(),
         flush,
+        /** The rest of the document's life is read-only; what was typed can still be flushed. */
+        stopEditing: () => {
+            isEditingStopped = true;
+            editor?.setEditable(false, false);
+        },
+        /** The script as plain text, for a writer rescuing it by hand. */
+        getText: () => serializeStagisticFragment(serializeStagisticUnits(getDocument())).text,
         saveManual: (save: (value: ScriptDocument) => Promise<boolean>) => runSave(save),
         dispose: () => {
             clearTimeout(timer);
             detach();
-            void flush();
+            // A save still running keeps the warning until it ends, then it always goes.
+            void flush().finally(() => unloadWarning.set(false));
             listeners.clear();
         },
     };

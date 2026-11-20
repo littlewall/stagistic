@@ -115,6 +115,146 @@ describe('reactive collection bridge', () => {
         expect(result.collection.get('row-1')?.title).toBe('Original');
     });
 
+    it('fails a mutation whose confirmation read fails under the source deadline', async () => {
+        const base = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
+        const result = createReactiveCollection({
+            id: `hung-${crypto.randomUUID()}`,
+            source: {...base, refresh: () => Promise.reject(new Error('The list did not answer in time.'))},
+            getKey: row => row.id,
+            confirmationTimeoutMs: 30,
+            handlers: {update: () => Promise.resolve()},
+        });
+
+        await result.collection.preload();
+
+        const transaction = result.collection.update('row-1', draft => {
+            draft.title = 'Hangs';
+        });
+
+        await expect(transaction.isPersisted.promise).rejects.toThrow('did not answer in time');
+    });
+
+    it('does not count a long lock wait in the confirmation timeout', async () => {
+        const base = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
+        let persisted = false;
+        const result = createReactiveCollection({
+            id: `slow-lock-${crypto.randomUUID()}`,
+            source: {
+                ...base,
+                refresh: async () => {
+                    await new Promise(resolve => setTimeout(resolve, 120));
+                    await base.refresh();
+                },
+            },
+            getKey: row => row.id,
+            confirmationTimeoutMs: 30,
+            handlers: {
+                update: (_original, modified) => {
+                    persisted = true;
+                    base.emit([modified]);
+
+                    return Promise.resolve();
+                },
+            },
+        });
+
+        await result.collection.preload();
+
+        const transaction = result.collection.update('row-1', draft => {
+            draft.title = 'Saved';
+        });
+
+        await expect(transaction.isPersisted.promise).resolves.toBeDefined();
+        expect(persisted).toBe(true);
+        expect(result.status.getSnapshot().mutations.filter(mutation => mutation.status === 'failed')).toEqual([]);
+    });
+
+    it('settles a confirmation that waits across a leader promotion', async () => {
+        const base = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
+        let subscribes = 0;
+        const result = createReactiveCollection({
+            id: `promotion-${crypto.randomUUID()}`,
+            source: {
+                ...base,
+                // Not yet visible on read; the confirmation waits for the re-established live query.
+                read: () => Promise.resolve([{id: 'row-1', title: 'Original'}]),
+                subscribe: async (listener, onError) => {
+                    subscribes += 1;
+
+                    if (subscribes === 1) {
+                        return base.subscribe(listener, onError);
+                    }
+
+                    await new Promise(resolve => setTimeout(resolve, 60));
+                    listener([{id: 'row-1', title: 'Promoted'}]);
+
+                    return () => {};
+                },
+            },
+            getKey: row => row.id,
+            confirmationTimeoutMs: 1_000,
+            handlers: {update: () => Promise.resolve()},
+        });
+
+        await result.collection.preload();
+
+        const transaction = result.collection.update('row-1', draft => {
+            draft.title = 'Promoted';
+        });
+
+        await expect(transaction.isPersisted.promise).resolves.toBeDefined();
+    });
+
+    it('releases the listener a failed confirmation subscribe left behind', async () => {
+        const base = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
+        const release = vi.fn();
+        let subscribes = 0;
+        const result = createReactiveCollection({
+            id: `failed-subscribe-${crypto.randomUUID()}`,
+            source: {
+                ...base,
+                subscribe: (listener, onError) => {
+                    subscribes += 1;
+
+                    if (subscribes === 1) {
+                        return base.subscribe(listener, onError);
+                    }
+
+                    return Promise.reject(Object.assign(new Error('no answer'), {unsubscribe: release}));
+                },
+            },
+            getKey: row => row.id,
+            confirmationTimeoutMs: 1_000,
+            handlers: {update: () => Promise.resolve()},
+        });
+
+        await result.collection.preload();
+
+        const transaction = result.collection.update('row-1', draft => {
+            draft.title = 'Unconfirmed';
+        });
+
+        await expect(transaction.isPersisted.promise).rejects.toThrow('no answer');
+        expect(release).toHaveBeenCalledTimes(1);
+    });
+
+    it('releases the listener of a failed collection subscribe once the collection is cleaned up', async () => {
+        const base = createInMemoryReactiveQuerySource<Row>([]);
+        const release = vi.fn();
+        const result = createReactiveCollection({
+            id: `failed-collection-${crypto.randomUUID()}`,
+            source: {...base, subscribe: () => Promise.reject(Object.assign(new Error('no answer'), {unsubscribe: release}))},
+            getKey: row => row.id,
+        });
+
+        await result.collection.preload();
+        await vi.waitFor(() => expect(result.status.getSnapshot().sourceError?.message).toBe('no answer'));
+        expect(release).not.toHaveBeenCalled();
+
+        await result.collection.cleanup();
+        expect(release).toHaveBeenCalledTimes(1);
+    });
+
     it('confirms an update whose source echo differs in key order and empty sections', async () => {
         interface SettingsRow {
             id: string,

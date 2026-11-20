@@ -30,6 +30,7 @@ export * from './initialPages/romanNumerals';
 
 // ─── PDF ────────────────────────────────────────────────────────────────────
 export * from './pdf/drawPdf';
+export * from './pdf/pdfFileLoadError';
 export * from './pdf/planIntegratedAssembly';
 export * from './pdf/readPdfPageCounts';
 export * from './pdf/renderPdfInWorker';

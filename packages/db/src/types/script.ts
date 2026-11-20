@@ -24,6 +24,8 @@ export interface ScriptSummary extends Pick<Script, 'id' | 'title' | 'createdAt'
     activeBlockId?: Script['activeBlockId'],
     formatTemplateId?: Script['formatTemplateId'],
     summaryMetadata?: Script['summaryMetadata'],
+    /** Counts changes to the script text; tabs compare it to know the text moved on. */
+    revision?: number,
     subtitle: string | null,
 }
 

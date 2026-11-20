@@ -32,6 +32,8 @@ interface UseScriptStateControlsArgs {
     view: ScriptView,
     /** Persists pending editor changes of the current script. */
     flush?: () => Promise<void>,
+    /** Ends typing in the open script before a restore replaces it. */
+    stopEditing?: () => void,
 }
 
 interface SaveRequest {
@@ -54,6 +56,7 @@ export const useScriptStateControls = ({
     scriptId,
     view,
     flush,
+    stopEditing,
 }: UseScriptStateControlsArgs) => {
     const navigate = useNavigate();
     const {
@@ -63,7 +66,7 @@ export const useScriptStateControls = ({
         liveScriptTitle,
     } = useScriptAccess();
     const {snapshots} = useScriptSnapshots(scriptId, liveRepository);
-    const actions = useScriptStateActions(scriptId, flush);
+    const actions = useScriptStateActions(scriptId, flush, stopEditing);
     const [saveRequest, setSaveRequest] = useState<SaveRequest | null>(null);
     const [manager, setManager] = useState<ManagerState | null>(null);
     const [restoreTarget, setRestoreTarget] = useState<{snapshot: ScriptSnapshot, mode: RestoreScriptStateMode} | null>(null);

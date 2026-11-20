@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@electric-sql/pglite@0.3.15': bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66
+
 importers:
 
   .:
@@ -35,6 +38,9 @@ importers:
       stylelint:
         specifier: ^17.15.0
         version: 17.15.0(supports-color@10.2.2)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -49,7 +55,7 @@ importers:
     dependencies:
       '@electric-sql/pglite':
         specifier: ^0.3.7
-        version: 0.3.15
+        version: 0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66)
       '@stagistic/app-core':
         specifier: workspace:*
         version: link:../../packages/app-core
@@ -62,6 +68,9 @@ importers:
       '@stagistic/mcp-contract':
         specifier: workspace:*
         version: link:../../packages/mcp
+      '@stagistic/release-notes':
+        specifier: workspace:*
+        version: link:../../packages/release-notes
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -145,9 +154,15 @@ importers:
       '@stagistic/editor':
         specifier: workspace:*
         version: link:../../packages/editor
+      '@stagistic/release-notes':
+        specifier: workspace:*
+        version: link:../../packages/release-notes
       '@stagistic/script':
         specifier: workspace:*
         version: link:../../packages/script
+      '@stagistic/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       astro:
         specifier: ^7.3.5
         version: 7.3.5(@astrojs/markdown-remark@7.3.1(supports-color@10.2.2))(@types/node@24.13.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(yaml@2.9.0)
@@ -175,7 +190,7 @@ importers:
     dependencies:
       '@electric-sql/pglite':
         specifier: ^0.3.7
-        version: 0.3.15
+        version: 0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66)
       '@stagistic/app-core':
         specifier: workspace:*
         version: link:../../packages/app-core
@@ -185,6 +200,9 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@stagistic/release-notes':
+        specifier: workspace:*
+        version: link:../../packages/release-notes
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -201,6 +219,9 @@ importers:
         specifier: ^7.13.0
         version: 7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
+      '@stagistic/editor':
+        specifier: workspace:*
+        version: link:../../packages/editor
       '@stagistic/vite-config':
         specifier: workspace:*
         version: link:../../packages/vite-config
@@ -280,6 +301,9 @@ importers:
       '@stagistic/export':
         specifier: workspace:*
         version: link:../export
+      '@stagistic/release-notes':
+        specifier: workspace:*
+        version: link:../release-notes
       '@stagistic/script':
         specifier: workspace:*
         version: link:../script
@@ -322,7 +346,7 @@ importers:
     dependencies:
       '@electric-sql/pglite':
         specifier: ^0.3.15
-        version: 0.3.15
+        version: 0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66)
       '@stagistic/mcp-contract':
         specifier: workspace:*
         version: link:../mcp
@@ -334,7 +358,7 @@ importers:
         version: link:../shared
       drizzle-orm:
         specifier: ^0.44.0
-        version: 0.44.7(@electric-sql/pglite@0.3.15)
+        version: 0.44.7(@electric-sql/pglite@0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66))
       fractional-indexing:
         specifier: ^3.2.0
         version: 3.2.0
@@ -496,6 +520,31 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
+  packages/release-notes:
+    dependencies:
+      yaml:
+        specifier: 2.8.1
+        version: 2.8.1
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@stagistic/db':
+        specifier: workspace:*
+        version: link:../db
+      '@stagistic/vite-config':
+        specifier: workspace:*
+        version: link:../vite-config
+      '@types/node':
+        specifier: ^24.13.1
+        version: 24.13.1
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
   packages/script:
     dependencies:
       '@stagistic/shared':
@@ -611,6 +660,9 @@ importers:
         specifier: ^0.3.0
         version: 0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
     devDependencies:
+      '@types/node':
+        specifier: ^24.13.1
+        version: 24.13.1
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -4345,9 +4397,6 @@ packages:
     resolution: {integrity: sha512-QRbvDIbx6YklUe6RxeTeleMR0yv3cYH6PsPZHcnVn7xv7zO1BHN8r0XETu8n6Ye3Q+ahtSarc3WgtNWmehIBfA==}
     engines: {node: '>=18'}
 
-  get-tsconfig@4.13.0:
-    resolution: {integrity: sha512-1VKTZJCwBrvbd+Wn3AOgQP/2Av+TfTCOlE4AcRJE72W1ksZXbAx8PPBR9RzgTeSPzlPMHrbANMH3LbltH73wxQ==}
-
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
 
@@ -7029,7 +7078,7 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
-  '@electric-sql/pglite@0.3.15': {}
+  '@electric-sql/pglite@0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66)': {}
 
   '@emmetio/abbreviation@2.3.3':
     dependencies:
@@ -7094,7 +7143,7 @@ snapshots:
   '@esbuild-kit/esm-loader@2.6.5':
     dependencies:
       '@esbuild-kit/core-utils': 3.3.2
-      get-tsconfig: 4.13.0
+      get-tsconfig: 4.14.0
 
   '@esbuild/aix-ppc64@0.25.12':
     optional: true
@@ -9393,9 +9442,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.7(@electric-sql/pglite@0.3.15):
+  drizzle-orm@0.44.7(@electric-sql/pglite@0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66)):
     optionalDependencies:
-      '@electric-sql/pglite': 0.3.15
+      '@electric-sql/pglite': 0.3.15(patch_hash=bf9eabc073963652d209b6b53ff443be2f5156dbdf915ca1a8d2bcdf9ce3da66)
 
   dset@3.1.4: {}
 
@@ -9528,7 +9577,6 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.7
       '@esbuild/win32-ia32': 0.27.7
       '@esbuild/win32-x64': 0.27.7
-    optional: true
 
   esbuild@0.28.1:
     optionalDependencies:
@@ -9802,14 +9850,9 @@ snapshots:
 
   get-east-asian-width@1.6.0: {}
 
-  get-tsconfig@4.13.0:
-    dependencies:
-      resolve-pkg-maps: 1.0.0
-
   get-tsconfig@4.14.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
-    optional: true
 
   get-tsconfig@5.0.0-beta.4:
     dependencies:
@@ -12074,7 +12117,6 @@ snapshots:
       get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
-    optional: true
 
   type-check@0.4.0:
     dependencies:

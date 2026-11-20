@@ -20,18 +20,23 @@ export interface LoadedProjectionDocument extends LoadedScriptDocument {
 }
 
 export interface SaveScriptDocumentOptions {
+    /** Runs first in the save transaction; throwing aborts the save before any block is written. */
+    beforePersist?: (tx: DbClient) => Promise<void>,
     afterPersist?: (tx: DbClient, documentChanged: boolean) => Promise<void>,
 }
 
 export interface ScriptDocumentSource {
     load(scriptId: string): Promise<LoadedScriptDocument | null>,
     save(scriptId: string, value: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>,
+    /** Stops trusting what the last save wrote: the next save compares against the database. */
+    forgetBaseline(scriptId: string): void,
 }
 
 export interface ScriptDocumentProjectionWriter {
     seedBaseline(scriptId: string, document: ScriptDocument, orderKeyByBlockId?: Map<string, string>): void,
     updateFromDocument(scriptId: string, document: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>,
     rebuildFromDocument(scriptId: string, document: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>,
+    forgetBaseline(scriptId: string): void,
 }
 
 interface CreateProjectedTableDocumentSourceArgs {
@@ -115,7 +120,7 @@ export const createSqlScriptDocumentProjectionWriter = ({getDb}: CreateSqlScript
 
         await baselineLoad;
 
-        await getPersister(scriptId).persist(db, document, options?.afterPersist);
+        await getPersister(scriptId).persist(db, document, options?.afterPersist, options?.beforePersist);
     };
 
     const rebuildFromDocument: ScriptDocumentProjectionWriter['rebuildFromDocument'] = async (scriptId, document, options) => {
@@ -133,10 +138,16 @@ export const createSqlScriptDocumentProjectionWriter = ({getDb}: CreateSqlScript
         seedBaseline(scriptId, loaded?.document ?? document, loaded?.orderKeyByBlockId);
     };
 
+    const forgetBaseline: ScriptDocumentProjectionWriter['forgetBaseline'] = scriptId => {
+        baselineLoads.delete(scriptId);
+        persisters.get(scriptId)?.setBaseline([]);
+    };
+
     return {
         seedBaseline,
         updateFromDocument,
         rebuildFromDocument,
+        forgetBaseline,
     };
 };
 
@@ -161,5 +172,9 @@ export const createProjectedTableDocumentSource = ({getDb, projectionWriter}: Cr
         await projectionWriter.updateFromDocument(scriptId, value, options);
     };
 
-    return {load, save};
+    return {
+        load,
+        save,
+        forgetBaseline: scriptId => projectionWriter.forgetBaseline(scriptId),
+    };
 };

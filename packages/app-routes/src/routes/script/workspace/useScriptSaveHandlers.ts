@@ -34,16 +34,22 @@ interface UseScriptSaveHandlersArgs {
     context: {
         currentScript: CurrentScriptItem | null,
         currentScriptId: string | null,
+        /** False once this tab may no longer write the script text (another tab edits it). */
+        canSave?: () => boolean,
     },
     repository: SaveRepository,
     notifications: {
         setStorageError: (value: string | null) => void,
         addToast: (payload: AppToastPayload) => void,
+        /** A save was refused because the script changed elsewhere since it was loaded here. */
+        onSaveRefused?: () => boolean,
     },
     state: {
         saveIndicatorControls: SaveIndicatorControls,
     },
 }
+
+const isRefusal = (error: unknown) => error instanceof Error && error.name === 'ScriptRevisionConflictError';
 
 export const useScriptSaveHandlers = ({
     context,
@@ -51,14 +57,22 @@ export const useScriptSaveHandlers = ({
     notifications,
     state,
 }: UseScriptSaveHandlersArgs) => {
-    const {currentScript, currentScriptId} = context;
+    const {
+        currentScript,
+        currentScriptId,
+        canSave,
+    } = context;
     const scriptRepository = repository;
-    const {setStorageError, addToast} = notifications;
+    const {
+        setStorageError,
+        addToast,
+        onSaveRefused,
+    } = notifications;
     const {saveIndicatorControls} = state;
     const {startSaveIndicator, finishSaveIndicator} = saveIndicatorControls;
 
     const handleAutoSave = useCallback(async (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => {
-        if (!currentScriptId) {
+        if (!currentScriptId || canSave?.() === false) {
             return false;
         }
 
@@ -68,7 +82,13 @@ export const useScriptSaveHandlers = ({
             finishSaveIndicator(true);
 
             return true;
-        } catch {
+        } catch (error) {
+            if (isRefusal(error) && onSaveRefused?.()) {
+                finishSaveIndicator(false);
+
+                return false;
+            }
+
             console.error('Failed to save latest script');
             setStorageError('Failed to save script data.');
             addToast({
@@ -82,15 +102,17 @@ export const useScriptSaveHandlers = ({
         }
     }, [
         addToast,
+        canSave,
         currentScriptId,
         finishSaveIndicator,
+        onSaveRefused,
         scriptRepository,
         setStorageError,
         startSaveIndicator,
     ]);
 
     const handleManualSave = useCallback(async (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => {
-        if (!currentScript || !currentScriptId) {
+        if (!currentScript || !currentScriptId || canSave?.() === false) {
             return false;
         }
 
@@ -105,7 +127,13 @@ export const useScriptSaveHandlers = ({
             finishSaveIndicator(true);
 
             return true;
-        } catch {
+        } catch (error) {
+            if (isRefusal(error) && onSaveRefused?.()) {
+                finishSaveIndicator(false);
+
+                return false;
+            }
+
             console.error('Failed to save script');
             setStorageError('Failed to save script data.');
             addToast({
@@ -119,12 +147,29 @@ export const useScriptSaveHandlers = ({
         }
     }, [
         addToast,
+        canSave,
         currentScript,
         currentScriptId,
         finishSaveIndicator,
+        onSaveRefused,
         scriptRepository,
         setStorageError,
         startSaveIndicator,
+    ]);
+
+    const handleSaveTimedOut = useCallback(() => {
+        console.error('A save did not finish in time');
+        setStorageError('Failed to save script data.');
+        addToast({
+            title: 'Failed to save',
+            description: 'Changes were not saved.',
+            variant: 'error',
+        });
+        finishSaveIndicator(false);
+    }, [
+        addToast,
+        finishSaveIndicator,
+        setStorageError,
     ]);
 
     const handleSummaryMetadataChange = useCallback(async (
@@ -132,7 +177,7 @@ export const useScriptSaveHandlers = ({
         metadata: ScriptSummaryMetadata,
         expectedSettings?: EditorSettingsOverride | null,
     ) => {
-        if (!currentScriptId) {
+        if (!currentScriptId || canSave?.() === false) {
             return false;
         }
 
@@ -144,6 +189,7 @@ export const useScriptSaveHandlers = ({
             return false;
         }
     }, [
+        canSave,
         currentScriptId,
         scriptRepository,
         setStorageError,
@@ -152,6 +198,7 @@ export const useScriptSaveHandlers = ({
     return {
         handleAutoSave,
         handleManualSave,
+        handleSaveTimedOut,
         handleSummaryMetadataChange,
     };
 };

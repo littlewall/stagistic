@@ -1,10 +1,13 @@
+import {createUnsavedWorkMark} from '@stagistic/shared';
 import {
     useEffect,
     useLayoutEffect,
+    useMemo,
     useState,
     useSyncExternalStore,
 } from 'react';
 
+import {useDatabaseHandoverParticipant} from '../database-handover/DatabaseHandoverContext';
 import {
     createPersistedDraftController,
     type PersistedDraftScheduler,
@@ -19,6 +22,8 @@ interface UsePersistedDraftOptions<TKey, TValue> {
     debounceMs?: number,
     equals?: (left: TValue, right: TValue) => boolean,
     scheduler?: PersistedDraftScheduler,
+    /** Renders the unsaved value for the handover rescue text. Without it the draft is not offered. */
+    toText?: (value: TValue) => string,
 }
 
 export const usePersistedDraft = <TKey, TValue>({
@@ -30,6 +35,7 @@ export const usePersistedDraft = <TKey, TValue>({
     debounceMs,
     equals,
     scheduler,
+    toText,
 }: UsePersistedDraftOptions<TKey, TValue>) => {
     const createController = () => {
         const nextController = createPersistedDraftController({
@@ -99,18 +105,36 @@ export const usePersistedDraft = <TKey, TValue>({
         return controller.pause;
     }, [controller]);
 
+    const handoverParticipant = useMemo(() => ({
+        flush: () => controller.flush().then(() => !controller.getSnapshot().isDirty, () => false),
+        stopEditing: () => controller.pause(),
+        getText: toText ? () => {
+            const snapshot = controller.getSnapshot();
+
+            return snapshot.isDirty ? toText(snapshot.value) : '';
+        } : undefined,
+    }), [controller, toText]);
+
+    useDatabaseHandoverParticipant(handoverParticipant);
+
     const snapshot = useSyncExternalStore(
         controller.subscribe,
         controller.getSnapshot,
         controller.getSnapshot,
     );
     const isCurrentEntity = Object.is(controller.getEntityKey(), entityKey);
+    const isDirty = isCurrentEntity && snapshot.isDirty;
+    const [markUnsavedWork] = useState(createUnsavedWorkMark);
+
+    // Dirty includes a save still running: the value is unconfirmed until it ends.
+    useEffect(() => markUnsavedWork(isDirty), [isDirty, markUnsavedWork]);
+    useEffect(() => () => markUnsavedWork(false), [markUnsavedWork]);
 
     return {
         draft: isCurrentEntity ? snapshot.value : defaultValue,
         status: isCurrentEntity ? snapshot.status : 'loading' as const,
         isHydrated: isCurrentEntity && snapshot.isHydrated,
-        isDirty: isCurrentEntity && snapshot.isDirty,
+        isDirty,
         error: isCurrentEntity ? snapshot.error : null,
         setDraft: controller.update,
         flush: controller.flush,

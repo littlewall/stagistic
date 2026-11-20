@@ -1,6 +1,11 @@
 import type {TranscriptResult} from '../model/visualLine';
+import {PdfFileLoadError} from './pdfFileLoadError';
 
-type WorkerResponse = {type: 'DONE', blob: Blob} | {type: 'ERROR', message: string};
+type WorkerResponse = {type: 'DONE', blob: Blob} | {
+    type: 'ERROR',
+    message: string,
+    fileFailure?: boolean,
+};
 
 export const renderPdfInWorker = (
     transcript: TranscriptResult,
@@ -27,7 +32,7 @@ export const renderPdfInWorker = (
         cleanup();
 
         if (event.data.type === 'ERROR') {
-            reject(new Error(event.data.message));
+            reject(event.data.fileFailure ? new PdfFileLoadError(event.data.message) : new Error(event.data.message));
 
             return;
         }
@@ -36,7 +41,8 @@ export const renderPdfInWorker = (
     };
     worker.onerror = event => {
         cleanup();
-        reject(new Error(event.message));
+        // The worker file itself failed to load (or threw while starting).
+        reject(new PdfFileLoadError(event.message));
     };
 
     signal?.addEventListener('abort', handleAbort, {once: true});

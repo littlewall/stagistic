@@ -9,14 +9,13 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {
+    createTrackedScript,
     findButton,
     locationText,
     mountApp,
-    repository,
+    type ScriptDocument,
     waitFor,
 } from './boardTestFixtures';
-
-type ScriptDocument = NonNullable<Parameters<typeof repository.createScript>[1]>;
 
 const block = (type: string, id: string, text: string, content: ScriptDocument['content'] = []) => ({
     type,
@@ -36,7 +35,7 @@ const MUSIC = {
 };
 
 const createMusicScript = async () => {
-    const scriptId = await repository.createScript('Rundown test', {
+    const scriptId = await createTrackedScript('Rundown test', {
         type: 'doc',
         content: [
             block('act', 'a1', 'ACT ONE'),

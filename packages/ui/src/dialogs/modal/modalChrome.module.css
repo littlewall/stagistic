@@ -13,6 +13,20 @@
     color: var(--color-text);
 }
 
+.titleRow {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.titleAside {
+    margin-inline-start: auto;
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
 .description {
     color: var(--color-text-muted);
 }

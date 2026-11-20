@@ -1,4 +1,5 @@
 import react from '@astrojs/react';
+import {validateReleasesPlugin} from '@stagistic/release-notes/validate-plugin';
 import {defineConfig} from 'astro/config';
 
 export default defineConfig({
@@ -9,6 +10,7 @@ export default defineConfig({
         format: 'file',
     },
     vite: {
+        plugins: [validateReleasesPlugin()],
         css: {
             modules: {
                 localsConvention: 'camelCase',

@@ -1,13 +1,7 @@
-import {
-    type ReactNode,
-    useRef,
-    useState,
-} from 'react';
+import type {ReactNode} from 'react';
 
-import {Button} from '../atoms/Button/Button';
-import {ModalDialog} from '../dialogs/modal/ModalDialog';
-import {PublicPreviewNotice} from '../dialogs/script/PublicPreviewNotice';
 import styles from './AppFooter.module.css';
+import {useFooterRelease} from './footerRelease';
 
 const FEEDBACK_URL = 'https://feedback.stagistic.com';
 
@@ -17,51 +11,47 @@ type AppFooterProps = {
 };
 
 export const AppFooter = ({children}: AppFooterProps) => {
-    const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
-    const previewTrigger = useRef<HTMLButtonElement>(null);
+    const release = useFooterRelease();
 
     return (
-        <>
-            <footer className={styles.footer}>
-                <span className={styles.start}>
-                    💛 Stagistic Editor • Public preview (
-                    <button
-                        aria-label="What does public preview mean?"
-                        className={styles.previewLink}
-                        type="button"
-                        ref={previewTrigger}
-                        onClick={() => setIsPreviewDialogOpen(true)}
-                    >
-                        what does it mean?
-                    </button>
-                    )
-                </span>
-                <div className={styles.center}>{children}</div>
-                <a
-                    className={styles.feedbackLink}
-                    href={FEEDBACK_URL}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                >
-                    Feedback & bug reports
-                </a>
-            </footer>
-            <ModalDialog
-                ariaLabel="About the public preview"
-                isOpen={isPreviewDialogOpen}
-                returnFocus={previewTrigger}
-                onClose={() => setIsPreviewDialogOpen(false)}
+        <footer className={styles.footer}>
+            <span className={styles.start}>
+                <span>💛 Stagistic Editor</span>
+                {release ? (
+                    <>
+                        <span aria-hidden="true">•</span>
+                        <span>{`Release ${release.releaseNumber}`}</span>
+                        <span aria-hidden="true">•</span>
+                        <button
+                            aria-label={release.hasUnseenRelease ? 'What\'s new, unread' : undefined}
+                            className={styles.releaseLink}
+                            type="button"
+                            onClick={release.onOpenWhatsNew}
+                        >
+                            What&apos;s new
+                            {release.hasUnseenRelease ? <span className={styles.dot} data-unseen-dot="" /> : null}
+                        </button>
+                        {release.onReload ? (
+                            <>
+                                <span aria-hidden="true">•</span>
+                                <button className={styles.releaseLink} type="button" onClick={release.onReload}>
+                                    A new Release is ready. Reload
+                                    <span className={styles.dot} data-update-dot="" />
+                                </button>
+                            </>
+                        ) : null}
+                    </>
+                ) : null}
+            </span>
+            <div className={styles.center}>{children}</div>
+            <a
+                className={styles.feedbackLink}
+                href={FEEDBACK_URL}
+                rel="noopener noreferrer"
+                target="_blank"
             >
-                <PublicPreviewNotice />
-                <div className={styles.modalActions}>
-                    <Button
-                        variant="secondary"
-                        onPress={() => setIsPreviewDialogOpen(false)}
-                    >
-                        Close
-                    </Button>
-                </div>
-            </ModalDialog>
-        </>
+                Feedback & bug reports
+            </a>
+        </footer>
     );
 };

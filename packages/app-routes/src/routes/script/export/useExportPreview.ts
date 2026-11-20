@@ -1,5 +1,7 @@
+import {reportDynamicImportFailure, reportRuntimeFileFailure} from '@stagistic/app-core';
 import {
     type ExportPlan,
+    PdfFileLoadError,
     readPdfPageCounts,
     renderPdfInWorker,
     type ScriptData,
@@ -86,9 +88,16 @@ export const useExportPreview = <TConfig>({
                     setArtifact(blob);
                     setStatus('idle');
                     onArtifact?.(blob);
-                } catch {
+                } catch (error) {
                     if (controller.signal.aborted || runRef.current !== runId) {
                         return;
+                    }
+
+                    // The PDF worker or a font may be gone after a deploy.
+                    if (error instanceof PdfFileLoadError) {
+                        reportRuntimeFileFailure('The PDF preview could not be prepared.');
+                    } else {
+                        reportDynamicImportFailure(error, 'The PDF preview could not be prepared.');
                     }
 
                     setStatus('error');

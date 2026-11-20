@@ -124,6 +124,7 @@ export const ScriptDocumentRuntime = ({
 
                 return await handler(value, buildScriptSummaryMetadata(value, pageCount), settingsRef.current ?? null) !== false;
             },
+            onSaveTimedOut: () => saveRef.current?.onSaveTimedOut?.(),
         });
 
         const flushOnPageHide = () => {

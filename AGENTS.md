@@ -7,6 +7,7 @@
 ## DB schema changes
 - Migration files are `packages/db/drizzle/<YYYYMMDDHHMMSS>_<snake_name>.sql` (UTC timestamp). Create one with `moon run db:db-new-migration -- <snake_name>` or `moon run db:db-generate`. Never add a sequential `NNNN_` prefix; `0000`–`0026` are frozen legacy ids.
 - Never rename or edit a migration that reached `rewrite`/`main`. When merging branches, keep both migrations; if two share a prefix, rename the branch-only one to a new timestamp and add its old id to `RENAMED_MIGRATIONS` in `packages/db/src/pglite/migrations.ts`.
+- Migrations stay forward-only and only add; removal happens at least one Release later. There is no rollback after a migration. `db-compile-migrations` rejects `DROP` and `RENAME` unless the migration id is in its `EXEMPT_MIGRATIONS` list, which must state the reason inline. `20261103094608` is the one recorded exemption: its `script_scene_characters` table is created and empty on the upgrade from `main`.
 - After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run `moon run db:db-compile-migrations` (`db-generate` does this automatically; manual SQL edits do not). It rejects bad names and duplicate prefixes.
 
 ## Data layer
@@ -23,6 +24,11 @@
 shape or meaning changes: node/mark types, attrs, cue/character-tag representation,
 or document-to-projection semantics. Do not bump it for DB-only projection changes,
 metadata columns, UI, autosave internals, or export layout changes.
+
+## Releases
+One Release number lives in every `package.json`, `tauri.conf.json`, `Cargo.toml` and `Cargo.lock`. Change it only with `moon run root:release-prepare`, which merges `releases/next/*.md` fragments into `releases/<release>.md`; it never commits or tags. `moon run root:release-revert -- <release>` undoes a prepare back to that Release (fragments return to `releases/next/`); it never commits or tags either. A change a writer could notice gets a fragment, written from the spec, never from commit messages. Format: `packages/release-notes/README.md`.
+- Code reaches `main` only through a Release: run `root:release-prepare`, then `root:test-all` before merging. Cloudflare runs no tests, so nothing else catches a broken build on the way to `main`.
+- Patch Releases (patch number > 0) are hidden outside git: the app and the marketing changelog/RSS list only non-patch Releases. See `isNonPatchRelease` in `@stagistic/release-notes`.
 
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.

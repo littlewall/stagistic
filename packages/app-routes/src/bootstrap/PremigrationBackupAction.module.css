@@ -1,0 +1,13 @@
+.note {
+    flex-basis: 100%;
+    margin: var(--space-sm) 0 0;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+}
+
+.link {
+    color: inherit;
+    text-decoration: underline;
+}

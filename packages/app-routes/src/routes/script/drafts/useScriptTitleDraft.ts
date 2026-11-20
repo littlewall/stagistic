@@ -21,6 +21,7 @@ export const useScriptTitleDraft = ({
         isHydrated: currentScriptId !== null,
         defaultValue: '',
         persist,
+        toText: value => value,
     });
 
     return {
