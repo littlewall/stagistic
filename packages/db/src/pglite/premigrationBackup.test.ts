@@ -1,6 +1,7 @@
 import {PGlite} from '@electric-sql/pglite';
 import {
     afterEach,
+    beforeAll,
     describe,
     expect,
     it,
@@ -31,6 +32,14 @@ const createClient = async () => {
 
 afterEach(async () => {
     await Promise.all(clients.splice(0).map(client => client.close()));
+});
+
+// A cold gzip dump and restore is per-worker setup: keep it out of the first test's timeout.
+beforeAll(async () => {
+    const client = await PGlite.create();
+    const restored = await PGlite.create({loadDataDir: await client.dumpDataDir('gzip')});
+
+    await Promise.all([client.close(), restored.close()]);
 });
 
 const quotaError = () => new DOMException('The quota has been exceeded.', 'QuotaExceededError');

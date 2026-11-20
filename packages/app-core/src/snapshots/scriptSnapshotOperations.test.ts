@@ -3,7 +3,7 @@ import {
     InMemoryFileStorage,
     type ScriptPackageWrite,
 } from '@stagistic/db';
-import {createTestDb} from '@stagistic/db/testing';
+import {createTestDb, loadMigratedDataDir} from '@stagistic/db/testing';
 import {
     collectCommentAnchorThreadIds,
     COMMENT_ANCHOR_MARK_NAME,
@@ -12,6 +12,7 @@ import {
 } from '@stagistic/script';
 import {requireValue} from '@stagistic/shared';
 import {
+    beforeAll,
     describe,
     expect,
     it,
@@ -216,6 +217,11 @@ const editAfterDraftOne = async (repository: Awaited<ReturnType<typeof setup>>['
         },
     }));
 };
+
+// Cold migrations are fixture setup, as in the db project's shared test setup.
+beforeAll(async () => {
+    await loadMigratedDataDir();
+});
 
 describe('script snapshot operations', () => {
     it('stores the current state and loads it back', async () => {

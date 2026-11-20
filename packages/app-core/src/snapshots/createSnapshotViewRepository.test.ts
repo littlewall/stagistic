@@ -4,10 +4,11 @@ import {
     ReadOnlyScriptRepositoryError,
     type ScriptRepository,
 } from '@stagistic/db';
-import {createTestDb} from '@stagistic/db/testing';
+import {createTestDb, loadMigratedDataDir} from '@stagistic/db/testing';
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {requireValue} from '@stagistic/shared';
 import {
+    beforeAll,
     describe,
     expect,
     it,
@@ -79,6 +80,11 @@ const contentMutations = (repository: ScriptRepository) => [
     () => repository.createScriptMusic(SCRIPT_ID, {title: 'Song', kind: 'song'}),
     () => repository.deleteScript(SCRIPT_ID),
 ];
+
+// Cold migrations are fixture setup, as in the db project's shared test setup.
+beforeAll(async () => {
+    await loadMigratedDataDir();
+});
 
 describe('snapshot view repository', () => {
     it('serves the stored state and rejects every content mutation', async () => {
