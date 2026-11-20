@@ -1,7 +1,6 @@
 import {PGlite} from '@electric-sql/pglite';
 import {
     afterEach,
-    beforeAll,
     describe,
     expect,
     it,
@@ -32,14 +31,6 @@ const createClient = async () => {
 
 afterEach(async () => {
     await Promise.all(clients.splice(0).map(client => client.close()));
-});
-
-// A cold gzip dump and restore is per-worker setup: keep it out of the first test's timeout.
-beforeAll(async () => {
-    const client = await PGlite.create();
-    const restored = await PGlite.create({loadDataDir: await client.dumpDataDir('gzip')});
-
-    await Promise.all([client.close(), restored.close()]);
 });
 
 const quotaError = () => new DOMException('The quota has been exceeded.', 'QuotaExceededError');
@@ -95,7 +86,8 @@ const backUp = (
     now: () => now,
 });
 
-describe('backing up before migrations', () => {
+// Each test runs real PGlite instances with gzip dumps (~0.5-1 s alone); slow under a full parallel run.
+describe('backing up before migrations', {timeout: 20_000}, () => {
     it('stores a dump that restores the database as it was', async () => {
         const client = await createClient();
         const {store, current} = createMemoryStore();
@@ -252,7 +244,7 @@ describe('backing up before migrations', () => {
     });
 });
 
-describe('reading the backup back', () => {
+describe('reading the backup back', {timeout: 20_000}, () => {
     it('offers the stored dump as a named file', async () => {
         const client = await createClient();
         const {store} = createMemoryStore();
