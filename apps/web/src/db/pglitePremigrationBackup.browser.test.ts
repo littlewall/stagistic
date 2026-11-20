@@ -130,7 +130,8 @@ describe('backup before migrations, in the real app worker', () => {
 
         const seed = await PGlite.create({dataDir});
 
-        await seed.exec('DROP TABLE script_scene_characters');
+        // Applying the additive last migration early makes its pending run fail.
+        await seed.exec(LAST_MIGRATION?.sql ?? '');
         await seed.close();
         await expect(prepare(dataDir).result).rejects.toMatchObject({kind: 'migration-failed'});
 
@@ -180,7 +181,8 @@ describe('backup before migrations, in the real app worker', () => {
 
         const seed = await PGlite.create({dataDir});
 
-        await seed.exec('DROP TABLE script_scene_characters');
+        // Applying the additive last migration early makes its pending run fail.
+        await seed.exec(LAST_MIGRATION?.sql ?? '');
         await seed.close();
 
         await expect(prepare(dataDir).result).rejects.toMatchObject({

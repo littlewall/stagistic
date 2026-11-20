@@ -14,9 +14,13 @@ import {Harness, makeRepository} from './__tests__/templateHarness';
 
 let root: Root | null = null;
 
-afterEach(async () => {
+afterEach(() => {
+    /*
+     * Empties the shared toast queue. A DOM click, because a toast that times out
+     * mid-click detaches and userEvent.click would retry until the test timeout.
+     */
     for (const dismiss of document.querySelectorAll<HTMLButtonElement>('[aria-label="Dismiss notification"]')) {
-        await userEvent.click(dismiss);
+        dismiss.click();
     }
 
     root?.unmount();

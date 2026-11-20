@@ -103,6 +103,65 @@ describe('script revision', () => {
         expect((await tabA.getScriptSummary(scriptId))?.revision).toBe((first ?? 0) + 1);
     });
 
+    it('lets one tab run saves at the same time', async () => {
+        const {tabA} = await setupTwoTabs();
+        const scriptId = await tabA.createScript('Play', document('one'));
+
+        await tabA.loadLatest(scriptId);
+        await Promise.all([
+            tabA.saveLatest(scriptId, document('one', 'two')),
+            tabA.saveLatest(scriptId, document('one', 'two', 'three')),
+        ]);
+
+        expect(await textsOf(tabA, scriptId)).toEqual([
+            'one',
+            'two',
+            'three',
+        ]);
+    });
+
+    it.each([
+        ['lost with the leader', true],
+        ['stored', false],
+    ])('lets a failed save retry when its commit was %s', async (_case, isLost) => {
+        const {db, client} = await createTestDb();
+        let failFlush = false;
+        const tab = createLocalPgliteRepository({
+            getLocalDb: () => Promise.resolve(db),
+            syncToFs: async () => {
+                if (!failFlush) {
+                    return;
+                }
+
+                failFlush = false;
+
+                if (isLost) {
+                    // The leader's tab closed before storing the commit: the stored state is the one before it.
+                    await client.exec('UPDATE scripts SET revision = revision - 1');
+                }
+
+                throw new Error('flush failed');
+            },
+            fileStorage: new InMemoryFileStorage(),
+        });
+
+        clients.push(client);
+
+        const scriptId = await tab.createScript('Play', document('one'));
+
+        await tab.loadLatest(scriptId);
+        failFlush = true;
+        await expect(tab.saveLatest(scriptId, document('one', 'two'))).rejects.toThrow('flush failed');
+        await tab.saveLatest(scriptId, document('one', 'two'));
+        await tab.saveLatest(scriptId, document('one', 'two', 'three'));
+
+        expect(await textsOf(tab, scriptId)).toEqual([
+            'one',
+            'two',
+            'three',
+        ]);
+    });
+
     it('lets a save that changes no text through even when the tab is behind', async () => {
         const {tabA, tabB} = await setupTwoTabs();
         const scriptId = await tabA.createScript('Play', document('one'));

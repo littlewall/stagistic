@@ -143,6 +143,15 @@ export const cardOf = (headingText: string) => requireValue(
     headingText,
 );
 
+/* dnd-kit makes a card focusable only once its sortable has registered, a moment after it renders. */
+export const focusCard = (headingText: string) => waitFor(() => {
+    const card = cardOf(headingText);
+
+    card.focus();
+
+    return document.activeElement === card;
+});
+
 export const openSceneMenu = async (sceneNumber: number) => {
     await userEvent.click(requireValue(await waitFor(() => findButton(`Scene ${sceneNumber} actions`))));
     await waitFor(() => document.querySelector('[role="menu"]'));

@@ -39,6 +39,19 @@ export const createContentHandlers = ({
      * edit lock, slept or runs an old build cannot overwrite newer text.
      */
     const knownRevisions = new Map<string, number>();
+    /*
+     * Revision a failed save started from. It may have committed (one higher) or
+     * been lost with the leader's tab (unchanged), so its retry accepts either.
+     */
+    const unsettledRevisions = new Map<string, number>();
+    const matchesRevision = (scriptId: string, current: number | null) => {
+        const expected = knownRevisions.get(scriptId);
+        const unsettled = unsettledRevisions.get(scriptId);
+
+        return expected === undefined
+            || current === expected
+            || (unsettled !== undefined && (current === unsettled || current === unsettled + 1));
+    };
 
     const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
         const revision = await dbQueries.getScriptRevision(await getDb(), scriptId);
@@ -56,7 +69,15 @@ export const createContentHandlers = ({
         return loaded.document;
     };
 
-    const persistLatest: ContentHandlers['saveLatest'] = async (scriptId, value, metadata, expectedSettings) => {
+    const persistLatest = async (
+        attempt: {startedFrom: number | null},
+        ...[
+            scriptId,
+            value,
+            metadata,
+            expectedSettings,
+        ]: Parameters<ContentHandlers['saveLatest']>
+    ) => {
         const now = Date.now();
         const derivedMetadata = metadata ?? buildScriptSummaryMetadata(value);
 
@@ -69,14 +90,21 @@ export const createContentHandlers = ({
 
         await documentSource.save(scriptId, value, {
             beforePersist: async tx => {
-                const expected = knownRevisions.get(scriptId);
+                const current = await dbQueries.getScriptRevision(tx, scriptId);
 
-                if (expected !== undefined && await dbQueries.getScriptRevision(tx, scriptId) !== expected) {
+                if (!matchesRevision(scriptId, current)) {
                     throw new ScriptRevisionConflictError(scriptId);
                 }
+
+                attempt.startedFrom = current;
             },
             afterPersist: async (tx, documentChanged) => {
-                saved.revision = documentChanged ? await dbQueries.bumpScriptRevision(tx, scriptId) : null;
+                if (documentChanged) {
+                    saved.revision = await dbQueries.bumpScriptRevision(tx, scriptId);
+                } else if (unsettledRevisions.has(scriptId)) {
+                    // The stored text already equals this one, so its revision is the one this tab knows now.
+                    saved.revision = await dbQueries.getScriptRevision(tx, scriptId);
+                }
 
                 const layoutMatches = expectedSettings === undefined
                     || getScriptLayoutFingerprint(await readScriptSettings(tx, scriptId)) === getScriptLayoutFingerprint(expectedSettings);
@@ -116,6 +144,7 @@ export const createContentHandlers = ({
          * on page refresh (the worker dies and the unflushed WAL disappears).
          */
         await syncDb();
+        unsettledRevisions.delete(scriptId);
     };
 
     /*
@@ -124,10 +153,17 @@ export const createContentHandlers = ({
      * retry trusting that baseline would write nothing and report success.
      */
     const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value, metadata, expectedSettings) => {
+        const attempt: {startedFrom: number | null} = {startedFrom: null};
+
         try {
-            await persistLatest(scriptId, value, metadata, expectedSettings);
+            await persistLatest(attempt, scriptId, value, metadata, expectedSettings);
         } catch (error) {
             documentSource.forgetBaseline(scriptId);
+
+            if (attempt.startedFrom !== null) {
+                unsettledRevisions.set(scriptId, attempt.startedFrom);
+            }
+
             throw error;
         }
     };

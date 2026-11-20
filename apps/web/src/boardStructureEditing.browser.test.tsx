@@ -12,6 +12,7 @@ import {
     cardOf,
     createScript,
     findButton,
+    focusCard,
     mountApp,
     mountedRoots,
     repository,
@@ -105,7 +106,7 @@ describe('Board structure editing', () => {
         await waitFor(() => sceneHeadings().length === 3);
         await userEvent.click(requireValue(findButton('Add act at the end')));
         await waitFor(() => document.querySelector('section[aria-label="ACT 3"]'));
-        cardOf('3. Roof').focus();
+        await focusCard('3. Roof');
         await userEvent.keyboard('{Space}{ArrowDown}{Space}');
         await waitFor(() => document.querySelector('section[aria-label="ACT 3"]')?.textContent?.includes('Roof'), 4000);
         expect(document.querySelector('section[aria-label="ACT TWO"]')?.textContent).not.toContain('Roof');
@@ -116,7 +117,7 @@ describe('Board structure editing', () => {
 
         await mountApp(`/script/${scriptId}/board/wall`);
         await waitFor(() => sceneHeadings().length === 3);
-        cardOf('2. Garden').focus();
+        await focusCard('2. Garden');
         await userEvent.keyboard('{Space}{ArrowDown}{Space}');
         await waitFor(() => {
             const secondAct = document.querySelector<HTMLElement>('section[aria-label="ACT TWO"]');
@@ -132,7 +133,7 @@ describe('Board structure editing', () => {
         await mountApp(`/script/${scriptId}/board/wall`);
         await waitFor(() => sceneHeadings().length === 3);
 
-        cardOf('2. Garden').focus();
+        await focusCard('2. Garden');
         await userEvent.keyboard('{Space}{ArrowLeft}{Space}');
         await waitFor(() => sceneHeadings().length === 3 && sceneHeadings()[0]?.includes('Garden') && sceneHeadings()[1]?.includes('Kitchen, night'));
         expect(sceneHeadings()[1]).toContain('Kitchen, night');
@@ -168,7 +169,7 @@ describe('Board structure editing', () => {
 
         await mountApp(`/script/${scriptId}/board/wall`);
         await waitFor(() => sceneHeadings().length === 3);
-        cardOf('1. Kitchen, night').focus();
+        await focusCard('1. Kitchen, night');
         await userEvent.keyboard('{Space}{ArrowRight}');
         // The other cards move aside while dragging; only the placeholder marks the landing place.
         await waitFor(() => firstAct()[0] === '2. Garden', 4000);
@@ -186,7 +187,7 @@ describe('Board structure editing', () => {
         await waitFor(() => sceneHeadings().length === 3);
         await userEvent.click(requireValue(findButton('Add act at the end')));
         await waitFor(() => document.querySelector('section[aria-label="ACT 3"]'));
-        cardOf('3. Roof').focus();
+        await focusCard('3. Roof');
         await userEvent.keyboard('{Space}{ArrowDown}{Space}');
         await waitFor(() => document.querySelector('section[aria-label="ACT 3"]')?.textContent?.includes('Roof'), 4000);
 
