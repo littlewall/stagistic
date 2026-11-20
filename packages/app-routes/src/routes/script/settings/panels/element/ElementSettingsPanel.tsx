@@ -1,13 +1,16 @@
-import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {DEFAULT_EDITOR_SETTINGS, isDefaultBlockSettings} from '@stagistic/script';
 import {
     PanelHeader,
     SettingsGroup,
+    Switch,
     UndoIcon,
 } from '@stagistic/ui';
 import {
 } from 'react';
 
 import {usePropState} from '../../../../../usePropState';
+import {FormatSection} from '../../template/FormatSection';
+import {useFormatTemplate} from '../../template/FormatTemplateContext';
 import styles from '../ScriptEditorSettingsPanel.module.css';
 import type {
     ElementNumericModel,
@@ -24,11 +27,12 @@ export const ElementSettingsPanel = ({
     blockType,
     blockLabel,
     resolvedScriptSettings,
-    canReset,
     shortcutPrefix,
     onResetBlockSettings,
     onUpdateBlockSettings,
 }: ElementSettingsPanelProps) => {
+    const {template} = useFormatTemplate();
+    const canReset = !isDefaultBlockSettings(resolvedScriptSettings, blockType);
     const viewModel = useElementSettingsViewModel({
         blockType,
         resolvedScriptSettings,
@@ -72,50 +76,58 @@ export const ElementSettingsPanel = ({
     };
 
     return (
-        <SettingsGroup gap="2xl" className={styles.panelTokens}>
+        <SettingsGroup gap="4xl" className={styles.panelTokens}>
             <div className={elementStyles.panelHeader}>
                 <PanelHeader level={3} title={blockLabel} />
-                {canReset ? (
+                {canReset && !template ? (
                     <button
                         type="button"
                         className={elementStyles.resetButton}
                         onClick={() => onResetBlockSettings(blockType)}
-                        aria-label={`Reset ${blockLabel} settings to defaults`}
                     >
                         <UndoIcon aria-hidden="true" />
-                        <span>Reset</span>
+                        <span>Reset block settings</span>
                     </button>
                 ) : null}
             </div>
-            <ElementPreview
-                model={preview}
-                handlers={{
-                    onStartChange: nextStart => {
-                        onUpdateBlockSettings(blockType, {
-                            indentLeftChars: nextStart,
-                        });
-                    },
-                    onEndChange: nextEnd => {
-                        onUpdateBlockSettings(blockType, {
-                            indentRightChars: preview.previewReferenceChars - nextEnd,
-                        });
-                    },
-                }}
-                previewStyleOverride={previewStyleOverride}
-                toolbar={(
-                    <ElementFormattingToolbar
-                        blockType={blockType}
-                        model={formatting}
-                        handlers={{onUpdateBlockSettings}}
-                    />
-                )}
-            />
-            <ElementNumericControls
-                blockType={blockType}
-                shortcutPrefix={shortcutPrefix}
-                model={localNumericModel}
-                handlers={{onUpdateBlockSettings: handleUpdateBlockSettings}}
-            />
+            <FormatSection heading="Format">
+                <ElementPreview
+                    model={preview}
+                    handlers={{
+                        onStartChange: nextStart => {
+                            onUpdateBlockSettings(blockType, {
+                                indentLeftChars: nextStart,
+                            });
+                        },
+                        onEndChange: nextEnd => {
+                            onUpdateBlockSettings(blockType, {
+                                indentRightChars: preview.previewReferenceChars - nextEnd,
+                            });
+                        },
+                    }}
+                    previewStyleOverride={previewStyleOverride}
+                    toolbar={(
+                        <ElementFormattingToolbar
+                            blockType={blockType}
+                            model={formatting}
+                            handlers={{onUpdateBlockSettings}}
+                        />
+                    )}
+                />
+                {blockType === 'stageDirection' ? <Switch isDisabled={Boolean(template)} isSelected={resolvedScriptSettings.blocks.stageDirection.parenWrap ?? false} onChange={parenWrap => onUpdateBlockSettings(blockType, {parenWrap})}>Wrap in parentheses</Switch> : null}
+                <ElementNumericControls
+                    blockType={blockType}
+                    shortcutPrefix={shortcutPrefix}
+                    model={localNumericModel}
+                    handlers={{onUpdateBlockSettings: handleUpdateBlockSettings}}
+                />
+            </FormatSection>
+            {numeric.shortcutOptions || numeric.nextElementOptions ? (
+                <SettingsGroup gap="lg">
+                    <PanelHeader level={4} size="section" title="Typing" />
+                    <ElementNumericControls section="typing" blockType={blockType} shortcutPrefix={shortcutPrefix} model={localNumericModel} handlers={{onUpdateBlockSettings: handleUpdateBlockSettings}} />
+                </SettingsGroup>
+            ) : null}
         </SettingsGroup>
     );
 };

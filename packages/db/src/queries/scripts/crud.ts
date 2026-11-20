@@ -25,7 +25,9 @@ const scriptSummarySelection = {
     createdAt: scripts.createdAt,
     updatedAt: scripts.updatedAt,
     activeBlockId: scripts.activeBlockId,
+    formatTemplateId: scripts.formatTemplateId,
     summaryMetadata: scripts.summaryMetadata,
+    revision: scripts.revision,
 };
 
 /**
@@ -50,7 +52,9 @@ export const listScripts = async (
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
+        formatTemplateId: row.formatTemplateId,
         summaryMetadata: row.summaryMetadata,
+        revision: row.revision,
     }));
 };
 
@@ -80,7 +84,9 @@ export const getScriptSummary = async (
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
+        formatTemplateId: row.formatTemplateId,
         summaryMetadata: row.summaryMetadata,
+        revision: row.revision,
     };
 };
 
@@ -183,4 +189,26 @@ export const invalidateScriptPageCount = async (db: DbClient, scriptId: string) 
         .update(scripts)
         .set({summaryMetadata: sql`jsonb_set(${scripts.summaryMetadata}, '{pageCount}', 'null'::jsonb)`})
         .where(eq(scripts.id, scriptId));
+};
+
+/** Script text revision, or null when the script does not exist. */
+export const getScriptRevision = async (db: DbClient, scriptId: string): Promise<number | null> => {
+    const rows = await db
+        .select({revision: scripts.revision})
+        .from(scripts)
+        .where(eq(scripts.id, scriptId))
+        .limit(1);
+
+    return rows[0]?.revision ?? null;
+};
+
+/** Counts one more change to the script text; returns the new revision. */
+export const bumpScriptRevision = async (db: DbClient, scriptId: string): Promise<number | null> => {
+    const rows = await db
+        .update(scripts)
+        .set({revision: sql`${scripts.revision} + 1`})
+        .where(eq(scripts.id, scriptId))
+        .returning({revision: scripts.revision});
+
+    return rows[0]?.revision ?? null;
 };

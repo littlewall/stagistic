@@ -9,6 +9,7 @@ const staticPaths = [
     '/editor/syntax',
     '/open-source',
     '/articles',
+    '/changelog',
 ];
 
 const escapeXml = (value: string) => value

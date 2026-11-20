@@ -11,6 +11,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {ConvertSceneHeadingModal} from './ConvertSceneHeadingModal';
 import {DeleteSceneHeadingModal} from './DeleteSceneHeadingModal';
 
 interface MountOptions {
@@ -60,10 +61,11 @@ describe('DeleteSceneHeadingModal', () => {
 
         expect(document.body.textContent).toContain('Delete scene heading?');
         expect([...document.querySelectorAll('li')].map(item => item.textContent)).toEqual([
-            'RemovedIts synopsis and places',
+            'RemovedIts outline, places and character notes from the Board',
             'KeptBlocks in this scene, moved under the previous scene',
         ]);
         expect(findButton('Cancel')).not.toBeNull();
+        expect(document.body.textContent).toContain('Undo restores these until you create a draft or version.');
     });
 
     it('fires onConfirm when Delete heading is pressed', async () => {
@@ -92,5 +94,18 @@ describe('DeleteSceneHeadingModal', () => {
 
         expect(onClose).toHaveBeenCalledOnce();
         expect(onConfirm).not.toHaveBeenCalled();
+    });
+    it('explains Board metadata removal and Undo when converting a heading', async () => {
+        const host = document.createElement('div');
+
+        document.body.append(host);
+
+        const root = createRoot(host);
+
+        roots.push(root);
+        root.render(<ConvertSceneHeadingModal isOpen onClose={() => {}} onConfirm={() => {}} />);
+        await vi.waitFor(() => expect(findButton('Convert heading')).not.toBeNull());
+        expect(document.body.textContent).toContain('Its outline, places and character notes from the Board');
+        expect(document.body.textContent).toContain('Undo restores these until you create a draft or version.');
     });
 });

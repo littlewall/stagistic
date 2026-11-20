@@ -21,6 +21,7 @@ import type {
     ScriptScene,
     ScriptSummary,
 } from './';
+import type {ScriptSceneCharacter} from './sceneMetadata';
 
 export type ScriptCharacterGroupMember = Pick<InferSelectModel<typeof scriptCharacterGroupMembers>, 'groupId' | 'characterId'>;
 export type ScriptSceneLocationRow = InferSelectModel<typeof scriptSceneLocations>;
@@ -37,6 +38,7 @@ export interface ScriptPackageSource {
     music: ScriptMusic[],
     locations: ScriptLocation[],
     scenes: ScriptScene[],
+    sceneCharacters: ScriptSceneCharacter[],
     sceneLocations: ScriptSceneLocationRow[],
     attachments: ScriptAttachment[],
     musicAttachmentBindings: ScriptMusicAttachmentBinding[],

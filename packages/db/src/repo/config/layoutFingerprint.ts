@@ -23,6 +23,9 @@ export const getScriptLayoutFingerprint = (settings?: EditorSettingsOverride | n
         blocks: Object.entries(resolved.blocks).toSorted(([a], [b]) => a.localeCompare(b)).map(([type, block]) => ({
             type,
             spacingBeforeEm: block.spacingBeforeEm,
+            spacingAfterEm: block.spacingAfterEm,
+            sceneNumberFormat: block.sceneNumberFormat,
+            parenWrap: block.parenWrap,
             lineHeight: block.lineHeight,
             indentLeftChars: block.indentLeftChars,
             indentRightChars: block.indentRightChars,

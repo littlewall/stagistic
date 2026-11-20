@@ -83,6 +83,7 @@ export const useImportScriptModalState = ({
 
     if (wasOpen !== isOpen) {
         setWasOpen(isOpen);
+
         if (!isOpen) {
             setIsProcessing(false);
             setIsDownloadingBackup(false);

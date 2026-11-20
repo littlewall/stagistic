@@ -6,6 +6,8 @@ import {
 import type {TitlePageSettings} from '@stagistic/script';
 import {useCallback} from 'react';
 
+import {titlePageRescueText} from './draftRescueText';
+
 interface UseTitlePageDraftArgs {
     currentScriptId: string | null,
     repository: ScriptRepository,
@@ -32,6 +34,7 @@ export const useTitlePageDraft = ({currentScriptId, repository}: UseTitlePageDra
         isHydrated: !record.isLoading,
         defaultValue: EMPTY_TITLE_PAGE,
         persist,
+        toText: titlePageRescueText,
     });
     const {setDraft} = draft;
     const updateTitlePage = useCallback(

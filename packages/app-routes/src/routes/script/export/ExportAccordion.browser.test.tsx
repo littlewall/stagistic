@@ -100,7 +100,7 @@ describe('Export accordion', () => {
 
         const contentTrigger = findButton('Content');
         const templateSelect = await waitFor(() => document.querySelector<HTMLButtonElement>(
-            'button[aria-label="Export template"]',
+            'button[aria-label="Export type"]',
         ));
 
         expect(findButton('Template')).toBeNull();
@@ -137,14 +137,15 @@ describe('Export accordion', () => {
                 'button[aria-haspopup="listbox"]',
             ));
 
-            return elements.length === 4 ? elements : null;
+            return elements.length === 5 ? elements : null;
         });
 
         expect(selects.map(select => select.getAttribute('aria-label'))).toEqual([
-            'Export template',
+            'Export type',
             'Blank page count',
             'Order characters by',
             'Show contents as',
+            'Continuation mark',
         ]);
 
         for (const select of selects) {
@@ -360,7 +361,7 @@ describe('Export accordion', () => {
             .map(heading => heading.textContent?.trim());
 
         expect(blankPageSelect).not.toBeNull();
-        expect(blankPageLabel?.textContent?.trim()).toBe('Blank pages');
+        expect(blankPageLabel?.textContent?.trim()).toBe('Blank pages after last initial page');
         expect(pageFlowRegion.querySelector('button[aria-label="Blank page count"]')).toBeNull();
         expect(openingHeadings).not.toContain('Blank pages');
         expect(numberingSwitch).not.toBeUndefined();

@@ -17,6 +17,7 @@ import {createMusicHandlers} from './music';
 import {createOutboxRecorder} from './outbox';
 import {createImportPackageHandler} from './package/importPackage';
 import {createReadScriptPackageSource} from './package/readScriptPackageSource';
+import {createSceneMetadataHandlers} from './sceneMetadata';
 import {createScriptsHandlers} from './scripts';
 import {createSnapshotHandlers} from './snapshots';
 import type {GetDb} from './types';
@@ -87,6 +88,7 @@ export const createLocalPgliteRepository = ({
 
     return {
         ...reactiveSources,
+        ...createSceneMetadataHandlers(mutationDeps),
         allocateScriptId: uuidv7,
         allocateScriptCharacterId: uuidv7,
         allocateScriptCharacterGroupId: uuidv7,
@@ -193,7 +195,7 @@ export const createLocalPgliteRepository = ({
         saveLatest: (scriptId, value, metadata, settings) => content.saveLatest(scriptId, value, metadata, settings),
         saveSummaryMetadata: (scriptId, document, metadata, settings) => content.saveSummaryMetadata(scriptId, document, metadata, settings),
         loadScriptSettings: scriptId => settingsHandlers.loadScriptSettings(scriptId),
-        saveScriptSettings: (scriptId, settings) => settingsHandlers.saveScriptSettings(scriptId, settings),
+        saveScriptSettings: (scriptId, settings, formatTemplateId) => settingsHandlers.saveScriptSettings(scriptId, settings, formatTemplateId),
         deleteScriptSettings: scriptId => settingsHandlers.deleteScriptSettings(scriptId),
         loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
         saveTitlePage: (scriptId, settings) => titlePageHandlers.save(scriptId, settings),

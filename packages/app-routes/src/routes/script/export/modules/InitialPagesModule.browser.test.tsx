@@ -3,6 +3,7 @@ import '@stagistic/ui/styles/base.css';
 import {
     BASIC_DEFAULTS,
     type InitialPagesValue,
+    INTEGRATED_SCORE_DEFAULTS,
 } from '@stagistic/export';
 import {requireValue} from '@stagistic/shared';
 import {useState} from 'react';
@@ -269,10 +270,11 @@ describe('InitialPagesModule', () => {
         const host = document.createElement('div');
         const root = createRoot(host);
         const Harness = () => {
-            const [value, setValue] = useState<InitialPagesValue>(BASIC_DEFAULTS.initialPages);
+            const [value, setValue] = useState<InitialPagesValue>(INTEGRATED_SCORE_DEFAULTS.initialPages);
 
             return (
                 <InitialPagesModule
+                    allowMusicContents
                     value={value}
                     blankPages={BASIC_DEFAULTS.blankPages}
                     hasAutomaticBalancingBlank={false}

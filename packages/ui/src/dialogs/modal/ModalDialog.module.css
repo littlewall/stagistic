@@ -22,6 +22,14 @@
         background: var(--color-overlay-scrim);
     }
 
+    /*
+     * Portalled overlays (tooltips, menus) mount beside the panel. Sharing one
+     * grid cell keeps them from adding a row that would shift the centered panel.
+     */
+    & > * {
+        grid-area: 1 / 1;
+    }
+
     & .panel {
         display: flex;
         flex-direction: column;

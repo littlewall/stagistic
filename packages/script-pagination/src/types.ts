@@ -22,6 +22,8 @@ export interface PaginatorBlock {
      * needed, `getLineMap().cleanHeight` takes over — mirroring the editor exactly.
      */
     height: number,
+    /** Space for a repeated cue when this block starts/resumes on a later page. */
+    continuationHeight?: number,
     splittable: boolean,
     orphanCandidate: boolean,
     forcedBreak?: 'new-page' | 'odd-page',
@@ -61,6 +63,8 @@ export interface PageInfo {
     endKey: string,
     startOffset: number,
     endOffset: number,
+    /** True when the page opens with the continuation of a block split on the previous page (`startKey` is then that block's start). */
+    continuesBlock: boolean,
 }
 
 export interface PaginationPlan {
@@ -68,4 +72,12 @@ export interface PaginationPlan {
     pages: PageInfo[],
     breaks: PageBreak[],
     endSpacer: {afterBlockKey: string | null, height: number} | null,
+    /** Where each block really lands, in page-flow offsets: from its first fragment to right after its last (spacers between fragments included). */
+    blockOffsets: BlockOffsets[],
+}
+
+export interface BlockOffsets {
+    key: string,
+    startOffset: number,
+    endOffset: number,
 }

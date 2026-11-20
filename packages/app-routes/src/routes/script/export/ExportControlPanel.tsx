@@ -32,7 +32,7 @@ export const ExportControlPanel = () => {
                             className={formControlStyles.label}
                             htmlFor="export-template"
                         >
-                            Template
+                            Export type
                         </label>
                         <TemplatePicker
                             id="export-template"

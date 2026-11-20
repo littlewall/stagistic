@@ -1,11 +1,16 @@
 import {fileURLToPath} from 'node:url';
 
 import react from '@vitejs/plugin-react';
-import {defineConfig, type ServerOptions} from 'vite-plus';
+import {
+    defineConfig,
+    type PluginOption,
+    type ServerOptions,
+} from 'vite-plus';
 
 /** Resolve PGlite assets from the consuming app's workspace installation. */
-export const createEditorViteConfig = (configUrl: string, server: ServerOptions) => defineConfig({
-    plugins: [react()],
+/** `extraPlugins` are for what only one app needs, e.g. the web's `version.json`. */
+export const createEditorViteConfig = (configUrl: string, server: ServerOptions, extraPlugins: PluginOption[] = []) => defineConfig({
+    plugins: [react(), ...extraPlugins],
     css: {
         transformer: 'lightningcss',
     },

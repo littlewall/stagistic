@@ -16,6 +16,7 @@ const sceneNumberingKey = new PluginKey<DecorationSet>('scene-numbering');
 export interface SceneNumberingOptions {
     /** Whether and how the scene number label is rendered. */
     format: SceneNumberFormat,
+    getFormat?: () => SceneNumberFormat,
 }
 
 /*
@@ -53,6 +54,8 @@ const buildSceneNumberDecorations = (doc: ProseMirrorNode, format: SceneNumberFo
     return DecorationSet.create(doc, decorations);
 };
 
+export const SCENE_NUMBER_FORMAT_CHANGED = 'sceneNumberFormatChanged';
+
 export const SceneNumberingExtension = Extension.create<SceneNumberingOptions>({
     name: 'sceneNumbering',
 
@@ -63,20 +66,25 @@ export const SceneNumberingExtension = Extension.create<SceneNumberingOptions>({
     },
 
     addProseMirrorPlugins() {
-        const {format} = this.options;
+        const {format, getFormat} = this.options;
+        const currentFormat = () => getFormat?.() ?? format;
 
         return [
             new Plugin<DecorationSet>({
                 key: sceneNumberingKey,
                 state: {
-                    init: (_config, state) => buildSceneNumberDecorations(state.doc, format),
+                    init: (_config, state) => buildSceneNumberDecorations(state.doc, currentFormat()),
                     apply: (tr, decorations, oldState) => {
+                        if (tr.getMeta(SCENE_NUMBER_FORMAT_CHANGED)) {
+                            return buildSceneNumberDecorations(tr.doc, currentFormat());
+                        }
+
                         if (!tr.docChanged) {
                             return decorations;
                         }
 
                         if (transactionTouchesStructureBlocks(tr, oldState.doc, tr.doc)) {
-                            return buildSceneNumberDecorations(tr.doc, format);
+                            return buildSceneNumberDecorations(tr.doc, currentFormat());
                         }
 
                         return decorations.map(tr.mapping, tr.doc);

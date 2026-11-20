@@ -10,6 +10,7 @@ const pgliteDataPath = fileURLToPath(
 const pgliteWasmPath = fileURLToPath(
     new URL('./node_modules/@electric-sql/pglite/dist/pglite.wasm', import.meta.url),
 );
+const browserStorageResetPath = fileURLToPath(new URL('./src/browserStorageReset.ts', import.meta.url));
 
 export default defineConfig({
     optimizeDeps: {
@@ -22,8 +23,14 @@ export default defineConfig({
     },
     test: {
         include: ['src/**/*.browser.{test,spec}.{ts,tsx}'],
-        setupFiles: [BROWSER_TEST_SETUP],
+        setupFiles: [BROWSER_TEST_SETUP, browserStorageResetPath],
         testTimeout: 30_000,
+        /*
+         * These tests run the whole app on real PGlite workers. Measured on 11 cores:
+         * 10 sessions (the default) take 141 s with single tests near the 30 s limit,
+         * 3 sessions take 138 s with the slowest under 20 s. More sessions only slow each other.
+         */
+        maxWorkers: 3,
         browser: {
             enabled: true,
             headless: true,

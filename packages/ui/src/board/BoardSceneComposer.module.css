@@ -1,0 +1,37 @@
+/* Laid out like a scene card with a title only, and no taller. */
+.card {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: var(--space-md) var(--space-md) var(--space-lg) var(--space-lg);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.form {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding-top: var(--space-sm);
+}
+
+/* The tint of a Board name being edited. */
+.input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    text-transform: var(--board-scene-casing, uppercase);
+    background: var(--state-selected);
+    border: 0;
+    border-radius: var(--radius-sm);
+    outline: none;
+    box-shadow: 0 0 0 var(--space-xs) var(--state-selected);
+
+    &::placeholder {
+        color: var(--color-text-muted);
+    }
+}

@@ -10,5 +10,6 @@ void worker({
         relaxedDurability: options.relaxedDurability,
         fsBundleUrl: pgliteDataUrl,
         wasmUrl: pgliteWasmUrl,
+        report: message => postMessage(message),
     }),
 });

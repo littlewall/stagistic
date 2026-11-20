@@ -20,6 +20,7 @@ import {
     type UseEditorLifecycleArgs,
     useEditorLifecycleSync,
 } from './editorLifecycleSync';
+import {useEditorIndexPublication} from './useEditorIndexPublication';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
@@ -36,7 +37,11 @@ export const useEditorLifecycle = ({
     characters,
     requests,
 }: UseEditorLifecycleArgs): {actCommands: EditorActCommands} => {
-    const {instance, autoFocus} = editor;
+    const {
+        instance,
+        autoFocus,
+        sessionOwned,
+    } = editor;
     const {
         initialValue,
         initialSerialized,
@@ -99,6 +104,8 @@ export const useEditorLifecycle = ({
 
         patchFallbackSnapshot(snapshot, meta);
     });
+
+    useEditorIndexPublication(instance, liveStore);
 
     useEditorStructureRequests({
         editor: instance,
@@ -187,7 +194,7 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        const isRestoredSurface = appliedInitialByEditor.get(instance) === initialSerialized;
+        const isRestoredSurface = sessionOwned || appliedInitialByEditor.get(instance) === initialSerialized;
 
         if (!isRestoredSurface) {
             isApplyingInitialRef.current = true;
@@ -251,6 +258,7 @@ export const useEditorLifecycle = ({
         initialSerialized,
         initialValue,
         onIndexChangeRef,
+        sessionOwned,
         syncRuntimeSnapshotFromEditor,
         syncInitialValue,
     ]);

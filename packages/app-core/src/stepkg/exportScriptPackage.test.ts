@@ -27,6 +27,7 @@ const source = {
     sceneLocations: [],
     attachments: [],
     musicAttachmentBindings: [],
+    sceneCharacters: [],
     comments: {threads: [], messages: []},
 } as ScriptPackageSource;
 
@@ -54,6 +55,7 @@ describe('exportScriptPackage', () => {
 
         expect(events).toEqual(['flush', 'snapshot']);
         expect(result.ok).toBe(true);
+
         if (result.ok) expect(result.fileName).toBe('Test.stepkg');
     });
 

@@ -13,6 +13,7 @@ export {EditorCanvas} from './editor/components/EditorCanvas';
 export {default as EditorToolbar} from './editor/components/EditorToolbar';
 export {EditorInstanceProvider, useEditorInstance} from './editor/context';
 export type {
+    BlockPages,
     ConvertSceneRequest,
     DeleteActRequest,
     DeleteSceneRequest,
@@ -23,6 +24,7 @@ export type {
     EditorLayoutProps,
     EditorLifecycleCallbacks,
     EditorLiveActiveBlockInfo,
+    EditorLiveBlockPagesSnapshot,
     EditorLiveCharacterSnapshot,
     EditorLiveMusicSnapshot,
     EditorLiveScenePlacementSnapshot,
@@ -59,6 +61,7 @@ export {EditorSnapshotStoreProvider} from './editor/live/context';
 export {
     useEditorLiveActiveBlock,
     useEditorLiveActiveBlockInfo,
+    useEditorLiveBlockPages,
     useEditorLiveCharacters,
     useEditorLiveMusic,
     useEditorLiveScenePlacement,
@@ -66,9 +69,15 @@ export {
     useEditorLiveSnapshot,
     useEditorLiveStructure,
 } from './editor/live/hooks';
-export {createEditorSnapshotStore, type EditorSnapshotStore} from './editor/live/store';
+export {
+    createEditorSnapshotStore,
+    type EditorSnapshotStore,
+    EMPTY_INDEX as EMPTY_EDITOR_INDEX,
+} from './editor/live/store';
 export {MiniScriptEditor, type MiniScriptEditorProps} from './editor/mini/MiniScriptEditor';
 export {useEditorSceneNumberFormat} from './editor/sceneNumberFormatContext';
+export {createScriptDocumentSession, type ScriptDocumentSession} from './editor/session/createScriptDocumentSession';
+export {ScriptDocumentRuntime} from './editor/session/ScriptDocumentRuntime';
 export {
     type CharacterColorRefsBundle,
     createCharacterColorRefsBundle,

@@ -1,0 +1,47 @@
+#!/usr/bin/env node
+import {spawn} from 'node:child_process';
+import {readFileSync, writeFileSync} from 'node:fs';
+import {text} from 'node:stream/consumers';
+import {setTimeout} from 'node:timers/promises';
+
+const args = process.argv.slice(2);
+
+if (args[0] === 'models') {
+    if (process.env.FAKE_GO_MODELS_FAIL) {
+        process.stderr.write('models failed\n');
+        process.exit(1);
+    }
+    const models = process.env.FAKE_GO_MODELS ?? 'opencode-go/glm-5.2,opencode-go/glm-5.3,opencode-go/glm-5.3-flash,opencode-go/kimi-k2.7-code';
+    process.stdout.write(`opencode/free-model\n${models.split(',').join('\n')}\n`);
+    process.exit(0);
+}
+const prompt = await text(process.stdin);
+const value = flag => args.includes(flag) ? args[args.indexOf(flag) + 1] : null;
+const sessionID = value('--session') ?? `ses_fake_${process.pid}`;
+const emit = event => process.stdout.write(`${JSON.stringify({sessionID, ...event})}\n`);
+const mode = process.env.FAKE_GO_MODE;
+const permissions = readFileSync(`.opencode/agents/${value('--agent')}.md`, 'utf8');
+
+emit({type: 'step_start', part: {messageID: 'message'}});
+if (mode === 'hang' || mode === 'child' || mode === 'detached-child') {
+    if (process.env.FAKE_GO_READY) writeFileSync(process.env.FAKE_GO_READY, String(process.pid));
+    if (mode === 'child' || mode === 'detached-child') {
+        const descendant = spawn(process.execPath, ['-e', 'setTimeout(() => require("node:fs").writeFileSync(process.argv[1], "survived"), 1500)', process.env.FAKE_GO_SURVIVOR], {stdio: 'ignore', detached: mode === 'detached-child'});
+        if (process.env.FAKE_GO_CHILD_PID) writeFileSync(process.env.FAKE_GO_CHILD_PID, String(descendant.pid));
+    }
+    await setTimeout(15_000);
+}
+if (mode === 'quota' || mode === 'auth') {
+    emit({type: 'error', error: {data: {message: mode === 'quota' ? 'usage limit reached' : '401 Unauthorized'}}});
+    process.exit(0);
+}
+if (mode === 'malformed') {
+    process.stdout.write('not json\n');
+    process.exit(0);
+}
+if (mode !== 'empty') {
+    const answer = mode === 'args' ? JSON.stringify({args, prompt, permissions}) : prompt;
+    emit({type: 'text', part: {id: 'text', messageID: 'message', text: answer}});
+    if (mode === 'update') emit({type: 'text', part: {id: 'text', messageID: 'message', text: `${answer} updated`}});
+}
+emit({type: 'step_finish', part: {reason: mode === 'unfinished' ? 'tool-calls' : 'stop'}});

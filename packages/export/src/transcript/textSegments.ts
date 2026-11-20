@@ -127,7 +127,7 @@ const applyCasing = (text: string, casing: string | undefined) => {
     return text;
 };
 
-export const normalizeBlockSegments = (rawSegments: TextSegment[], blockType: string, casing: string | undefined) => {
+export const normalizeBlockSegments = (rawSegments: TextSegment[], blockType: string, casing: string | undefined, parenWrap = false) => {
     const segments: TextSegment[] = [];
     let pendingSpace = false;
 
@@ -151,7 +151,7 @@ export const normalizeBlockSegments = (rawSegments: TextSegment[], blockType: st
         });
     });
 
-    if (blockType === 'aside' && segments.length > 0) {
+    if ((blockType === 'aside' || (blockType === 'stageDirection' && parenWrap)) && segments.length > 0) {
         pushSegment(segments, ')', segments.at(-1)?.style);
         segments.unshift({text: '(', style: segments[0].style});
     }

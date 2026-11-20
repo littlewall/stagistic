@@ -11,6 +11,7 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {FocusVisibilityManager} from '../../layout/FocusVisibilityManager';
+import {Select} from '../../molecules/forms/Select/Select';
 import {SettingsModal} from './SettingsModal';
 
 let mountedRoot: Root | null = null;
@@ -120,4 +121,103 @@ describe('SettingsModal', () => {
 
         expect(document.activeElement).toBe(trigger);
     });
+});
+
+it('renders an interactive accessory beside a settings group heading', async () => {
+    const host = document.createElement('div');
+
+    document.body.append(host);
+    mountedRoot = createRoot(host);
+    mountedRoot.render(
+        <SettingsModal
+            isOpen
+            groups={[
+                {
+                    id: 'format',
+                    label: 'Format',
+                    headerAccessory: <button type="button">Custom template</button>,
+                    items: [],
+                },
+            ]}
+            activePanelId="page"
+            onClose={() => {}}
+            onSelectPanel={() => {}}
+        ><p>Page format</p>
+        </SettingsModal>,
+    );
+    await expect.poll(() => document.querySelector('aside')?.textContent).toContain('Custom template');
+    expect(document.querySelector('aside h3')?.textContent).toBe('Format');
+});
+
+it('keeps a long group accessory inside the sidebar and omits a headerless group label', async () => {
+    const host = document.createElement('div');
+
+    document.body.append(host);
+    mountedRoot = createRoot(host);
+    mountedRoot.render(
+        <SettingsModal
+            isOpen
+            groups={[
+                {
+                    id: 'script',
+                    label: 'Script',
+                    items: [
+                        {
+                            id: 'title',
+                            kind: 'item',
+                            label: 'Title page',
+                            panelId: 'title',
+                        },
+                    ],
+                },
+                {
+                    id: 'format',
+                    label: 'Format',
+                    headerAccessory: (
+                        <Select
+                            ariaLabel="Format template"
+                            value="long"
+                            variant="plain"
+                            options={[{value: 'long', label: 'Samuel French / Concord — Manuscript with a very long name'}]}
+                            onChange={() => {}}
+                        />
+                    ),
+                    items: [],
+                },
+                {
+                    id: 'danger',
+                    items: [
+                        {
+                            id: 'danger',
+                            kind: 'item',
+                            label: 'Danger zone',
+                            panelId: 'danger',
+                        },
+                    ],
+                },
+            ]}
+            activePanelId="title"
+            onClose={() => {}}
+            onSelectPanel={() => {}}
+        ><p>Panel</p>
+        </SettingsModal>,
+    );
+
+    await expect.poll(() => document.querySelector('button[aria-label="Format template"]')).toBeTruthy();
+
+    const sidebar = document.querySelector('aside') as HTMLElement;
+    const trigger = document.querySelector('button[aria-label="Format template"]') as HTMLElement;
+    const label = [...sidebar.querySelectorAll('h3')].find(heading => heading.textContent === 'Format') as HTMLElement;
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const labelRect = label.getBoundingClientRect();
+    const sidebarPaddingRight = Number.parseFloat(window.getComputedStyle(sidebar).paddingRight);
+
+    expect(triggerRect.right).toBeLessThanOrEqual(sidebarRect.right - sidebarPaddingRight + 0.5);
+    expect(trigger.querySelector('svg')?.getBoundingClientRect().right).toBeLessThanOrEqual(triggerRect.right);
+    expect(triggerRect.left - labelRect.right).toBeGreaterThan(0);
+    expect(Math.abs((labelRect.top + labelRect.bottom) / 2 - (triggerRect.top + triggerRect.bottom) / 2)).toBeLessThanOrEqual(1);
+    expect(window.getComputedStyle(label).fontWeight).toBe('600');
+    expect([...sidebar.querySelectorAll('h3')].map(heading => heading.textContent)).toEqual(['Script', 'Format']);
+    expect(sidebar.lastElementChild?.textContent).toBe('Danger zone');
 });

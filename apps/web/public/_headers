@@ -1,0 +1,4 @@
+# Cloudflare Pages response headers. A missing file is answered with the HTML fallback, so the
+# version check needs a fresh copy every time.
+/version.json
+  Cache-Control: no-store

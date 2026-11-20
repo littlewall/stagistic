@@ -60,7 +60,7 @@ export const SceneCollapseOverlay = ({
     }, [canvasRef]);
 
     const updateItems = useCallback(() => {
-        if (!editor || !canvas) {
+        if (!editor || editor.isDestroyed || !canvas) {
             setItems([]);
 
             return;
@@ -108,7 +108,7 @@ export const SceneCollapseOverlay = ({
     }, [canvas, editor]);
 
     useLayoutEffect(() => {
-        if (!editor || !canvas) {
+        if (!editor || editor.isDestroyed || !canvas) {
             return;
         }
 

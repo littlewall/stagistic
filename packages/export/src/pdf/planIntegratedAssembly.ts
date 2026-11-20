@@ -32,15 +32,19 @@ export interface IntegratedAssemblyPlan {
 export const planIntegratedAssembly = ({
     scriptPageSourceBlockIds,
     scores,
+    oddPageBlockIds = [],
 }: {
     scriptPageSourceBlockIds: string[][],
     scores: IntegratedAssemblyScore[],
+    oddPageBlockIds?: string[],
 }): IntegratedAssemblyPlan => {
     const firstPageIndexOf = (blockId: string) => scriptPageSourceBlockIds
         .findIndex(sourceIds => sourceIds.includes(blockId));
     const lastPageIndexOf = (blockId: string) => scriptPageSourceBlockIds
         .reduce((last, sourceIds, index) => sourceIds.includes(blockId) ? index : last, -1);
 
+    const nextContentPage = (index: number) => scriptPageSourceBlockIds.findIndex((ids, i) => i > index && ids.length > 0);
+    const oddBlocks = new Set(oddPageBlockIds);
     const musicStartPageIndexes = new Set<number>();
     const afterPageIndexes = new Set<number>();
     const scoresAfterPage = new Map<number, IntegratedAssemblyScore[]>();
@@ -49,7 +53,7 @@ export const planIntegratedAssembly = ({
         const startPageIndex = firstPageIndexOf(score.startBlockId);
 
         if (startPageIndex >= 0) {
-            musicStartPageIndexes.add(startPageIndex + 1);
+            musicStartPageIndexes.add(nextContentPage(startPageIndex));
         }
 
         const afterPageIndex = lastPageIndexOf(score.afterBlockId);
@@ -72,35 +76,26 @@ export const planIntegratedAssembly = ({
 
     const steps: IntegratedAssemblyStep[] = [];
     const scoreStartPageByMusicId = new Map<string, number>();
-    let scriptPagesSinceBlank = 0;
-    const nextWouldBeEven = () => scriptPagesSinceBlank % 2 === 0 && scriptPagesSinceBlank > 0;
+    const ensureOddPage = () => {
+        if (steps.length % 2 === 1) steps.push({kind: 'blank'});
+    };
     let requireOddBookPage = false;
 
     for (let pageIndex = 0; pageIndex < scriptPageSourceBlockIds.length; pageIndex += 1) {
-        if (musicStartPageIndexes.has(pageIndex) && nextWouldBeEven()) {
-            steps.push({kind: 'blank'});
-            scriptPagesSinceBlank = 0;
-        }
+        const sourceIds = scriptPageSourceBlockIds[pageIndex];
 
-        if (requireOddBookPage && nextWouldBeEven()) {
-            steps.push({kind: 'blank'});
-            scriptPagesSinceBlank = 0;
-        }
+        // Pagination blanks were based on script-only parity. Recompute them after scores.
+        if (sourceIds.length === 0) continue;
+
+        if (musicStartPageIndexes.has(pageIndex) || requireOddBookPage || sourceIds.some(id => oddBlocks.has(id))) ensureOddPage();
 
         requireOddBookPage = false;
         steps.push({kind: 'script', scriptPageIndex: pageIndex});
-        scriptPagesSinceBlank += 1;
 
-        if (afterPageIndexes.has(pageIndex)) {
-            requireOddBookPage = true;
-        }
+        if (afterPageIndexes.has(pageIndex)) requireOddBookPage = true;
 
         (scoresAfterPage.get(pageIndex) ?? []).forEach(score => {
-            if (nextWouldBeEven()) {
-                steps.push({kind: 'blank'});
-                scriptPagesSinceBlank = 0;
-            }
-
+            ensureOddPage();
             scoreStartPageByMusicId.set(score.musicId, steps.length + 1);
 
             for (let offset = 0; offset < score.pageCount; offset += 1) {

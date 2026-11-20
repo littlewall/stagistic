@@ -30,6 +30,8 @@ export const SPACING_BEFORE_OPTIONS = [
 
 export const LINE_HEIGHT_OPTIONS = [
     1,
+    1.13,
+    1.2,
     1.25,
     1.5,
     1.75,

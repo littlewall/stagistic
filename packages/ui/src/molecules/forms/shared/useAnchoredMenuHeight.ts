@@ -35,6 +35,7 @@ export const useAnchoredMenuPlacement = ({
 
     if (wasOpen !== isOpen) {
         setWasOpen(isOpen);
+
         if (!isOpen) {
             setPlacement('below');
             setStyle({});
@@ -87,6 +88,7 @@ export const useAnchoredMenuPlacement = ({
         const menu = menuRef.current;
 
         updateHeight();
+
         if (anchor) {
             resizeObserver?.observe(anchor);
         }

@@ -32,6 +32,10 @@ export const createScriptAttachmentsStore = (
     });
     const enqueueMusic = createKeyedTaskQueue<string>();
 
+    /*
+     * Uploads coordinate blob storage and repository metadata. Show confirmed bindings only;
+     * an optimistic binding could offer a file that is not yet available (or failed to upload).
+     */
     const refresh = async () => {
         await Promise.all([attachmentsSource.refresh(), bindingsSource.refresh()]);
     };

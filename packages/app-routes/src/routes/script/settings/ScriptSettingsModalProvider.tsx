@@ -19,6 +19,7 @@ import {useAttributeManagerItems} from '../attribute-manager/useAttributeManager
 import {useAttributeManagerModalState} from '../attribute-manager/useAttributeManagerModalState';
 import {useMusicAttachmentsState} from '../attribute-manager/useMusicAttachmentsState';
 import {useScriptPlacesState} from '../attribute-manager/useScriptPlacesState';
+import {combineDraftSaveErrors} from '../drafts/combineDraftSaveErrors';
 import {DraftSaveError} from '../drafts/DraftSaveError';
 import {useScriptEditorSettingsDraft} from '../drafts/useScriptEditorSettingsDraft';
 import {useScriptTitleDraft} from '../drafts/useScriptTitleDraft';
@@ -26,12 +27,14 @@ import {useTitlePageDraft} from '../drafts/useTitlePageDraft';
 import {useScriptMusicState} from '../editor/music/useScriptMusicState';
 import {useScriptReadOnlyState} from '../workspace/ScriptAccessContext';
 import {ScriptCharactersProvider} from '../workspace/ScriptCharactersContext';
+import {ScriptDocumentSessionHost} from '../workspace/ScriptDocumentSessionHost';
 import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {ScriptEditorSettingsPanel} from './panels';
 import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
 import {readOnlyScriptSettingsMenu} from './settingsMenu';
 import {BLOCK_LABEL_BY_TYPE, getShownSettingsPanelId} from './settingsPanelPresentation';
+import {FormatTemplateControls} from './template/FormatTemplateControls';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
@@ -43,6 +46,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {
         currentScript,
         currentScriptId,
+        documentSession,
         characterCatalog,
         musicCatalog,
         initialValue,
@@ -50,6 +54,10 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
+        formatTemplateId,
+        applyTemplate,
+        unlockTemplate,
+        updatePdfFlowSettings,
         isScriptSettingsHydrated,
         resolvedScriptSettings,
         updateBlockSettings,
@@ -128,6 +136,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         getEditorValue,
     } = useScriptCharactersContextValue({
         currentScriptId,
+        documentSession,
         characterCatalog,
         initialValue,
         resolvedScriptSettings,
@@ -154,15 +163,12 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         getMusicTitleDraft,
     });
     const shortcutPrefix = isApplePlatform() ? 'Control' : 'Alt';
-    const draftSaveError = scriptSettingsDraftError ?? titlePageDraftError ?? scriptTitleDraftError;
     const isEditorPresentationHydrated = isScriptSettingsHydrated && isTitlePageHydrated && isScriptTitleHydrated;
-    const retryFailedDrafts = () => {
-        void Promise.allSettled([
-            scriptSettingsDraftError ? retryScriptSettings() : Promise.resolve(),
-            titlePageDraftError ? retryTitlePage() : Promise.resolve(),
-            scriptTitleDraftError ? retryScriptTitle() : Promise.resolve(),
-        ]);
-    };
+    const draftSave = combineDraftSaveErrors([
+        {error: scriptSettingsDraftError, retry: retryScriptSettings},
+        {error: titlePageDraftError, retry: retryTitlePage},
+        {error: scriptTitleDraftError, retry: retryScriptTitle},
+    ]);
     const handleDeleteMusic = (musicId: string) => deleteAttributeManagerMusic({
         document: getEditorValue(),
         musicId,
@@ -184,6 +190,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const contextValue = useMemo<ScriptSettingsModalContextValue>(
         () => ({
             resolvedScriptSettings,
+            formatTemplateId,
             effectiveScriptSettingsDraft,
             isEditorPresentationHydrated,
             titlePageDraft,
@@ -201,6 +208,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         [
             musicState,
             musicAttachmentsState,
+            formatTemplateId,
             effectiveScriptSettingsDraft,
             isEditorPresentationHydrated,
             openAttributeManagerModal,
@@ -218,80 +226,84 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
 
     return (
         <ScriptSettingsModalContext.Provider value={contextValue}>
-            <ScriptCharactersProvider value={charactersContextValue}>
-                {children}
-                <SettingsModal
-                    returnFocus={settingsReturnFocus}
-                    isOpen={isSettingsOpen}
-                    title="Script settings"
-                    groups={isReadOnly ? readOnlyScriptSettingsMenu : groups}
-                    activePanelId={shownPanelId}
-                    notice={isReadOnly ? (
-                        <ReadOnlyNotice
-                            label={snapshot ? getScriptSnapshotLabel(snapshot) : null}
-                            message={`Changes apply to this ${snapshot?.kind === 'version' ? 'version' : 'draft'} only`}
+            <FormatTemplateControls key={`${currentScriptId}:${snapshot?.id ?? 'current'}`} formatTemplateId={formatTemplateId} settings={resolvedScriptSettings} onApply={applyTemplate} onUnlock={unlockTemplate} onChangeRequested={openSettingsModal} onUpdatePdfFlow={updatePdfFlowSettings}>
+                {picker => (
+                    <ScriptCharactersProvider value={charactersContextValue}>
+                        <ScriptDocumentSessionHost>{children}</ScriptDocumentSessionHost>
+                        <SettingsModal
+                            returnFocus={settingsReturnFocus}
+                            isOpen={isSettingsOpen}
+                            title="Script settings"
+                            groups={(isReadOnly ? readOnlyScriptSettingsMenu : groups).map(group => (group.id === 'format' ? {...group, headerAccessory: picker} : group))}
+                            activePanelId={shownPanelId}
+                            notice={isReadOnly ? (
+                                <ReadOnlyNotice
+                                    label={snapshot ? getScriptSnapshotLabel(snapshot) : null}
+                                    message={`Changes apply to this ${snapshot?.kind === 'version' ? 'version' : 'draft'} only`}
+                                />
+                            ) : null}
+                            expandedItemIds={expandedItemIds}
+                            onClose={handleCloseSettings}
+                            onSelectPanel={handleSelectSettingsPanel}
+                            onToggleExpand={toggleExpanded}
+                        >
+                            <DraftSaveError error={draftSave.error} onRetry={draftSave.retry} />
+                            <ScriptEditorSettingsPanel
+                                panelId={shownPanelId}
+                                resolvedScriptSettings={resolvedScriptSettings}
+                                settingsOverride={effectiveScriptSettingsDraft}
+                                blockLabelByType={BLOCK_LABEL_BY_TYPE}
+                                shortcutPrefix={shortcutPrefix}
+                                elementsHandlers={{
+                                    onResetBlockSettings: resetBlockSettings,
+                                    onUpdateBlockSettings: updateBlockSettings,
+                                }}
+                                visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
+                                structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
+                                pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                                headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
+                                initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
+                                titlePageHandlers={{
+                                    titlePageSettings: titlePageDraft,
+                                    scriptTitle: scriptTitleDraft,
+                                    onUpdateScriptTitle: updateScriptTitle,
+                                    onUpdateTitlePage: updateTitlePage,
+                                }}
+                                dangerZoneHandlers={{
+                                    scriptTitle: scriptTitleDraft,
+                                    onDeleteScript: handleDeleteScript,
+                                }}
+                            />
+                        </SettingsModal>
+                        <ScriptAttributeManagerModal
+                            returnFocus={attributeManagerReturnFocus}
+                            currentScriptId={currentScriptId}
+                            isOpen={isAttributeManagerOpen}
+                            tabs={attributeManagerTabs}
+                            activePanelId={activeAttributeManagerPanelId}
+                            selectedCharacterId={selectedAttributeManagerCharacterId}
+                            selectedGroupId={selectedAttributeManagerGroupId}
+                            selectedMusicId={selectedAttributeManagerMusicId}
+                            initialWorkspaceId={initialAttributeManagerWorkspaceId}
+                            onClose={closeAttributeManagerModal}
+                            onSelectPanel={selectAttributeManagerPanel}
+                            characters={charactersContextValue}
+                            characterItems={attributeManagerCharacters}
+                            groupItems={attributeManagerGroups}
+                            sceneItems={attributeManagerScenes}
+                            firstSceneHeadingBlockId={firstSceneHeadingBlockId}
+                            onDeleteScene={handleDeleteScene}
+                            placeState={placeState}
+                            musicState={musicState}
+                            musicItems={attributeManagerMusic}
+                            musicAttachmentsState={musicAttachmentsState}
+                            setMusicTitleDraft={setMusicTitleDraft}
+                            persistMusicTitleDraft={persistMusicTitleDraft}
+                            onDeleteMusic={handleDeleteMusic}
                         />
-                    ) : null}
-                    expandedItemIds={expandedItemIds}
-                    onClose={handleCloseSettings}
-                    onSelectPanel={handleSelectSettingsPanel}
-                    onToggleExpand={toggleExpanded}
-                >
-                    <DraftSaveError error={draftSaveError} onRetry={retryFailedDrafts} />
-                    <ScriptEditorSettingsPanel
-                        panelId={shownPanelId}
-                        resolvedScriptSettings={resolvedScriptSettings}
-                        settingsOverride={effectiveScriptSettingsDraft}
-                        blockLabelByType={BLOCK_LABEL_BY_TYPE}
-                        shortcutPrefix={shortcutPrefix}
-                        elementsHandlers={{
-                            onResetBlockSettings: resetBlockSettings,
-                            onUpdateBlockSettings: updateBlockSettings,
-                        }}
-                        visualPreferencesHandlers={{onUpdateCharacterDecoration: updateCharacterDecoration}}
-                        structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
-                        pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
-                        headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
-                        initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
-                        titlePageHandlers={{
-                            titlePageSettings: titlePageDraft,
-                            scriptTitle: scriptTitleDraft,
-                            onUpdateScriptTitle: updateScriptTitle,
-                            onUpdateTitlePage: updateTitlePage,
-                        }}
-                        dangerZoneHandlers={{
-                            scriptTitle: scriptTitleDraft,
-                            onDeleteScript: handleDeleteScript,
-                        }}
-                    />
-                </SettingsModal>
-                <ScriptAttributeManagerModal
-                    returnFocus={attributeManagerReturnFocus}
-                    currentScriptId={currentScriptId}
-                    isOpen={isAttributeManagerOpen}
-                    tabs={attributeManagerTabs}
-                    activePanelId={activeAttributeManagerPanelId}
-                    selectedCharacterId={selectedAttributeManagerCharacterId}
-                    selectedGroupId={selectedAttributeManagerGroupId}
-                    selectedMusicId={selectedAttributeManagerMusicId}
-                    initialWorkspaceId={initialAttributeManagerWorkspaceId}
-                    onClose={closeAttributeManagerModal}
-                    onSelectPanel={selectAttributeManagerPanel}
-                    characters={charactersContextValue}
-                    characterItems={attributeManagerCharacters}
-                    groupItems={attributeManagerGroups}
-                    sceneItems={attributeManagerScenes}
-                    firstSceneHeadingBlockId={firstSceneHeadingBlockId}
-                    onDeleteScene={handleDeleteScene}
-                    placeState={placeState}
-                    musicState={musicState}
-                    musicItems={attributeManagerMusic}
-                    musicAttachmentsState={musicAttachmentsState}
-                    setMusicTitleDraft={setMusicTitleDraft}
-                    persistMusicTitleDraft={persistMusicTitleDraft}
-                    onDeleteMusic={handleDeleteMusic}
-                />
-            </ScriptCharactersProvider>
+                    </ScriptCharactersProvider>
+                )}
+            </FormatTemplateControls>
         </ScriptSettingsModalContext.Provider>
     );
 };

@@ -244,6 +244,7 @@ export const buildCharactersAndPlacesPages = (
     };
 
     startPage(cursor, geometry);
+
     if (showCharacters) {
         plan.characters.forEach(character => {
             pushCharacter(

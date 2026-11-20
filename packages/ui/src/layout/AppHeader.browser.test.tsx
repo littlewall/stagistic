@@ -1,5 +1,6 @@
-import '../../styles/tokens.css';
+import '../../styles/base.css';
 
+import type {ReactElement} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -158,6 +159,60 @@ describe('ScriptEditorAppHeader', () => {
         await userEvent.keyboard('{Tab}');
 
         expect(document.activeElement).not.toBe(input);
+    });
+});
+
+describe('AppHeader width variants', () => {
+    const mountHeaderAt = (hostWidth: number, element: ReactElement) => {
+        const host = document.createElement('div');
+
+        host.style.width = `${hostWidth}px`;
+        document.body.appendChild(host);
+        root = createRoot(host);
+        root.render(element);
+    };
+
+    const innerBox = async () => (await waitForElement<HTMLElement>('[data-header-inner]')).getBoundingClientRect();
+
+    it('caps the Board header at the Board column width and centers it', async () => {
+        mountHeaderAt(
+            2200, (
+                <ScriptEditorAppHeader
+                    currentScript={{id: 'script-1', name: 'One Small Light'}}
+                    onHome={() => {}}
+                    activeView="board"
+                    onSelectView={() => {}}
+                    width="board"
+                />
+            ),
+        );
+
+        const rect = await innerBox();
+
+        expect(rect.width).toBe(1680);
+        expect(rect.left).toBeCloseTo(260, 1);
+        expect(rect.right).toBeCloseTo(1940, 1);
+    });
+
+    it('keeps the Editor header full width by default', async () => {
+        mountHeaderAt(
+            2200, (
+                <ScriptEditorAppHeader
+                    currentScript={{id: 'script-1', name: 'One Small Light'}}
+                    onHome={() => {}}
+                    activeView="editor"
+                    onSelectView={() => {}}
+                />
+            ),
+        );
+
+        expect((await innerBox()).width).toBe(2200);
+    });
+
+    it('keeps the standard header at the homepage width', async () => {
+        mountHeaderAt(2200, <AppHeader onHome={() => {}} />);
+
+        expect((await innerBox()).width).toBe(1400);
     });
 });
 

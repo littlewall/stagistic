@@ -35,6 +35,7 @@ const snapshot: StepkgSnapshot = {
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
+    sceneCharacters: {items: []},
     comments: {threads: [], messages: []},
     attachmentBindings: [],
 };
@@ -59,6 +60,7 @@ describe('serializeStepkgContent', () => {
             'data/music.json',
             'data/scenes.json',
             'data/comments.json',
+            'data/scene-characters.json',
         ]);
         expect(entries.every(entry => entry.compression === 'deflate')).toBe(true);
         expect(decode('document.json')).toContain('"id":"block-1"');

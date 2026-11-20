@@ -97,7 +97,7 @@ const renderEditor = (documentValue: ScriptDocument = initialValue) => {
 };
 
 const poll = async <T, >(getValue: () => T | null | undefined, label: string): Promise<T> => {
-    const deadline = Date.now() + 2_000;
+    const deadline = Date.now() + 5_000;
 
     while (Date.now() < deadline) {
         const value = getValue();

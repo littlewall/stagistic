@@ -15,6 +15,7 @@ import type {
 } from '../types';
 import {normalizeSettingsBlockType} from './configBlockTypes';
 import {buildConfigRows, hydrateBlockSettings} from './configRows';
+import {setScriptFormatTemplateId} from './formatTemplate';
 import {getScriptLayoutFingerprint} from './layoutFingerprint';
 
 type SettingsHandlers = Pick<ScriptRepository, 'loadScriptSettings' | 'saveScriptSettings' | 'deleteScriptSettings'>;
@@ -70,6 +71,9 @@ export const readScriptSettings = async (db: DbClient, scriptId: string): Promis
             contentMarginTopPx: pageLayout.contentMarginTopPx,
             contentMarginBottomPx: pageLayout.contentMarginBottomPx,
         });
+
+        if (pageLayout.pdfFlow) settings.pdfFlow = pageLayout.pdfFlow;
+
         settings.typography = toDefined({fontSizePx: pageLayout.fontSizePx, lineHeight: pageLayout.lineHeight});
     }
 
@@ -104,6 +108,7 @@ export const readScriptSettings = async (db: DbClient, scriptId: string): Promis
     [...blocks]
         .toSorted((a, b) => Number(normalizeSettingsBlockType(a.blockType) === a.blockType) - Number(normalizeSettingsBlockType(b.blockType) === b.blockType))
         .forEach(block => hydrateBlockSettings(settings, block));
+
     if (Object.keys(settings.blocks).length === 0) delete settings.blocks;
 
     return Object.keys(settings).length > 0 ? settings : null;
@@ -136,10 +141,11 @@ export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, sett
 
     await dbQueries.deleteScriptSettings(tx, scriptId);
 
-    if (settings.page || settings.typography) {
+    if (settings.page || settings.typography || settings.pdfFlow) {
         await dbQueries.insertScriptPageLayoutSettings(tx, {
             scriptId,
             ...settings.page,
+            pdfFlow: settings.pdfFlow,
             fontSizePx: settings.typography?.fontSizePx,
             lineHeight: settings.typography?.lineHeight,
             createdAt: now,
@@ -182,6 +188,7 @@ export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, sett
         scriptId,
         rows: buildConfigRows(scriptId, settings, now),
     });
+
     if (layoutChanged) {
         await dbQueries.invalidateScriptPageCount(tx, scriptId);
     }
@@ -199,99 +206,17 @@ export const createSettingsHandlers = ({
         const settings = await readScriptSettings(db, scriptId);
 
         return settings;
-        /*
-         * Kept below temporarily for an isolated, reviewable refactor; remove
-         * once the compiler confirms the helper's exact behavioral parity.
-         */
-        /*
-         *const settings: EditorSettingsOverride = {};
-         *
-         *if (pageLayout) {
-         *    settings.page = toDefined({
-         *        widthPx: pageLayout.widthPx,
-         *        heightPx: pageLayout.heightPx,
-         *        marginTopPx: pageLayout.marginTopPx,
-         *        marginRightPx: pageLayout.marginRightPx,
-         *        marginBottomPx: pageLayout.marginBottomPx,
-         *        marginLeftPx: pageLayout.marginLeftPx,
-         *        pageGapPx: pageLayout.pageGapPx,
-         *        pageBreakBackground: pageLayout.pageBreakBackground,
-         *        contentMarginTopPx: pageLayout.contentMarginTopPx,
-         *        contentMarginBottomPx: pageLayout.contentMarginBottomPx,
-         *    });
-         *    settings.typography = toDefined({
-         *        fontSizePx: pageLayout.fontSizePx,
-         *        lineHeight: pageLayout.lineHeight,
-         *    });
-         *}
-         *
-         *if (isCharacterDecoration(visual?.characterDecoration)) {
-         *    settings.visual = {characterDecoration: visual.characterDecoration};
-         *}
-         *
-         *if (structure) {
-         *    settings.structure = {
-         *        actDisplay: toDefined({
-         *            linesBefore: structure.actLinesBefore,
-         *            linesAfter: structure.actLinesAfter,
-         *        }),
-         *    };
-         *}
-         *
-         *if (initialPages) {
-         *    const castOrderBy = initialPages.castOrderBy === 'appearance' ? 'appearance' : 'name';
-         *
-         *    settings.initialPages = {
-         *        castAndPlace: toDefined({
-         *            castOrderBy,
-         *            showOutline: initialPages.showOutline,
-         *        }),
-         *        songs: toDefined({
-         *            showCharactersInSongs: initialPages.showCharactersInSongs,
-         *        }),
-         *    };
-         *}
-         *
-         *headerFooterRows.forEach(row => {
-         *    if ((row.area !== 'header' && row.area !== 'footer')
-         *        || !ALIGNMENTS.includes(row.alignment as HeaderFooterAlignment)) {
-         *        return;
-         *    }
-         *
-         *    const area = row.area;
-         *    const alignment = row.alignment as HeaderFooterAlignment;
-         *
-         *    settings.headerFooter ??= {};
-         *    settings.headerFooter[area] ??= {};
-         *    settings.headerFooter[area][alignment] = {
-         *        text: row.textContent,
-         *        isBold: row.isBold,
-         *        isItalic: row.isItalic,
-         *        isUnderline: row.isUnderline,
-         *        isHiddenInEditor: row.isHiddenInEditor,
-         *    };
-         *});
-         *
-         *settings.blocks = {};
-         *[...blocks]
-         *    .sort((a, b) => Number(normalizeSettingsBlockType(a.blockType) === a.blockType)
-         *        - Number(normalizeSettingsBlockType(b.blockType) === b.blockType))
-         *    .forEach(block => hydrateBlockSettings(settings, block));
-         *
-         *if (Object.keys(settings.blocks).length === 0) {
-         *    delete settings.blocks;
-         *}
-         *
-         *return Object.keys(settings).length > 0 ? settings : null;
-         */
     };
 
-    const saveScriptSettings: SettingsHandlers['saveScriptSettings'] = async (scriptId, settings) => {
+    const saveScriptSettings: SettingsHandlers['saveScriptSettings'] = async (scriptId, settings, formatTemplateId) => {
         const db = await getDb();
         const now = Date.now();
 
         await db.transaction(async tx => {
             await writeScriptSettingsTx(tx, scriptId, settings, now);
+
+            if (formatTemplateId !== undefined) await setScriptFormatTemplateId(tx, scriptId, formatTemplateId, now);
+
             await recordOutbox(
                 {
                     scriptId,
@@ -317,6 +242,7 @@ export const createSettingsHandlers = ({
 
         await db.transaction(async tx => {
             await dbQueries.deleteScriptSettings(tx, scriptId);
+            await setScriptFormatTemplateId(tx, scriptId, null, now);
             await dbQueries.invalidateScriptPageCount(tx, scriptId);
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
             await recordOutbox(

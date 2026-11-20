@@ -11,8 +11,8 @@ export interface DeleteAttributeManagerSceneArgs {
 }
 
 /**
- * Removes a scene heading block from the working document (its synopsis and
- * places are pruned by the projection). Mirrors {@link deleteAttributeManagerMusic}:
+ * Removes a scene heading block from the working document. The projection holds
+ * its Board metadata aside for Undo until a draft or version is created. Mirrors {@link deleteAttributeManagerMusic}:
  * the change flows through `applyDocumentChange`, which persists and re-renders
  * the live editor — the attribute manager cannot reach the editor's live
  * `deleteSceneRequest` channel.

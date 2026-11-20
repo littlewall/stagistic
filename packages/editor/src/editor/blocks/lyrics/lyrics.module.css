@@ -1,7 +1,5 @@
 .lyrics {
-    padding-top: var(--lyrics-spacing-before, 0);
-    padding-right: var(--lyrics-indent-right, 0);
-    padding-left: var(--lyrics-indent-left, 0);
+    padding: var(--lyrics-spacing-before, 0) var(--lyrics-indent-right, 0) var(--lyrics-spacing-after, 0) var(--lyrics-indent-left, 0);
     font-weight: var(--lyrics-font-weight, 400);
     font-style: var(--lyrics-font-style, italic);
     line-height: var(--lyrics-line-height, inherit);

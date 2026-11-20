@@ -95,6 +95,7 @@ describe('script summary metadata lifecycle', () => {
             scenes: [],
             attachments: [],
             bindings: [],
+            sceneCharacters: [],
             comments: {threads: [], messages: []},
         };
 

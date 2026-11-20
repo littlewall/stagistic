@@ -234,6 +234,7 @@ const MusicDraftSuggestionsOverlay = ({
     }
 
     useExclusiveOverlay(overlayState !== null, closeOverlay);
+
     if (!overlayState || suggestions.length === 0) {
         return null;
     }

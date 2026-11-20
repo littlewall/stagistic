@@ -2,6 +2,7 @@ import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-sel
 
 import type {
     EditorLiveActiveBlockInfo,
+    EditorLiveBlockPagesSnapshot,
     EditorLiveCharacterSnapshot,
     EditorLiveMusicSnapshot,
     EditorLiveScenePlacementSnapshot,
@@ -35,6 +36,10 @@ export const useEditorLiveSnapshot = () => {
 
 export const useEditorLiveStructure = () => {
     return useEditorLiveSelector<EditorLiveStructureSnapshot>(snapshot => snapshot.structure);
+};
+
+export const useEditorLiveBlockPages = () => {
+    return useEditorLiveSelector<EditorLiveBlockPagesSnapshot>(snapshot => snapshot.blockPages);
 };
 
 export const useEditorLiveScenePlacement = () => {

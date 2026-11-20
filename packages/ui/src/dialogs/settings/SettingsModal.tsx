@@ -59,7 +59,12 @@ export const SettingsModal = ({
                             key={group.id}
                             className={styles.group}
                         >
-                            {groups.length > 1 ? <h3 className={styles.groupLabel}>{group.label}</h3> : null}
+                            {group.label && (groups.length > 1 || group.headerAccessory) ? (
+                                <div className={styles.groupHeader}>
+                                    <h3 className={styles.groupLabel}>{group.label}</h3>
+                                    {group.headerAccessory}
+                                </div>
+                            ) : null}
                             <ul className={styles.navList}>
                                 {group.items.map(item => {
                                     if (item.kind === 'separator') {

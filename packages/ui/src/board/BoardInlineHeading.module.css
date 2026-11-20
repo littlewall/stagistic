@@ -1,0 +1,64 @@
+/* The tint grows with a shadow, not padding, so text never moves when editing starts. */
+.field {
+    --name-tint: transparent;
+
+    cursor: text;
+    overflow-wrap: anywhere;
+
+    /* Typed spaces show and wrap like any other character, so none ever overflows the card. */
+    white-space: break-spaces;
+    background: var(--name-tint);
+    border-radius: var(--radius-sm);
+    outline: none;
+    box-shadow: 0 0 0 var(--space-xs) var(--name-tint);
+    box-decoration-break: clone;
+    transition: background var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+        --name-tint: var(--state-hover);
+    }
+
+    /* An emptied name keeps a caret-sized place. */
+    &:empty {
+        display: inline-block;
+        min-width: 1ch;
+    }
+    :global(:root[data-focus-ring-visible]) &:focus:not(.editing) {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    &.editing {
+        --name-tint: var(--state-selected);
+    }
+}
+
+/* An outline is a block of lines under the scene name. */
+.lines {
+    display: block;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.multiline {
+    composes: lines;
+    min-height: 1lh;
+    white-space: break-spaces;
+
+    &:empty {
+        display: block;
+    }
+
+    /* Empty, it keeps its line and always names itself, faintly, until text exists. */
+    &:empty::before {
+        content: attr(data-placeholder);
+        color: var(--color-text-placeholder);
+    }
+
+    &.editing:empty::before {
+        content: none;
+    }
+}

@@ -31,12 +31,29 @@ const metadata: ScriptSummaryMetadata = {
     unassignedSceneCount: 1,
 };
 
-const Harness = ({handlersRef, stored}: {
+type Reported = {
+    storageErrors: (string | null)[],
+    toasts: {title: string, variant?: string}[],
+    finishedSaves: boolean[],
+};
+
+const Harness = ({
+    handlersRef,
+    stored,
+    reported,
+    canSave,
+}: {
     handlersRef: {current: Handlers | null},
     stored: StoredSnapshot[],
+    reported: Reported,
+    canSave?: () => boolean,
 }) => {
     const handlers = useScriptSaveHandlers({
-        context: {currentScriptId: 'script-id', currentScript: {id: 'script-id', name: 'Script'}},
+        context: {
+            currentScriptId: 'script-id',
+            currentScript: {id: 'script-id', name: 'Script'},
+            canSave,
+        },
         repository: {
             saveLatest: (scriptId, snapshotValue, snapshotMetadata) => {
                 stored.push({
@@ -58,8 +75,16 @@ const Harness = ({handlersRef, stored}: {
                 return Promise.resolve(true);
             },
         },
-        notifications: {setStorageError: () => {}, addToast: () => {}},
-        state: {saveIndicatorControls: {startSaveIndicator: () => {}, finishSaveIndicator: () => {}}},
+        notifications: {
+            setStorageError: error => reported.storageErrors.push(error),
+            addToast: toast => reported.toasts.push(toast),
+        },
+        state: {
+            saveIndicatorControls: {
+                startSaveIndicator: () => {},
+                finishSaveIndicator: didSave => reported.finishedSaves.push(didSave),
+            },
+        },
     });
 
     useLayoutEffect(() => {
@@ -69,14 +94,19 @@ const Harness = ({handlersRef, stored}: {
     return null;
 };
 
-const mount = async () => {
+const mount = async (canSave?: () => boolean) => {
     const stored: StoredSnapshot[] = [];
+    const reported: Reported = {
+        storageErrors: [],
+        toasts: [],
+        finishedSaves: [],
+    };
     const handlersRef: {current: Handlers | null} = {current: null};
     const host = document.createElement('div');
 
     document.body.append(host);
     root = createRoot(host);
-    root.render(<Harness stored={stored} handlersRef={handlersRef} />);
+    root.render(<Harness stored={stored} handlersRef={handlersRef} reported={reported} canSave={canSave} />);
 
     const deadline = Date.now() + 1000;
 
@@ -88,7 +118,11 @@ const mount = async () => {
         throw new Error('Save handlers did not mount');
     }
 
-    return {stored, handlers: handlersRef.current};
+    return {
+        stored,
+        reported,
+        handlers: handlersRef.current,
+    };
 };
 
 afterEach(() => {
@@ -98,6 +132,16 @@ afterEach(() => {
 });
 
 describe('workspace editor save snapshots', () => {
+    it('shows a save that ran out of time like any other failed save', async () => {
+        const {handlers, reported} = await mount();
+
+        handlers.handleSaveTimedOut();
+
+        expect(reported.storageErrors).toEqual(['Failed to save script data.']);
+        expect(reported.toasts).toEqual([expect.objectContaining({title: 'Failed to save', variant: 'error'})]);
+        expect(reported.finishedSaves).toEqual([false]);
+    });
+
     it('forwards autosave document metadata to the repository', async () => {
         const {stored, handlers} = await mount();
 
@@ -137,6 +181,15 @@ describe('workspace editor save snapshots', () => {
                 expectedSettings,
             },
         ]);
+    });
+
+    it('writes nothing once this tab may no longer edit the script', async () => {
+        const {stored, handlers} = await mount(() => false);
+
+        expect(await handlers.handleAutoSave(value, metadata)).toBe(false);
+        expect(await handlers.handleManualSave(value, metadata)).toBe(false);
+        expect(await handlers.handleSummaryMetadataChange(value, metadata)).toBe(false);
+        expect(stored).toEqual([]);
     });
 });
 import {useLayoutEffect} from 'react';

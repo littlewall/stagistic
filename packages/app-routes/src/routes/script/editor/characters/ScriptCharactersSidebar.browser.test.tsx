@@ -125,7 +125,7 @@ const createContextValue = (
     characterGenderOptions: [],
     isCharactersLoading: false,
     normalizeCharacterNameForInlineInput: name => name,
-    handleConfirmCharacter: () => {},
+    handleConfirmCharacter: () => Promise.resolve(null),
     handleDeleteCharacter: () => {},
     handleRenameCharacterPreview: () => {},
     handleRenameCharacter: async () => {},

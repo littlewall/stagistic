@@ -1,0 +1,224 @@
+.changelogPage {
+    min-height: 65vh;
+    padding: clamp(3rem, 8vw, 6rem) 1.5rem;
+    background: var(--color-bg);
+}
+
+.changelogInner {
+    max-width: 44rem;
+    margin: 0 auto;
+    overflow-wrap: break-word;
+}
+
+.intro {
+    max-width: 36rem;
+    margin-bottom: 3rem;
+}
+
+.title {
+    margin-bottom: 1rem;
+    font-size: clamp(2.25rem, 6vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -.03em;
+}
+
+.intro p {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+}
+
+.feedLink {
+    color: inherit;
+    text-underline-offset: .25em;
+
+    &:focus-visible {
+        border-radius: .125rem;
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 4px;
+    }
+}
+
+.releaseList {
+    display: grid;
+    gap: 3.5rem;
+    list-style: none;
+}
+
+.release {
+    scroll-margin-top: 8rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.releaseHeader {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem 1rem;
+    align-items: baseline;
+    margin-bottom: 1.5rem;
+}
+
+.releaseNumber {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+}
+
+.releaseLink {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: .2em;
+    }
+
+    &:focus-visible {
+        border-radius: .125rem;
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 4px;
+    }
+}
+
+.releaseDate {
+    font-size: .9375rem;
+    color: var(--color-text-muted);
+}
+
+.notes {
+    display: grid;
+    gap: 2.5rem;
+    list-style: none;
+}
+
+.noteTitle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem .75rem;
+    align-items: baseline;
+    margin-bottom: .5rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -.01em;
+}
+
+/* Same intent as the app: the pill colour shows weight. Highlights take the action colour, fixes the danger status colour, the rest stays neutral. */
+.typeLabel {
+    flex: none;
+    padding: .125rem .625rem;
+    font-size: .6875rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    background: var(--color-surface-raised);
+    border-radius: 999px;
+
+    &[data-note-weight = 'highlight'] {
+        color: var(--color-on-action);
+        background: var(--color-action);
+    }
+
+    &[data-note-weight = 'fix'] {
+        color: var(--color-status-danger);
+        background: color-mix(in oklch, var(--color-status-danger) 14%, var(--color-surface-raised));
+    }
+}
+
+.breakingLabel {
+    padding: .0625rem .5rem;
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+    border-radius: .25rem;
+}
+
+.description {
+    line-height: 1.75;
+}
+
+.description :global(> * + *) {
+    margin-top: .75rem;
+}
+
+.description :global(ul) {
+    padding-left: 1.5rem;
+}
+
+.description :global(a) {
+    text-underline-offset: .2em;
+}
+
+.description :global(code) {
+    font-family: var(--font-mono);
+    font-size: .9375em;
+}
+
+.image {
+    display: block;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+    margin: .75rem 0 1rem;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    border-radius: .25rem;
+}
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem 1.25rem;
+    margin-top: .75rem;
+    font-size: .9375rem;
+
+    & a {
+        color: var(--color-text-muted);
+        text-underline-offset: .2em;
+
+        &:hover,
+        &:focus-visible {
+            color: var(--color-text);
+        }
+
+        &:focus-visible {
+            border-radius: .125rem;
+            outline: 2px solid var(--color-focus-ring);
+            outline-offset: 4px;
+        }
+    }
+}
+
+.emptyState {
+    padding: 2rem 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.emptyTitle {
+    margin-bottom: .75rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+}
+
+.emptyState p {
+    max-width: 40rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+}
+
+@media (max-width: 40em) {
+    .changelogPage {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+}

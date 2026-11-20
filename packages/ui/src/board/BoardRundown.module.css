@@ -1,0 +1,130 @@
+.rundown {
+
+    /* One template for rows and act headings; `cqi` is resolved where it is used, against this container. */
+    --rundown-columns: 3rem minmax(0, 1fr) 6rem 5rem calc(40cqi - var(--space-md));
+    --rundown-gap: var(--space-lg);
+
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4xl);
+}
+
+.act {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.actHeading {
+    display: grid;
+    grid-template-columns: var(--rundown-columns);
+    column-gap: var(--rundown-gap);
+    align-items: baseline;
+    padding-block: 0 var(--space-sm);
+    padding-inline: var(--space-md);
+    border-bottom: 1px solid var(--color-border-subtle);
+
+    > h2 {
+        grid-column: 1 / 4;
+    }
+}
+
+.summary {
+    grid-column: 5;
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: var(--rundown-columns);
+    column-gap: var(--rundown-gap);
+    align-items: center;
+    width: 100%;
+    min-height: var(--control-height-md);
+    padding: var(--space-xs) var(--space-md);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+        background: var(--state-hover);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: calc(var(--focus-ring-offset) * -1);
+    }
+}
+
+/* Songs sit under their scene, one step in. */
+.song {
+    padding-inline-start: var(--space-4xl);
+    color: var(--color-text-muted);
+}
+
+.label {
+    grid-column: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.title {
+    overflow: hidden;
+    grid-column: 2;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kind {
+    grid-column: 3;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: end;
+}
+
+.pages {
+    display: grid;
+    grid-column: 4;
+    grid-template-columns: 2rem auto;
+    column-gap: var(--space-xs);
+    justify-content: start;
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+}
+
+.pagesNumber {
+    text-align: end;
+}
+
+.people {
+    --chip-size: .75rem;
+
+    display: flex;
+    grid-column: 5;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-lg);
+    font-size: var(--font-size-xs);
+    color: var(--color-text);
+}
+
+.person {
+    display: inline-flex;
+    gap: var(--space-sm);
+    align-items: center;
+}

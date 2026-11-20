@@ -107,7 +107,7 @@ const buildVocalRangesPlan = (
     };
 };
 
-export const deriveBasicExportPlan = (
+export const deriveScriptExportPlan = (
     config: BasicExportConfig,
     script: ScriptData,
 ): ExportPlan => {
@@ -133,53 +133,50 @@ export const deriveBasicExportPlan = (
         filteredDoc,
         script.characters,
         script.groups,
+        doc,
     );
     const vocalRanges = buildVocalRangesPlan(config, script);
     const blankSpec = config.blankPages.betweenInitialPagesAndScript;
-    let hasPreviousGroup = false;
+    let currentActHeading: string | null = null;
     let currentActHasScene = false;
+    const firstBlockId = getScriptBlockId(doc.content[0] ?? {});
+    const addBreak = (blockId: string, kind: ForcedBreak['kind']) => {
+        if (blockId === firstBlockId) return;
+
+        const previous = forcedBreaks.find(item => item.blockId === blockId);
+
+        if (previous) {
+            if (kind === 'odd-page') previous.kind = kind;
+
+            return;
+        }
+
+        forcedBreaks.push({blockId, kind});
+    };
 
     groupScenes(doc).forEach(group => {
-        const heading = group.blocks[0];
-        const blockId = heading ? getScriptBlockId(heading) : null;
+        const blockId = getScriptBlockId(group.blocks[0] ?? {});
 
-        if (!blockId) {
-            return;
-        }
+        if (!blockId) return;
 
         if (group.sceneBlockId === null && group.actBlockId !== null) {
+            currentActHeading = blockId;
             currentActHasScene = false;
 
-            if (hasPreviousGroup) {
-                forcedBreaks.push({blockId, kind: 'new-page'});
-            }
-
-            hasPreviousGroup = true;
+            if (config.pageBreaks.actOnNewPage !== false) addBreak(blockId, 'new-page');
 
             return;
         }
 
-        const isFirstSceneInAct = group.sceneBlockId !== null
-            && !currentActHasScene;
+        if (group.sceneBlockId === null) return;
 
-        if (group.sceneBlockId !== null) {
-            currentActHasScene = true;
+        const target = !currentActHasScene && currentActHeading ? currentActHeading : blockId;
+
+        currentActHasScene = true;
+
+        if (config.pageBreaks.sceneOnNewPage || config.pageBreaks.sceneOnOddPage) {
+            addBreak(target, config.pageBreaks.sceneOnOddPage ? 'odd-page' : 'new-page');
         }
-
-        if (group.sceneBlockId !== null
-            && !isFirstSceneInAct
-            && (config.pageBreaks.sceneOnNewPage || config.pageBreaks.sceneOnOddPage)) {
-            forcedBreaks.push({
-                blockId,
-                kind: config.pageBreaks.sceneOnOddPage ? 'odd-page' : 'new-page',
-            });
-
-            hasPreviousGroup = true;
-
-            return;
-        }
-
-        hasPreviousGroup = true;
     });
 
     return {
@@ -200,6 +197,8 @@ export const deriveBasicExportPlan = (
         },
         pagination: {
             forcedBreaks,
+            repeatCharacterOnBreak: config.pageBreaks.repeatCharacterOnBreak,
+            continuationMark: config.pageBreaks.continuationMark,
         },
         postSteps: [],
         visibleBlockIds: preservePagination
@@ -207,3 +206,9 @@ export const deriveBasicExportPlan = (
             : undefined,
     };
 };
+
+/** Basic exports always list scenes, even when passed an older music-contents selection. */
+export const deriveBasicExportPlan = (config: BasicExportConfig, script: ScriptData): ExportPlan => deriveScriptExportPlan({
+    ...config,
+    initialPages: {...config.initialPages, contents: {...config.initialPages.contents, variant: 'scenes'}},
+}, script);

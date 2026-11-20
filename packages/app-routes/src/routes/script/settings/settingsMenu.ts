@@ -76,8 +76,14 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             },
             {
                 kind: 'item',
+                id: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
+                label: 'Visual preferences',
+                panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
+            },
+            {
+                kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
-                label: 'Page layout',
+                label: 'Page format',
                 panelId: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
             },
             {
@@ -86,12 +92,12 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                 label: 'Header and footer',
                 panelId: SCRIPT_SETTINGS_PANEL_HEADERS,
             },
-            {
-                kind: 'item',
-                id: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
-                label: 'Visual preferences',
-                panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
-            },
+        ],
+    },
+    {
+        id: 'format',
+        label: 'Block styles',
+        items: [
             {
                 kind: 'expandable',
                 id: SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS,
@@ -103,6 +109,11 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                     icon: BLOCK_ICONS[item.blockType],
                 })),
             },
+        ],
+    },
+    {
+        id: 'danger',
+        items: [
             {
                 kind: 'separator',
                 id: 'danger-zone-separator',
@@ -120,7 +131,9 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
 const DANGER_ZONE_ITEM_IDS = new Set(['danger-zone-separator', SCRIPT_SETTINGS_PANEL_DANGER_ZONE]);
 
 /** A saved draft or version cannot be deleted from its settings, so the danger zone goes. */
-export const readOnlyScriptSettingsMenu: SettingsNavGroup[] = scriptSettingsMenu.map(group => ({
-    ...group,
-    items: group.items.filter(item => !DANGER_ZONE_ITEM_IDS.has(item.id)),
-}));
+export const readOnlyScriptSettingsMenu: SettingsNavGroup[] = scriptSettingsMenu
+    .map(group => ({
+        ...group,
+        items: group.items.filter(item => !DANGER_ZONE_ITEM_IDS.has(item.id)),
+    }))
+    .filter(group => group.items.length > 0);

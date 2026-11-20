@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+// Fake agy CLI for tests; behavior driven by FAKE_MODE.
+import {setTimeout} from 'node:timers/promises';
+
+const args = process.argv.slice(2);
+const prompt = args.find((arg) => arg.startsWith('--print='))?.slice('--print='.length);
+const reply = (fields) => process.stdout.write(JSON.stringify({status: 'SUCCESS', response: '', ...fields}));
+
+switch (process.env.FAKE_MODE) {
+    case 'logged-out':
+        process.stderr.write('Waiting for authentication (timeout 0s)...\n');
+        await setTimeout(10_000);
+        break;
+    case 'denied':
+        reply({denied_actions: [{action: 'write_file', display_name: 'WriteFile'}]});
+        break;
+    case 'error-exit0':
+        reply({status: 'ERROR', error: 'model exploded'});
+        break;
+    case 'auth-exit0':
+        reply({status: 'ERROR', error: 'authentication failed or timed out'});
+        break;
+    case 'fail':
+        reply({status: 'ERROR', error: 'model exploded'});
+        process.exit(1);
+    case 'args':
+        reply({response: JSON.stringify(args)});
+        break;
+    default:
+        reply({response: prompt});
+}

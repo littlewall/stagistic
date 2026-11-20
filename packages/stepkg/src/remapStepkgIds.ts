@@ -137,6 +137,7 @@ export const remapStepkgIds = (snapshot: StepkgSnapshot, newId: () => string = u
             })),
             locations: snapshot.scenes.locations.map(location => ({...location, id: idMap.locations[location.id]})),
         },
+        sceneCharacters: {items: snapshot.sceneCharacters.items.map(row => ({...row, characterId: idMap.characters[row.characterId] ?? row.characterId}))},
         attachments: snapshot.attachments.map(attachment => ({...attachment, id: idMap.attachments[attachment.id]})),
         attachmentBindings: snapshot.attachmentBindings.map(binding => ({
             ...binding,

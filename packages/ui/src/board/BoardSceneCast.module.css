@@ -1,0 +1,60 @@
+.cast {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    min-width: 0;
+}
+
+.notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* A sub-card: the character's dot and name on a header line, the note under the name. */
+.row {
+    --chip-size: .875rem;
+    --note-gap: var(--space-sm);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    text-align: left;
+    overflow-wrap: anywhere;
+
+    &.dimmed {
+        opacity: .4;
+    }
+}
+
+.header {
+    display: flex;
+    gap: var(--note-gap);
+    align-items: center;
+}
+
+.name {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text);
+}
+
+.state {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.note {
+    padding-left: calc(var(--chip-size) + var(--note-gap));
+}
+
+/* Look and states come from IconButton; this only pushes it to the row's end. */
+.clear {
+    margin-inline-start: auto;
+}

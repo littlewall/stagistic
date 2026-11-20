@@ -15,3 +15,8 @@ minimumReleaseAgeExclude:
     - '@tauri-apps/cli'
     - '@tauri-apps/plugin-dialog'
     - '@tauri-apps/plugin-fs'
+patchedDependencies:
+    # PGliteWorker kept calling for a leader on its closed channel after close(): an unhandled rejection in a stopped tab.
+    # A leader change or a closing tab could leave calls unanswered for good: calls now wait for the new leader, what ran
+    # under a replaced leader fails without reaching the new one, and a lock granted to a closed tab goes straight back.
+    '@electric-sql/pglite@0.3.15': patches/@electric-sql__pglite@0.3.15.patch

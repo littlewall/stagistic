@@ -1,3 +1,8 @@
+export type {
+    SceneCharacterInput,
+    ScriptSceneCharacter,
+    ScriptSceneSynopsis,
+} from './types/sceneMetadata';
 // ─── Types & repository contracts ──────────────────────────────────────────────
 export {createLocalMcpReadService} from './mcp/createLocalMcpReadService';
 export type {McpReadService} from './mcp/types';
@@ -102,6 +107,7 @@ export {
     type ScriptDocumentProjectionWriter,
     type ScriptDocumentSource,
 } from './repo/document/documentProjection';
+export {ScriptRevisionConflictError} from './repo/document/scriptRevisionConflict';
 export {
     createReadOnlyScriptRepository,
     createReadThroughFileStorage,

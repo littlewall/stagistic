@@ -26,7 +26,7 @@ export const ConvertSceneHeadingModal = ({
             {
                 tone: 'out',
                 label: 'Removed',
-                text: 'Its synopsis and places',
+                text: 'Its outline, places and character notes from the Board',
             },
             {
                 tone: 'kept',
@@ -34,6 +34,7 @@ export const ConvertSceneHeadingModal = ({
                 text: 'The heading text, as the new block type',
             },
         ]}
+        notes={['Undo restores these until you create a draft or version.']}
         confirmLabel="Convert heading"
         isPending={isConverting}
         lockWhilePending

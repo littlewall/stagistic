@@ -1,5 +1,5 @@
 import * as dbQueries from '../queries';
-import {createPgliteReactiveQuerySource, type ReactiveQuerySource} from '../reactive';
+import {createPgliteReactiveQuerySource} from '../reactive';
 import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
@@ -18,6 +18,9 @@ import type {
     ScriptSceneLocationAssignment,
     ScriptTitlePageRecord,
 } from '../types/scriptRepository';
+import {readScriptFormatTemplateId} from './config/formatTemplate';
+import {createScriptSourceRegistry} from './createScriptSourceRegistry';
+import {createSceneMetadataSources} from './sceneMetadataSources';
 import type {GetDb} from './types';
 
 interface CreateLocalPgliteReactiveSourcesArgs {
@@ -35,24 +38,6 @@ interface CreateLocalPgliteReactiveSourcesArgs {
     loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>,
     loadEditorSettings: (scriptId: string) => Promise<ScriptEditorSettingsRecord['settings'] | null>,
 }
-
-const createScriptSourceRegistry = <T>(createSource: (scriptId: string) => ReactiveQuerySource<T>) => {
-    const sources = new Map<string, ReactiveQuerySource<T>>();
-
-    return (scriptId: string) => {
-        const existing = sources.get(scriptId);
-
-        if (existing) {
-            return existing;
-        }
-
-        const source = createSource(scriptId);
-
-        sources.set(scriptId, source);
-
-        return source;
-    };
-};
 
 export const createLocalPgliteReactiveSources = ({
     getDb,
@@ -73,7 +58,7 @@ export const createLocalPgliteReactiveSources = ({
         getDb,
         readRows: listScripts,
         watchQuery: `
-            SELECT id, title, subtitle, created_at, updated_at, active_block_id, summary_metadata
+            SELECT id, title, subtitle, created_at, updated_at, active_block_id, summary_metadata, revision
             FROM scripts
         `,
     });
@@ -215,12 +200,21 @@ export const createLocalPgliteReactiveSources = ({
             getDb,
             readRows: async () => {
                 const settings = await loadEditorSettings(scriptId);
+                const formatTemplateId = await readScriptFormatTemplateId(await getDb(), scriptId);
 
-                return settings ? [{scriptId, settings}] : [];
+                return settings || formatTemplateId ? [
+                    {
+                        scriptId,
+                        settings: settings ?? {},
+                        formatTemplateId,
+                    },
+                ] : [];
             },
             watchQuery: `
                 SELECT script_id, source
                 FROM (
+                    SELECT id AS script_id, 'template:' || COALESCE(format_template_id, '') AS source FROM scripts
+                    UNION ALL
                     SELECT script_id, 'page' AS source FROM script_settings_page_layout
                     UNION ALL
                     SELECT script_id, 'visual' AS source FROM script_settings_visual_preferences
@@ -279,6 +273,7 @@ export const createLocalPgliteReactiveSources = ({
     });
 
     return {
+        ...createSceneMetadataSources(getDb),
         scriptSummaries,
         getScriptCharactersSource,
         getScriptCharacterGroupsSource,

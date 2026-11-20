@@ -11,6 +11,8 @@ import {
 } from '../../icons/ui';
 import styles from '../AppHeader.module.css';
 
+export type AppHeaderWidth = 'standard' | 'board' | 'full';
+
 export type AppHeaderProps = {
     leftControls?: ReactNode,
     scriptControls?: ReactNode,
@@ -20,7 +22,8 @@ export type AppHeaderProps = {
     onImportScript?: (returnFocus?: HTMLElement | null) => void,
     /** Opens the app settings (appearance and platform integrations). */
     onOpenSettings?: (returnFocus?: HTMLElement | null) => void,
-    isFullWidth?: boolean,
+    /** The width of the header's content: the homepage column, the Board column, or the full width. */
+    width?: AppHeaderWidth,
     contentInset?: 'default' | 'page',
 };
 
@@ -32,7 +35,7 @@ export const AppHeader = ({
     onNewScript,
     onImportScript,
     onOpenSettings,
-    isFullWidth = false,
+    width = 'standard',
     contentInset = 'default',
 }: AppHeaderProps) => {
     return (
@@ -43,7 +46,8 @@ export const AppHeader = ({
                 aria-hidden="true"
             />
             <div
-                className={clsx(styles.inner, isFullWidth && styles.full, contentInset === 'page' && styles.pageInset)}
+                className={clsx(styles.inner, width === 'full' && styles.full, width === 'board' && styles.board, contentInset === 'page' && styles.pageInset)}
+                data-header-inner
                 data-tauri-drag-region
             >
                 <div
@@ -115,13 +119,13 @@ export const AppHeader = ({
                     data-tauri-drag-region
                 >
                     {scriptActions ? (
-                        <>
-                            <div className={styles.actionGroup}>{scriptActions}</div>
-                            <span
-                                className={styles.actionDivider}
-                                aria-hidden="true"
-                            />
-                        </>
+                        <div className={styles.actionGroup}>{scriptActions}</div>
+                    ) : null}
+                    {scriptActions && onOpenSettings ? (
+                        <span
+                            className={styles.actionDivider}
+                            aria-hidden="true"
+                        />
                     ) : null}
                     {onOpenSettings ? (
                         <div className={styles.actionGroup}>

@@ -28,11 +28,14 @@ export type ScriptEditorController = {
     initialValue: ScriptDocument | null | undefined,
     initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,
     storageError: string | null,
+    retryLoad: () => void,
     shouldAutoFocus: boolean,
     saveIndicator: ScriptSyncState,
+    trackSave: <T>(save: () => Promise<T>) => Promise<T>,
     editorLoadState: EditorLoadState,
     handleAutoSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
     handleManualSave: (value: ScriptDocument, metadata?: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
+    handleSaveTimedOut: () => void,
     handleSummaryMetadataChange: (value: ScriptDocument, metadata: ScriptSummaryMetadata, expectedSettings?: EditorSettingsOverride | null) => Promise<boolean>,
 };
 

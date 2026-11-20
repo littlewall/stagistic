@@ -64,6 +64,7 @@ const packageWrite = (overrides: Partial<ScriptPackageWrite> = {}): ScriptPackag
             createdAt: 1_000,
         },
     ],
+    sceneCharacters: [],
     comments: {threads: [], messages: []},
     ...overrides,
 });

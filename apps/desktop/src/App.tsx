@@ -1,14 +1,24 @@
-import {ScriptRepositoryProvider} from '@stagistic/app-core';
+import {
+    DatabaseHandoverProvider,
+    ScriptRepositoryProvider,
+    UnsavedWorkHandoverBridge,
+} from '@stagistic/app-core';
 import {
     type AppSettingsSection,
+    BootFailureScreen,
+    DatabaseHandoverOverlay,
     GlobalModalsProvider,
     HomeRoute,
+    ScriptBoardRoute,
     ScriptEditorRoute,
     ScriptExportRoute,
+    ScriptReleaseNotesProvider,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
     useAppBootstrap,
+    WaitingForDatabaseScreen,
 } from '@stagistic/app-routes';
+import {currentReleaseNumber, releases} from '@stagistic/release-notes/bundled';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {getCurrentWindow} from '@tauri-apps/api/window';
 import {useEffect} from 'react';
@@ -18,7 +28,11 @@ import {
     Routes,
 } from 'react-router-dom';
 
-import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
+import {
+    databaseHandover,
+    prepareLocalDbWithProgress,
+    requestPersistentStorage,
+} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
 import {McpSettingsPanel} from './mcp/McpSettingsPanel';
 import {useDeepLinkNavigation} from './mcp/useDeepLinkNavigation';
@@ -50,11 +64,19 @@ const AppRoutes = () => {
             <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
                 <Route index element={<Navigate to="editor" replace />} />
                 <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="board">
+                    <Route index element={<Navigate to="wall" replace />} />
+                    <Route path=":lens" element={<ScriptBoardRoute />} />
+                </Route>
                 <Route path="export" element={<ScriptExportRoute />} />
             </Route>
             <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
                 <Route index element={<Navigate to="editor" replace />} />
                 <Route path="editor" element={<ScriptEditorRoute />} />
+                <Route path="board">
+                    <Route index element={<Navigate to="wall" replace />} />
+                    <Route path=":lens" element={<ScriptBoardRoute />} />
+                </Route>
                 <Route path="export" element={<ScriptExportRoute />} />
             </Route>
             <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
@@ -63,11 +85,14 @@ const AppRoutes = () => {
     );
 };
 
-const App = () => {
+const BootedApp = () => {
     const {
         services,
         bootProgress,
         bootStatus,
+        failure,
+        waitingNotice,
+        waitingSilent,
     } = useAppBootstrap(bootstrapOptions);
     const scriptRepository = services?.scriptRepository ?? null;
     const snapshotViews = services?.snapshotViews ?? null;
@@ -96,7 +121,15 @@ const App = () => {
         };
     }, [scriptRepository]);
 
+    if (failure) {
+        return <BootFailureScreen failure={failure} />;
+    }
+
     if (!scriptRepository) {
+        if (waitingNotice) {
+            return <WaitingForDatabaseScreen status={bootStatus} progress={bootProgress} canReload={waitingSilent} />;
+        }
+
         return <LoaderOverlay label="Starting Stagistic" messages={[bootStatus]} progress={bootProgress} />;
     }
 
@@ -106,12 +139,22 @@ const App = () => {
             snapshotViews={snapshotViews}
         >
             <ToastProvider>
-                <GlobalModalsProvider settingsSections={settingsSections}>
-                    <AppRoutes />
-                </GlobalModalsProvider>
+                <ScriptReleaseNotesProvider releaseNumber={currentReleaseNumber} releases={releases}>
+                    <GlobalModalsProvider settingsSections={settingsSections}>
+                        <AppRoutes />
+                    </GlobalModalsProvider>
+                </ScriptReleaseNotesProvider>
             </ToastProvider>
         </ScriptRepositoryProvider>
     );
 };
+
+const App = () => (
+    <DatabaseHandoverProvider handover={databaseHandover}>
+        <BootedApp />
+        <UnsavedWorkHandoverBridge />
+        <DatabaseHandoverOverlay />
+    </DatabaseHandoverProvider>
+);
 
 export default App;

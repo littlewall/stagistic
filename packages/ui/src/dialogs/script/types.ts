@@ -4,11 +4,17 @@ import type {ImportScriptFile, StepkgPeekResult} from './import/types';
 
 export type NewScriptShape = 'multi-act' | 'one-act';
 
+export interface NewScriptFormatSelection {
+    templateId: string,
+    lock: boolean,
+}
+
 export interface NewScriptModalProps extends ModalFocusRestoreOptions {
     isOpen: boolean,
     isTransitioning?: boolean,
+    formatTemplates?: readonly {id: string, label: string}[],
     onClose: () => void,
-    onCreate: (name: string, shape: NewScriptShape) => void | Promise<void>,
+    onCreate: (name: string, shape: NewScriptShape, format?: NewScriptFormatSelection) => void | Promise<void>,
 }
 
 export interface ImportScriptModalProps extends ModalFocusRestoreOptions {

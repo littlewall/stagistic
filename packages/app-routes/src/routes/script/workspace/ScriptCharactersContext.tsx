@@ -45,7 +45,8 @@ export interface ScriptCharactersContextValue {
 
     // Sidebar actions (optional editorCallbacks — sidebar adds them using useEditorInstance)
     normalizeCharacterNameForInlineInput: (name: string) => string,
-    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    /** Resolves to the new character, or null when nothing was confirmed. */
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => Promise<{id: string} | null>,
     handleDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     handleRenameCharacterPreview: (
         characterId: string,
@@ -61,7 +62,7 @@ export interface ScriptCharactersContextValue {
     ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
-    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void | Promise<void>,
     handleSetCharacterVoiceType: (characterId: string, voiceType: string | null) => void,
     handleSetCharacterVocalRange: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,

@@ -10,6 +10,7 @@ import type {
 
 export const useScriptEditorCharacters = ({
     currentScriptId,
+    documentSession,
     characterCatalog,
     initialValue,
     resolvedScriptSettings,
@@ -20,6 +21,7 @@ export const useScriptEditorCharacters = ({
         catalog,
     } = useCharacterState({
         currentScriptId,
+        documentSession,
         characterCatalog,
         initialValue,
     });
@@ -53,6 +55,7 @@ export const useScriptEditorCharacters = ({
         },
     });
     const documentActions = useCharacterDocumentActions({
+        documentSession,
         getEditorValue: editor.getEditorValue,
         setEditorValue: editor.setEditorValue,
         setEditorOverrideValue: editor.setEditorOverrideValue,

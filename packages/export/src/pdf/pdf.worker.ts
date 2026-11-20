@@ -1,5 +1,6 @@
 import type {TranscriptResult} from '../model/visualLine';
 import {drawPdf} from './drawPdf';
+import {PdfFileLoadError} from './pdfFileLoadError';
 
 interface StartMessage {
     type: 'START',
@@ -17,7 +18,11 @@ self.onmessage = (event: MessageEvent<StartMessage>) => {
 
             self.postMessage({type: 'DONE', blob});
         } catch (error) {
-            self.postMessage({type: 'ERROR', message: String(error)});
+            self.postMessage({
+                type: 'ERROR',
+                message: String(error),
+                fileFailure: error instanceof PdfFileLoadError,
+            });
         }
     })();
 };

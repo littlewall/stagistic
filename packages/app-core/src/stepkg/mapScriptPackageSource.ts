@@ -29,6 +29,7 @@ export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): Ste
             id: source.script.id,
             title: source.script.title,
             subtitle: source.script.subtitle,
+            formatTemplateId: source.script.formatTemplateId ?? null,
             createdAt: toIso(source.script.createdAt),
             updatedAt: toIso(source.script.updatedAt),
         },
@@ -103,6 +104,15 @@ export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): Ste
                 updatedAt: toIso(location.updatedAt),
             })),
         },
+        sceneCharacters: {items: source.sceneCharacters.map(row => ({
+            headingBlockId: row.headingBlockId,
+            characterId: row.characterId,
+            note: row.note,
+            arcValue: row.arcValue,
+            onCard: row.onCard,
+            createdAt: toIso(row.createdAt),
+            updatedAt: toIso(row.updatedAt),
+        }))},
         attachments: source.attachments.map(attachment => ({
             id: attachment.id,
             filename: attachment.filename,

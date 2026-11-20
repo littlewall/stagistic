@@ -21,6 +21,11 @@
     gap: var(--space-md);
 }
 
+/* Parent settings groups already provide the spacing above this grid. */
+.flatGrid.flushGrid {
+    margin-top: 0;
+}
+
 .label {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);

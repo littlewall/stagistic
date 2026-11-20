@@ -86,6 +86,26 @@ describe('React Aria overlays in native dialogs', () => {
         expect(dialog.contains(tooltip)).toBe(true);
     });
 
+    it('does not shift the centered panel when a tooltip opens', async () => {
+        const dialog = await mount(
+            <ModalDialog isOpen onClose={() => {}} ariaLabel="Help">
+                <button type="button">Initial focus</button>
+                <Tooltip label="Helpful description"><button type="button">Help</button></Tooltip>
+            </ModalDialog>,
+        );
+        const button = requireValue(dialog.querySelectorAll('button')[1]);
+
+        await expect.poll(() => document.activeElement?.textContent).toBe('Initial focus');
+
+        const before = button.getBoundingClientRect().top;
+
+        await userEvent.tab();
+        await find('[role="tooltip"]');
+
+        // A shifted trigger slips out from under the pointer, closing and reopening the tooltip in a loop.
+        expect(button.getBoundingClientRect().top).toBe(before);
+    });
+
     it('applies a character color through the real native attribute manager', async () => {
         const onSetCharacterColor = vi.fn();
         const dialog = await mount(

@@ -47,12 +47,14 @@ declare module '@tiptap/core' {
 
 export const EmptyEnterChooserExtension = Extension.create<{
     blockNextElements?: BlockNextElementMap,
+    getBlockNextElements?: () => BlockNextElementMap,
 }>({
     name: 'EmptyEnterChooser',
 
     addOptions() {
         return {
             blockNextElements: undefined,
+            getBlockNextElements: undefined,
         };
     },
 
@@ -195,7 +197,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                         }
                     }
 
-                    const nextType = resolveNextEmptyType(selectedType, this.options.blockNextElements);
+                    const nextType = resolveNextEmptyType(selectedType, this.options.getBlockNextElements?.() ?? this.options.blockNextElements);
                     const didInsert = splitBlockWithType(this.editor, nextType);
 
                     closeChooser();

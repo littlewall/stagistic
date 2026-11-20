@@ -27,6 +27,7 @@ const source = {
     sceneLocations: [],
     attachments: [],
     musicAttachmentBindings: [],
+    sceneCharacters: [],
     comments: {
         threads: [
             {

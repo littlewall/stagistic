@@ -158,6 +158,7 @@ export const usePointerDragInteraction = ({
         });
         pressVisualTimeoutRef.current = window.setTimeout(() => {
             pressVisualTimeoutRef.current = null;
+
             if (!canStartDrag) {
                 return;
             }

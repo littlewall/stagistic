@@ -171,12 +171,14 @@ export const buildPaginationState = (
         endPos: Number(page.endKey),
         startOffset: page.startOffset,
         endOffset: page.endOffset,
+        continuesBlock: page.continuesBlock,
     }));
 
     return buildFinalPaginationStateResult({
         view,
         decorations,
         pages,
+        blockOffsets: plan.blockOffsets,
         options,
         contentHeight,
         fallbackHeight,

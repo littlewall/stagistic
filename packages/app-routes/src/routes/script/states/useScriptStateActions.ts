@@ -22,7 +22,7 @@ import {errorMessage, waitForScriptInList} from './scriptStateItems';
  * Stored-state operations on the current script's repository, with toasts and
  * the navigation that follows. Every operation reports whether it succeeded.
  */
-export const useScriptStateActions = (scriptId: string | null, flush?: () => Promise<void>) => {
+export const useScriptStateActions = (scriptId: string | null, flush?: () => Promise<void>, stopEditing?: () => void) => {
     const navigate = useNavigate();
     const {addToast} = useToastController();
     const {isReadOnly, liveRepository} = useScriptAccess();
@@ -88,6 +88,8 @@ export const useScriptStateActions = (scriptId: string | null, flush?: () => Pro
     const restore = (snapshot: ScriptSnapshot) => run('Could not restore', async id => {
         // Pending edits of the current script belong to the backup draft.
         if (!isReadOnly) {
+            // Nothing may be typed between the flush and the replacement.
+            stopEditing?.();
             await flush?.();
         }
 

@@ -71,6 +71,7 @@ const snapshot = (): StepkgSnapshot => ({
     },
     attachments: [],
     attachmentBindings: [],
+    sceneCharacters: {items: []},
     comments: {
         threads: [
             {

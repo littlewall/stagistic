@@ -1,10 +1,18 @@
-import {buildScriptSummaryMetadata, type ScriptDocument} from '@stagistic/script';
+import {
+    applyFormatTemplate,
+    buildScriptSummaryMetadata,
+    type ScriptDocument,
+    type ScriptFormatSelection,
+} from '@stagistic/script';
 import {
     trimOrFallback,
     uuidv7,
 } from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
+import type {CreateScriptWithIdInput} from '../types/scriptRepository';
+import {writeScriptSettingsTx} from './config/config';
+import {setScriptFormatTemplateId} from './config/formatTemplate';
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,
     migrateScriptDocumentToBlocks,
@@ -31,14 +39,9 @@ export const createScriptsHandlers = ({
         title,
         initialContent,
         activeBlockId,
+        format,
         timestamp = Date.now(),
-    }: {
-        id: string,
-        title: string,
-        initialContent?: ScriptDocument,
-        activeBlockId?: string | null,
-        timestamp?: number,
-    }) => {
+    }: CreateScriptWithIdInput) => {
         const db = await getDb();
 
         await db.transaction(async tx => {
@@ -49,6 +52,13 @@ export const createScriptsHandlers = ({
                 updatedAt: timestamp,
                 summaryMetadata: buildScriptSummaryMetadata(initialContent ?? {type: 'doc', content: []}),
             });
+
+            if (format) {
+                const state = applyFormatTemplate(format);
+
+                await writeScriptSettingsTx(tx, id, state.settings, timestamp);
+                await setScriptFormatTemplateId(tx, id, state.formatTemplateId, timestamp);
+            }
 
             if (initialContent) {
                 await migrateScriptDocumentToBlocks({
@@ -126,13 +136,14 @@ export const createScriptsHandlers = ({
 
             return dbQueries.getScriptSummary(db, scriptId);
         },
-        create: async (title: string, initialContent?: ScriptDocument) => {
+        create: async (title: string, initialContent?: ScriptDocument, format?: ScriptFormatSelection) => {
             const id = uuidv7();
 
             await createWithId({
                 id,
                 title,
                 initialContent,
+                format,
             });
 
             return id;

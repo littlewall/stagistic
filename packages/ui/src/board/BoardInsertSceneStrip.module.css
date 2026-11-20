@@ -1,0 +1,45 @@
+/* Fills the gap before its card and reaches a little over both neighbours, so it is easy to hit. */
+.strip {
+    cursor: pointer;
+    position: absolute;
+    inset: 0 calc(-1 * var(--space-sm));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: oklch(from var(--base-neutral) .155 c h);
+    background: transparent;
+    border: 0;
+    outline: none;
+
+    &:hover,
+    :global(:root[data-focus-ring-visible]) &:focus {
+        &::before {
+            inset: 0;
+
+            /* See-through, so the card edges it covers stay visible. */
+            background: color-mix(in oklch, var(--color-accent) 55%, transparent);
+        }
+
+        & svg {
+            opacity: 1;
+        }
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: var(--space-md) calc(50% - var(--space-xs) / 2);
+        background: var(--color-border-subtle);
+        border-radius: var(--radius-full);
+        transition: inset var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-standard);
+    }
+
+    & svg {
+        position: relative;
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
+        opacity: 0;
+        transition: opacity var(--duration-fast) var(--ease-standard);
+    }
+}

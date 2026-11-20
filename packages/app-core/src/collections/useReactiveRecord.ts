@@ -24,6 +24,10 @@ export const useReactiveRecord = <T extends object, TValue>(store: ReactiveRecor
     );
 
     return {
+        /*
+         * Settings/title-page draft controllers need a confirmed baseline, not their own
+         * pending save echoed back as an external edit. The live query tracks loading only.
+         */
         record: confirmed.rows[0] ?? null,
         isLoading: Boolean(store) && (
             !storeStatus.isReady

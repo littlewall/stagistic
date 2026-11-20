@@ -4,6 +4,7 @@ import {
     formatSceneNumber,
     getScriptBlockId,
     getScriptBlockNodeType,
+    resolveBlockSpacingGroups,
 } from '@stagistic/script';
 import {
     FIT_EPSILON_PX,
@@ -17,18 +18,17 @@ import {
 } from '@stagistic/script-pagination';
 
 import {composeLeadingPages} from '../initialPages/composeLeadingPages';
-import type {ContentsPageNumbers} from '../initialPages/contents/contentsPageNumbers';
 import type {ExportPlan} from '../model/plan';
 import type {
     PageItem,
     TranscriptResult,
     VisualLine,
 } from '../model/visualLine';
-import {planIntegratedAssembly} from '../pdf/planIntegratedAssembly';
 import {buildTitlePageItems} from '../titlePage/buildTitlePageItems';
 import {buildTitlePageLogoItem} from '../titlePage/buildTitlePageLogoItem';
-import {getIntegratedFooter, withHeaderFooter} from './headerFooter';
-import {makeRun, resolveLineX} from './lineLayout';
+import {buildContinuationCues, renderPreparedLine} from './continuation';
+import {withHeaderFooter} from './headerFooter';
+import {getIntegratedFooter, withIntegratedNumberingSpace} from './integratedNumbering';
 import {
     CHAR_WIDTH_EM,
     DEFAULT_BLOCK_TYPE,
@@ -36,6 +36,7 @@ import {
     type PreparedBlock,
     type ScriptPage,
 } from './model';
+import {resolveTranscriptPageNumbers} from './resolveTranscriptPageNumbers';
 import {buildStructureMarks} from './structureMarks';
 import {
     buildMusicLabels,
@@ -49,11 +50,15 @@ export interface TranscribeOptions {
     scorePageCounts?: Record<string, number>,
 }
 
-export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings, options: TranscribeOptions = {}): TranscriptResult => {
+export const transcribeExportPlan = (plan: ExportPlan, inputSettings: EditorSettings, options: TranscribeOptions = {}): TranscriptResult => {
+    // Integrated numbering owns a small footer area even when no footer token is configured.
+    const settings = plan.postSteps.length ? withIntegratedNumberingSpace(inputSettings) : inputSettings;
     const forcedBreakByBlockId = new Map(plan.pagination.forcedBreaks.map(item => [item.blockId, item]));
     const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
     const musicLabels = buildMusicLabels(plan.doc);
     const structureMarks = buildStructureMarks(plan.doc);
+
+    const spacingEdges = resolveBlockSpacingGroups(plan.doc.content);
 
     const prepared: PreparedBlock[] = plan.doc.content.map((node, index) => {
         const blockType = getScriptBlockNodeType(node, DEFAULT_BLOCK_TYPE);
@@ -67,7 +72,7 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
         const availableWidthPx = Math.max(charWidthPx, contentWidthPx - indentLeftPx - indentRightPx);
         const maxChars = Math.max(1, Math.floor(availableWidthPx / charWidthPx));
         const rawSegments = getBlockRawSegments(node, blockId ?? '', musicLabels);
-        const segments = normalizeBlockSegments(rawSegments, blockType, block.casing);
+        const segments = normalizeBlockSegments(rawSegments, blockType, block.casing, block.parenWrap);
 
         if (blockType === 'scene') {
             const label = formatSceneNumber(structureMarks[index]?.sceneNumber ?? 0, block.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT);
@@ -82,8 +87,8 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
             block,
             fontSizePx,
             lineHeightPx,
-            spacingBeforePx: (block.spacingBeforeEm ?? 0) * fontSizePx,
-            spacingAfterPx: (block.spacingAfterEm ?? 0) * fontSizePx,
+            spacingBeforePx: spacingEdges[index].before ? (block.spacingBeforeEm ?? 0) * fontSizePx : 0,
+            spacingAfterPx: spacingEdges[index].after ? (block.spacingAfterEm ?? 0) * fontSizePx : 0,
             baseX: settings.page.marginLeftPx + indentLeftPx,
             availableWidthPx,
             charWidthPx,
@@ -91,6 +96,7 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
         };
     });
 
+    const continuationCues = buildContinuationCues(prepared, plan.pagination);
     const paginatorBlocks: PaginatorBlock[] = prepared.map((item, index) => {
         const blockId = getScriptBlockId(plan.doc.content[index]) ?? '';
         const forcedBreak = forcedBreakByBlockId.get(blockId)?.kind;
@@ -101,6 +107,7 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
             key,
             endKey: key,
             height,
+            continuationHeight: continuationCues[index] ? continuationCues[index].wrapped.length * continuationCues[index].lineHeightPx : 0,
             splittable: isSplittableBlockType(item.blockType),
             orphanCandidate: isOrphanCandidateBlockType(item.blockType),
             forcedBreak,
@@ -174,6 +181,18 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
 
         wholeBreaks.forEach(pushBreak);
 
+        const cue = continuationCues[index];
+        const pushCue = () => {
+            if (!cue) return;
+
+            for (const line of cue.wrapped) {
+                currentPage.items.push(renderPreparedLine(cue, line, y, getScriptBlockId(plan.doc.content[index]) ?? undefined));
+                y += cue.lineHeightPx;
+            }
+        };
+
+        if (pages.length > 1 && currentPage.items.length === 0) pushCue();
+
         y += item.spacingBeforePx;
 
         const splits = (splitsByKey.get(key) ?? []).toSorted((left, right) => left - right);
@@ -182,31 +201,15 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
         item.wrapped.forEach((line, lineIndex) => {
             if (splitIndex < splits.length && splits[splitIndex] === lineIndex) {
                 pushBreak('split');
+                pushCue();
                 splitIndex += 1;
             }
 
-            const lineX = resolveLineX({
-                block: item.block,
-                line: line.text,
-                baseX: item.baseX,
-                availableWidthPx: item.availableWidthPx,
-                charWidthPx: item.charWidthPx,
-            });
-            let runX = lineX;
-            const visualLine: VisualLine = {
-                y,
-                runs: line.segments.map(segment => {
-                    const run = makeRun(segment.text, runX, item.block, item.fontSizePx, segment.style);
-
-                    runX += segment.text.length * item.charWidthPx;
-
-                    return run;
-                }),
-                sourceBlockId: getScriptBlockId(plan.doc.content[index]) ?? undefined,
-            };
+            const visualLine: VisualLine = renderPreparedLine(item, line, y, getScriptBlockId(plan.doc.content[index]) ?? undefined);
 
             currentPage.mark ??= structureMarks[index] ?? {actIndex: null, sceneNumber: 0};
             currentPage.items.push(visualLine);
+
             if (visualLine.sourceBlockId) {
                 currentPage.sourceBlockIds.add(visualLine.sourceBlockId);
             }
@@ -243,37 +246,20 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
             }))
             .filter(page => page.items.length > 0 || page.isInsertedBlank)
         : allScriptPages;
-    const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titlePageLogo = buildTitlePageLogoItem(plan.titlePage, settings);
     const titleItems: PageItem[] = [...titlePageLogo ? [titlePageLogo] : [], ...buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings)];
-    const scriptPageSourceBlockIds = scriptPages.map(page => [...page.sourceBlockIds]);
-    const scriptPageNumberByBlockId = new Map<string, number>();
-
-    scriptPages.forEach((page, index) => {
-        const pageNumber = page.referencePageNumber ?? index + 1;
-
-        page.sourceBlockIds.forEach(blockId => {
-            if (!scriptPageNumberByBlockId.has(blockId)) {
-                scriptPageNumberByBlockId.set(blockId, pageNumber);
-            }
-        });
+    const {
+        scriptPageSourceBlockIds,
+        oddPageBlockIds,
+        integratedPageNumbers,
+        pageNumbers,
+    } = resolveTranscriptPageNumbers({
+        scriptPages,
+        plan,
+        settings,
+        scorePageCounts: options.scorePageCounts,
     });
-
-    const scoreStartPageByMusicId = options.scorePageCounts
-        ? planIntegratedAssembly({
-            scriptPageSourceBlockIds,
-            scores: plan.postSteps.map(step => ({
-                musicId: step.musicId,
-                startBlockId: step.startBlockId,
-                afterBlockId: step.afterBlockId,
-                pageCount: options.scorePageCounts?.[step.musicId] ?? 0,
-            })),
-        }).scoreStartPageByMusicId
-        : new Map<string, number>();
-    const pageNumbers: ContentsPageNumbers = {
-        scriptPageNumberByBlockId,
-        scoreStartPageByMusicId,
-    };
+    const scriptItems = withHeaderFooter(scriptPages, plan, settings, integratedPageNumbers);
     const leadingPages = composeLeadingPages(plan.leadingPages, settings, pageNumbers);
     const leadingItems: PageItem[] = [titleItems, ...leadingPages].flatMap(page => [...page, PAGE_BREAK_ITEM]);
 
@@ -286,6 +272,7 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
         items: [...leadingItems, ...scriptItems],
         leadingPageCount: [titleItems, ...leadingPages].length,
         scriptPageSourceBlockIds,
+        oddPageBlockIds,
         integratedScores: plan.postSteps.map(step => ({
             musicId: step.musicId,
             title: step.title,

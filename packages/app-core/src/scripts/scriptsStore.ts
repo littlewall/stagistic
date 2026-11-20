@@ -11,6 +11,7 @@ import {
     ensureScriptStructure,
     getFirstBlockId,
     type ScriptDocument,
+    type ScriptFormatSelection,
 } from '@stagistic/script';
 import {BasicIndex} from '@tanstack/react-db';
 
@@ -107,7 +108,7 @@ export const createScriptsStore = (repository: ScriptRepository) => {
         }
     };
 
-    const createScript = async (title: string, initialContent?: ScriptDocument) => {
+    const createScript = async (title: string, initialContent?: ScriptDocument, format?: ScriptFormatSelection) => {
         const id = repository.allocateScriptId();
         const timestamp = Date.now();
         const normalizedTitle = normalizeTitle(title);
@@ -126,6 +127,7 @@ export const createScriptsStore = (repository: ScriptRepository) => {
             id,
             title: normalizedTitle,
             initialContent: content,
+            ...format ? {format} : {},
             activeBlockId,
             timestamp,
         }));

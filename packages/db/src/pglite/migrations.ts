@@ -1,4 +1,5 @@
 import type {PGlite} from '@electric-sql/pglite';
+import {StartFailureError} from '@stagistic/shared';
 
 import {compiledMigrations} from './migrations.compiled';
 
@@ -12,6 +13,19 @@ const MIGRATIONS_LOCK = `LOCK TABLE ${MIGRATIONS_TABLE} IN EXCLUSIVE MODE;`;
  */
 const LEGACY_CHECKSUMS: Readonly<Record<string, readonly string[]>> = {
     '0014_add_script_attachments': ['d7d194c2771be944c1b2e78e631a7fea0ea836be13a8aedf4bc538ff53315a80'],
+};
+
+/*
+ * Branch-only migrations renamed while merging (old id -> new id), usually a
+ * sequential or clashing prefix replaced by a fresh timestamp. Same SQL, same
+ * checksum: databases that applied the old id are relabelled, not re-migrated.
+ */
+export const RENAMED_MIGRATIONS: Readonly<Record<string, string>> = {
+    '0027_block_spacing_after_scene_number': '20261029155537_block_spacing_after_scene_number',
+    '0027_scene_board_metadata': '20261029074607_scene_board_metadata',
+    '0028_scripts_format_template_id': '20261029155538_scripts_format_template_id',
+    '0029_stage_direction_paren_wrap': '20261029155539_stage_direction_paren_wrap',
+    '0030_pdf_flow_settings': '20261029155540_pdf_flow_settings',
 };
 
 type MigrationClient = Pick<PGlite, 'exec' | 'query'>;
@@ -60,8 +74,10 @@ const assertMigrationHistory = (appliedMigrations: AppliedMigration[]) => {
         const compiledMigration = compiledById.get(appliedMigration.id);
 
         if (!compiledMigration) {
-            throw new Error(
+            throw new StartFailureError(
+                'database-newer-than-app',
                 `Database migration ${appliedMigration.id} is newer than this app. Update the app before opening this database.`,
+                {migrationId: appliedMigration.id},
             );
         }
 
@@ -73,8 +89,10 @@ const assertMigrationHistory = (appliedMigrations: AppliedMigration[]) => {
             continue;
         }
 
-        throw new Error(
+        throw new StartFailureError(
+            'migration-failed',
             `Migration ${appliedMigration.id} checksum mismatch. Historical migrations are immutable; add a new migration instead.`,
+            {migrationId: appliedMigration.id},
         );
     }
 };
@@ -82,6 +100,14 @@ const assertMigrationHistory = (appliedMigrations: AppliedMigration[]) => {
 const prepareMigrationHistory = async (client: PGlite) => {
     await client.transaction(async tx => {
         await tx.exec(MIGRATIONS_LOCK);
+
+        for (const [oldId, newId] of Object.entries(RENAMED_MIGRATIONS)) {
+            await tx.query(
+                `UPDATE ${MIGRATIONS_TABLE} SET id = $2 WHERE id = $1`
+                + ` AND NOT EXISTS (SELECT 1 FROM ${MIGRATIONS_TABLE} WHERE id = $2)`,
+                [oldId, newId],
+            );
+        }
 
         const appliedMigrations = await getAppliedMigrations(tx);
 
@@ -138,16 +164,52 @@ const applyMigration = async (client: PGlite, migration: typeof compiledMigratio
     });
 };
 
-export const runPgliteMigrations = async (client: PGlite) => {
+export interface RunMigrationsOptions {
+    /*
+     * Called once, before the first pending migration runs, with the pending
+     * ids. Skipped when nothing is pending and on a database with no applied
+     * migration: that is a new install with nothing to back up.
+     */
+    beforePending?: (pendingIds: readonly string[]) => Promise<void>,
+}
+
+const findPendingIds = async (client: PGlite) => {
+    const applied = await getAppliedMigrations(client);
+    const appliedIds = new Set(applied.map(migration => migration.id));
+
+    return {
+        hasData: applied.length > 0,
+        pendingIds: compiledMigrations.map(migration => migration.id).filter(id => !appliedIds.has(id)),
+    };
+};
+
+export const runPgliteMigrations = async (client: PGlite, {beforePending}: RunMigrationsOptions = {}) => {
     await ensureMigrationsTable(client);
     await prepareMigrationHistory(client);
+
+    if (beforePending) {
+        const {hasData, pendingIds} = await findPendingIds(client);
+
+        if (hasData && pendingIds.length > 0) {
+            await beforePending(pendingIds);
+        }
+    }
 
     for (const migration of compiledMigrations) {
         try {
             await applyMigration(client, migration);
         } catch (error) {
             console.error(`[db] Migration ${migration.id} failed.`);
-            throw error;
+
+            if (error instanceof StartFailureError) {
+                throw error;
+            }
+
+            throw new StartFailureError(
+                'migration-failed',
+                `Migration ${migration.id} failed: ${error instanceof Error ? error.message : String(error)}`,
+                {migrationId: migration.id, cause: error},
+            );
         }
     }
 };

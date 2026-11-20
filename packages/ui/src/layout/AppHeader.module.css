@@ -20,6 +20,13 @@
             max-width: none;
         }
 
+        /* The Board column: as wide as the Board layout's column, with the same inset,
+         * so the header's content edges align with the toolbar's and the canvas's. */
+        &.board {
+            max-width: var(--layout-board-max-width);
+            padding-inline: var(--space-3xl);
+        }
+
         &.pageInset {
             padding-inline: calc(var(--space-3xl) + var(--space-md));
         }
@@ -27,11 +34,11 @@
         & .leftControls {
             position: relative;
             z-index: 1;
-            display: inline-flex;
+            display: flex;
             grid-column: 1;
             gap: var(--space-md);
             align-items: center;
-            justify-self: start;
+            justify-content: flex-start;
             width: 100%;
             min-width: 0;
 
@@ -53,11 +60,12 @@
         & .rightControls {
             position: relative;
             z-index: 1;
-            display: inline-flex;
+            display: flex;
             grid-column: 3;
             gap: var(--space-lg);
             align-items: center;
-            justify-self: end;
+            justify-content: flex-end;
+            width: 100%;
             min-width: 0;
         }
 
@@ -98,6 +106,11 @@
     --tl-lead-pad: 0;
 
     padding-left: calc(var(--space-xl) + var(--traffic-light-space));
+}
+
+/* The Board column insets its content by the Board's own padding, not the default one. */
+:global(.platform-macos) .inner.board {
+    --tl-lead-pad: calc(var(--space-xl) + var(--traffic-light-space) - var(--space-3xl));
 }
 
 .menuTrigger {

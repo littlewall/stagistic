@@ -3,14 +3,16 @@ import {
     InMemoryFileStorage,
     type ScriptPackageWrite,
 } from '@stagistic/db';
-import {createTestDb} from '@stagistic/db/testing';
+import {createTestDb, loadMigratedDataDir} from '@stagistic/db/testing';
 import {
     collectCommentAnchorThreadIds,
     COMMENT_ANCHOR_MARK_NAME,
+    type FormatTemplateId,
     type ScriptDocument,
 } from '@stagistic/script';
 import {requireValue} from '@stagistic/shared';
 import {
+    beforeAll,
     describe,
     expect,
     it,
@@ -135,6 +137,7 @@ const packageWrite = (overrides: Partial<ScriptPackageWrite> = {}): ScriptPackag
             createdAt: 1_000,
         },
     ],
+    sceneCharacters: [],
     comments: {
         threads: [thread('range-kept', 'range', null), thread('range-deleted', 'range', null)],
         messages: [message('range-kept'), message('range-deleted')],
@@ -147,7 +150,7 @@ const blockTexts = (doc: ScriptDocument | undefined) => doc?.content.map(node =>
     text: node.content?.map(part => part.text ?? '').join(''),
 })) ?? [];
 
-const setup = async () => {
+const setup = async (formatTemplateId: FormatTemplateId | null = null) => {
     const {db} = await createTestDb();
     const fileStorage = new InMemoryFileStorage();
     const repository = createLocalPgliteRepository({
@@ -156,7 +159,10 @@ const setup = async () => {
         fileStorage,
     });
 
-    await repository.createScriptFromPackage(packageWrite());
+    const initial = packageWrite();
+
+    initial.script.formatTemplateId = formatTemplateId;
+    await repository.createScriptFromPackage(initial);
 
     return {repository, fileStorage};
 };
@@ -196,6 +202,7 @@ const editAfterDraftOne = async (repository: Awaited<ReturnType<typeof setup>>['
         music: [],
         attachments: [],
         bindings: [],
+        sceneCharacters: [],
         comments: {
             threads: [
                 thread('range-kept', 'range', null),
@@ -210,6 +217,11 @@ const editAfterDraftOne = async (repository: Awaited<ReturnType<typeof setup>>['
         },
     }));
 };
+
+// Cold migrations are fixture setup, as in the db project's shared test setup.
+beforeAll(async () => {
+    await loadMigratedDataDir();
+});
 
 describe('script snapshot operations', () => {
     it('stores the current state and loads it back', async () => {
@@ -240,6 +252,26 @@ describe('script snapshot operations', () => {
         });
         expect(loaded.ok && loaded.snapshot.document).toEqual((await repository.getScriptPackageSource(SCRIPT_ID))?.document);
         expect(loaded.ok && loaded.snapshot.attachments.map(attachment => attachment.filename)).toEqual(['score.pdf']);
+    });
+
+    it('keeps a draft’s own locked template after Current changes', async () => {
+        const {repository} = await setup('samuel-french');
+        const draft = await createScriptSnapshotFromCurrent({
+            repository,
+            scriptId: SCRIPT_ID,
+            kind: 'draft',
+        });
+
+        await editAfterDraftOne(repository);
+
+        const loaded = await loadScriptSnapshot({
+            repository,
+            scriptId: SCRIPT_ID,
+            snapshotId: requireValue(draft).id,
+        });
+
+        expect(loaded.ok && loaded.snapshot.script.formatTemplateId).toBe('samuel-french');
+        expect((await repository.getScriptPackageSource(SCRIPT_ID))?.script.formatTemplateId).toBeNull();
     });
 
     it('restores content, keeps the surroundings and saves the current state first', async () => {

@@ -82,6 +82,7 @@ const mergeInitialPages = (base: EditorSettings['initialPages'], override: NonNu
 
 export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<EditorSettingsOverride | null | undefined>): EditorSettings => {
     let next: EditorSettings = {
+        pdfFlow: {...base.pdfFlow},
         page: {...base.page},
         typography: {...base.typography},
         visual: {...base.visual},
@@ -114,6 +115,8 @@ export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<Ed
         if (!override) {
             continue;
         }
+
+        if (override.pdfFlow) next.pdfFlow = {...next.pdfFlow, ...override.pdfFlow};
 
         if (override.page) {
             next.page = mergePageSettings(next.page, override.page);

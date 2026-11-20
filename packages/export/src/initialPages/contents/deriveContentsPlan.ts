@@ -44,6 +44,7 @@ const toMusicEntry = (
     blocks: IndexedScriptBlock[],
     characters: ExportCharacter[],
     groups: ExportCharacterGroup[],
+    numberingMusic?: DerivedMusic,
 ): ContentsMusicEntry => {
     const singers = collectMusicSingers(music, {
         blocks,
@@ -54,7 +55,7 @@ const toMusicEntry = (
 
     return {
         musicId: music.musicId,
-        number: formatMusicNumber(music),
+        number: formatMusicNumber(numberingMusic ?? music),
         title: music.title || UNTITLED_MUSIC,
         singers: isInstrumental ? [] : singers,
         isInstrumental,
@@ -67,6 +68,7 @@ export const deriveContentsPlan = (
     doc: ScriptDocument,
     characters: ExportCharacter[],
     groups: ExportCharacterGroup[],
+    numberingDoc: ScriptDocument = doc,
 ): ContentsInitialPagePlan | null => {
     if (!value.enabled) {
         return null;
@@ -74,6 +76,14 @@ export const deriveContentsPlan = (
 
     const {snapshot} = buildScriptBlockIndex(doc);
     const {blocks} = snapshot;
+    const numbering = numberingDoc === doc ? snapshot : buildScriptBlockIndex(numberingDoc).snapshot;
+    const musicNumbering = new Map(numbering.music.map(music => [music.musicId, music]));
+    let sourceSceneNumber = 0;
+    const sceneNumberById = new Map(numbering.blocks.filter(block => block.blockType === 'scene').map(block => {
+        sourceSceneNumber += 1;
+
+        return [block.blockId, sourceSceneNumber];
+    }));
     const openMusicByStartBlock = groupOpenMusicByStartBlock(snapshot.music);
     const acts: ContentsActGroup[] = [];
     let currentAct: ContentsActGroup | null = null;
@@ -107,7 +117,7 @@ export const deriveContentsPlan = (
         } else if (block.blockType === 'scene') {
             sceneNumber += 1;
             currentScene = {
-                sceneNumber,
+                sceneNumber: sceneNumberById.get(block.blockId) ?? sceneNumber,
                 title: block.textContent || UNTITLED_SCENE,
                 startBlockId: block.blockId,
                 music: [],
@@ -116,7 +126,7 @@ export const deriveContentsPlan = (
         }
 
         (openMusicByStartBlock.get(block.blockId) ?? []).forEach(music => {
-            const entry = toMusicEntry(music, blocks, characters, groups);
+            const entry = toMusicEntry(music, blocks, characters, groups, musicNumbering.get(music.musicId));
 
             if (currentScene) {
                 currentScene.music.push(entry);

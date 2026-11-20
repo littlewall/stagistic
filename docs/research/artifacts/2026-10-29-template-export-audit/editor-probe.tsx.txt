@@ -1,0 +1,38 @@
+import '@stagistic/ui/styles/base.css';
+
+import type {ScriptDocument} from '@stagistic/script';
+import {createRoot} from 'react-dom/client';
+import {expect, it} from 'vite-plus/test';
+
+import ScriptEditor from './Editor';
+
+it('records current adjacent block spacing in the real editor', async () => {
+    const host = document.createElement('div');
+    host.style.width = '1000px';
+    document.body.append(host);
+    const root = createRoot(host);
+    const types = ['lyrics', 'lyrics', 'lyrics', 'dialogue', 'dialogue', 'dialogue', 'scene'];
+    const doc: ScriptDocument = {
+        type: 'doc',
+        content: types.map((type, index) => ({type, attrs: {id: `probe-${index}`}, content: [{type: 'text', text: `PROBE ${index}`}]})),
+    };
+
+    root.render(<ScriptEditor document={{initialValue: doc}} layout={{autoFocus: false}} settings={{scriptSettings: {blocks: {
+        lyrics: {spacingBeforeEm: 1, spacingAfterEm: 1},
+        dialogue: {spacingBeforeEm: 1, spacingAfterEm: 1},
+        scene: {spacingBeforeEm: 1, spacingAfterEm: 1},
+    }}}} />);
+
+    try {
+        await expect.poll(() => host.querySelectorAll('[data-editor] p[blocktype]').length).toBe(7);
+        const rows = Array.from(host.querySelectorAll<HTMLElement>('[data-editor] p[blocktype]')).map(element => {
+            const style = getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            return {type: element.getAttribute('blocktype'), paddingBefore: style.paddingTop, paddingAfter: style.paddingBottom, font: style.fontSize, lineHeight: style.lineHeight, height: rect.height};
+        });
+        console.log('EDITOR_SPACING_AUDIT', JSON.stringify(rows));
+    } finally {
+        root.unmount();
+        host.remove();
+    }
+});

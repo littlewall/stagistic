@@ -26,7 +26,7 @@ export const DeleteSceneHeadingModal = ({
             {
                 tone: 'out',
                 label: 'Removed',
-                text: 'Its synopsis and places',
+                text: 'Its outline, places and character notes from the Board',
             },
             {
                 tone: 'kept',
@@ -34,6 +34,7 @@ export const DeleteSceneHeadingModal = ({
                 text: 'Blocks in this scene, moved under the previous scene',
             },
         ]}
+        notes={['Undo restores these until you create a draft or version.']}
         confirmLabel="Delete heading"
         isPending={isDeleting}
         lockWhilePending

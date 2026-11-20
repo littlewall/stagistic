@@ -1,5 +1,16 @@
 {
     "hooks": {
+        "SessionStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && node tools/agent-flows/bin/upstream.mjs session-start",
+                        "timeout": 20
+                    }
+                ]
+            }
+        ],
         "PostToolUse": [
             {
                 "matcher": "Write|Edit|MultiEdit",
@@ -23,5 +34,9 @@
                 ]
             }
         ]
+    },
+    "enabledPlugins": {
+        "mattpocock-skills@claude-plugins-official": true,
+        "superpowers@claude-plugins-official": false
     }
 }

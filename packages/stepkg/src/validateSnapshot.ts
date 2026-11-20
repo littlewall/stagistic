@@ -10,6 +10,7 @@ import {
     isSafeStepkgAttachmentId,
     isSafeStepkgPath,
 } from './paths';
+import {validateSceneCharacters} from './sceneCharacters';
 
 type EntityType = NonNullable<StepkgExportIssue['entity']>['type'];
 
@@ -88,6 +89,7 @@ export const validateStepkgSnapshot = (snapshot: StepkgSnapshot): StepkgExportIs
     }
 
     validateCharacters(snapshot, issues);
+    issues.push(...validateSceneCharacters(snapshot));
 
     const blockIds = collectBlockIds(snapshot.document.content);
     const locationIds = new Set(snapshot.scenes.locations.map(location => location.id));

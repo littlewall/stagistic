@@ -1,7 +1,5 @@
 .scene {
-    padding-top: var(--scene-spacing-before, 0);
-    padding-right: var(--scene-indent-right, 0);
-    padding-left: var(--scene-indent-left, 0);
+    padding: var(--scene-spacing-before, 0) var(--scene-indent-right, 0) var(--scene-spacing-after, 0) var(--scene-indent-left, 0);
     font-weight: var(--scene-font-weight, 700);
     font-style: var(--scene-font-style, normal);
     line-height: var(--scene-line-height, inherit);

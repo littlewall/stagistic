@@ -10,7 +10,7 @@ import {useNavigate} from 'react-router-dom';
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
 import {getScriptBasePath, useScriptReadOnlyState} from '../routes/script/workspace/ScriptAccessContext';
 
-type AppHeaderProps = Pick<UIAppHeaderProps, 'contentInset' | 'isFullWidth' | 'scriptControls'> & {
+type AppHeaderProps = Pick<UIAppHeaderProps, 'contentInset' | 'width' | 'scriptControls'> & {
     showScriptActions?: boolean,
 };
 

@@ -42,12 +42,14 @@ describe('planIntegratedAssembly', () => {
 
         expect(kinds(plan.steps)).toEqual([
             'script',
+            'blank',
             'script',
             'blank',
             'score',
             'score',
         ]);
-        expect(plan.scoreStartPageByMusicId.get('m1')).toBe(4);
+        expect(plan.scoreStartPageByMusicId.get('m1')).toBe(5);
+        expect((plan.scoreStartPageByMusicId.get('m1') ?? 0) % 2).toBe(1);
     });
 
     it('forces an odd book page after the music start page', () => {
@@ -71,13 +73,12 @@ describe('planIntegratedAssembly', () => {
         expect(kinds(plan.steps)).toEqual([
             'script',
             'script',
-            'blank',
             'script',
             'script',
-            'blank',
             'score',
         ]);
-        expect(plan.scoreStartPageByMusicId.get('m1')).toBe(7);
+        expect(plan.scoreStartPageByMusicId.get('m1')).toBe(5);
+        expect(plan.steps[2]).toEqual({kind: 'script', scriptPageIndex: 2});
     });
 
     it('uses the last page a music ends on', () => {
@@ -95,6 +96,7 @@ describe('planIntegratedAssembly', () => {
 
         expect(kinds(plan.steps)).toEqual([
             'script',
+            'blank',
             'script',
             'blank',
             'score',
@@ -120,6 +122,7 @@ describe('planIntegratedAssembly', () => {
 
         expect(kinds(plan.steps)).toEqual([
             'script',
+            'blank',
             'script',
             'blank',
             'script',

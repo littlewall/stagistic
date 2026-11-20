@@ -35,6 +35,7 @@ export interface StructureRowActProps extends StructureRowActContentProps {
 }
 
 export type DragEndEvent = Parameters<NonNullable<ComponentProps<typeof DragDropProvider>['onDragEnd']>>[0];
+export type DragOverEvent = Parameters<NonNullable<ComponentProps<typeof DragDropProvider>['onDragOver']>>[0];
 
 export interface UseStructureSidebarDndArgs {
     groups: readonly StructureGroup[],

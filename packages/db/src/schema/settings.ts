@@ -1,8 +1,10 @@
+import type {PdfFlowPreset} from '@stagistic/script';
 import {
     bigint,
     boolean,
     index,
     integer,
+    jsonb,
     pgTable,
     real,
     text,
@@ -27,6 +29,7 @@ export const scriptSettingsPageLayout = pgTable('script_settings_page_layout', {
     contentMarginBottomPx: real('content_margin_bottom_px'),
     fontSizePx: real('font_size_px'),
     lineHeight: real('line_height'),
+    pdfFlow: jsonb('pdf_flow').$type<Partial<PdfFlowPreset>>(),
     createdAt: bigint('created_at', {mode: 'number'}).notNull(),
     updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
 });
@@ -93,7 +96,10 @@ export const scriptSettingsBlocks = pgTable(
             .references(() => scripts.id, {onDelete: 'cascade'}),
         blockType: text('block_type').notNull(),
         spacingBeforeMillis: integer('spacing_before_millis'),
+        spacingAfterMillis: integer('spacing_after_millis'),
         lineHeightMillis: integer('line_height_millis'),
+        sceneNumberFormat: text('scene_number_format'),
+        parenWrap: boolean('paren_wrap'),
         indentLeftChars: integer('indent_left_chars'),
         indentRightChars: integer('indent_right_chars'),
         shortcut: text('shortcut'),

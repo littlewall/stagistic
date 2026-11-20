@@ -81,6 +81,7 @@ export {
 } from './molecules/ToggleButtonGroup/ToggleButtonGroup';
 
 // Menus & popovers
+export {ButtonDropdownMenu, type ButtonDropdownMenuProps} from './molecules/ButtonDropdownMenu/ButtonDropdownMenu';
 export {
     DropdownMenu,
     type DropdownMenuItem,
@@ -120,6 +121,59 @@ export {PageContainer} from './organisms/PageContainer/PageContainer';
 export {PageHeader} from './organisms/PageHeader/PageHeader';
 export {Section, SectionHeader} from './organisms/Section/Section';
 
+// ─── Board ──────────────────────────────────────────────────────────────────
+export {BoardActSection, type BoardActSectionProps} from './board/BoardActSection';
+export {
+    BoardAddCharacter,
+    type BoardAddCharacterOption,
+    type BoardAddCharacterProps,
+} from './board/BoardAddCharacter';
+export {
+    BoardArcs,
+    type BoardArcsAct,
+    type BoardArcsArc,
+    type BoardArcsPoint,
+    type BoardArcsProps,
+    type BoardArcsScene,
+} from './board/BoardArcs';
+export {type BoardFilterCharacter} from './board/BoardCharacterFilter';
+export {type BoardCharacterActions} from './board/BoardCharacterPopover';
+export {BoardEmpty, type BoardEmptyProps} from './board/BoardEmpty';
+export {BoardLayout, type BoardLayoutProps} from './board/BoardLayout';
+export {type BoardLens} from './board/BoardLensTabs';
+export {
+    BoardMatrix,
+    type BoardMatrixAct,
+    type BoardMatrixCell,
+    type BoardMatrixCellKind,
+    type BoardMatrixProps,
+    type BoardMatrixRow,
+    type BoardMatrixSceneColumn,
+} from './board/BoardMatrix';
+export {
+    BoardRundown,
+    type BoardRundownAct,
+    type BoardRundownProps,
+    type BoardRundownScene,
+    type BoardRundownSong,
+} from './board/BoardRundown';
+export {BoardSceneCast, type BoardSceneCastProps} from './board/BoardSceneCast';
+export {
+    BoardToolbar,
+    type BoardToolbarCardOptions,
+    type BoardToolbarProps,
+} from './board/BoardToolbar';
+export {
+    type BoardCharacterChip,
+    CharacterChipStack,
+    type CharacterChipStackProps,
+} from './board/CharacterChipStack';
+export {
+    SceneCard,
+    type SceneCardActions,
+    type SceneCardProps,
+} from './board/SceneCard';
+
 // ─── Feedback ───────────────────────────────────────────────────────────────
 export {LoaderOverlay} from './feedback/LoaderOverlay/LoaderOverlay';
 export {Notice} from './feedback/Notice/Notice';
@@ -136,6 +190,7 @@ export {AppFooter} from './layout/AppFooter';
 export {
     AppHeader,
     type AppHeaderProps,
+    type AppHeaderWidth,
     ScriptEditorAppHeader,
     type ScriptEditorAppHeaderProps,
     type ScriptListItem,
@@ -144,6 +199,7 @@ export {
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
 export {FocusVisibilityManager} from './layout/FocusVisibilityManager';
+export {type FooterRelease, FooterReleaseProvider} from './layout/footerRelease';
 export {
     ScriptStateMenu,
     type ScriptStateMenuItem,
@@ -173,6 +229,7 @@ export {
 } from './molecules/ChangeSummary/ChangeSummary';
 
 // ─── Dialogs: script ────────────────────────────────────────────────────────
+export {BrowserDataNotice} from './dialogs/script/BrowserDataNotice';
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
 export {DeleteScriptModal} from './dialogs/script/DeleteScriptModal';
 export {
@@ -183,7 +240,6 @@ export {
 export type {StepkgPeekResult} from './dialogs/script/import/types';
 export {ImportScriptModal} from './dialogs/script/ImportScriptModal';
 export {NewScriptModal} from './dialogs/script/NewScriptModal';
-export {PublicPreviewNotice} from './dialogs/script/PublicPreviewNotice';
 export {
     RenameScriptModal,
     type RenameScriptModalProps,
@@ -202,7 +258,18 @@ export {
     type ScriptStatesModalProps,
     type ScriptStateUpdate,
 } from './dialogs/script/ScriptStatesModal';
-export type {NewScriptShape} from './dialogs/script/types';
+export type {NewScriptFormatSelection, NewScriptShape} from './dialogs/script/types';
+export {
+    ReleaseHighlightsDialog,
+    type ReleaseHighlightsDialogProps,
+} from './dialogs/whats-new/ReleaseHighlightsDialog';
+export {
+    WhatsNewDialog,
+    type WhatsNewDialogProps,
+    type WhatsNewNote,
+    type WhatsNewNoteType,
+    type WhatsNewRelease,
+} from './dialogs/whats-new/WhatsNewDialog';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────
 export {AttributeManagerCharactersPanel} from './dialogs/attribute-manager/AttributeManagerCharactersPanel';
@@ -244,6 +311,11 @@ export {RemoveAttachmentModal, type RemoveAttachmentModalProps} from './dialogs/
 export {RemoveGroupModal, type RemoveGroupModalProps} from './dialogs/attribute-manager/RemoveGroupModal';
 
 // ─── Editor panels ──────────────────────────────────────────────────────────
+export {BoardAddActButton} from './board/BoardAddActButton';
+export {BoardAddSceneCard} from './board/BoardAddSceneCard';
+export {BoardInlineHeading} from './board/BoardInlineHeading';
+export {BoardInsertSceneStrip} from './board/BoardInsertSceneStrip';
+export {BoardSceneComposer} from './board/BoardSceneComposer';
 export {
     EditorSidebar,
     type EditorSidebarCharacter,

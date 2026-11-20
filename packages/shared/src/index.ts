@@ -5,8 +5,12 @@
  * lets any layer in the monorepo import it safely.
  */
 
+export * from './errors/startFailure';
 export * from './ids/nodeId';
 export * from './ids/uuidv7';
+export * from './runtime/unsavedWork';
+export * from './utils/arcValue';
+export * from './utils/markdown';
 export * from './utils/number';
 export * from './utils/object';
 export * from './utils/platform';

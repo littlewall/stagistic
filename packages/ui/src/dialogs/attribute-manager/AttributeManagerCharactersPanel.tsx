@@ -15,7 +15,6 @@ import {AttributeManagerGroupDetail} from './AttributeManagerGroupDetail';
 import {CreateCharacterModal} from './CreateCharacterModal';
 import {CreateGroupModal} from './CreateGroupModal';
 import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterNames';
-import {useOptimisticAttributeManagerColors} from './useOptimisticAttributeManagerColors';
 
 const includesId = (ids: string[] | undefined, id: string) => ids?.includes(id) ?? false;
 
@@ -60,14 +59,13 @@ export const AttributeManagerCharactersPanel = ({
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
     const createCharacterTriggerRef = useRef<HTMLElement | null>(null);
     const createGroupTriggerRef = useRef<HTMLElement | null>(null);
-    const {colorizedItems: colorizedCharacters, setColor: handleSetCharacterColor} = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
     const {
         displayedCharacters,
         persistName,
         resetName,
         setName,
     } = useAttributeManagerCharacterNames({
-        characters: colorizedCharacters,
+        characters,
         draftScopeKey,
         onRenameCharacter,
     });
@@ -171,7 +169,7 @@ export const AttributeManagerCharactersPanel = ({
                     onNameDraftChange={name => setName(selectedCharacter.id, name)}
                     onResetNameDraft={() => resetName(selectedCharacter.id)}
                     onRenameCharacter={persistName}
-                    onSetCharacterColor={handleSetCharacterColor}
+                    onSetCharacterColor={onSetCharacterColor}
                     onSetCharacterOutline={onSetCharacterOutline}
                     onSetCharacterVoiceType={onSetCharacterVoiceType}
                     onSetCharacterVocalRange={onSetCharacterVocalRange}

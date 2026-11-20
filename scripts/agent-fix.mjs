@@ -21,6 +21,8 @@ import {
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
+import {verifyTask} from './verification.mjs';
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SCRIPT = /\.(ts|tsx|js|jsx|mjs|cjs)$/;
 const STYLE = /\.(css|scss)$/;
@@ -171,15 +173,13 @@ const testFiles = files => {
         return [];
     }
 
-    const result = run('root:test-related', [
-        'vp',
-        'test',
-        'related',
-        '--run',
-        '--passWithNoTests',
-    ], scripts);
+    const result = verifyTask({
+        root,
+        task: 'root:test-related',
+        args: scripts,
+    });
 
-    return result.ok ? [] : [result];
+    return result.ok ? [] : [{...result, name: result.task}];
 };
 
 const stopStateFile = input => {

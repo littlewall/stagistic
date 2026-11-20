@@ -1,6 +1,7 @@
 import {type useScriptCharacterCatalog} from '@stagistic/app-core';
 import {
     type EditorValueChangeMeta,
+    type ScriptDocumentSession,
 } from '@stagistic/editor';
 import {
     type EditorSettings,
@@ -15,6 +16,7 @@ import type {
 
 export interface UseScriptEditorCharactersArgs {
     currentScriptId: string | null,
+    documentSession?: ScriptDocumentSession,
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
@@ -47,7 +49,7 @@ export interface UseScriptEditorCharactersResult {
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
     normalizeCharacterNameForInlineInput: (name: string) => string,
-    handleConfirmCharacter: (characterKey: string, colorHex?: string | null) => void,
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null) => Promise<{id: string} | null>,
     handleDeleteCharacter: (characterId: string) => void,
     handleRenameCharacterPreview: (
         characterId: string,
@@ -61,7 +63,7 @@ export interface UseScriptEditorCharactersResult {
     ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
-    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void | Promise<void>,
     handleSetCharacterVoiceType: (characterId: string, voiceType: string | null) => void,
     handleSetCharacterVocalRange: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,

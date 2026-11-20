@@ -5,7 +5,7 @@ export * from './model/scriptData';
 export * from './model/visualLine';
 
 // ─── Plan derivation ────────────────────────────────────────────────────────
-export * from './plan/deriveBasicExportPlan';
+export {deriveBasicExportPlan} from './plan/deriveBasicExportPlan';
 export * from './plan/deriveIntegratedScoreExportPlan';
 export * from './plan/filterByCharacter';
 export * from './plan/scenes';
@@ -30,6 +30,7 @@ export * from './initialPages/romanNumerals';
 
 // ─── PDF ────────────────────────────────────────────────────────────────────
 export * from './pdf/drawPdf';
+export * from './pdf/pdfFileLoadError';
 export * from './pdf/planIntegratedAssembly';
 export * from './pdf/readPdfPageCounts';
 export * from './pdf/renderPdfInWorker';

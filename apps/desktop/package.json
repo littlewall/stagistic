@@ -1,6 +1,6 @@
 {
     "name": "@stagistic/desktop",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "private": true,
     "type": "module",
     "dependencies": {
@@ -8,6 +8,7 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
+        "@stagistic/release-notes": "workspace:*",
         "@stagistic/mcp-contract": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",

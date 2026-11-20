@@ -8,7 +8,9 @@ import {
 
 import {Button} from '../../atoms/Button/Button';
 import {RadioChoiceGroup, type RadioChoiceOption} from '../../atoms/RadioChoiceGroup/RadioChoiceGroup';
+import {Switch} from '../../atoms/Switch/Switch';
 import {LoaderOverlay} from '../../feedback/LoaderOverlay/LoaderOverlay';
+import {FormSelect} from '../../molecules/forms/FormSelect/FormSelect';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
@@ -31,6 +33,7 @@ const SCRIPT_SHAPE_OPTIONS: RadioChoiceOption<NewScriptShape>[] = [
 export const NewScriptModal = ({
     isOpen,
     isTransitioning = false,
+    formatTemplates,
     onClose,
     onCreate,
     returnFocus,
@@ -39,6 +42,8 @@ export const NewScriptModal = ({
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [shape, setShape] = useState<NewScriptShape>('multi-act');
+    const [templateId, setTemplateId] = useState('stagistic-default');
+    const [lock, setLock] = useState(true);
     const [isPending, setIsPending] = useState(false);
     const loadingMessages: string[] = [];
 
@@ -60,6 +65,8 @@ export const NewScriptModal = ({
         if (!isOpen) {
             setName('');
             setShape('multi-act');
+            setTemplateId('stagistic-default');
+            setLock(true);
         }
     }
 
@@ -68,7 +75,11 @@ export const NewScriptModal = ({
         setIsPending(true);
 
         try {
-            await onCreate(name, shape);
+            if (formatTemplates?.length) {
+                await onCreate(name, shape, {templateId, lock});
+            } else {
+                await onCreate(name, shape);
+            }
         } finally {
             setIsPending(false);
         }
@@ -129,6 +140,7 @@ export const NewScriptModal = ({
                             options={SCRIPT_SHAPE_OPTIONS}
                             onChange={setShape}
                         />
+                        {formatTemplates?.length ? <><label className={styles.label} htmlFor="new-script-template">Template</label><FormSelect id="new-script-template" ariaLabel="New script template" value={templateId} options={formatTemplates.map(template => ({value: template.id, label: template.label}))} onChange={value => setTemplateId(String(value))} /><Switch isSelected={lock} onChange={setLock}>Lock to template</Switch></> : null}
                         <ModalActions>
                             <Button type="submit">Create script</Button>
                             <Button

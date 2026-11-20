@@ -5,7 +5,7 @@ import {
 
 import {BasicExportTemplate} from './BasicExportTemplate';
 
-/** The score template intentionally exposes the same settings as Basic. */
+/** Integrated score also allows music and combined contents. */
 export const IntegratedScoreExportTemplate = ({
     config,
     onConfigChange,
@@ -14,6 +14,7 @@ export const IntegratedScoreExportTemplate = ({
     onConfigChange: (config: BasicExportConfig) => void,
 }) => (
     <BasicExportTemplate
+        allowMusicContents
         config={config}
         onConfigChange={onConfigChange}
         derive={deriveIntegratedScoreExportPlan}

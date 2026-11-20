@@ -61,6 +61,7 @@ export const useSidebarLayout = ({
 
     if (previousOverlayViewport !== isOverlayViewport) {
         setPreviousOverlayViewport(isOverlayViewport);
+
         if (!isOverlayViewport) {
             setOverlayDrawer(null);
         }

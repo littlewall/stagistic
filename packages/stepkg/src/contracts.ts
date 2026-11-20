@@ -1,5 +1,6 @@
 import type {
     EditorSettingsOverride,
+    FormatTemplateId,
     ScriptDocument,
     TitlePageSettings,
 } from '@stagistic/script';
@@ -15,6 +16,7 @@ export interface StepkgScriptData {
     id: string,
     title: string,
     subtitle: string | null,
+    formatTemplateId?: FormatTemplateId | null,
     createdAt: string,
     updatedAt: string,
 }
@@ -159,6 +161,18 @@ export interface StepkgCommentsData {
     messages: StepkgCommentMessage[],
 }
 
+export interface StepkgSceneCharacter {
+    headingBlockId: string,
+    characterId: string,
+    note: string | null,
+    /** −100…100 on the continuous arc scale. */
+    arcValue: number | null,
+    /** False when the record only carries an arc point; the card does not show the character. */
+    onCard: boolean,
+    createdAt: string,
+    updatedAt: string,
+}
+
 export interface StepkgSnapshot {
     script: StepkgScriptData,
     document: ScriptDocument,
@@ -167,6 +181,7 @@ export interface StepkgSnapshot {
     characters: StepkgCharactersData,
     music: StepkgMusicData,
     scenes: StepkgScenesData,
+    sceneCharacters: {items: StepkgSceneCharacter[]},
     attachments: StepkgAttachmentSnapshot[],
     attachmentBindings: StepkgAttachmentBinding[],
     comments: StepkgCommentsData,

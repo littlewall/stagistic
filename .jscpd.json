@@ -1,5 +1,5 @@
 {
-    "path": ["apps", "packages", "scripts"],
+    "path": ["apps", "packages", "scripts", "tools"],
     "format": ["javascript", "jsx", "typescript", "tsx", "css", "scss", "astro"],
     "crossFormats": "js-ts",
     "minLines": 10,

@@ -121,6 +121,7 @@ const snapshot: StepkgSnapshot = {
             updatedAt: '2026-09-18T10:00:00.000Z',
         },
     ],
+    sceneCharacters: {items: []},
     comments: {threads: [], messages: []},
     attachmentBindings: [
         {
@@ -192,6 +193,7 @@ describe('validateStepkgSnapshot', () => {
             music: {items: []},
             attachments: [],
             attachmentBindings: [],
+            sceneCharacters: {items: []},
             comments: {
                 threads: [thread, thread],
                 messages: [

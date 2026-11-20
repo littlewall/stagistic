@@ -1,0 +1,21 @@
+---
+import {releases} from '@stagistic/release-notes/bundled';
+import ChangelogList from '../components/changelog/ChangelogList.astro';
+import {toChangelog} from '../data/changelog';
+import Layout from '../layouts/Layout.astro';
+
+const changelog = toChangelog(releases, {site: new URL('/', Astro.site)});
+---
+
+<Layout
+    title="Changelog - Stagistic"
+    description="What is new, improved and fixed in each Release of Stagistic Editor."
+    canonical={new URL('/changelog', Astro.site).href}
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Changelog', url: new URL('/changelog', Astro.site).href},
+    ]}
+>
+    <link slot="head" rel="alternate" type="application/rss+xml" title="Stagistic Editor changelog" href="/changelog.xml">
+    <ChangelogList releases={changelog} />
+</Layout>

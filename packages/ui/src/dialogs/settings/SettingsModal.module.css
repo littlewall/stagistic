@@ -62,7 +62,7 @@
 .groupLabel {
     margin-bottom: var(--space-md);
     font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-muted);
 }
 
@@ -196,5 +196,24 @@
     :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
+    }
+}
+
+.groupHeader {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+
+    & > .groupLabel {
+        flex: none;
+        margin-bottom: 0;
+    }
+
+    /* The accessory keeps its own width but shrinks to stay inside the sidebar. */
+    & > :not(.groupLabel) {
+        flex: 0 1 auto;
+        min-width: 0;
     }
 }

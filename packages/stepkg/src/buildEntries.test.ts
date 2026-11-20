@@ -36,6 +36,7 @@ const snapshot: StepkgSnapshot = {
             updatedAt: '2026-09-18T10:00:00.000Z',
         },
     ],
+    sceneCharacters: {items: []},
     comments: {threads: [], messages: []},
     attachmentBindings: [],
 };
@@ -50,6 +51,7 @@ describe('buildStepkgEntries', () => {
         });
 
         expect(result.ok).toBe(true);
+
         if (result.ok) {
             expect(result.manifest.script.id).toBe(snapshot.script.id);
             expect(result.manifest.files.some(file => file.path === 'assets/att-1/score.pdf')).toBe(true);
@@ -76,6 +78,7 @@ describe('buildStepkgEntries', () => {
         });
 
         expect(missing.ok).toBe(false);
+
         if (!missing.ok) expect(missing.issues.map(issue => issue.code)).toEqual(['asset_blob_missing', 'asset_blob_missing']);
 
         await expect(

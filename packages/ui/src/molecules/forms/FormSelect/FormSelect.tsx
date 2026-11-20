@@ -11,7 +11,7 @@ interface FormSelectProps {
     className?: string,
     isOpen?: boolean,
     onIsOpenChange?: (isOpen: boolean) => void,
-    size?: 'md' | 'lg',
+    size?: 'sm' | 'md' | 'lg',
     width?: 'full' | 'content',
 }
 

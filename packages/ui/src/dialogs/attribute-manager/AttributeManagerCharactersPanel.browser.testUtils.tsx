@@ -110,6 +110,7 @@ export const renderPanel = (
     initialSelectedGroupId?: string,
     groups: AttributeManagerGroup[] = [],
 ): {
+    rerenderCharacters: (items: AttributeManagerCharacter[]) => void,
     onSetCharacterColor: (characterId: string, colorHex: string | null) => unknown,
     onSetCharacterOutline: (characterId: string, outline: string | null) => unknown,
     onDeleteCharacter: (characterId: string) => unknown,
@@ -126,9 +127,9 @@ export const renderPanel = (
 
     const root = createRoot(host);
 
-    root.render(
+    const rerenderCharacters = (items: AttributeManagerCharacter[]) => root.render(
         <AttributeManagerCharactersPanel
-            characters={characters}
+            characters={items}
             groups={groups}
             initialSelectedCharacterId={initialSelectedCharacterId}
             initialWorkspaceId={initialWorkspaceId}
@@ -139,9 +140,12 @@ export const renderPanel = (
             onCreateCharacter={onCreateCharacter}
         />,
     );
+
+    rerenderCharacters(characters);
     mountedRoots.push(root);
 
     return {
+        rerenderCharacters,
         onSetCharacterColor,
         onSetCharacterOutline,
         onDeleteCharacter,

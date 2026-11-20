@@ -35,7 +35,7 @@ export interface AttributeManagerCharactersPanelProps {
     renamingGroupIds?: string[],
     colorUpdatingGroupIds?: string[],
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void | Promise<unknown>,
-    onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
+    onSetCharacterOutline?: (characterId: string, outline: string | null) => void | Promise<void>,
     onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void,
     onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,

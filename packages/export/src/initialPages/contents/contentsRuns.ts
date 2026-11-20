@@ -33,7 +33,7 @@ const rightAlignedRun = (text: string, rightPx: number, fontSizePx: number, char
     return makeRun(text, rightPx - text.length * charWidthPx, fontSizePx, emphasis);
 };
 
-export const numberRuns = (geometry: ContentsGeometry, scriptPage: number | null, scorePage: number | null): VisualRun[] => {
+export const numberRuns = (geometry: ContentsGeometry, scriptPage: number | string | null, scorePage: number | null): VisualRun[] => {
     const runs: VisualRun[] = [];
 
     if (scriptPage !== null) {

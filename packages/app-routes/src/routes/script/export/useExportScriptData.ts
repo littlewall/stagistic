@@ -12,7 +12,7 @@ import {
     type EditorSettings,
     normalizeCharacterKey,
 } from '@stagistic/script';
-import {useMemo} from 'react';
+import {useMemo, useSyncExternalStore} from 'react';
 
 import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
 import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
@@ -53,8 +53,8 @@ export const useExportScriptData = (): {
     const {
         currentScript,
         currentScriptId,
+        documentSession,
         initialValue,
-        initialIndexSnapshot,
     } = useScriptWorkspace();
     const {
         confirmedCharacterRecords,
@@ -67,12 +67,15 @@ export const useExportScriptData = (): {
         titlePageDraft,
     } = useScriptSettingsModal();
 
+    const revision = useSyncExternalStore(documentSession.subscribe, () => documentSession.getSnapshot().revision, () => 0);
+    const sessionDocument = useMemo(() => ({value: documentSession.getDocument(), revision}), [documentSession, revision]);
     const script = useMemo<ScriptData | null>(() => {
         if (!initialValue || !currentScript) {
             return null;
         }
 
-        const snapshot = initialIndexSnapshot ?? buildScriptBlockIndex(initialValue).snapshot;
+        const currentDocument = sessionDocument.value;
+        const snapshot = buildScriptBlockIndex(currentDocument).snapshot;
         const catalogEntities: ExportCatalogEntity[] = [
             ...confirmedCharacterRecords.map(character => ({
                 ...character,
@@ -92,7 +95,7 @@ export const useExportScriptData = (): {
         );
 
         return {
-            doc: initialValue,
+            doc: currentDocument,
             characters: collectCharacters(catalogEntities),
             groups: collectGroups(catalogEntities),
             initialCharacters,
@@ -105,7 +108,7 @@ export const useExportScriptData = (): {
         confirmedCharacterRecords,
         confirmedGroupRecords,
         currentScript,
-        initialIndexSnapshot,
+        sessionDocument,
         initialValue,
         placeState.places,
         placeState.scenePlaceIds,

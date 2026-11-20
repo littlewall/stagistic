@@ -1,3 +1,4 @@
+import type {BlockOffsets} from '@stagistic/script-pagination';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {type DecorationSet} from '@tiptap/pm/view';
 
@@ -7,11 +8,15 @@ export interface PageInfo {
     endPos: number,
     startOffset: number,
     endOffset: number,
+    /** Page opens with the continuation of a block split on the previous page; `startPos` is then that block's start. */
+    continuesBlock: boolean,
 }
 
 export interface PaginationState {
     pageCount: number,
     pages: PageInfo[],
+    /** Where each block really lands in page-flow offsets; keys are `String(docPosition)`. */
+    blockOffsets: BlockOffsets[],
     pageHeight: number,
     contentHeight: number,
     lineHeightPx: number,

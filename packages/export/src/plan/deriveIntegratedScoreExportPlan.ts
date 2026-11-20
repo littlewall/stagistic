@@ -12,7 +12,7 @@ import type {
     IntegratedScorePostStep,
 } from '../model/plan';
 import type {ScriptData} from '../model/scriptData';
-import {deriveBasicExportPlan} from './deriveBasicExportPlan';
+import {deriveScriptExportPlan} from './deriveBasicExportPlan';
 
 /**
  * Derives fixed music units for the Integrated score template. Hits are point
@@ -22,7 +22,7 @@ export const deriveIntegratedScoreExportPlan = (
     config: IntegratedScoreExportConfig,
     script: ScriptData,
 ): ExportPlan => {
-    const plan = deriveBasicExportPlan(config, script);
+    const plan = deriveScriptExportPlan(config, script);
     const sourceBlocks: MusicBlockInput[] = script.doc.content.map(node => ({
         blockId: getScriptBlockId(node) ?? '',
         blockType: getScriptBlockNodeType(node, 'stageDirection'),
@@ -31,6 +31,14 @@ export const deriveIntegratedScoreExportPlan = (
     const retainedIds = new Set(plan.visibleBlockIds ?? plan.doc.content
         .map(node => getScriptBlockId(node))
         .filter((id): id is string => id !== null));
+    const blockIds = plan.doc.content.map(node => getScriptBlockId(node) ?? '');
+    const printableIds = new Set(blockIds);
+    const printableEnd = (startId: string, endId: string) => {
+        const start = sourceBlocks.findIndex(block => block.blockId === startId);
+        const end = sourceBlocks.findIndex(block => block.blockId === endId);
+
+        return sourceBlocks.slice(start, Math.max(start, end) + 1).findLast(block => printableIds.has(block.blockId))?.blockId ?? startId;
+    };
     const postSteps: IntegratedScorePostStep[] = deriveMusicTimeline(sourceBlocks).music
         .filter(music => music.mode === 'open' && retainedIds.has(music.startBlockId))
         .map(music => ({
@@ -38,10 +46,8 @@ export const deriveIntegratedScoreExportPlan = (
             musicId: music.musicId,
             title: music.title,
             startBlockId: music.startBlockId,
-            afterBlockId: music.effectiveEndBlockId,
+            afterBlockId: printableEnd(music.startBlockId, music.effectiveEndBlockId),
         }));
-
-    const blockIds = plan.doc.content.map(node => getScriptBlockId(node) ?? '');
 
     postSteps.forEach(step => {
         const startIndex = blockIds.indexOf(step.startBlockId);

@@ -18,6 +18,7 @@ import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFro
 import {
     createEditorSnapshotStore,
     type EditorSnapshotStore,
+    EMPTY_BLOCK_PAGES,
     EMPTY_SCENE_PLACEMENT,
 } from '../live/store';
 import {
@@ -31,6 +32,7 @@ interface UseEditorCharacterColorsArgs {
     /** Externally-owned containers (cached editor surface); falls back to per-mount ones. */
     refs?: CharacterColorRefsBundle,
     liveStore?: EditorSnapshotStore,
+    initializeLiveStore?: boolean,
 }
 
 export const useEditorCharacterColors = ({
@@ -38,6 +40,7 @@ export const useEditorCharacterColors = ({
     resolvedInitialValue,
     refs,
     liveStore: providedLiveStore,
+    initializeLiveStore = true,
 }: UseEditorCharacterColorsArgs) => {
     const [localRefs] = useState(createCharacterColorRefsBundle);
 
@@ -120,6 +123,7 @@ export const useEditorCharacterColors = ({
             index: indexSnapshot,
             structure: projection.structure,
             scenePlacement: EMPTY_SCENE_PLACEMENT,
+            blockPages: EMPTY_BLOCK_PAGES,
             characters: projection.characters,
             music: indexSnapshot.music,
             activeBlockId: null,
@@ -137,13 +141,17 @@ export const useEditorCharacterColors = ({
     const initializedLiveStoreRef = useRef<EditorSnapshotStore | null>(null);
 
     useEffect(() => {
-        if (!providedLiveStore || initializedLiveStoreRef.current === providedLiveStore) {
+        if (!initializeLiveStore || !providedLiveStore || initializedLiveStoreRef.current === providedLiveStore) {
             return;
         }
 
         initializedLiveStoreRef.current = providedLiveStore;
         providedLiveStore.setSnapshot(initialLiveSnapshot);
-    }, [initialLiveSnapshot, providedLiveStore]);
+    }, [
+        initialLiveSnapshot,
+        initializeLiveStore,
+        providedLiveStore,
+    ]);
 
     return {
         colorByCharacterIdRef,

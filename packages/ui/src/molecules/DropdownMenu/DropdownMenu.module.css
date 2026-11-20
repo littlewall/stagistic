@@ -17,6 +17,27 @@
     outline: none;
 }
 
+/*
+ * The search field atop a dropdown menu, compact and single-line: shared by the
+ * header's state filter and the Board's character picker.
+ */
+.searchinput {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    outline: none;
+
+    &[data-focused] {
+        border-color: var(--color-focus-ring);
+    }
+}
+
 .item,
 .dangerItem {
     cursor: pointer;

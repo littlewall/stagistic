@@ -1,5 +1,7 @@
 import type {EditorSettings} from '@stagistic/script';
 
+import type {ContentsPageNumbers} from './contentsPageNumbers';
+
 export const MONO_FONT_FAMILY = 'Courier Prime';
 export const CHAR_WIDTH_EM = 0.6;
 export const HEADING_FONT_SCALE = 1.1;
@@ -32,21 +34,29 @@ export interface ContentsGeometry {
 }
 
 /**
- * Column widths come from the header text, never from the values, so the title
- * column — and therefore wrapping and the page count — stay independent of the
- * actual page numbers.
+ * Reserve both the header and the longest resolved label. Compound book labels
+ * can be much wider than the word “script”; music titles must wrap before them.
  */
 export const createContentsGeometry = (
     settings: EditorSettings,
     showScoreColumn: boolean,
+    pageNumbers?: ContentsPageNumbers,
 ): ContentsGeometry => {
     const bodyFontSizePx = settings.typography.fontSizePx;
     const bodyCharWidthPx = bodyFontSizePx * CHAR_WIDTH_EM;
     const smallFontSizePx = bodyFontSizePx * SMALL_FONT_SCALE;
     const headingFontSizePx = bodyFontSizePx * HEADING_FONT_SCALE;
     const contentRightPx = settings.page.widthPx - settings.page.marginRightPx;
-    const scriptColumnPx = Math.max(COLUMN_MIN_CHARS, SCRIPT_COLUMN_HEADER.length) * bodyCharWidthPx;
-    const scoreColumnPx = Math.max(COLUMN_MIN_CHARS, SCORE_COLUMN_HEADER.length) * bodyCharWidthPx;
+    const scriptColumnPx = Math.max(
+        COLUMN_MIN_CHARS,
+        SCRIPT_COLUMN_HEADER.length,
+        ...Array.from(pageNumbers?.scriptPageNumberByBlockId.values() ?? [], value => String(value).length),
+    ) * bodyCharWidthPx;
+    const scoreColumnPx = Math.max(
+        COLUMN_MIN_CHARS,
+        SCORE_COLUMN_HEADER.length,
+        ...Array.from(pageNumbers?.scoreStartPageByMusicId.values() ?? [], value => String(value).length),
+    ) * bodyCharWidthPx;
     const gutterPx = COLUMN_GUTTER_CHARS * bodyCharWidthPx;
     const scoreRightPx = showScoreColumn ? contentRightPx : null;
     const scriptRightPx = showScoreColumn

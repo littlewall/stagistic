@@ -29,7 +29,8 @@ interface UseCharacterActionsArgs {
 }
 
 export interface CharacterActions {
-    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    /** Resolves to the new character, or null when nothing was confirmed. */
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => Promise<{id: string} | null>,
     handleDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     handleRenameCharacterPreview: (
         characterId: string,
@@ -45,7 +46,7 @@ export interface CharacterActions {
     ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
-    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void | Promise<void>,
     handleSetCharacterVoiceType: (characterId: string, voiceType: string | null) => void,
     handleSetCharacterVocalRange: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
@@ -65,25 +66,25 @@ export const useCharacterActions = ({
         const normalizedKey = normalizeCharacterKey(characterKey);
 
         if (!normalizedKey || confirmedCharacterSet.has(normalizedKey)) {
-            return;
+            return Promise.resolve(null);
         }
 
-        void catalog.confirmCharacter(
+        return catalog.confirmCharacter(
             normalizedKey,
             normalizeCharacterColorHex(colorHex),
         ).then(async character => {
             if (!character) {
-                return;
+                return null;
             }
 
             if (editorCallbacks) {
                 editorCallbacks.onLinkRef(normalizedKey, character.id);
-
-                return;
+            } else {
+                await documentActions.linkCharacter(normalizedKey, character.id);
             }
 
-            await documentActions.linkCharacter(normalizedKey, character.id);
-        }).catch(() => undefined);
+            return character;
+        }).catch(() => null);
     }, [
         catalog,
         confirmedCharacterSet,
@@ -182,7 +183,7 @@ export const useCharacterActions = ({
         void catalog.setCharacterGender(id, gender).catch(() => undefined);
     }, [catalog]);
     const handleSetCharacterOutline = useCallback((id: string, outline: string | null) => {
-        void catalog.setCharacterOutline(id, outline).catch(() => undefined);
+        return catalog.setCharacterOutline(id, outline).then(() => undefined);
     }, [catalog]);
     const handleSetCharacterVoiceType = useCallback((id: string, voiceType: string | null) => {
         void catalog.setCharacterVoiceType(id, voiceType).catch(() => undefined);

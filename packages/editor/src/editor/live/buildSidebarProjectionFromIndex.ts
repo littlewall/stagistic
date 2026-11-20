@@ -76,6 +76,7 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
             rows.push(row);
             rowIndexByBlockId.set(block.blockId, row.index);
             sceneByBlockId.set(block.blockId, block.blockId);
+
             if (currentActBlockId) {
                 actByBlockId.set(block.blockId, currentActBlockId);
             }

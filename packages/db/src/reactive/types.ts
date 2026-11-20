@@ -9,3 +9,10 @@ export interface ReactiveQuerySource<T> {
     ) => Promise<() => void>,
     refresh: () => Promise<void>,
 }
+
+/** A failed `subscribe` rejects with an error carrying the cleanup of the listener it left behind. */
+export const unsubscribeOfFailedSubscribe = (error: unknown): (() => void) | undefined => {
+    const unsubscribe = (error as {unsubscribe?: unknown} | null | undefined)?.unsubscribe;
+
+    return typeof unsubscribe === 'function' ? unsubscribe as () => void : undefined;
+};

@@ -1,4 +1,6 @@
+import {validateReleasesPlugin} from '@stagistic/release-notes/validate-plugin';
 import {createEditorViteConfig} from '@stagistic/vite-config';
+import {versionManifestPlugin} from '@stagistic/vite-config/version-manifest';
 
 export default createEditorViteConfig(import.meta.url, {
     host: true,
@@ -18,4 +20,4 @@ export default createEditorViteConfig(import.meta.url, {
             changeOrigin: true,
         },
     },
-});
+}, [versionManifestPlugin(), validateReleasesPlugin()]);

@@ -1,6 +1,7 @@
 import {
     type EditorSettings,
     type EditorSettingsOverride,
+    type FormatTemplateId,
     type TitlePageSettings,
 } from '@stagistic/script';
 import {createContext, useContext} from 'react';
@@ -11,6 +12,7 @@ import {type useScriptMusicState} from '../editor/music/useScriptMusicState';
 
 export interface ScriptSettingsModalContextValue {
     resolvedScriptSettings: EditorSettings,
+    formatTemplateId?: FormatTemplateId | null,
     effectiveScriptSettingsDraft: EditorSettingsOverride,
     isEditorPresentationHydrated: boolean,
     titlePageDraft: TitlePageSettings,

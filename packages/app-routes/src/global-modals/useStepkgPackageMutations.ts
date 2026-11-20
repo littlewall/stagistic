@@ -3,6 +3,7 @@ import {
     importScriptPackageAsNew,
     peekStepkgPackage,
     restoreScriptPackage,
+    useRunExclusiveOnScript,
 } from '@stagistic/app-core';
 import {useCallback} from 'react';
 
@@ -33,6 +34,7 @@ export const useStepkgPackageMutations = ({
     setIsDownloadingBackup,
     setPrefilledImport,
 }: UseStepkgPackageMutationsArgs) => {
+    const runExclusive = useRunExclusiveOnScript();
     const handlePeekStepkg = useCallback(
         async (bytes: Uint8Array) => {
             const result = await peekStepkgPackage({repository, bytes});
@@ -104,7 +106,11 @@ export const useStepkgPackageMutations = ({
             setIsImportLoading(true);
 
             try {
-                const result = await restoreScriptPackage({repository, bytes: payload.bytes});
+                const result = await restoreScriptPackage({
+                    repository,
+                    bytes: payload.bytes,
+                    runExclusive,
+                });
 
                 if (!result.ok) {
                     throw new Error(PACKAGE_SUBMIT_ERROR);
@@ -133,6 +139,7 @@ export const useStepkgPackageMutations = ({
             addToast,
             navigate,
             repository,
+            runExclusive,
             setIsImportLoading,
             setIsImportOpen,
             setPrefilledImport,

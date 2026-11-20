@@ -26,6 +26,12 @@ const buildHeaderFooterRow = (
 });
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
+    pdfFlow: {
+        actOnNewPage: true,
+        sceneOnNewPage: true,
+        repeatCharacterOnBreak: false,
+        continuationMark: 'none',
+    },
     page: {
         widthPx: 794,
         heightPx: 1123,

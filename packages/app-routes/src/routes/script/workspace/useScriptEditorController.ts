@@ -1,6 +1,7 @@
 import {
     useRecentScripts,
     useScriptCharacterCatalog,
+    useScriptEditingSession,
     useScriptEditorSettingsRecord,
     useScriptMusic,
     useScriptRepository,
@@ -20,6 +21,7 @@ import {useScriptLoader} from './useScriptLoader';
 import {useScriptSaveHandlers} from './useScriptSaveHandlers';
 
 const readOnlySave = () => Promise.resolve(true);
+const ignoreSaveTimeout = () => {};
 
 export const useScriptEditorController = (scriptId: string | undefined): ScriptEditorController => {
     const navigate = useNavigate();
@@ -35,17 +37,23 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     } = useScriptSummary(scriptId);
     const scriptRepository = useScriptRepository();
     const {isReadOnly} = useScriptAccess();
+    const editing = useScriptEditingSession();
+    // A tab that lost editing must not write the script text, not even a flush on unmount.
+    const canSave = useMemo(() => editing ? () => editing.getState().role === 'editing' : undefined, [editing]);
+    const onSaveRefused = useMemo(() => editing ? () => editing.markRefused() : undefined, [editing]);
     const {
         initialValue,
         initialIndexSnapshot,
         storageError,
         shouldAutoFocus,
         setStorageError,
+        retryLoad,
     } = useScriptLoader(currentScript?.id ?? null, scriptRepository, {isReadOnly});
     const {
         saveIndicator,
         startSaveIndicator,
         finishSaveIndicator,
+        trackSave,
     } = useSaveIndicator();
     const {addToast} = useToastController();
 
@@ -113,16 +121,19 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const {
         handleAutoSave,
         handleManualSave,
+        handleSaveTimedOut,
         handleSummaryMetadataChange,
     } = useScriptSaveHandlers({
         context: {
             currentScript,
             currentScriptId,
+            canSave,
         },
         repository: scriptRepository,
         notifications: {
             setStorageError,
             addToast,
+            onSaveRefused,
         },
         state: {
             saveIndicatorControls: {
@@ -140,15 +151,18 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         ? {
             handleAutoSave: readOnlySave,
             handleManualSave: readOnlySave,
+            handleSaveTimedOut: ignoreSaveTimeout,
             handleSummaryMetadataChange: readOnlySave,
         }
         : {
             handleAutoSave,
             handleManualSave,
+            handleSaveTimedOut,
             handleSummaryMetadataChange,
         }, [
         handleAutoSave,
         handleManualSave,
+        handleSaveTimedOut,
         handleSummaryMetadataChange,
         isReadOnly,
     ]);
@@ -163,8 +177,10 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         initialValue,
         initialIndexSnapshot,
         storageError,
+        retryLoad,
         shouldAutoFocus,
         saveIndicator,
+        trackSave,
         editorLoadState,
         ...saveHandlers,
     };

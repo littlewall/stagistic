@@ -1,0 +1,15 @@
+{
+    "plugin": "mattpocock-skills@claude-plugins-official",
+    "skills": [
+        "grill-with-docs",
+        "grilling",
+        "domain-modeling",
+        "to-spec",
+        "to-tickets",
+        "implement",
+        "tdd",
+        "codebase-design",
+        "code-review",
+        "diagnosing-bugs"
+    ]
+}

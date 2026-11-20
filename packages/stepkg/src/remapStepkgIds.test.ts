@@ -89,6 +89,7 @@ const snapshot = (): StepkgSnapshot => ({
             contentKey: 'assets/old-att/a.pdf',
         },
     ],
+    sceneCharacters: {items: []},
     comments: {threads: [], messages: []},
     attachmentBindings: [
         {

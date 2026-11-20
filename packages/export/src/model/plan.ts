@@ -1,4 +1,5 @@
 import type {
+    ContinuationMark,
     ScriptDocument,
     TitlePageSettings,
 } from '@stagistic/script';
@@ -11,6 +12,8 @@ export interface ForcedBreak {
 }
 
 export interface PaginationOverrides {
+    repeatCharacterOnBreak?: boolean,
+    continuationMark?: ContinuationMark,
     forcedBreaks: ForcedBreak[],
 }
 

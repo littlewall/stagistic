@@ -29,6 +29,7 @@ const snapshot: StepkgSnapshot = {
     scenes: {scenes: [], locations: []},
     attachments: [],
     attachmentBindings: [],
+    sceneCharacters: {items: []},
     comments: {threads: [], messages: []},
 };
 
@@ -51,6 +52,7 @@ describe('peekStepkgPackage', () => {
         const result = await peekStepkgPackage({repository, bytes: await exportBytes()});
 
         expect(result.ok).toBe(true);
+
         if (result.ok) {
             expect(result.scriptId).toBe('script-1');
             expect(result.packageTitle).toBe('My Play');
@@ -70,6 +72,7 @@ describe('peekStepkgPackage', () => {
         const result = await peekStepkgPackage({repository, bytes: await exportBytes()});
 
         expect(result.ok).toBe(true);
+
         if (result.ok) expect(result.existingScript).toEqual({id: 'script-1', title: 'Local Copy'});
     });
 
@@ -86,6 +89,7 @@ describe('peekStepkgPackage', () => {
         const result = await peekStepkgPackage({repository, bytes: new TextEncoder().encode('not a zip')});
 
         expect(result.ok).toBe(false);
+
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
 
         expect(called).toBe(false);

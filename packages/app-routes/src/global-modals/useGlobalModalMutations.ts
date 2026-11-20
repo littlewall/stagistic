@@ -1,5 +1,5 @@
-import {trimOrFallback} from '@stagistic/script';
-import type {NewScriptShape} from '@stagistic/ui';
+import {getFormatTemplate, trimOrFallback} from '@stagistic/script';
+import type {NewScriptFormatSelection, NewScriptShape} from '@stagistic/ui';
 import {
     type Dispatch,
     type SetStateAction,
@@ -60,10 +60,16 @@ export const useGlobalModalMutations = ({
     setIsDuplicating,
 }: UseGlobalModalMutationsArgs) => {
     const handleCreate = useCallback(
-        async (name: string, shape: NewScriptShape) => {
+        async (name: string, shape: NewScriptShape, format?: NewScriptFormatSelection) => {
             try {
                 const initialContent = createInitialScriptDocument(shape);
-                const scriptId = await scriptActions.createScript(name, initialContent);
+                const template = format ? getFormatTemplate(format.templateId) : undefined;
+
+                if (format && !template) throw new Error('Unknown format template');
+
+                const scriptId = format && template
+                    ? await scriptActions.createScript(name, initialContent, {templateId: template.id, lock: format.lock})
+                    : await scriptActions.createScript(name, initialContent);
                 const editorPath = `/script/${scriptId}/editor`;
 
                 setNewScriptTransitionPath(editorPath);

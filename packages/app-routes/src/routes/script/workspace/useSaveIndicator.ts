@@ -13,26 +13,25 @@ type SaveIndicatorController = {
     saveIndicator: ScriptSyncState,
     startSaveIndicator: () => void,
     finishSaveIndicator: (success: boolean) => void,
+    trackSave: <T>(save: () => Promise<T>) => Promise<T>,
 };
 
 export const useSaveIndicator = (): SaveIndicatorController => {
     const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('idle');
     const pendingSaveRef = useRef(0);
+    const failedSaveRef = useRef(false);
     const slowSaveTimerRef = useRef<number | null>(null);
 
     const startSaveIndicator = useCallback(() => {
         pendingSaveRef.current += 1;
 
-        setSaveIndicator(current => {
-            return current === 'saved' ? 'idle' : current;
-        });
+        if (pendingSaveRef.current > 1) return;
 
-        if (slowSaveTimerRef.current) {
-            window.clearTimeout(slowSaveTimerRef.current);
-        }
+        failedSaveRef.current = false;
+        setSaveIndicator('idle');
 
         slowSaveTimerRef.current = window.setTimeout(() => {
-            if (pendingSaveRef.current > 0) {
+            if (pendingSaveRef.current > 0 && !failedSaveRef.current) {
                 setSaveIndicator('saving');
             }
         }, SAVE_SLOW_INDICATOR_MS);
@@ -40,6 +39,7 @@ export const useSaveIndicator = (): SaveIndicatorController => {
 
     const finishSaveIndicator = useCallback((success: boolean) => {
         if (!success) {
+            failedSaveRef.current = true;
             setSaveIndicator('error');
         }
 
@@ -51,7 +51,7 @@ export const useSaveIndicator = (): SaveIndicatorController => {
                 slowSaveTimerRef.current = null;
             }
 
-            if (!success) {
+            if (failedSaveRef.current) {
                 setSaveIndicator('error');
 
                 return;
@@ -60,6 +60,21 @@ export const useSaveIndicator = (): SaveIndicatorController => {
             setSaveIndicator('saved');
         }
     }, []);
+
+    const trackSave = useCallback(async <T>(save: () => Promise<T>): Promise<T> => {
+        startSaveIndicator();
+
+        try {
+            const result = await save();
+
+            finishSaveIndicator(true);
+
+            return result;
+        } catch (error) {
+            finishSaveIndicator(false);
+            throw error;
+        }
+    }, [finishSaveIndicator, startSaveIndicator]);
 
     useEffect(() => {
         if (saveIndicator !== 'saved') {
@@ -87,5 +102,6 @@ export const useSaveIndicator = (): SaveIndicatorController => {
         saveIndicator,
         startSaveIndicator,
         finishSaveIndicator,
+        trackSave,
     };
 };

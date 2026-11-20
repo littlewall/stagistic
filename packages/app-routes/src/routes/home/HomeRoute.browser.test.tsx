@@ -14,6 +14,7 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {createExampleScript} from '../../example-script/createExampleScript';
+import {ReleaseUpdateProvider} from '../../updates/ReleaseUpdateProvider';
 import {HomeRoute} from './HomeRoute';
 
 const {
@@ -393,5 +394,114 @@ describe('HomeRoute hover states', () => {
         expect(getComputedStyle(card).borderTopColor).not.toBe(restingBorder);
         expect(getComputedStyle(card).boxShadow).toBe('none');
         expect(getComputedStyle(card).transform).toBe('none');
+    });
+});
+
+describe('HomeRoute with a newer Release deployed', () => {
+    it('reloads quietly when the writer comes back to the list, at most once', async () => {
+        window.sessionStorage.clear();
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 1)];
+
+        const reload = vi.fn();
+        const focusTarget = new EventTarget();
+        const monitorOptions = {
+            fetch: () => Promise.resolve(new Response(
+                '{"release":"9.0.0","dbGeneration":"27/20261103094608_x/0.3.15"}',
+                {headers: {'content-type': 'application/json'}},
+            )),
+            focusTarget,
+            isOnline: () => true,
+        };
+        const host = document.body.appendChild(document.createElement('div'));
+        const root = createRoot(host);
+        const render = (isListShown: boolean) => root.render(
+            <ReleaseUpdateProvider
+                currentRelease="0.1.0"
+                dbGeneration="27/20261103094608_x/0.3.15"
+                monitorOptions={monitorOptions}
+                quietReloadDelayMs={30}
+                reload={reload}
+            >
+                {isListShown ? <MemoryRouter><HomeRoute /></MemoryRouter> : null}
+            </ReleaseUpdateProvider>,
+        );
+
+        roots.push(root);
+        render(false);
+        await new Promise(resolve => window.setTimeout(resolve, 30));
+        focusTarget.dispatchEvent(new Event('focus'));
+        await new Promise(resolve => window.setTimeout(resolve, 60));
+        expect(reload).not.toHaveBeenCalled();
+
+        render(true);
+        await waitForText('One draft');
+        await vi.waitFor(() => expect(reload).toHaveBeenCalledTimes(1));
+
+        render(false);
+        await new Promise(resolve => window.setTimeout(resolve, 30));
+        render(true);
+        await new Promise(resolve => window.setTimeout(resolve, 150));
+        expect(reload).toHaveBeenCalledTimes(1);
+        window.sessionStorage.clear();
+    });
+
+    it('never reloads quietly when the deployed Release needs another database generation', async () => {
+        window.sessionStorage.clear();
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 1)];
+
+        const reload = vi.fn();
+        const focusTarget = new EventTarget();
+        const monitorOptions = {
+            fetch: () => Promise.resolve(new Response(
+                '{"release":"9.0.0","dbGeneration":"28/20261201000000_y/0.3.15"}',
+                {headers: {'content-type': 'application/json'}},
+            )),
+            focusTarget,
+            isOnline: () => true,
+        };
+        const host = document.body.appendChild(document.createElement('div'));
+        const root = createRoot(host);
+
+        roots.push(root);
+        root.render(
+            <ReleaseUpdateProvider
+                currentRelease="0.1.0"
+                dbGeneration="27/20261103094608_x/0.3.15"
+                monitorOptions={monitorOptions}
+                quietReloadDelayMs={30}
+                reload={reload}
+            >
+                <MemoryRouter><HomeRoute /></MemoryRouter>
+            </ReleaseUpdateProvider>,
+        );
+        await waitForText('One draft');
+        focusTarget.dispatchEvent(new Event('focus'));
+        await new Promise(resolve => window.setTimeout(resolve, 150));
+        root.render(
+            <ReleaseUpdateProvider
+                currentRelease="0.1.0"
+                dbGeneration="27/20261103094608_x/0.3.15"
+                monitorOptions={monitorOptions}
+                quietReloadDelayMs={30}
+                reload={reload}
+            >
+                {null}
+            </ReleaseUpdateProvider>,
+        );
+        await new Promise(resolve => window.setTimeout(resolve, 30));
+        root.render(
+            <ReleaseUpdateProvider
+                currentRelease="0.1.0"
+                dbGeneration="27/20261103094608_x/0.3.15"
+                monitorOptions={monitorOptions}
+                quietReloadDelayMs={30}
+                reload={reload}
+            >
+                <MemoryRouter><HomeRoute /></MemoryRouter>
+            </ReleaseUpdateProvider>,
+        );
+        await new Promise(resolve => window.setTimeout(resolve, 150));
+        expect(reload).not.toHaveBeenCalled();
+        window.sessionStorage.clear();
     });
 });

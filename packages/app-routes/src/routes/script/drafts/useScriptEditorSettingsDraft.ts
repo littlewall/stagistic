@@ -4,15 +4,18 @@ import {
     useScriptEditorSettingsRecord,
 } from '@stagistic/app-core';
 import {
+    applyFormatTemplate,
     type CharacterDecoration,
-    DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     type EditorSettingsOverride,
+    type FormatTemplateId,
     type HeaderFooterAlignment,
     type HeaderFooterSettingsPatch,
     type InitialPagesSettingsPatch,
-    mergeEditorSettings,
+    materializeLegacyTemplateSettings,
     type PageSettings,
+    type PdfFlowPreset,
+    resolveScriptEditorSettings,
     type ScriptBlockNodeType,
     type StructureSettingsPatch,
 } from '@stagistic/script';
@@ -25,6 +28,7 @@ import {
     type BlockSettingsPatch,
     normalizeSettingsOverride,
 } from '../settings/panels';
+import {settingsRescueText} from './draftRescueText';
 
 type HeaderFooterRowPatch = NonNullable<HeaderFooterSettingsPatch['header']>;
 
@@ -61,8 +65,8 @@ export const useScriptEditorSettingsDraft = ({
     const record = useScriptEditorSettingsRecord(currentScriptId, repository);
     const {save} = record;
     const confirmedSettings = useMemo(
-        () => normalizeSettingsOverride(record.record?.settings ?? EMPTY_SETTINGS),
-        [record.record?.settings],
+        () => normalizeSettingsOverride(materializeLegacyTemplateSettings(record.record?.formatTemplateId ?? null, record.record?.settings ?? EMPTY_SETTINGS)),
+        [record.record?.settings, record.record?.formatTemplateId],
     );
     const persist = useCallback((_scriptId: string, value: EditorSettingsOverride) => {
         return save(normalizeSettingsOverride(value));
@@ -73,13 +77,42 @@ export const useScriptEditorSettingsDraft = ({
         isHydrated: !record.isLoading,
         defaultValue: EMPTY_SETTINGS,
         persist,
+        toText: settingsRescueText,
     });
     const {setDraft} = draft;
     const scriptSettingsDraft = draft.draft;
+    const formatTemplateId = record.record?.formatTemplateId ?? null;
     const resolvedScriptSettings = useMemo<EditorSettings>(
-        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsDraft),
-        [scriptSettingsDraft],
+        () => resolveScriptEditorSettings({formatTemplateId, override: scriptSettingsDraft}),
+        [scriptSettingsDraft, formatTemplateId],
     );
+
+    const applyTemplate = useCallback(async (id: FormatTemplateId, {lock}: {lock: boolean}) => {
+        if (!currentScriptId) return;
+
+        await draft.flush();
+
+        const next = applyFormatTemplate({templateId: id, lock}, resolvedScriptSettings);
+
+        await save(normalizeSettingsOverride(next.settings), next.formatTemplateId);
+    }, [
+        currentScriptId,
+        draft,
+        save,
+        resolvedScriptSettings,
+    ]);
+
+    const unlockTemplate = useCallback(async () => {
+        if (!formatTemplateId) return;
+
+        await draft.flush();
+        await save(normalizeSettingsOverride(resolvedScriptSettings), null);
+    }, [
+        draft,
+        formatTemplateId,
+        resolvedScriptSettings,
+        save,
+    ]);
 
     const updateBlockSettings = useCallback((
         blockType: ScriptBlockNodeType,
@@ -108,6 +141,10 @@ export const useScriptEditorSettingsDraft = ({
                 blocks: Object.keys(nextBlocks).length > 0 ? nextBlocks : undefined,
             };
         });
+    }, [setDraft]);
+
+    const updatePdfFlowSettings = useCallback((patch: Partial<PdfFlowPreset>) => {
+        setDraft(previous => ({...previous, pdfFlow: {...previous.pdfFlow, ...patch}}));
     }, [setDraft]);
 
     const updateCharacterDecoration = useCallback((value: CharacterDecoration) => {
@@ -174,8 +211,12 @@ export const useScriptEditorSettingsDraft = ({
     }, [setDraft]);
 
     return {
+        formatTemplateId,
+        applyTemplate,
+        unlockTemplate,
+        updatePdfFlowSettings,
         scriptSettingsDraft,
-        effectiveScriptSettingsDraft: scriptSettingsDraft,
+        effectiveScriptSettingsDraft: resolvedScriptSettings,
         /*
          * draft.isHydrated alone lags one render behind a script switch (the
          * controller only learns the new key in a layout effect), which lets

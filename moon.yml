@@ -8,8 +8,56 @@ workspace:
     include: []
 
 tasks:
+  # Agent checks with shared results/logs; full regression always runs afresh.
+  verify:
+    command: 'node scripts/verify.mjs'
+    options:
+      cache: false
+
+  # Agent roles (tools/agent-roles): regenerate .claude/agents from .agents/roles.json.
+  agents-sync:
+    command: 'node tools/agent-roles/bin/sync.mjs'
+    options:
+      cache: false
+
+  agents-check:
+    command: 'node tools/agent-roles/bin/sync.mjs --check'
+    options:
+      cache: false
+
+  # Live OpenCode Go models vs. role candidates and the tier table.
+  agents-models:
+    command: 'node tools/agent-roles/bin/models.mjs'
+    options:
+      cache: false
+
+  agents-test:
+    command: 'node --test tools/agent-roles/test/*.test.mjs'
+    options:
+      cache: false
+
+  # Merges releases/next/*.md into releases/<release>.md and sets every Release number.
+  # Never commits or tags. Usage: moon run root:release-prepare [-- --date YYYY-MM-DD]
+  release-prepare:
+    command: 'tsx packages/release-notes/src/cli.ts'
+    options:
+      cache: false
+
+  # Undoes release-prepare back to a Release: splits every releases/<n>.md newer than it into
+  # releases/next/ fragments, deletes those files and sets every Release number to it.
+  # Never commits or tags. Usage: moon run root:release-revert -- 0.1.0
+  release-revert:
+    command: 'tsx packages/release-notes/src/cli.ts revert'
+    options:
+      cache: false
+
+  upstream-check:
+    command: 'node tools/agent-flows/bin/upstream.mjs check'
+    options:
+      cache: false
+
   lint:
-    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
+    script: 'vp lint && jscpd --config .jscpd.json && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs && node tools/agent-roles/bin/sync.mjs --check'
     options:
       cache: false
 
@@ -77,6 +125,8 @@ tasks:
     command: 'echo "All test suites passed."'
     deps:
       - 'root:test'
+      - 'agent-flows:test'
+      - 'agent-roles:test'
       - 'app-core:test-browser'
       - 'app-routes:test-browser'
       - 'editor:test-browser'

@@ -1,4 +1,8 @@
-import {useScriptRepository, useScripts} from '@stagistic/app-core';
+import {
+    reportDynamicImportFailure,
+    useScriptRepository,
+    useScripts,
+} from '@stagistic/app-core';
 import {
     ActionCard,
     AppLayout,
@@ -24,6 +28,8 @@ import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
+import {useQuietReloadOnReturn} from '../../updates/ReleaseUpdateProvider';
+import {ReleaseHighlightsPopup} from '../../whats-new/ReleaseHighlightsPopup';
 import {buildHomeDashboardModel, type ScriptSort} from './homeDashboardModel';
 import {HomeHeader} from './HomeHeader';
 import styles from './HomeRoute.module.css';
@@ -35,6 +41,10 @@ export const HomeRoute = () => {
     useDocumentTitle('Scripts');
 
     const navigate = useNavigate();
+
+    // The list is where a newer Release may be picked up without disturbing anything.
+    useQuietReloadOnReturn();
+
     const repository = useScriptRepository();
     const {
         scriptSummaries,
@@ -121,6 +131,7 @@ export const HomeRoute = () => {
             void navigate(`/script/${example.scriptId}/editor`);
         } catch (caughtError) {
             console.error('Could not create example script.', caughtError);
+            reportDynamicImportFailure(caughtError, 'The example script could not be prepared.');
             setExampleError('Couldn’t create the example script. Please try again.');
         } finally {
             setIsCreatingExample(false);
@@ -251,6 +262,7 @@ export const HomeRoute = () => {
                     )}
                 </div>
             </PageContainer>
+            <ReleaseHighlightsPopup />
         </AppLayout>
     );
 };

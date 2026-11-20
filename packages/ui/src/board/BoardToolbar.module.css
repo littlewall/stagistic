@@ -1,0 +1,13 @@
+.toolbar {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: center;
+    justify-content: space-between;
+    height: 2.75rem;
+}
+
+.controls {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+}

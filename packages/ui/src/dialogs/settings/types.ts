@@ -37,8 +37,10 @@ export type SettingsNavItem =
     } & SettingsNavSeparatorItem);
 
 export interface SettingsNavGroup {
+    headerAccessory?: ReactNode,
     id: string,
-    label: string,
+    /** Omit for a trailing headerless group, e.g. a danger zone set apart from the labelled groups. */
+    label?: string,
     items: SettingsNavItem[],
 }
 

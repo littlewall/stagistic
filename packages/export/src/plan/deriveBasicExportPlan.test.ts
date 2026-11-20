@@ -281,7 +281,7 @@ describe('deriveBasicExportPlan', () => {
             .toEqual(['characters-and-places', 'contents']);
         expect(plan.leadingPages.initialPages[1]).toMatchObject({
             kind: 'contents',
-            variant: 'scenes-and-musical-numbers',
+            variant: 'scenes',
             showScoreColumn: false,
         });
     });

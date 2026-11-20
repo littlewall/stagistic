@@ -12,6 +12,7 @@
         {"path": "./packages/script-pagination"},
         {"path": "./packages/export"},
         {"path": "./packages/stepkg"},
+        {"path": "./packages/release-notes"},
         {"path": "./apps/desktop"},
         {"path": "./apps/web"}
     ],

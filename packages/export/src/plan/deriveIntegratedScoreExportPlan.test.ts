@@ -132,3 +132,13 @@ describe('deriveIntegratedScoreExportPlan', () => {
         expect(runs.some(run => run.text === '7')).toBe(false);
     });
 });
+
+it('attaches the score after the last printable music block when its out marker is in a hidden note', () => {
+    const plan = deriveIntegratedScoreExportPlan({...INTEGRATED_SCORE_DEFAULTS, showNotes: false}, {
+        ...script,
+        doc: {...script.doc, content: script.doc.content.map(node => (node.attrs?.id === 'out' ? {...node, type: 'note'} : node))},
+    });
+
+    expect(plan.postSteps[0]?.afterBlockId).toBe('music');
+    expect(plan.doc.content.some(node => node.attrs?.id === 'out')).toBe(false);
+});

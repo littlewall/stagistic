@@ -1,4 +1,5 @@
 import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
+import {ALL_FORMAT_TEMPLATES} from '@stagistic/script';
 import {
     DeleteScriptModal,
     DuplicateScriptModal,
@@ -158,6 +159,7 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
                 returnFocus={newScriptReturnFocus}
                 onClose={closeNewScript}
                 onCreate={handleCreate}
+                formatTemplates={ALL_FORMAT_TEMPLATES}
             />
             <ImportScriptModal
                 isOpen={isImportOpen}

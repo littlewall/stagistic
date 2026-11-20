@@ -1,3 +1,4 @@
+import type {ScriptDocumentSession} from '@stagistic/editor';
 import {
     linkCharacterRefInScriptDocument,
     renameCharacterInScriptDocument,
@@ -8,6 +9,7 @@ import {
 import {useCallback} from 'react';
 
 interface UseCharacterDocumentActionsArgs {
+    documentSession?: ScriptDocumentSession,
     getEditorValue: () => ScriptDocument | null,
     setEditorValue: (value: ScriptDocument | null) => void,
     setEditorOverrideValue: (value: ScriptDocument | null) => void,
@@ -16,6 +18,7 @@ interface UseCharacterDocumentActionsArgs {
 }
 
 export const useCharacterDocumentActions = ({
+    documentSession,
     getEditorValue,
     setEditorValue,
     setEditorOverrideValue,
@@ -30,11 +33,16 @@ export const useCharacterDocumentActions = ({
             return true;
         }
 
+        if (documentSession) {
+            return documentSession.applyDocumentChange(change.value) ? documentSession.flush() : false;
+        }
+
         setEditorValue(change.value);
         setEditorOverrideValue(change.value);
 
         return handleAutoSave(change.value);
     }, [
+        documentSession,
         handleAutoSave,
         setEditorOverrideValue,
         setEditorValue,

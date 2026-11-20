@@ -22,7 +22,7 @@
     grid-auto-flow: column;
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--space-md);
-    align-items: start;
+    align-items: center;
     /* stylelint-disable-next-line csstree/validator */
     min-width: min(300px, 80vw);
     /* stylelint-disable-next-line csstree/validator */
@@ -45,7 +45,6 @@
     & .statusIndicator {
         width: 6px;
         height: 6px;
-        margin-top: var(--space-sm);
         background: var(--color-text-muted);
         border-radius: var(--radius-full);
     }

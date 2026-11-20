@@ -6,6 +6,7 @@ import {
     isScriptBlockNodeName,
     normalizeBlockNodeType,
 } from '../tiptap/scriptCore';
+import {createPageCursor} from './pageCursor';
 
 export interface ScenePlacementResult {
     byBlockId: Map<string, ScenePlacement>,
@@ -16,21 +17,6 @@ export interface ScenePlacementResult {
 const EMPTY_RESULT: ScenePlacementResult = {
     byBlockId: new Map(),
     fingerprint: '',
-};
-
-/** Index of the last page whose start position is at or before `pos`. */
-const findPageIndex = (pages: PaginationState['pages'], pos: number): number => {
-    let index = 0;
-
-    for (let i = 0; i < pages.length; i += 1) {
-        if (pages[i].startPos <= pos) {
-            index = i;
-        } else {
-            break;
-        }
-    }
-
-    return index;
 };
 
 /*
@@ -50,6 +36,7 @@ export const buildScenePlacements = (
         return EMPTY_RESULT;
     }
 
+    const cursor = createPageCursor(pages);
     const byBlockId = new Map<string, ScenePlacement>();
     const fingerprintParts: string[] = [];
 
@@ -68,7 +55,7 @@ export const buildScenePlacements = (
             return;
         }
 
-        const startPage = findPageIndex(pages, offset) + 1;
+        const startPage = cursor.startPage(offset);
 
         byBlockId.set(blockId, {startPage});
         fingerprintParts.push(`${blockId}:${startPage}`);

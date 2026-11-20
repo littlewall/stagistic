@@ -17,6 +17,7 @@ import {userEvent} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../context';
 import ScriptEditor from '../Editor';
+import {createEditorSnapshotStore} from '../live/store';
 import {getActiveScriptBlockFromState} from '../tiptap/scriptCore';
 
 type LifecycleTestWindow = Window & {__lifecycleTestEditor?: Editor | null};
@@ -307,5 +308,45 @@ describe('useEditorLifecycle', () => {
         await userEvent.keyboard('{ArrowRight}');
 
         expect(document.querySelector('[data-placeholder]')).toBeNull();
+    });
+
+    it('publishes the live index as the editor unmounts, with the latest keystrokes', async () => {
+        const liveStore = createEditorSnapshotStore();
+        const host = document.createElement('div');
+
+        host.style.width = '1024px';
+        host.style.height = '720px';
+        document.body.appendChild(host);
+
+        const root = createRoot(host);
+
+        root.render(
+            <ScriptEditor
+                document={{initialValue: createDefaultScriptDocument('scene-1')}}
+                liveStore={liveStore}
+                layout={{autoFocus: true}}
+            >
+                <ScriptEditor.LeftSidebar>
+                    <EditorProbe />
+                </ScriptEditor.LeftSidebar>
+            </ScriptEditor>,
+        );
+
+        const editor = await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        // Mounting seeds the load-time index; typing alone builds none, which keeps keystrokes cheap.
+        editor.chain().focus('end').insertContent('Kitchen')
+            .run();
+
+        expect(liveStore.getSnapshot().index.blocks.some(block => block.textContent.includes('Kitchen'))).toBe(false);
+
+        root.unmount();
+
+        const {blocks} = liveStore.getSnapshot().index;
+
+        expect(blocks.some(block => block.blockType === 'scene' && block.textContent.includes('Kitchen'))).toBe(true);
     });
 });

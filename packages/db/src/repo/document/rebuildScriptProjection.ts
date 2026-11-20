@@ -5,13 +5,12 @@ import {extractScriptBlocks} from '../../blocks';
 import * as dbQueries from '../../queries';
 import {type DbClient, generateBlockOrderKeys} from '../../queries';
 import {
-    scriptActs,
     scriptBlocks,
     scriptMusic,
-    scriptScenes,
 } from '../../schema';
 import {toCharacterRefRows} from '../characters/characterRefRows';
 import type {SaveScriptDocumentOptions} from './documentProjection';
+import {reconcileActsAndScenes} from './persist/reconcileActsAndScenes';
 
 export interface RebuildScriptProjectionArgs extends SaveScriptDocumentOptions {
     db: DbClient,
@@ -33,62 +32,11 @@ export const rebuildScriptProjection = async ({
     const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
 
     await db.transaction(async tx => {
-        const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));
-        const existingScenes = await tx.select().from(scriptScenes).where(eq(scriptScenes.scriptId, scriptId));
         const existingBlocks = await tx.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId));
         const existingMusic = await tx.select({id: scriptMusic.id}).from(scriptMusic).where(eq(scriptMusic.scriptId, scriptId));
         const knownSpeakingEntities = await dbQueries.listScriptSpeakingEntities(tx, scriptId);
 
-        const nextActIds = new Set(extracted.acts.map(act => act.id));
-
-        await dbQueries.bulkUpsertScriptActs(
-            tx,
-            extracted.acts.map(act => ({
-                id: act.id,
-                scriptId,
-                headingBlockId: act.headingBlockId,
-                name: act.name,
-                createdAt: now,
-                updatedAt: now,
-            })),
-        );
-        await dbQueries.bulkDeleteScriptActs(
-            tx,
-            existingActs.filter(act => !nextActIds.has(act.id)).map(act => act.id),
-        );
-
-        /*
-         * Scene rows are hybrid rows: heading identity/ordering is projection-owned,
-         * while color/synopsis/location are user metadata. Rebuild must refresh the
-         * projection fields without erasing metadata for surviving heading blocks.
-         */
-        const existingSceneByHeading = new Map(
-            existingScenes.filter(scene => scene.headingBlockId).map(scene => [scene.headingBlockId as string, scene] as const),
-        );
-        const nextSceneIds = new Set(extracted.scenes.map(scene => scene.id));
-
-        await dbQueries.bulkUpsertScriptScenes(
-            tx,
-            extracted.scenes.map(scene => {
-                const prev = existingSceneByHeading.get(scene.headingBlockId) ?? null;
-
-                return {
-                    id: scene.id,
-                    scriptId,
-                    headingBlockId: scene.headingBlockId,
-                    sceneNumber: scene.sceneNumber,
-                    colorHex: prev?.colorHex ?? null,
-                    synopsis: prev?.synopsis ?? null,
-                    locationId: prev?.locationId ?? null,
-                    createdAt: prev?.createdAt ?? now,
-                    updatedAt: now,
-                };
-            }),
-        );
-        await dbQueries.bulkDeleteScriptScenes(
-            tx,
-            existingScenes.filter(scene => !nextSceneIds.has(scene.id)).map(scene => scene.id),
-        );
+        await reconcileActsAndScenes(tx, scriptId, extracted, now);
 
         const nextBlockIds = new Set(extracted.blocks.map(block => block.blockId));
 

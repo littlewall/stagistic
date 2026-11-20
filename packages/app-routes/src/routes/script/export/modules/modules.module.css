@@ -76,3 +76,21 @@
     color: var(--color-text-muted);
     white-space: nowrap;
 }
+
+.continuationRow {
+    gap: var(--space-lg);
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.continuationField {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    &:disabled {
+        opacity: .5;
+    }
+}

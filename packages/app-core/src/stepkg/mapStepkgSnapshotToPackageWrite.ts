@@ -53,6 +53,7 @@ export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets
         id: snapshot.script.id,
         title: snapshot.script.title,
         subtitle: snapshot.script.subtitle,
+        formatTemplateId: snapshot.script.formatTemplateId ?? null,
         createdAt: toEpoch(snapshot.script.createdAt),
         updatedAt: toEpoch(snapshot.script.updatedAt),
     },
@@ -112,6 +113,11 @@ export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets
         colorHex: scene.colorHex,
         synopsis: scene.synopsis,
         locationIds: scene.locationIds,
+    })),
+    sceneCharacters: snapshot.sceneCharacters.items.map(row => ({
+        ...row,
+        createdAt: toEpoch(row.createdAt),
+        updatedAt: toEpoch(row.updatedAt),
     })),
     attachments: snapshot.attachments.map(attachment => mapAttachment(attachment, assets)),
     bindings: snapshot.attachmentBindings.map(binding => ({
