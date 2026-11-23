@@ -168,7 +168,7 @@ export const runCharacterRefRenameCommand = ({
                 return false;
             }
 
-            const newText = dedupedValues.join('+');
+            const newText = dedupedValues.join('/');
             const presentKeys = new Set(dedupedKeys);
             const nextRefs: CharacterRefByKey = {};
 

@@ -17,6 +17,7 @@ import {
     getSelectionOffset,
     isInsideParentheses,
 } from '../context';
+import {isAtBlockStart, stripLeadingWhitespace} from './leadingWhitespace';
 import {
     type BlockCasingMap,
     type HandlerMap,
@@ -169,6 +170,18 @@ export const handleTextInput = (
 
     if (!block) {
         return false;
+    }
+
+    /*
+     * Q23: typed whitespace at a block start is swallowed (a selection it would replace is deleted).
+     * Other ways in (Enter split, Backspace join, autocomplete, IME) are caught by leadingWhitespacePlugin.
+     */
+    if (isAtBlockStart(editor.state, from) && stripLeadingWhitespace(text).length === 0) {
+        if (from !== to) {
+            editor.view.dispatch(editor.state.tr.delete(from, to));
+        }
+
+        return true;
     }
 
     if (block.blockType === 'character') {

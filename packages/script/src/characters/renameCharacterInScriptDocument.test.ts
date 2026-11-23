@@ -44,3 +44,21 @@ describe('renameCharacterInScriptDocument with tags', () => {
         expect(value.content[0].content?.[1]?.text).toBe(' waits for Anna.');
     });
 });
+
+describe('renameCharacterInScriptDocument cue delimiter', () => {
+    it.each(['ANNA+BOB', 'ANNA/BOB'])('writes `/` between names when renaming in the cue %s by id', cue => {
+        const doc: ScriptDocument = {
+            type: 'doc',
+            content: [
+                {
+                    type: 'character',
+                    attrs: {id: 'b1', characterRefs: {ANNA: 'char-anna', BOB: 'char-bob'}},
+                    content: [{type: 'text', text: cue}],
+                },
+            ],
+        };
+        const {value} = renameCharacterInScriptDocument(doc, 'ANNA', 'CLARA', name => name, {characterId: 'char-anna'});
+
+        expect(value.content[0].content?.[0].text).toBe('CLARA/BOB');
+    });
+});

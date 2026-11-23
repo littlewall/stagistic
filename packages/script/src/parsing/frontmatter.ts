@@ -12,12 +12,17 @@ const FRONTMATTER_KEYS = new Set([
     'draftDate',
     'contact',
     'copyright',
+    'singleHashtag',
 ]);
+
+export type StagisticSingleHashtag = 'act' | 'scene';
 
 export interface ParsedFrontmatter {
     body: string,
     bodyStartLine: number,
     title?: string,
+    /** What a lone `#` heading is, when the file says so; otherwise inferred from `##`. */
+    singleHashtag?: StagisticSingleHashtag,
     titlePage: TitlePageSettings,
 }
 
@@ -77,6 +82,20 @@ const readCredits = (value: unknown): TitlePageCredit[] | undefined => {
     });
 };
 
+const readSingleHashtag = (source: unknown): StagisticSingleHashtag | undefined => {
+    if (!isObjectRecord(source)) {
+        return undefined;
+    }
+
+    const value = readOptionalString(source, 'singleHashtag');
+
+    if (value !== undefined && value !== 'act' && value !== 'scene') {
+        throw new StagisticParseError('Frontmatter field "singleHashtag" must be "act" or "scene".');
+    }
+
+    return value;
+};
+
 const toTitlePageSettings = (value: unknown): TitlePageSettings => {
     if (value === null || value === undefined) {
         return {};
@@ -102,7 +121,7 @@ const toTitlePageSettings = (value: unknown): TitlePageSettings => {
         subtitle: readOptionalString(value, 'subtitle'),
         credits: readCredits(value.credits),
         source: readOptionalString(value, 'source'),
-        draftDateMode: draftDate ? 'manual' : undefined,
+        draftDateMode: draftDate || value.draftDate === '' ? 'manual' : undefined,
         draftDate,
         contact: readOptionalString(value, 'contact'),
         copyright: readOptionalString(value, 'copyright'),
@@ -134,12 +153,20 @@ export const parseStagisticFrontmatter = (source: string): ParsedFrontmatter => 
         throw new StagisticParseError(`Invalid YAML frontmatter: ${yamlDocument.errors[0].message}`);
     }
 
-    const parsed: unknown = yamlDocument.toJS();
+    let parsed: unknown;
+
+    try {
+        parsed = yamlDocument.toJS();
+    } catch (error) {
+        // e.g. an alias without an anchor: the yaml library throws a ReferenceError from toJS().
+        throw new StagisticParseError(`Invalid YAML frontmatter: ${error instanceof Error ? error.message : 'unreadable'}`);
+    }
 
     return {
         body: lines.slice(closingIndex + 1).join('\n'),
         bodyStartLine: closingIndex + 2,
         title: isObjectRecord(parsed) ? readOptionalString(parsed, 'title') : undefined,
+        singleHashtag: readSingleHashtag(parsed),
         titlePage: toTitlePageSettings(parsed),
     };
 };

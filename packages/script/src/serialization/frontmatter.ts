@@ -4,6 +4,8 @@ export interface StagisticFrontmatterOptions {
     scriptTitle: string,
     titlePage?: TitlePageSettings,
     exportDate?: Date,
+    /** Written only for a document with acts and no scenes, so a lone `#` reads back as an act. */
+    singleHashtag?: 'act',
 }
 
 const yamlString = (value: string) => JSON.stringify(value);
@@ -22,6 +24,7 @@ export const serializeStagisticFrontmatter = ({
     scriptTitle,
     titlePage = {},
     exportDate = new Date(),
+    singleHashtag,
 }: StagisticFrontmatterOptions): string => {
     const lines = ['---'];
     const title = trimValue(scriptTitle);
@@ -67,6 +70,9 @@ export const serializeStagisticFrontmatter = ({
 
     if ((/^\d{4}-\d{2}-\d{2}$/u).test(draftDate)) {
         lines.push(`draftDate: ${draftDate}`);
+    } else if (titlePage.draftDateMode === 'manual') {
+        // `draftDate: ""` keeps manual mode with no date; a missing key means auto.
+        lines.push('draftDate: ""');
     }
 
     const trailingScalarFields = [['contact', titlePage.contact], ['copyright', titlePage.copyright]] as const;
@@ -78,6 +84,10 @@ export const serializeStagisticFrontmatter = ({
             lines.push(`${key}: ${yamlString(value)}`);
         }
     });
+
+    if (singleHashtag) {
+        lines.push(`singleHashtag: ${singleHashtag}`);
+    }
 
     lines.push('---');
 

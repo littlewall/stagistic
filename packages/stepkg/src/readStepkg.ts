@@ -133,6 +133,59 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         return {ok: false, issues: [{code: 'schema_invalid', stage: 'schema'}]};
     }
 
+    /*
+     * Package files are untrusted JSON: valid checksums do not guarantee the shape. Only reading the
+     * decoded shape is guarded (property test: stepkgRoundTrip.property.test.ts); container and
+     * checksum failures other than controlled issues propagate.
+     */
+    try {
+        return assemblePackage({
+            manifest,
+            files,
+            document,
+            script,
+            characters,
+            music,
+            scenes,
+            titlePage,
+            settings,
+            attachmentsFile,
+            comments,
+        });
+    } catch {
+        return {ok: false, issues: [{code: 'schema_invalid', stage: 'schema'}]};
+    }
+};
+
+interface DecodedPackage {
+    manifest: StepkgManifest,
+    files: Map<string, Uint8Array>,
+    document: ScriptDocument,
+    script: StepkgSnapshot['script'],
+    characters: StepkgSnapshot['characters'],
+    music: StepkgSnapshot['music'],
+    scenes: StepkgSnapshot['scenes'],
+    titlePage: StepkgSnapshot['titlePage'],
+    settings: StepkgSnapshot['settings'],
+    attachmentsFile: StepkgAttachmentsFile,
+    comments: StepkgSnapshot['comments'],
+}
+
+const assemblePackage = ({
+    manifest,
+    files,
+    document,
+    script,
+    characters,
+    music,
+    scenes,
+    titlePage,
+    settings,
+    attachmentsFile,
+    comments,
+}: DecodedPackage): StepkgReadResult => {
+    const issues: StepkgImportIssue[] = [];
+
     if (manifest.script.id !== script.id) {
         return {
             ok: false,

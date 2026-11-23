@@ -137,7 +137,9 @@ export const paginate = (
         const shouldPushDown = block.orphanCandidate
             && block.height <= remainingBefore
             && remainingAfter < orphanThreshold
-            && lastBlockEndKey !== null;
+            && lastBlockEndKey !== null
+            /* F4: never push down from a page that has no content yet (e.g. one a forced break just opened). */
+            && pageHasContent;
 
         if (shouldPushDown) {
             emitWholeBreak('pushDown', block, remainingBefore);

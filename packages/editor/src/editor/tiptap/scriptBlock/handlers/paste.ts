@@ -3,6 +3,7 @@ import type {Editor} from '@tiptap/react';
 
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {type BlockContext, createBlockContext} from '../context';
+import {isAtBlockStart, stripLeadingWhitespace} from './leadingWhitespace';
 import {type HandlerMap} from './types';
 
 const STRUCTURED_SCRIPT_HTML_PATTERN = /<p\b[^>]*\b(?:blocktype|data-block-type)\s*=/i;
@@ -48,8 +49,12 @@ const pasteMultilineAsActiveBlockType = (context: BlockContext, event: Clipboard
     }
 
     const marks = context.editor.state.selection.$from.marks();
-    const blocks = splitPastedTextLines(text).map(line => {
-        const normalized = normalizePastedText(context.block.blockType, line);
+    const startsBlock = isAtBlockStart(context.editor.state, context.editor.state.selection.from);
+    const blocks = splitPastedTextLines(text).map((line, index) => {
+        const normalized = normalizePastedText(
+            context.block.blockType,
+            index === 0 && !startsBlock ? line : stripLeadingWhitespace(line),
+        );
         const content = normalized ? context.editor.schema.text(normalized, marks) : undefined;
 
         return blockNodeType.create({blockType: context.block.blockType}, content);
@@ -62,6 +67,10 @@ const pasteMultilineAsActiveBlockType = (context: BlockContext, event: Clipboard
     return true;
 };
 
+const withoutLeadingWhitespace = (context: BlockContext, text: string) => {
+    return isAtBlockStart(context.editor.state, context.editor.state.selection.from) ? stripLeadingWhitespace(text) : text;
+};
+
 const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) => boolean> = {
     ['act']: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
@@ -72,7 +81,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         event.preventDefault();
 
-        const normalized = text.replace(/\s*\n+\s*/g, ' ').toLocaleUpperCase();
+        const normalized = withoutLeadingWhitespace(context, text.replace(/\s*\n+\s*/g, ' ').toLocaleUpperCase());
 
         context.editor.commands.insertContent(normalized);
 
@@ -87,7 +96,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         event.preventDefault();
 
-        const sanitized = text.replace(/\s*\n+\s*/g, ' ').replace(/[()]/g, '');
+        const sanitized = withoutLeadingWhitespace(context, text.replace(/\s*\n+\s*/g, ' ').replace(/[()]/g, ''));
 
         context.editor.commands.insertContent(sanitized);
 

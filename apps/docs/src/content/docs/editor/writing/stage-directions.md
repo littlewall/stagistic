@@ -1,6 +1,6 @@
 ---
 title: Write stage directions
-description: Describe action on stage, adjust indentation and include character or music references.
+description: Describe action on stage and include character or music references.
 ---
 
 Use a **Stage direction** for what happens on stage, such as `Robin opens the door.` Use an [Aside](/editor/writing/dialogue/) for a note about a particular speech, such as `quietly`.
@@ -15,15 +15,11 @@ The words can be ordinary text. If Robin's name should be linked to a character,
 
 At the end of a nonempty Stage direction, <kbd><span aria-hidden="true">⏎</span> Enter</kbd> starts a Character block with the default settings. To write another Stage direction, choose that type for the new block. [Continue writing](/editor/writing/flow/) explains the chooser available in empty blocks.
 
-## Adjust indentation
+## Start at the margin
 
-1. Place the cursor in the Stage direction you want to indent.
-2. Press <kbd><span aria-hidden="true">⇥</span> Tab</kbd> to add one level of indentation to that block.
-3. Press <kbd><span aria-hidden="true">⇧</span> Shift</kbd> + <kbd><span aria-hidden="true">⇥</span> Tab</kbd> to remove one level.
+A block never starts with a space or a tab. Whitespace you type or paste at the start of a block is ignored, and <kbd><span aria-hidden="true">⇥</span> Tab</kbd> does not indent a Stage direction. Spaces inside the text stay.
 
-You can add up to two levels. The indentation is added at the beginning of the block, even if the cursor is in the middle of its text. The text stays in the same block.
-
-In Dialogue and Aside, <kbd><span aria-hidden="true">⇥</span> Tab</kbd> changes the block type instead. Check the current type in the toolbar when the result differs from the indentation you expected.
+In Dialogue and Aside, <kbd><span aria-hidden="true">⇥</span> Tab</kbd> changes the block type instead. Check the current type in the toolbar when the result differs from what you expected.
 
 ## Include references
 

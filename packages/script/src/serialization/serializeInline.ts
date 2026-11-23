@@ -1,6 +1,7 @@
 import {CHARACTER_TAG_MARK_NAME} from '../characters';
 import {type ScriptNode} from '../document';
 import {
+    MUSIC_KIND_ATTR,
     MUSIC_MODE_ATTR,
     MUSIC_OUT_NODE_NAME,
     MUSIC_START_NODE_NAME,
@@ -21,7 +22,7 @@ const escapeQuotedLiteral = (value: string) => value.replace(/\\/gu, '\\\\').rep
 const quoteLiteral = (value: string) => `"${escapeQuotedLiteral(value)}"`;
 
 export const quoteNameWhenRequired = (value: string, force = false) => {
-    return force || (/[\s.@/"\\]/u).test(value) ? quoteLiteral(value) : value;
+    return force || (/[\s.@/:"\\]/u).test(value) ? quoteLiteral(value) : value;
 };
 
 const applyEmphasisMarks = (value: string, node: ScriptNode) => {
@@ -57,16 +58,48 @@ const getCharacterTagIdentity = (node: ScriptNode) => {
     return JSON.stringify(mark.attrs ?? {});
 };
 
-const serializeTextNode = (node: ScriptNode) => {
+const escapeInlineText = (value: string) => value.replace(/[\\*_@]/gu, '\\$&');
+
+const hasEmphasis = (node: ScriptNode) => (node.marks ?? []).some(mark => [
+    'bold',
+    'italic',
+    'underline',
+].includes(mark.type));
+
+// 'bareSpaced': only whitespace was written since a bare out, so only a digit is still ambiguous.
+type AfterOut = 'bare' | 'bareSpaced' | 'numbered' | null;
+
+const serializeTextNode = (node: ScriptNode, afterOut: AfterOut = null) => {
     const text = (node.text ?? '').replace(/\u200b/gu, '');
 
     if (!text) {
         return '';
     }
 
-    const value = hasCharacterTag(node) ? `@${quoteNameWhenRequired(text)}` : text;
+    if (hasCharacterTag(node)) {
+        return serializeTag(text, node, undefined);
+    }
 
-    return applyEmphasisMarks(value, node);
+    const escaped = escapeInlineText(text);
+
+    /*
+     * A digit that would read as the number of the `@@out` before it, or a letter/digit that would
+     * extend the marker (`@@outro`), is escaped.
+     */
+    const unambiguous = afterOut === 'bare'
+        ? escaped.replace(/^(\s+)(\d)/u, '$1\\$2').replace(/^([\p{L}\p{N}])/u, '\\$1')
+        : afterOut === 'numbered' ? escaped.replace(/^([\p{L}\p{N}])/u, '\\$1')
+            : afterOut === 'bareSpaced' ? escaped.replace(/^(\d)/u, '\\$1') : escaped;
+
+    return applyEmphasisMarks(hasEmphasis(node) ? escaped : unambiguous, node);
+};
+
+/* Quoted when text follows directly, or emphasis markers would otherwise end up in the name. */
+const serializeTag = (name: string, node: ScriptNode, next: ScriptNode | undefined) => {
+    const nextText = next?.text ?? '';
+    const mustSeparateFollowingText = nextText.length > 0 && !(/^\s/u).test(nextText);
+
+    return applyEmphasisMarks(`@${quoteNameWhenRequired(name, mustSeparateFollowingText || hasEmphasis(node))}`, node);
 };
 
 const characterTagContinues = (node: ScriptNode | undefined, identity: string) => {
@@ -78,7 +111,9 @@ const serializeMusicStart = (node: ScriptNode, state: SerializationState, previo
 
     const number = state.musicNumber;
     const title = typeof node.attrs?.[MUSIC_TITLE_ATTR] === 'string' ? node.attrs[MUSIC_TITLE_ATTR] : '';
-    const marker = `@@music ${number} ${quoteLiteral(title)}`;
+    const kind = node.attrs?.[MUSIC_KIND_ATTR];
+    const kindWord = typeof kind === 'string' && (/^[A-Za-z][\w-]*$/u).test(kind) ? `${kind} ` : '';
+    const marker = `@@music ${number} ${kindWord}${quoteLiteral(title)}`;
 
     if (node.attrs?.[MUSIC_MODE_ATTR] === 'hit') {
         return {marker, hitOut: `@@out ${number}`};
@@ -89,6 +124,11 @@ const serializeMusicStart = (node: ScriptNode, state: SerializationState, previo
     return {marker, hitOut: previousHit};
 };
 
+/*
+ * Text is written verbatim around music markers: a marker follows its text directly, and two
+ * markers with nothing between them are separated by one space (the parser drops that space). Text
+ * made only of whitespace between two markers has its first character escaped to survive that rule.
+ */
 export const serializeInlineContent = (
     nodes: ScriptNode[] | undefined,
     state: SerializationState,
@@ -100,9 +140,23 @@ export const serializeInlineContent = (
 } => {
     let text = '';
     let hitOut: string | null = null;
+    let lastAtomEnd = -1;
+    let afterOut: AfterOut = null;
     const outMarkers: string[] = [];
 
     const content = nodes ?? [];
+    const appendAtom = (marker: string) => {
+        const between = lastAtomEnd >= 0 ? text.slice(lastAtomEnd) : null;
+
+        if (between === '') {
+            text += ' ';
+        } else if (between !== null && between.trim() === '') {
+            text = `${text.slice(0, lastAtomEnd)}\\${between}`;
+        }
+
+        text += marker;
+        lastAtomEnd = text.length;
+    };
 
     for (let index = 0; index < content.length; index += 1) {
         const node = content[index];
@@ -110,8 +164,9 @@ export const serializeInlineContent = (
         if (node.type === MUSIC_START_NODE_NAME) {
             const {marker, hitOut: nextHit} = serializeMusicStart(node, state, hitOut);
 
-            text = text.trimEnd() ? `${text.trimEnd()} ${marker}` : marker;
+            appendAtom(marker);
             hitOut = nextHit;
+            afterOut = null;
 
             continue;
         }
@@ -120,7 +175,8 @@ export const serializeInlineContent = (
             const marker = state.openMusicNumber !== null ? `@@out ${state.openMusicNumber}` : '@@out';
 
             if (options.includeOut !== false) {
-                text = text.trimEnd() ? `${text.trimEnd()} ${marker}` : marker;
+                appendAtom(marker);
+                afterOut = state.openMusicNumber === null ? 'bare' : 'numbered';
             } else {
                 outMarkers.push(marker);
             }
@@ -149,14 +205,18 @@ export const serializeInlineContent = (
                     continue;
                 }
 
-                const nextText = content[index + 1]?.text ?? '';
-                const mustSeparateFollowingText = nextText.length > 0 && !(/^\s/u).test(nextText);
-
-                text += applyEmphasisMarks(`@${quoteNameWhenRequired(taggedText, mustSeparateFollowingText)}`, node);
+                text += serializeTag(taggedText, node, content[index + 1]);
+                afterOut = null;
                 continue;
             }
 
-            text += serializeTextNode(node);
+            text += serializeTextNode(node, afterOut);
+
+            const written = node.text.replace(/\u200b/gu, '');
+
+            if (written !== '' && afterOut !== null) {
+                afterOut = afterOut !== 'numbered' && written.trim() === '' ? 'bareSpaced' : null;
+            }
 
             continue;
         }

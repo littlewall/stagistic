@@ -13,15 +13,11 @@ const isPureMusicBlock = (block: ParsedBlock, role: 'start' | 'out') => {
     return getSingleMusicMarker(block)?.role === role && block.node.content?.length === 1;
 };
 
-// A hit marker closes its block: `@@music N "…"` may follow text, as serializeStagistic writes it.
-const endsWithMusicStart = (block: ParsedBlock) => {
-    return getSingleMusicMarker(block)?.role === 'start' && block.node.content?.at(-1)?.type === MUSIC_START_NODE_NAME;
-};
-
+// A hit marker closes its block: `@@music N "…"` may follow text or other markers, as serializeStagistic writes it.
 const isMusicHit = (block: ParsedBlock, next: ParsedBlock | undefined) => {
-    const marker = getSingleMusicMarker(block);
+    const marker = block.music?.at(-1);
 
-    return marker?.role === 'start' && endsWithMusicStart(block) && next !== undefined
+    return marker?.role === 'start' && block.node.content?.at(-1)?.type === MUSIC_START_NODE_NAME && next !== undefined
         && isPureMusicBlock(next, 'out') && getSingleMusicMarker(next)?.number === marker.number;
 };
 
@@ -31,6 +27,15 @@ const validateMusicNumber = (musicNumber: number | null, line: number) => {
     }
 
     return musicNumber;
+};
+
+const validateOutMarker = (
+    marker: NonNullable<ParsedBlock['music']>[number],
+    openMusicNumber: number | null,
+) => {
+    if (marker.number !== null && openMusicNumber !== marker.number) {
+        throw new StagisticParseError(`@@out ${marker.number} does not match the currently open music.`, marker.line);
+    }
 };
 
 export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
@@ -52,19 +57,9 @@ export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
             continue;
         }
 
-        if (isMusicHit(block, blocks[index + 1])) {
-            const musicNode = block.node.content?.at(-1);
+        const isHit = isMusicHit(block, blocks[index + 1]);
 
-            if (musicNode?.attrs) {
-                musicNode.attrs[MUSIC_MODE_ATTR] = 'hit';
-            }
-
-            result.push(block.node);
-            index += 1;
-            continue;
-        }
-
-        for (const current of markers) {
+        for (const current of isHit ? markers.slice(0, -1) : markers) {
             if (current.role === 'start') {
                 const musicNumber = validateMusicNumber(current.number, current.line);
 
@@ -77,11 +72,20 @@ export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
                 continue;
             }
 
-            if (current.number !== null && openMusicNumber !== current.number) {
-                throw new StagisticParseError(`@@out ${current.number} does not match the currently open music.`, current.line);
+            validateOutMarker(current, openMusicNumber);
+            openMusicNumber = null;
+        }
+
+        if (isHit) {
+            const musicNode = block.node.content?.at(-1);
+
+            if (musicNode?.attrs) {
+                musicNode.attrs[MUSIC_MODE_ATTR] = 'hit';
             }
 
-            openMusicNumber = null;
+            result.push(block.node);
+            index += 1;
+            continue;
         }
 
         if (isPureMusicBlock(block, 'out') && result.length > 0) {

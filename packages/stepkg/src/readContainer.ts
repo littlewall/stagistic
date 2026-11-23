@@ -13,6 +13,18 @@ const unzipAsync = (bytes: Uint8Array): Promise<Record<string, Uint8Array>> => n
     unzip(bytes, (error, data) => error ? reject(error) : resolve(data));
 });
 
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+const isManifestShape = (manifest: unknown): manifest is StepkgManifest => isRecord(manifest)
+    && manifest.format === STEPKG_FORMAT
+    && Array.isArray(manifest.files)
+    && manifest.files.every(file => isRecord(file)
+        && typeof file.path === 'string'
+        && typeof file.byteLength === 'number'
+        && typeof file.sha256 === 'string')
+    && isRecord(manifest.script)
+    && typeof manifest.script.id === 'string';
+
 export type StepkgContainerResult = {
     ok: true,
     manifest: StepkgManifest,
@@ -60,7 +72,7 @@ export const readStepkgContainer = async (bytes: Uint8Array): Promise<StepkgCont
         };
     }
 
-    if (manifest.format !== STEPKG_FORMAT || !Array.isArray(manifest.files) || typeof manifest.script?.id !== 'string') {
+    if (!isManifestShape(manifest)) {
         return {
             ok: false,
             issues: [

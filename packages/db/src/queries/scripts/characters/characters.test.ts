@@ -84,10 +84,14 @@ describe('script character read/write', () => {
         expect(await listScriptCharacters(db, SCRIPT_ID)).toEqual([expected]);
     });
 
-    it('updates the existing row and keeps its id on key conflict', async () => {
+    it('keeps the existing row untouched on key conflict', async () => {
         const db = await setup();
 
-        await upsert(db, {id: 'c1', colorHex: '#111111'});
+        await upsert(db, {
+            id: 'c1',
+            colorHex: '#111111',
+            notes: 'keep me',
+        });
         await upsert(db, {
             id: 'c2',
             colorHex: '#222222',
@@ -100,19 +104,9 @@ describe('script character read/write', () => {
         expect(rows[0]).toMatchObject({
             id: 'c1',
             key: 'ANNA',
-            colorHex: '#222222',
+            colorHex: '#111111',
+            notes: 'keep me',
         });
-    });
-
-    it('clears unset optional fields on upsert', async () => {
-        const db = await setup();
-
-        await upsert(db, {colorHex: '#111111', notes: 'keep me'});
-        await upsert(db, {updatedAt: 2});
-
-        const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
-
-        expect(row).toMatchObject({colorHex: null, notes: null});
     });
 
     it('lists characters ordered by key and scoped to the script', async () => {

@@ -14,7 +14,7 @@ import path from 'node:path';
 
 import {gitOutput, verificationFingerprint} from './verificationInputs.mjs';
 
-const allowedTask = /^[a-z][a-z0-9-]*:(test|test-browser|test-related|test-all|typecheck|lint|format-check|duplicates|duplicates-changed)$/;
+const allowedTask = /^[a-z][a-z0-9-]*:(test|test-browser|test-related|test-explore|test-all|typecheck|lint|format-check|duplicates|duplicates-changed)$/;
 const delay = new Int32Array(new SharedArrayBuffer(4));
 
 const readRecord = file => {
@@ -97,7 +97,7 @@ export const verifyTask = ({
     const key = createHash('sha256').update(JSON.stringify([task, args])).digest('hex');
     const recordFile = path.join(directory, `${key}.json`);
     const lockFile = path.join(directory, `${key}.lock`);
-    const reusable = !fresh && task !== 'root:test-all' && task !== 'marketing:test';
+    const reusable = !fresh && task !== 'root:test-all' && task !== 'root:test-explore' && task !== 'marketing:test';
 
     mkdirSync(directory, {recursive: true});
     acquireLock(lockFile);

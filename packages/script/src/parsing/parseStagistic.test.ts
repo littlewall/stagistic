@@ -125,7 +125,7 @@ The lights return. @@out 1
             'aside',
             'dialogue',
             'lyrics',
-            'lyrics',
+            'dialogue',
             'lyrics',
             'stageDirection',
             'stageDirection',
@@ -266,5 +266,150 @@ Text
 
 @@out 2
 `)).toThrow('@@out 2 does not match');
+    });
+
+    describe('singleHashtag', () => {
+        it('reads a lone `#` as an act when the key says `act`', () => {
+            const result = parseStagistic('---\nsingleHashtag: act\n---\n\n# ACT ONE\n');
+
+            expect(result.document.content.map(node => node.type)).toEqual(['act']);
+        });
+
+        it('reads `#` as a scene when the key says `scene`, even next to `##`', () => {
+            const result = parseStagistic('---\nsingleHashtag: scene\n---\n\n# One\n\n## Two\n');
+
+            expect(result.document.content.map(node => node.type)).toEqual(['scene', 'scene']);
+        });
+
+        it('keeps inferring from `##` when the key is absent', () => {
+            expect(parseStagistic('# One\n').document.content[0]?.type).toBe('scene');
+            expect(parseStagistic('# One\n\n## Two\n').document.content.map(node => node.type)).toEqual(['act', 'scene']);
+        });
+
+        it('rejects an unknown value like any other invalid frontmatter value', () => {
+            expect(() => parseStagistic('---\nsingleHashtag: chapter\n---\n\n# One\n')).toThrow(StagisticParseError);
+        });
+    });
+
+    it('rejects `@@out N` when no music is open', () => {
+        expect(() => parseStagistic('!x @@out 0 a')).toThrow(StagisticParseError);
+        expect(() => parseStagistic('!x @@out 0 a')).toThrow('does not match');
+    });
+
+    it('reads an escaped digit after a bare `@@out` as text', () => {
+        const nodes = parseStagistic('!x @@out \\0 a').document.content[0]?.content ?? [];
+
+        expect(nodes.map(node => node.type)).toEqual([
+            'text',
+            MUSIC_OUT_NODE_NAME,
+            'text',
+        ]);
+        expect(nodes[2]?.text).toBe(' 0 a');
+    });
+
+    it('reads `@@out` glued to a letter or digit as plain text', () => {
+        for (const source of ['!x @@outro a', '!x @@out2 a']) {
+            const nodes = parseStagistic(source).document.content[0]?.content ?? [];
+
+            expect(nodes.every(node => node.type === 'text')).toBe(true);
+            expect(nodes.map(node => node.text).join('')).toBe(source.slice(1));
+        }
+    });
+
+    it('reads an escaped letter glued to `@@out` as text after the out', () => {
+        const nodes = parseStagistic('!x @@out\\ro a').document.content[0]?.content ?? [];
+
+        expect(nodes.map(node => node.type)).toEqual([
+            'text',
+            MUSIC_OUT_NODE_NAME,
+            'text',
+        ]);
+        expect(nodes[2]?.text).toBe('ro a');
+    });
+
+    it('reads an escaped leading `!` or `(` inside a speech as dialogue', () => {
+        const blocks = parseStagistic('ANNA\n\\!hey\n\\(softly)').document.content;
+
+        expect(blocks.map(block => block.type)).toEqual([
+            'character',
+            'dialogue',
+            'dialogue',
+        ]);
+        expect(blocks[1]?.content?.[0]?.text).toBe('!hey');
+        expect(blocks[2]?.content?.[0]?.text).toBe('(softly)');
+    });
+
+    it('reads escaped `@` and `~` as text', () => {
+        const nodes = parseStagistic('mail a\\@b.cz').document.content[0]?.content ?? [];
+
+        expect(nodes).toEqual([{type: 'text', text: 'mail a@b.cz'}]);
+    });
+
+    it('keeps an all-uppercase speech line dialogue behind a leading backslash', () => {
+        const types = parseStagistic('ANNA\n\\STOP\nSTOP').document.content.map(node => node.type);
+
+        expect(types).toEqual([
+            'character',
+            'dialogue',
+            'lyrics',
+        ]);
+    });
+
+    it('still takes the number after `@@out` while music is open', () => {
+        const nodes = parseStagistic('!x @@music 1 "Song" y @@out 1 2 z').document.content[0]?.content ?? [];
+
+        expect(nodes.at(-1)?.text).toBe(' 2 z');
+    });
+
+    it('reads a quoted character name that contains a colon', () => {
+        const result = parseStagistic('"ANNA: X"\nhi');
+
+        expect(result.document.content.map(node => node.type)).toEqual(['character', 'dialogue']);
+        expect(getText(result.document.content[0])).toBe('ANNA: X');
+    });
+});
+
+describe('parseStagistic music and speech syntax', () => {
+    it('reads a music kind before the title', () => {
+        const start = parseStagistic('!x @@music 1 instrumental "Song" y').document.content[0]?.content?.[1];
+
+        expect(start?.attrs?.kind).toBe('instrumental');
+        expect(start?.attrs?.title).toBe('Song');
+    });
+
+    it('still drops whitespace between adjacent music markers of an app-written file', () => {
+        const nodes = parseStagistic('!x @@out @@music 2 "N"\n').document.content[0]?.content ?? [];
+
+        expect(nodes.map(node => node.type)).toEqual([
+            'text',
+            MUSIC_OUT_NODE_NAME,
+            MUSIC_START_NODE_NAME,
+        ]);
+    });
+
+    it('reads a leading caret as lyrics, an escaped caret as text, and `~` as a dialogue soft break', () => {
+        const blocks = parseStagistic('ANNA\n^la\n\\^la\n~\n~').document.content;
+
+        expect(blocks.map(node => node.type)).toEqual([
+            'character',
+            'lyrics',
+            'dialogue',
+            'dialogue',
+            'dialogue',
+        ]);
+        expect(getText(blocks[2])).toBe('^la');
+    });
+
+    it('reads `@""` as a character cue without a name', () => {
+        const blocks = parseStagistic('@""\nhi').document.content;
+
+        expect(blocks.map(node => node.type)).toEqual(['character', 'dialogue']);
+        expect(getText(blocks[0])).toBe('');
+    });
+});
+
+describe('parseStagistic hostile frontmatter', () => {
+    it('reports an unresolved YAML alias as a parse error', () => {
+        expect(() => parseStagistic('---\n**\n---')).toThrow(StagisticParseError);
     });
 });

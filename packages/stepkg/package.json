@@ -1,6 +1,6 @@
 {
     "name": "@stagistic/stepkg",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "private": true,
     "type": "module",
     "main": "./src/index.ts",
@@ -10,6 +10,8 @@
         "fflate": "^0.8.2"
     },
     "devDependencies": {
+        "@stagistic/test-oracles": "workspace:*",
+        "fast-check": "^4.10.3",
         "typescript": "^5.9.2"
     }
 }

@@ -158,6 +158,10 @@ export const extractScriptBlocks = (
                 : undefined;
             const blockType = getScriptBlockTypeFromNodeType(node.type);
             const blockId = resolveUniqueBlockId(scriptId, attrs?.id, orderNo, usedBlockIds, warnings);
+            /*
+             * Q23: trimming leading/trailing whitespace is intended. The editor never lets a block start with
+             * whitespace; trailing whitespace is dropped on save.
+             */
             const textContent = getNodeTextContent(node).trim();
             const contentJson = toContentJsonForStorage(node);
             const characterRefByKey = toCharacterRefByKeyWithTags(node);

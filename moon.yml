@@ -119,6 +119,13 @@ tasks:
     options:
       cache: false
 
+  # Manual only (end of feature work / before merge, via `root:verify -- --fresh`):
+  # property oracles with a random seed and more runs. Not in test or test-all.
+  test-explore:
+    command: 'node scripts/test-explore.mjs'
+    options:
+      cache: false
+
   # Everything before merging a feature branch: node, browser and marketing suites.
   # One suite at a time; parallel browser suites compete for CPU and focus.
   test-all:

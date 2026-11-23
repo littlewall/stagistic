@@ -40,10 +40,11 @@ The YAML document must be an object, empty or null. A list or a non-null scalar 
 | `draftDate` | String shaped as `YYYY-MM-DD` | Fixed draft date |
 | `contact` | String | Contact details |
 | `copyright` | String | Copyright text |
+| `singleHashtag` | `act` or `scene` | What a lone `#` heading means. See [Acts and scenes](/syntax/reference/structure/#scripts-without-scenes) |
 
-All fields are optional. Missing, null or empty-string scalar fields are treated as absent; other non-string scalar values are rejected. Quote values that YAML would otherwise interpret as a number or boolean.
+All fields are optional. Missing, null or empty-string scalar fields are treated as absent, except `draftDate`: an empty `draftDate: ""` keeps the manual draft-date setting with no date. Other non-string scalar values are rejected. Quote values that YAML would otherwise interpret as a number or boolean.
 
-Unknown top-level keys are rejected. There are no supported `version`, `settings`, `dateFormat` or attachment fields here.
+Unknown top-level keys are rejected. `singleHashtag` is rejected unless it is `act` or `scene`. There are no supported `version`, `settings`, `dateFormat` or attachment fields here.
 
 ## Credits
 
@@ -56,15 +57,15 @@ Whitespace-only credit and author strings are invalid. Unknown keys inside a cre
 
 ## Dates
 
-The reader checks the digit-and-hyphen shape of `draftDate`; it does not validate whether that date exists in the calendar. A supplied date becomes a fixed draft date.
+The reader checks the digit-and-hyphen shape of `draftDate`; it does not validate whether that date exists in the calendar. A supplied date becomes a fixed draft date. An empty `draftDate` also selects the manual setting, with the date left empty; a missing key means the date follows the day of export.
 
-The reference writer emits the fixed date for a manual draft-date setting. Otherwise it resolves the local date of export. Consequently, re-exporting a file without `draftDate` can add a date; the text format does not store an automatic-date mode.
+The reference writer emits the fixed date for a manual draft-date setting, or `draftDate: ""` when the manual setting has no date. Otherwise it resolves the local date of export. Consequently, re-exporting a file without `draftDate` adds a date; the text format has no key for the automatic mode other than leaving `draftDate` out.
 
 YAML strings follow YAML quoting rules. These are separate from the restricted quoting rules for [names and music titles](/syntax/reference/text/#quoted-literals).
 
 ## Writer output
 
-The reference writer emits supported fields in this order: title, subtitle, credits, source, draftDate, contact and copyright. Scalar text and credit/author strings are double-quoted using JSON-compatible escapes. The date is emitted in its ISO-shaped text form.
+The reference writer emits supported fields in this order: title, subtitle, credits, source, draftDate, contact, copyright and, only when needed, singleHashtag. Scalar text and credit/author strings are double-quoted using JSON-compatible escapes. The date is emitted in its ISO-shaped text form.
 
 It trims supported scalar text, omits empty values and omits credit rows without a nonempty credit and at least one nonempty author. It still emits opening and closing fences even when there is little metadata.
 

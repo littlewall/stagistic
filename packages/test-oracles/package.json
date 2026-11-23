@@ -1,0 +1,16 @@
+{
+    "name": "@stagistic/test-oracles",
+    "version": "0.2.1",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "dependencies": {
+        "@stagistic/script": "workspace:*",
+        "@stagistic/stepkg": "workspace:*",
+        "fast-check": "^4.10.3"
+    },
+    "devDependencies": {
+        "@types/node": "^24.13.1",
+        "typescript": "^5.9.2"
+    }
+}

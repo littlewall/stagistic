@@ -41,7 +41,7 @@ We meet again.
 The door opens. @@music 1 "She Said \"Yes\""
 ```
 
-Quoting protects spaces and punctuation in names and allows escaped quotes in titles. Cue `/` separators are split outside quotes. Inline-cue colon recognition has a [quoted-name limitation](/syntax/reference/speech/#inline-cues); do not assume that quoting protects a colon in a cue name. After a quoted cue name, only the remaining recognized cue syntax is allowed; arbitrary suffix text is rejected.
+Quoting protects spaces and punctuation in names and allows escaped quotes in titles. Cue `/` separators are split outside quotes. A quoted cue name may contain a colon: an inline cue is split at the first colon outside quotes. After a quoted cue name, only the remaining recognized cue syntax is allowed; arbitrary suffix text is rejected.
 
 The writer quotes names containing whitespace, `.`, `@`, `/`, `"` or `\`. It can also quote an inline reference to keep immediately following punctuation or text outside the name.
 
@@ -57,14 +57,20 @@ This gives Peter a bold character reference and leaves the comma after Anna outs
 
 ## Escapes and re-export
 
-In ordinary inline text, the reader decodes escapes only for `*`, `_` and `\`:
+In ordinary inline text, a backslash escapes `\`, `*`, `_`, `@`, `~`, `^`, `!`, `(` and any whitespace character; the escaped character is read as plain text. A backslash before any other character is a literal backslash.
 
 ```text
-!Use \*literal stars\* and \_literal underscores\_.
+!Use \*literal stars\*, \_literal underscores\_ and mail jane\@example.com.
 ```
 
-Other backslash pairs are not general escapes. For example, backslash before `@` does not guarantee a literal, unreferenced `@name`. A leading `!` controls block recognition; it is not a replacement for inline escaping.
+A leading `!` also controls block recognition; inside text, `\!` is the escape that keeps a literal `!`.
 
-The current writer does not re-escape every ordinary text run. Re-exporting the example above can expose the formerly literal delimiters, and re-reading can then produce emphasis. Preserve or regenerate the required escapes in an implementation that needs that distinction to survive.
+The writer escapes `\`, `*`, `_` and `@` wherever they are plain text, so exporting and reading a script gives back what was written. It also protects a few starts of line in Dialogue, where the first characters would otherwise change the block type: a leading `!` becomes `\!`, a leading `^` becomes `\^`, a Dialogue that is only `~` becomes `\~`, an all-uppercase Dialogue gets a leading `\`, and a Dialogue line that looks like an Aside, such as `(softly)`, gets `\(`. A reader of your own should decode these the same way.
+
+An empty quoted name, `@""`, is not a character reference: it stays literal text.
+
+### `@@out` and the text after it
+
+`@@out` is a marker only when no letter or digit follows it directly. `@@outro` and `@@out2` are plain text. After a marker, the writer puts a backslash before a letter or digit that directly follows it (`@@out\ro`) and before a digit that follows a bare `@@out` and spaces (`@@out \7`), so the text is not read as part of the marker or as its number. The reader removes that backslash. An `@@out N` that does not match the open music is an error.
 
 For block-level collisions, see [Stage directions and notes](/syntax/reference/directions/). For YAML values, see [Frontmatter](/syntax/reference/frontmatter/).

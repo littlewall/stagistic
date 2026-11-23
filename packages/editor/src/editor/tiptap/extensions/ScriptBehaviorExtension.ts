@@ -14,6 +14,8 @@ import {
     handlePaste,
     handleTextInput,
 } from '../scriptBlock/handlers';
+import {stripPastedLeadingWhitespace} from '../scriptBlock/handlers/leadingWhitespace';
+import {createLeadingWhitespacePlugin} from './leadingWhitespacePlugin';
 
 const createInputHandlersPlugin = (
     editor: Editor,
@@ -38,6 +40,7 @@ const createInputHandlersPlugin = (
             },
             handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text, getSettings?.().blockCasing ?? blockCasing),
             handlePaste: (_view, event) => handlePaste(editor, event),
+            transformPasted: (slice, view) => stripPastedLeadingWhitespace(slice, view.state),
             transformCopied: (slice, view) => transformCopiedScriptSlice(slice, view.state),
         },
     });
@@ -73,6 +76,7 @@ export const ScriptBehaviorExtension = Extension.create<{
                 this.options.blockCasing,
                 this.options.getSettings,
             ),
+            createLeadingWhitespacePlugin(),
         ];
     },
 });
