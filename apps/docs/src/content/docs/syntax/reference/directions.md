@@ -21,7 +21,7 @@ This contains ordinary action text and a character reference to Peter. The visib
 
 Column-one `!` is removed before reading the action content. It prevents the first line from becoming an uppercase cue and the second from becoming a forced cue. It also allows action [inside a continuing speech](/syntax/reference/speech/#action-within-a-speech).
 
-Only a column-one prefix has this role. Leading spaces before `!` do not give it forced-action semantics. To represent action text beginning with a literal `!`, use two at the start: `!!The warning is painted in red.` removes the first and retains the second.
+Only a column-one prefix has this role. Leading spaces before `!` do not give it forced-action semantics. To represent action text beginning with a literal `!`, use two at the start: `!!The warning is painted in red.` removes the first and retains the second. A bare `!` line is an empty Stage direction.
 
 ## Character references
 

@@ -3,6 +3,8 @@ import {
     type ScriptDocument,
     type ScriptNode,
 } from '../document';
+import {MUSIC_OUT_NODE_NAME} from '../music';
+import {startsInlineDialogue} from '../parsing/parseStagistic';
 import {
     isQuotedCharacterCueLine,
     isUppercaseSyntaxLine,
@@ -35,30 +37,63 @@ const serializeCharacterCue = (node: ScriptNode) => {
         .map(name => quoteNameWhenRequired(name))
         .join(' / ');
 
+    if (!cue) {
+        return '@""';
+    }
+
     return isUppercaseSyntaxLine(cue) || isQuotedCharacterCueLine(cue) ? cue : `@${cue}`;
+};
+
+const isOnlyMusicOut = (node: ScriptNode) => {
+    return node.content?.length === 1 && node.content[0].type === MUSIC_OUT_NODE_NAME;
+};
+
+/* Lyrics are an all-uppercase line; any other lyrics line is marked with a leading `^` (after its indent). */
+const serializeLyrics = (text: string) => {
+    const [
+        ,
+        indent = '',
+        rest = '',
+    ] = (/^(\t*)(.*)$/su).exec(text) ?? [];
+
+    return isUppercaseSyntaxLine(rest) && !(/^[\\^]/u).test(rest) ? text : `${indent}^${rest}`;
 };
 
 const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     const blockType = getScriptBlockNodeType(node);
+
+    if (blockType === 'stageDirection' && isOnlyMusicOut(node)) {
+        // An `!` line holding only `@@out` attaches to the previous block, so the block is written empty first.
+        return `!\n!${serializeInlineContent(node.content, state).text}`;
+    }
+
     const {
         text,
         hitOut,
         outMarkers,
-    } = serializeInlineContent(node.content, state, {includeOut: false});
+    } = serializeInlineContent(node.content, state, {includeOut: blockType === 'stageDirection'});
     let serialized: string;
 
-    if ((blockType === 'dialogue' || blockType === 'lyrics') && text.length === 0) {
+    if (blockType === 'dialogue' && text.length === 0) {
         serialized = '~';
+    } else if (blockType === 'lyrics' && text.length === 0) {
+        serialized = '^';
+    } else if (blockType === 'dialogue' && text.trim() === '~') {
+        serialized = text.replace('~', '\\~');
     } else if (blockType === 'stageDirection') {
-        serialized = hitOut ? `!${text} ${hitOut}` : `!${text}`;
+        serialized = hitOut ? `!${text}\n!${hitOut}` : `!${text}`;
     } else if (blockType === 'aside') {
         const trimmed = text.trim();
 
-        serialized = trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed : `(${trimmed})`;
+        serialized = `(${trimmed})`;
     } else if (blockType === 'lyrics') {
-        const match = (/^(\t*)(.*)$/su).exec(text);
+        serialized = serializeLyrics(text);
+    } else if (blockType === 'dialogue') {
+        // A line starting with `^` (also after tabs) is lyrics, with `!` a stage direction, and `(…)` an aside: escape it.
+        const escaped = (/^\t*\^/u).test(text) || text.startsWith('!') ? `\\${text}`
+            : (/^\s*\(/u).test(text) && text.trim().endsWith(')') ? text.replace('(', '\\(') : text;
 
-        serialized = `${match?.[1] ?? ''}${(match?.[2] ?? '').toUpperCase()}`;
+        serialized = isUppercaseSyntaxLine(escaped) ? `\\${escaped}` : escaped;
     } else {
         serialized = text;
     }
@@ -174,8 +209,13 @@ export const serializeStagisticUnits = (document: ScriptDocument): StagisticUnit
         }
 
         if (blockType === 'stageDirection') {
+            if (isOnlyMusicOut(node)) {
+                append(`!\n!${serializeInlineContent(node.content, state).text}`);
+                continue;
+            }
+
             const {text, hitOut} = serializeInlineContent(node.content, state);
-            const serializedText = shouldForceStageDirection(text) ? `!${text}` : text;
+            const serializedText = text.trim() === '' || shouldForceStageDirection(text) || startsInlineDialogue(text) ? `!${text}` : text;
 
             append(hitOut ? `${serializedText}\n\n${hitOut}` : serializedText);
             continue;
@@ -194,7 +234,9 @@ export const serializeStagisticFragment = (units: readonly StagisticUnit[]) => (
 });
 
 export const serializeStagistic = (document: ScriptDocument, options: SerializeStagisticOptions): string => {
-    const frontmatter = serializeStagisticFrontmatter(options);
+    const blockTypes = document.content.map(node => getScriptBlockNodeType(node));
+    const singleHashtag = blockTypes.includes('act') && !blockTypes.includes('scene') ? 'act' : undefined;
+    const frontmatter = serializeStagisticFrontmatter({...options, singleHashtag});
     const body = serializeStagisticFragment(serializeStagisticUnits(document)).text;
 
     return `${frontmatter}${body ? `\n\n${body}` : ''}\n`;

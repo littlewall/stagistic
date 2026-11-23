@@ -13,7 +13,7 @@ You can choose a type before writing or change a block you have already written.
 - [Continue writing](/editor/writing/flow/) — move to the next speaker, continue the same speech or split existing text.
 - [Customize your writing flow](/editor/writing/customize-flow/) — choose what comes next and assign your own number shortcuts.
 - [Write dialogue and asides](/editor/writing/dialogue/) — add `quietly` between two parts of Robin's speech and return to the dialogue.
-- [Write stage directions](/editor/writing/stage-directions/) — describe `Robin opens the door.` and adjust its indentation.
+- [Write stage directions](/editor/writing/stage-directions/) — describe `Robin opens the door.`
 - [Format your text](/editor/writing/formatting/) — emphasize words without changing the block type.
 - [Keyboard shortcuts](/editor/writing/shortcuts/) — find the keys for a specific operation.
 

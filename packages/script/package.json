@@ -9,6 +9,8 @@
         "yaml": "2.8.1"
     },
     "devDependencies": {
+        "@stagistic/test-oracles": "workspace:*",
+        "fast-check": "^4.10.3",
         "typescript": "^5.9.2"
     }
 }

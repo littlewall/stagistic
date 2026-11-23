@@ -100,15 +100,16 @@ copyright: "© 2026 Jane Smith"
 
 ## A garden. Dusk.
 
-Anna watches as @"Mrs. Washington" enters. @@music 1 "She said \"Yes\""
+Anna watches as @"Mrs. Washington" enters.@@music 1 "She said \"Yes\""
 
 "Mrs. Washington"
 (quietly)
 **Stop!**
-\tAND I WILL STAY
-~
+\t^And I will stay
+^
 
-@@out 1
+!
+!@@out 1
 
 @@music 2 "Knock \\ twice"
 
@@ -135,8 +136,8 @@ Anna watches as @"Mrs. Washington" enters. @@music 1 "She said \"Yes\""
 
         expect(result).toContain(`MICHAEL
 !A brief pause.
-LYRICS ONE
-LYRICS TWO`);
+^lyrics one
+^lyrics two`);
 
         const reparsed = parseStagistic(result);
 
@@ -237,5 +238,44 @@ Michael enters`);
         });
 
         expect(result).toContain('@McCLANE\nYippie ki-yay.');
+    });
+
+    describe('singleHashtag', () => {
+        const options = {scriptTitle: 'Hashtag', titlePage: {draftDateMode: 'manual' as const, draftDate: '2026-07-01'}};
+        const act = {type: 'act', content: [text('ACT ONE')]};
+        const scene = {type: 'scene', content: [text('A garden.')]};
+
+        it('writes `singleHashtag: act` only when the document has an act and no scene', () => {
+            expect(serializeStagistic({type: 'doc', content: [act]}, options)).toBe(`---
+title: "Hashtag"
+draftDate: 2026-07-01
+singleHashtag: act
+---
+
+# ACT ONE
+`);
+        });
+
+        it('leaves the frontmatter unchanged for documents with scenes, or without acts', () => {
+            const withScene = serializeStagistic({type: 'doc', content: [act, scene]}, options);
+            const sceneOnly = serializeStagistic({type: 'doc', content: [scene]}, options);
+            const empty = serializeStagistic({type: 'doc', content: []}, options);
+
+            [
+                withScene,
+                sceneOnly,
+                empty,
+            ].forEach(result => expect(result).not.toContain('singleHashtag'));
+            expect(withScene).toContain('# ACT ONE\n\n## A garden.');
+        });
+    });
+
+    it('quotes a character name that contains a colon', () => {
+        const document: ScriptDocument = {
+            type: 'doc',
+            content: [{type: 'character', content: [text('ANNA:X')]}, {type: 'dialogue', content: [text('hi')]}],
+        };
+
+        expect(serializeStagistic(document, {scriptTitle: 'Colon'})).toContain('"ANNA:X"\nhi');
     });
 });

@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits `lint` + `typecheck`. Overrides `test` to run from the package root.
+tasks:
+  test:
+    command: 'vp test run --dir .'
+    options:
+      cache: false
+      # fully replace the inherited `vp test run` args, don't append to them
+      mergeArgs: 'replace'

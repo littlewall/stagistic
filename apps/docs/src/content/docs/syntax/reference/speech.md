@@ -30,7 +30,7 @@ For uppercase recognition, the trimmed cue base must contain at least one letter
 
 A forced unquoted cue name is a single token without whitespace, `.`, `/` or `@`. Use quoted names for spaces and punctuation. Shared cue names are split on `/` outside quoted literals; an optional `@` on a subsequent name is accepted.
 
-`+` is not a shared-cue separator in this text grammar. In a bare uppercase cue such as `ANNA + PETER`, the current reader leaves it in one decoded name. Do not substitute the editor's input conventions for the file rules.
+`+` is not a shared-cue separator in this text grammar. The editor accepts `+` while typing and turns it into `/`; renaming one name of a shared cue keeps the `/` between the names. In a bare uppercase cue such as `ANNA + PETER`, the current reader leaves it in one decoded name. Do not substitute the editor's input conventions for the file rules.
 
 Cue names are decoded as names, not parsed for inline emphasis. A trailing parenthetical suffix creates an Aside after the Character block.
 
@@ -42,9 +42,9 @@ JANE: I told you already.
 
 A recognized cue prefix followed by a colon can introduce Dialogue on the same line. The text after it is Dialogue even when uppercase. Further lines resume the ordinary speech rules.
 
-The current reader looks for the first unescaped colon without reliably excluding quoted cue names. For example, `"CAPTAIN: JANE"` is mis-split and rejected as an unterminated name. Quoting alone does not protect a cue name containing a colon, including some forced quoted forms. Treat this as a current reader compatibility limit.
+The reader looks for the first colon outside quotes, so a quoted cue name may contain a colon: `"CAPTAIN: JANE": Hello.` is the cue `CAPTAIN: JANE` followed by Dialogue. The writer quotes such names.
 
-The reference writer normally emits the cue and its speech on separate lines. For `JANE: HELLO`, that can change the re-read block type from Dialogue to Lyrics. If that distinction matters, keep or regenerate the inline form deliberately.
+The reference writer normally emits the cue and its speech on separate lines. For `JANE: HELLO`, the Dialogue is uppercase, so the writer puts a `\` before it (`\HELLO`) and it is read back as Dialogue.
 
 ## Speech context and new speakers
 
@@ -58,7 +58,7 @@ It's fine.
 
 Here `ANNA` is a Lyrics line in Peter's speech, followed by Dialogue. It is not a new speaker. Prefixing a line with `@` while speech is active does not establish a new cue either; it is handled as inline speech text and can contain a character reference.
 
-Whole trimmed parenthetical lines are Asides while speech is active. The same parenthetical line outside speech is a Stage direction with its parentheses preserved.
+Whole trimmed parenthetical lines are Asides while speech is active. To write Dialogue that looks like that, put a backslash before the opening parenthesis: `\(softly)` is Dialogue with the text `(softly)`. Likewise `\!Look out` is Dialogue starting with `!`, and `\^caret` is Dialogue starting with `^`. The same parenthetical line outside speech is a Stage direction with its parentheses preserved.
 
 ## Action within a speech
 

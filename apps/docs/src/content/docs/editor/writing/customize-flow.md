@@ -26,7 +26,7 @@ The setting controls the normal transition from the **end of a nonempty block**.
 - At the end of a nonempty Dialogue or Lyrics block, <kbd><span aria-hidden="true">⇧</span> Shift</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> continues with the same type.
 - Empty blocks have their own chooser or type change.
 - An Aside within a sung passage resumes Lyrics.
-- <kbd><span aria-hidden="true">⇥</span> Tab</kbd> retains its type-specific behavior: switching a speech block to or from Aside, or indenting a Stage direction.
+- <kbd><span aria-hidden="true">⇥</span> Tab</kbd> retains its type-specific behavior: switching a speech block to or from Aside. It does not indent a block.
 
 See [Continue writing](/editor/writing/flow/) for cursor positions and empty blocks, and [Write dialogue and asides](/editor/writing/dialogue/) for inserting a note within a speech.
 

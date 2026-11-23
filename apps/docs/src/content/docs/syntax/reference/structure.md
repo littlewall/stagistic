@@ -35,6 +35,10 @@ When the body has no raw column-one `##` followed by whitespace, its `#` heading
 
 The reader prescans raw lines before applying speech recognition. Even a `##` line accidentally left inside a speech affects this mode. Writers should keep actual headings outside speech and choose a consistent heading scheme.
 
+## Scripts without scenes
+
+A script can have Acts and no Scene at all. The writer then emits each Act as a lone `#`, which the rule above would read as a Scene. To keep the Acts, it adds `singleHashtag: act` to the [frontmatter](/syntax/reference/frontmatter/). The reader lets this key decide what a lone `#` means; `singleHashtag: scene` is accepted too. Without the key, the `##` rule above applies, so older files read as before.
+
 ## Boundaries and collisions
 
 - Separate a heading from a preceding speech with a blank line. While speech is active, heading-looking text follows speech rules.
@@ -44,7 +48,7 @@ The reader prescans raw lines before applying speech recognition. Even a `##` li
 
 ## Writer output
 
-The reference writer checks whether its document contains any Acts. It emits Acts with `#`, and Scenes with `##` when Acts are present. Without Acts, it emits Scenes with `#`. Heading text is trimmed on writing.
+The reference writer checks whether its document contains any Acts. It emits Acts with `#`, and Scenes with `##` when Acts are present. Without Acts, it emits Scenes with `#`. It writes `singleHashtag: act` only for the case above, Acts without any Scene; it never writes `singleHashtag: scene`. Heading text is trimmed on writing.
 
 A Scene resets the reader's current open-music number. See [Music endings](/syntax/reference/music/#open-music-and-endings) before carrying a numbered musical unit across that boundary.
 

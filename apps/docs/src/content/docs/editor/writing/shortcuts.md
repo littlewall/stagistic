@@ -12,8 +12,6 @@ Use these shortcuts while the cursor is in the script editor. Some keys have dif
 | <kbd><span aria-hidden="true">⏎</span> Enter</kbd> | Continue, split text or act on an empty block. [Details](/editor/writing/flow/). |
 | <kbd><span aria-hidden="true">⇧</span> Shift</kbd> + <kbd><span aria-hidden="true">⏎</span> Enter</kbd> | Continue a nonempty Dialogue or Lyrics block with the same type. [Details](/editor/writing/flow/#continue-the-same-speech). |
 | <kbd><span aria-hidden="true">⇥</span> Tab</kbd> | Switch Dialogue or Lyrics to Aside, or switch Aside back. [Details](/editor/writing/dialogue/). |
-| <kbd><span aria-hidden="true">⇥</span> Tab</kbd> | In Stage direction, add indentation, up to two levels. [Details](/editor/writing/stage-directions/#adjust-indentation). |
-| <kbd><span aria-hidden="true">⇧</span> Shift</kbd> + <kbd><span aria-hidden="true">⇥</span> Tab</kbd> | In Stage direction, remove one indentation level. [Details](/editor/writing/stage-directions/#adjust-indentation). |
 
 For the compact chooser opened by <kbd><span aria-hidden="true">⏎</span> Enter</kbd> in an empty Scene, Stage direction or Character block, use <kbd><span aria-hidden="true">←</span> Arrow left</kbd> and <kbd><span aria-hidden="true">→</span> Arrow right</kbd> to select a type, <kbd><span aria-hidden="true">⏎</span> Enter</kbd> to apply it, or <kbd>Esc</kbd> to close it. See [Choose what to write in an empty block](/editor/writing/flow/#choose-what-to-write-in-an-empty-block) for the difference between changing types and inserting another block.
 

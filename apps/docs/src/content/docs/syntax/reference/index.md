@@ -34,7 +34,7 @@ After handling an empty line, apply these rules in order:
 | 2 | Column-one `#` or `##` followed by whitespace | Act or Scene according to the file's heading mode |
 | 3 | Trimmed line enclosed in `[[` and `]]` | Note |
 | 4 | Trimmed line enclosed in parentheses | Parenthetical Stage direction |
-| 5 | Recognizable cue prefix followed by a colon, subject to the quoted-name limitation | Character, optional cue Aside, then Dialogue; enter speech context |
+| 5 | Recognizable cue prefix followed by a colon (a quoted name may contain a colon) | Character, optional cue Aside, then Dialogue; enter speech context |
 | 6 | Recognizable cue line | Character and optional cue Aside; enter speech context |
 | 7 | Anything else | Stage direction with inline text and music markers |
 
@@ -46,13 +46,15 @@ A blank line leaves speech context. Otherwise:
 
 | Order | Recognition | Result |
 | --- | --- | --- |
-| 1 | Trimmed line equal to `~` | One empty block of the last speech type; keep speech context |
+| 1 | Trimmed line equal to `~` | One empty Dialogue block; keep speech context |
 | 2 | Column-one `!` | Stage direction; keep speech context |
 | 3 | Trimmed line enclosed in parentheses | Aside; keep speech context |
-| 4 | Line with letters equal to its uppercase form | Lyrics |
-| 5 | Other text | Dialogue |
+| 4 | `\` before an uppercase line | Dialogue (the backslash is removed) |
+| 5 | `^` after the leading tabs | Lyrics (the `^` is removed) |
+| 6 | Line with letters equal to its uppercase form | Lyrics |
+| 7 | Other text | Dialogue |
 
-Consecutive `~` lines produce only one empty block. A new cue, heading or Note is not recognized by its usual outside-speech rule until speech context has ended. For example, an uppercase name on the next line can be lyric text belonging to the current speaker.
+Every `~` line produces its own empty Dialogue block. A new cue, heading or Note is not recognized by its usual outside-speech rule until speech context has ended. For example, an uppercase name on the next line can be lyric text belonging to the current speaker.
 
 After block recognition, music markers are resolved into open musical units or Hits. This is a separate pass described in [Music and lyrics](/syntax/reference/music/).
 
@@ -66,10 +68,8 @@ Treat this as a semantic text format, not a byte-preserving storage format. Name
 
 The current reader and writer are not a universal round-trip guarantee:
 
-- An uppercase Dialogue line supplied through an inline cue can become Lyrics when the writer puts it on its own line. See [Inline cues](/syntax/reference/speech/#inline-cues).
-- A colon inside a quoted cue name is not reliably protected during cue recognition. Some such names are mis-split and rejected; see [Inline cues](/syntax/reference/speech/#inline-cues).
-- Ordinary text escapes are decoded by the reader, but the writer does not escape every literal emphasis character again. See [Escapes and re-export](/syntax/reference/text/#escapes-and-re-export).
-- A Hit inside a continuing speech can be emitted with its end marker on the same forced line; re-reading that form resolves open-style markers instead of a Hit. See [Writer compatibility](/syntax/reference/music/#writer-compatibility).
+- The writer escapes what would otherwise change meaning on re-reading: `\`, `*`, `_` and `@` in text, and a leading `!`, `^`, `~` or `(`…`)` in Dialogue. See [Escapes and re-export](/syntax/reference/text/#escapes-and-re-export).
+- Text that reads the same on a re-read is not necessarily byte-identical: spacing, quoting and music numbers are normalized.
 - Quoting protects cue separators while reading, but decoded cue text can be retokenized on writing. Do not rely on a quoted literal `/` or `+` inside a speaker's name surviving that cycle as one name.
 
 When implementing another reader or writer, verify block types, speaker boundaries, marks and music modes on representative files. Requiring only that both parses succeed will miss these changes.

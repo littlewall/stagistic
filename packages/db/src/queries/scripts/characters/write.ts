@@ -51,21 +51,8 @@ export const upsertScriptCharacter = async (db: DbClient, payload: UpsertScriptC
             createdAt: payload.createdAt,
             updatedAt: payload.updatedAt,
         })
-        .onConflictDoUpdate({
-            target: [scriptCharacters.scriptId, scriptCharacters.characterKey],
-            set: {
-                colorHex: payload.colorHex ?? null,
-                genderKey: payload.genderKey ?? null,
-                notes: payload.notes ?? null,
-                backstory: payload.backstory ?? null,
-                outline: payload.outline ?? null,
-                voiceType: payload.voiceType ?? null,
-                vocalRangeLow: payload.vocalRangeLow ?? null,
-                vocalRangeHigh: payload.vocalRangeHigh ?? null,
-                updatedAt: payload.updatedAt,
-            },
-            setWhere: eq(scriptCharacters.kind, 'character'),
-        });
+        /* F6: never overwrite an existing row; callers confirm, not update. */
+        .onConflictDoNothing({target: [scriptCharacters.scriptId, scriptCharacters.characterKey]});
 };
 
 export const deleteScriptCharacter = async (db: DbClient, payload: DeleteScriptCharacterPayload) => {

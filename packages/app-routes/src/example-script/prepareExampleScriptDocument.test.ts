@@ -2,6 +2,7 @@ import {
     buildScriptBlockIndex,
     collectCommentAnchorThreadIds,
     parseStagistic,
+    serializeStagistic,
 } from '@stagistic/script';
 import {
     describe,
@@ -13,6 +14,16 @@ import source from './example-script.stagistic?raw';
 import {anchorExampleComment, prepareExampleScriptDocument} from './prepareExampleScriptDocument';
 
 describe('prepareExampleScriptDocument', () => {
+    it('exports the example script without adding escapes, and re-exports it unchanged', () => {
+        const options = (parsed: ReturnType<typeof parseStagistic>) => ({scriptTitle: parsed.title ?? '', titlePage: parsed.titlePage});
+        const parsed = parseStagistic(source);
+        const exported = serializeStagistic(parsed.document, options(parsed));
+        const reparsed = parseStagistic(exported);
+
+        expect(exported.slice(exported.indexOf('\n---\n', 4))).not.toContain('\\');
+        expect(serializeStagistic(reparsed.document, options(reparsed))).toBe(exported);
+    });
+
     it('prepares the example source as a two-act musical with linked-ready characters', () => {
         const parsed = parseStagistic(source);
         const {

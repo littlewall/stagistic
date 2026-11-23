@@ -115,7 +115,7 @@ const renameCharacterLine = (
     }
 
     return {
-        line: dedupedValues.join('+'),
+        line: dedupedValues.join('/'),
         changed: true,
         characterRefByKey: nextCharacterRefByKey,
     };

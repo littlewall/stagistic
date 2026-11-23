@@ -16,8 +16,6 @@ import {decodeNameLiteral, splitOutsideQuotes} from './literals';
 import {type ParsedBlock, resolveMusicModes} from './resolveMusicModes';
 import {type ParseStagisticResult, StagisticParseError} from './types';
 
-type SpeechBlockType = 'dialogue' | 'lyrics';
-
 const createBlock = (type: string, content: ScriptNode[] = []): ScriptNode => {
     const block = createScriptBlockNode(type, createNodeId());
 
@@ -44,6 +42,12 @@ const isCharacterCueLine = (value: string) => {
 
 const parseCharacterCue = (source: string, line: number) => {
     const withoutForcePrefix = source.trim().replace(/^@/u, '');
+
+    // `@""` is a cue whose name is empty.
+    if (withoutForcePrefix === '""') {
+        return [createBlock('character')];
+    }
+
     const {base, suffix} = splitTrailingParentheticalSuffix(withoutForcePrefix);
     const names = splitOutsideQuotes(base, '/')
         .map(name => decodeNameLiteral(name, line))
@@ -85,7 +89,7 @@ const splitInlineDialogue = (source: string) => {
             continue;
         }
 
-        if (character !== ':') {
+        if (character !== ':' || inQuotes) {
             continue;
         }
 
@@ -101,6 +105,27 @@ const splitInlineDialogue = (source: string) => {
     return null;
 };
 
+/** True when a line reads as `CUE: dialogue`; the serializer forces `!` on stage directions that would. */
+export const startsInlineDialogue = (source: string) => splitInlineDialogue(source) !== null;
+
+/*
+ * Lyrics are an all-uppercase line, or any line marked with a leading `^` after its indent. A leading
+ * `\` before an all-uppercase line keeps it dialogue (the serializer writes both).
+ */
+const parseSpeechLine = (rawLine: string, line: number) => {
+    const [indent] = (/^\t*/u).exec(rawLine) ?? [''];
+
+    if (rawLine.startsWith('\\') && isUppercaseSyntaxLine(rawLine.slice(1))) {
+        return createBlock('dialogue', parseInlineText(rawLine.slice(1), line));
+    }
+
+    if (rawLine.startsWith('^', indent.length)) {
+        return createBlock('lyrics', parseInlineText(`${indent}${rawLine.slice(indent.length + 1)}`, line));
+    }
+
+    return createBlock(isUppercaseSyntaxLine(rawLine) ? 'lyrics' : 'dialogue', parseInlineText(rawLine, line));
+};
+
 const isParenthetical = (value: string) => {
     const trimmed = value.trim();
 
@@ -111,15 +136,15 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
     const {
         body,
         bodyStartLine,
+        singleHashtag,
         title,
         titlePage,
     } = parseStagisticFrontmatter(source);
     const lines = body.split('\n');
-    const hasActs = lines.some(line => (/^##\s+/u).test(line));
+    // A lone `#` is an act or a scene as the frontmatter says; without the key, `##` anywhere makes `#` an act.
+    const hasActs = singleHashtag ? singleHashtag === 'act' : lines.some(line => (/^##\s+/u).test(line));
     const blocks: ParsedBlock[] = [];
     let inSpeech = false;
-    let lastSpeechType: SpeechBlockType = 'dialogue';
-    let lastWasSoftBreak = false;
 
     lines.forEach((rawLine, index) => {
         const lineNumber = bodyStartLine + index;
@@ -127,22 +152,16 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
 
         if (!trimmed) {
             inSpeech = false;
-            lastWasSoftBreak = false;
 
             return;
         }
 
         if (inSpeech) {
             if (trimmed === '~') {
-                if (!lastWasSoftBreak) {
-                    blocks.push({line: lineNumber, node: createBlock(lastSpeechType)});
-                    lastWasSoftBreak = true;
-                }
+                blocks.push({line: lineNumber, node: createBlock('dialogue')});
 
                 return;
             }
-
-            lastWasSoftBreak = false;
 
             if (rawLine.startsWith('!')) {
                 parseStageDirectionLine(rawLine.slice(1), lineNumber).forEach(block => blocks.push({...block, line: lineNumber}));
@@ -159,11 +178,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                 return;
             }
 
-            lastSpeechType = isUppercaseSyntaxLine(rawLine) ? 'lyrics' : 'dialogue';
-            blocks.push({
-                line: lineNumber,
-                node: createBlock(lastSpeechType, parseInlineText(rawLine, lineNumber)),
-            });
+            blocks.push({line: lineNumber, node: parseSpeechLine(rawLine, lineNumber)});
 
             return;
         }
@@ -213,7 +228,6 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                 node: createBlock('dialogue', parseInlineText(inlineDialogue.dialogue, lineNumber)),
             });
             inSpeech = true;
-            lastSpeechType = 'dialogue';
 
             return;
         }
@@ -221,7 +235,6 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
         if (isCharacterCueLine(rawLine)) {
             parseCharacterCue(rawLine, lineNumber).forEach(node => blocks.push({line: lineNumber, node}));
             inSpeech = true;
-            lastSpeechType = 'dialogue';
 
             return;
         }

@@ -9,13 +9,6 @@ import {
 } from '../../scriptCore';
 import {setBlockTypeWithSelection} from '../commands';
 import {type BlockContext, createBlockContext} from '../context';
-import {type HandlerMap} from './types';
-
-/*
- * Stage directions use literal leading tabs for indentation; one tab renders
- * 0.5" (tab-size: 5 with the monospace font).
- */
-const MAX_ACTION_INDENT = 2;
 
 const hasAnyTabModifier = (event: KeyboardEvent) => event.altKey || event.ctrlKey || event.metaKey;
 
@@ -24,43 +17,6 @@ const isQuickToggleShortcut = (event: KeyboardEvent) => {
 };
 
 const isPlainTab = (event: KeyboardEvent) => !hasAnyTabModifier(event) && !event.shiftKey;
-
-const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, event: KeyboardEvent) => {
-    event.preventDefault();
-
-    if (hasAnyTabModifier(event)) {
-        return true;
-    }
-
-    const text = context.block.node.textContent ?? '';
-    let indentCount = 0;
-
-    while (text.startsWith('\t', indentCount)) {
-        indentCount += 1;
-    }
-
-    if (event.shiftKey) {
-        if (indentCount === 0) {
-            return true;
-        }
-
-        const tr = context.editor.state.tr.delete(context.block.from, context.block.from + 1);
-
-        context.editor.view.dispatch(tr);
-
-        return true;
-    }
-
-    if (indentCount >= maxIndent) {
-        return true;
-    }
-
-    const tr = context.editor.state.tr.insertText('\t', context.block.from);
-
-    context.editor.view.dispatch(tr);
-
-    return true;
-};
 
 /*
  * An aside doesn't record whether it interrupted a dialogue or a lyrics flow,
@@ -146,10 +102,6 @@ const handleAsideToggle = (context: BlockContext, event: KeyboardEvent) => {
     return setBlockTypeWithSelection(context.editor, context.block, nextBlockType);
 };
 
-const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    ['stageDirection']: createIndentTabHandler(MAX_ACTION_INDENT),
-};
-
 export const handleTab = (editor: Editor, event: KeyboardEvent) => {
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
@@ -167,12 +119,7 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
         return true;
     }
 
-    const handler = tabHandlers[block.blockType];
-
-    if (handler) {
-        return handler(context, event);
-    }
-
+    // A block never starts with whitespace (Q23), so Tab does nothing else.
     event.preventDefault();
 
     return true;

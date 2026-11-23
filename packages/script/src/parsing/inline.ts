@@ -70,6 +70,20 @@ const hasClosingMarker = (source: string, marker: string, start: number) => {
     return source.indexOf(marker, start + marker.length) >= 0;
 };
 
+const ESCAPABLE = new Set([
+    '*',
+    '_',
+    '\\',
+    '@',
+    '~',
+    '^',
+    '!',
+    '(',
+]);
+
+// A backslash escapes the format's own characters and any whitespace character.
+const isEscapable = (character: string) => ESCAPABLE.has(character) || (/\s/u).test(character);
+
 export const parseInlineText = (source: string, line: number): ScriptNode[] => {
     const nodes: ScriptNode[] = [];
     const activeMarks = new Set<string>();
@@ -95,11 +109,7 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
             continue;
         }
 
-        if (source[index] === '\\' && [
-            '*',
-            '_',
-            '\\',
-        ].includes(source[index + 1] ?? '')) {
+        if (source[index] === '\\' && isEscapable(source[index + 1] ?? '')) {
             appendText(nodes, source[index + 1], getEmphasisMarks(activeMarks));
             index += 2;
             continue;
@@ -153,7 +163,7 @@ const readMusicMarker = (source: string, start: number, line: number) => {
         throw new StagisticParseError('@@cue is no longer supported; use @@music.', line);
     }
 
-    const musicMatch = (/^@@music\s+(\d+)\s+/u).exec(source.slice(start));
+    const musicMatch = (/^@@music\s+(\d+)\s+(?:([A-Za-z][\w-]*)\s+(?="))?/u).exec(source.slice(start));
 
     if (musicMatch) {
         const titleStart = start + musicMatch[0].length;
@@ -169,13 +179,17 @@ const readMusicMarker = (source: string, start: number, line: number) => {
                     [MUSIC_ID_ATTR]: createNodeId(),
                     [MUSIC_MODE_ATTR]: 'open',
                     [MUSIC_TITLE_ATTR]: title.value,
-                    [MUSIC_KIND_ATTR]: null,
+                    [MUSIC_KIND_ATTR]: musicMatch[2] ?? null,
                 },
             } satisfies ScriptNode,
         };
     }
 
-    const outMatch = (/^@@out(?:\s+(\d+))?\b/u).exec(source.slice(start));
+    /*
+     * Rule (docs: syntax/music): `@@out` is a marker only when no letter or digit is glued to it (`_` may follow: underline).
+     * `@@outro` and `@@out2` stay text; the serializer writes `@@out\ro` for an out followed by "ro".
+     */
+    const outMatch = (/^@@out(?:\s+(\d+))?(?![\p{L}\p{N}])/u).exec(source.slice(start));
 
     if (outMatch) {
         return {
@@ -189,16 +203,41 @@ const readMusicMarker = (source: string, start: number, line: number) => {
     return null;
 };
 
+/*
+ * `@@out \3` / `@@out\ro`: the serializer escapes a digit after a bare out (it would read as the out's
+ * number) and a letter or digit glued to an out (it would extend the marker).
+ */
+const unescapeDigitAfterOut = (segment: string, previous: ScriptNode | undefined) => {
+    return previous?.type === MUSIC_OUT_NODE_NAME ? segment.replace(/^(?:\\(?=[\p{L}\p{N}])|(\s+)\\(?=\d))/u, '$1') : segment;
+};
+
+// The next `@@` that is not an escaped `@` (an odd run of backslashes before it).
+const findMarkerStart = (source: string, from: number) => {
+    for (let index = source.indexOf('@@', from); index >= 0; index = source.indexOf('@@', index + 1)) {
+        let backslashes = 0;
+
+        while (index - backslashes - 1 >= from && source[index - backslashes - 1] === '\\') {
+            backslashes += 1;
+        }
+
+        if (backslashes % 2 === 0) {
+            return index;
+        }
+    }
+
+    return -1;
+};
+
 export const parseStageDirectionLine = (source: string, line: number): ParsedStageBlock[] => {
     const content: ScriptNode[] = [];
     const music: NonNullable<ParsedStageBlock['music']> = [];
     let cursor = 0;
 
     while (cursor < source.length) {
-        const markerStart = source.indexOf('@@', cursor);
+        const markerStart = findMarkerStart(source, cursor);
 
         if (markerStart < 0) {
-            content.push(...parseInlineText(source.slice(cursor), line));
+            content.push(...parseInlineText(unescapeDigitAfterOut(source.slice(cursor), content.at(-1)), line));
             break;
         }
 
@@ -208,7 +247,7 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
             || previous?.type === MUSIC_OUT_NODE_NAME;
 
         if (!(followsMusicAtom && betweenMarkers.trim().length === 0)) {
-            content.push(...parseInlineText(betweenMarkers, line));
+            content.push(...parseInlineText(unescapeDigitAfterOut(betweenMarkers, previous), line));
         }
 
         const marker = readMusicMarker(source, markerStart, line);

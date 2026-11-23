@@ -37,6 +37,7 @@ export const createCoreCharacterMutations = ({
         const db = await getDb();
         const now = input.timestamp ?? Date.now();
         let confirmed = false;
+        let alreadyConfirmed = false;
 
         await db.transaction(async tx => {
             const existing = await dbQueries.getScriptSpeakingEntityByKey(tx, {
@@ -45,6 +46,13 @@ export const createCoreCharacterMutations = ({
             });
 
             if (existing?.kind === 'group') {
+                return;
+            }
+
+            if (existing) {
+                /* F6: an existing character keeps its row; confirm only returns it. */
+                alreadyConfirmed = true;
+
                 return;
             }
 
@@ -84,7 +92,7 @@ export const createCoreCharacterMutations = ({
             confirmed = true;
         });
 
-        if (!confirmed) {
+        if (!confirmed && !alreadyConfirmed) {
             return null;
         }
 

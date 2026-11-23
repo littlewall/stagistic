@@ -16,11 +16,13 @@ WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
 The lights come up. @@out 1
 ```
 
-`@@music N "title"` introduces a music start with a quoted title. `@@out N` ends the currently tracked numbered music. A marker can follow ordinary action text on the same line.
+`@@music N "title"` introduces a music start with a quoted title. An optional kind word may sit between the number and the title, as in `@@music 1 overture "When Night Falls"`; it starts with a letter and continues with letters, digits, `_` or `-`, and the writer emits it when the music has a kind. `@@out N` ends the currently tracked numbered music. A marker can follow ordinary action text on the same line.
+
+`@@out` is a marker only when no letter or digit follows it directly: `@@outro` and `@@out2` are plain text (see [Escapes and re-export](/syntax/reference/text/#escapes-and-re-export)).
 
 For interoperable output, generate distinct positive integer labels, preferably consecutive from `1`. The labels connect text markers; they are not persistent music IDs. Titles use the [quoted-literal rules](/syntax/reference/text/#quoted-literals).
 
-The reference reader tracks one current open number, not a stack. A new open start replaces that tracked number. A Scene clears it. A numbered `@@out` must match the current open number; a bare `@@out` clears it without a number check and is also accepted without a current open unit.
+The reference reader tracks one current open number, not a stack. A new open start replaces that tracked number. A Scene clears it. A numbered `@@out` must match the current open number, and is an error when no music is open; a bare `@@out` clears it without a number check and is also accepted without a current open unit.
 
 Ordinary open declarations reject non-positive or unsafe integer numbers and a repeated open declaration number. Use explicit matching endings when generating files rather than depending on replacement of the tracked number. The older `@@cue` directive is rejected.
 
@@ -57,11 +59,11 @@ WHEN NIGHT FALLS
 
 Without `!`, the common speech-line reader treats the ending line as Dialogue or Lyrics; it does not resolve music directives there. A bare `@@out` can be used when an unnumbered ending is intended.
 
-A standalone out marker can be associated with the preceding block rather than retained as a separate action block. Implementations should preserve its endpoint meaning, not assume one semantic action block for each marker-only line.
+A line `!@@out` that holds only the marker attaches it to the preceding block rather than becoming a separate action block. A stage direction that holds only an out is written as an empty `!` line followed by `!@@out`. Implementations should preserve its endpoint meaning, not assume one semantic action block for each marker-only line.
 
 ## Lyrics and tab levels
 
-Within speech, a line containing letters that equals its uppercase form becomes Lyrics. A line without that uppercase form becomes Dialogue.
+Within speech, a line containing letters that equals its uppercase form becomes Lyrics, and so does any line that starts with `^` (after its leading tabs). A line without either becomes Dialogue. To keep an uppercase line as Dialogue, put a `\` before it; the backslash is removed.
 
 ```text
 ANNA
@@ -69,7 +71,7 @@ WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
 	AND I'LL BE STANDING HERE
 ```
 
-The second lyric line begins with a literal tab, U+0009. Leading tabs provide lyric-section levels; the reference reader preserves them as a text prefix, and the writer retains that prefix while uppercasing the remaining lyric text. Spaces are not an equivalent tab-level marker.
+The second lyric line begins with a literal tab, U+0009. Leading tabs provide lyric-section levels; the reference reader preserves them as a text prefix, and the writer retains that prefix. Spaces are not an equivalent tab-level marker. Lyrics in lowercase are written with a `^` after the tabs: `^la la la` is Lyrics with the text `la la la`.
 
 Lyrics are recognized by speech context and casing, independently of whether an open music marker has been supplied.
 
@@ -83,7 +85,7 @@ SECOND LINE OF THE SONG
 A LATER LINE
 ```
 
-A line containing only `~` after trimming creates an empty block of the last Dialogue or Lyrics type without resetting the speaker. Consecutive soft-break lines collapse into one empty block. After a cue with no speech yet, the default soft-break type is Dialogue.
+A line containing only `~` after trimming creates an empty Dialogue block without resetting the speaker, whatever the lines before it were. Every `~` line makes its own block; consecutive soft-break lines do not collapse. A Dialogue whose text is only `~` is written as `\~`.
 
 A real blank line ends the speech instead. Outside speech, `~` is ordinary Stage direction text, not a soft break.
 
@@ -91,6 +93,6 @@ A real blank line ends the speech instead. Outside speech, `~` is ordinary Stage
 
 The reference writer assigns fresh consecutive music numbers in document order. It always quotes music titles. A standalone Hit is written as a start followed by a separate matching out section.
 
-For a Hit in an action that continues a speech, it can instead emit the out marker on that same forced action line. The current reader resolves that output as open-style markers, so the Hit mode does not round-trip. Generate the separate matching forced out line when preserving that mode is required.
+For a Hit in an action that continues a speech, the out marker is written on its own forced `!@@out N` line, so the Hit mode survives a re-read.
 
 Use the [complete example](/syntax/examples/) for an open musical passage in a full file.
