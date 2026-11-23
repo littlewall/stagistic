@@ -121,19 +121,17 @@ describe('announceReleases', () => {
         });
     });
 
-    it('hides a patch Release with a Highlight, with no dot or popup', () => {
+    it('announces a patch Release with a Highlight, with dot and popup', () => {
         const result = announce({
             currentRelease: '0.4.1',
             lastSeenRelease: '0.4.0',
             hasScripts: true,
         });
 
-        expect(result).toEqual({
-            releases: [],
-            popup: false,
-            hasUnseenRelease: false,
-            markSeen: true,
-        });
+        expect(result.popup).toBe(true);
+        expect(result.hasUnseenRelease).toBe(true);
+        expect(result.markSeen).toBe(false);
+        expect(titles(result.releases)).toEqual([['Patch highlight']]);
     });
 
     it('records a patch-only gap silently when it has no Highlight', () => {
@@ -149,7 +147,7 @@ describe('announceReleases', () => {
         expect(result.hasUnseenRelease).toBe(false);
     });
 
-    it('opens the popup for a skipped minor Release and hides the patch Highlight that came with it', () => {
+    it('opens the popup for skipped Releases including patch Highlights', () => {
         const result = announce({
             currentRelease: '0.4.1',
             lastSeenRelease: '0.3.0',
@@ -157,7 +155,7 @@ describe('announceReleases', () => {
         });
 
         expect(result.popup).toBe(true);
-        expect(result.releases.map(release => release.release)).toEqual(['0.4.0']);
+        expect(result.releases.map(release => release.release)).toEqual(['0.4.1', '0.4.0']);
     });
 
     it('does nothing once the current Release has been seen', () => {

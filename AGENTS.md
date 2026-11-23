@@ -28,7 +28,7 @@ metadata columns, UI, autosave internals, or export layout changes.
 ## Releases
 One Release number lives in every `package.json`, `tauri.conf.json`, `Cargo.toml` and `Cargo.lock`. Change it only with `moon run root:release-prepare`, which merges `releases/next/*.md` fragments into `releases/<release>.md`; it never commits or tags. `moon run root:release-revert -- <release>` undoes a prepare back to that Release (fragments return to `releases/next/`); it never commits or tags either. A change a writer could notice gets a fragment, written from the spec, never from commit messages. Format: `packages/release-notes/README.md`.
 - Code reaches `main` only through a Release: run `root:release-prepare`, then `root:test-all` before merging. Cloudflare runs no tests, so nothing else catches a broken build on the way to `main`.
-- Patch Releases (patch number > 0) are hidden outside git: the app and the marketing changelog/RSS list only non-patch Releases. See `isNonPatchRelease` in `@stagistic/release-notes`.
+- Releases and highlights: the marketing changelog and RSS list all Releases (including patch Releases). In the editor, What's new and announcement popups show only notes with `highlight: true` (regardless of patch or non-patch). The editor footer shows the current Release number.
 
 ## Checks (clean-shield toolchain)
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.

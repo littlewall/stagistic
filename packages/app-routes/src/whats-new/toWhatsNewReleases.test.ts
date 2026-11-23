@@ -104,20 +104,29 @@ describe('toWhatsNewReleases', () => {
         }
     });
 
-    it('hides patch Releases, which are visible only in git', () => {
+    it('includes patch Releases with highlights, but drops notes without highlights and empty releases', () => {
         const releases = [
             {
                 release: '0.2.1',
                 date: '2026-11-08',
-                notes: [note()],
+                notes: [note({title: 'Patch highlight'}), note({title: 'Patch minor', highlight: false})],
             },
             {
                 release: '0.2.0',
                 date: '2026-11-06',
-                notes: [note()],
+                notes: [note({title: 'Feature highlight'}), note({title: 'Quiet change', highlight: false})],
+            },
+            {
+                release: '0.1.9',
+                date: '2026-11-01',
+                notes: [note({title: 'Only non-highlight', highlight: false})],
             },
         ];
 
-        expect(toWhatsNewReleases(releases).map(release => release.release)).toEqual(['0.2.0']);
+        const result = toWhatsNewReleases(releases);
+
+        expect(result.map(release => release.release)).toEqual(['0.2.1', '0.2.0']);
+        expect(result[0].notes.map(item => item.title)).toEqual(['Patch highlight']);
+        expect(result[1].notes.map(item => item.title)).toEqual(['Feature highlight']);
     });
 });

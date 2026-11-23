@@ -1,7 +1,6 @@
 import {
     BREAKING_NOTE_LABEL,
     getReleaseNoteWeight,
-    isNonPatchRelease,
     type Release,
     RELEASE_NOTE_TYPE_LABELS,
     RELEASE_NOTE_TYPES,
@@ -96,7 +95,6 @@ export const toChangelog = (releases: readonly Release[], options: {site: string
     const site = withoutTrailingSlash(options.site);
 
     return releases
-        .filter(release => isNonPatchRelease(release.release))
         .map(release => {
             const notes = release.notes.map(note => ({
                 type: note.type,

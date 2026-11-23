@@ -236,13 +236,15 @@ describe('ReleaseNotesProvider', () => {
 
         const labels = [...requireValue(dialog()).querySelectorAll<HTMLElement>('[data-note-type]')];
 
+        const displayedNotes = notes.filter(item => item.highlight);
+
         for (const label of labels) {
-            const note = requireValue(notes.find(item => label.closest('li')?.textContent.includes(item.title)));
+            const note = requireValue(displayedNotes.find(item => label.closest('li')?.textContent.includes(item.title)));
 
             expect(label.dataset.noteWeight).toBe(getReleaseNoteWeight(note));
         }
 
-        expect(labels).toHaveLength(notes.length);
+        expect(labels).toHaveLength(displayedNotes.length);
     });
 
     describe('announcing Highlights', () => {

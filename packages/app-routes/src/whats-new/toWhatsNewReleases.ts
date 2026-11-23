@@ -1,5 +1,4 @@
 import {
-    isNonPatchRelease,
     resolveNoteImage,
     resolveNoteLink,
 } from '@stagistic/release-notes';
@@ -25,18 +24,20 @@ const DOCS_SITE = 'https://docs.stagistic.com';
 const MARKETING_SITE = 'https://stagistic.com';
 
 export const toWhatsNewReleases = (releases: readonly ReleaseSource[]): WhatsNewRelease[] => releases
-    .filter(release => isNonPatchRelease(release.release))
     .map(release => ({
         release: release.release,
         date: release.date,
-        notes: release.notes.map(note => ({
-            type: note.type,
-            title: note.title,
-            breaking: note.breaking,
-            highlight: note.highlight,
-            description: note.description,
-            image: resolveNoteImage(note.image),
-            docsUrl: resolveNoteLink(note.docs, DOCS_SITE),
-            articleUrl: resolveNoteLink(note.article, MARKETING_SITE),
-        })),
-    }));
+        notes: release.notes
+            .filter(note => note.highlight)
+            .map(note => ({
+                type: note.type,
+                title: note.title,
+                breaking: note.breaking,
+                highlight: note.highlight,
+                description: note.description,
+                image: resolveNoteImage(note.image),
+                docsUrl: resolveNoteLink(note.docs, DOCS_SITE),
+                articleUrl: resolveNoteLink(note.article, MARKETING_SITE),
+            })),
+    }))
+    .filter(release => release.notes.length > 0);

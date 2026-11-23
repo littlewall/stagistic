@@ -109,13 +109,17 @@ describe('toChangelog', () => {
 });
 
 describe('patch Releases', () => {
-    it('are left out of the page model and the feed', () => {
+    it('are included in the page model and the feed', () => {
         const [first] = fixtureReleases;
         const withPatch = [{...first, release: '99.0.1'}, ...fixtureReleases];
         const changelog = toChangelog(withPatch, {site});
 
-        expect(changelog.map(release => release.release)).toEqual(['99.0.0', '98.0.0']);
-        expect(buildChangelogFeed(changelog, {site})).not.toContain('99.0.1');
+        expect(changelog.map(release => release.release)).toEqual([
+            '99.0.1',
+            '99.0.0',
+            '98.0.0',
+        ]);
+        expect(buildChangelogFeed(changelog, {site})).toContain('99.0.1');
     });
 });
 

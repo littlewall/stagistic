@@ -1,9 +1,8 @@
 ---
-import {isNonPatchRelease} from '@stagistic/release-notes';
 import {releases} from '@stagistic/release-notes/bundled';
 import styles from './Footer.module.css';
 
-const hasChangelog = releases.some(release => isNonPatchRelease(release.release));
+const hasChangelog = releases.length > 0;
 
 const footerColumns = [
     {
@@ -14,7 +13,7 @@ const footerColumns = [
             {href: '/editor/musicals', label: 'For Musicals'},
             {href: '/editor/syntax', label: 'Stagistic Syntax'},
             {href: '/articles', label: 'Articles'},
-            // Linked only once a non-patch Release exists; the page itself shows an empty state.
+            // Linked only once a Release exists; the page itself shows an empty state.
             ...hasChangelog ? [{href: '/changelog', label: 'Changelog'}] : [],
         ],
     },
