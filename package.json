@@ -1,6 +1,6 @@
 {
     "name": "stagistic",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "private": true,
     "type": "module",
     "description": "Cloud editor for theatre and musical scripts",
