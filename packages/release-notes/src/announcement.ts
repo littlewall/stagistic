@@ -1,6 +1,5 @@
 import {
     compareReleaseNumbers,
-    isNonPatchRelease,
     isReleaseNumber,
 } from './version';
 
@@ -51,8 +50,8 @@ const nothing = <R extends AnnouncedRelease>(markSeen = false): ReleaseAnnouncem
  * - New writer (no stored Release, no scripts): nothing, the current Release is recorded silently.
  * - Existing writer without a stored Release: every Release counts as unseen.
  * - Skipped Releases merge into one list; only Highlights count.
- * - A patch Release never opens the popup or the dot; patch Highlights are hidden
- *   outside git. Only an unseen non-patch Release with a Highlight shows anything.
+ * - Releases without a Highlight never open the popup or the dot; only an unseen Release
+ *   with a Highlight shows anything.
  * - Unseen Releases without a Highlight are recorded silently.
  * - A stored Release newer than this build (an older tab or a rollback) shows nothing and is kept.
  */
@@ -78,7 +77,6 @@ export const announceReleases = <R extends AnnouncedRelease>({
 
     const unseen = releases
         .filter(release => isReleaseNumber(release.release)
-            && isNonPatchRelease(release.release)
             && compareReleaseNumbers(release.release, currentRelease) <= 0
             && (lastSeen === null || compareReleaseNumbers(release.release, lastSeen) > 0))
         .toSorted((a, b) => compareReleaseNumbers(b.release, a.release))
