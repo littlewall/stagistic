@@ -71,7 +71,7 @@ Automated: preflight (public key, signing key, password prompt, signing mode); b
 
 You do: in A create a script, attach a score PDF, edit, quit with ⌘Q; then open A, wait for or choose **Check for Updates…**, check that the footer and **Settings ▸ About app** show "Release X.Y.Z-test.2 is ready. Restart", choose **Restart**; finally confirm that scripts, attachment and backups are intact. The test build stays installed afterwards; the wizard prints how to restore the previous app.
 
-CI variant: Actions ▸ `desktop-release` ▸ Run workflow with `test_version` (pattern `X.Y.Z-test.N`) and optionally `updater_endpoint`, which must be https; the archive is expected next to `latest.json` at that endpoint. It uploads the files as a workflow artifact and publishes nothing.
+CI variant (only once the workflow is on `main`; GitHub offers Run workflow only for workflows on the default branch): Actions ▸ `desktop-release` ▸ Run workflow with `test_version` (pattern `X.Y.Z-test.N`) and optionally `updater_endpoint`, which must be https; the archive is expected next to `latest.json` at that endpoint. It uploads the files as a workflow artifact and publishes nothing.
 
 ## 5. Publish
 

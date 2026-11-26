@@ -108,7 +108,7 @@ Every check must be PASS (no SKIP) for a signed build.
 
    Set all Apple secrets or none; a partial set fails the build. After `pbcopy` of a key, copy something else so the key leaves the clipboard.
 
-Check, a signed CI test build: Actions ▸ `desktop-release` ▸ Run workflow from your branch, `test_version` `1.0.0-test.1`. Approve the `release` Environment. Download the artifact `desktop-test-aarch64-apple-darwin`, unzip it and run:
+Check, a signed CI test build. GitHub offers Run workflow only for workflows on the default branch, and `main` has none until the first Release is merged; until then the first CI run is the release candidate tag (runbook step 3), and the local signed build from step 4 is the check. Once the workflow is on `main`: Actions ▸ `desktop-release` ▸ Run workflow, choose the branch (`pre-release`), `test_version` `1.0.0-test.1`. Approve the `release` Environment. Download the artifact `desktop-test-aarch64-apple-darwin`, unzip it and run:
 ```sh
 moon run desktop:release-verify -- --dmg <unzipped folder>/Stagistic-Editor-mac-arm64.dmg
 ```
