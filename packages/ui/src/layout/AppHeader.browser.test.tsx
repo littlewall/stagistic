@@ -31,7 +31,7 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const mountHeader = () => {
+const mountHeader = (saveVerb?: 'Save' | 'Download') => {
     const host = document.createElement('div');
     const actions: string[] = [];
 
@@ -45,6 +45,7 @@ const mountHeader = () => {
             onSelectView={() => {}}
             onMenuAction={action => actions.push(action)}
             onRenameScript={() => {}}
+            saveVerb={saveVerb}
         />,
     );
 
@@ -83,6 +84,14 @@ describe('ScriptEditorAppHeader', () => {
         expect(document.querySelector('button[aria-label="Open script settings"]')).not.toBeNull();
         expect(document.querySelector('button[aria-label="Open attribute manager"]')).not.toBeNull();
         expect(document.querySelector('button[aria-label="Download script"]')).not.toBeNull();
+    });
+
+    it('words the file action as Save when the Surface opens a Save dialog', async () => {
+        mountHeader('Save');
+
+        await waitForElement('button[aria-label="Save script"]');
+
+        expect(document.querySelector('button[aria-label="Download script"]')).toBeNull();
     });
 
     it('keeps the sync status in a fixed lane directly after the truncated script title', async () => {

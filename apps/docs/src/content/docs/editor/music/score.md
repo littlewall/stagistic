@@ -28,7 +28,7 @@ Choose **Replace PDF** and select the revised file. The slot now uses that PDF f
 2. Check the filename in the confirmation.
 3. Confirm **Remove**.
 
-The dialog removes the file from this browser and states that the removal cannot be undone. The musical number and its placement remain. You can upload another PDF afterward.
+The dialog removes the file from this device and states that the removal cannot be undone. The musical number and its placement remain. You can upload another PDF afterward.
 
 ## Take the score to another device
 

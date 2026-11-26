@@ -33,6 +33,7 @@ const {releases} = Astro.props;
                                         <h3 class={styles.noteTitle}>
                                             {note.breaking && <span class={styles.breakingLabel}>{BREAKING_NOTE_LABEL}</span>}
                                             <span>{note.title}</span>
+                                            {note.surfaceLabel && <span class={styles.typeLabel} data-note-surface>{note.surfaceLabel}</span>}
                                             <span class={styles.typeLabel} data-note-type={note.type} data-note-weight={note.weight}>{note.label}</span>
                                         </h3>
                                         {note.image && <img class={styles.image} src={note.image} alt="" loading="lazy" />}

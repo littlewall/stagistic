@@ -20,6 +20,7 @@ Development and production preview request `http://localhost:4322`. If the port 
 
 - `src/content/docs/index.md`: shared knowledge base homepage with section cards.
 - `src/content/docs/editor/`: Editor splash page and task-oriented user guide.
+- `src/content/docs/mac-app/`: Mac app section (install, updates, data, backups, moving from the Web app, MCP, what it sends, uninstall).
 - `src/content/docs/syntax/`: Syntax splash page and technical reference.
 - `src/navigation/sections.ts`: section routes, labels, directory descriptions and sidebars.
 - `src/routeData.ts`: Starlight route middleware that scopes navigation to the current section.
@@ -29,7 +30,7 @@ Development and production preview request `http://localhost:4322`. If the port 
 - `src/components/KnowledgeBaseHeader.astro`: dark header with the landing mark, "Knowledge base", Lucode search, its mobile drawer trigger and the visible `stagistic.com` link.
 - `src/components/KnowledgeBaseContent.astro`: Lucode Markdown rendering with a centered content container on splash pages.
 - `src/components/KnowledgeBasePageTitle.astro`: article headings with inline code in descriptions; descriptions without literal input use Lucode's original title component.
-- `src/components/KnowledgeBaseSectionNav.astro`: persistent Editor/Syntax links with the current section identified.
+- `src/components/KnowledgeBaseSectionNav.astro`: persistent Editor/Mac app/Syntax links with the current section identified.
 - `src/components/KnowledgeBaseDirectory.astro`: homepage cards generated from the section registry.
 - `src/components/LightThemeProvider.astro`: consistent light reading mode regardless of stored or system dark-mode preferences.
 - `src/assets/stagistic-mark-on-dark.svg`: the existing landing mark, reused unchanged.

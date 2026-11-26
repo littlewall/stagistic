@@ -2,6 +2,7 @@ import {
     BREAKING_NOTE_LABEL,
     getReleaseNoteWeight,
     type Release,
+    RELEASE_NOTE_SURFACE_LABELS,
     RELEASE_NOTE_TYPE_LABELS,
     RELEASE_NOTE_TYPES,
     type ReleaseNoteType,
@@ -25,6 +26,8 @@ export interface ChangelogNote {
     /** The type's label, e.g. `New`. */
     label: string,
     title: string,
+    /** `Mac app` for a note that applies to the Mac app only; absent otherwise. */
+    surfaceLabel?: string,
     /** A change to how existing data behaves; listed first and labelled `BREAKING_NOTE_LABEL`. */
     breaking: boolean,
     /** `highlight` for a main feature, `fix` for a fix, else `plain`; drives the pill colour. */
@@ -100,6 +103,7 @@ export const toChangelog = (releases: readonly Release[], options: {site: string
                 type: note.type,
                 label: RELEASE_NOTE_TYPE_LABELS[note.type],
                 title: note.title,
+                surfaceLabel: note.surface === undefined ? undefined : RELEASE_NOTE_SURFACE_LABELS[note.surface],
                 breaking: note.breaking,
                 weight: getReleaseNoteWeight(note),
                 descriptionHtml: markdownToHtml(note.description),
@@ -130,7 +134,7 @@ const noteHtml = (note: ChangelogNote, site: string) => {
     ].filter(Boolean);
 
     return [
-        `<h4>${escapeXml(`${note.breaking ? BREAKING_NOTE_LABEL : note.label}: ${note.title}`)}</h4>`,
+        `<h4>${escapeXml(`${note.breaking ? BREAKING_NOTE_LABEL : note.label}: ${note.title}${note.surfaceLabel ? ` (${note.surfaceLabel})` : ''}`)}</h4>`,
         note.image ? `<p><img src="${escapeXml(new URL(note.image, site).href)}" alt=""></p>` : '',
         note.descriptionHtml,
         links.length > 0 ? `<p>${links.join(' ')}</p>` : '',

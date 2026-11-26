@@ -40,12 +40,17 @@ export const compareReleaseNumbers = (a: string, b: string): number => {
     return 0;
 };
 
-export const bumpRelease = (current: string, bump: ReleaseBump): string => {
+/** `major` is only for `release-prepare --major`; fragments carry `minor` or `patch`. */
+export const bumpRelease = (current: string, bump: ReleaseBump | 'major'): string => {
     const [
         major,
         minor,
         patch,
     ] = parts(current);
+
+    if (bump === 'major') {
+        return `${major + 1}.0.0`;
+    }
 
     return bump === 'minor' ? `${major}.${minor + 1}.0` : `${major}.${minor}.${patch + 1}`;
 };

@@ -93,6 +93,7 @@ export const McpSettingsPanel = () => {
                     <ButtonGroup>
                         <Button
                             variant="secondary"
+                            size="xs"
                             isPending={manual.isPending}
                             onPress={() => void prepareManualConfig()}
                         >

@@ -1,3 +1,4 @@
+export {loadPgliteFsBundle, loadPgliteWasmModule} from './assets';
 export {
     createPgliteBootstrap,
     type DbBootstrapStep,
@@ -5,6 +6,7 @@ export {
     type DbDumpCompression,
     type LocalDb,
 } from './bootstrap';
+export {readDataChangeMarker} from './changeMarker';
 export {createPgliteWorkerDb} from './createWorkerDb';
 export {currentDbGeneration, type DbGeneration} from './dbGeneration';
 export type {
@@ -14,6 +16,7 @@ export type {
 } from './dbHandover';
 export {runPgliteMigrations} from './migrations';
 export {compiledMigrations} from './migrations.compiled';
+export type {PremigrationBackup, PremigrationBackupStore} from './premigrationBackup';
 export {
     createIdbPremigrationBackupStore,
     PREMIGRATION_BACKUP_DB_NAME,
@@ -21,3 +24,10 @@ export {
     premigrationBackupFileName,
     readPremigrationBackupFile,
 } from './premigrationBackup';
+export {answerPremigrationDumps, createPortPremigrationBackupStore} from './premigrationBackupPort';
+export {
+    deleteIdbDataDir,
+    type PgliteAssets,
+    replaceDataDirWithDump,
+    validateDump,
+} from './restoreDump';

@@ -3,12 +3,12 @@ title: Import or restore a script
 description: Bring in a script file, keep a new copy or restore an existing script from a package.
 ---
 
-Use **Import script** on the home screen to bring a downloaded file into the library. The supported files are `.stagistic` and `.stepkg`.
+Use **Import script** on the home screen to bring a downloaded file into the library. In the [Mac app](/mac-app/), **File ▸ Import…** opens the same dialog. The supported files are `.stagistic` and `.stepkg`.
 
 ## Import a file
 
 1. Choose **Import script**.
-2. Drop the file into the dialog, or click the file area to browse for it.
+2. Drop the file into the dialog, or click the file area to browse for it. Dropping works in the Web app and in the Mac app.
 3. Review **Script name**. For a separate draft, enter `The last door — restored copy`.
 4. Choose **Import script**.
 
@@ -27,7 +27,7 @@ Use this when you want to inspect an earlier snapshot or try a restored draft al
 ## Replace an existing script from a package
 
 1. Select **Replace existing**, checking the script title shown beside the choice.
-2. Use **Download backup** to keep a package of the existing local script before replacing it. Check that the backup was downloaded.
+2. Use **Download backup** (**Save backup** in the Mac app) to keep a package of the existing local script before replacing it. Check that the backup was downloaded or saved.
 3. Enter `replace me` in the confirmation field.
 4. Choose **Replace script**.
 
@@ -46,6 +46,10 @@ Replacement is offered only when the matching script exists in this library. A `
 ## If the file cannot be imported
 
 Read the error message shown by the app. Check that you selected a `.stagistic` or `.stepkg` file. A package created with a newer unsupported document version may require updating the app before importing.
+
+## Bring scripts from the Web app to the Mac app
+
+The two apps keep separate libraries. Download a `.stepkg` package from the Web app and import it in the Mac app, one script at a time. See [Move scripts from the Web app](/mac-app/move-from-web-app/).
 
 ## Related tasks
 

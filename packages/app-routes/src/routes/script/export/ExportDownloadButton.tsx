@@ -4,21 +4,10 @@ import {
     IconDropdownMenu,
 } from '@stagistic/ui';
 
+import {sanitizeFileName} from '../../../shared/downloadStagistic';
+import {useSaveFile, useSaveWording} from '../../../shared/saveFile';
 import styles from './ExportPreview.module.css';
 import {useExportContext} from './ExportProvider';
-
-const SAVE_AND_DOWNLOAD_ITEMS = [{id: 'draft', label: 'Save as draft and download…'}, {id: 'version', label: 'Save as version and download…'}];
-
-const sanitizeFileName = (value: string) => {
-    const normalized = value
-        .trim()
-        // Control chars are intentionally stripped from file names.
-        // eslint-disable-next-line no-control-regex
-        .replace(/[<>:"/\\|?*\u0000-\u001f]/gu, '-')
-        .replace(/[. ]+$/u, '');
-
-    return normalized || 'Untitled';
-};
 
 export const ExportDownloadButton = () => {
     const {
@@ -28,6 +17,8 @@ export const ExportDownloadButton = () => {
         fileName,
         saveAndDownload,
     } = useExportContext();
+    const saveFile = useSaveFile();
+    const wording = useSaveWording();
     const isDisabled = !canExport || !artifact;
 
     const download = (stateLabel?: string) => {
@@ -37,16 +28,10 @@ export const ExportDownloadButton = () => {
 
         const baseName = fileName ?? script.scriptTitle;
 
-        const url = URL.createObjectURL(artifact);
-        const anchor = document.createElement('a');
-
-        anchor.href = url;
-        anchor.download = `${sanitizeFileName(stateLabel ? `${baseName} – ${stateLabel}` : baseName)}.pdf`;
-        anchor.style.display = 'none';
-        document.body.append(anchor);
-        anchor.click();
-        anchor.remove();
-        URL.revokeObjectURL(url);
+        void saveFile({
+            data: artifact,
+            suggestedName: `${sanitizeFileName(stateLabel ? `${baseName} – ${stateLabel}` : baseName)}.pdf`,
+        });
     };
 
     const button = (
@@ -56,7 +41,7 @@ export const ExportDownloadButton = () => {
             onPress={() => download()}
             isDisabled={isDisabled}
         >
-            Download PDF
+            {wording.pdfButton}
         </Button>
     );
 
@@ -68,10 +53,10 @@ export const ExportDownloadButton = () => {
         <span className={styles.downloadGroup}>
             {button}
             <IconDropdownMenu
-                aria-label="More download options"
+                aria-label={wording.pdfMoreOptions}
                 icon={<ChevronDownIcon aria-hidden="true" />}
                 size="sm"
-                items={SAVE_AND_DOWNLOAD_ITEMS}
+                items={[{id: 'draft', label: wording.stateMenuItem('draft')}, {id: 'version', label: wording.stateMenuItem('version')}]}
                 onAction={id => saveAndDownload(id === 'version' ? 'version' : 'draft', download)}
             />
         </span>

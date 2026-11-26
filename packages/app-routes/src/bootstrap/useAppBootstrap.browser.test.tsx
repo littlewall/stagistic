@@ -30,7 +30,7 @@ const Harness = ({options}: {options: Options}) => {
     } = useAppBootstrap(options);
 
     if (failure) {
-        return <BootFailureScreen failure={failure} />;
+        return <BootFailureScreen surface="web" failure={failure} />;
     }
 
     if (waitingNotice) {

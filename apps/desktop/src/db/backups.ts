@@ -1,56 +1,38 @@
+import {dumpDataDir, readChangeMarker} from '~db';
+
 import {
-    BaseDirectory,
-    mkdir,
-    readDir,
-    remove,
-    writeFile,
-} from '@tauri-apps/plugin-fs';
+    listBackupNames,
+    removeBackups,
+    writeBackupFile,
+} from './backupStorage';
+import {createBackupWriter} from './backupWriter';
 
-import {dumpDataDir} from '~db';
-
-const BACKUP_DIR = 'backups';
-const BACKUP_PREFIX = 'stagistic-';
-const BACKUP_SUFFIX = '.pgdata.gz';
-const MAX_BACKUPS = 5;
-const DEFAULT_INTERVAL_MS = 5 * 60 * 1000;
-
-const timestamp = (): string => {
-    const now = new Date();
-    const pad = (value: number) => String(value).padStart(2, '0');
-
-    return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` + `-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-};
-
-const pruneOldBackups = async (): Promise<void> => {
-    const entries = await readDir(BACKUP_DIR, {baseDir: BaseDirectory.AppData});
-    const backups = entries
-        .filter(entry => entry.isFile && entry.name.startsWith(BACKUP_PREFIX) && entry.name.endsWith(BACKUP_SUFFIX))
-        .map(entry => entry.name)
-        .toSorted();
-
-    if (backups.length <= MAX_BACKUPS) {
-        return;
-    }
-
-    const stale = backups.slice(0, backups.length - MAX_BACKUPS);
-
-    await Promise.all(stale.map(name => remove(`${BACKUP_DIR}/${name}`, {baseDir: BaseDirectory.AppData})));
-};
+const DEFAULT_INTERVAL_MS = 15 * 60 * 1000;
 
 /*
  * Snapshot the whole pglite data dir to a single portable file in the app data
- * folder. The live store already persists incrementally to OPFS; this is the
- * durable, inspectable, exportable copy the user can back up or migrate.
+ * folder. The live store already persists incrementally; this is the durable,
+ * inspectable copy the user can back up or restore from Settings ▸ Storage.
  */
-export const writeBackup = async (): Promise<void> => {
-    const dump = await dumpDataDir('gzip');
-    const bytes = new Uint8Array(await dump.arrayBuffer());
+const writer = createBackupWriter({
+    readMarker: readChangeMarker,
+    dump: async () => new Uint8Array(await (await dumpDataDir('gzip')).arrayBuffer()),
+    writeFile: writeBackupFile,
+    listNames: listBackupNames,
+    removeFiles: async names => {
+        await removeBackups(names);
+    },
+    now: () => new Date(),
+});
 
-    await mkdir(BACKUP_DIR, {baseDir: BaseDirectory.AppData, recursive: true});
-    await writeFile(`${BACKUP_DIR}/${BACKUP_PREFIX}${timestamp()}${BACKUP_SUFFIX}`, bytes, {
-        baseDir: BaseDirectory.AppData,
-    });
-    await pruneOldBackups();
+/** Periodic and shutdown backup: written only when script data changed since the last one. */
+export const writeBackup = async (): Promise<void> => {
+    await writer.writeIfChanged();
+};
+
+/** Backup of the current state even when unchanged: the safety copy before a restore. */
+export const writeSafetyBackup = async (): Promise<void> => {
+    await writer.writeAlways();
 };
 
 export interface BackupSchedule {
@@ -58,8 +40,8 @@ export interface BackupSchedule {
 }
 
 /*
- * Periodic snapshots. Call the returned `stop()` on teardown; pair with a
- * window-close handler that awaits `writeBackup()` for a final snapshot.
+ * Periodic snapshots. Call the returned `stop()` on teardown; the final one is
+ * written by the safe-shutdown sequence through `writeBackup()`.
  */
 export const startBackupSchedule = (intervalMs: number = DEFAULT_INTERVAL_MS): BackupSchedule => {
     const runSafely = () => {
@@ -67,6 +49,10 @@ export const startBackupSchedule = (intervalMs: number = DEFAULT_INTERVAL_MS): B
             console.error('Backup snapshot failed', error);
         });
     };
+
+    void writer.start().catch(error => {
+        console.error('Backup baseline failed', error);
+    });
 
     const handle = setInterval(runSafely, intervalMs);
 

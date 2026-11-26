@@ -39,6 +39,8 @@ export interface RevertResult {
     /** Release files deleted, relative to the root. */
     removed: string[],
     updated: string[],
+    /** Releases that were major steps; prepare again with `--major` to get their number back. */
+    majorReleases: string[],
 }
 
 const FRAGMENT_DIR = 'releases/next';
@@ -56,15 +58,20 @@ const releaseFiles = (root: string): string[] => {
         .toSorted(compareReleaseNumbers);
 };
 
-const bumpBetween = (from: string, to: string): ReleaseBump => {
+/** A major step is recorded as `minor` fragments; `release-prepare --major` makes the number again. */
+const bumpBetween = (from: string, to: string): {bump: ReleaseBump, major: boolean} => {
     for (const bump of ['minor', 'patch'] as const) {
         if (bumpRelease(from, bump) === to) {
-            return bump;
+            return {bump, major: false};
         }
     }
 
+    if (bumpRelease(from, 'major') === to) {
+        return {bump: 'minor', major: true};
+    }
+
     throw new ReleaseNotesError(
-        `Cannot tell how Release ${from} became ${to}: only a minor or a patch step can be undone. Revert to the Release before ${to} instead.`,
+        `Cannot tell how Release ${from} became ${to}: only a major, minor or patch step can be undone. Revert to the Release before ${to} instead.`,
     );
 };
 
@@ -120,6 +127,7 @@ const serializeFragment = (note: ReleaseNote, bump: ReleaseBump): string => {
         ...note.image === undefined ? {} : {image: note.image},
         ...note.docs === undefined ? {} : {docs: note.docs},
         ...note.article === undefined ? {} : {article: note.article},
+        ...note.surface === undefined ? {} : {surface: note.surface},
     };
 
     return `---\n${stringify(data, {lineWidth: 0})}---\n${note.description}\n`;
@@ -166,7 +174,11 @@ export const revertRelease = ({root, target}: RevertOptions): RevertResult => {
         throw new ReleaseNotesError(`The newest Release file must be the current Release ${current}, but ${found}. Nothing was changed.`);
     }
 
-    const planned: {release: Release, bump: ReleaseBump}[] = [];
+    const planned: {
+        release: Release,
+        bump: ReleaseBump,
+        major: boolean,
+    }[] = [];
     let previous = target;
 
     for (const number of newer) {
@@ -177,7 +189,7 @@ export const revertRelease = ({root, target}: RevertOptions): RevertResult => {
             throw new ReleaseNotesError(`${file}: the file name must match its Release number ${release.release}`);
         }
 
-        planned.push({release, bump: bumpBetween(previous, number)});
+        planned.push({release, ...bumpBetween(previous, number)});
         previous = number;
     }
 
@@ -221,5 +233,6 @@ export const revertRelease = ({root, target}: RevertOptions): RevertResult => {
         written: fragments.map(fragment => fragment.file).toSorted(),
         removed,
         updated: [...updates.keys()],
+        majorReleases: planned.filter(step => step.major).map(step => step.release.release),
     };
 };

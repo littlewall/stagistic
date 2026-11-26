@@ -7,7 +7,11 @@ import {currentDbGeneration, formatDbGeneration} from './dbGeneration';
 import {installFlushQueue, withDurableSyncToFs} from './durableSyncToFs';
 import {runPgliteMigrations} from './migrations';
 import {compiledPgliteVersion} from './migrations.compiled';
-import {backUpBeforeMigrations, createIdbPremigrationBackupStore} from './premigrationBackup';
+import {
+    backUpBeforeMigrations,
+    createIdbPremigrationBackupStore,
+    type PremigrationBackupStore,
+} from './premigrationBackup';
 import {type WorkerStartMessage, workerStartMessage} from './workerStart';
 
 interface WorkerDbOptions extends Pick<PGliteOptions, 'dataDir' | 'relaxedDurability'> {
@@ -16,6 +20,8 @@ interface WorkerDbOptions extends Pick<PGliteOptions, 'dataDir' | 'relaxedDurabi
      * (see premigrationBackup.ts). Only applies to a persistent `idb://` database.
      */
     premigrationBackup?: boolean,
+    /** Where the dump goes; defaults to an IndexedDB database next to the data. */
+    premigrationBackupStore?: PremigrationBackupStore,
     fsBundleUrl: string,
     wasmUrl: string,
     /** Tells the page how the start is going; pass `postMessage` from the worker entry. */
@@ -28,6 +34,7 @@ export const createPgliteWorkerDb = async ({
     dataDir = 'idb://stagistic-main',
     relaxedDurability = true,
     premigrationBackup = false,
+    premigrationBackupStore,
     report,
 }: WorkerDbOptions) => {
     try {
@@ -58,7 +65,7 @@ export const createPgliteWorkerDb = async ({
                     report?.(workerStartMessage('backing-up'));
                     await backUpBeforeMigrations({
                         client: db,
-                        store: createIdbPremigrationBackupStore(),
+                        store: premigrationBackupStore ?? createIdbPremigrationBackupStore(),
                         pgliteVersion: compiledPgliteVersion,
                         targetGeneration: formatDbGeneration(currentDbGeneration),
                         firstPendingId: pendingIds[0] ?? '',

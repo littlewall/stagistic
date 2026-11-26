@@ -88,7 +88,7 @@ const mount = ({
                 quietReloadDelayMs={30}
                 reload={reload}
             >
-                <ReleaseNotesProvider releaseNumber="0.2.0" releases={[]}>
+                <ReleaseNotesProvider surface="web" releaseNumber="0.2.0" releases={[]}>
                     <AppFooter />
                     <Screen />
                 </ReleaseNotesProvider>

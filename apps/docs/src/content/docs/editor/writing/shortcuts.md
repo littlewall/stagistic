@@ -56,6 +56,22 @@ Use these with your words selected. See [Format your text](/editor/writing/forma
 | Undo | <kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>Z</kbd> | <kbd>Ctrl</kbd> + <kbd>Z</kbd> |
 | Redo | <kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd><span aria-hidden="true">⇧</span> Shift</kbd> + <kbd>Z</kbd> | <kbd>Ctrl</kbd> + <kbd>Y</kbd> |
 
+## Mac app menu
+
+The [Mac app](/mac-app/) has a menu bar. Its commands and keys work alongside the editor shortcuts above. Script commands are available only inside an open script and are greyed out on the script list.
+
+| Menu | Commands |
+| --- | --- |
+| Stagistic Editor | About, **Check for Updates…**, **Settings…** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>,</kbd>), Hide, **Quit** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>Q</kbd>) |
+| File | **New Script** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>N</kbd>), **Import…**, **Script Library** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>O</kbd>), **Close Window** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>W</kbd>) |
+| Edit | **Undo** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>Z</kbd>), **Redo** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd><span aria-hidden="true">⇧</span> Shift</kbd> + <kbd>Z</kbd>), Cut, Copy, Paste, Select All |
+| Script | **Script Settings…**, **Attribute Manager…**, **Export…**, **Save Script…** |
+| View | **Zoom In** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>+</kbd>), **Zoom Out** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>−</kbd>), **Actual Size** (<kbd><span aria-hidden="true">⌘</span> Command</kbd> + <kbd>0</kbd>), Full Screen |
+| Window | Minimize, Zoom, Bring All to Front |
+| Help | **Stagistic Help**, **What's New**, **Changelog**, **Report a Problem…**, **Show Backups Folder**, **Third-Party Licences** |
+
+Undo and Redo from the menu act on the script in the editor, the same as the keys.
+
 ## Character references
 
 While entering a character reference in a Stage direction, <kbd><span aria-hidden="true">⏎</span> Enter</kbd> or <kbd><span aria-hidden="true">⇥</span> Tab</kbd> finishes the reference, and <kbd>Esc</kbd> cancels the unfinished one. These keys act on the reference rather than changing the whole block. See [Refer to a character in a stage direction](/editor/characters/references/) for suggestions and returning to ordinary text.

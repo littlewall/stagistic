@@ -7,7 +7,7 @@ import {
     useScriptSummary,
 } from '@stagistic/app-core';
 import type {ScriptDocumentSession} from '@stagistic/editor';
-import {getUnsavedWorkParticipants} from '@stagistic/shared';
+import {addUnsavedWorkParticipant, getUnsavedWorkParticipants} from '@stagistic/shared';
 import {LoaderOverlay} from '@stagistic/ui';
 import {
     type ReactNode,
@@ -28,6 +28,21 @@ import {ScriptEditingBanner} from './ScriptEditingBanner';
 export const useEditingParticipant = (documentSession: ScriptDocumentSession | null, isReadOnly: boolean) => {
     const editing = useScriptEditingSession();
 
+    /*
+     * Shutdown and restore ask every owner of unsaved text, the open script included, to write it.
+     * No getText: the database handover and the takeover below already rescue the script text themselves.
+     */
+    useEffect(() => {
+        if (!documentSession || isReadOnly) {
+            return;
+        }
+
+        return addUnsavedWorkParticipant({
+            flush: () => documentSession.flush(),
+            stopEditing: () => documentSession.stopEditing(),
+        });
+    }, [documentSession, isReadOnly]);
+
     useEffect(() => {
         if (!documentSession || isReadOnly || !editing) {
             return;
@@ -36,13 +51,10 @@ export const useEditingParticipant = (documentSession: ScriptDocumentSession | n
         // Another tab asking for editing: stop typing, save everything, then let go.
         return editing.registerParticipant({
             flush: async () => {
-                documentSession.stopEditing();
+                // The participants include this script's document session (registered above).
                 getUnsavedWorkParticipants().forEach(participant => participant.stopEditing?.());
 
-                const results = await Promise.all([
-                    documentSession.flush(),
-                    ...getUnsavedWorkParticipants().map(participant => participant.flush().catch(() => false)),
-                ]);
+                const results = await Promise.all(getUnsavedWorkParticipants().map(participant => participant.flush().catch(() => false)));
 
                 return results.every(Boolean);
             },

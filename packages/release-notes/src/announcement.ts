@@ -1,3 +1,4 @@
+import type {ReleaseNoteSurface} from './schema';
 import {
     compareReleaseNumbers,
     isReleaseNumber,
@@ -5,6 +6,7 @@ import {
 
 interface AnnouncedNote {
     highlight: boolean,
+    surface?: ReleaseNoteSurface,
 }
 
 interface AnnouncedRelease {
@@ -24,6 +26,8 @@ export interface AnnounceReleasesInput<R extends AnnouncedRelease> {
     lastSeenRelease: string | null | undefined,
     /** Whether the writer has a script; `undefined` while that is still unknown. */
     hasScripts: boolean | undefined,
+    /** The Surface the app runs on; notes for the other Surface are ignored. */
+    surface: ReleaseNoteSurface,
 }
 
 export interface ReleaseAnnouncement<R extends AnnouncedRelease> {
@@ -60,6 +64,7 @@ export const announceReleases = <R extends AnnouncedRelease>({
     releases,
     lastSeenRelease,
     hasScripts,
+    surface,
 }: AnnounceReleasesInput<R>): ReleaseAnnouncement<R> => {
     if (!isReleaseNumber(currentRelease) || lastSeenRelease === undefined || hasScripts === undefined) {
         return nothing();
@@ -80,7 +85,7 @@ export const announceReleases = <R extends AnnouncedRelease>({
             && compareReleaseNumbers(release.release, currentRelease) <= 0
             && (lastSeen === null || compareReleaseNumbers(release.release, lastSeen) > 0))
         .toSorted((a, b) => compareReleaseNumbers(b.release, a.release))
-        .map(release => ({...release, notes: release.notes.filter(note => note.highlight)}))
+        .map(release => ({...release, notes: release.notes.filter(note => note.highlight && (note.surface ?? surface) === surface)}))
         .filter(release => release.notes.length > 0);
 
     if (unseen.length === 0) {

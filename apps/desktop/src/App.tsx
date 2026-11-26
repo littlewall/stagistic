@@ -9,9 +9,11 @@ import {
     DatabaseHandoverOverlay,
     GlobalModalsProvider,
     HomeRoute,
+    SaveFileProvider,
     ScriptBoardRoute,
     ScriptEditorRoute,
     ScriptExportRoute,
+    ScriptMenuActionsProvider,
     ScriptReleaseNotesProvider,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
@@ -19,9 +21,16 @@ import {
     WaitingForDatabaseScreen,
 } from '@stagistic/app-routes';
 import {currentReleaseNumber, releases} from '@stagistic/release-notes/bundled';
-import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
-import {getCurrentWindow} from '@tauri-apps/api/window';
-import {useEffect} from 'react';
+import {
+    AppBannerProvider,
+    LoaderOverlay,
+    NoticeBar,
+    ToastProvider,
+} from '@stagistic/ui';
+import {
+    useEffect,
+    useMemo,
+} from 'react';
 import {
     Navigate,
     Route,
@@ -33,11 +42,20 @@ import {
     prepareLocalDbWithProgress,
     requestPersistentStorage,
 } from './db';
-import {startBackupSchedule, writeBackup} from './db/backups';
+import {startBackupSchedule} from './db/backups';
+import {openDownloadPage, showBackupsFolder} from './db/backupsFolder';
+import {RestoreDiscardedNotice} from './db/RestoreDiscardedNotice';
+import {saveFileWithDialog} from './files/saveFile';
+import {DOWNLOAD_URL} from './lifecycle/updateNotice';
+import {DesktopUpdatesProvider} from './lifecycle/updatesContext';
+import {useDesktopLifecycle} from './lifecycle/useDesktopLifecycle';
+import {openExternalUrl} from './links/externalLinks';
 import {McpSettingsPanel} from './mcp/McpSettingsPanel';
 import {useDeepLinkNavigation} from './mcp/useDeepLinkNavigation';
 import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
+import {StorageSettings} from './storage/StorageSettings';
+import {UpdatesSettings} from './updates/UpdatesSettings';
 
 const bootstrapOptions = {
     beforeDatabase: requestPersistentStorage,
@@ -50,6 +68,16 @@ const settingsSections: AppSettingsSection[] = [
         id: 'mcp',
         label: 'MCP',
         content: <McpSettingsPanel />,
+    },
+    {
+        id: 'storage',
+        label: 'Storage',
+        content: <StorageSettings />,
+    },
+    {
+        id: 'updates',
+        label: 'About app',
+        content: <UpdatesSettings />,
     },
 ];
 
@@ -99,9 +127,21 @@ const BootedApp = () => {
 
     useLocalMcp(Boolean(scriptRepository));
 
+    const {
+        dialogs: lifecycleDialogs,
+        updates,
+        notice,
+        hideNotice,
+    } = useDesktopLifecycle(Boolean(scriptRepository));
+    const footerUpdate = useMemo(() => (
+        updates.state.status === 'ready'
+            ? {label: `Release ${updates.state.release} is ready. Restart`, onPress: updates.restart}
+            : undefined
+    ), [updates.state, updates.restart]);
+
     /*
-     * Portable backup snapshots into the app data folder: periodic while running,
-     * plus a best-effort snapshot when the window is closed.
+     * Portable backup snapshots into the app data folder while running; the
+     * final one is written by the safe-shutdown sequence (see lifecycle/).
      */
     useEffect(() => {
         if (!scriptRepository) {
@@ -109,20 +149,30 @@ const BootedApp = () => {
         }
 
         const schedule = startBackupSchedule();
-        const unlistenPromise = getCurrentWindow().onCloseRequested(() => {
-            void writeBackup().catch(error => {
-                console.error('Backup on close failed', error);
-            });
-        });
 
         return () => {
             schedule.stop();
-            void unlistenPromise.then(dispose => dispose());
         };
     }, [scriptRepository]);
 
+    const banner = notice.visible && notice.notice ? (
+        <NoticeBar
+            message={notice.notice.message}
+            actionLabel="Download"
+            onAction={() => void openExternalUrl(notice.notice?.url ?? DOWNLOAD_URL).catch(() => undefined)}
+            onHide={hideNotice}
+        />
+    ) : null;
+
     if (failure) {
-        return <BootFailureScreen failure={failure} />;
+        return (
+            <BootFailureScreen
+                surface="desktop"
+                failure={failure}
+                onOpenDownloadPage={() => void openDownloadPage()}
+                onShowBackupsFolder={() => void showBackupsFolder()}
+            />
+        );
     }
 
     if (!scriptRepository) {
@@ -139,22 +189,37 @@ const BootedApp = () => {
             snapshotViews={snapshotViews}
         >
             <ToastProvider>
-                <ScriptReleaseNotesProvider releaseNumber={currentReleaseNumber} releases={releases}>
-                    <GlobalModalsProvider settingsSections={settingsSections}>
-                        <AppRoutes />
-                    </GlobalModalsProvider>
-                </ScriptReleaseNotesProvider>
+                <RestoreDiscardedNotice />
+                <DesktopUpdatesProvider value={updates}>
+                    <ScriptReleaseNotesProvider
+                        releaseNumber={currentReleaseNumber}
+                        releases={releases}
+                        surface="desktop"
+                        footerUpdate={footerUpdate}
+                    >
+                        <GlobalModalsProvider settingsSections={settingsSections}>
+                            <AppBannerProvider banner={banner}>
+                                <ScriptMenuActionsProvider>
+                                    <AppRoutes />
+                                </ScriptMenuActionsProvider>
+                            </AppBannerProvider>
+                            {lifecycleDialogs}
+                        </GlobalModalsProvider>
+                    </ScriptReleaseNotesProvider>
+                </DesktopUpdatesProvider>
             </ToastProvider>
         </ScriptRepositoryProvider>
     );
 };
 
 const App = () => (
-    <DatabaseHandoverProvider handover={databaseHandover}>
-        <BootedApp />
-        <UnsavedWorkHandoverBridge />
-        <DatabaseHandoverOverlay />
-    </DatabaseHandoverProvider>
+    <SaveFileProvider saveFile={saveFileWithDialog} verb="Save">
+        <DatabaseHandoverProvider handover={databaseHandover}>
+            <BootedApp />
+            <UnsavedWorkHandoverBridge />
+            <DatabaseHandoverOverlay />
+        </DatabaseHandoverProvider>
+    </SaveFileProvider>
 );
 
 export default App;

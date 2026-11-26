@@ -23,3 +23,22 @@
     background: color-mix(in oklch, var(--color-bg) 56%, transparent);
     backdrop-filter: blur(2px);
 }
+
+.notice {
+    background: color-mix(in oklch, var(--color-bg) 90%, transparent);
+    backdrop-filter: blur(6px);
+
+    & .panel {
+        /* Larger copy for a message read in a second or two; scoped to this variant only. */
+        --font-size-sm: var(--font-size-xl);
+
+        width: min(360px, 90vw);
+    }
+
+    & .title {
+        margin: 0 0 var(--space-lg);
+        font-size: var(--font-size-3xl);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text);
+    }
+}

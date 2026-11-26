@@ -1,0 +1,146 @@
+name: desktop-release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      test_version:
+        description: 'Test version, pattern X.Y.Z-test.N (build-time only, no publish)'
+        required: true
+        type: string
+      updater_endpoint:
+        description: 'Optional updater endpoint override'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    environment: release
+    timeout-minutes: 90
+    env:
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+    steps:
+      - name: Validate test version
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TEST_VERSION: ${{ inputs.test_version }}
+        run: |
+          if ! [[ "$TEST_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-test\.[0-9]+$ ]]; then
+            echo "test_version must match X.Y.Z-test.N" >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: pnpm/action-setup@v4
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Rust toolchain
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add ${{ matrix.target }}
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/desktop/src-tauri/target
+            packages/mcp/target
+          key: cargo-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: cargo-${{ matrix.target }}-
+
+      - name: Checks
+        run: |
+          pnpm exec moon run desktop:test
+          pnpm exec moon run desktop:test-rust
+          pnpm exec moon run mcp:test-rust
+          pnpm exec moon run mcp:contract-check
+
+      - name: Import Apple signing certificate
+        if: env.APPLE_CERTIFICATE != ''
+        env:
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY_SECRET: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/stagistic-release.keychain-db"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -P "$APPLE_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN" login.keychain-db
+          rm -f "$RUNNER_TEMP/cert.p12"
+          KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY_ID}.p8"
+          echo "$APPLE_API_KEY_P8" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          {
+            echo "APPLE_SIGNING_IDENTITY=$APPLE_SIGNING_IDENTITY_SECRET"
+            echo "APPLE_API_ISSUER=$APPLE_API_ISSUER_ID"
+            echo "APPLE_API_KEY=$APPLE_API_KEY_ID"
+            echo "APPLE_API_KEY_PATH=$KEY_PATH"
+            echo "STAGISTIC_KEYCHAIN=$KEYCHAIN"
+          } >> "$GITHUB_ENV"
+
+      - name: Release (tag)
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: pnpm exec moon run desktop:release -- --tag "$RELEASE_TAG" --publish-draft
+
+      - name: Test build (dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TEST_VERSION: ${{ inputs.test_version }}
+          UPDATER_ENDPOINT: ${{ inputs.updater_endpoint }}
+        run: |
+          args=(--test-version "$TEST_VERSION")
+          if [ -n "$UPDATER_ENDPOINT" ]; then args+=(--updater-endpoint "$UPDATER_ENDPOINT"); fi
+          pnpm exec moon run desktop:release -- "${args[@]}"
+
+      - name: Upload test build
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-test-${{ matrix.target }}
+          path: apps/desktop/release-out/**
+          if-no-files-found: error
+
+      - name: Remove signing keychain
+        if: always()
+        run: |
+          if [ -n "${STAGISTIC_KEYCHAIN:-}" ]; then
+            security delete-keychain "$STAGISTIC_KEYCHAIN" || true
+          fi
+          rm -f "$RUNNER_TEMP"/AuthKey_*.p8 "$RUNNER_TEMP/cert.p12"

@@ -62,16 +62,17 @@ const report = (action: () => string[], error: (line: string) => void, log: (lin
     }
 };
 
-/** `release-prepare [--date YYYY-MM-DD] [--root DIR]`. Returns the exit code. */
+/** `release-prepare [--major] [--date YYYY-MM-DD] [--root DIR]`. Returns the exit code. */
 export const runCli = (args: readonly string[], log: (line: string) => void = console.log, error: (line: string) => void = console.error): number => {
+    const major = args.includes('--major');
     const {
         flags,
         rest,
         unknown,
-    } = parseFlags(args, ['--date', '--root']);
+    } = parseFlags(args.filter(arg => arg !== '--major'), ['--date', '--root']);
 
     if (unknown !== undefined || rest.length > 0) {
-        error(`Unknown argument "${unknown ?? rest[0]}". Usage: release-prepare [--date YYYY-MM-DD] [--root DIR]`);
+        error(`Unknown argument "${unknown ?? rest[0]}". Usage: release-prepare [--major] [--date YYYY-MM-DD] [--root DIR]`);
 
         return 2;
     }
@@ -80,7 +81,11 @@ export const runCli = (args: readonly string[], log: (line: string) => void = co
     const root = flags.get('--root') ?? REPOSITORY_ROOT;
 
     return report(() => {
-        const result = prepareRelease({root, date});
+        const result = prepareRelease({
+            root,
+            date,
+            major,
+        });
 
         return [
             `Prepared Release ${result.release} (was ${result.previous}) dated ${date}.`,
@@ -109,9 +114,14 @@ export const runRevertCli = (args: readonly string[], log: (line: string) => voi
     return report(() => {
         const result = revertRelease({root, target: rest[0]});
 
+        const major = result.majorReleases.length > 0
+            ? [`Release ${result.majorReleases.join(', ')} was a major step: prepare again with --major.`]
+            : [];
+
         return [
             `Reverted to Release ${result.release} (was ${result.previous}).`,
             `Wrote ${result.written.length} fragments (${result.written.join(', ')}); removed ${result.removed.join(', ')}; updated ${result.updated.length} files.`,
+            ...major,
             'Nothing was committed or tagged. Review the changes before you commit.',
         ];
     }, error, log);

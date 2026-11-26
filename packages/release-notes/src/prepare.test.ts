@@ -243,6 +243,19 @@ describe('prepareRelease', () => {
         expect(snapshot(root)).toEqual(before);
     });
 
+    it('--major turns 0.2.2 into 1.0.0 in every file, whatever the fragments say', () => {
+        const root = makeRepo({version: '0.2.2', files: {'releases/next/a.md': fragmentFile('fix', 'patch', 'A', 'surface: desktop\n')}});
+        const result = prepareRelease({
+            root,
+            date: '2026-11-06',
+            major: true,
+        });
+
+        expect(result.release).toBe('1.0.0');
+        expect(readReleaseNumbers(root).every(entry => entry.version === '1.0.0')).toBe(true);
+        expect(parseRelease(readFileSync(join(root, 'releases/1.0.0.md'), 'utf8'), 'x').notes[0].surface).toBe('desktop');
+    });
+
     it('rejects a malformed date', () => {
         const root = makeRepo({files: {'releases/next/a.md': fragmentFile('fix', 'patch', 'A')}});
 

@@ -2,9 +2,11 @@ import {
     announceReleases,
     compareReleaseNumbers,
     isReleaseNumber,
+    type ReleaseNoteSurface,
 } from '@stagistic/release-notes';
 import {
     FooterReleaseProvider,
+    type FooterReleaseUpdate,
     WhatsNewDialog,
     type WhatsNewNote,
 } from '@stagistic/ui';
@@ -66,6 +68,10 @@ interface ReleaseNotesProviderProps {
      * announced, and nothing recorded, until it is known.
      */
     hasScripts?: boolean,
+    /** The Surface this app runs on; notes for the other Surface are never shown. */
+    surface: ReleaseNoteSurface,
+    /** Replaces the web reload prompt in the footer, e.g. the Mac app's "Restart". */
+    footerUpdate?: FooterReleaseUpdate,
 }
 
 export const ReleaseNotesProvider = ({
@@ -73,6 +79,8 @@ export const ReleaseNotesProvider = ({
     releaseNumber,
     releases,
     hasScripts,
+    surface,
+    footerUpdate,
 }: ReleaseNotesProviderProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [lastSeenStore] = useState(createLastSeenReleaseStore);
@@ -82,11 +90,13 @@ export const ReleaseNotesProvider = ({
         releases,
         lastSeenRelease,
         hasScripts,
+        surface,
     }), [
         releaseNumber,
         releases,
         lastSeenRelease,
         hasScripts,
+        surface,
     ]);
     const markSeen = useCallback(() => {
         const current = lastSeenStore.read();
@@ -105,7 +115,7 @@ export const ReleaseNotesProvider = ({
         }
     }, [announcement.markSeen, markSeen]);
 
-    const whatsNewReleases = useMemo(() => toWhatsNewReleases(releases), [releases]);
+    const whatsNewReleases = useMemo(() => toWhatsNewReleases(releases, surface), [releases, surface]);
     const open = useCallback(() => {
         markSeen();
         setIsOpen(true);
@@ -129,7 +139,7 @@ export const ReleaseNotesProvider = ({
             };
         }
 
-        const notes = toWhatsNewReleases(announcement.releases).flatMap(release => release.notes);
+        const notes = toWhatsNewReleases(announcement.releases, surface).flatMap(release => release.notes);
 
         return {
             notes: [...notes.filter(note => note.breaking), ...notes.filter(note => !note.breaking)],
@@ -138,21 +148,26 @@ export const ReleaseNotesProvider = ({
         };
     }, [
         announcement,
+        surface,
         markSeen,
         open,
     ]);
     const update = useReleaseUpdate();
     const reloadForUpdate = update?.availableRelease ? update.reload : undefined;
+    const webUpdate = useMemo<FooterReleaseUpdate | undefined>(() => (
+        reloadForUpdate ? {label: 'A new Release is ready. Reload', onPress: reloadForUpdate} : undefined
+    ), [reloadForUpdate]);
+    const shownUpdate = footerUpdate ?? webUpdate;
     const footerRelease = useMemo(() => ({
         releaseNumber,
         hasUnseenRelease: announcement.hasUnseenRelease,
         onOpenWhatsNew: open,
-        onReload: reloadForUpdate,
+        update: shownUpdate,
     }), [
         releaseNumber,
         announcement.hasUnseenRelease,
         open,
-        reloadForUpdate,
+        shownUpdate,
     ]);
 
     return (

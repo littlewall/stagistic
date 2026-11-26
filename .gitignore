@@ -93,3 +93,5 @@ graphify-out/
 # Vitest browser-mode failure screenshots (screenshotOnFailure debris, not baselines)
 **/__screenshots__/
 .fallow/
+apps/desktop/release-out
+apps/desktop/src-tauri/licenses/

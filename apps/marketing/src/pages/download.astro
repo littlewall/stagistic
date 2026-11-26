@@ -1,0 +1,130 @@
+---
+import {
+    DOCS_URL,
+    FEEDBACK_URL,
+    MAC_DOWNLOAD_PATH,
+    MAC_REQUIREMENTS,
+    WEB_APP_URL,
+} from '../data/site';
+import Layout from '../layouts/Layout.astro';
+import s from './index.module.css';
+import styles from './download.module.css';
+
+const comparison = [
+    {
+        topic: 'Price and account',
+        mac: 'Free, no account.',
+        web: 'Free, no account.',
+    },
+    {
+        topic: 'Where your scripts live',
+        mac: 'On your Mac.',
+        web: 'In your browser.',
+    },
+    {
+        topic: 'Backups',
+        mac: 'Automatic, in a folder you can open. Export a script as a file any time.',
+        web: 'You export scripts as files and keep them where you like.',
+    },
+    {
+        topic: 'MCP connection',
+        mac: 'Claude or other AI agents can read your scripts through a read-only connection.',
+        web: 'Not available.',
+    },
+];
+---
+
+<Layout
+    title="Download Stagistic Editor - Mac app and Web app"
+    description="Get Stagistic Editor for your Mac or use it in your browser. Free, no account, and your scripts stay on your computer."
+    canonical={new URL('/download', Astro.site).href}
+    softwareApplication
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Download', url: new URL('/download', Astro.site).href},
+    ]}
+>
+    <main class={styles.page}>
+        <div class={styles.inner}>
+            <header class={styles.intro}>
+                <h1 class={styles.title}>Download Stagistic Editor</h1>
+                <p>Use Stagistic Editor on your Mac or in your browser. Both are free, need no account, and keep your scripts on your computer.</p>
+            </header>
+
+            <div class={styles.columns} data-download-columns>
+                <section class={styles.column} aria-labelledby="download-mac" data-download-column="mac">
+                    <h2 class={styles.columnTitle} id="download-mac">Mac app</h2>
+                    <p class={styles.columnText}>Scripts are saved on your Mac, with automatic backups.</p>
+                    <div class={styles.columnActions}>
+                        <a href={MAC_DOWNLOAD_PATH} class={s.btnPrimary}>Download for Mac</a>
+                        <p class={styles.note}>{MAC_REQUIREMENTS}</p>
+                    </div>
+                </section>
+                <section class={styles.column} aria-labelledby="download-web" data-download-column="web">
+                    <h2 class={styles.columnTitle} id="download-web">Web app</h2>
+                    <p class={styles.columnText}>Nothing to install. Scripts are stored in your browser.</p>
+                    <div class={styles.columnActions}>
+                        <a href={WEB_APP_URL} class={s.btnOutline}>Open in browser</a>
+                    </div>
+                </section>
+                <section class={styles.column} aria-labelledby="download-windows" data-download-column="windows">
+                    <h2 class={styles.columnTitle} id="download-windows">Windows</h2>
+                    <p class={styles.columnText}>
+                        Not available yet.{' '}
+                        <a href={FEEDBACK_URL} class={s.textLink} target="_blank" rel="noopener noreferrer">Tell us you need it.</a>
+                    </p>
+                </section>
+            </div>
+
+            <section class={styles.section} aria-labelledby="compare">
+                <h2 class={styles.sectionTitle} id="compare">Mac app or Web app</h2>
+                <table class={styles.table}>
+                    <thead>
+                        <tr>
+                            <th scope="col" class={styles.colHeader}><span class={s.visuallyHidden}>Topic</span></th>
+                            <th scope="col" class={styles.colHeader}>Mac app</th>
+                            <th scope="col" class={styles.colHeader}>Web app</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {comparison.map(row => (
+                            <tr>
+                                <th scope="row" class={styles.rowHeader}>{row.topic}</th>
+                                <td>{row.mac}</td>
+                                <td>{row.web}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </section>
+
+            <section class={styles.section} aria-labelledby="install">
+                <h2 class={styles.sectionTitle} id="install">Install the Mac app</h2>
+                <ol class={styles.steps}>
+                    <li>Download the app and open the file you get (a DMG).</li>
+                    <li>Drag Stagistic Editor to the Applications folder.</li>
+                    <li>Open Stagistic Editor from Applications.</li>
+                </ol>
+                <p class={styles.text}>That is all. From then on every Release installs itself.</p>
+            </section>
+
+            <section class={styles.section} aria-labelledby="move">
+                <h2 class={styles.sectionTitle} id="move">Moving scripts from the Web app</h2>
+                <p class={styles.text}>Scripts in your browser stay there. To use one in the Mac app, move it one script at a time:</p>
+                <ol class={styles.steps}>
+                    <li>In the Web app, export the script as a <code>.stepkg</code> file.</li>
+                    <li>In the Mac app, import that file.</li>
+                    <li>Repeat for each script you want to move.</li>
+                </ol>
+            </section>
+
+            <section class={styles.section} aria-labelledby="more">
+                <h2 class={styles.sectionTitle} id="more">More</h2>
+                <ul class={styles.links}>
+                    <li><a href="/changelog" class={s.textLink}>Changelog</a> lists what is new in each Release.</li>
+                    <li><a href={DOCS_URL} class={s.textLink}>Docs</a> explain installing, backups and moving scripts in detail.</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+</Layout>

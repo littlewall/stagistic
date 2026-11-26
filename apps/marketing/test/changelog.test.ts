@@ -161,3 +161,51 @@ describe('buildChangelogFeed', () => {
         expect(empty).toContain('<channel>');
     });
 });
+
+describe('toChangelog by Surface', () => {
+    const release = {
+        release: '1.0.0',
+        date: '2026-12-01',
+        notes: [
+            {
+                type: 'feature',
+                title: 'Mac thing',
+                highlight: false,
+                breaking: false,
+                description: 'D.',
+                surface: 'desktop',
+            },
+            {
+                type: 'feature',
+                title: 'Web thing',
+                highlight: false,
+                breaking: false,
+                description: 'D.',
+                surface: 'web',
+            },
+            {
+                type: 'fix',
+                title: 'Both thing',
+                highlight: false,
+                breaking: false,
+                description: 'D.',
+            },
+        ],
+    } satisfies Parameters<typeof toChangelog>[0][number];
+    const changelog = toChangelog([release], {site});
+
+    it('shows every note and labels only Mac-only notes with "Mac app"', () => {
+        expect(changelog[0].notes.map(note => note.surfaceLabel)).toEqual([
+            'Mac app',
+            undefined,
+            undefined,
+        ]);
+    });
+
+    it('carries the label into the RSS entry', () => {
+        const feed = buildChangelogFeed(changelog, {site});
+
+        expect(feed).toContain('New: Mac thing (Mac app)');
+        expect(feed).not.toContain('Web thing (');
+    });
+});

@@ -7,7 +7,8 @@ type LoaderOverlayProps = {
     label?: string,
     messages?: ReactNode[],
     progress?: number,
-    variant?: 'solid' | 'scrim',
+    /** `notice`: a strongly tinted scrim with a visible title and larger, narrower copy, for short moments the writer must read quickly. */
+    variant?: 'solid' | 'scrim' | 'notice',
 };
 
 export const LoaderOverlay = ({
@@ -18,11 +19,12 @@ export const LoaderOverlay = ({
 }: LoaderOverlayProps) => {
     return (
         <div
-            className={`${styles.overlay} ${variant === 'scrim' ? styles.scrim : ''}`}
+            className={`${styles.overlay} ${variant === 'scrim' ? styles.scrim : ''} ${variant === 'notice' ? styles.notice : ''}`}
             role="status"
             aria-live="polite"
         >
             <div className={styles.panel}>
+                {variant === 'notice' ? <p className={styles.title}>{label}</p> : null}
                 <ProgressPanel
                     label={label}
                     messages={messages}

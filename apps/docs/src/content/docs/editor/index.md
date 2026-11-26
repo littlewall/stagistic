@@ -26,6 +26,8 @@ Start with [Getting started](/editor/getting-started/) to write a first scene wi
 
 ## About the text format
 
+These guides apply to the Web app and the [Mac app](/mac-app/). The Mac app section covers installing, updating and finding your data.
+
 The separate [Syntax documentation](/syntax/) describes the text format for implementers and people working in plain-text editors.
 
 [Visit the Stagistic website](https://stagistic.com).

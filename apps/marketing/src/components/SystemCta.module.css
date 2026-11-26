@@ -1,0 +1,45 @@
+.cta {
+    min-width: 0;
+}
+
+.variant {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: center;
+
+    &[hidden] {
+        display: none;
+    }
+
+    .cta[data-layout = 'stack'] & {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.note {
+    flex-basis: 100%;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: .8125rem;
+    color: var(--color-text-muted);
+
+    .cta[data-layout = 'stack'] & {
+        text-align: center;
+    }
+}
+
+/* The Web app is not made for small screens, so the browser variant keeps its old behaviour: no primary button there. */
+@media (max-width: 62.4375em) {
+    .browserPrimary {
+        display: none;
+    }
+}
+
+@media (max-width: 40em) {
+    .variant {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

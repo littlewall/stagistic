@@ -1,5 +1,7 @@
 ---
 import type {CollectionEntry} from 'astro:content';
+import {releases} from '@stagistic/release-notes/bundled';
+import {MAC_DOWNLOAD_PATH} from '../data/site';
 
 interface Breadcrumb {
     name: string;
@@ -45,10 +47,14 @@ const graph = [
         '@id': `${canonical}#software-application`,
         name: 'Stagistic Editor',
         applicationCategory: 'WritingApplication',
-        operatingSystem: 'Web',
+        operatingSystem: 'macOS, Web',
         description,
         url: canonical,
         image: new URL('/opengraph.jpg', Astro.site).href,
+        downloadUrl: new URL(MAC_DOWNLOAD_PATH, Astro.site).href,
+        // Absent until the first Release is prepared.
+        softwareVersion: releases[0]?.release,
+        releaseNotes: new URL('/changelog', Astro.site).href,
         offers: {
             '@type': 'Offer',
             price: '0',

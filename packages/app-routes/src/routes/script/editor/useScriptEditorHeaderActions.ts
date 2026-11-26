@@ -7,7 +7,9 @@ import {
 import {useCallback, useState} from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-import {downloadBlob, downloadStagistic} from '../../../shared/downloadStagistic';
+import {stagisticFileRequest} from '../../../shared/downloadStagistic';
+import {useSaveFile} from '../../../shared/saveFile';
+import {useRegisterScriptMenuActions} from '../menu/ScriptMenuActions';
 import type {CurrentScriptItem} from '../workspace/types';
 
 interface HeaderActionsParams {
@@ -32,6 +34,7 @@ export const useScriptEditorHeaderActions = ({
 }: HeaderActionsParams) => {
     const [isPreparingPackage, setIsPreparingPackage] = useState(false);
 
+    const saveFile = useSaveFile();
     const handleMenuAction = useCallback(
         (actionId: string, returnFocus?: HTMLElement | null) => {
             if (actionId === 'settings' && currentScript) {
@@ -58,7 +61,7 @@ export const useScriptEditorHeaderActions = ({
                     titlePage,
                 });
 
-                downloadStagistic(currentScript.name, content);
+                void saveFile(stagisticFileRequest(currentScript.name, content));
 
                 return;
             }
@@ -74,7 +77,7 @@ export const useScriptEditorHeaderActions = ({
                     }))
                     .then(result => {
                         if (result.ok) {
-                            downloadBlob(result.fileName, result.blob);
+                            void saveFile({data: result.blob, suggestedName: result.fileName});
                         }
                     })
                     .catch(() => undefined)
@@ -89,8 +92,12 @@ export const useScriptEditorHeaderActions = ({
             scriptRepository,
             titlePage,
             flushScript,
+            saveFile,
         ],
     );
+
+    // Lets the Mac app's native Script menu run these header actions.
+    useRegisterScriptMenuActions(handleMenuAction);
 
     return {handleMenuAction, isPreparingPackage};
 };

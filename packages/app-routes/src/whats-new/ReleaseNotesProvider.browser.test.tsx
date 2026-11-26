@@ -81,7 +81,7 @@ afterEach(() => {
 describe('ReleaseNotesProvider', () => {
     it('shows the Release number in the footer and opens What\'s new from it', async () => {
         mount(
-            <ReleaseNotesProvider releaseNumber="0.2.0" releases={RELEASES}>
+            <ReleaseNotesProvider surface="web" releaseNumber="0.2.0" releases={RELEASES}>
                 <AppFooter />
             </ReleaseNotesProvider>,
         );
@@ -105,7 +105,7 @@ describe('ReleaseNotesProvider', () => {
 
     it('lets other parts of the app open and close it', async () => {
         mount(
-            <ReleaseNotesProvider releaseNumber="0.2.0" releases={RELEASES}>
+            <ReleaseNotesProvider surface="web" releaseNumber="0.2.0" releases={RELEASES}>
                 <Opener />
             </ReleaseNotesProvider>,
         );
@@ -124,7 +124,7 @@ describe('ReleaseNotesProvider', () => {
 
     it('works with no Releases yet', async () => {
         mount(
-            <ReleaseNotesProvider releaseNumber="0.1.0" releases={[]}>
+            <ReleaseNotesProvider surface="web" releaseNumber="0.1.0" releases={[]}>
                 <AppFooter />
             </ReleaseNotesProvider>,
         );
@@ -140,7 +140,7 @@ describe('ReleaseNotesProvider', () => {
 
     it('links What\'s new to all Releases in a new tab', async () => {
         mount(
-            <ReleaseNotesProvider releaseNumber="0.2.0" releases={RELEASES}>
+            <ReleaseNotesProvider surface="web" releaseNumber="0.2.0" releases={RELEASES}>
                 <Opener />
             </ReleaseNotesProvider>,
         );
@@ -165,6 +165,7 @@ describe('ReleaseNotesProvider', () => {
 
         mount(
             <ReleaseNotesProvider
+                surface="web"
                 releaseNumber="0.2.0"
                 releases={[
                     {
@@ -218,6 +219,7 @@ describe('ReleaseNotesProvider', () => {
 
         mount(
             <ReleaseNotesProvider
+                surface="web"
                 releaseNumber="0.2.0"
                 releases={[
                     {
@@ -249,7 +251,7 @@ describe('ReleaseNotesProvider', () => {
 
     describe('announcing Highlights', () => {
         const mountAnnouncing = (hasScripts: boolean | undefined, withPopup: boolean, releases = RELEASES) => mount(
-            <ReleaseNotesProvider hasScripts={hasScripts} releaseNumber="0.2.0" releases={releases}>
+            <ReleaseNotesProvider surface="web" hasScripts={hasScripts} releaseNumber="0.2.0" releases={releases}>
                 <AppFooter />
                 {withPopup ? <ReleaseHighlightsPopup /> : null}
             </ReleaseNotesProvider>,
@@ -376,7 +378,7 @@ describe('ReleaseNotesProvider', () => {
             });
 
             mount(
-                <ReleaseNotesProvider hasScripts releaseNumber="0.2.0" releases={RELEASES}>
+                <ReleaseNotesProvider surface="web" hasScripts releaseNumber="0.2.0" releases={RELEASES}>
                     <PopupToggle />
                 </ReleaseNotesProvider>,
             );

@@ -107,7 +107,7 @@ const getEditor = async () => {
     while (Date.now() < deadline) {
         const editor = (window as TestWindow).__leadingWhitespaceEditor;
 
-        if (editor) {
+        if (editor && !editor.isDestroyed) {
             return editor;
         }
 
@@ -136,18 +136,37 @@ const pasteClipboard = async (
 
 const blockTexts = (editor: Editor) => Array.from({length: editor.state.doc.childCount}, (_, index) => editor.state.doc.child(index).textContent);
 
-const placeCaret = async (editor: Editor, offset: number, end = offset) => {
-    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 1 + offset, 1 + end)));
-    editor.commands.focus();
-
+/*
+ * With a document session the editor can be replaced while the session settles,
+ * so this places the caret on the live instance and returns it for the rest of the test.
+ */
+const placeCaret = async (initial: Editor, offset: number, end = offset): Promise<Editor> => {
+    let editor = initial;
+    let placed: Editor | null = null;
     // Focus lands one animation frame late.
     const deadline = Date.now() + 2_000;
 
-    while (!editor.view.hasFocus() && Date.now() < deadline) {
+    while (Date.now() < deadline) {
+        if (editor.isDestroyed) {
+            editor = await getEditor();
+        }
+
+        if (placed !== editor) {
+            editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 1 + offset, 1 + end)));
+            editor.commands.focus();
+            placed = editor;
+        }
+
+        if (editor.view.hasFocus()) {
+            break;
+        }
+
         await new Promise(resolve => window.setTimeout(resolve, 10));
     }
 
     expect(editor.view.hasFocus()).toBe(true);
+
+    return editor;
 };
 
 afterEach(() => {
@@ -304,9 +323,8 @@ describe('no leading whitespace (stage direction, as in the app)', () => {
     it('strips the space Enter leaves in a stage direction', async () => {
         renderEditor('stageDirection', 'pq rs', true);
 
-        const editor = await getEditor();
+        const editor = await placeCaret(await getEditor(), 2);
 
-        await placeCaret(editor, 2);
         await userEvent.keyboard('{Enter}');
 
         expect(blockTexts(editor).some(text => text.startsWith(' '))).toBe(false);
@@ -316,9 +334,8 @@ describe('no leading whitespace (stage direction, as in the app)', () => {
     it('strips the space two Backspaces leave in a stage direction', async () => {
         renderEditor('stageDirection', 'ab cd', true);
 
-        const editor = await getEditor();
+        const editor = await placeCaret(await getEditor(), 2);
 
-        await placeCaret(editor, 2);
         await userEvent.keyboard('{Backspace}{Backspace}');
 
         expect(blockTexts(editor)).toEqual(['cd']);

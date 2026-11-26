@@ -9,6 +9,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
 import {getScriptBasePath, useScriptReadOnlyState} from '../routes/script/workspace/ScriptAccessContext';
+import {useSaveVerb} from '../shared/saveFile';
 
 type AppHeaderProps = Pick<UIAppHeaderProps, 'contentInset' | 'width' | 'scriptControls'> & {
     showScriptActions?: boolean,
@@ -38,16 +39,18 @@ export const AppHeader = ({
 
 type ScriptEditorAppHeaderProps = Omit<
     UIScriptEditorAppHeaderProps,
-    'onHome' | 'onOpenSettings' | 'onSelectView'
+    'onHome' | 'onOpenSettings' | 'onSelectView' | 'saveVerb'
 >;
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
     const {basePath} = useScriptReadOnlyState();
     const {openAppSettings} = useGlobalModals();
+    const saveVerb = useSaveVerb();
 
     return (
         <UIScriptEditorAppHeader
+            saveVerb={saveVerb}
             {...props}
             onHome={() => void navigate('/')}
             onOpenSettings={openAppSettings}

@@ -89,7 +89,8 @@ export const useImportFileSelection = ({
 
                 setStepkgPeek(result);
                 setImportChoice('new');
-                setName(previous => (previous.trim() === '' ? result.packageTitle : previous));
+                // A match on this device means importing as new makes a copy; say so in the title.
+                setName(previous => (previous.trim() === '' ? result.existingLocalTitle === null ? result.packageTitle : `${result.packageTitle} (copy)` : previous));
             } catch {
                 setIsPeeking(false);
                 setFileError('Failed to read the package.');

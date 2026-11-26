@@ -29,6 +29,7 @@ export const ImportScriptModal = ({
     preselectedFile,
     isLoading,
     isDownloadingBackup,
+    saveVerb = 'Download',
 }: ImportScriptModalProps) => {
     const {
         inputRef,
@@ -148,7 +149,7 @@ export const ImportScriptModal = ({
                                 <div className={styles.replaceNoticeContent}>
                                     <span>
                                         Replacing will overwrite &quot;{existingTitle}&quot; with this package. Local changes made since the last export will be
-                                        lost. We recommend downloading a backup first.
+                                        lost. We recommend {saveVerb === 'Save' ? 'saving' : 'downloading'} a backup first.
                                     </span>
                                     <Button
                                         variant="secondary"
@@ -158,7 +159,7 @@ export const ImportScriptModal = ({
                                             void handleDownloadBackup();
                                         }}
                                     >
-                                        Download backup
+                                        {saveVerb} backup
                                     </Button>
                                 </div>
                             </Notice>

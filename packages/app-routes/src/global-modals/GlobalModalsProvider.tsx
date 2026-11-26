@@ -21,6 +21,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {AppSettingsModal} from '../app-settings/AppSettingsModal';
 import type {AppSettingsSection} from '../app-settings/types';
+import {useSaveVerb} from '../shared/saveFile';
 import {
     type ScriptToDelete,
     type ScriptToDuplicate,
@@ -58,6 +59,7 @@ interface GlobalModalsProviderProps {
 
 export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
+    const saveVerb = useSaveVerb();
     const [isAppSettingsOpen, setIsAppSettingsOpen] = useState(false);
     const appSettingsReturnFocus = useRef<HTMLElement | null>(null);
     const openAppSettings = useCallback((returnFocus?: HTMLElement | null) => {
@@ -173,6 +175,7 @@ export const GlobalModalsProvider = ({children, settingsSections}: GlobalModalsP
                 preselectedFile={prefilledImport}
                 isLoading={isImportLoading}
                 isDownloadingBackup={isDownloadingBackup}
+                saveVerb={saveVerb}
             />
             <DeleteScriptModal
                 isOpen={isDeleteScriptOpen}

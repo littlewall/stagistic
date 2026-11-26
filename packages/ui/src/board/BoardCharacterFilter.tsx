@@ -127,7 +127,7 @@ export const BoardCharacterFilter = ({
                         )}
                         <div className={styles.footer}>
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="xs"
                                 isDisabled={!isFiltering}
                                 onPress={() => onChange([])}

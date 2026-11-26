@@ -33,4 +33,6 @@ export interface ImportScriptModalProps extends ModalFocusRestoreOptions {
     preselectedFile?: ImportScriptFile | null,
     isLoading?: boolean,
     isDownloadingBackup?: boolean,
+    /** Wording of the backup action: a browser download or a Save dialog. */
+    saveVerb?: 'Save' | 'Download',
 }

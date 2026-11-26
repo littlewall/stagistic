@@ -71,8 +71,8 @@ describe('marketing website', () => {
     });
 
     it('uses the editor identity in product copy and the umbrella brand in the footer', () => {
-        expect(homeHtml).toContain('<title>Stagistic Editor - Script editor built for theatre</title>');
-        expect(homeHtml).toContain('Stagistic Editor is a free, browser-based script editor');
+        expect(homeHtml).toContain('<title>Stagistic Editor - Script editor for theatre and musicals</title>');
+        expect(homeHtml).toMatch(/<h1\b[^>]*>A script editor for theatre and musicals\.<\/h1>/);
         expect(homeHtml).toContain('© Stagistic • Made with 💛 in Prague');
     });
 
@@ -80,7 +80,7 @@ describe('marketing website', () => {
         const normalize = (html: string) => html.replace(/\s+/g, ' ');
 
         expect(normalize(homeHtml)).toContain(
-            'Your play is not a screenplay with the camera removed. Stagistic Editor is a free, browser-based script editor built for acts, scenes, dialogue, lyrics, and music cues. Not shots and cuts.',
+            'Write plays and musicals with acts, scenes, characters, dialogue, lyrics, and music cues. Not shots and cuts.',
         );
         expect(normalize(playwritingHtml)).toContain(
             'Acts and scenes are not camera setups. Stagistic Editor keeps your play structured around characters, dialogue, and stage directions without making theatre conform to screenplay logic.',
@@ -103,7 +103,7 @@ describe('marketing website', () => {
         const articleDirectory = new URL('../dist/articles/', import.meta.url);
         const hasPublishedArticles = existsSync(articleDirectory) && readdirSync(articleDirectory, {encoding: 'utf8', recursive: true}).some(file => file.endsWith('.html'));
 
-        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(hasPublishedArticles ? 4 : 3);
+        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(hasPublishedArticles ? 5 : 4);
         expect(primaryNav).toContain('aria-label="Primary"');
 
         const editorMenu = primaryNav.match(/<details\b[^>]*data-editor-menu[\s\S]*?<\/details>/)?.[0] ?? '';
@@ -112,6 +112,7 @@ describe('marketing website', () => {
         expect(editorMenu).toContain('href="/editor/playwriting"');
         expect(editorMenu).toContain('href="/editor/musicals"');
         expect(primaryNav.includes('href="/articles"')).toBe(hasPublishedArticles);
+        expect(primaryNav).toContain('href="/download"');
         expect(primaryNav).toContain('href="https://docs.stagistic.com"');
         expect(primaryNav).toMatch(/<span\b[^>]*aria-hidden="true"[^>]*>↗<\/span>/);
         expect(primaryNav).not.toContain('href="/open-source"');
@@ -119,6 +120,7 @@ describe('marketing website', () => {
 
         const footer = homeHtml.match(/<footer\b[\s\S]*?<\/footer>/)?.[0] ?? '';
 
+        expect(footer).toContain('href="/download"');
         expect(footer).toContain('href="/open-source"');
         expect(footer).toContain('href="/editor/syntax"');
         expect(primaryNav).not.toContain('href="#alpha"');
@@ -127,11 +129,53 @@ describe('marketing website', () => {
         expect(homeHeader).toContain('>Try editor</a>');
     });
 
-    it('offers a secondary hero action that links to the features section', () => {
+    it('puts the trust line and the system-aware action in the hero', () => {
         const heroSection = homeHtml.match(/<!-- Hero --><section\b[\s\S]*?<\/section>/)?.[0] ?? '';
 
-        expect(heroSection).toContain('<a href="#features" class="_btnOutline_');
-        expect(heroSection).toMatch(/>\s*Explore features\s*<\/a>/);
+        expect(heroSection).toContain('data-system-cta');
+        expect(heroSection.replace(/\s+/g, ' ')).toContain('Free forever · No account · Scripts stay on your computer · Open source');
+    });
+
+    it('orders the home page by the approved message', () => {
+        const markers = [
+            '<h1',
+            'data-system-cta',
+            'The screenplay problem.',
+            '>Write</h3>',
+            '>Musicals</h3>',
+            '>Plan</h3>',
+            '>Format and export</h3>',
+            '>Keep</h3>',
+            'Common<br>questions.',
+            'Stagistic Editor is free.<br>Forever.',
+        ];
+        const positions = markers.map(marker => homeHtml.indexOf(marker));
+
+        expect(positions.every(position => position > -1)).toBe(true);
+        expect(positions).toEqual(positions.toSorted((a, b) => a - b));
+        expect(homeHtml.match(/<div\b[^>]*data-system-cta/g) ?? []).toHaveLength(2);
+    });
+
+    it('keeps the feature groups text-only where there is no media yet', () => {
+        const textOnly = homeHtml.match(/<article\b[^>]*data-text-only[^>]*>[\s\S]*?<\/article>/g) ?? [];
+
+        expect(textOnly.length).toBeGreaterThan(0);
+
+        for (const article of textOnly) {
+            expect(article).not.toContain('data-feature-media');
+        }
+    });
+
+    it('answers about six questions that hold for both Surfaces', () => {
+        const faq = homeHtml.match(/<section\b[^>]*id="faq"[\s\S]*?<\/section>/)?.[0] ?? '';
+
+        expect(faq.match(/<details\b/g) ?? []).toHaveLength(6);
+    });
+
+    it('keeps MCP, Claude and Windows off the home page', () => {
+        const visibleText = homeHtml.replace(/<script\b[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ');
+
+        expect(visibleText).not.toMatch(/\bMCP\b|Claude|Windows/i);
     });
 
     it('links feature descriptions to their specific editor guides', () => {
@@ -206,7 +250,7 @@ describe('marketing website', () => {
         expect(main).toContain('href="https://docs.stagistic.com/syntax/"');
         expect(main).not.toMatch(/<h2\b|<pre\b|<aside\b/);
         expect(normalizedSyntax).toContain('Stagistic Syntax is an open, plain-text format for theatrical plays and musicals.');
-        expect(normalizedOpenSource).toContain('runs in your browser even without an account and stores scripts locally by default.');
+        expect(normalizedOpenSource).toContain('runs in your browser or as a Mac app, works without an account and stores scripts locally by default.');
     });
 
     it('exposes the non-PWA favicon set and browser theme on every page', () => {
@@ -338,7 +382,9 @@ describe('marketing website', () => {
 
         expect(softwareApplication).toMatchObject({
             applicationCategory: 'WritingApplication',
-            operatingSystem: 'Web',
+            operatingSystem: 'macOS, Web',
+            downloadUrl: 'https://stagistic.com/download/mac',
+            releaseNotes: 'https://stagistic.com/changelog',
             offers: {
                 price: '0',
                 priceCurrency: 'USD',

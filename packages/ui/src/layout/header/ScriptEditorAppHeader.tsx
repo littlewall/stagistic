@@ -36,6 +36,8 @@ export type ScriptEditorAppHeaderProps = {
     onSelectView: (view: ScriptView) => void,
     /** Chooses the shown script state (current, draft or version); sits after the title. */
     scriptState?: ReactNode,
+    /** Wording of the file actions: a browser download or a Save dialog. */
+    saveVerb?: 'Save' | 'Download',
 };
 
 export const ScriptEditorAppHeader = ({
@@ -51,6 +53,7 @@ export const ScriptEditorAppHeader = ({
     activeView,
     onSelectView,
     scriptState,
+    saveVerb = 'Download',
 }: ScriptEditorAppHeaderProps) => {
     return (
         <AppHeader
@@ -100,13 +103,13 @@ export const ScriptEditorAppHeader = ({
                         </Tooltip>
                         <MenuTrigger>
                             <Tooltip
-                                label="Download"
+                                label={saveVerb}
                                 placement="bottom"
                             >
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    aria-label="Download script"
+                                    aria-label={`${saveVerb} script`}
                                 >
                                     <DownloadIcon
                                         className={styles.icon}
@@ -115,7 +118,7 @@ export const ScriptEditorAppHeader = ({
                                 </Button>
                             </Tooltip>
                             <DropdownMenu
-                                aria-label="Download script"
+                                aria-label={`${saveVerb} script`}
                                 items={[{id: 'export-stagistic', label: 'Script (.stagistic)'}, {id: 'export-stepkg', label: 'Script & metadata (.stepkg)'}]}
                                 onAction={key => onMenuAction(String(key))}
                             />

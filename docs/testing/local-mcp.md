@@ -7,7 +7,7 @@ Node 24.19.0, pinned MCPB CLI 2.1.2. Branch: `tauri`. No staging or commits.
 
 One Rust `stagistic-mcp` executable implements standard MCP over stdio using
 the official `rmcp` SDK. Both manual installation and the binary MCPB contain
-the same signed universal macOS executable. End users need no Node runtime.
+the same signed arm64 macOS executable. End users need no Node runtime.
 
 The bridge connects to a private Unix socket, then the Tauri broker targets
 the main WebView and its existing PGlite worker. It reads committed local
@@ -59,7 +59,7 @@ All 27 migrations were compiled. The document schema version is unchanged.
 | `moon run mcp:lint-rust desktop:lint-rust` | PASS after fixing Clippy findings. |
 | `moon run mcp:test-e2e` | PASS: real stdio executable → real Rust broker/UDS → real PGlite read service. |
 | `moon run desktop:build` | PASS, `.app` and `.dmg`; both MCP resources present under `Contents/Resources/mcp/`. |
-| `moon run mcp:verify-artifacts` | PASS: identical x86_64/arm64 binary, executable bit, signature and system-only dynamic dependencies. Both app resources match `dist/`. |
+| `moon run mcp:verify-artifacts` | PASS: identical arm64-only binary, executable bit, signature and system-only dynamic dependencies. Both app resources match `dist/`. |
 | `moon run root:test-all` | Aggregate stopped at one editor browser failure; that suite passed on an unchanged rerun. Every constituent suite passed as detailed below. |
 
 Final constituent results: Node **1,144/1,144** (236 files); app-core browser
@@ -98,9 +98,9 @@ the shared ignore list now excludes that build output alongside `dist/`.
 ## Build and installation
 
 ```sh
-rustup target add aarch64-apple-darwin x86_64-apple-darwin
+rustup target add aarch64-apple-darwin
 moon run desktop:dev          # development socket, host bridge, no Claude install
-moon run desktop:build        # universal bridge, local ad-hoc signature
+moon run desktop:build        # arm64 bridge, local ad-hoc signature
 moon run mcp:verify-artifacts
 ```
 

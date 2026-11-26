@@ -2,16 +2,17 @@
 import {clsx} from 'clsx';
 import CreatorNote from '../components/CreatorNote.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
+import SystemCta from '../components/SystemCta.astro';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
 import {landingFaqs} from '../data/landingFaqs';
-import {landingFeatures} from '../data/landingFeatures';
+import {landingFeatureGroups} from '../data/landingFeatures';
 import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
 ---
 
 <Layout
-    title="Stagistic Editor - Script editor built for theatre"
-    description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
+    title="Stagistic Editor - Script editor for theatre and musicals"
+    description="Stagistic Editor is a free script editor for theatre and musicals. No account, scripts stay on your computer, open source. Use it in your browser or download the Mac app."
     canonical={new URL('/', Astro.site).href.replace(/\/$/, '')}
     softwareApplication
 >
@@ -20,16 +21,15 @@ import s from './index.module.css';
         <section class={s.hero}>
             <div class={s.heroInner}>
                 <div class={s.heroContent}>
-                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>Write for the stage, not the screen.</h1>
+                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>A script editor for theatre and musicals.</h1>
 
                     <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                        Your play is not a screenplay with the camera removed. Stagistic Editor is a free, browser-based script editor built for acts, scenes,
-                        dialogue, lyrics, and music cues. Not shots and cuts.
+                        Write plays and musicals with acts, scenes, characters, dialogue, lyrics, and music cues. Not shots and cuts.
                     </p>
 
-                    <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
-                        <a href="https://editor.stagistic.app" class={s.btnPrimary}> Open editor in browser </a>
-                        <a href="#features" class={s.btnOutline}> Explore features </a>
+                    <div class={clsx(s.heroActions, s.fadeUp, s.fadeUpD2)}>
+                        <SystemCta />
+                        <p class={s.heroMeta}>Free forever · No account · Scripts stay on your computer · Open source</p>
                     </div>
                 </div>
 
@@ -91,12 +91,8 @@ import s from './index.module.css';
                 </div>
                 <div>
                     <p class={s.forTheatreText}>
-                        Industry standard tools like Final Draft are built for film. They assume your story is driven by <em>INT/EXT</em> camera setups, shots,
-                        and cuts. When you try to write a play in them, you spend more time fighting the formatting than writing.
-                    </p>
-                    <p class={s.forTheatreText}>
-                        Stagistic Editor is different. It understands the craft of theatre: acts, scenes, musical cues, and complex character interactions. It
-                        doesn't force a screenplay structure onto your stage play.
+                        Tools like Final Draft are built for film. They assume camera setups, shots, and cuts, so writing a play in them means fighting the
+                        formatting. Stagistic Editor is built around acts, scenes, music cues, and characters who speak together.
                     </p>
                 </div>
             </div>
@@ -106,47 +102,62 @@ import s from './index.module.css';
 
         <section class={s.features} id="features">
             <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
-                <h2 class={s.featuresTitle}>Features built for playwrights and librettists.</h2>
-                <div class={s.featuresList}>
-                    {landingFeatures.map(f => (
-    <article class={s.featureItem}>
-        <div class={s.featureCopy}>
-            <h3 class={s.featureLabel}>{f.label}</h3>
-            <p class={s.featureDesc}>{f.description}</p>
-            {f.href && (
-                <div class={s.featureLinkWrap}>
-                    <a href={f.href} class={s.btnOutline}>
-                        {f.linkLabel} &rarr;
-                    </a>
-                </div>
-            )}
-        </div>
-        <div class={s.featureMedia} data-feature-media data-shape={f.shape}>
-            {f.videoSrc ? (
-                <div class={s.featureMediaFrame}>
-                    <video
-                        data-feature-video
-                        src={f.videoSrc}
-                        title={f.videoTitle}
-                        class={s.featureVideo}
-                        data-fit={f.videoFit}
-                        autoplay
-                        muted
-                        loop
-                        playsinline
-                    >
-                        <source src={f.videoSrc} type="video/mp4" />
-                    </video>
-                </div>
-            ) : f.imageSrc ? (
-                <div class={s.featureMediaFrame}>
-                    <img data-feature-image src={f.imageSrc} alt={f.imageAlt} class={s.featureImage} data-fit={f.imageFit} loading="lazy" decoding="async" />
-                </div>
-            ) : null}
-        </div>
-    </article>
-))}
-                </div>
+                <h2 class={s.featuresTitle}>Everything a play or musical needs, in one place.</h2>
+                {landingFeatureGroups.map(group => (
+                    <div class={s.featureGroup}>
+                        <h3 class={s.featureGroupTitle}>{group.title}</h3>
+                        <div class={s.featuresList}>
+                            {group.features.map(f => (
+                                <article class={s.featureItem} data-text-only={f.videoSrc || f.imageSrc ? undefined : ''}>
+                                    <div class={s.featureCopy}>
+                                        <h4 class={s.featureLabel}>{f.label}</h4>
+                                        <p class={s.featureDesc}>{f.description}</p>
+                                        {f.href && (
+                                            <div class={s.featureLinkWrap}>
+                                                <a href={f.href} class={s.btnOutline}>
+                                                    {f.linkLabel} &rarr;
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {(f.videoSrc || f.imageSrc) && (
+                                        <div class={s.featureMedia} data-feature-media data-shape={f.shape}>
+                                            {f.videoSrc ? (
+                                                <div class={s.featureMediaFrame}>
+                                                    <video
+                                                        data-feature-video
+                                                        src={f.videoSrc}
+                                                        title={f.videoTitle}
+                                                        class={s.featureVideo}
+                                                        data-fit={f.videoFit}
+                                                        autoplay
+                                                        muted
+                                                        loop
+                                                        playsinline
+                                                    >
+                                                        <source src={f.videoSrc} type="video/mp4" />
+                                                    </video>
+                                                </div>
+                                            ) : (
+                                                <div class={s.featureMediaFrame}>
+                                                    <img
+                                                        data-feature-image
+                                                        src={f.imageSrc}
+                                                        alt={f.imageAlt}
+                                                        class={s.featureImage}
+                                                        data-fit={f.imageFit}
+                                                        loading="lazy"
+                                                        decoding="async"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
         </section>
 
@@ -182,7 +193,7 @@ import s from './index.module.css';
                 <div>
                     <h2 class={s.previewTitle}>Stagistic Editor is free.<br>Forever.</h2>
                     <p class={s.previewText}>
-                        Stagistic Editor is free to use in your browser, with no account or paywall. Every current and future Editor feature will remain free.
+                        Stagistic Editor is free to use in your browser or on your Mac, with no account or paywall. Every current and future Editor feature will remain free.
                     </p>
                 </div>
                 <div class={s.previewCard}>
@@ -193,7 +204,7 @@ import s from './index.module.css';
                                     <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </span>
-                            <span>Free &amp; open source</span>
+                            <span>Free forever &amp; open source</span>
                         </div>
                         <div class={s.previewCheckItem}>
                             <span class={s.previewCheckMark}>
@@ -209,11 +220,11 @@ import s from './index.module.css';
                                     <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </span>
-                            <span>Stored locally by default</span>
+                            <span>Scripts stay on your computer</span>
                         </div>
                     </div>
                     <div class={s.previewCtas}>
-                        <a href="https://editor.stagistic.app" class={s.btnPrimary}> Open editor in browser </a>
+                        <SystemCta layout="stack" />
                     </div>
                 </div>
             </div>

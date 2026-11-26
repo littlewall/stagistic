@@ -1,143 +1,43 @@
 mod commands;
+mod menu;
 use stagistic_editor::mcp::{broker::McpBroker, commands::McpState};
 use std::sync::Arc;
 
-use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
-    Emitter, Manager,
-};
+use tauri::{Emitter, Manager};
 
-const MENU_EVENT_NAME: &str = "menu-action";
-const MENU_ID_OPEN_SCRIPT: &str = "file_open_script";
-const MENU_ID_NEW_SCRIPT: &str = "file_new_script";
-const MENU_ID_IMPORT: &str = "file_import_script";
-
-fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
-    let pkg_info = app.package_info();
-    let config = app.config();
-    let app_name = config
-        .product_name
-        .clone()
-        .unwrap_or_else(|| pkg_info.name.clone());
-    let about_metadata = tauri::menu::AboutMetadata {
-        name: Some(app_name.clone()),
-        version: Some(pkg_info.version.to_string()),
-        copyright: config.bundle.copyright.clone(),
-        authors: config
-            .bundle
-            .publisher
-            .clone()
-            .map(|publisher| vec![publisher]),
-        ..Default::default()
-    };
-
-    let window_menu = Submenu::with_id_and_items(
-        app,
-        tauri::menu::WINDOW_SUBMENU_ID,
-        "Window",
-        true,
-        &[
-            &PredefinedMenuItem::minimize(app, None)?,
-            &PredefinedMenuItem::maximize(app, None)?,
-            #[cfg(target_os = "macos")]
-            &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::close_window(app, None)?,
-        ],
-    )?;
-
-    let help_menu = Submenu::with_id_and_items(
-        app,
-        tauri::menu::HELP_SUBMENU_ID,
-        "Help",
-        true,
-        &[
-            #[cfg(not(target_os = "macos"))]
-            &PredefinedMenuItem::about(app, None, Some(about_metadata))?,
-        ],
-    )?;
-
-    let file_menu = Submenu::with_items(
-        app,
-        "File",
-        true,
-        &[
-            &MenuItem::with_id(
-                app,
-                MENU_ID_OPEN_SCRIPT,
-                "Open Script…",
-                true,
-                Some("CmdOrCtrl+O"),
-            )?,
-            &MenuItem::with_id(
-                app,
-                MENU_ID_NEW_SCRIPT,
-                "New Script",
-                true,
-                Some("CmdOrCtrl+N"),
-            )?,
-            &MenuItem::with_id(app, MENU_ID_IMPORT, "Import…", true, None::<&str>)?,
-            &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::close_window(app, None)?,
-            #[cfg(not(target_os = "macos"))]
-            &PredefinedMenuItem::quit(app, None)?,
-        ],
-    )?;
-
-    let menu = Menu::with_items(
-        app,
-        &[
-            #[cfg(target_os = "macos")]
-            &Submenu::with_items(
-                app,
-                app_name,
-                true,
-                &[
-                    &PredefinedMenuItem::about(app, None, Some(about_metadata))?,
-                    &PredefinedMenuItem::separator(app)?,
-                    &PredefinedMenuItem::services(app, None)?,
-                    &PredefinedMenuItem::separator(app)?,
-                    &PredefinedMenuItem::hide(app, None)?,
-                    &PredefinedMenuItem::hide_others(app, None)?,
-                    &PredefinedMenuItem::separator(app)?,
-                    &PredefinedMenuItem::quit(app, None)?,
-                ],
-            )?,
-            &file_menu,
-            &Submenu::with_items(
-                app,
-                "Edit",
-                true,
-                &[
-                    &PredefinedMenuItem::undo(app, None)?,
-                    &PredefinedMenuItem::redo(app, None)?,
-                    &PredefinedMenuItem::separator(app)?,
-                    &PredefinedMenuItem::cut(app, None)?,
-                    &PredefinedMenuItem::copy(app, None)?,
-                    &PredefinedMenuItem::paste(app, None)?,
-                    &PredefinedMenuItem::select_all(app, None)?,
-                ],
-            )?,
-            #[cfg(target_os = "macos")]
-            &Submenu::with_items(
-                app,
-                "View",
-                true,
-                &[&PredefinedMenuItem::fullscreen(app, None)?],
-            )?,
-            &window_menu,
-            &help_menu,
-        ],
-    )?;
-
-    Ok(menu)
+/// Logs go to stdout and `~/Library/Logs/<identifier>/`. Info in release, debug
+/// in dev. Messages carry events and errors, never script text.
+fn log_plugin<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
+    tauri_plugin_log::Builder::new()
+        .level(if cfg!(debug_assertions) {
+            log::LevelFilter::Debug
+        } else {
+            log::LevelFilter::Info
+        })
+        .clear_targets()
+        .target(tauri_plugin_log::Target::new(
+            tauri_plugin_log::TargetKind::Stdout,
+        ))
+        // `stagistic-editor.log` in `~/Library/Logs/<identifier>/`.
+        .target(tauri_plugin_log::Target::new(
+            tauri_plugin_log::TargetKind::LogDir {
+                file_name: Some("stagistic-editor".into()),
+            },
+        ))
+        .max_file_size(2_000_000)
+        .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepSome(3))
+        .build()
 }
 
 fn main() {
     tauri::Builder::default()
+        // Registered first so every later plugin and setup step can log.
+        .plugin(log_plugin())
         // Tauri 3 requires the runtime to be selected explicitly; without this
         // the app fails to start with `RuntimeNotConfigured`.
         .runtime(tauri_runtime_wry::Wry::default())
         .setup(|app| {
+            log::info!("Stagistic Editor {} started", app.package_info().version);
             let handle = app.handle().clone();
             let broker = McpBroker::new(
                 stagistic_mcp_protocol::endpoint_path(),
@@ -157,10 +57,12 @@ fn main() {
             }
             let state = Arc::new(McpState::new(broker, data_dir, app.path().resource_dir()?));
             app.manage(state.clone());
+            app.manage(commands::ShutdownState::default());
+            app.manage(menu::ZoomState::default());
             if state.data_dir.join("mcp/enabled").exists() {
                 tauri::async_runtime::spawn(async move {
                     if state.set_enabled(true).await.is_err() {
-                        eprintln!("Local MCP could not start.");
+                        log::error!("Local MCP could not start.");
                     }
                 });
             }
@@ -170,29 +72,59 @@ fn main() {
             if webview.label() == "main"
                 && matches!(payload.event(), tauri::webview::PageLoadEvent::Started)
             {
+                if let Some(shutdown) = webview.try_state::<commands::ShutdownState>() {
+                    shutdown.reset();
+                }
                 if let Some(state) = webview.try_state::<Arc<McpState>>() {
                     state.broker.invalidate();
                 }
             }
         })
-        .menu(build_menu)
+        .on_window_event(|window, event| {
+            // Close (button, ⌘W) runs the safe-shutdown sequence in the frontend first.
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let app = window.app_handle();
+                if window.label() == "main"
+                    && app
+                        .try_state::<commands::ShutdownState>()
+                        .is_some_and(|state| state.should_intercept())
+                {
+                    api.prevent_close();
+                    if let Err(error) = app.emit(commands::SHUTDOWN_EVENT, ()) {
+                        log::error!("Failed to emit shutdown request: {error}");
+                    }
+                }
+            }
+        })
+        .menu(menu::build_menu)
         .on_menu_event(|app, event| {
-            if event.id() == MENU_ID_OPEN_SCRIPT {
-                if let Err(error) = app.emit(MENU_EVENT_NAME, "open-script") {
-                    eprintln!("Failed to emit menu event: {error}");
+            if event.id() == menu::MENU_ID_QUIT {
+                let intercept = app
+                    .try_state::<commands::ShutdownState>()
+                    .is_some_and(|state| state.should_intercept());
+                if intercept {
+                    if let Err(error) = app.emit(commands::SHUTDOWN_EVENT, ()) {
+                        log::error!("Failed to emit shutdown request: {error}");
+                    }
+                } else {
+                    app.exit(0);
                 }
-            } else if event.id() == MENU_ID_NEW_SCRIPT {
-                if let Err(error) = app.emit(MENU_EVENT_NAME, "new-script") {
-                    eprintln!("Failed to emit menu event: {error}");
-                }
-            } else if event.id() == MENU_ID_IMPORT {
-                if let Err(error) = app.emit(MENU_EVENT_NAME, "import-script") {
-                    eprintln!("Failed to emit menu event: {error}");
-                }
+            } else {
+                menu::handle_menu_event(app, event.id().as_ref());
             }
         })
         .invoke_handler(tauri::generate_handler![
             commands::ping,
+            commands::desktop_shutdown_ready,
+            commands::desktop_exit,
+            commands::desktop_relaunch,
+            commands::desktop_show_backups_folder,
+            commands::desktop_show_attachments_folder,
+            commands::desktop_import_backup_file,
+            commands::desktop_open_download_page,
+            commands::desktop_open_external_url,
+            commands::desktop_open_licenses,
+            commands::desktop_set_menu_context,
             stagistic_editor::mcp::commands::mcp_status,
             stagistic_editor::mcp::commands::mcp_enable,
             stagistic_editor::mcp::commands::mcp_disable,
@@ -204,6 +136,7 @@ fn main() {
         ])
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, event| match event {
@@ -211,9 +144,21 @@ fn main() {
                 for url in urls {
                     if url.scheme() == "stagistic" {
                         if let Err(error) = app.emit("deep-link-open", url.as_str()) {
-                            eprintln!("Failed to emit deep-link event: {error}");
+                            log::error!("Failed to emit deep-link event: {error}");
                         }
                     }
+                }
+            }
+            // ⌘Q / menu Quit: only user-initiated exits (code None) are intercepted.
+            tauri::RunEvent::ExitRequested { api, code, .. }
+                if code.is_none()
+                    && app
+                        .try_state::<commands::ShutdownState>()
+                        .is_some_and(|state| state.should_intercept()) =>
+            {
+                api.prevent_exit();
+                if let Err(error) = app.emit(commands::SHUTDOWN_EVENT, ()) {
+                    log::error!("Failed to emit shutdown request: {error}");
                 }
             }
             tauri::RunEvent::Exit => {

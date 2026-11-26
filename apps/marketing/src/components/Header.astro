@@ -28,6 +28,9 @@ const hasPublishedArticles = variant === 'full' && (await getPublishedArticles()
                             Articles
                         </a>
                     )}
+                    <a href="/download" class={styles.navLink} aria-current={currentPath === '/download' ? 'page' : undefined}>
+                        Download
+                    </a>
                     <a href="https://docs.stagistic.com" class={styles.navLink}>
                         Docs <span aria-hidden="true">↗</span>
                     </a>

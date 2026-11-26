@@ -2,7 +2,12 @@ import {execFileSync} from 'node:child_process';
 import {readdir, readFile} from 'node:fs/promises';
 import path from 'node:path';
 
-export const collectLicenses = async root => {
+/*
+ * Notices for the third-party crates a package ships. `packageName` picks the
+ * root crate; `onMissing` receives a crate without a license file and returns
+ * replacement text (default: fail the build).
+ */
+export const collectLicenses = async (root, {packageName = 'stagistic-mcp', onMissing} = {}) => {
     const metadata = JSON.parse(execFileSync('cargo', [
         'metadata',
         '--locked',
@@ -10,10 +15,14 @@ export const collectLicenses = async root => {
         '1',
         '--filter-platform',
         'aarch64-apple-darwin',
-    ], {cwd: root, encoding: 'utf8'}));
+    ], {
+        cwd: root,
+        encoding: 'utf8',
+        maxBuffer: 256 * 1024 * 1024,
+    }));
     const packages = new Map(metadata.packages.map(pkg => [pkg.id, pkg]));
     const nodes = new Map(metadata.resolve.nodes.map(node => [node.id, node]));
-    const server = metadata.packages.find(pkg => pkg.name === 'stagistic-mcp');
+    const server = metadata.packages.find(pkg => pkg.name === packageName);
     const visited = new Set();
     const visit = id => {
         if (visited.has(id)) {
@@ -51,7 +60,11 @@ export const collectLicenses = async root => {
         }
 
         if (texts.length === 0) {
-            throw new Error(`Missing license text for ${pkg.name}.`);
+            if (!onMissing) {
+                throw new Error(`Missing license text for ${pkg.name}.`);
+            }
+
+            texts.push(onMissing(pkg));
         }
 
         notices.push(`${pkg.name} ${pkg.version} (${pkg.license})\n${texts.join('\n')}`);

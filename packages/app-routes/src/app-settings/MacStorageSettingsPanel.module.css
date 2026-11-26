@@ -1,0 +1,22 @@
+.backups {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.backup {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    padding-block: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.empty {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}

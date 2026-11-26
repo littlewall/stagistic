@@ -30,7 +30,7 @@ afterEach(() => {
 
 describe('boot failure screen', () => {
     it('says an older version is running and does not offer a reload', async () => {
-        const container = mount(<BootFailureScreen failure={{kind: 'older-version-running', message: ''}} />);
+        const container = mount(<BootFailureScreen surface="web" failure={{kind: 'older-version-running', message: ''}} />);
 
         await expect.poll(() => container.querySelector('h1')?.textContent).toBe(
             'An older version of Stagistic is running',
@@ -45,6 +45,7 @@ describe('boot failure screen', () => {
         const onReload = vi.fn();
         const container = mount(
             <BootFailureScreen
+                surface="web"
                 failure={{kind: 'database-newer-than-app', message: 'Database migration 9999_x is newer than this app.'}}
                 onReload={onReload}
             />,
@@ -60,6 +61,7 @@ describe('boot failure screen', () => {
     it('explains a failed migration, shows its id and renders the extra actions', async () => {
         const container = mount(
             <BootFailureScreen
+                surface="web"
                 failure={{
                     kind: 'migration-failed',
                     message: 'Migration 0042_x failed.',
@@ -77,10 +79,63 @@ describe('boot failure screen', () => {
     });
 
     it('falls back to a generic message with technical details', async () => {
-        const container = mount(<BootFailureScreen failure={{kind: 'unknown', message: 'Worker blew up'}} />);
+        const container = mount(<BootFailureScreen surface="web" failure={{kind: 'unknown', message: 'Worker blew up'}} />);
 
         await expect.poll(() => container.querySelector('h1')?.textContent).toBe('Stagistic could not start');
         expect(container.querySelector('pre')?.textContent).toBe('Worker blew up');
         expect(findButton(container, 'Reload')).toBeDefined();
+    });
+    describe('on the Mac app', () => {
+        it('asks to download the current Release and gives no reload or tab advice', async () => {
+            const onOpenDownloadPage = vi.fn();
+            const container = mount(
+                <BootFailureScreen
+                    surface="desktop"
+                    failure={{kind: 'database-newer-than-app', message: ''}}
+                    onOpenDownloadPage={onOpenDownloadPage}
+                />,
+            );
+
+            await expect.poll(() => container.querySelector('h1')?.textContent).toBe(
+                'Your scripts need a newer Release of Stagistic',
+            );
+            expect(container.textContent).toContain('https://stagistic.com/download');
+            expect(container.textContent).not.toMatch(/reload|tab/i);
+            expect(findButton(container, 'Reload')).toBeUndefined();
+            findButton(container, 'Open download page')?.click();
+            expect(onOpenDownloadPage).toHaveBeenCalledTimes(1);
+        });
+
+        it('names the backups folder after a failed migration and shows it on request', async () => {
+            const onShowBackupsFolder = vi.fn();
+            const container = mount(
+                <BootFailureScreen
+                    surface="desktop"
+                    failure={{
+                        kind: 'migration-failed',
+                        message: 'boom',
+                        migrationId: '2026_x',
+                    }}
+                    onShowBackupsFolder={onShowBackupsFolder}
+                />,
+            );
+
+            await expect.poll(() => container.querySelector('h1')?.textContent).toBe(
+                'Stagistic could not update your scripts',
+            );
+            expect(container.textContent).toContain('backups folder');
+            expect(container.textContent).not.toMatch(/reload|tab|device/i);
+            findButton(container, 'Show Backups Folder')?.click();
+            expect(onShowBackupsFolder).toHaveBeenCalledTimes(1);
+        });
+
+        it('has no tab wording when an older version is running', async () => {
+            const container = mount(
+                <BootFailureScreen surface="desktop" failure={{kind: 'older-version-running', message: ''}} />,
+            );
+
+            await expect.poll(() => container.querySelector('h1')?.textContent).toContain('older version');
+            expect(container.textContent).not.toMatch(/tab|reload/i);
+        });
     });
 });

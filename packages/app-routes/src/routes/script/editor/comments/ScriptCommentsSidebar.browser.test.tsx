@@ -435,7 +435,11 @@ describe('ScriptCommentsSidebar', () => {
         editor.chain().focus().setTextSelection(3)
             .startCommentDraft()
             .run();
-        await poll(() => panel()?.querySelector('textarea[aria-label="Comment"]'), 'draft composer');
+
+        const textarea = await poll(() => panel()?.querySelector('textarea[aria-label="Comment"]'), 'draft composer');
+
+        // Focus lands a frame later; Esc before that would miss the composer.
+        await poll(() => document.activeElement === textarea, 'composer focus');
         await userEvent.keyboard('{Escape}');
 
         await poll(() => getCommentsState(editor.state).draft === null, 'draft cleared');

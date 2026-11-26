@@ -16,20 +16,33 @@
                 "title": "Stagistic Editor",
                 "width": 1280,
                 "height": 800,
-                "maximized": true
+                "maximized": true,
+                "dragDropEnabled": false
             }
         ],
         "security": {
-            "csp": null
+            "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://stagistic.com; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+            "devCsp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://stagistic.com http://localhost:5173 ws://localhost:5173; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
         }
     },
     "bundle": {
         "active": true,
-        "targets": "all",
+        "targets": ["app", "dmg"],
+        "copyright": "© 2026 Stagistic",
+        "createUpdaterArtifacts": true,
+        "publisher": "Stagistic",
+        "category": "Productivity",
         "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns"],
         "resources": {
             "icons/Assets.car": "Assets.car",
+            "licenses/THIRD_PARTY_LICENSES.txt": "licenses/THIRD_PARTY_LICENSES.txt",
             "../../../packages/mcp/tauri-resources/": "mcp/"
+        }
+    },
+    "plugins": {
+        "updater": {
+            "endpoints": ["https://github.com/littlewall/stagistic/releases/latest/download/latest.json"],
+            "pubkey": "REPLACE_WITH_STAGISTIC_UPDATER_PUBLIC_KEY"
         }
     }
 }

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {type CSSProperties, useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -120,5 +120,29 @@ describe('ModalDialog', () => {
         await closeButton.click();
 
         await waitForNull(() => document.querySelector('dialog'), 'dialog');
+    });
+
+    it('does not pass the outer modal\'s layout variables to a modal opened inside it', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        mountedRoots.push(root);
+        root.render(
+            <div style={{'--modal-panel-padding': '0px', '--modal-panel-gap': '0px'} as CSSProperties}>
+                <ModalDialog isOpen onClose={() => {}} ariaLabel="Outer dialog">
+                    <ModalDialog isOpen onClose={() => {}} ariaLabel="Inner dialog">
+                        <p>Inner</p>
+                    </ModalDialog>
+                </ModalDialog>
+            </div>,
+        );
+
+        const inner = await waitFor(() => document.querySelector('dialog[aria-label="Inner dialog"]'), 'inner dialog');
+        const panel = await waitFor(() => inner.querySelector('div'), 'inner panel');
+
+        // Tokens are not loaded here, so check the variable falls back instead of a pixel value.
+        expect(getComputedStyle(panel).getPropertyValue('--modal-panel-padding')).toBe('');
+        expect(getComputedStyle(panel).getPropertyValue('--modal-panel-gap')).toBe('');
     });
 });

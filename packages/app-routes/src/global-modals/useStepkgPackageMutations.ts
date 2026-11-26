@@ -7,7 +7,7 @@ import {
 } from '@stagistic/app-core';
 import {useCallback} from 'react';
 
-import {downloadBlob} from '../shared/downloadStagistic';
+import {useSaveFile} from '../shared/saveFile';
 import type {UseGlobalModalMutationsArgs} from './useGlobalModalMutations';
 
 const PEEK_ERROR_MESSAGES: Record<string, string> = {
@@ -145,6 +145,7 @@ export const useStepkgPackageMutations = ({
             setPrefilledImport,
         ],
     );
+    const saveFile = useSaveFile();
     const handleDownloadStepkgBackup = async (scriptId: string) => {
         setIsDownloadingBackup(true);
 
@@ -156,7 +157,7 @@ export const useStepkgPackageMutations = ({
             });
 
             if (result.ok) {
-                downloadBlob(result.fileName, result.blob);
+                void saveFile({data: result.blob, suggestedName: result.fileName});
             }
         } finally {
             setIsDownloadingBackup(false);

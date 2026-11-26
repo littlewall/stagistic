@@ -5,7 +5,7 @@ description: Write a short first scene with Robin and Alex, then choose how to c
 
 Write a short scene with Robin and Alex. You will create a script, give each part of the writing its role and find the next task when you are ready.
 
-Already have a `.stagistic` or `.stepkg` file? Start with [Import or restore a script](/editor/scripts/import/).
+These steps work the same in the Web app and the [Mac app](/mac-app/). Already have a `.stagistic` or `.stepkg` file? Start with [Import or restore a script](/editor/scripts/import/).
 
 ## Start with a new script
 
@@ -70,17 +70,17 @@ Finishing a Character block with <kbd><span aria-hidden="true">⏎</span> Enter<
 
 ## Keep and share your work
 
-The web editor saves automatically in this browser's storage on this device. Let saving finish before closing the tab. The header's save indicator shows progress or a failure; see [Understand saving and storage](/editor/scripts/saving/) if a save does not finish successfully.
+Stagistic saves automatically on this device: in this browser's storage in the Web app, and on this Mac in the [Mac app](/mac-app/). Let saving finish before closing the tab or quitting. The header's save indicator shows progress or a failure; see [Understand saving and storage](/editor/scripts/saving/) if a save does not finish successfully.
 
-To return to your library, use <img class="kb-editor-icon" src="/icons/editor/home.svg" alt="" aria-hidden="true" /> **Go to home** in the app header. Later, open the same editor site in the same browser profile and choose the script's title or **Go to editor** on its card.
+To return to your library, use <img class="kb-editor-icon" src="/icons/editor/home.svg" alt="" aria-hidden="true" /> **Go to home** in the app header. Later, open the Web app in the same browser profile (or the Mac app) and choose the script's title or **Go to editor** on its card.
 
 Your first scene is ready. Choose the next step for how you want to use it:
 
 | I want to… | Next step |
 | --- | --- |
 | Send a copy for reading or print it | [Preview and download a PDF](/editor/export/pdf/) |
-| Keep an editable file with its metadata or move to another device | [Download a `.stepkg` package](/editor/scripts/download/#download-a-package-for-backup-or-transfer), then [import it](/editor/scripts/import/) where needed |
-| Keep writing in this browser | Reopen the script from the home screen and continue in Editor |
+| Keep an editable file with its metadata or move to another device | [Download a `.stepkg` package](/editor/scripts/download/#download-a-package-for-backup-or-transfer), then [import it](/editor/scripts/import/) where needed. Moving from the Web app to the Mac app: [Move scripts](/mac-app/move-from-web-app/) |
+| Keep writing | Reopen the script from the home screen and continue in Editor |
 
 ## Choose what to do next
 

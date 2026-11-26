@@ -21,6 +21,8 @@ export interface PrepareOptions {
     root: string,
     /** Release date, `YYYY-MM-DD`. */
     date: string,
+    /** Bump to (major + 1).0.0 whatever the fragments say. */
+    major?: boolean,
 }
 
 export interface PrepareResult {
@@ -72,7 +74,11 @@ const readFragments = (root: string, files: string[]): ReleaseNoteFragment[] => 
  * Merges `releases/next/*.md` into `releases/<release>.md`, sets every Release number and removes the
  * fragments. Everything is validated before the first write. Never touches git.
  */
-export const prepareRelease = ({root, date}: PrepareOptions): PrepareResult => {
+export const prepareRelease = ({
+    root,
+    date,
+    major = false,
+}: PrepareOptions): PrepareResult => {
     if (!isReleaseDate(date)) {
         throw new ReleaseNotesError(`Invalid date "${date}": write a real calendar day as YYYY-MM-DD`);
     }
@@ -95,7 +101,7 @@ export const prepareRelease = ({root, date}: PrepareOptions): PrepareResult => {
         );
     }
 
-    const release = bumpRelease(previous, highestBump(fragments.map(fragment => fragment.bump)));
+    const release = bumpRelease(previous, major ? 'major' : highestBump(fragments.map(fragment => fragment.bump)));
     const file = `releases/${release}.md`;
 
     if (existsSync(join(root, file))) {

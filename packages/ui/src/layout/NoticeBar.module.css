@@ -1,0 +1,35 @@
+.bar {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    box-sizing: border-box;
+    height: 28px;
+    padding: 0 var(--space-2xl) 0 var(--space-2xl);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-tight);
+    color: var(--color-text);
+    background: var(--color-surface-accent);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.message {
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.action {
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    color: var(--color-text);
+    text-decoration: underline;
+    background: none;
+    border: 0;
+
+    &:hover {
+        color: var(--color-text-muted);
+    }
+}
