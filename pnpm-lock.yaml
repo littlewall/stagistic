@@ -157,15 +157,9 @@ importers:
       '@fontsource/courier-prime':
         specifier: ^5.2.8
         version: 5.2.8
-      '@stagistic/editor':
-        specifier: workspace:*
-        version: link:../../packages/editor
       '@stagistic/release-notes':
         specifier: workspace:*
         version: link:../../packages/release-notes
-      '@stagistic/script':
-        specifier: workspace:*
-        version: link:../../packages/script
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared

@@ -91,7 +91,7 @@ Every check must be PASS (no SKIP) for a signed build.
 
 1. GitHub ▸ Settings ▸ Environments ▸ New environment `release`.
    - Required reviewers: yourself.
-   - Deployment branches and tags: "Selected branches and tags", tag rule `v*`, plus the branch you run manual test builds from (e.g. `init-desktop`).
+   - Deployment branches and tags: "Selected branches and tags", tag rule `v*`, plus the branch you run manual test builds from (`pre-release`).
 2. Environment secrets:
 
    | Secret | Value |
