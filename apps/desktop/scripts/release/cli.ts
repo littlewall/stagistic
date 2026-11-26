@@ -8,7 +8,7 @@ import {
     rmSync,
     writeFileSync,
 } from 'node:fs';
-import {join} from 'node:path';
+import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {parseRelease, renderGithubRelease} from '@stagistic/release-notes';
@@ -61,7 +61,8 @@ const main = (): void => {
     const args = parseArgs(process.argv.slice(2));
     const release = resolveReleaseNumber(readReleaseNumbers(root), args.tag);
     const version = effectiveVersion(release, args.testVersion);
-    const outDir = args.outDir ?? join(desktop, 'release-out');
+    // Absolute, because later commands run from the repository root.
+    const outDir = args.outDir === undefined ? join(desktop, 'release-out') : resolve(args.outDir);
     const signing = selectSigning(process.env);
     const env = signingEnv(process.env, signing);
     const tauriConfig = JSON.parse(readFileSync(join(desktop, 'src-tauri/tauri.conf.json'), 'utf8')) as {
