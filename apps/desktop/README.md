@@ -123,4 +123,7 @@ skips them and says so.
 
 ## Release gate
 
+- `moon run desktop:release-verify -- --dmg <abs path> | --draft vX.Y.Z | --live X.Y.Z`: PASS/FAIL checks of a build, a draft Release or the live Release.
+- `moon run desktop:update-test`: interactive A → B updater test on this Mac.
+
 `root:test-all` runs `desktop:test`, `desktop:test-rust` and `mcp:test-rust` (sequentially) before merge. CI release workflow: `.github/workflows/desktop-release.yml`. Steps and go-live order: [docs/releasing/runbook.md](../../docs/releasing/runbook.md); credentials: [docs/releasing/credentials.md](../../docs/releasing/credentials.md).

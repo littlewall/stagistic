@@ -18,6 +18,7 @@ import {
     assertUpdaterReady,
     ASSET_NAMES,
     buildConfigOverride,
+    dmgNotarizeCommands,
     draftTag,
     effectiveVersion,
     ghCommands,
@@ -134,7 +135,11 @@ const main = (): void => {
         return target;
     };
 
-    place(findOne(join(bundleDir, 'dmg'), '.dmg'), ASSET_NAMES.dmg);
+    const dmg = place(findOne(join(bundleDir, 'dmg'), '.dmg'), ASSET_NAMES.dmg);
+
+    for (const [command, commandArgs] of dmgNotarizeCommands(dmg, signing, env)) {
+        run(command, commandArgs, root, env);
+    }
 
     const archive = join(bundleDir, 'macos');
     const hasUpdaterArtifacts = existsSync(archive) && readdirSync(archive).some(name => name.endsWith('.app.tar.gz.sig'));
@@ -148,6 +153,7 @@ const main = (): void => {
             notes: plainNotes(notes),
             pubDate: new Date().toISOString(),
             signature: readFileSync(signaturePath, 'utf8').trim(),
+            updaterEndpoint: args.updaterEndpoint,
         });
 
         writeFileSync(join(outDir, ASSET_NAMES.latest), `${JSON.stringify(latest, null, 2)}\n`);

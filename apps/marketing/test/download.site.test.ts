@@ -109,7 +109,7 @@ describe('system-aware call to action', () => {
     it('renders the browser variant by default and keeps the Mac variant hidden', () => {
         const ctas = home().match(/<div\b[^>]*data-system-cta>[\s\S]*?<\/div><\/div>/g) ?? [];
 
-        expect(ctas.length).toBeGreaterThanOrEqual(2);
+        expect(ctas.length).toBeGreaterThanOrEqual(1);
 
         for (const cta of ctas) {
             const browser = cta.match(/<div\b[^>]*data-cta-variant="browser"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? '';

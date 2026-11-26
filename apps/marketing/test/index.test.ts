@@ -129,17 +129,17 @@ describe('marketing website', () => {
         expect(homeHeader).toContain('>Try editor</a>');
     });
 
-    it('puts the trust line and the system-aware action in the hero', () => {
+    it('puts the trust line and the actions in the hero', () => {
         const heroSection = homeHtml.match(/<!-- Hero --><section\b[\s\S]*?<\/section>/)?.[0] ?? '';
 
-        expect(heroSection).toContain('data-system-cta');
+        expect(heroSection).toContain('>Download</a>');
         expect(heroSection.replace(/\s+/g, ' ')).toContain('Free forever · No account · Scripts stay on your computer · Open source');
     });
 
     it('orders the home page by the approved message', () => {
         const markers = [
             '<h1',
-            'data-system-cta',
+            '>Try in browser</a>',
             'The screenplay problem.',
             '>Write</h3>',
             '>Musicals</h3>',
@@ -153,7 +153,7 @@ describe('marketing website', () => {
 
         expect(positions.every(position => position > -1)).toBe(true);
         expect(positions).toEqual(positions.toSorted((a, b) => a - b));
-        expect(homeHtml.match(/<div\b[^>]*data-system-cta/g) ?? []).toHaveLength(2);
+        expect(homeHtml.match(/<div\b[^>]*data-system-cta/g) ?? []).toHaveLength(1);
     });
 
     it('keeps the feature groups text-only where there is no media yet', () => {
@@ -202,28 +202,19 @@ describe('marketing website', () => {
         );
     });
 
-    it('invites visitors to try the mini editor before the editor island', () => {
+    it('shows the Mac app and offers Download and Try in browser in the hero', () => {
         const heroSection = homeHtml.match(/<!-- Hero --><section\b[\s\S]*?<\/section>/)?.[0] ?? '';
-        const callout = heroSection.match(/<div\b[^>]*data-try-editor-callout[\s\S]*?<\/div>/)?.[0] ?? '';
-        const calloutIndex = heroSection.indexOf('data-try-editor-callout');
-        const editorIndex = heroSection.indexOf('aria-label="Interactive preview of Stagistic Editor"');
 
-        expect(callout).toContain('>Try it!</span>');
-        expect(callout).toContain('aria-hidden="true"');
-        expect(homeCss).toMatch(/\._tryEditorCallout_[^{]+\{[^}]*color:var\(--color-text\)/);
-        expect(calloutIndex).toBeGreaterThan(-1);
-        expect(editorIndex).toBeGreaterThan(calloutIndex);
+        expect(heroSection).toMatch(/<img\b[^>]*src="\/images\/hero-mac-app\.webp"/);
+        expect(heroSection).toContain('alt="Stagistic Editor Mac app with the structure panel and a musical number with lyrics"');
+        expect(heroSection).toMatch(/<a href="\/download"[^>]*>Download<\/a>/);
+        expect(heroSection).toMatch(/<a href="https:\/\/editor\.stagistic\.app"[^>]*>Try in browser<\/a>/);
+        expect(heroSection).not.toContain('data-system-cta');
+        expect(heroSection).not.toContain('astro-island');
     });
 
-    it('only adds the mini editor above 1000px', () => {
-        const miniEditorIslandMarkup = homeHtml.match(/<astro-island\b[^>]+component-url="[^"]+LandingMiniEditor[^"]+"[\s\S]*?<\/astro-island>/)?.[0] ?? '';
-        const miniEditorIsland = miniEditorIslandMarkup.match(/<astro-island\b[^>]*>/)?.[0] ?? '';
-
-        expect(miniEditorIsland).toContain('client="media"');
-        expect(miniEditorIsland).toContain('&quot;value&quot;:&quot;(min-width: 1000px)&quot;');
-        expect(homeCss).toContain('@media (width<=62.4375em)');
-        expect(homeCss).toMatch(/@media \(width<=62\.4375em\)\{[^@]*\._heroScript_[^{]+\{display:none}/);
-        expect(homeHtml).not.toContain('Stagistic Editor is built for larger screens.');
+    it('hides Try in browser below 1000px, where the Web app does not fit', () => {
+        expect(homeCss).toMatch(/@media \(width<=62\.4375em\)\{[^@]*\._heroTryInBrowser_[^{]*\{display:none}/);
     });
 
     it('stacks the hero content on small screens', () => {

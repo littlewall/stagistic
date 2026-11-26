@@ -66,6 +66,19 @@ tasks:
     options:
       cache: false
 
+  # Checks a DMG/app, a draft GitHub Release (--draft vX.Y.Z) or the live Release (--live X.Y.Z).
+  release-verify:
+    command: 'tsx scripts/release/verify.ts'
+    options:
+      cache: false
+
+  # Interactive A -> B updater test on this Mac (docs/releasing/runbook.md).
+  update-test:
+    command: 'tsx scripts/release/updateTest.ts'
+    options:
+      cache: false
+      interactive: true
+
   build-ui:
     command: 'vp build'
     options:

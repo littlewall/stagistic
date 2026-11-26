@@ -10,8 +10,7 @@ Publish before the merge: `stagistic.com/download/mac` and the updater endpoint 
 
 ## Once, before the first Release
 
-- Updater key, public key in `tauri.conf.json`, GitHub Environment `release` and its secrets: [credentials.md](credentials.md), section "Now".
-- Apple Developer account, certificate, notarization key and secrets: [credentials.md](credentials.md), section "Later". Buy the account only before the last release candidate. Without it CI builds are ad-hoc signed and not notarized: fine for testing, not for public download.
+- Do [credentials.md](credentials.md) steps 1 to 5 in order: updater key and public key in `tauri.conf.json`, Developer ID certificate, notarization key, local release settings, GitHub Environment `release` and its secrets. Without them CI builds are ad-hoc signed and not notarized: fine for testing, not for public download.
 - Updater key custody (ADR 0002): keep the private key and its password in a password manager plus an offline copy. If the key is lost, installed apps can never update themselves; the only recovery is the [Manual update notice](#manual-update-notice-emergency) asking writers to install the current Release by hand. To rotate a key you still hold, ship one Release signed with the old key that contains the new public key, then switch the secret (not tested).
 
 ## 1. Prepare the Release
@@ -42,9 +41,10 @@ CI repeats `desktop:test`, `desktop:test-rust`, `mcp:test-rust` and `mcp:contrac
 
 ## 4. Smoke test the draft
 
-Download the DMG from the draft's page in Safari (the download keeps the quarantine flag, so Gatekeeper behaves as for a writer). Test on macOS 15 and on the current macOS. Record the Gatekeeper result: a warning is expected only for unsigned or ad-hoc builds.
+1. Automatic checks: `moon run desktop:release-verify -- --draft vX.Y.Z`. It checks the draft state and body, the four assets, `latest.json` (version, URL, signature, date), then the DMG: bundle id, version, macOS 15 minimum, arm64 only, `codesign`, Gatekeeper, stapled tickets and the MCP bridge signature. It prints `PASS|FAIL|SKIP` per check and exits 1 on any FAIL. Add `--allow-ad-hoc` only for test builds (signed-only checks become SKIP). `--dmg <path>` or `--app <path>` checks a local artifact.
+2. Human smoke on the draft's DMG. Download it in Safari (the download keeps the quarantine flag, so Gatekeeper behaves as for a writer). Test on macOS 15 and on the current macOS.
 
-- Install to Applications and first launch. Signed builds: `spctl --assess --type execute -vv "/Applications/Stagistic Editor.app"` accepts, and `xcrun stapler validate` on the DMG succeeds.
+- Install to Applications and first launch; no Gatekeeper warning for a signed build.
 - Create, edit and rename a script; add an attachment (score PDF); open Board; export a PDF (Save dialog); save `.stepkg` and `.stagistic` (Save dialog); import by dialog and by drag and drop.
 - Every menu item. The Script menu is disabled on the script list. Settings with ⌘,. Zoom. Undo and Redo by menu and by keys. About shows the Release and copyright.
 - External links open the browser: What's new guide, Changelog, Report a Problem, docs.
@@ -57,35 +57,32 @@ Download the DMG from the draft's page in Safari (the download keeps the quarant
 
 ### Update test A → B
 
-Run it for the first Release and again after every Tauri upgrade, with real data (the webview origin decides where scripts are found). The updater needs the key pair from credentials.md and an https URL it can reach. Plain http is likely refused in a release build; this procedure has not been run end to end yet.
+Run it for the first Release and again after every Tauri upgrade, with real data (the webview origin decides where scripts are found).
 
-1. Export the signing key for the local build:
-   ```sh
-   export TAURI_SIGNING_PRIVATE_KEY="$(cat ~/.tauri/stagistic-updater.key)"
-   export TAURI_SIGNING_PRIVATE_KEY_PASSWORD='<password>'
-   ```
-2. Build A and install it. Create scripts, attach a score PDF and let a backup run:
-   ```sh
-   moon run desktop:release -- --test-version 1.0.0-test.1 --updater-endpoint https://<your-host>/latest.json
-   ```
-   Output is in `apps/desktop/release-out/`. A test version never changes any file in the repository.
-3. Build B the same way with `--test-version 1.0.0-test.2`.
-4. Host B's `Stagistic-Editor-mac-arm64.app.tar.gz` and `latest.json` at the endpoint. Edit `platforms.darwin-aarch64.url` in the served `latest.json` to the hosted archive; the generated URL points to a GitHub Release that does not exist for a test version.
-5. Open A. Wait for the check or choose **Check for Updates…**. The footer shows "Release 1.0.0-test.2 is ready. Restart" and **Settings ▸ About app** shows the same.
-6. Choose **Restart**. The app saves, takes a backup and relaunches into B. Check that scripts, attachments and backups are intact.
+Prerequisites: [credentials.md](credentials.md) steps 1 to 4 done, and `source ~/.config/stagistic/release.env` in the shell.
 
-A manual run of the workflow does the same build in CI: Actions ▸ `desktop-release` ▸ Run workflow with `test_version` (pattern `X.Y.Z-test.N`) and an optional `updater_endpoint`. It uploads the files as a workflow artifact and publishes nothing.
+```sh
+moon run desktop:update-test
+```
+
+An interactive wizard; each step waits for Enter (run), `s` (skip) or `q` (quit). `-- --from <step id or number>` resumes. It uses the real app data of `com.stagistic.editor` on this Mac. Work files go to `apps/desktop/update-test-out/` (gitignored).
+
+Automated: preflight (public key, signing key, password prompt, signing mode); builds A (`X.Y.Z-test.1`) and B (`-test.2`) against `http://127.0.0.1:8765/latest.json` (a local http endpoint is allowed only for test builds; `latest.json` points at the archive next to it); installs A into `/Applications` (an installed non-test app is moved to `update-test-out/previous/`; it never kills a running app); serves B; waits until the archive is served and the installed version becomes B; checks the version, `codesign` and a fresh backup; writes `update-test-out/report.md`.
+
+You do: in A create a script, attach a score PDF, edit, quit with ⌘Q; then open A, wait for or choose **Check for Updates…**, check that the footer and **Settings ▸ About app** show "Release X.Y.Z-test.2 is ready. Restart", choose **Restart**; finally confirm that scripts, attachment and backups are intact. The test build stays installed afterwards; the wizard prints how to restore the previous app.
+
+CI variant: Actions ▸ `desktop-release` ▸ Run workflow with `test_version` (pattern `X.Y.Z-test.N`) and optionally `updater_endpoint`, which must be https; the archive is expected next to `latest.json` at that endpoint. It uploads the files as a workflow artifact and publishes nothing.
 
 ## 5. Publish
 
 1. If the smoke test failed, fix, prepare again if needed and go back to step 3. Nothing is public yet.
 2. On GitHub, open the draft and choose **Publish release**. Keep it marked as the latest release.
-3. Check at once: `https://github.com/littlewall/stagistic/releases/latest/download/latest.json` shows the new version.
+3. Check at once: `moon run desktop:release-verify -- --live X.Y.Z` (the `latest.json` and download checks apply now; the site checks pass after the merge).
 
 ## 6. Merge to `main`
 
 1. Merge the release branch to `main`. Cloudflare deploys the Web app, the marketing site and the docs; it runs no tests, which is why step 2 comes first.
-2. Check: the Web app footer shows the Release; `stagistic.com/download` and `stagistic.com/download/mac` (redirects to the DMG); `stagistic.com/changelog`; the Mac app section of `docs.stagistic.com`; `stagistic.com/desktop/notice.json` is valid JSON with `cache-control: no-store`.
+2. Check: `moon run desktop:release-verify -- --live X.Y.Z`. It covers `latest.json`, `stagistic.com/download/mac` (redirect to the DMG), `notice.json` (valid JSON, `cache-control: no-store`), `stagistic.com/changelog`, `docs.stagistic.com/mac-app/` and the Web app's `version.json`. Manual: the Web app footer shows the Release; `stagistic.com/download` looks right.
 3. On a Mac with the previous Release installed, wait for the update check or choose **Check for Updates…**. The first Mac app Release, 1.0.0, has no previous Release to update from.
 
 ## Manual update notice (emergency)

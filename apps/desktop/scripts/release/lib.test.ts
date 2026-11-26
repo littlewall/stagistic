@@ -8,6 +8,7 @@ import {
     assertUpdaterReady,
     ASSET_NAMES,
     buildConfigOverride,
+    dmgNotarizeCommands,
     ghCommands,
     hasUpdaterSigningKey,
     latestJson,
@@ -136,6 +137,32 @@ describe('release script', () => {
 
         expect(mcpBuildArgs(signed)).toContain('--release');
         expect(signingEnv(apple, signed)).toMatchObject({STAGISTIC_MCP_SIGNING_IDENTITY: apple.APPLE_SIGNING_IDENTITY, CI: 'true'});
+    });
+
+    it('passes the updater key path to the Tauri CLI as TAURI_SIGNING_PRIVATE_KEY', () => {
+        expect(signingEnv({TAURI_SIGNING_PRIVATE_KEY_PATH: '/k.key'}, {mode: 'ad-hoc'}).TAURI_SIGNING_PRIVATE_KEY).toBe('/k.key');
+        expect(signingEnv({TAURI_SIGNING_PRIVATE_KEY: 'inline', TAURI_SIGNING_PRIVATE_KEY_PATH: '/k.key'}, {mode: 'ad-hoc'}).TAURI_SIGNING_PRIVATE_KEY).toBe('inline');
+        expect(signingEnv({}, {mode: 'ad-hoc'}).TAURI_SIGNING_PRIVATE_KEY).toBeUndefined();
+    });
+
+    it('signs, notarizes and staples the DMG only for Developer ID builds', () => {
+        expect(dmgNotarizeCommands('/o/a.dmg', {mode: 'ad-hoc'}, apple)).toEqual([]);
+
+        const commands = dmgNotarizeCommands('/o/a.dmg', selectSigning(apple), apple);
+
+        expect(commands.map(([command, args]) => [command, args[0]])).toEqual([
+            ['codesign', '--force'],
+            ['xcrun', 'notarytool'],
+            ['xcrun', 'stapler'],
+        ]);
+        expect(commands[0][1]).toContain(apple.APPLE_SIGNING_IDENTITY);
+        expect(commands[1][1]).toEqual(expect.arrayContaining([
+            '/o/a.dmg',
+            '/k.p8',
+            'k',
+            'i',
+            '--wait',
+        ]));
     });
 
     it('constructs gh commands for create and update', () => {

@@ -56,7 +56,32 @@ export const parseArgs = (argv: readonly string[]): ReleaseArgs => {
         throw new Error(`--test-version must look like X.Y.Z-test.N, got ${args.testVersion}.`);
     }
 
+    if (args.updaterEndpoint !== undefined) {
+        assertUpdaterEndpoint(args);
+    }
+
     return args;
+};
+
+/** True for `http://127.0.0.1:<port>/…` and `http://localhost:<port>/…`. */
+export const isLoopbackHttpEndpoint = (endpoint: string): boolean => (/^http:\/\/(?:127\.0\.0\.1|localhost):\d+(?:\/|$)/).test(endpoint);
+
+const assertUpdaterEndpoint = (args: ReleaseArgs): void => {
+    const endpoint = args.updaterEndpoint ?? '';
+
+    if (args.tag !== undefined || args.publishDraft) {
+        throw new Error('--updater-endpoint is for test builds; it cannot be combined with --tag or --publish-draft.');
+    }
+
+    if (endpoint.startsWith('http://')) {
+        if (!isLoopbackHttpEndpoint(endpoint)) {
+            throw new Error(`Plain http is allowed only for 127.0.0.1 or localhost with a port, got ${endpoint}.`);
+        }
+
+        if (args.testVersion === undefined) {
+            throw new Error('An http:// --updater-endpoint needs --test-version.');
+        }
+    }
 };
 
 /** The one Release number every file agrees on; throws on disagreement, unreadable numbers or a tag mismatch. */
@@ -138,7 +163,12 @@ export const buildConfigOverride = (options: {
     }
 
     if (options.updaterEndpoint !== undefined && options.hasUpdaterConfig) {
-        override.plugins = {updater: {endpoints: [options.updaterEndpoint]}};
+        const insecure = options.testVersion !== undefined && isLoopbackHttpEndpoint(options.updaterEndpoint);
+
+        override.plugins = {updater: {
+            endpoints: [options.updaterEndpoint],
+            ...insecure ? {dangerousInsecureTransportProtocol: true} : {},
+        }};
     }
 
     return Object.keys(override).length === 0 ? undefined : override;
@@ -182,6 +212,8 @@ export const signingEnv = (env: Readonly<Record<string, string | undefined>>, si
     const base = {
         ...env,
         CI: 'true',
+        // The Tauri CLI reads only TAURI_SIGNING_PRIVATE_KEY (a path or the key itself), not *_PATH.
+        TAURI_SIGNING_PRIVATE_KEY: env.TAURI_SIGNING_PRIVATE_KEY || env.TAURI_SIGNING_PRIVATE_KEY_PATH || undefined,
     };
 
     if (signing.mode === 'developer-id') {
@@ -204,6 +236,56 @@ export const signingEnv = (env: Readonly<Record<string, string | undefined>>, si
     };
 };
 
+/**
+ * Commands that sign, notarize and staple the DMG for a Developer ID build.
+ * Tauri notarizes only the app inside; the downloaded DMG needs its own ticket.
+ */
+export const dmgNotarizeCommands = (
+    dmg: string,
+    signing: SigningMode,
+    env: Readonly<Record<string, string | undefined>>,
+): [string, string[]][] => {
+    if (signing.mode !== 'developer-id') {
+        return [];
+    }
+
+    return [
+        [
+            'codesign',
+            [
+                '--force',
+                '--timestamp',
+                '--sign',
+                signing.identity,
+                dmg,
+            ],
+        ],
+        [
+            'xcrun',
+            [
+                'notarytool',
+                'submit',
+                dmg,
+                '--key',
+                env.APPLE_API_KEY_PATH ?? '',
+                '--key-id',
+                env.APPLE_API_KEY ?? '',
+                '--issuer',
+                env.APPLE_API_ISSUER ?? '',
+                '--wait',
+            ],
+        ],
+        [
+            'xcrun',
+            [
+                'stapler',
+                'staple',
+                dmg,
+            ],
+        ],
+    ];
+};
+
 /** `node` arguments for the MCP artifact build: Developer ID release or ad-hoc. */
 export const mcpBuildArgs = (signing: SigningMode): string[] => ['scripts/build-artifacts.mjs', ...signing.mode === 'developer-id' ? ['--release'] : []];
 
@@ -214,6 +296,8 @@ export const latestJson = (options: {
     notes: string,
     pubDate: string,
     signature: string,
+    /** Updater endpoint override: the archive is expected next to latest.json there. */
+    updaterEndpoint?: string,
 }) => ({
     version: options.version,
     notes: options.notes,
@@ -221,7 +305,9 @@ export const latestJson = (options: {
     platforms: {
         [UPDATER_PLATFORM]: {
             signature: options.signature,
-            url: releaseUrl(options.version, ASSET_NAMES.updaterArchive),
+            url: options.updaterEndpoint === undefined
+                ? releaseUrl(options.version, ASSET_NAMES.updaterArchive)
+                : new URL(ASSET_NAMES.updaterArchive, options.updaterEndpoint).toString(),
         },
     },
 });

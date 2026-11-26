@@ -3,6 +3,7 @@ type: feature
 bump: minor
 highlight: true
 title: Stagistic for Mac
+image: /releases/mac-app.webp
 docs: /mac-app/
 surface: web
 ---
