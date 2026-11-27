@@ -30,7 +30,16 @@ export const exec = (command: string, args: string[]): {
     output: string,
     stdout: string,
 } => {
-    const result = spawnSync(command, args, {encoding: 'utf8'});
+    // Plain output even when the shell forces colour (GH_FORCE_TTY, CLICOLOR_FORCE): `gh --json` must stay parseable.
+    const {
+        GH_FORCE_TTY: _forceTty,
+        CLICOLOR_FORCE: _forceColor,
+        ...env
+    } = process.env;
+    const result = spawnSync(command, args, {
+        encoding: 'utf8',
+        env: {...env, NO_COLOR: '1'},
+    });
 
     return {
         status: result.status ?? 1,

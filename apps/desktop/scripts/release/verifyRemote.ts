@@ -46,12 +46,19 @@ export const checkDraft = (tag: string, allowAdHoc: boolean): CheckResult[] => {
         return [fail('draft', `gh release view ${tag} failed: ${view.output.trim()}`)];
     }
 
-    const release = JSON.parse(view.stdout) as {
+    let release: {
         isDraft: boolean,
         assets: {name: string}[],
         body: string,
         tagName: string,
     };
+
+    try {
+        release = JSON.parse(view.stdout) as typeof release;
+    } catch {
+        return [fail('draft', `gh release view ${tag} did not return JSON: ${JSON.stringify(view.stdout.slice(0, 80))}`)];
+    }
+
     const results = [
         ...checkDraftState(release, tag),
         checkAssetSet(release.assets.map(asset => asset.name)),
