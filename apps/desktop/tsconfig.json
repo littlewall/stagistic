@@ -17,6 +17,7 @@
     "include": [
         "src",
         "scripts/release",
+        "scripts/cspSmoke.ts",
         "vite.config.ts"
     ],
     "references": []

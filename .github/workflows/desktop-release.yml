@@ -79,6 +79,8 @@ jobs:
           pnpm exec moon run desktop:test-rust
           pnpm exec moon run mcp:test-rust
           pnpm exec moon run mcp:contract-check
+          pnpm --filter @stagistic/desktop exec playwright install chromium webkit
+          pnpm exec moon run desktop:csp-smoke
 
       - name: Import Apple signing certificate
         if: env.APPLE_CERTIFICATE != ''

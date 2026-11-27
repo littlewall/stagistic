@@ -84,6 +84,13 @@ tasks:
     options:
       cache: false
 
+  # The built UI under the release CSP (dev builds use the looser devCsp).
+  csp-smoke:
+    command: 'tsx scripts/cspSmoke.ts'
+    deps: ['~:build-ui']
+    options:
+      cache: false
+
   build-release:
     command: 'tauri build --target aarch64-apple-darwin'
     deps: ['~:licenses', 'mcp:bundle-release']

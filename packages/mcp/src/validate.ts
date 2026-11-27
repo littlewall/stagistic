@@ -1,12 +1,12 @@
-import Ajv2020 from 'ajv/dist/2020';
-
 import type {LocalRequest} from './generated/LocalRequest';
-import localRequestSchema from './generated/LocalRequest.json';
 import type {ErrorCode, ReadReply} from './generated/ReadReply';
 import type {UiReply} from './generated/UiReply';
-import uiReplySchema from './generated/UiReply.json';
 import type {UiRequest} from './generated/UiRequest';
-import uiRequestSchema from './generated/UiRequest.json';
+import {
+    checkReply,
+    checkRequest,
+    checkUiRequest,
+} from './generated/validators.js';
 
 export class LocalMcpReadError extends Error {
     constructor(public readonly code: ErrorCode, message = code as string, public readonly block_id?: string) {
@@ -15,18 +15,7 @@ export class LocalMcpReadError extends Error {
     }
 }
 
-const ajv = new Ajv2020({
-    strict: false,
-    allErrors: false,
-    formats: {
-        uint: true,
-        uint32: true,
-        uint64: true,
-    },
-});
-const checkRequest = ajv.compile<LocalRequest>(localRequestSchema);
-const checkUiRequest = ajv.compile<UiRequest>(uiRequestSchema);
-const checkReply = ajv.compile<UiReply>(uiReplySchema);
+// Compiled at build time (scripts/contract.mjs): the Mac app's CSP forbids compiling them at runtime.
 const encoder = new TextEncoder();
 
 export const jsonByteLength = (value: unknown): number => encoder.encode(JSON.stringify(value)).length;

@@ -15,6 +15,7 @@ export default defineConfig({
         '**/build/**',
         '**/dist/**',
         '**/sanity.types.ts',
+        'packages/mcp/src/generated/validators.js',
     ],
     options: {
         typeAware: true,

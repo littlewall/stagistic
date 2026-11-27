@@ -1,3 +1,5 @@
+// Must run before any module that parses with zod.
+import './zodConfig';
 import '@stagistic/ui/styles/base.css';
 import './index.css';
 

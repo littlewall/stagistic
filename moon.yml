@@ -136,6 +136,7 @@ tasks:
       - 'agent-roles:test'
       - 'desktop:test'
       - 'desktop:test-rust'
+      - 'desktop:csp-smoke'
       - 'mcp:test-rust'
       - 'app-core:test-browser'
       - 'app-routes:test-browser'

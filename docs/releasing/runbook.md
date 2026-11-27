@@ -20,11 +20,11 @@ Publish before the merge: `stagistic.com/download/mac` and the updater endpoint 
 
 ## 2. Check
 
-1. `moon run root:verify -- --fresh root:test-all`. It includes `desktop:test`, `desktop:test-rust` and `mcp:test-rust`, every browser suite and `marketing:test`.
+1. `moon run root:verify -- --fresh root:test-all`. It includes `desktop:test`, `desktop:test-rust`, `desktop:csp-smoke` (the built UI under the release CSP; dev builds use a looser one) and `mcp:test-rust`, every browser suite and `marketing:test`.
 2. Property oracles, once per feature before merge: `moon run root:verify -- --fresh root:test-explore`.
 3. Optional local dry run of the build: `moon run desktop:release`. It writes `apps/desktop/release-out/` (gitignored) and touches no GitHub Release.
 
-CI repeats `desktop:test`, `desktop:test-rust`, `mcp:test-rust` and `mcp:contract-check` for a tag, and refuses a tag whose number differs from the number in the files.
+CI repeats `desktop:test`, `desktop:test-rust`, `mcp:test-rust`, `mcp:contract-check` and `desktop:csp-smoke` for a tag, and refuses a tag whose number differs from the number in the files.
 
 ## 3. Commit and tag
 
