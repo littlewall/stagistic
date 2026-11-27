@@ -1,6 +1,6 @@
 [package]
 name = "stagistic-editor"
-version = "0.2.2"
+version = "1.0.0"
 description = "Stagistic Editor"
 edition = "2021"
 
