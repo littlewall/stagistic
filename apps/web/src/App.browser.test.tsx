@@ -168,7 +168,7 @@ describe('App', () => {
         mountedRoots.push(root);
         await waitFor(() => document.querySelector('footer') !== null, 20_000);
 
-        const hasReload = () => [...document.querySelectorAll('footer button')].some(button => button.textContent?.startsWith('A new Release is ready'));
+        const hasReload = () => [...document.querySelectorAll('footer button')].some(button => button.textContent?.startsWith('Click to reload'));
 
         // The host's fallback page for a missing version.json changes nothing.
         window.dispatchEvent(new Event('focus'));

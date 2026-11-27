@@ -34,9 +34,9 @@ const statusLine = (status: MacUpdateStatus): string => {
         case 'up-to-date':
             return `Up to date · checked ${formatTime(status.checkedAt)}`;
         case 'downloading':
-            return `Downloading Release ${status.release}…`;
+            return 'Downloading the new version…';
         case 'ready':
-            return `Release ${status.release} is ready`;
+            return 'New version is ready';
         case 'failed':
             return 'Couldn\'t check for updates';
         default:

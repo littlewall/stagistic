@@ -6,13 +6,15 @@ export interface FooterRelease {
     onOpenWhatsNew: () => void,
     /** Adds a dot to What's new while the writer has not seen the newest Release. */
     hasUnseenRelease?: boolean,
-    /** Set while a newer Release is ready: shows a quiet action with its own dot, which opening What's new does not clear. */
+    /** Set while a newer Release is ready: shows a quiet action. */
     update?: FooterReleaseUpdate,
 }
 
 export interface FooterReleaseUpdate {
-    /** Full text of the action, e.g. `Release 1.0.1 is ready. Restart`. */
-    label: string,
+    /** Plain status text, e.g. `New version is ready.` */
+    message: string,
+    /** The underlined action after it, e.g. `Click to restart`. */
+    actionLabel: string,
     onPress: () => void,
 }
 

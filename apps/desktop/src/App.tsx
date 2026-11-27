@@ -28,6 +28,7 @@ import {
     ToastProvider,
 } from '@stagistic/ui';
 import {
+    type ReactNode,
     useEffect,
     useMemo,
 } from 'react';
@@ -56,6 +57,7 @@ import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
 import {StorageSettings} from './storage/StorageSettings';
 import {UpdatesSettings} from './updates/UpdatesSettings';
+import {useHomeUpdateBanner} from './updates/useHomeUpdateBanner';
 
 const bootstrapOptions = {
     beforeDatabase: requestPersistentStorage,
@@ -82,34 +84,39 @@ const settingsSections: AppSettingsSection[] = [
 ];
 
 // Runs inside the router + providers so it can use navigation and modal hooks.
-const AppRoutes = () => {
+const AppRoutes = ({noticeBanner}: {noticeBanner: ReactNode}) => {
     useNativeMenuActions();
     useDeepLinkNavigation();
 
+    const updateBanner = useHomeUpdateBanner();
+
     return (
-        <Routes>
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
-                <Route index element={<Navigate to="editor" replace />} />
-                <Route path="editor" element={<ScriptEditorRoute />} />
-                <Route path="board">
-                    <Route index element={<Navigate to="wall" replace />} />
-                    <Route path=":lens" element={<ScriptBoardRoute />} />
+        // A manual-update notice outranks the update bar.
+        <AppBannerProvider banner={noticeBanner ?? updateBanner}>
+            <Routes>
+                <Route path="/" element={<HomeRoute />} />
+                <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                    <Route index element={<Navigate to="editor" replace />} />
+                    <Route path="editor" element={<ScriptEditorRoute />} />
+                    <Route path="board">
+                        <Route index element={<Navigate to="wall" replace />} />
+                        <Route path=":lens" element={<ScriptBoardRoute />} />
+                    </Route>
+                    <Route path="export" element={<ScriptExportRoute />} />
                 </Route>
-                <Route path="export" element={<ScriptExportRoute />} />
-            </Route>
-            <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
-                <Route index element={<Navigate to="editor" replace />} />
-                <Route path="editor" element={<ScriptEditorRoute />} />
-                <Route path="board">
-                    <Route index element={<Navigate to="wall" replace />} />
-                    <Route path=":lens" element={<ScriptBoardRoute />} />
+                <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
+                    <Route index element={<Navigate to="editor" replace />} />
+                    <Route path="editor" element={<ScriptEditorRoute />} />
+                    <Route path="board">
+                        <Route index element={<Navigate to="wall" replace />} />
+                        <Route path=":lens" element={<ScriptBoardRoute />} />
+                    </Route>
+                    <Route path="export" element={<ScriptExportRoute />} />
                 </Route>
-                <Route path="export" element={<ScriptExportRoute />} />
-            </Route>
-            <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+                <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </AppBannerProvider>
     );
 };
 
@@ -135,7 +142,11 @@ const BootedApp = () => {
     } = useDesktopLifecycle(Boolean(scriptRepository));
     const footerUpdate = useMemo(() => (
         updates.state.status === 'ready'
-            ? {label: `Release ${updates.state.release} is ready. Restart`, onPress: updates.restart}
+            ? {
+                message: 'New version is ready.',
+                actionLabel: 'Click to restart',
+                onPress: updates.restart,
+            }
             : undefined
     ), [updates.state, updates.restart]);
 
@@ -198,11 +209,9 @@ const BootedApp = () => {
                         footerUpdate={footerUpdate}
                     >
                         <GlobalModalsProvider settingsSections={settingsSections}>
-                            <AppBannerProvider banner={banner}>
-                                <ScriptMenuActionsProvider>
-                                    <AppRoutes />
-                                </ScriptMenuActionsProvider>
-                            </AppBannerProvider>
+                            <ScriptMenuActionsProvider>
+                                <AppRoutes noticeBanner={banner} />
+                            </ScriptMenuActionsProvider>
                             {lifecycleDialogs}
                         </GlobalModalsProvider>
                     </ScriptReleaseNotesProvider>

@@ -188,6 +188,9 @@
     --sidebar-head-height: var(--control-height-md);
     /* The Board's centered column: wider than the homepage's 1400px, narrower than the Editor's full width. */
     --layout-board-max-width: 1680px;
+    /* The page column (homepage): content and the bars that line up with it. */
+    --layout-page-max-width: 1400px;
+    --layout-page-padding: calc(var(--space-5xl) + var(--space-md));
 
     /* ── Interaction states ────────────────────────────────────────
        One mechanic per state. Two states never differ only in the alpha

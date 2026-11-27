@@ -55,7 +55,7 @@ describe('Mac updates settings panel', () => {
     it('shows a status line for each state', async () => {
         const downloading = mount({status: 'downloading', release: '1.0.1'});
 
-        await expect.poll(() => downloading.container.textContent).toContain('Downloading Release 1.0.1…');
+        await expect.poll(() => downloading.container.textContent).toContain('Downloading the new version…');
         expect(button(downloading.container, 'Check now')?.disabled).toBe(true);
 
         const checking = mount({status: 'checking'});
@@ -72,7 +72,7 @@ describe('Mac updates settings panel', () => {
     it('offers Restart, never automatically, when a Release is ready', async () => {
         const {container, onRestart} = mount({status: 'ready', release: '1.0.1'});
 
-        await expect.poll(() => container.textContent).toContain('Release 1.0.1 is ready');
+        await expect.poll(() => container.textContent).toContain('New version is ready');
         expect(onRestart).not.toHaveBeenCalled();
         button(container, 'Restart')?.click();
         expect(onRestart).toHaveBeenCalledTimes(1);

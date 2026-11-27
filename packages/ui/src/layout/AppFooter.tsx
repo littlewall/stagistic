@@ -32,9 +32,9 @@ export const AppFooter = ({children}: AppFooterProps) => {
                         {release.update ? (
                             <>
                                 <span aria-hidden="true">•</span>
+                                <span>{release.update.message}</span>
                                 <button className={styles.releaseLink} type="button" onClick={release.update.onPress}>
-                                    {release.update.label}
-                                    <span className={styles.dot} data-update-dot="" />
+                                    {release.update.actionLabel}
                                 </button>
                             </>
                         ) : null}

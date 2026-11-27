@@ -126,13 +126,13 @@ describe('a newer Release', () => {
     it('shows a quiet reload in the footer and reloads only when the writer asks', async () => {
         const {reload, focus} = mount();
 
-        expect(button('A new Release is ready')).toBeUndefined();
+        expect(button('Click to reload')).toBeUndefined();
 
         await focus();
-        expect(button('A new Release is ready')).toBeDefined();
+        expect(button('Click to reload')).toBeDefined();
         expect(reload).not.toHaveBeenCalled();
 
-        button('A new Release is ready')?.click();
+        button('Click to reload')?.click();
         expect(reload).toHaveBeenCalledTimes(1);
     });
 
@@ -140,7 +140,7 @@ describe('a newer Release', () => {
         const {focus} = mount({serverRelease: '0.2.0'});
 
         await focus();
-        expect(button('A new Release is ready')).toBeUndefined();
+        expect(button('Click to reload')).toBeUndefined();
     });
 
     it('keeps showing the reload after What\'s new was opened', async () => {
@@ -150,7 +150,7 @@ describe('a newer Release', () => {
         button('What\'s new')?.click();
         await wait(30);
 
-        expect(button('A new Release is ready')).toBeDefined();
+        expect(button('Click to reload')).toBeDefined();
     });
 });
 
@@ -241,14 +241,14 @@ describe('quiet reload on return to the script list', () => {
         await returnToList();
         await returnToList();
         expect(reload).toHaveBeenCalledTimes(1);
-        expect(button('A new Release is ready')).toBeDefined();
+        expect(button('Click to reload')).toBeDefined();
     });
 
     it('does not quiet-reload when the deployed generation differs, but still offers the footer prompt', async () => {
         const {reload, focus} = mount({runningDbGeneration: '27/20261103094608_x/0.3.15', serverDbGeneration: '28/other/0.3.15'});
 
         await focus();
-        expect(button('A new Release is ready')).toBeDefined();
+        expect(button('Click to reload')).toBeDefined();
 
         await returnToList();
         expect(reload).not.toHaveBeenCalled();

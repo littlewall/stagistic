@@ -155,7 +155,11 @@ export const ReleaseNotesProvider = ({
     const update = useReleaseUpdate();
     const reloadForUpdate = update?.availableRelease ? update.reload : undefined;
     const webUpdate = useMemo<FooterReleaseUpdate | undefined>(() => (
-        reloadForUpdate ? {label: 'A new Release is ready. Reload', onPress: reloadForUpdate} : undefined
+        reloadForUpdate ? {
+            message: 'New version is ready.',
+            actionLabel: 'Click to reload',
+            onPress: reloadForUpdate,
+        } : undefined
     ), [reloadForUpdate]);
     const shownUpdate = footerUpdate ?? webUpdate;
     const footerRelease = useMemo(() => ({

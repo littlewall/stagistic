@@ -97,7 +97,7 @@ describe('AppFooter', () => {
         expect(calmLink.querySelector('[data-unseen-dot]')).toBeNull();
     });
 
-    it('offers a quiet reload with its own dot while a new version is available', async () => {
+    it('offers a quiet reload while a new version is available', async () => {
         const onReload = vi.fn();
 
         render(
@@ -105,7 +105,11 @@ describe('AppFooter', () => {
                 value={{
                     releaseNumber: '0.2.0',
                     onOpenWhatsNew: vi.fn(),
-                    update: {label: 'A new Release is ready. Reload', onPress: onReload},
+                    update: {
+                        message: 'New version is ready.',
+                        actionLabel: 'Click to reload',
+                        onPress: onReload,
+                    },
                 }}
             >
                 <AppFooter />
@@ -117,14 +121,16 @@ describe('AppFooter', () => {
 
         expect(whatsNew.textContent).toBe('What\'s new');
         expect(whatsNew.querySelector('[data-unseen-dot]')).toBeNull();
-        expect(reload.textContent).toBe('A new Release is ready. Reload');
-        expect(reload.querySelector('[data-update-dot]')).not.toBeNull();
+        // Only the action is the underlined button; the status stays plain text.
+        expect(reload.textContent).toBe('Click to reload');
+        expect(reload.querySelector('[data-unseen-dot]')).toBeNull();
+        expect(document.querySelector('footer')?.textContent).toContain('New version is ready.Click to reload');
 
         await page.elementLocator(reload).click();
         expect(onReload).toHaveBeenCalledTimes(1);
     });
 
-    it('shows whatever label the update action brings', async () => {
+    it('shows whatever action the update brings', async () => {
         const onPress = vi.fn();
 
         render(
@@ -132,7 +138,11 @@ describe('AppFooter', () => {
                 value={{
                     releaseNumber: '1.0.0',
                     onOpenWhatsNew: vi.fn(),
-                    update: {label: 'Release 1.0.1 is ready. Restart', onPress},
+                    update: {
+                        message: 'New version is ready.',
+                        actionLabel: 'Click to restart',
+                        onPress,
+                    },
                 }}
             >
                 <AppFooter />
@@ -142,29 +152,9 @@ describe('AppFooter', () => {
 
         const [, action] = [...document.querySelectorAll<HTMLButtonElement>('footer button')];
 
-        expect(action.textContent).toBe('Release 1.0.1 is ready. Restart');
+        expect(action.textContent).toBe('Click to restart');
         await page.elementLocator(action).click();
         expect(onPress).toHaveBeenCalledTimes(1);
-    });
-
-    it('keeps the update dot apart from the unread notes dot', async () => {
-        render(
-            <FooterReleaseProvider
-                value={{
-                    releaseNumber: '0.2.0',
-                    onOpenWhatsNew: vi.fn(),
-                    hasUnseenRelease: false,
-                    update: {label: 'A new Release is ready. Reload', onPress: vi.fn()},
-                }}
-            >
-                <AppFooter />
-            </FooterReleaseProvider>,
-        );
-        await settle();
-
-        // Opening What's new clears the unread dot; the pending update must stay visible.
-        expect(document.querySelectorAll('[data-unseen-dot]')).toHaveLength(0);
-        expect(document.querySelectorAll('[data-update-dot]')).toHaveLength(1);
     });
 
     it('keeps the centre slot and the feedback link', async () => {

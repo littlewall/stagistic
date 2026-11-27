@@ -11,6 +11,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {PageContainer} from '../organisms/PageContainer/PageContainer';
 import {AppHeader, ScriptEditorAppHeader} from './AppHeader';
 
 let root: Root | null = null;
@@ -279,6 +280,24 @@ describe('AppHeader window controls', () => {
         expect(await homeLeft()).toBeCloseTo(92, 1);
         expect(settings.right).toBeCloseTo(1600 - 140, 1);
         expect(middle.left + (middle.width / 2)).toBeCloseTo(800, 1);
+    });
+
+    it('lines the first and last icons up with the page content', async () => {
+        mountHeaderAt(
+            1916, (
+                <>
+                    <AppHeader onHome={() => {}} onOpenSettings={() => {}} contentInset="page" />
+                    <PageContainer><div data-page-content>Scripts</div></PageContainer>
+                </>
+            ),
+        );
+
+        const content = (await waitForElement<HTMLElement>('[data-page-content]')).getBoundingClientRect();
+        const homeIcon = (await waitForElement<SVGElement>('[aria-label="Go to home"] svg')).getBoundingClientRect();
+        const settingsIcon = (await waitForElement<SVGElement>('[aria-label="Open settings"] svg')).getBoundingClientRect();
+
+        expect(homeIcon.left).toBeCloseTo(content.left, 1);
+        expect(settingsIcon.right).toBeCloseTo(content.right, 1);
     });
 
     it('adds no inset on the web', async () => {

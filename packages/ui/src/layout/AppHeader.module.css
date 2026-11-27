@@ -15,7 +15,7 @@
     border-bottom: 1px solid var(--layer-panel-edge);
 
     & .inner {
-        --header-max-width: 1400px;
+        --header-max-width: var(--layout-page-max-width);
         --header-padding: var(--space-lg);
         /* Distance of the content edge from the window edge. */
         --header-content-edge: calc(max(0px, (100cqw - var(--header-max-width)) / 2) + var(--header-padding));
@@ -43,8 +43,10 @@
             --header-padding: var(--space-3xl);
         }
 
+        /* PageContainer's column: its padding less the ghost icon button's own
+         * inset, so the first and last icons line up with the page content. */
         &.pageInset {
-            --header-padding: calc(var(--space-3xl) + var(--space-md));
+            --header-padding: calc(var(--layout-page-padding) - (var(--control-height-md) - var(--icon-size-md)) / 2);
         }
 
         & .leftControls {
