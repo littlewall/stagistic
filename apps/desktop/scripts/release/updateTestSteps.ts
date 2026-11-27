@@ -23,6 +23,7 @@ import {
     appVersion,
     askHidden,
     backupsDir,
+    checkUpdaterKeyPassword,
     confirm,
     desktop,
     exec,
@@ -149,6 +150,14 @@ const stepPreflight = async (state: State): Promise<Outcome> => {
 
     if (!state.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD) {
         state.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD = await askHidden('TAURI_SIGNING_PRIVATE_KEY_PASSWORD (hidden, empty if none): ');
+    }
+
+    const passwordProblem = checkUpdaterKeyPassword(state.env);
+
+    if (passwordProblem !== undefined) {
+        delete state.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD;
+
+        return failed(passwordProblem);
     }
 
     const signing = selectSigning(state.env);

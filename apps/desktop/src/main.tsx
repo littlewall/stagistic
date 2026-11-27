@@ -21,7 +21,7 @@ installFrontendErrorLog({
     send: sendToLog,
 });
 bootstrapAppTheme();
-// Reserves the header's traffic-light space and enables its drag region on macOS.
+// Marks the platform so the header keeps clear of the macOS traffic lights.
 applyPlatformClass();
 // Links to other sites open in the default browser, never inside the app window.
 installExternalLinkHandler(document);

@@ -225,6 +225,69 @@ describe('AppHeader width variants', () => {
     });
 });
 
+describe('AppHeader window controls', () => {
+    const mountHeaderAt = (hostWidth: number, element: ReactElement) => {
+        const host = document.createElement('div');
+
+        host.style.width = `${hostWidth}px`;
+        document.body.appendChild(host);
+        root = createRoot(host);
+        root.render(element);
+    };
+
+    const editorHeader = (
+        <ScriptEditorAppHeader
+            currentScript={{id: 'script-1', name: 'One Small Light'}}
+            onHome={() => {}}
+            activeView="editor"
+            onSelectView={() => {}}
+            onOpenSettings={() => {}}
+        />
+    );
+
+    const homeLeft = async () => (await waitForElement<HTMLElement>('[aria-label="Go to home"]')).getBoundingClientRect().left;
+
+    afterEach(() => {
+        document.documentElement.style.removeProperty('--window-controls-start');
+        document.documentElement.style.removeProperty('--window-controls-end');
+    });
+
+    it('keeps the leading controls clear of window controls at the window edge', async () => {
+        document.documentElement.style.setProperty('--window-controls-start', '92px');
+        mountHeaderAt(1200, <AppHeader onHome={() => {}} />);
+
+        expect(await homeLeft()).toBeCloseTo(92, 1);
+    });
+
+    it('adds no inset when the capped header content already clears the window controls', async () => {
+        document.documentElement.style.setProperty('--window-controls-start', '92px');
+        mountHeaderAt(2200, <AppHeader onHome={() => {}} />);
+
+        // The 1400px column starts at 400px; its 12px padding puts Home at 412px.
+        expect(await homeLeft()).toBeCloseTo(412, 1);
+    });
+
+    it('keeps the middle column on the window centre while insetting the edges', async () => {
+        document.documentElement.style.setProperty('--window-controls-start', '92px');
+        document.documentElement.style.setProperty('--window-controls-end', '140px');
+        mountHeaderAt(1600, editorHeader);
+
+        const inner = await waitForElement<HTMLElement>('[data-header-inner]');
+        const middle = (inner.children[1] as HTMLElement).getBoundingClientRect();
+        const settings = (await waitForElement<HTMLElement>('[aria-label="Open settings"]')).getBoundingClientRect();
+
+        expect(await homeLeft()).toBeCloseTo(92, 1);
+        expect(settings.right).toBeCloseTo(1600 - 140, 1);
+        expect(middle.left + (middle.width / 2)).toBeCloseTo(800, 1);
+    });
+
+    it('adds no inset on the web', async () => {
+        mountHeaderAt(1200, <AppHeader onHome={() => {}} />);
+
+        expect(await homeLeft()).toBeCloseTo(12, 1);
+    });
+});
+
 describe('AppHeader settings', () => {
     it('opens the app settings from the header', async () => {
         const onOpenSettings = vi.fn();

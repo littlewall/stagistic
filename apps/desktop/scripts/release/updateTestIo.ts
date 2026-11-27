@@ -1,10 +1,13 @@
-import {spawnSync} from 'node:child_process';
+import {execFileSync, spawnSync} from 'node:child_process';
 import {
     existsSync,
+    mkdtempSync,
     readdirSync,
+    rmSync,
     statSync,
+    writeFileSync,
 } from 'node:fs';
-import {homedir} from 'node:os';
+import {homedir, tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createInterface} from 'node:readline';
 import {fileURLToPath} from 'node:url';
@@ -47,7 +50,8 @@ export const askHidden = async (question: string): Promise<string> => {
                     stdin.setRawMode(false);
                     stdin.off('data', onData);
                     process.stdout.write('\n');
-                    resolve(value);
+                    // A paste can arrive wrapped in bracketed-paste markers.
+                    resolve(value.replaceAll('\u001B[200~', '').replaceAll('\u001B[201~', ''));
 
                     return;
                 }
@@ -117,3 +121,35 @@ export const newestBackup = (): {name: string, mtimeMs: number} | undefined => e
     mtimeMs: statSync(join(backupsDir, name)).mtimeMs,
 }))) : undefined;
 
+// Signs a throwaway file so a wrong password fails here, not minutes into Build A.
+export const checkUpdaterKeyPassword = (env: NodeJS.ProcessEnv): string | undefined => {
+    const dir = mkdtempSync(join(tmpdir(), 'stagistic-key-check-'));
+    const file = join(dir, 'check.txt');
+    const keyPath = env.TAURI_SIGNING_PRIVATE_KEY_PATH;
+
+    try {
+        writeFileSync(file, 'check');
+        execFileSync('pnpm', [
+            'exec',
+            'tauri',
+            'signer',
+            'sign',
+            ...keyPath ? ['--private-key-path', keyPath] : [],
+            file,
+        ], {
+            cwd: desktop,
+            env,
+            stdio: 'pipe',
+        });
+
+        return undefined;
+    } catch (error) {
+        const output = String((error as {stderr?: Buffer}).stderr ?? '');
+
+        return (/password/i).test(output)
+            ? 'Wrong updater key password. Run the wizard again and retype it.'
+            : `Updater key check failed: ${output.trim().split('\n').at(-1) ?? 'unknown error'}`;
+    } finally {
+        rmSync(dir, {force: true, recursive: true});
+    }
+};

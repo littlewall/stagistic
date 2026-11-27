@@ -1,4 +1,10 @@
 /* Desktop-level overrides beyond base.css.
- * The macOS window uses titleBarStyle "Overlay"; the shared UI header reserves
- * the traffic-light space and enables its drag region via the `platform-macos`
- * class set in src/platform.ts. */
+ * The macOS window uses titleBarStyle "Overlay" with the traffic lights at
+ * x 16 (tauri.macos.conf.json). The shared UI header keeps its controls clear
+ * of them through --window-controls-start (see @stagistic/ui
+ * AppHeader.module.css); src/platform.ts sets the platform class. A Windows
+ * build would set --window-controls-end for its caption buttons instead. */
+:root.platform-macos {
+    /* Traffic lights end at about 76px; the leading control keeps a gap after them. */
+    --window-controls-start: calc(76px + var(--space-xl));
+}
