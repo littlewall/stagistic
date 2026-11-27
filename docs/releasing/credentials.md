@@ -112,7 +112,7 @@ Check, a signed CI test build. GitHub offers Run workflow only for workflows on 
 ```sh
 moon run desktop:release-verify -- --dmg <unzipped folder>/Stagistic-Editor-mac-arm64.dmg
 ```
-On this first signed run, watch the log for a second certificate import by the Tauri bundler (it imports `APPLE_CERTIFICATE` itself when it also sees `APPLE_CERTIFICATE_PASSWORD`; the workflow passes the password only to its own keychain step, so expect one import).
+The certificate is imported once, by the workflow's keychain step: only that step gets `APPLE_CERTIFICATE`, so the Tauri bundler does not import it again. If the log of the first signed run shows a second import, report it.
 
 ## Secret list
 
