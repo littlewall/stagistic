@@ -1,5 +1,5 @@
 import {getScriptSnapshotLabel, useScriptRepository} from '@stagistic/app-core';
-import {AppLayout, LoaderOverlay} from '@stagistic/ui';
+import {AppLayout} from '@stagistic/ui';
 import {useCallback, useMemo} from 'react';
 import {
     Navigate,
@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
+import {PreparingPackageOverlay} from '../../shared/PreparingPackageOverlay';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {BoardArcsLens} from './board/BoardArcsLens';
 import {DEFAULT_BOARD_LENS_ID, isBoardLensId} from './board/boardLenses';
@@ -103,7 +104,7 @@ const ScriptBoardPage = ({lensId}: {lensId: string}) => {
                 ) : null
             }
         >
-            {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
+            {isPreparingPackage ? <PreparingPackageOverlay /> : null}
             {currentScriptId ? <LensComponent activeLensId={lensId} onSelectLens={openLens} /> : null}
             {scriptStateControls.modals}
         </AppLayout>

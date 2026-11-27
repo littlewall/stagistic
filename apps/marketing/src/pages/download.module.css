@@ -91,6 +91,13 @@
     letter-spacing: -.03em;
 }
 
+.subsectionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+}
+
 .text {
     margin-top: 1rem;
     font-size: .9375rem;
@@ -100,30 +107,6 @@
     & code {
         font-family: var(--font-mono);
     }
-}
-
-.steps {
-    display: grid;
-    gap: .5rem;
-    padding-left: 1.5rem;
-    font-size: .9375rem;
-    line-height: 1.7;
-    color: var(--color-text-muted);
-
-    & code {
-        font-family: var(--font-mono);
-        color: var(--color-text);
-    }
-}
-
-.links {
-    display: grid;
-    gap: .5rem;
-    padding-left: 0;
-    font-size: .9375rem;
-    line-height: 1.7;
-    color: var(--color-text-muted);
-    list-style: none;
 }
 
 .table {

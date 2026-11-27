@@ -4,7 +4,7 @@ import {
     useScriptRepository,
 } from '@stagistic/app-core';
 import {serializeStagistic} from '@stagistic/script';
-import {AppLayout, LoaderOverlay} from '@stagistic/ui';
+import {AppLayout} from '@stagistic/ui';
 import {
     useCallback,
     useMemo,
@@ -13,6 +13,7 @@ import {
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {stagisticFileRequest} from '../../shared/downloadStagistic';
+import {PreparingPackageOverlay} from '../../shared/PreparingPackageOverlay';
 import {useSaveFile, useSaveWording} from '../../shared/saveFile';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {ExportControlPanel} from './export/ExportControlPanel';
@@ -145,7 +146,7 @@ export const ScriptExportRoute = () => {
                 ) : null
             }
         >
-            {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
+            {isPreparingPackage ? <PreparingPackageOverlay /> : null}
             {script ? (
                 <ExportProvider
                     script={script}

@@ -13,6 +13,7 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
+import {PreparingPackageOverlay} from '../../shared/PreparingPackageOverlay';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {useCommentsEditorBridge, useCommentsPanelState} from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
@@ -226,7 +227,7 @@ export const ScriptEditorRoute = () => {
                     )
                 }
             >
-                {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
+                {isPreparingPackage ? <PreparingPackageOverlay /> : null}
                 {storageError ? (
                     <div
                         role="alert"

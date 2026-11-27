@@ -6,7 +6,7 @@
 
 The source geometry is the existing two-path Stagistic mark from
 `apps/web/public/favicon.svg`, unchanged. Its warm graphite `#3d2a1d` matches
-the favicon. The background is solid white, as requested. The Apple symbol occupies 68%
+the favicon. The background is solid white, as requested. The Apple symbol occupies 78%
 of a 1024 px square canvas, centered from the favicon's viewBox.
 
 The macOS source is a real Icon Composer document:

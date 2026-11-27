@@ -98,6 +98,14 @@ and appearances/materials in `icon.json`. Generated icons are checked in so
 ordinary builds do not regenerate them. See
 [icon design and validation](../../docs/testing/desktop-icons.md).
 
+The DMG window (`bundle.macOS.dmg` in `src-tauri/tauri.macos.conf.json`) uses
+`src-tauri/icons/dmg-background.tiff`, a 660 × 400 px background with 1× and 2×
+images. Its source is `scripts/dmg/background.html`: render it at 1× and 2× and
+combine with `tiffutil -cathidpicheck`. The Tauri bundler lays the window out
+only when `TAURI_BUNDLER_DMG_IGNORE_CI=true`; the release script sets it on
+GitHub Actions. Locally it needs Finder automation permission for the Terminal,
+so set it yourself to check the layout.
+
 ## Release build
 
 ```sh

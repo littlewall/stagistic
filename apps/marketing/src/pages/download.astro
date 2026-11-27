@@ -1,6 +1,5 @@
 ---
 import {
-    DOCS_URL,
     FEEDBACK_URL,
     MAC_DOWNLOAD_PATH,
     MAC_REQUIREMENTS,
@@ -98,32 +97,12 @@ const comparison = [
                 </table>
             </section>
 
-            <section class={styles.section} aria-labelledby="install">
-                <h2 class={styles.sectionTitle} id="install">Install the Mac app</h2>
-                <ol class={styles.steps}>
-                    <li>Download the app and open the file you get (a DMG).</li>
-                    <li>Drag Stagistic Editor to the Applications folder.</li>
-                    <li>Open Stagistic Editor from Applications.</li>
-                </ol>
-                <p class={styles.text}>That is all. From then on every Release installs itself.</p>
-            </section>
-
             <section class={styles.section} aria-labelledby="move">
-                <h2 class={styles.sectionTitle} id="move">Moving scripts from the Web app</h2>
-                <p class={styles.text}>Scripts in your browser stay there. To use one in the Mac app, move it one script at a time:</p>
-                <ol class={styles.steps}>
-                    <li>In the Web app, export the script as a <code>.stepkg</code> file.</li>
-                    <li>In the Mac app, import that file.</li>
-                    <li>Repeat for each script you want to move.</li>
-                </ol>
-            </section>
-
-            <section class={styles.section} aria-labelledby="more">
-                <h2 class={styles.sectionTitle} id="more">More</h2>
-                <ul class={styles.links}>
-                    <li><a href="/changelog" class={s.textLink}>Changelog</a> lists what is new in each Release.</li>
-                    <li><a href={DOCS_URL} class={s.textLink}>Docs</a> explain installing, backups and moving scripts in detail.</li>
-                </ul>
+                <h2 class={styles.subsectionTitle} id="move">Moving scripts from the Web app</h2>
+                <p class={styles.text}>
+                    Scripts in your browser stay there. To use one in the Mac app, export it in the Web app as a <code>.stepkg</code> file and import
+                    that file in the Mac app. Move each script you want this way, one at a time.
+                </p>
             </section>
         </div>
     </main>

@@ -14,9 +14,10 @@ import {
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
+import {waitForScriptInList} from '../../../shared/waitForScriptInList';
 import {getScriptBasePath, useScriptAccess} from '../workspace/ScriptAccessContext';
 import {SCRIPT_WORKSPACE_RELOAD_STATE} from '../workspace/scriptWorkspaceReload';
-import {errorMessage, waitForScriptInList} from './scriptStateItems';
+import {errorMessage} from './scriptStateItems';
 
 /**
  * Stored-state operations on the current script's repository, with toasts and

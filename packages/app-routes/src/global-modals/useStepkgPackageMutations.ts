@@ -8,6 +8,7 @@ import {
 import {useCallback} from 'react';
 
 import {useSaveFile} from '../shared/saveFile';
+import {waitForScriptInList} from '../shared/waitForScriptInList';
 import type {UseGlobalModalMutationsArgs} from './useGlobalModalMutations';
 
 const PEEK_ERROR_MESSAGES: Record<string, string> = {
@@ -73,6 +74,8 @@ export const useStepkgPackageMutations = ({
                     throw new Error(PACKAGE_SUBMIT_ERROR);
                 }
 
+                // Otherwise the editor route, not knowing the new id yet, redirects to another script.
+                await waitForScriptInList(repository, result.scriptId);
                 setIsImportOpen(false);
                 setPrefilledImport(null);
                 void navigate(`/script/${result.scriptId}/editor`);

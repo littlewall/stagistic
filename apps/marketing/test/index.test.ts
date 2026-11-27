@@ -64,8 +64,8 @@ describe('marketing website', () => {
         const images = homeHtml.match(/data-feature-image/g) ?? [];
         const videos = homeHtml.match(/data-feature-video/g) ?? [];
 
-        expect(homeHtml.match(/data-feature-media/g) ?? []).toHaveLength(6);
-        expect(images.length + videos.length).toBe(6);
+        expect(homeHtml.match(/data-feature-media/g) ?? []).toHaveLength(5);
+        expect(images.length + videos.length).toBe(5);
         expect(homeHtml.match(/data-feature-image[^>]+alt="[^"]+"/g) ?? []).toHaveLength(images.length);
         expect(homeHtml.match(/data-feature-video[^>]+title="[^"]+"/g) ?? []).toHaveLength(videos.length);
     });
@@ -80,7 +80,7 @@ describe('marketing website', () => {
         const normalize = (html: string) => html.replace(/\s+/g, ' ');
 
         expect(normalize(homeHtml)).toContain(
-            'Write plays and musicals with acts, scenes, characters, dialogue, lyrics, and music cues. Not shots and cuts.',
+            'Write plays and musicals in an editor made for them. No more bending a word processor or screenwriting software to fit the stage.',
         );
         expect(normalize(playwritingHtml)).toContain(
             'Acts and scenes are not camera setups. Stagistic Editor keeps your play structured around characters, dialogue, and stage directions without making theatre conform to screenplay logic.',
@@ -125,15 +125,15 @@ describe('marketing website', () => {
         expect(footer).toContain('href="/editor/syntax"');
         expect(primaryNav).not.toContain('href="#alpha"');
         expect(homeHeader).not.toContain('Early alpha');
-        expect(homeHeader).toContain('<a href="https://editor.stagistic.app" class="_navCta_');
-        expect(homeHeader).toContain('>Try editor</a>');
+        expect(homeHeader).toContain('<a href="/download" class="_navCta_');
+        expect(homeHeader).toContain('>Get free editor</a>');
     });
 
     it('puts the trust line and the actions in the hero', () => {
         const heroSection = homeHtml.match(/<!-- Hero --><section\b[\s\S]*?<\/section>/)?.[0] ?? '';
 
         expect(heroSection).toContain('>Download</a>');
-        expect(heroSection.replace(/\s+/g, ' ')).toContain('Free forever · No account · Scripts stay on your computer · Open source');
+        expect(heroSection.replace(/\s+/g, ' ')).toContain('Free forever · No account · All data stays on your computer · Open source');
     });
 
     it('orders the home page by the approved message', () => {
@@ -141,11 +141,14 @@ describe('marketing website', () => {
             '<h1',
             '>Try in browser</a>',
             'The screenplay problem.',
-            '>Write</h3>',
-            '>Musicals</h3>',
-            '>Plan</h3>',
-            '>Format and export</h3>',
-            '>Keep</h3>',
+            '>A playwriting structure</h3>',
+            '>Characters that come from your script</h3>',
+            '>Lyrics, songs and scores</h3>',
+            '>Templates and a writing flow you can configure</h3>',
+            '>Print-ready PDF, scores included</h3>',
+            '>The Board</h3>',
+            '>Drafts and Versions</h3>',
+            '>Read-only access for AI apps</h3>',
             'Common<br>questions.',
             'Stagistic Editor is free.<br>Forever.',
         ];
@@ -156,10 +159,15 @@ describe('marketing website', () => {
         expect(homeHtml.match(/<div\b[^>]*data-system-cta/g) ?? []).toHaveLength(1);
     });
 
-    it('keeps the feature groups text-only where there is no media yet', () => {
-        const textOnly = homeHtml.match(/<article\b[^>]*data-text-only[^>]*>[\s\S]*?<\/article>/g) ?? [];
+    it('lists the smaller features as three text-only items below the main ones', () => {
+        const minor = homeHtml.match(/<div\b[^>]*data-minor-features[\s\S]*?<\/div>/)?.[0] ?? '';
 
-        expect(textOnly.length).toBeGreaterThan(0);
+        expect(minor.match(/<article\b/g) ?? []).toHaveLength(3);
+        expect(minor).not.toMatch(/<(?:img|video)\b/);
+    });
+
+    it('keeps features text-only where there is no media yet', () => {
+        const textOnly = homeHtml.match(/<article\b[^>]*data-text-only[^>]*>[\s\S]*?<\/article>/g) ?? [];
 
         for (const article of textOnly) {
             expect(article).not.toContain('data-feature-media');
@@ -172,10 +180,15 @@ describe('marketing website', () => {
         expect(faq.match(/<details\b/g) ?? []).toHaveLength(6);
     });
 
-    it('keeps MCP, Claude and Windows off the home page', () => {
+    it('mentions MCP only in its short read-only feature, never in the hero, and keeps Claude and Windows off the home page', () => {
         const visibleText = homeHtml.replace(/<script\b[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ');
+        const heroSection = homeHtml.match(/<!-- Hero --><section\b[\s\S]*?<\/section>/)?.[0] ?? '';
+        const mcpFeature = homeHtml.match(/<article\b[^>]*>(?:(?!<\/article>)[\s\S])*Read-only access for AI apps[\s\S]*?<\/article>/)?.[0] ?? '';
 
-        expect(visibleText).not.toMatch(/\bMCP\b|Claude|Windows/i);
+        expect(visibleText).not.toMatch(/Claude|Windows/i);
+        expect(heroSection).not.toMatch(/\bMCP\b/);
+        expect(mcpFeature).toContain('never change them');
+        expect(visibleText.replace(mcpFeature.replace(/<[^>]+>/g, ' '), '')).not.toMatch(/\bMCP\b/);
     });
 
     it('links feature descriptions to their specific editor guides', () => {
@@ -241,7 +254,7 @@ describe('marketing website', () => {
         expect(main).toContain('href="https://docs.stagistic.com/syntax/"');
         expect(main).not.toMatch(/<h2\b|<pre\b|<aside\b/);
         expect(normalizedSyntax).toContain('Stagistic Syntax is an open, plain-text format for theatrical plays and musicals.');
-        expect(normalizedOpenSource).toContain('runs in your browser or as a Mac app, works without an account and stores scripts locally by default.');
+        expect(normalizedOpenSource).toContain('runs as a Mac app or in your browser, works without an account and stores scripts locally by default.');
     });
 
     it('exposes the non-PWA favicon set and browser theme on every page', () => {

@@ -10,11 +10,11 @@ export const landingFaqs = [
     },
     {
         q: 'Where are my scripts stored?',
-        a: 'On your computer: in your browser in the Web app, on your Mac in the Mac app. Scripts are never uploaded. You can export a script as a file at any time and import it again, and the Mac app also makes automatic backups.',
+        a: 'On your computer: on your Mac in the Mac app, in your browser in the Web app. Scripts are never uploaded. You can export a script as a file at any time and import it again, and the Mac app also makes automatic backups.',
     },
     {
-        q: 'Can I keep earlier drafts and versions of a play?',
-        a: 'Yes. Save a numbered Script Draft before a rewrite, or a named Script Version for a reading, festival or tour. Revisit what you saved, export it, restore it to your current script or use it to create a separate editable script. Drafts and versions are saved when you choose; automatic saving keeps your current work up to date.',
+        q: 'Is there a limit to how many scripts I can create?',
+        a: 'No. Write as many scripts as you like, and save as many Drafts and Versions of each as you need. Stagistic Editor sets no limit of its own.',
     },
     {
         q: 'How is it different from screenwriting software?',

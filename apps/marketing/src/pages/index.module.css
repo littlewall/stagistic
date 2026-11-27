@@ -283,23 +283,6 @@
     margin-bottom: 2rem;
 }
 
-.featureGroup {
-    padding-top: 3rem;
-    border-top: 1px solid var(--color-border);
-
-    &:first-of-type {
-        border-top: 0;
-    }
-}
-
-.featureGroupTitle {
-    font-size: clamp(1.5rem, 2.6vw, 2rem);
-    font-weight: 600;
-    line-height: 1.1;
-    color: var(--color-text);
-    letter-spacing: -.03em;
-}
-
 .featureItem {
     display: grid;
     grid-template-columns: minmax(14rem, .82fr) minmax(26rem, 1.18fr);
@@ -311,6 +294,40 @@
 .featureItem[data-text-only] {
     grid-template-columns: minmax(0, 1fr);
     padding: 2rem 0;
+}
+
+/* Smaller features below the main ones: three text-only columns. */
+.minorFeatures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem;
+    margin-top: 2rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.minorFeatureLabel {
+    margin-bottom: .625rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text);
+    letter-spacing: -.01em;
+}
+
+.minorFeatureDesc {
+    font-size: .9375rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+}
+
+.minorFeatureLink {
+    display: inline-block;
+    margin-top: .75rem;
+    font-size: .9375rem;
+    font-weight: 500;
+    color: var(--color-text);
+    text-underline-offset: 3px;
 }
 
 .featureCopy {
@@ -335,6 +352,12 @@
 
 .featureLinkWrap {
     margin-top: 1.5rem;
+
+    /* A quieter, smaller link button than the page's main actions. */
+    & .btnOutline {
+        padding: .4375rem 1rem;
+        font-size: .8125rem;
+    }
 }
 
 .featureMedia {
@@ -655,6 +678,11 @@
 }
 
 @media (max-width: 53.75em) {
+    .minorFeatures {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2rem;
+    }
+
     .hero {
         min-height: 0;
         padding-top: 5.5rem;

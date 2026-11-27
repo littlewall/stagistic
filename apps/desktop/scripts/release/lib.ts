@@ -212,6 +212,11 @@ export const signingEnv = (env: Readonly<Record<string, string | undefined>>, si
     const base = {
         ...env,
         CI: 'true',
+        /*
+         * CI=true makes the Tauri bundler skip the Finder script that lays out the DMG window (background, icon positions).
+         * GitHub's macOS runners can run it; a local Terminal needs Finder automation permission, so locally it stays opt-in.
+         */
+        TAURI_BUNDLER_DMG_IGNORE_CI: env.TAURI_BUNDLER_DMG_IGNORE_CI ?? (env.GITHUB_ACTIONS === 'true' ? 'true' : undefined),
         // The Tauri CLI reads only TAURI_SIGNING_PRIVATE_KEY (a path or the key itself), not *_PATH.
         TAURI_SIGNING_PRIVATE_KEY: env.TAURI_SIGNING_PRIVATE_KEY || env.TAURI_SIGNING_PRIVATE_KEY_PATH || undefined,
     };
