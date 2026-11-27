@@ -32,7 +32,7 @@ const [
     width,
     height,
 ] = viewBox;
-const scale = (1024 * 0.68) / Math.max(width, height);
+const scale = (1024 * 0.78) / Math.max(width, height);
 const paths = shapes.map(shape => `<path d="${shape}"/>`).join('\n');
 const transform = `translate(512 512) scale(${scale}) translate(${-x - width / 2} ${-y - height / 2})`;
 const mcpScale = (1024 * 0.8) / Math.max(width, height);

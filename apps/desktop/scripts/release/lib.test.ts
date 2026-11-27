@@ -139,6 +139,14 @@ describe('release script', () => {
         expect(signingEnv(apple, signed)).toMatchObject({STAGISTIC_MCP_SIGNING_IDENTITY: apple.APPLE_SIGNING_IDENTITY, CI: 'true'});
     });
 
+    it('lays out the DMG window on GitHub Actions only, unless set explicitly', () => {
+        const signing = selectSigning({});
+
+        expect(signingEnv({GITHUB_ACTIONS: 'true'}, signing).TAURI_BUNDLER_DMG_IGNORE_CI).toBe('true');
+        expect(signingEnv({}, signing).TAURI_BUNDLER_DMG_IGNORE_CI).toBeUndefined();
+        expect(signingEnv({TAURI_BUNDLER_DMG_IGNORE_CI: 'true'}, signing).TAURI_BUNDLER_DMG_IGNORE_CI).toBe('true');
+    });
+
     it('passes the updater key path to the Tauri CLI as TAURI_SIGNING_PRIVATE_KEY', () => {
         expect(signingEnv({TAURI_SIGNING_PRIVATE_KEY_PATH: '/k.key'}, {mode: 'ad-hoc'}).TAURI_SIGNING_PRIVATE_KEY).toBe('/k.key');
         expect(signingEnv({TAURI_SIGNING_PRIVATE_KEY: 'inline', TAURI_SIGNING_PRIVATE_KEY_PATH: '/k.key'}, {mode: 'ad-hoc'}).TAURI_SIGNING_PRIVATE_KEY).toBe('inline');

@@ -1,5 +1,6 @@
 ---
 import {getPublishedArticles} from '../data/articles';
+import {DOWNLOAD_PATH} from '../data/site';
 import styles from './Header.module.css';
 import HeaderEditorMenu from './HeaderEditorMenu.astro';
 
@@ -37,6 +38,6 @@ const hasPublishedArticles = variant === 'full' && (await getPublishedArticles()
                 </nav>
             )}
 
-        <a href="https://editor.stagistic.app" class={styles.navCta}>Try editor</a>
+        <a href={DOWNLOAD_PATH} class={styles.navCta}>Get free editor</a>
     </div>
 </header>

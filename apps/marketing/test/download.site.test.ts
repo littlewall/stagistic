@@ -73,12 +73,15 @@ describe('/download', () => {
         expect(table).not.toContain('Updates');
     });
 
-    it('explains the install steps and moving scripts from the Web app', () => {
+    it('explains moving scripts from the Web app in prose, without install steps or a More section', () => {
         const text = normalize(html);
+        const move = html.match(/<section\b[^>]*aria-labelledby="move"[\s\S]*?<\/section>/)?.[0] ?? '';
 
-        expect(text).toContain('Drag Stagistic Editor to the Applications folder.');
         expect(text).toContain('<code>.stepkg</code>');
-        expect(text).toContain('one script at a time');
+        expect(text).toContain('one at a time');
+        expect(move).not.toMatch(/<(?:ol|ul|li)\b/);
+        expect(html).not.toContain('id="install"');
+        expect(html).not.toContain('id="more"');
     });
 
     it('leaves what the Mac app sends to the docs', () => {

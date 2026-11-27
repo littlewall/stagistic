@@ -4,7 +4,7 @@ import CreatorNote from '../components/CreatorNote.astro';
 import ScrollReveal from '../components/ScrollReveal.astro';
 import SystemCta from '../components/SystemCta.astro';
 import {landingFaqs} from '../data/landingFaqs';
-import {landingFeatureGroups} from '../data/landingFeatures';
+import {landingFeatures, landingMinorFeatures} from '../data/landingFeatures';
 import {DOWNLOAD_PATH, WEB_APP_URL} from '../data/site';
 import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
@@ -12,7 +12,7 @@ import s from './index.module.css';
 
 <Layout
     title="Stagistic Editor - Script editor for theatre and musicals"
-    description="Stagistic Editor is a free script editor for theatre and musicals. No account, scripts stay on your computer, open source. Use it in your browser or download the Mac app."
+    description="Stagistic Editor is a free script editor for theatre and musicals. No account, all data stays on your computer, open source. Download the Mac app or use it in your browser."
     canonical={new URL('/', Astro.site).href.replace(/\/$/, '')}
     softwareApplication
 >
@@ -24,7 +24,7 @@ import s from './index.module.css';
                     <h1 class={clsx(s.heroTitle, s.fadeUp)}>A script editor for theatre and musicals.</h1>
 
                     <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                        Write plays and musicals with acts, scenes, characters, dialogue, lyrics, and music cues. Not shots and cuts.
+                        Write plays and musicals in an editor made for them. No more bending a word processor or screenwriting software to fit the stage.
                     </p>
 
                     <div class={clsx(s.heroActions, s.fadeUp, s.fadeUpD2)}>
@@ -32,7 +32,7 @@ import s from './index.module.css';
                             <a href={DOWNLOAD_PATH} class={s.btnPrimary}>Download</a>
                             <a href={WEB_APP_URL} class={clsx(s.btnOutline, s.heroTryInBrowser)}>Try in browser</a>
                         </div>
-                        <p class={s.heroMeta}>Free forever · No account · Scripts stay on your computer · Open source</p>
+                        <p class={s.heroMeta}>Free forever · No account · All data stays on your computer · Open source</p>
                     </div>
                 </div>
 
@@ -40,8 +40,8 @@ import s from './index.module.css';
                     <img
                         class={s.heroImage}
                         src="/images/hero-mac-app.webp"
-                        width="2000"
-                        height="1250"
+                        width="2880"
+                        height="1800"
                         alt="Stagistic Editor Mac app with the structure panel and a musical number with lyrics"
                         fetchpriority="high"
                     />
@@ -69,61 +69,69 @@ import s from './index.module.css';
         <section class={s.features} id="features">
             <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
                 <h2 class={s.featuresTitle}>Everything a play or musical needs, in one place.</h2>
-                {landingFeatureGroups.map(group => (
-                    <div class={s.featureGroup}>
-                        <h3 class={s.featureGroupTitle}>{group.title}</h3>
-                        <div class={s.featuresList}>
-                            {group.features.map(f => (
-                                <article class={s.featureItem} data-text-only={f.videoSrc || f.imageSrc ? undefined : ''}>
-                                    <div class={s.featureCopy}>
-                                        <h4 class={s.featureLabel}>{f.label}</h4>
-                                        <p class={s.featureDesc}>{f.description}</p>
-                                        {f.href && (
-                                            <div class={s.featureLinkWrap}>
-                                                <a href={f.href} class={s.btnOutline}>
-                                                    {f.linkLabel} &rarr;
-                                                </a>
-                                            </div>
-                                        )}
+                <div class={s.featuresList}>
+                    {landingFeatures.map(f => (
+                        <article class={s.featureItem} data-text-only={f.videoSrc || f.imageSrc ? undefined : ''}>
+                            <div class={s.featureCopy}>
+                                <h3 class={s.featureLabel}>{f.label}</h3>
+                                <p class={s.featureDesc}>{f.description}</p>
+                                {f.href && (
+                                    <div class={s.featureLinkWrap}>
+                                        <a href={f.href} class={s.btnOutline}>
+                                            {f.linkLabel} &rarr;
+                                        </a>
                                     </div>
-                                    {(f.videoSrc || f.imageSrc) && (
-                                        <div class={s.featureMedia} data-feature-media data-shape={f.shape}>
-                                            {f.videoSrc ? (
-                                                <div class={s.featureMediaFrame}>
-                                                    <video
-                                                        data-feature-video
-                                                        src={f.videoSrc}
-                                                        title={f.videoTitle}
-                                                        class={s.featureVideo}
-                                                        data-fit={f.videoFit}
-                                                        autoplay
-                                                        muted
-                                                        loop
-                                                        playsinline
-                                                    >
-                                                        <source src={f.videoSrc} type="video/mp4" />
-                                                    </video>
-                                                </div>
-                                            ) : (
-                                                <div class={s.featureMediaFrame}>
-                                                    <img
-                                                        data-feature-image
-                                                        src={f.imageSrc}
-                                                        alt={f.imageAlt}
-                                                        class={s.featureImage}
-                                                        data-fit={f.imageFit}
-                                                        loading="lazy"
-                                                        decoding="async"
-                                                    />
-                                                </div>
-                                            )}
+                                )}
+                            </div>
+                            {(f.videoSrc || f.imageSrc) && (
+                                <div class={s.featureMedia} data-feature-media data-shape={f.shape}>
+                                    {f.videoSrc ? (
+                                        <div class={s.featureMediaFrame}>
+                                            <video
+                                                data-feature-video
+                                                src={f.videoSrc}
+                                                title={f.videoTitle}
+                                                class={s.featureVideo}
+                                                data-fit={f.videoFit}
+                                                autoplay
+                                                muted
+                                                loop
+                                                playsinline
+                                            >
+                                                <source src={f.videoSrc} type="video/mp4" />
+                                            </video>
+                                        </div>
+                                    ) : (
+                                        <div class={s.featureMediaFrame}>
+                                            <img
+                                                data-feature-image
+                                                src={f.imageSrc}
+                                                alt={f.imageAlt}
+                                                class={s.featureImage}
+                                                data-fit={f.imageFit}
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
                                         </div>
                                     )}
-                                </article>
-                            ))}
-                        </div>
-                    </div>
-                ))}
+                                </div>
+                            )}
+                        </article>
+                    ))}
+                </div>
+                <div class={s.minorFeatures} data-minor-features>
+                    {landingMinorFeatures.map(f => (
+                        <article class={s.minorFeature}>
+                            <h3 class={s.minorFeatureLabel}>{f.label}</h3>
+                            <p class={s.minorFeatureDesc}>{f.description}</p>
+                            {f.href && (
+                                <a href={f.href} class={s.minorFeatureLink}>
+                                    {f.linkLabel} &rarr;
+                                </a>
+                            )}
+                        </article>
+                    ))}
+                </div>
             </div>
         </section>
 
@@ -159,7 +167,7 @@ import s from './index.module.css';
                 <div>
                     <h2 class={s.previewTitle}>Stagistic Editor is free.<br>Forever.</h2>
                     <p class={s.previewText}>
-                        Stagistic Editor is free to use in your browser or on your Mac, with no account or paywall. Every current and future Editor feature will remain free.
+                        Stagistic Editor is free to use on your Mac or in your browser, with no account or paywall. Every current and future Editor feature will remain free.
                     </p>
                 </div>
                 <div class={s.previewCard}>
@@ -186,7 +194,7 @@ import s from './index.module.css';
                                     <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </span>
-                            <span>Scripts stay on your computer</span>
+                            <span>All data stays on your computer</span>
                         </div>
                     </div>
                     <div class={s.previewCtas}>
