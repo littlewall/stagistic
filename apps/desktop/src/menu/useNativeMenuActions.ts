@@ -1,42 +1,69 @@
-import {useGlobalModals} from '@stagistic/app-routes';
+import {
+    useGlobalModals,
+    useRunScriptMenuCommand,
+    useWhatsNew,
+} from '@stagistic/app-routes';
 import {listen} from '@tauri-apps/api/event';
-import {useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useEffect, useMemo} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 
-// Native menu items emit `menu-action` from the Rust side (see src-tauri/src/main.rs).
-const MENU_EVENT = 'menu-action';
+import {showBackupsFolder} from '../db/backupsFolder';
+import {useDesktopUpdates} from '../lifecycle/updatesContext';
+import {openExternalUrl} from '../links/externalLinks';
+import {openThirdPartyLicenses} from '../links/licenses';
+import {MENU_EVENT} from './menuActions';
+import {isInScriptPath, reportMenuContext} from './menuContext';
+import {createMenuHandlers, dispatchMenuAction} from './menuHandlers';
+import {runHistoryCommand} from './undoRedo';
 
-type MenuAction = 'open-script' | 'new-script' | 'import-script';
-
-// Bridges the native macOS menu to the shared app: File ▸ New/Import open the
-// global modals, File ▸ Open returns to the script list.
+/*
+ * Bridges the native macOS menu (see src-tauri/src/menu.rs) to the shared app and
+ * tells Rust whether a script is open so the Script menu enables only there.
+ */
 export const useNativeMenuActions = (): void => {
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {
+        openNewScript,
+        openImportScript,
+        openAppSettings,
+    } = useGlobalModals();
+    const {open: openWhatsNew} = useWhatsNew();
+    const {checkForUpdatesWithDialog} = useDesktopUpdates();
+    const runScriptCommand = useRunScriptMenuCommand();
     const navigate = useNavigate();
+    const {pathname} = useLocation();
+    const inScript = isInScriptPath(pathname);
+
+    const handlers = useMemo(() => createMenuHandlers({
+        checkForUpdates: checkForUpdatesWithDialog,
+        openSettings: () => openAppSettings(),
+        openNewScript: () => openNewScript(),
+        openImportScript: () => openImportScript(),
+        openScriptLibrary: () => navigate('/'),
+        runHistory: runHistoryCommand,
+        runScriptCommand,
+        openWhatsNew,
+        openExternal: openExternalUrl,
+        showBackupsFolder,
+        openLicenses: openThirdPartyLicenses,
+    }), [
+        checkForUpdatesWithDialog,
+        openAppSettings,
+        openNewScript,
+        openImportScript,
+        navigate,
+        runScriptCommand,
+        openWhatsNew,
+    ]);
 
     useEffect(() => {
-        const unlisten = listen<MenuAction>(MENU_EVENT, event => {
-            switch (event.payload) {
-                case 'new-script':
-                    openNewScript();
-                    break;
-                case 'import-script':
-                    openImportScript();
-                    break;
-                case 'open-script':
-                    void navigate('/');
-                    break;
-                default:
-                    break;
-            }
-        });
+        const unlisten = listen<unknown>(MENU_EVENT, event => dispatchMenuAction(event.payload, handlers));
 
         return () => {
             void unlisten.then(dispose => dispose());
         };
-    }, [
-        openNewScript,
-        openImportScript,
-        navigate,
-    ]);
+    }, [handlers]);
+
+    useEffect(() => {
+        void reportMenuContext(inScript).catch(() => undefined);
+    }, [inScript]);
 };

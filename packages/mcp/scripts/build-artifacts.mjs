@@ -44,25 +44,16 @@ if (development) {
     ]);
     await copyFile(path.join(root, 'target/debug/stagistic-mcp'), executable);
 } else {
-    for (const target of ['aarch64-apple-darwin', 'x86_64-apple-darwin']) {
-        run('cargo', [
-            'build',
-            '--release',
-            '--locked',
-            '-p',
-            'stagistic-mcp',
-            '--target',
-            target,
-        ]);
-    }
-
-    run('/usr/bin/lipo', [
-        '-create',
-        'target/aarch64-apple-darwin/release/stagistic-mcp',
-        'target/x86_64-apple-darwin/release/stagistic-mcp',
-        '-output',
-        executable,
+    run('cargo', [
+        'build',
+        '--release',
+        '--locked',
+        '-p',
+        'stagistic-mcp',
+        '--target',
+        'aarch64-apple-darwin',
     ]);
+    await copyFile(path.join(root, 'target/aarch64-apple-darwin/release/stagistic-mcp'), executable);
 }
 
 run('/usr/bin/codesign', [

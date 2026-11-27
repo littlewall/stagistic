@@ -1,3 +1,16 @@
+/*
+ * A modal opened inside another modal (a confirmation inside Settings) is a DOM
+ * descendant and would inherit the outer modal's layout variables, such as a
+ * zero panel padding. Reset them with zero specificity, so a nested modal's own
+ * class still sets them.
+ */
+:where(.dialog .dialog) {
+    --modal-dialog-padding: initial;
+    --modal-panel-gap: initial;
+    --modal-panel-padding: initial;
+    --modal-panel-width: initial;
+}
+
 .dialog {
     position: fixed;
     inset: 0;

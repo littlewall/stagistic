@@ -32,4 +32,22 @@ describe('browserStorageSettingsSection', () => {
         expect(host.textContent).toContain('Back up your work regularly');
         expect(host.querySelector('dialog')).toBeNull();
     });
+
+    it('quietly links to the Mac app download', async () => {
+        const host = document.createElement('div');
+
+        document.body.append(host);
+        root = createRoot(host);
+        root.render(browserStorageSettingsSection.content);
+
+        await expect.poll(() => host.querySelector('a')).not.toBeNull();
+
+        const link = host.querySelector('a');
+
+        expect(host.textContent).toContain('Want automatic backups?');
+        expect(link?.textContent).toBe('Get the Mac app');
+        expect(link?.getAttribute('href')).toBe('https://stagistic.com/download');
+        expect(link?.getAttribute('target')).toBe('_blank');
+        expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
+    });
 });

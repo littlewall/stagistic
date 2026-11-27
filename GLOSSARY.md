@@ -40,6 +40,24 @@ _Avoid_: Commit message, patch note
 A Release Note important enough to be announced in the app.
 _Avoid_: Headline, featured note
 
+**Manual update notice**:
+A message from Stagistic asking writers on an older Release of the Mac app to install the current Release by hand, used when the app cannot update itself.
+_Avoid_: Kill switch, backdoor, alert
+
+## Surfaces
+
+**Surface**:
+One way to run Stagistic Editor: the Web app or the Mac app.
+_Avoid_: Platform, client
+
+**Web app**:
+Stagistic Editor running in a browser, with scripts stored in that browser.
+_Avoid_: Web editor, browser version
+
+**Mac app**:
+Stagistic Editor installed on a Mac, with scripts stored on that Mac.
+_Avoid_: Desktop version, native app
+
 ## Board
 
 **Lens**:

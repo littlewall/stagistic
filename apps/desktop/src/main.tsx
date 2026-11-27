@@ -1,3 +1,5 @@
+// Must run before any module that parses with zod.
+import './zodConfig';
 import '@stagistic/ui/styles/base.css';
 import './index.css';
 
@@ -8,11 +10,21 @@ import ReactDOM from 'react-dom/client';
 import {HashRouter} from 'react-router-dom';
 
 import App from './App';
+import {installExternalLinkHandler} from './links/externalLinks';
+import {installFrontendErrorLog, sendToLog} from './logging/frontendLog';
 import {applyPlatformClass} from './platform';
 
+// Frontend errors reach the same log file as Rust errors.
+installFrontendErrorLog({
+    console,
+    target: window,
+    send: sendToLog,
+});
 bootstrapAppTheme();
-// Reserves the header's traffic-light space and enables its drag region on macOS.
+// Marks the platform so the header keeps clear of the macOS traffic lights.
 applyPlatformClass();
+// Links to other sites open in the default browser, never inside the app window.
+installExternalLinkHandler(document);
 
 /*
  * HashRouter keeps routing self-contained under Tauri's custom protocol, so deep

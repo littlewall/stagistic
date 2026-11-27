@@ -1,34 +1,52 @@
+/* Window controls a desktop shell draws over the header (macOS traffic lights,
+   Windows caption buttons). The shell sets on :root how far from each window
+   edge the header's controls must stay; the web leaves both at 0.
+     --window-controls-start: leading edge (macOS)
+     --window-controls-end: trailing edge (Windows)
+   The leading and trailing controls move in only by what the content edge
+   lacks: a wide window whose capped header content already clears the
+   controls gets no extra inset. The insets sit on the outer columns, so the
+   symmetric `1fr auto 1fr` grid keeps the middle column on the window centre. */
 .header {
-    --traffic-light-space: 76px;
-
     position: relative;
+    container-type: inline-size;
     height: var(--shell-height);
     background: var(--color-surface);
     border-bottom: 1px solid var(--layer-panel-edge);
 
     & .inner {
+        --header-max-width: var(--layout-page-max-width);
+        --header-padding: var(--space-lg);
+        /* Distance of the content edge from the window edge. */
+        --header-content-edge: calc(max(0px, (100cqw - var(--header-max-width)) / 2) + var(--header-padding));
+        /* What the content edge lacks to clear the window controls on each side. */
+        --header-controls-start-inset: max(0px, var(--window-controls-start, 0px) - var(--header-content-edge));
+        --header-controls-end-inset: max(0px, var(--window-controls-end, 0px) - var(--header-content-edge));
+
         position: relative;
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
-        max-width: 1400px;
+        max-width: var(--header-max-width);
         height: 100%;
         margin: 0 auto;
-        padding: 0 var(--space-lg);
+        padding: 0 var(--header-padding);
 
         &.full {
-            max-width: none;
+            --header-max-width: 100cqw;
         }
 
         /* The Board column: as wide as the Board layout's column, with the same inset,
          * so the header's content edges align with the toolbar's and the canvas's. */
         &.board {
-            max-width: var(--layout-board-max-width);
-            padding-inline: var(--space-3xl);
+            --header-max-width: var(--layout-board-max-width);
+            --header-padding: var(--space-3xl);
         }
 
+        /* PageContainer's column: its padding less the ghost icon button's own
+         * inset, so the first and last icons line up with the page content. */
         &.pageInset {
-            padding-inline: calc(var(--space-3xl) + var(--space-md));
+            --header-padding: calc(var(--layout-page-padding) - (var(--control-height-md) - var(--icon-size-md)) / 2);
         }
 
         & .leftControls {
@@ -41,10 +59,7 @@
             justify-content: flex-start;
             width: 100%;
             min-width: 0;
-
-            /* macOS traffic-light clearance is applied here (not on `.inner`) so
-               the symmetric grid stays centred; the variable is set below. */
-            padding-left: var(--tl-lead-pad, 0);
+            padding-inline-start: var(--header-controls-start-inset);
         }
 
         & .scriptControls {
@@ -67,6 +82,7 @@
             justify-content: flex-end;
             width: 100%;
             min-width: 0;
+            padding-inline-end: var(--header-controls-end-inset);
         }
 
         & .actionGroup {
@@ -87,30 +103,6 @@
         z-index: 0;
         inset: 0;
     }
-}
-
-/* Reserve space for the macOS traffic lights by insetting the leading controls
-   (via --tl-lead-pad, consumed by .leftControls) rather than padding .inner.
-   Padding .inner would shift the symmetric `1fr auto 1fr` grid and push the
-   centred middle column (view switcher) off the window centre; insetting only
-   the leading controls keeps the grid symmetric so the view switcher stays
-   centred just like on the web. `- var(--space-lg)` accounts for .inner's base
-   padding so the leading control lands at the intended offset. */
-:global(.platform-macos) .inner {
-    --tl-lead-pad: calc(var(--space-xl) + var(--traffic-light-space) - var(--space-lg));
-}
-
-/* The page-inset layout has no centred controls, so simply shift the whole
-   content clear of the traffic lights and skip the leading-control inset. */
-:global(.platform-macos) .inner.pageInset {
-    --tl-lead-pad: 0;
-
-    padding-left: calc(var(--space-xl) + var(--traffic-light-space));
-}
-
-/* The Board column insets its content by the Board's own padding, not the default one. */
-:global(.platform-macos) .inner.board {
-    --tl-lead-pad: calc(var(--space-xl) + var(--traffic-light-space) - var(--space-3xl));
 }
 
 .menuTrigger {

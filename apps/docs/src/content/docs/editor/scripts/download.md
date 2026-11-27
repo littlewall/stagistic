@@ -5,6 +5,10 @@ description: Keep a portable package for backup or transfer, or download the scr
 
 Download a copy of `The last door` before transferring it to another device or keeping a snapshot of the current draft.
 
+## Download in the Web app, save in the Mac app
+
+In the Web app, these actions download a file to your browser's download folder. In the [Mac app](/mac-app/) the same actions say **Save**: **Save script** and **Save PDF** open a Save dialog where you choose the folder and name. Cancelling the dialog saves nothing and shows no error. You can also use **Script ▸ Save Script…** in the menu bar; it saves a `.stepkg` package without asking for a format. The rest of this guide says "download" for both.
+
 ## Choose a format
 
 | Format | What it keeps |
@@ -21,7 +25,7 @@ To download a [saved draft or version](/editor/scripts/drafts-and-versions/), se
 1. Open the script in the editor.
 2. In the header, use <img class="kb-editor-icon" src="/icons/editor/download.svg" alt="" aria-hidden="true" /> **Download script**.
 3. Choose **Script & metadata (`.stepkg`)**.
-4. Wait for preparation to finish, then check the downloaded file.
+4. Wait for preparation to finish, then check the downloaded file. In the Mac app, choose a folder in the Save dialog and check the file there.
 
 The editor saves pending writing before building the package. Attached files are included in the package, so you can transfer it as one file. Keep it somewhere you can find again.
 

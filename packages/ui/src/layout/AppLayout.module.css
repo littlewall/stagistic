@@ -12,6 +12,10 @@
     top: 0;
 }
 
+.banner {
+    flex: none;
+}
+
 .body {
     overflow: hidden;
     display: grid;

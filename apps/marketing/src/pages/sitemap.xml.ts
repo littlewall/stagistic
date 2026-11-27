@@ -7,6 +7,7 @@ const staticPaths = [
     '/editor/playwriting',
     '/editor/musicals',
     '/editor/syntax',
+    '/download',
     '/open-source',
     '/articles',
     '/changelog',

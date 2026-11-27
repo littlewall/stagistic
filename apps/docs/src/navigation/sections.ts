@@ -114,6 +114,37 @@ export const documentationSections: DocumentationSection[] = [
         ],
     },
     {
+        label: 'Mac app',
+        href: '/mac-app/',
+        description: 'Install Stagistic Editor on your Mac, keep it updated and find your scripts and backups.',
+        sidebar: [
+            {
+                label: 'Install and update',
+                items: [
+                    {label: 'Mac app overview', slug: 'mac-app'},
+                    'mac-app/install',
+                    'mac-app/updates',
+                ],
+            },
+            {
+                label: 'Your scripts',
+                items: [
+                    'mac-app/where-data-lives',
+                    'mac-app/backups',
+                    'mac-app/move-from-web-app',
+                ],
+            },
+            {
+                label: 'Connect and remove',
+                items: [
+                    'mac-app/claude-mcp',
+                    'mac-app/what-it-sends',
+                    'mac-app/uninstall',
+                ],
+            },
+        ],
+    },
+    {
         label: 'Syntax',
         href: '/syntax/',
         description: 'Read the Stagistic text format reference for implementations and plain-text writing.',

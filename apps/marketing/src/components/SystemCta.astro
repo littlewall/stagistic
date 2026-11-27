@@ -1,0 +1,41 @@
+---
+import {clsx} from 'clsx';
+import {
+    DOWNLOAD_PATH,
+    MAC_DOWNLOAD_PATH,
+    MAC_REQUIREMENTS,
+    WEB_APP_URL,
+} from '../data/site';
+import s from '../pages/index.module.css';
+import styles from './SystemCta.module.css';
+
+interface Props {
+    layout?: 'row' | 'stack';
+}
+
+const {layout = 'row'} = Astro.props;
+---
+
+{/* The browser variant is the server-rendered default (no JavaScript, crawlers, other systems). The script below reveals the Mac variant on a Mac. */}
+<div class={styles.cta} data-layout={layout} data-system-cta>
+    <div class={styles.variant} data-cta-variant="browser">
+        <a href={WEB_APP_URL} class={clsx(s.btnPrimary, styles.browserPrimary)}>Open in browser</a>
+        <a href={DOWNLOAD_PATH} class={s.btnOutline}>Other ways to use Stagistic</a>
+    </div>
+    <div class={styles.variant} data-cta-variant="mac" hidden>
+        <a href={MAC_DOWNLOAD_PATH} class={s.btnPrimary}>Download for Mac</a>
+        <a href={WEB_APP_URL} class={s.btnOutline}>Open in browser</a>
+        <p class={styles.note}>{MAC_REQUIREMENTS}</p>
+    </div>
+</div>
+
+<script>
+    import {detectMacDesktop, readSystemHints} from '../lib/detectMacDesktop';
+
+    if (detectMacDesktop(readSystemHints(navigator))) {
+        document.querySelectorAll('[data-system-cta]').forEach(cta => {
+            cta.querySelector('[data-cta-variant="browser"]')?.setAttribute('hidden', '');
+            cta.querySelector('[data-cta-variant="mac"]')?.removeAttribute('hidden');
+        });
+    }
+</script>

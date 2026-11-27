@@ -34,7 +34,7 @@ describe('toWhatsNewReleases', () => {
             ...releaseOf(),
         ];
 
-        expect(toWhatsNewReleases(releases)).toEqual([
+        expect(toWhatsNewReleases(releases, 'web')).toEqual([
             {
                 release: '0.3.0',
                 date: '2026-12-02',
@@ -65,8 +65,8 @@ describe('toWhatsNewReleases', () => {
     });
 
     it('resolves docs and article paths against their sites and keeps https addresses', () => {
-        const [first] = toWhatsNewReleases(releaseOf({docs: '/guide/templates', article: '/articles/templates'}));
-        const [second] = toWhatsNewReleases(releaseOf({docs: 'https://example.com/a', article: 'https://example.com/b'}));
+        const [first] = toWhatsNewReleases(releaseOf({docs: '/guide/templates', article: '/articles/templates'}), 'web');
+        const [second] = toWhatsNewReleases(releaseOf({docs: 'https://example.com/a', article: 'https://example.com/b'}), 'web');
 
         expect(first.notes[0].docsUrl).toBe('https://docs.stagistic.com/guide/templates');
         expect(first.notes[0].articleUrl).toBe('https://stagistic.com/articles/templates');
@@ -81,14 +81,14 @@ describe('toWhatsNewReleases', () => {
         'guide/templates',
         'data:text/html,hi',
     ])('drops the unsafe or unclear link %s', value => {
-        const [release] = toWhatsNewReleases(releaseOf({docs: value, article: value}));
+        const [release] = toWhatsNewReleases(releaseOf({docs: value, article: value}), 'web');
 
         expect(release.notes[0].docsUrl).toBeUndefined();
         expect(release.notes[0].articleUrl).toBeUndefined();
     });
 
     it('keeps only images served from the app itself', () => {
-        const [local] = toWhatsNewReleases(releaseOf({image: '/release-images/templates.png'}));
+        const [local] = toWhatsNewReleases(releaseOf({image: '/release-images/templates.png'}), 'web');
 
         expect(local.notes[0].image).toBe('/release-images/templates.png');
 
@@ -98,7 +98,7 @@ describe('toWhatsNewReleases', () => {
             'data:image/png;base64,AA',
             'i.png',
         ]) {
-            const [release] = toWhatsNewReleases(releaseOf({image}));
+            const [release] = toWhatsNewReleases(releaseOf({image}), 'web');
 
             expect(release.notes[0].image).toBeUndefined();
         }
@@ -123,10 +123,34 @@ describe('toWhatsNewReleases', () => {
             },
         ];
 
-        const result = toWhatsNewReleases(releases);
+        const result = toWhatsNewReleases(releases, 'web');
 
         expect(result.map(release => release.release)).toEqual(['0.2.1', '0.2.0']);
         expect(result[0].notes.map(item => item.title)).toEqual(['Patch highlight']);
         expect(result[1].notes.map(item => item.title)).toEqual(['Feature highlight']);
+    });
+});
+
+describe('toWhatsNewReleases by Surface', () => {
+    const releases = [
+        {
+            release: '1.0.0',
+            date: '2026-12-01',
+            notes: [
+                note({title: 'Mac', surface: 'desktop'}),
+                note({title: 'Web', surface: 'web'}),
+                note({title: 'Both'}),
+            ],
+        },
+        {
+            release: '0.9.0',
+            date: '2026-11-01',
+            notes: [note({title: 'Mac only', surface: 'desktop'})],
+        },
+    ];
+
+    it('lists notes for the running Surface and shared notes, and drops emptied Releases', () => {
+        expect(toWhatsNewReleases(releases, 'web').map(release => release.notes.map(item => item.title))).toEqual([['Web', 'Both']]);
+        expect(toWhatsNewReleases(releases, 'desktop').map(release => release.notes.map(item => item.title))).toEqual([['Mac', 'Both'], ['Mac only']]);
     });
 });

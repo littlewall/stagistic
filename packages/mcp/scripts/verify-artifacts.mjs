@@ -40,8 +40,8 @@ execFileSync('/usr/bin/codesign', [
 
 const architectures = execFileSync('/usr/bin/lipo', ['-archs', fileURLToPath(executable)], {encoding: 'utf8'}).trim();
 
-if (!metadata.development && (!architectures.includes('arm64') || !architectures.includes('x86_64'))) {
-    throw new Error('MCP executable is not universal.');
+if (!metadata.development && (architectures !== 'arm64')) {
+    throw new Error('MCP executable is not arm64-only.');
 }
 
 const libraries = execFileSync('/usr/bin/otool', ['-L', fileURLToPath(executable)], {encoding: 'utf8'}).split('\n').filter(line => (/^\s+\S+\s+\(compatibility version/u).test(line));

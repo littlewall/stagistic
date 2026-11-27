@@ -4,6 +4,7 @@ export default [
     {ignores: [
         '**/node_modules/**',
         'packages/db/src/pglite/migrations.compiled.ts',
+        'packages/mcp/src/generated/validators.js',
         // tsc -b build artifacts of the root TS configs (gitignored).
         'vite.config.js',
         'oxlint.config.js',

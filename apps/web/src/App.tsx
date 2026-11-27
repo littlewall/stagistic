@@ -44,6 +44,7 @@ import {
     readPremigrationBackupFile,
 } from './db';
 import {browserEditingLocks} from './editingLocks';
+import {MacAppCard} from './macApp/MacAppCard';
 import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
 const settingsSections = [browserStorageSettingsSection];
@@ -68,6 +69,7 @@ const BootedApp = () => {
     if (failure) {
         return (
             <BootFailureScreen
+                surface="web"
                 failure={failure}
                 actions={failure.kind === 'migration-failed'
                     ? <PremigrationBackupAction loadBackup={readPremigrationBackupFile} />
@@ -94,10 +96,11 @@ const BootedApp = () => {
                     <ScriptReleaseNotesProvider
                         releaseNumber={currentReleaseNumber}
                         releases={releases}
+                        surface="web"
                     >
                         <GlobalModalsProvider settingsSections={settingsSections}>
                             <Routes>
-                                <Route path="/" element={<HomeRoute />} />
+                                <Route path="/" element={<HomeRoute footerSlot={<MacAppCard />} />} />
                                 <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
                                     <Route index element={<Navigate to="editor" replace />} />
                                     <Route path="editor" element={<ScriptEditorRoute />} />

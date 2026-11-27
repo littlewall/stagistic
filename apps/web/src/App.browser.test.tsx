@@ -130,7 +130,8 @@ describe('App', () => {
 
         const footer = requireValue(document.querySelector('footer'));
 
-        expect(footer.textContent).toContain(`💛 Stagistic Editor•Release ${rootReleaseNumber}•What's new`);
+        expect(footer.textContent).toContain(`Release ${rootReleaseNumber}•What's new`);
+        expect(footer.textContent).not.toContain('Stagistic Editor');
         expect(footer.textContent?.toLowerCase()).not.toContain('preview');
 
         await page.elementLocator(requireValue(findButton(footer, 'What\'s new'))).click();
@@ -167,7 +168,7 @@ describe('App', () => {
         mountedRoots.push(root);
         await waitFor(() => document.querySelector('footer') !== null, 20_000);
 
-        const hasReload = () => [...document.querySelectorAll('footer button')].some(button => button.textContent?.startsWith('A new Release is ready'));
+        const hasReload = () => [...document.querySelectorAll('footer button')].some(button => button.textContent?.startsWith('Click to reload'));
 
         // The host's fallback page for a missing version.json changes nothing.
         window.dispatchEvent(new Event('focus'));

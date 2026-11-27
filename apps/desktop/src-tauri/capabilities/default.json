@@ -12,6 +12,16 @@
     "allow-mcp-reply",
     "allow-mcp-prepare-manual",
     "allow-mcp-install-claude",
+    "allow-desktop-shutdown-ready",
+    "allow-desktop-exit",
+    "allow-desktop-relaunch",
+    "allow-desktop-show-backups-folder",
+    "allow-desktop-show-attachments-folder",
+    "allow-desktop-import-backup-file",
+    "allow-desktop-open-download-page",
+    "allow-desktop-open-external-url",
+    "allow-desktop-open-licenses",
+    "allow-desktop-set-menu-context",
     "core:window:default",
     "core:window:allow-start-dragging",
     "core:event:default",
@@ -21,24 +31,11 @@
     "core:window:allow-close",
     "core:window:allow-destroy",
     "dialog:default",
+    "log:default",
+    "updater:allow-check",
+    "updater:allow-download-and-install",
     "fs:allow-appdata-read-recursive",
     "fs:allow-appdata-write-recursive",
-    {
-      "identifier": "fs:allow-read-text-file",
-      "allow": [
-        {
-          "path": "$HOME/**"
-        },
-        {
-          "path": "$DESKTOP/**"
-        },
-        {
-          "path": "$DOCUMENT/**"
-        },
-        {
-          "path": "$DOWNLOAD/**"
-        }
-      ]
-    }
+    "fs:allow-write-file"
   ]
 }

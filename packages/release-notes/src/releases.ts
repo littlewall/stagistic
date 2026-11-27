@@ -53,6 +53,7 @@ export const serializeRelease = (release: Release): string => {
             ...note.image === undefined ? {} : {image: note.image},
             ...note.docs === undefined ? {} : {docs: note.docs},
             ...note.article === undefined ? {} : {article: note.article},
+            ...note.surface === undefined ? {} : {surface: note.surface},
             description: note.description,
         })),
     };

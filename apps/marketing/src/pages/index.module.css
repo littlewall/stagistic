@@ -63,6 +63,11 @@
     gap: .75rem;
 }
 
+.heroActions {
+    display: flex;
+    flex-direction: column;
+}
+
 .heroMeta {
     margin-top: 1rem;
     font-family: var(--font-mono);
@@ -108,77 +113,21 @@
     }
 }
 
-.tryEditorCallout {
-    pointer-events: none;
-    position: absolute;
-    z-index: 2;
-    top: -1.875rem;
-    right: 1.75rem;
-    width: 10.5rem;
-    color: var(--color-text);
-}
-
-.tryEditorCallout svg {
-    overflow: visible;
+.heroImage {
     display: block;
     width: 100%;
     height: auto;
 }
 
-.tryEditorCalloutStroke {
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 2.35;
-}
-
-.tryEditorCalloutText,
-.tryEditorCalloutArrow {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-}
-
-.tryEditorCalloutText {
-    animation: tryEditorStrokeIn .32s .62s cubic-bezier(.65, 0, .35, 1) both;
-}
-
-.tryEditorCalloutArrow {
-    animation: tryEditorStrokeIn .4s .84s cubic-bezier(.65, 0, .35, 1) both;
-}
-
-.visuallyHidden {
-    position: absolute;
-    overflow: hidden;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
+/* The app window runs past the right edge of the page (the hero clips it), so its text stays readable. */
+.heroScript:has(.heroImage) {
+    justify-self: start;
+    width: 62rem;
     padding: 0;
-    white-space: nowrap;
-    clip: rect(0 0 0 0);
-    border: 0;
-}
 
-.scriptExcerpt {
-    --color-text: oklch(from var(--color-palette-steel-wool) .18 calc(c * .9) h);
-    --color-text-muted: var(--color-palette-steel-wool);
-    --color-border: color-mix(in oklch, var(--color-palette-steel-wool) 18%, var(--color-palette-paper));
-    --color-surface: oklch(from var(--color-palette-paper) .985 calc(c * .7) h);
-    --color-surface-raised: oklch(from var(--color-palette-paper) .94 calc(c * 1.15) h);
-
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    height: 27.25rem;
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: .75rem;
-    box-shadow: 0 3px 8px oklch(from var(--color-palette-steel-wool) .18 c h / .08), 0 28px 70px oklch(from var(--color-palette-steel-wool) .18 c h / .16);
-
-    & > :global(astro-island) {
-        display: block;
-        height: 100%;
+    &::before {
+        inset: 3rem auto 2rem 2rem;
+        width: 36rem;
     }
 }
 
@@ -334,12 +283,34 @@
     margin-bottom: 2rem;
 }
 
+.featureGroup {
+    padding-top: 3rem;
+    border-top: 1px solid var(--color-border);
+
+    &:first-of-type {
+        border-top: 0;
+    }
+}
+
+.featureGroupTitle {
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--color-text);
+    letter-spacing: -.03em;
+}
+
 .featureItem {
     display: grid;
     grid-template-columns: minmax(14rem, .82fr) minmax(26rem, 1.18fr);
     gap: 6rem;
     align-items: center;
     padding: 4rem 0;
+}
+
+.featureItem[data-text-only] {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 2rem 0;
 }
 
 .featureCopy {
@@ -644,6 +615,7 @@
     animation-duration: .56s;
 }
 
+.heroActions.fadeUp,
 .heroCtas.fadeUp {
     animation-duration: .48s;
 }
@@ -664,20 +636,8 @@
     }
 }
 
-@keyframes tryEditorStrokeIn {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
     .fadeUp {
-        animation: none;
-    }
-
-    .tryEditorCalloutText,
-    .tryEditorCalloutArrow {
-        stroke-dashoffset: 0;
         animation: none;
     }
 }
@@ -758,12 +718,6 @@
         width: 6rem;
     }
 
-    .tryEditorCallout {
-        top: -1.5rem;
-        right: .5rem;
-        width: 9rem;
-    }
-
     .hero,
     .forTheatre,
     .features,
@@ -792,15 +746,17 @@
         inset: 1.5rem -.5rem .5rem .5rem;
     }
 
+    .heroScript:has(.heroImage) {
+        width: 165%;
+    }
+
     .sectionDivider {
         width: calc(100% - 2rem);
     }
 }
 
 @media (max-width: 62.4375em) {
-    .tryEditorCallout,
-    .heroScript,
-    .heroCtas .btnPrimary,
+    .heroTryInBrowser,
     .previewCtas .btnPrimary {
         display: none;
     }

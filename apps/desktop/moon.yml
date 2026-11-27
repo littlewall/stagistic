@@ -11,6 +11,11 @@ tasks:
     command: 'node scripts/generate-icons.mjs'
     options:
       cache: false
+  # Generates src-tauri/licenses/THIRD_PARTY_LICENSES.txt (bundled resource, gitignored).
+  licenses:
+    command: 'node scripts/licenses.mjs'
+    options:
+      cache: false
   build-test-host:
     command: 'cargo build --manifest-path src-tauri/Cargo.toml --example local_mcp_host --locked'
     options:
@@ -21,14 +26,17 @@ tasks:
       mergeArgs: 'replace'
       cache: false
   test-rust:
-    command: 'cargo test --manifest-path src-tauri/Cargo.toml --lib --tests --locked'
+    deps: ['~:licenses']
+    command: 'cargo test --manifest-path src-tauri/Cargo.toml --lib --bins --tests --locked'
     options:
       cache: false
   check-rust:
+    deps: ['~:licenses']
     command: 'cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked'
     options:
       cache: false
   lint-rust:
+    deps: ['~:licenses']
     script: 'cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --locked -- -D warnings'
     options:
       cache: false
@@ -38,7 +46,7 @@ tasks:
       cache: false
   dev:
     command: 'tauri dev'
-    deps: ['mcp:bundle-dev']
+    deps: ['~:licenses', 'mcp:bundle-dev']
     preset: 'server'
 
   dev-ui:
@@ -46,18 +54,45 @@ tasks:
     preset: 'server'
 
   build:
-    command: 'tauri build'
-    deps: ['mcp:bundle']
+    # Local unsigned build: updater artifacts need the private key (see desktop:release).
+    command: 'tauri build --target aarch64-apple-darwin --config src-tauri/tauri.unsigned.conf.json'
+    deps: ['~:licenses', 'mcp:bundle']
     options:
       cache: false
+
+  release:
+    command: 'tsx scripts/release/cli.ts'
+    deps: ['~:licenses', 'mcp:contract-check']
+    options:
+      cache: false
+
+  # Checks a DMG/app, a draft GitHub Release (--draft vX.Y.Z) or the live Release (--live X.Y.Z).
+  release-verify:
+    command: 'tsx scripts/release/verify.ts'
+    options:
+      cache: false
+
+  # Interactive A -> B updater test on this Mac (docs/releasing/runbook.md).
+  update-test:
+    command: 'tsx scripts/release/updateTest.ts'
+    options:
+      cache: false
+      interactive: true
 
   build-ui:
     command: 'vp build'
     options:
       cache: false
 
+  # The built UI under the release CSP (dev builds use the looser devCsp).
+  csp-smoke:
+    command: 'tsx scripts/cspSmoke.ts'
+    deps: ['~:build-ui']
+    options:
+      cache: false
+
   build-release:
-    command: 'tauri build'
-    deps: ['mcp:bundle-release']
+    command: 'tauri build --target aarch64-apple-darwin'
+    deps: ['~:licenses', 'mcp:bundle-release']
     options:
       cache: false

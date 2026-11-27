@@ -186,6 +186,7 @@ export {
 } from './feedback/ToastProvider/ToastProvider';
 
 // ─── App layout ─────────────────────────────────────────────────────────────
+export {AppBannerProvider} from './layout/AppBanner';
 export {AppFooter} from './layout/AppFooter';
 export {
     AppHeader,
@@ -199,12 +200,17 @@ export {
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
 export {FocusVisibilityManager} from './layout/FocusVisibilityManager';
-export {type FooterRelease, FooterReleaseProvider} from './layout/footerRelease';
+export {
+    type FooterRelease,
+    FooterReleaseProvider,
+    type FooterReleaseUpdate,
+} from './layout/footerRelease';
 export {
     ScriptStateMenu,
     type ScriptStateMenuItem,
     type ScriptStateMenuProps,
 } from './layout/header/ScriptStateMenu';
+export {NoticeBar} from './layout/NoticeBar';
 export {SidebarActionsGroup} from './layout/SidebarActionsGroup';
 export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMiniHeader';
 

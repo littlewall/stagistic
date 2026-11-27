@@ -7,6 +7,7 @@ import {
     vi,
 } from 'vite-plus/test';
 
+import {SaveFileProvider} from '../shared/saveFile';
 import {BootFailureScreen} from './BootFailureScreen';
 import {PremigrationBackupAction} from './PremigrationBackupAction';
 
@@ -56,6 +57,15 @@ describe('pre-migration backup action', () => {
         await expect.poll(() => revokeObjectURL).toHaveBeenCalledWith('blob:backup');
     });
 
+    it('offers Save backup on a Surface with a Save dialog', async () => {
+        const container = mount(
+            <SaveFileProvider saveFile={vi.fn()} verb="Save"><PremigrationBackupAction loadBackup={() => Promise.resolve(backup)} /></SaveFileProvider>,
+        );
+
+        await expect.poll(() => findButton(container, 'Save backup')).toBeDefined();
+        expect(findButton(container, 'Download backup')).toBeUndefined();
+    });
+
     it('says in plain words what the copy is, when it was taken and that the app cannot open it yet', async () => {
         const container = mount(<PremigrationBackupAction loadBackup={() => Promise.resolve(backup)} />);
 
@@ -85,6 +95,7 @@ describe('pre-migration backup action', () => {
     it('sits next to Reload on the failed migration screen', async () => {
         const container = mount(
             <BootFailureScreen
+                surface="web"
                 failure={{
                     kind: 'migration-failed',
                     message: 'x',

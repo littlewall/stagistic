@@ -1,38 +1,27 @@
+/** Answers must hold for both the Web app and the Mac app. */
 export const landingFaqs = [
     {
         q: 'Is Stagistic Editor free?',
-        a: 'Yes. Stagistic Editor is free now and will remain free in the future. There is no subscription, trial, or paywall for writing, structuring, or exporting your scripts.',
+        a: 'Yes, and it will stay free. There is no subscription, trial or paywall for writing, structuring or exporting your scripts, and no restriction on using what you write in a commercial production.',
     },
     {
         q: 'Do I need an account?',
-        a: 'No. You can open the editor and start writing without signing up. Your scripts are stored locally in your browser by default. You can also download a backup of your work and import it again whenever you need it.',
+        a: 'No. Open the Web app or install the Mac app and start writing. There is nothing to sign up for.',
     },
     {
-        q: 'Where is my data stored?',
-        a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
+        q: 'Where are my scripts stored?',
+        a: 'On your computer: in your browser in the Web app, on your Mac in the Mac app. Scripts are never uploaded. You can export a script as a file at any time and import it again, and the Mac app also makes automatic backups.',
     },
     {
         q: 'Can I keep earlier drafts and versions of a play?',
-        a: 'Yes. Save numbered drafts before a rewrite, or name a version for a reading, festival or tour. Revisit the saved writing, export it, restore it to your current script or use it to create a separate editable script. Drafts and versions are saved when you choose; automatic saving keeps your current work up to date.',
+        a: 'Yes. Save a numbered Script Draft before a rewrite, or a named Script Version for a reading, festival or tour. Revisit what you saved, export it, restore it to your current script or use it to create a separate editable script. Drafts and versions are saved when you choose; automatic saving keeps your current work up to date.',
     },
     {
-        q: 'Can I use it for a commercial production?',
-        a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic Editor. The editor is free for everyone.',
-    },
-    {
-        q: 'How is Stagistic Editor different from other software?',
-        a: 'Industry standard tools like Final Draft use a screenplay structure (INT/EXT) which Stagistic Editor deliberately avoids in favour of theatre acts and scenes. It is designed from the ground up specifically for stage plays and musicals.',
-    },
-    {
-        q: 'How does Stagistic Editor help me format a stage script?',
-        a: 'Instead of formatting text with spaces and tabs, Stagistic Editor uses dedicated blocks for elements like stage directions, dialogue, and lyrics. This means your play stays perfectly structured, character names remain linked to a central cast list, and stage directions format automatically.',
-    },
-    {
-        q: 'How do I format a musical script?',
-        a: 'Writing a libretto is natively supported. Stagistic Editor has dedicated blocks for lyrics, handles songs and instrumentals via a catalogue, and allows you to attach PDF scores directly to musical numbers. The export engine then seamlessly combines your script and scores into one paginated document.',
+        q: 'How is it different from screenwriting software?',
+        a: 'Industry standard tools like Final Draft use a screenplay structure (INT/EXT) that Stagistic Editor deliberately avoids in favour of acts and scenes. It is designed from the ground up for stage plays and musicals, with dedicated blocks for stage directions, dialogue and lyrics.',
     },
     {
         q: 'Is Stagistic Editor open source?',
-        a: 'Yes, the editor is available on GitHub under the MIT licence. Any contributions are welcome!',
+        a: 'Yes. The code is on GitHub under the MIT licence. Contributions are welcome.',
     },
 ];

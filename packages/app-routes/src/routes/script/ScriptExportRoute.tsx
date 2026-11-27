@@ -12,12 +12,14 @@ import {
 } from 'react';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
-import {downloadBlob, downloadStagistic} from '../../shared/downloadStagistic';
+import {stagisticFileRequest} from '../../shared/downloadStagistic';
+import {useSaveFile, useSaveWording} from '../../shared/saveFile';
 import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {ExportControlPanel} from './export/ExportControlPanel';
 import {ExportPreview} from './export/ExportPreview';
 import {ExportProvider, type SaveScriptStateKind} from './export/ExportProvider';
 import {useExportScriptData} from './export/useExportScriptData';
+import {useRegisterScriptMenuActions} from './menu/ScriptMenuActions';
 import styles from './ScriptExportRoute.module.css';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
 import {useScriptStateControls} from './states/useScriptStateControls';
@@ -56,15 +58,21 @@ export const ScriptExportRoute = () => {
         stopEditing: () => documentSession.stopEditing(),
     });
     const {openSave} = scriptStateControls;
+    const wording = useSaveWording();
     const saveAndDownload = useMemo(() => isReadOnly ? null : (kind: SaveScriptStateKind, download: (stateLabel: string) => void) => {
         openSave(kind, {
-            submitLabel: kind === 'draft' ? 'Save draft and download' : 'Save version and download',
+            submitLabel: wording.stateSubmit(kind),
             afterSave: created => download(getScriptSnapshotLabel(created)),
         });
-    }, [isReadOnly, openSave]);
+    }, [
+        isReadOnly,
+        openSave,
+        wording,
+    ]);
 
     useDocumentTitle(currentScript ? `Export · ${fileTitle}` : 'Export');
 
+    const saveFile = useSaveFile();
     const handleMenuAction = useCallback(
         (actionId: string, returnFocus?: HTMLElement | null) => {
             if (actionId === 'settings') {
@@ -85,7 +93,7 @@ export const ScriptExportRoute = () => {
                     titlePage: script.titlePage ?? undefined,
                 });
 
-                downloadStagistic(fileTitle, content);
+                void saveFile(stagisticFileRequest(fileTitle, content));
 
                 return;
             }
@@ -101,7 +109,7 @@ export const ScriptExportRoute = () => {
                     }))
                     .then(result => {
                         if (result.ok) {
-                            downloadBlob(result.fileName, result.blob);
+                            void saveFile({data: result.blob, suggestedName: result.fileName});
                         }
                     })
                     .catch(() => undefined)
@@ -117,8 +125,11 @@ export const ScriptExportRoute = () => {
             currentScript,
             fileTitle,
             repository,
+            saveFile,
         ],
     );
+
+    useRegisterScriptMenuActions(handleMenuAction);
 
     return (
         <AppLayout

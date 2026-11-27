@@ -1,6 +1,7 @@
 import {Button} from '@stagistic/ui';
 import {useEffect, useState} from 'react';
 
+import {useSaveFile, useSaveWording} from '../shared/saveFile';
 import styles from './PremigrationBackupAction.module.css';
 
 export interface PremigrationBackupDownload {
@@ -13,17 +14,6 @@ interface PremigrationBackupActionProps {
     /** Resolves to the stored backup, or null when there is none. */
     loadBackup: () => Promise<PremigrationBackupDownload | null>,
 }
-
-const saveFile = ({fileName, blob}: PremigrationBackupDownload) => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    // The browser has started reading the file by the next task.
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-};
 
 const formatTaken = (createdAt: number) => new Date(createdAt).toLocaleString('en', {
     dateStyle: 'medium',
@@ -39,6 +29,8 @@ const FEEDBACK_URL = 'https://feedback.stagistic.com';
  * out of the writer's sight.
  */
 export const PremigrationBackupAction = ({loadBackup}: PremigrationBackupActionProps) => {
+    const saveFile = useSaveFile();
+    const wording = useSaveWording();
     const [state, setState] = useState<{backup: PremigrationBackupDownload | null} | null>(null);
 
     useEffect(() => {
@@ -66,7 +58,7 @@ export const PremigrationBackupAction = ({loadBackup}: PremigrationBackupActionP
 
     return (
         <>
-            <Button onPress={() => saveFile(backup)}>Download backup</Button>
+            <Button onPress={() => void saveFile({data: backup.blob, suggestedName: backup.fileName})}>{wording.backupButton}</Button>
             <p className={styles.note}>
                 A copy of your scripts from {formatTaken(backup.createdAt)}, taken before the update.
                 Keep the file safe. Stagistic cannot open it yet; if you need it, contact us

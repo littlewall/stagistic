@@ -109,3 +109,19 @@ describe('parseFragment', () => {
         expect(quiet.issues.join('\n')).toMatch(/breaking.*highlight/);
     });
 });
+
+describe('parseFragment surface', () => {
+    it('accepts web and desktop, and none', () => {
+        expect(parseFragment(valid.replace('bump: minor', 'bump: minor\nsurface: desktop'), 'x.md').surface).toBe('desktop');
+        expect(parseFragment(valid.replace('bump: minor', 'bump: minor\nsurface: web'), 'x.md').surface).toBe('web');
+        expect(parseFragment(valid, 'x.md').surface).toBeUndefined();
+    });
+
+    it('rejects an unknown surface', () => {
+        expect(() => parseFragment(valid.replace('bump: minor', 'bump: minor\nsurface: ios'), 'x.md')).toThrow(/surface/);
+    });
+
+    it('rejects bump: major', () => {
+        expect(() => parseFragment(valid.replace('bump: minor', 'bump: major'), 'x.md')).toThrow(/bump/);
+    });
+});

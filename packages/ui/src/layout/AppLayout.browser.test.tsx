@@ -11,6 +11,7 @@ import {
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {formControlStyles} from '../molecules/forms/shared/formControlStyles';
+import {AppBannerProvider} from './AppBanner';
 import {AppLayout} from './AppLayout';
 import {FocusVisibilityManager} from './FocusVisibilityManager';
 
@@ -97,5 +98,36 @@ describe('AppLayout', () => {
         expect(feedback?.textContent).toBe('Feedback & bug reports');
         expect(feedback?.target).toBe('_blank');
         expect(document.querySelector('footer')?.textContent?.toLowerCase()).not.toContain('preview');
+    });
+
+    it('puts the banner between header and content and fits the window', async () => {
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+
+        const root = createRoot(host);
+
+        root.render(
+            <AppBannerProvider banner={<div style={{height: 28}} data-testid="banner">Notice</div>}>
+                <AppLayout header={<header style={{height: 40}}>Header</header>}><div>Script canvas</div></AppLayout>
+            </AppBannerProvider>,
+        );
+        mountedRoots.push(root);
+        await waitFor(() => document.querySelector('[data-testid="banner"]') !== null);
+
+        const banner = document.querySelector('[data-testid="banner"]')?.getBoundingClientRect();
+        const header = document.querySelector('header')?.getBoundingClientRect();
+        const main = document.querySelector('main')?.getBoundingClientRect();
+
+        expect(banner?.top).toBe(header?.bottom);
+        expect(main?.top).toBeGreaterThanOrEqual(banner?.bottom ?? Infinity);
+        expect(banner?.width).toBe(document.documentElement.clientWidth);
+        expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight);
+    });
+
+    it('renders no banner row without a provider banner', async () => {
+        renderLayout();
+        await waitFor(() => document.querySelector('main') !== null);
+        expect(document.querySelector('[data-testid="banner"]')).toBeNull();
     });
 });

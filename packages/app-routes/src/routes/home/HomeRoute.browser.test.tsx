@@ -2,6 +2,7 @@ import '@stagistic/ui/styles/base.css';
 
 import type * as MockedModule from '@stagistic/app-core';
 import type {ScriptSummary} from '@stagistic/app-core';
+import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {MemoryRouter} from 'react-router-dom';
 import {
@@ -77,13 +78,13 @@ vi.mock('../../layout/AppHeader', () => ({
 
 const roots: Root[] = [];
 
-const mountHome = () => {
+const mountHome = (footerSlot?: ReactNode) => {
     const host = document.createElement('div');
     const root = createRoot(host);
 
     document.body.appendChild(host);
 
-    const render = () => root.render(<MemoryRouter><HomeRoute /></MemoryRouter>);
+    const render = () => root.render(<MemoryRouter><HomeRoute footerSlot={footerSlot} /></MemoryRouter>);
 
     render();
     roots.push(root);
@@ -184,6 +185,26 @@ afterEach(() => {
 });
 
 describe('HomeRoute', () => {
+    it('renders a Surface-provided footer slot after the script list, and nothing without one', async () => {
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 1)];
+        mountHome(<aside data-testid="footer-slot">Extra</aside>);
+        await waitForText('One draft');
+
+        const slot = document.querySelector('[data-testid="footer-slot"]');
+        const content = document.querySelector('h1')?.parentElement;
+
+        expect(slot?.textContent).toBe('Extra');
+        expect(content?.lastElementChild).toBe(slot);
+
+        roots.forEach(root => root.unmount());
+        roots.length = 0;
+        document.body.innerHTML = '';
+        mountHome();
+        await waitForText('One draft');
+
+        expect(document.querySelector('[data-testid="footer-slot"]')).toBeNull();
+    });
+
     it('uses three start cards as the empty-state actions', async () => {
         mountHome();
         await waitForText('No scripts yet.');

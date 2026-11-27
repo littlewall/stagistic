@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import type {ReactNode} from 'react';
 
+import {useAppBanner} from './AppBanner';
 import {AppFooter} from './AppFooter';
 import styles from './AppLayout.module.css';
 
@@ -18,11 +19,14 @@ export const AppLayout = ({
     footer,
     children,
 }: AppLayoutProps) => {
+    const banner = useAppBanner();
+
     return (
         <div className={styles.page}>
             {header ? (
                 <div className={styles.header}>{header}</div>
             ) : null}
+            {banner ? <div className={styles.banner}>{banner}</div> : null}
             <div className={clsx(styles.body, sidebar ? null : styles.single)}>
                 <main className={styles.main} data-modal-focus-fallback>{children}</main>
                 {sidebar ? (

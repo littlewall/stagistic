@@ -1,4 +1,9 @@
 {
+    "bundle": {
+        "macOS": {
+            "minimumSystemVersion": "15.0"
+        }
+    },
     "app": {
         "windows": [
             {
@@ -7,9 +12,10 @@
                 "titleBarStyle": "Overlay",
                 "hiddenTitle": true,
                 "decorations": true,
+                "dragDropEnabled": false,
                 "trafficLightPosition": {
                     "x": 16,
-                    "y": 28
+                    "y": 26
                 }
             }
         ]

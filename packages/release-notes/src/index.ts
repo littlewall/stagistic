@@ -5,10 +5,12 @@ export {
 } from './announcement';
 export {ReleaseNotesError} from './errors';
 export {parseFragment} from './fragment';
+export {renderGithubRelease} from './githubRelease';
 export {resolveNoteImage, resolveNoteLink} from './links';
 export {
     BREAKING_NOTE_LABEL,
     getReleaseNoteWeight,
+    RELEASE_NOTE_SURFACE_LABELS,
     RELEASE_NOTE_TYPE_LABELS,
     type ReleaseNoteWeight,
 } from './noteLabels';
@@ -22,10 +24,12 @@ export type {
     Release,
     ReleaseNote,
     ReleaseNoteFragment,
+    ReleaseNoteSurface,
     ReleaseNoteType,
 } from './schema';
 export {
     isReleaseDate,
+    RELEASE_NOTE_SURFACES,
     RELEASE_NOTE_TYPES,
     releaseNoteFragmentSchema,
     releaseNoteSchema,

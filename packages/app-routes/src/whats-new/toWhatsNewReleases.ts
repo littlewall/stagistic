@@ -1,4 +1,5 @@
 import {
+    type ReleaseNoteSurface,
     resolveNoteImage,
     resolveNoteLink,
 } from '@stagistic/release-notes';
@@ -17,18 +18,19 @@ export interface ReleaseSource {
         image?: string,
         docs?: string,
         article?: string,
+        surface?: ReleaseNoteSurface,
     }[],
 }
 
 const DOCS_SITE = 'https://docs.stagistic.com';
 const MARKETING_SITE = 'https://stagistic.com';
 
-export const toWhatsNewReleases = (releases: readonly ReleaseSource[]): WhatsNewRelease[] => releases
+export const toWhatsNewReleases = (releases: readonly ReleaseSource[], surface: ReleaseNoteSurface): WhatsNewRelease[] => releases
     .map(release => ({
         release: release.release,
         date: release.date,
         notes: release.notes
-            .filter(note => note.highlight)
+            .filter(note => note.highlight && (note.surface ?? surface) === surface)
             .map(note => ({
                 type: note.type,
                 title: note.title,

@@ -12,6 +12,7 @@ interface TestRelease {
         title: string,
         highlight: boolean,
         breaking: boolean,
+        surface?: 'web' | 'desktop',
     }[],
 }
 
@@ -33,7 +34,12 @@ const announce = (input: {
     lastSeenRelease: string | null | undefined,
     hasScripts: boolean | undefined,
     releases?: TestRelease[],
-}) => announceReleases({releases: RELEASES, ...input});
+    surface?: 'web' | 'desktop',
+}) => announceReleases({
+    releases: RELEASES,
+    surface: 'web',
+    ...input,
+});
 
 const titles = (releases: TestRelease[]) => releases.map(release => release.notes.map(item => item.title));
 
@@ -245,5 +251,56 @@ describe('announceReleases', () => {
 
         expect(result.popup).toBe(false);
         expect(result.markSeen).toBe(true);
+    });
+});
+
+describe('announceReleases by Surface', () => {
+    const releases: TestRelease[] = [
+        {
+            release: '1.0.0',
+            notes: [
+                {...note('Mac only'), surface: 'desktop'},
+                {...note('Web only'), surface: 'web'},
+                note('Both'),
+            ],
+        },
+        {release: '0.9.0', notes: [{...note('Only Mac'), surface: 'desktop'}]},
+    ];
+
+    it('keeps notes for the running Surface and notes without a Surface', () => {
+        const web = announce({
+            currentRelease: '1.0.0',
+            lastSeenRelease: '0.8.0',
+            hasScripts: true,
+            releases,
+            surface: 'web',
+        });
+        const desktop = announce({
+            currentRelease: '1.0.0',
+            lastSeenRelease: '0.8.0',
+            hasScripts: true,
+            releases,
+            surface: 'desktop',
+        });
+
+        expect(titles(web.releases)).toEqual([['Web only', 'Both']]);
+        expect(titles(desktop.releases)).toEqual([['Mac only', 'Both'], ['Only Mac']]);
+    });
+
+    it('does not announce a Release whose Highlights are all for the other Surface', () => {
+        const result = announce({
+            currentRelease: '0.9.0',
+            lastSeenRelease: '0.8.0',
+            hasScripts: true,
+            releases,
+            surface: 'web',
+        });
+
+        expect(result).toMatchObject({
+            releases: [],
+            popup: false,
+            hasUnseenRelease: false,
+            markSeen: true,
+        });
     });
 });

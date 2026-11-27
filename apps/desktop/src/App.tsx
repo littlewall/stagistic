@@ -9,9 +9,11 @@ import {
     DatabaseHandoverOverlay,
     GlobalModalsProvider,
     HomeRoute,
+    SaveFileProvider,
     ScriptBoardRoute,
     ScriptEditorRoute,
     ScriptExportRoute,
+    ScriptMenuActionsProvider,
     ScriptReleaseNotesProvider,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
@@ -19,9 +21,17 @@ import {
     WaitingForDatabaseScreen,
 } from '@stagistic/app-routes';
 import {currentReleaseNumber, releases} from '@stagistic/release-notes/bundled';
-import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
-import {getCurrentWindow} from '@tauri-apps/api/window';
-import {useEffect} from 'react';
+import {
+    AppBannerProvider,
+    LoaderOverlay,
+    NoticeBar,
+    ToastProvider,
+} from '@stagistic/ui';
+import {
+    type ReactNode,
+    useEffect,
+    useMemo,
+} from 'react';
 import {
     Navigate,
     Route,
@@ -33,11 +43,21 @@ import {
     prepareLocalDbWithProgress,
     requestPersistentStorage,
 } from './db';
-import {startBackupSchedule, writeBackup} from './db/backups';
+import {startBackupSchedule} from './db/backups';
+import {openDownloadPage, showBackupsFolder} from './db/backupsFolder';
+import {RestoreDiscardedNotice} from './db/RestoreDiscardedNotice';
+import {saveFileWithDialog} from './files/saveFile';
+import {DOWNLOAD_URL} from './lifecycle/updateNotice';
+import {DesktopUpdatesProvider} from './lifecycle/updatesContext';
+import {useDesktopLifecycle} from './lifecycle/useDesktopLifecycle';
+import {openExternalUrl} from './links/externalLinks';
 import {McpSettingsPanel} from './mcp/McpSettingsPanel';
 import {useDeepLinkNavigation} from './mcp/useDeepLinkNavigation';
 import {useLocalMcp} from './mcp/useLocalMcp';
 import {useNativeMenuActions} from './menu/useNativeMenuActions';
+import {StorageSettings} from './storage/StorageSettings';
+import {UpdatesSettings} from './updates/UpdatesSettings';
+import {useHomeUpdateBanner} from './updates/useHomeUpdateBanner';
 
 const bootstrapOptions = {
     beforeDatabase: requestPersistentStorage,
@@ -51,37 +71,52 @@ const settingsSections: AppSettingsSection[] = [
         label: 'MCP',
         content: <McpSettingsPanel />,
     },
+    {
+        id: 'storage',
+        label: 'Storage',
+        content: <StorageSettings />,
+    },
+    {
+        id: 'updates',
+        label: 'About app',
+        content: <UpdatesSettings />,
+    },
 ];
 
 // Runs inside the router + providers so it can use navigation and modal hooks.
-const AppRoutes = () => {
+const AppRoutes = ({noticeBanner}: {noticeBanner: ReactNode}) => {
     useNativeMenuActions();
     useDeepLinkNavigation();
 
+    const updateBanner = useHomeUpdateBanner();
+
     return (
-        <Routes>
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
-                <Route index element={<Navigate to="editor" replace />} />
-                <Route path="editor" element={<ScriptEditorRoute />} />
-                <Route path="board">
-                    <Route index element={<Navigate to="wall" replace />} />
-                    <Route path=":lens" element={<ScriptBoardRoute />} />
+        // A manual-update notice outranks the update bar.
+        <AppBannerProvider banner={noticeBanner ?? updateBanner}>
+            <Routes>
+                <Route path="/" element={<HomeRoute />} />
+                <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                    <Route index element={<Navigate to="editor" replace />} />
+                    <Route path="editor" element={<ScriptEditorRoute />} />
+                    <Route path="board">
+                        <Route index element={<Navigate to="wall" replace />} />
+                        <Route path=":lens" element={<ScriptBoardRoute />} />
+                    </Route>
+                    <Route path="export" element={<ScriptExportRoute />} />
                 </Route>
-                <Route path="export" element={<ScriptExportRoute />} />
-            </Route>
-            <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
-                <Route index element={<Navigate to="editor" replace />} />
-                <Route path="editor" element={<ScriptEditorRoute />} />
-                <Route path="board">
-                    <Route index element={<Navigate to="wall" replace />} />
-                    <Route path=":lens" element={<ScriptBoardRoute />} />
+                <Route path="/script/:scriptId/snapshots/:snapshotId" element={<ScriptWorkspaceRoute />}>
+                    <Route index element={<Navigate to="editor" replace />} />
+                    <Route path="editor" element={<ScriptEditorRoute />} />
+                    <Route path="board">
+                        <Route index element={<Navigate to="wall" replace />} />
+                        <Route path=":lens" element={<ScriptBoardRoute />} />
+                    </Route>
+                    <Route path="export" element={<ScriptExportRoute />} />
                 </Route>
-                <Route path="export" element={<ScriptExportRoute />} />
-            </Route>
-            <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+                <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </AppBannerProvider>
     );
 };
 
@@ -99,9 +134,25 @@ const BootedApp = () => {
 
     useLocalMcp(Boolean(scriptRepository));
 
+    const {
+        dialogs: lifecycleDialogs,
+        updates,
+        notice,
+        hideNotice,
+    } = useDesktopLifecycle(Boolean(scriptRepository));
+    const footerUpdate = useMemo(() => (
+        updates.state.status === 'ready'
+            ? {
+                message: 'New version is ready.',
+                actionLabel: 'Click to restart',
+                onPress: updates.restart,
+            }
+            : undefined
+    ), [updates.state, updates.restart]);
+
     /*
-     * Portable backup snapshots into the app data folder: periodic while running,
-     * plus a best-effort snapshot when the window is closed.
+     * Portable backup snapshots into the app data folder while running; the
+     * final one is written by the safe-shutdown sequence (see lifecycle/).
      */
     useEffect(() => {
         if (!scriptRepository) {
@@ -109,20 +160,30 @@ const BootedApp = () => {
         }
 
         const schedule = startBackupSchedule();
-        const unlistenPromise = getCurrentWindow().onCloseRequested(() => {
-            void writeBackup().catch(error => {
-                console.error('Backup on close failed', error);
-            });
-        });
 
         return () => {
             schedule.stop();
-            void unlistenPromise.then(dispose => dispose());
         };
     }, [scriptRepository]);
 
+    const banner = notice.visible && notice.notice ? (
+        <NoticeBar
+            message={notice.notice.message}
+            actionLabel="Download"
+            onAction={() => void openExternalUrl(notice.notice?.url ?? DOWNLOAD_URL).catch(() => undefined)}
+            onHide={hideNotice}
+        />
+    ) : null;
+
     if (failure) {
-        return <BootFailureScreen failure={failure} />;
+        return (
+            <BootFailureScreen
+                surface="desktop"
+                failure={failure}
+                onOpenDownloadPage={() => void openDownloadPage()}
+                onShowBackupsFolder={() => void showBackupsFolder()}
+            />
+        );
     }
 
     if (!scriptRepository) {
@@ -139,22 +200,35 @@ const BootedApp = () => {
             snapshotViews={snapshotViews}
         >
             <ToastProvider>
-                <ScriptReleaseNotesProvider releaseNumber={currentReleaseNumber} releases={releases}>
-                    <GlobalModalsProvider settingsSections={settingsSections}>
-                        <AppRoutes />
-                    </GlobalModalsProvider>
-                </ScriptReleaseNotesProvider>
+                <RestoreDiscardedNotice />
+                <DesktopUpdatesProvider value={updates}>
+                    <ScriptReleaseNotesProvider
+                        releaseNumber={currentReleaseNumber}
+                        releases={releases}
+                        surface="desktop"
+                        footerUpdate={footerUpdate}
+                    >
+                        <GlobalModalsProvider settingsSections={settingsSections}>
+                            <ScriptMenuActionsProvider>
+                                <AppRoutes noticeBanner={banner} />
+                            </ScriptMenuActionsProvider>
+                            {lifecycleDialogs}
+                        </GlobalModalsProvider>
+                    </ScriptReleaseNotesProvider>
+                </DesktopUpdatesProvider>
             </ToastProvider>
         </ScriptRepositoryProvider>
     );
 };
 
 const App = () => (
-    <DatabaseHandoverProvider handover={databaseHandover}>
-        <BootedApp />
-        <UnsavedWorkHandoverBridge />
-        <DatabaseHandoverOverlay />
-    </DatabaseHandoverProvider>
+    <SaveFileProvider saveFile={saveFileWithDialog} verb="Save">
+        <DatabaseHandoverProvider handover={databaseHandover}>
+            <BootedApp />
+            <UnsavedWorkHandoverBridge />
+            <DatabaseHandoverOverlay />
+        </DatabaseHandoverProvider>
+    </SaveFileProvider>
 );
 
 export default App;

@@ -120,6 +120,13 @@
     background: var(--color-surface-raised);
     border-radius: 999px;
 
+    /* The Mac app pill names where the note applies; an outline sets it apart from the type pill beside it. */
+    &[data-note-surface] {
+        color: var(--color-text);
+        background: transparent;
+        border: 1px solid var(--color-border-strong);
+    }
+
     &[data-note-weight = 'highlight'] {
         color: var(--color-on-action);
         background: var(--color-action);

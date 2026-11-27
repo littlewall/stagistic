@@ -11,6 +11,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
+import {PageContainer} from '../organisms/PageContainer/PageContainer';
 import {AppHeader, ScriptEditorAppHeader} from './AppHeader';
 
 let root: Root | null = null;
@@ -31,7 +32,7 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const mountHeader = () => {
+const mountHeader = (saveVerb?: 'Save' | 'Download') => {
     const host = document.createElement('div');
     const actions: string[] = [];
 
@@ -45,6 +46,7 @@ const mountHeader = () => {
             onSelectView={() => {}}
             onMenuAction={action => actions.push(action)}
             onRenameScript={() => {}}
+            saveVerb={saveVerb}
         />,
     );
 
@@ -83,6 +85,14 @@ describe('ScriptEditorAppHeader', () => {
         expect(document.querySelector('button[aria-label="Open script settings"]')).not.toBeNull();
         expect(document.querySelector('button[aria-label="Open attribute manager"]')).not.toBeNull();
         expect(document.querySelector('button[aria-label="Download script"]')).not.toBeNull();
+    });
+
+    it('words the file action as Save when the Surface opens a Save dialog', async () => {
+        mountHeader('Save');
+
+        await waitForElement('button[aria-label="Save script"]');
+
+        expect(document.querySelector('button[aria-label="Download script"]')).toBeNull();
     });
 
     it('keeps the sync status in a fixed lane directly after the truncated script title', async () => {
@@ -213,6 +223,87 @@ describe('AppHeader width variants', () => {
         mountHeaderAt(2200, <AppHeader onHome={() => {}} />);
 
         expect((await innerBox()).width).toBe(1400);
+    });
+});
+
+describe('AppHeader window controls', () => {
+    const mountHeaderAt = (hostWidth: number, element: ReactElement) => {
+        const host = document.createElement('div');
+
+        host.style.width = `${hostWidth}px`;
+        document.body.appendChild(host);
+        root = createRoot(host);
+        root.render(element);
+    };
+
+    const editorHeader = (
+        <ScriptEditorAppHeader
+            currentScript={{id: 'script-1', name: 'One Small Light'}}
+            onHome={() => {}}
+            activeView="editor"
+            onSelectView={() => {}}
+            onOpenSettings={() => {}}
+        />
+    );
+
+    const homeLeft = async () => (await waitForElement<HTMLElement>('[aria-label="Go to home"]')).getBoundingClientRect().left;
+
+    afterEach(() => {
+        document.documentElement.style.removeProperty('--window-controls-start');
+        document.documentElement.style.removeProperty('--window-controls-end');
+    });
+
+    it('keeps the leading controls clear of window controls at the window edge', async () => {
+        document.documentElement.style.setProperty('--window-controls-start', '92px');
+        mountHeaderAt(1200, <AppHeader onHome={() => {}} />);
+
+        expect(await homeLeft()).toBeCloseTo(92, 1);
+    });
+
+    it('adds no inset when the capped header content already clears the window controls', async () => {
+        document.documentElement.style.setProperty('--window-controls-start', '92px');
+        mountHeaderAt(2200, <AppHeader onHome={() => {}} />);
+
+        // The 1400px column starts at 400px; its 12px padding puts Home at 412px.
+        expect(await homeLeft()).toBeCloseTo(412, 1);
+    });
+
+    it('keeps the middle column on the window centre while insetting the edges', async () => {
+        document.documentElement.style.setProperty('--window-controls-start', '92px');
+        document.documentElement.style.setProperty('--window-controls-end', '140px');
+        mountHeaderAt(1600, editorHeader);
+
+        const inner = await waitForElement<HTMLElement>('[data-header-inner]');
+        const middle = (inner.children[1] as HTMLElement).getBoundingClientRect();
+        const settings = (await waitForElement<HTMLElement>('[aria-label="Open settings"]')).getBoundingClientRect();
+
+        expect(await homeLeft()).toBeCloseTo(92, 1);
+        expect(settings.right).toBeCloseTo(1600 - 140, 1);
+        expect(middle.left + (middle.width / 2)).toBeCloseTo(800, 1);
+    });
+
+    it('lines the first and last icons up with the page content', async () => {
+        mountHeaderAt(
+            1916, (
+                <>
+                    <AppHeader onHome={() => {}} onOpenSettings={() => {}} contentInset="page" />
+                    <PageContainer><div data-page-content>Scripts</div></PageContainer>
+                </>
+            ),
+        );
+
+        const content = (await waitForElement<HTMLElement>('[data-page-content]')).getBoundingClientRect();
+        const homeIcon = (await waitForElement<SVGElement>('[aria-label="Go to home"] svg')).getBoundingClientRect();
+        const settingsIcon = (await waitForElement<SVGElement>('[aria-label="Open settings"] svg')).getBoundingClientRect();
+
+        expect(homeIcon.left).toBeCloseTo(content.left, 1);
+        expect(settingsIcon.right).toBeCloseTo(content.right, 1);
+    });
+
+    it('adds no inset on the web', async () => {
+        mountHeaderAt(1200, <AppHeader onHome={() => {}} />);
+
+        expect(await homeLeft()).toBeCloseTo(12, 1);
     });
 });
 

@@ -1,4 +1,4 @@
-import type {ReleaseNoteType} from './schema';
+import type {ReleaseNoteSurface, ReleaseNoteType} from './schema';
 
 /**
  * The words a Release Note carries wherever Releases are shown. The order of `RELEASE_NOTE_TYPES`
@@ -27,3 +27,9 @@ export const getReleaseNoteWeight = (note: {highlight: boolean, type: ReleaseNot
 };
 
 export const BREAKING_NOTE_LABEL = 'Breaking change';
+
+/**
+ * Label of a note that applies to one Surface only; absent for both. Web-only notes carry none,
+ * as the web app is the default reading of a changelog.
+ */
+export const RELEASE_NOTE_SURFACE_LABELS: Readonly<Partial<Record<ReleaseNoteSurface, string>>> = {desktop: 'Mac app'};

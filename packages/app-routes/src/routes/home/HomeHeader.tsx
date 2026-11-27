@@ -4,6 +4,7 @@ import styles from './HomeHeader.module.css';
 export const HomeHeader = () => (
     <AppHeader
         showScriptActions={false}
+        contentInset="page"
         scriptControls={(
             <div className={styles.brand}>
                 <svg

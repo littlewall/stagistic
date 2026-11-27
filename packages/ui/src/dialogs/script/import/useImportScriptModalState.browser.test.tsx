@@ -164,6 +164,7 @@ describe('useImportScriptModalState', () => {
 
         expect(requireValue(getApi()).showChoiceToggle).toBe(true);
         expect(requireValue(getApi()).importChoice).toBe('new');
+        expect(requireValue(getApi()).name).toBe('My Play (copy)');
         expect(requireValue(getApi()).showNameField).toBe(true);
         expect(requireValue(getApi()).showReplacePanel).toBe(false);
 

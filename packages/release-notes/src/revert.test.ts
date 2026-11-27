@@ -234,6 +234,43 @@ describe('revertRelease', () => {
     });
 });
 
+describe('revertRelease across a major step', () => {
+    it('0.2.2 -> 1.0.0 reverts to minor fragments and --major prepares the same Release again', () => {
+        const root = makeRepo({
+            version: '0.2.2',
+            files: {
+                'releases/next/a.md': fragmentFile('feature', 'patch', 'Mac thing', 'surface: desktop\nhighlight: true\n'),
+                'releases/next/b.md': fragmentFile('fix', 'patch', 'Other'),
+            },
+        });
+
+        prepareRelease({
+            root,
+            date: '2026-11-06',
+            major: true,
+        });
+
+        const first = readFileSync(join(root, 'releases/1.0.0.md'), 'utf8');
+
+        // 0.2.2 needs its own Release file to be a revert target.
+        writeFileSync(join(root, 'releases/0.2.2.md'), '---\nrelease: 0.2.2\ndate: 2026-11-01\nnotes:\n  - type: fix\n    title: Old\n    highlight: false\n    description: Old.\n---\n');
+
+        const result = revertRelease({root, target: '0.2.2'});
+
+        expect(result.majorReleases).toEqual(['1.0.0']);
+        expect(existsSync(join(root, 'releases/1.0.0.md'))).toBe(false);
+        expect(readFileSync(join(root, 'releases/next/mac-thing.md'), 'utf8')).toContain('bump: minor');
+        expect(readFileSync(join(root, 'releases/next/mac-thing.md'), 'utf8')).toContain('surface: desktop');
+
+        prepareRelease({
+            root,
+            date: '2026-11-06',
+            major: true,
+        });
+        expect(readFileSync(join(root, 'releases/1.0.0.md'), 'utf8')).toBe(first);
+    });
+});
+
 describe('runRevertCli', () => {
     it('reverts a repository given by --root and reports what changed', async () => {
         const {runRevertCli} = await import('./cli');

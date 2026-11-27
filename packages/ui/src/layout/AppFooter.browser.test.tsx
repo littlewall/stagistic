@@ -36,7 +36,7 @@ afterEach(() => {
 });
 
 describe('AppFooter', () => {
-    it('shows the product name, Release number and a What\'s new link bottom-left, and no preview wording', async () => {
+    it('starts with the Release number and a What\'s new link, without a product name or preview wording', async () => {
         const onOpenWhatsNew = vi.fn();
 
         render(
@@ -49,7 +49,8 @@ describe('AppFooter', () => {
         const footer = requireValue(document.querySelector('footer'));
         const start = requireValue(footer.firstElementChild);
 
-        expect(start.textContent).toBe('💛 Stagistic Editor•Release 0.2.0•What\'s new');
+        expect(start.textContent).toBe('Release 0.2.0•What\'s new');
+        expect(footer.textContent).not.toContain('Stagistic Editor');
         expect(footer.textContent?.toLowerCase()).not.toContain('preview');
 
         const link = requireValue(start.querySelector('button'));
@@ -96,7 +97,7 @@ describe('AppFooter', () => {
         expect(calmLink.querySelector('[data-unseen-dot]')).toBeNull();
     });
 
-    it('offers a quiet reload with its own dot while a new version is available', async () => {
+    it('offers a quiet reload while a new version is available', async () => {
         const onReload = vi.fn();
 
         render(
@@ -104,7 +105,11 @@ describe('AppFooter', () => {
                 value={{
                     releaseNumber: '0.2.0',
                     onOpenWhatsNew: vi.fn(),
-                    onReload,
+                    update: {
+                        message: 'New version is ready.',
+                        actionLabel: 'Click to reload',
+                        onPress: onReload,
+                    },
                 }}
             >
                 <AppFooter />
@@ -116,21 +121,28 @@ describe('AppFooter', () => {
 
         expect(whatsNew.textContent).toBe('What\'s new');
         expect(whatsNew.querySelector('[data-unseen-dot]')).toBeNull();
-        expect(reload.textContent).toBe('A new Release is ready. Reload');
-        expect(reload.querySelector('[data-update-dot]')).not.toBeNull();
+        // Only the action is the underlined button; the status stays plain text.
+        expect(reload.textContent).toBe('Click to reload');
+        expect(reload.querySelector('[data-unseen-dot]')).toBeNull();
+        expect(document.querySelector('footer')?.textContent).toContain('New version is ready.Click to reload');
 
         await page.elementLocator(reload).click();
         expect(onReload).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps the update dot apart from the unread notes dot', async () => {
+    it('shows whatever action the update brings', async () => {
+        const onPress = vi.fn();
+
         render(
             <FooterReleaseProvider
                 value={{
-                    releaseNumber: '0.2.0',
+                    releaseNumber: '1.0.0',
                     onOpenWhatsNew: vi.fn(),
-                    hasUnseenRelease: false,
-                    onReload: vi.fn(),
+                    update: {
+                        message: 'New version is ready.',
+                        actionLabel: 'Click to restart',
+                        onPress,
+                    },
                 }}
             >
                 <AppFooter />
@@ -138,9 +150,11 @@ describe('AppFooter', () => {
         );
         await settle();
 
-        // Opening What's new clears the unread dot; the pending update must stay visible.
-        expect(document.querySelectorAll('[data-unseen-dot]')).toHaveLength(0);
-        expect(document.querySelectorAll('[data-update-dot]')).toHaveLength(1);
+        const [, action] = [...document.querySelectorAll<HTMLButtonElement>('footer button')];
+
+        expect(action.textContent).toBe('Click to restart');
+        await page.elementLocator(action).click();
+        expect(onPress).toHaveBeenCalledTimes(1);
     });
 
     it('keeps the centre slot and the feedback link', async () => {
@@ -155,11 +169,11 @@ describe('AppFooter', () => {
         expect(document.querySelector('a[href="https://feedback.stagistic.com"]')?.textContent).toBe('Feedback & bug reports');
     });
 
-    it('renders only the product name without a provider', async () => {
+    it('renders only the feedback link without a provider', async () => {
         render(<AppFooter />);
         await settle();
 
         expect(document.querySelector('footer button')).toBeNull();
-        expect(document.querySelector('footer')?.textContent).toBe('💛 Stagistic EditorFeedback & bug reports');
+        expect(document.querySelector('footer')?.textContent).toBe('Feedback & bug reports');
     });
 });

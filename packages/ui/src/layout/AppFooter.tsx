@@ -16,10 +16,8 @@ export const AppFooter = ({children}: AppFooterProps) => {
     return (
         <footer className={styles.footer}>
             <span className={styles.start}>
-                <span>💛 Stagistic Editor</span>
                 {release ? (
                     <>
-                        <span aria-hidden="true">•</span>
                         <span>{`Release ${release.releaseNumber}`}</span>
                         <span aria-hidden="true">•</span>
                         <button
@@ -31,12 +29,12 @@ export const AppFooter = ({children}: AppFooterProps) => {
                             What&apos;s new
                             {release.hasUnseenRelease ? <span className={styles.dot} data-unseen-dot="" /> : null}
                         </button>
-                        {release.onReload ? (
+                        {release.update ? (
                             <>
                                 <span aria-hidden="true">•</span>
-                                <button className={styles.releaseLink} type="button" onClick={release.onReload}>
-                                    A new Release is ready. Reload
-                                    <span className={styles.dot} data-update-dot="" />
+                                <span>{release.update.message}</span>
+                                <button className={styles.releaseLink} type="button" onClick={release.update.onPress}>
+                                    {release.update.actionLabel}
                                 </button>
                             </>
                         ) : null}

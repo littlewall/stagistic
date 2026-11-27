@@ -16,6 +16,7 @@ title: Start from a template
 image: /images/templates.png # optional
 docs: /docs/templates # optional
 article: /articles/templates # optional
+surface: desktop # optional: web | desktop; absent = both
 ---
 
 Pick a template on the script list and start writing.
@@ -23,13 +24,17 @@ Pick a template on the script list and start writing.
 
 `docs` and `article` are site paths (`/guide/templates` on docs.stagistic.com, `/articles/templates` on stagistic.com) or `https://` addresses; the app shows other values as no link. `image` is shown only as a path served by the site itself (a file in that site's `public/` folder); other values are not shown. The web app and the marketing site each serve their own `public/`, so put the file at the same path in both `apps/web/public/` and `apps/marketing/public/` (a marketing test fails when a Release image is missing from either). Give an image only to a Highlight: one cover, shown right under the note title in What's new, the popup and the changelog. It is a 16:9 WebP screenshot of the real app (1920×1080, so it stays sharp on 2x screens; under about 100 kB) that shows roughly what the change is about, not everything it does; keep covers in `public/releases/`. `resolveNoteLink` and `resolveNoteImage` apply these rules for the app dialog and the changelog.
 
+`surface` limits a note to one Surface: `web` (the web app) or `desktop` (the Mac app). Without it the note applies to both. Each app's What's new, popup and unread dot consider only notes for its own Surface (a Release whose Highlights are all for the other Surface is not announced); the changelog and RSS show every note and label Mac-only notes "Mac app" (`RELEASE_NOTE_SURFACE_LABELS`; web-only notes have no label). Unknown values are rejected.
+
 Unknown fields are rejected. `breaking: true` marks a change to how existing data behaves; the popup shows it first with a warning, so it must also be `highlight: true` and `bump: minor`.
 
 ## Prepare a Release
 
 ```sh
-moon run root:release-prepare [-- --date YYYY-MM-DD]
+moon run root:release-prepare [-- --major] [--date YYYY-MM-DD]
 ```
+
+`--major` sets the number to (major + 1).0.0 (0.2.2 becomes 1.0.0) whatever the fragments' `bump` says; fragments themselves stay `minor | patch`.
 
 Merges the fragments into `releases/<release>.md`, sets the number in every `package.json`, `tauri.conf.json`, `Cargo.toml` and `Cargo.lock`, and removes the fragments. The number is the current one bumped by the highest `bump`. It fails, changing nothing, when there are no fragments, a fragment is invalid, the target file exists or the files disagree about the current number. It never commits or tags.
 
@@ -39,7 +44,7 @@ Merges the fragments into `releases/<release>.md`, sets the number in every `pac
 moon run root:release-revert -- 0.1.0
 ```
 
-Goes back to a Release: every `releases/<n>.md` newer than the target is split back into `releases/next/<slug>.md` fragments (same format `prepare` reads; `bump` is `minor` or `patch` by how the number changed) and deleted, and the number in every `package.json`, `tauri.conf.json`, `Cargo.toml` and `Cargo.lock` is set to the target. Preparing again gives the same Release file apart from its date. When file names alone would reorder notes of one type, the fragments get a `NN-` prefix. The target is an existing `releases/<n>.md` or the initial version `0.1.0`. It refuses, changing nothing, when the target is neither, is not older than the current Release, the newest Release file is not the current Release, the numbers disagree, a step between Releases is not a minor or patch bump, or a fragment file name already exists. It never commits or tags and prints what changed.
+Goes back to a Release: every `releases/<n>.md` newer than the target is split back into `releases/next/<slug>.md` fragments (same format `prepare` reads; `bump` is `minor` or `patch` by how the number changed; a major step such as 0.2.2 to 1.0.0 is recorded as `minor`, and the command tells you to prepare again with `--major`) and deleted, and the number in every `package.json`, `tauri.conf.json`, `Cargo.toml` and `Cargo.lock` is set to the target. Preparing again gives the same Release file apart from its date. When file names alone would reorder notes of one type, the fragments get a `NN-` prefix. The target is an existing `releases/<n>.md` or the initial version `0.1.0`. It refuses, changing nothing, when the target is neither, is not older than the current Release, the newest Release file is not the current Release, the numbers disagree, a step between Releases is not a major, minor or patch bump, or a fragment file name already exists. It never commits or tags and prints what changed.
 
 ## Reading Releases
 
@@ -60,7 +65,11 @@ Node only: `@stagistic/release-notes/node` (`prepareRelease`, `revertRelease`, `
 
 ## Announcing Releases
 
-`announceReleases({currentRelease, releases, lastSeenRelease, hasScripts})` decides what a writer is told: unseen Releases with a Highlight (merged, newest first), whether they deserve a popup, whether the dot shows, and whether the current Release should be recorded silently. Pure; the app keeps `lastSeenRelease` in `localStorage`. In the editor, What's new and announcement popups list only notes marked with `highlight: true` (regardless of patch or non-patch). The dot shows only for an unseen Release with a Highlight. The footer still shows the current number, including a patch.
+`announceReleases({currentRelease, releases, lastSeenRelease, hasScripts, surface})` decides what a writer is told: unseen Releases with a Highlight (merged, newest first), whether they deserve a popup, whether the dot shows, and whether the current Release should be recorded silently. Pure; the app keeps `lastSeenRelease` in `localStorage`. In the editor, What's new and announcement popups list only notes marked with `highlight: true` (regardless of patch or non-patch). The dot shows only for an unseen Release with a Highlight. The footer still shows the current number, including a patch.
+
+## GitHub Release text
+
+`renderGithubRelease(release)` (`@stagistic/release-notes`, pure) returns the Markdown body of a GitHub Release: one `### <type label>: <title>` block per note followed by its description, in changelog order (breaking first, then New, Improved, Fixed), with `(Mac app)` appended for desktop-only notes.
 
 ## Update detection (web only)
 

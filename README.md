@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://stagistic.app">
+  <a href="https://stagistic.com">
     <img src="apps/marketing/public/favicon.svg" alt="Stagistic logo" width="96" height="96">
   </a>
 </p>
@@ -10,8 +10,9 @@
 
 <p align="center">
   <a href="https://editor.stagistic.app"><b>Open the editor</b></a> ·
-  <a href="https://stagistic.app">Website</a> ·
-  <a href="https://stagistic.app/editor/syntax">Stagistic Syntax</a> ·
+  <a href="https://stagistic.com/download"><b>Download for Mac</b></a> ·
+  <a href="https://stagistic.com">Website</a> ·
+  <a href="https://stagistic.com/editor/syntax">Stagistic Syntax</a> ·
   <a href="LICENSE">MIT licence</a>
 </p>
 
@@ -19,10 +20,10 @@
 
 Your play is not a screenplay with the camera removed. Most script software is built for film: `INT./EXT.`, shots and cuts. Stagistic Editor is built around the way theatre actually works — acts, scenes, characters, stage directions, lyrics and music cues — and exports a correctly formatted, print-ready PDF.
 
-It runs in your browser, needs no account, and stores your scripts locally by default.
+It runs in your browser (the Web app) or as the **Mac app** (Apple silicon, macOS 15 or later; [download](https://stagistic.com/download), [docs](https://docs.stagistic.com/mac-app/)). It needs no account and stores your scripts locally: in your browser, or on your Mac.
 
 <p align="center">
-  <img src="apps/marketing/public/opengraph.jpg" alt="Stagistic Editor with the structure panel and a musical number with lyrics" width="100%">
+  <img src="docs/images/mac-app.webp" alt="Stagistic Editor Mac app with the structure panel and a musical number with lyrics" width="100%">
 </p>
 
 # Features
@@ -64,15 +65,14 @@ It runs in your browser, needs no account, and stores your scripts locally by de
 
 ### Your data
 
-- **Local-first** — scripts live in your browser; no account or sign-in
+- **Local-first** — scripts live in your browser or, in the Mac app, on your Mac, with automatic backups; no account or sign-in
 - **Backups** — download a `.stagistic` (script) or `.stepkg` (script + metadata + assets) file and import it again at any time
-- **Open format** — [Stagistic Syntax](https://stagistic.app/editor/syntax), a readable plain-text format for plays and musicals
+- **Open format** — [Stagistic Syntax](https://stagistic.com/editor/syntax), a readable plain-text format for plays and musicals
 
 # Roadmap
 
-- **Cloud sync** — optional and free
+- **Cloud sync** — optional and free; today the Web app and the Mac app keep separate libraries
 - **Mobile and tablet support** — the editor currently needs a screen at least 1000 px wide
-- **Desktop app** — offline-first Tauri shell (`apps/desktop`, early stage)
 - **Production apps** — tools for directors, stage managers and production teams, working from the same script
 
 # Development
@@ -82,7 +82,7 @@ Requirements: **Node.js ≥ 24.12**, **pnpm ≥ 11**. Tasks run through [moon](h
 ```bash
 pnpm install
 moon run web:dev        # editor app
-moon run marketing:dev  # stagistic.app website
+moon run marketing:dev  # stagistic.com website
 ```
 
 Checks:
@@ -91,7 +91,7 @@ Checks:
 moon run root:typecheck
 moon run root:lint
 moon run root:test
-moon run <project>:test-browser   # app-core, app-routes, editor, ui
+moon run <project>:test-browser   # app-core, app-routes, editor, ui, web
 ```
 
 ### Repository layout
@@ -99,16 +99,21 @@ moon run <project>:test-browser   # app-core, app-routes, editor, ui
 | Path                                       | Contents                                      |
 | ------------------------------------------ | --------------------------------------------- |
 | `apps/web`                                 | The editor app (editor.stagistic.app)         |
-| `apps/marketing`                           | The website (stagistic.app), built with Astro |
-| `apps/desktop`                             | Desktop shell (Tauri), work in progress       |
+| `apps/marketing`                           | The website (stagistic.com), built with Astro |
+| `apps/docs`                                | The documentation (docs.stagistic.com)        |
+| `apps/desktop`                             | The Mac app (Tauri)                           |
 | `packages/editor`                          | The script editor (Tiptap / ProseMirror)      |
 | `packages/script`                          | Script document model and Stagistic Syntax    |
 | `packages/script-pagination`               | Page layout of the script                     |
 | `packages/export`                          | PDF export                                    |
-| `packages/stepkg`                          | `.stagistic` backup package format            |
+| `packages/stepkg`                          | `.stepkg` package format                      |
 | `packages/db`                              | Local database (PGlite + Drizzle)             |
 | `packages/app-core`, `packages/app-routes` | App state and screens                         |
 | `packages/ui`                              | Shared UI components and design tokens        |
+
+### Releases
+
+Every Release ships the Web app and the Mac app together. Steps from `release-prepare` to a published Mac app (signing, tag, smoke test, go-live): [docs/releasing/runbook.md](docs/releasing/runbook.md). Credentials: [docs/releasing/credentials.md](docs/releasing/credentials.md).
 
 # Contributing
 

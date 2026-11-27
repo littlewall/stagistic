@@ -20,7 +20,7 @@ Start a script, keep track of drafts and working copies, and take your work with
 
 ## Keep your work and take it with you
 
-The web editor saves work in this browser's storage on this device. A downloaded file gives you a separate copy to keep or import elsewhere. Start with [saving and storage](/editor/scripts/saving/) if you are unsure where your script lives.
+The Web app saves work in this browser's storage on this device; the [Mac app](/mac-app/) saves on your Mac. A downloaded file gives you a separate copy to keep or import elsewhere. Start with [saving and storage](/editor/scripts/saving/) if you are unsure where your script lives.
 
 Use a `.stepkg` package for a backup with metadata and attachments. Use `.stagistic` for the script's text format. See [Download a script file](/editor/scripts/download/) for their different contents.
 

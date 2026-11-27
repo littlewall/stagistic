@@ -77,9 +77,9 @@ The header's **Download script** menu also lets you download the selected state 
 
 To save Current at the moment you download a PDF, use **More download options** beside **Download PDF**. Choose **Save as draft and download…** or **Save as version and download…**, fill in the details and confirm. See [Save a draft or version with your PDF](/editor/export/pdf/#save-a-draft-or-version-with-your-pdf).
 
-## Keep a copy outside the browser
+## Keep a copy outside the app
 
-In the web editor, drafts and versions live in the same local browser storage as the script. They do not provide a separate backup if that site's browser data is cleared. [Download packages](/editor/scripts/download/) of the states you need to preserve or transfer.
+Drafts and versions live in the same local storage as the script: browser storage in the Web app, your Mac in the Mac app. In the Web app they are not a separate backup if that site's browser data is cleared. [Download packages](/editor/scripts/download/) of the states you need to preserve or transfer.
 
 ## Related tasks
 

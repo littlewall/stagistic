@@ -9,6 +9,10 @@ export const RELEASE_NOTE_TYPES = [
 ] as const;
 export type ReleaseNoteType = (typeof RELEASE_NOTE_TYPES)[number];
 
+export const RELEASE_NOTE_SURFACES = ['web', 'desktop'] as const;
+/** Where a note applies. A note without a Surface applies to both. */
+export type ReleaseNoteSurface = (typeof RELEASE_NOTE_SURFACES)[number];
+
 const text = z.string().trim().min(1);
 
 const noteFields = {
@@ -21,6 +25,8 @@ const noteFields = {
     image: text.optional(),
     docs: text.optional(),
     article: text.optional(),
+    /** Absent means both Surfaces. */
+    surface: z.enum(RELEASE_NOTE_SURFACES).optional(),
 };
 
 type BreakingCheck = {

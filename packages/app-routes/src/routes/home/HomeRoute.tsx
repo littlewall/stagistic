@@ -20,6 +20,7 @@ import {
 } from '@stagistic/ui';
 import clsx from 'clsx';
 import {
+    type ReactNode,
     useCallback,
     useMemo,
     useState,
@@ -37,7 +38,12 @@ import {ScriptListSection} from './ScriptListSection';
 
 const SORT_OPTIONS = [{value: 'newest', label: 'Newest first'}, {value: 'title', label: 'Title A–Z'}];
 
-export const HomeRoute = () => {
+type HomeRouteProps = {
+    /** Quiet extra shown below the script list. A Surface passes it only where it applies; the other passes nothing. */
+    footerSlot?: ReactNode,
+};
+
+export const HomeRoute = ({footerSlot}: HomeRouteProps) => {
     useDocumentTitle('Scripts');
 
     const navigate = useNavigate();
@@ -260,6 +266,7 @@ export const HomeRoute = () => {
                             ) : null}
                         </div>
                     )}
+                    {footerSlot}
                 </div>
             </PageContainer>
             <ReleaseHighlightsPopup />
